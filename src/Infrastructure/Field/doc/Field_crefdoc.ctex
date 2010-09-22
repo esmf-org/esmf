@@ -1,4 +1,4 @@
-% $Id: Field_crefdoc.ctex,v 1.6 2010/03/30 21:47:40 svasquez Exp $
+% $Id: Field_crefdoc.ctex,v 1.7 2010/09/22 14:36:33 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -42,7 +42,7 @@
 \input{../Infrastructure/Field/doc/Field_desc}
 #endif
 
-#\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
 #\input{Field_usage}
 %\input{ESMF_FieldEx_fapi}
@@ -71,18 +71,18 @@
 %\input{../Infrastructure/FieldComm/doc/ESMF_FieldSMMEx_fapi} 
 #endif
 
-#\subsection{Restrictions and Future Work}
+%\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 %\input{Field_rest}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/Field/doc/Field_rest}
 #endif
 
-#\subsection{Design and Implementation Notes}
+%\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-#\input{Field_implnotes}
+%\input{Field_implnotes}
 #elif defined(CONSTITUENT)
-#\input{../Infrastructure/Field/doc/Field_implnotes}
+%\input{../Infrastructure/Field/doc/Field_implnotes}
 #endif
 
 \subsection{Class API}

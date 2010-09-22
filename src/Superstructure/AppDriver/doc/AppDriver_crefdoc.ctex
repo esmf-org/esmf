@@ -1,4 +1,4 @@
-% $Id: AppDriver_crefdoc.ctex,v 1.2 2010/09/16 04:42:38 theurich Exp $
+% $Id: AppDriver_crefdoc.ctex,v 1.3 2010/09/22 14:36:33 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@
 %\input{../Superstructure/AppDriver/doc/AppDriver_options}
 #endif
 
-#\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{AppDriver_usage}
 %\input{AppDriverSeqPrF_fapi}

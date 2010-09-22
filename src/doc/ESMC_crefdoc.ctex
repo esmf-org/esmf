@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.4 2010/09/16 04:33:44 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.5 2010/09/22 14:36:33 eschwab Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -88,13 +88,13 @@
 
 \newpage
 %\section{API Overview}
-#\input{ESMF_api}
+%\input{ESMF_api}
 
 %\section{Global Options and Parameters}
-#\input{ESMF_options}
+%\input{ESMF_options}
 
 %\subsection{Overall Design and Implementation Notes}
-#\input{ESMF_implnotes}
+%\input{ESMF_implnotes}
 
 \newpage
 \begin{htmlonly}

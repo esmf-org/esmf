@@ -1,4 +1,4 @@
-% $Id: FieldBundle_crefdoc.ctex,v 1.1 2010/03/30 21:46:25 svasquez Exp $
+% $Id: FieldBundle_crefdoc.ctex,v 1.2 2010/09/22 14:36:33 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -30,6 +30,8 @@
 \newpage
 \tableofcontents
 
+\newpage
+#endif
 
 \section{FieldBundle Class}
 

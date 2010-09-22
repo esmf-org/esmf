@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.18 2010/09/16 04:33:44 theurich Exp $
+% $Id: Component_crefdoc.ctex,v 1.19 2010/09/22 14:36:33 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@
 %#elif defined(CONSTITUENT)
 %\input{../Superstructure/Component/doc/CplComp_usage}
 %\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
-#endif
+%#endif
 
 %\subsection{Restrictions and Future Work}
 %#ifdef STANDALONE
