@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.158 2010/09/22 06:24:19 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.159 2010/09/22 22:32:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.158 2010/09/22 06:24:19 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.159 2010/09/22 22:32:31 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3033,6 +3033,7 @@ end subroutine ESMF_GridConvertIndex
     integer :: DimId, VarId
     real(ESMF_KIND_R8) :: rad2deg
     real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
+    integer, allocatable:: imask(:), mask2D(:,:)
     type(ESMF_Grid)  :: grid
     type(ESMF_Array) :: array
     real(ESMF_KIND_R8), allocatable :: coord2D(:,:)
@@ -3098,8 +3099,10 @@ end subroutine ESMF_GridConvertIndex
 
        ! Get the cell_center lat and lan, if in radians, convert to degree
        allocate(coordX(totalpoints), coordY(totalpoints))
+       allocate(imask(totalpoints))
        call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
-          grid_center_lat=coordY, convertToDeg=.TRUE., rc=localrc)
+          grid_center_lat=coordY, grid_imask=imask,  &
+	  convertToDeg=.TRUE., rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     endif
@@ -3142,6 +3145,25 @@ end subroutine ESMF_GridConvertIndex
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
+
+    ! Mask
+    call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	item = ESMF_GRIDITEM_MASK, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
+	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
+    if (PetNo == 0) then
+       allocate(mask2D(dims(1),dims(2)))
+       mask2D = RESHAPE(imask,(/dims(1), dims(2)/))
+    endif
+    call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
+    !print *, "Finish ArrayScatter 1st dim coord"
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
     
     ESMF_GridCreateFrmScripDistGrd = grid
     if (present(rc)) rc=ESMF_SUCCESS
