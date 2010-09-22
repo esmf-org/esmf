@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.32 2010/07/29 22:14:30 w6ws Exp $
+// $Id: ESMC_State.h,v 1.33 2010/09/22 22:13:32 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -49,8 +49,8 @@ typedef void* ESMC_State;
 // !INTERFACE:
 ESMC_State ESMC_StateCreate(
   const char *name,  // in
-  int *rc);          // out
-
+  int *rc            // out
+);
 // !RETURN VALUE:
 //  Newly created ESMC_State object.
 //
@@ -77,8 +77,8 @@ ESMC_State ESMC_StateCreate(
 //
 // !INTERFACE:
 int ESMC_StateDestroy(
-  ESMC_State *state);  // in
-
+  ESMC_State *state    // in
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -101,8 +101,8 @@ int ESMC_StateDestroy(
 //
 // !INTERFACE:
 int ESMC_StatePrint(
-  ESMC_State state);  // in
-
+  ESMC_State state    // in
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -126,8 +126,8 @@ int ESMC_StatePrint(
 // !INTERFACE:
 int ESMC_StateAddArray(
   ESMC_State state,   // in
-  ESMC_Array array);  // in
-
+  ESMC_Array array    // in
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -153,8 +153,8 @@ int ESMC_StateAddArray(
 // !INTERFACE:
 int ESMC_StateAddField(
   ESMC_State state,   // in
-  ESMC_Field field);  // in
-
+  ESMC_Field field    // in
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -181,8 +181,8 @@ int ESMC_StateAddField(
 int ESMC_StateGetArray(
   ESMC_State state,    // in
   const char *name,    // in
-  ESMC_Array *array);  // out
-
+  ESMC_Array *array    // out
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -212,8 +212,8 @@ int ESMC_StateGetArray(
 int ESMC_StateGetField(
   ESMC_State state,    // in
   const char *name,    // in
-  ESMC_Field *field);  // out
-
+  ESMC_Field *field    // out
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //

@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.22 2010/09/15 18:16:31 w6ws Exp $
+// $Id: ESMC_Config.h,v 1.23 2010/09/22 22:08:13 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ ESMC_Config ESMC_ConfigCreate(
 // !INTERFACE:
 int ESMC_ConfigDestroy(
   ESMC_Config* config        // in
-  );
+);
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -122,7 +122,7 @@ int ESMC_ConfigLoadFile(
   ESMC_Config config,        // in
   const char* file,          // in
   ...                        // optional argument list
-  );
+);
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -155,8 +155,7 @@ int ESMC_ConfigLoadFile(
 int ESMC_ConfigFindLabel(
   ESMC_Config config,        // in
   const char* label          // in
-  );
-
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //  Equals -1 if buffer could not be loaded, -2 if label not found,
@@ -189,8 +188,8 @@ int ESMC_ConfigFindLabel(
 // !INTERFACE:
 int ESMC_ConfigNextLine(
   ESMC_Config config,       // in
-  int *tableEnd);           // out
-
+  int *tableEnd             // out
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -220,8 +219,7 @@ int ESMC_ConfigGetLen(
   ESMC_Config config,        // in
   int* wordCount,            // out
   ...                        // optional argument list
-  );
-
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -252,8 +250,7 @@ int ESMC_ConfigGetDim(
   int* lineCount,            // out
   int* columnCount,          // out
   ...                        // optional argument list
-  );
-
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -284,8 +281,7 @@ int ESMC_ConfigGetDim(
 int ESMC_ConfigValidate(
   ESMC_Config config,        // in
   ...                        // optional argument list
-  );
-
+);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //  Equals ESMF_RC_ATTR_UNUSED if any unused attributes are found
@@ -313,10 +309,19 @@ int ESMC_ConfigValidate(
 //EOP
 
 // The following are not currently implemented:
-int ESMC_ConfigGetAttribute(ESMC_Config config, void* value, enum ESMC_TypeKind tk,
-  ...);
+int ESMC_ConfigGetAttribute(
+  ESMC_Config config,        // in
+  void* value,               // out
+  enum ESMC_TypeKind tk,
+  ...
+);
 
-int ESMC_ConfigSetAttribute(ESMC_Config config, void* value, enum ESMC_TypeKind tk, ...);
+int ESMC_ConfigSetAttribute(
+  ESMC_Config config,        // in
+  void* value,               // in
+  enum ESMC_TypeKind tk,
+  ...
+);
 
 #ifdef __cplusplus
 } // extern "C"
