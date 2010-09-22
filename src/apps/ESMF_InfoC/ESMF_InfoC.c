@@ -1,4 +1,4 @@
-/* $Id: ESMC_Info.c,v 1.3 2010/07/13 23:37:15 theurich Exp $ */
+/* $Id: ESMF_InfoC.c,v 1.1 2010/09/22 23:46:55 theurich Exp $ */
 
 #include <stdio.h>
 #include "ESMC.h"
@@ -20,12 +20,12 @@ int main(int argc, char *argv[]){
     argIndex = ESMC_UtilGetArgIndex(argc, argv, "--help", &rc);
     if (argIndex >= 0){
       /* standard --help argument was specified */
-      printf("ESMC_Info: Print information about the ESMF installation.\n");
+      printf("ESMF_InfoC: Print information about the ESMF installation.\n");
       printf("Options:\n");
       printf("  --help        Display this information\n");
     }else{
       /* regular execution */
-      printf("ESMC_Info\n");
+      printf("ESMF_InfoC\n");
       printf("  ESMF_MAJOR_VERSION:  %d\n", ESMF_MAJOR_VERSION);
       printf("  ESMF_MINOR_VERSION:  %d\n", ESMF_MINOR_VERSION);
       printf("  ESMF_REVISION:       %d\n", ESMF_REVISION);

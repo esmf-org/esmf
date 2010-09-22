@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.320 2010/09/22 19:33:45 garyblock Exp $
+#  $Id: common.mk,v 1.321 2010/09/22 23:46:55 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1680,18 +1680,17 @@ build_apps: reqfile_libesmf reqdir_lib
 tree_build_apps: $(APPS_BUILD)
 
 #
-#  Link rule for Fortran apps.
+#  Link rule for apps, switch between C and Fortran
 #
-$(ESMF_APPSDIR)/ESMF_% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
-	$(MAKE) chkdir_apps
-	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMF_F90ESMFLINKLIBS)
-
-#
-#  Link rule for C apps.
-#
-$(ESMF_APPSDIR)/ESMC_% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
+ifeq ($(APPS_MAINLANGUAGE),C)
+$(ESMF_APPSDIR)/% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
 	$(MAKE) chkdir_apps
 	$(ESMF_CXXLINKER) $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMF_CXXESMFLINKLIBS)
+else        
+$(ESMF_APPSDIR)/% : $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMFLIB)
+	$(MAKE) chkdir_apps
+	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(addprefix $(ESMF_LOCOBJDIR)/,$(APPS_OBJ)) $(ESMF_F90ESMFLINKLIBS)
+endif
 
 #-------------------------------------------------------------------------------
 # Targets for building and running system tests.
