@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.1 2010/09/01 23:40:26 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.2 2010/09/22 22:41:39 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,6 +39,7 @@ program ESMF_RegridWeightGen
       real(ESMF_KIND_R8), pointer :: weights(:)
       character(len=256) :: srcfile, dstfile, wgtfile
       character(len=40)  :: method, flag
+      integer(ESMF_KIND_I4) :: maskvals(1)
       integer            :: index
       integer            :: pole
       integer, pointer   :: dims(:)
@@ -319,9 +320,11 @@ program ESMF_RegridWeightGen
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
+      maskvals(1) = 0
       if (trim(method) .eq. 'bilinear') then
         if (conservflag) then
         call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
@@ -332,6 +335,7 @@ program ESMF_RegridWeightGen
 
 	else 
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
@@ -342,6 +346,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'patch') then
         if (conservflag) then
         call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
@@ -351,6 +356,7 @@ program ESMF_RegridWeightGen
             methodStr = "Patch Regridding with Conservative Correction"
 	else 
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
