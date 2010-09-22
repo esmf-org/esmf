@@ -4,14 +4,77 @@
 \subsection{Description}
 
 The ESMF\_RegridWeightGen application is used to generate regridding weights in an offline mode.
-This program combines the two offline regrid applications in the previous release 
-\ref{sec:regrid:offline} into one application.  It takes a source grid file and a destination grid file
+It takes a source grid file and a destination grid file
 in either the SCRIP format or the ESMF Unstructured grid format, and generate a regridding weight 
 file in the SCRIP format.  It supports bilinear, patch and conservative regridding methods.  
 The source and the destination grids can be either a regularly rectangular grid or an unstructured grid
 including cubed sphere grid.  This application is a parallel application that can be run on any number of PETs.
 
-The command line arguments are all keyword based.  Both the long keyward prefixed with {\tt '--'} or the 
+In this application, we use {\tt ESMF\_GridCreate}~\ref{example:2DLogRecFromScrip} to create a 
+ESMF\_Grid object if the source or destination grid is a logically rectangular grid.  We put the cell center 
+coordinates of the input grid at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) and we map the 2D coordinates
+into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} while calling 
+{\tt ESMF\_FieldRegridStore()}.   We use 
+{\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} to create a ESMF\_Mesh object if the 
+source or destination grid is a cubed sphere grid or an unstructured grid. We set {\tt cartisian3D} flag to {\tt TRUE} to
+convert the 2D coordinates into 2D Cartesian coordinates while calling {\tt ESMF\_MeshCreate()}. We then use
+{\tt ESMF\_FieldRegridStore()} to generate the regridding weight table and indicies table.   
+
+The regridding occurs in 3D to avoid
+problems with periodicity and with the pole singularity. 
+Unless the pole option is turned off, the polar region is handled by constructing 
+an artificial point in the center of the top and bottom row of grid points. 
+The pole is located at the average of the position of the points surrounding
+it, but moved in the z-direction to be at the same radius as the rest of the points
+in the grid. There are a couple of options for what value is used at the pole. 
+The default is for the value at the pole to be the average of the values
+of all of the grid points surrounding the pole. For another option, the user may also choose
+a number N from 1 to the number of source grid points around the pole. For
+each destination point, the value at the pole is then the average of the N source points
+surrounding that destination point.
+
+ This regridding application can be used to generate either bilinear or patch interpolation weights. The default interpolation method
+is bilinear. The algorithm used by this application to generate the bilinear weights is the standard one found in
+many textbooks.  Each destination point is mapped to a location in the source Mesh, the position of the destination point relative 
+to the source points surrounding it is used to calculate the interpolation weights. 
+
+ This application can also be used to generate patch interpolation weights. Patch
+interpolation is the ESMF version of a techique called ``patch recovery'' commonly
+used in finite element modeling~\cite{PatchInterp1}~\cite{PatchInterp2}. It typically results in better approximations to values and derivatives when compared to bilinear interpolation.  
+Patch interpolation works by constructing multiple polynomial patches to represent
+the data in a source element. For 2D grids, these polynomials 
+are currently 2nd degree 2D polynomials. The interpolated value at the destination point 
+is the weighted average of the values of the patches at that point. 
+
+The patch interpolation process works as follows. 
+For each source element containing a destination point
+we construct a patch for each corner node that makes up the element (e.g. 4 patches for 
+quadrilateral elements, 3 for triangular elements). To construct a polynomial patch for
+ a corner node we gather all the elements around that node. 
+(Note that this means that the patch interpolation weights depends on the source 
+element's nodes, and the nodes of all elements neighboring the source element.)  
+We then use a least squares fitting algorithm to choose the set of coefficients 
+for the polynomial that produces the best fit for the data in the elements. 
+This polynomial will give a value at the destination point that fits the source data 
+in the elements surrounding the corner node. We then repeat this process for each 
+corner node of the source element generating a new polynomial for each set of elements.  
+To calculate the value at the destination point we do a weighted average of the values 
+of each of the corner polynomials evaluated at that point. The weight for a corner's 
+polynomial is the bilinear weight of the destination point with regard to that corner.  
+
+Global first-order conservative interpolation weights are also available with the 
+file based regrid application. When this option is selected a conservative modification
+is applied to the interpolation weights using the L2 method.  The L2 method in ESMF is based
+on a finite element method to constrain the interpolation for global conservation of 
+mass.  The conservative option can be used with either the patch or bilinear interpolation
+and any of the pole options.  If this option is selected, integration weights will be
+written to the output file containing the interpolation weights. 
+Note that conservation is still in beta and should only be used with extreme caution.
+It can have interpolation problems with certain combinations of source and destination grid. 
+Particularly those where a high resolution area in the destination aligns with a lower resolution 
+region in the source. 
+
+The command line arguments are all keyword based.  Both the long keyward prefixed with {\tt '-\-'} or the 
 one character short keyword prefixed with {\tt '-'} are supported.  The format to run the application is 
 as follows:
 
@@ -70,8 +133,3 @@ where
                  be generated.
 \end{verbatim}
 
-In this application, we use {\tt ESMF\_GridCreate}~\ref{example:2DLogRecFromScrip} to create a 
-ESMF\_Grid object if the source or destination grid is a logically rectangular grid.  We use 
-{\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} to create a ESMF\_Mesh object if the 
-source or destination grid is a cubed sphere grid or an unstructured grid.  We then use
-{\tt ESMF\_FieldRegridStore} to generate the regridding weight table and indicies table.   
