@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.28 2010/09/22 21:39:57 peggyli Exp $
+! $Id: ESMF_MeshEx.F90,v 1.29 2010/09/22 22:16:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -719,7 +719,7 @@ program ESMF_MeshEx
 ! {\tt grid\_center\_lon}.  {\tt grid\_imask} is not used in the Mesh object in the current implementation.
 ! 
 ! The following example code dipicts how to create a Mesh using a SCRIP file. Note that
-! you have to set the filetype to ESMF_FILEFORMAT_SCRIP.  If the optional argument {\tt convert3D}
+! you have to set the filetype to ESMF\_FILEFORMAT\_SCRIP.  If the optional argument {\tt convert3D}
 ! is set to one, the coordinates will be converted into 3D Cartisian first.  If the grid
 ! is a global grid and will be used in a regrid operation, this flag should be set to 1.
 !EOE
@@ -777,7 +777,7 @@ program ESMF_MeshEx
 !\end{verbatim}
 !
 ! Here is an example of creating a Mesh from a ESMF unstructured grid file. Note you have to set the filetype to
-! ESMF_FILEFORMAT_ESMFMESH.  Similarly from the previous example, we set convert3D to true because this is a
+! ESMF\_FILEFORMAT\_ESMFMESH.  Similarly from the previous example, we set convert3D to true because this is a
 ! global grid.
 !EOE
 
