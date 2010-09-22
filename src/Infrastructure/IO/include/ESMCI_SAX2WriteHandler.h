@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2WriteHandler.h,v 1.3 2010/09/20 05:53:07 eschwab Exp $
+// $Id: ESMCI_SAX2WriteHandler.h,v 1.4 2010/09/22 05:53:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -28,7 +28,8 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI::SAX2WriteHandler - Handles XML SAX2 Write events for the IO class
+// !CLASS: ESMCI::SAX2WriteHandler - Handles XML SAX2 Write events for the
+// IO_XML class.
 //
 // !DESCRIPTION:
 //  TODO

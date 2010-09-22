@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.h,v 1.6 2010/06/24 16:26:40 theurich Exp $
+// $Id: ESMCI_SAX2ReadHandler.h,v 1.7 2010/09/22 05:53:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -28,7 +28,8 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI::SAX2ReadHandler - Handles XML SAX2 Parse events for the IO class
+// !CLASS: ESMCI::SAX2ReadHandler - Handles XML SAX2 Parse events for the
+// IO_XML class.
 //
 // !DESCRIPTION:
 //  TODO

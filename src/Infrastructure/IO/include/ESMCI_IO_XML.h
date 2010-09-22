@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.10 2010/09/20 05:53:07 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.11 2010/09/22 05:53:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,11 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI::IO_XML - Handles low-level XML IO for ESMF internals and user API.
+// !CLASS: ESMCI::IO_XML - Handles low-level XML IO for ESMF internals and
+//  ESMF user API.  Translates between ESMF internals/API and specific XML
+//  protocols/API such as SAX2 and DOM.  Xerces is used for SAX2 currently,
+//  (via ESMCI::SAX2[Write,Read]Handler), although Xerces/DOM could 
+//  be added via a separate class such as ESMCI::DOM.
 //
 // !DESCRIPTION:
 //  TODO
