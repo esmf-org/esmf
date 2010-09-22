@@ -1,4 +1,4 @@
-% $Id: Attribute_pack_nest.tex,v 1.3 2010/08/27 22:12:21 murphysj Exp $
+% $Id: Attribute_pack_nest.tex,v 1.4 2010/09/22 05:51:05 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -12,33 +12,36 @@
 \label{sec:AttPackNesting}
 
 
-Nesting is a way of creating larger packages out of smaller ones and allows users to add the attributes they want to an existing package. It is very useful when combining a custom package with a pre-defined package. One or more child Attribute packages can be nested within a parent package, and this can be repeated multiple times, allowing a full Attribute tree (hierarchical) structure to be created.  Breaking Attributes up into smaller packages that are then nested also allows for the construction of complex attribute trees where certain structures repeat themselves, allowing for Attribute package reusability.
+Nesting is a way of creating larger Attribute packages out of smaller ones and allows users to add the attributes they want to an existing package. It is very useful when combining a custom package with a pre-defined package. One or more child Attribute packages can be nested within a parent package, and this can be repeated multiple times, allowing a full Attribute tree (hierarchical) structure to be created.  Breaking Attributes up into smaller packages that are then nested also allows for the construction of complex attribute trees where certain structures repeat themselves, allowing for Attribute package reusability.
 
 
-Several of the ESMF pre-defined packages come pre-nested:
+Several of the ESMF pre-defined packages, when added to an ESMF object, are created with nested packages:
 
-CIM Main is a nest with three child packages:
+CIM Main -- Component package -- is a nest with three child packages:
 \begin{enumerate}
    \item CIM Platform
    \item CIM Responsible Party
    \item CIM Citation
 \end{enumerate}
 
-CF Extended is a nest with one child package:
-
+CF Extended -- Field package -- is a nest with one child package:
 \begin{enumerate}
    \item CF General
 \end{enumerate}
 
-An explanation of the specifiers is in order at this point.  The purpose 
-specifier is really just meant as an additional means, beyond the use of 
-"convention", to specify Attribute packages.  One could imagine that the 
-CF convention would want to be able to have Attribute packages divided 
-up in some fashion, which ESMF could then keep track of with the purpose 
-specifier.  It was added with the intention of allowing Attributes, and 
-packages, maximum flexibility.  Take the Field's ESMF standard Attribute 
-package for example.  This package is made up of three nested Attribute 
-packages.  The lowest one is made up of three Attributes with convention=CF 
-and purpose=General.  The next level contains one Attribute with convention=CF 
-but purpose=Extended.  On top of this is the convention=ESG package, also 
-with purpose=General.
+CIM Inputs -- Field package -- is a nest with one child package:
+\begin{enumerate}
+   \item CF Extended (with a CF General package nested within it)
+\end{enumerate}
+
+ESG General -- Field package -- is a nest with one child package:
+\begin{enumerate}
+   \item CF Extended (with a CF General package nested within it)
+\end{enumerate}
+
+ESMF General -- Grid package -- is a nest with one child package:
+\begin{enumerate}
+   \item GridSpec General
+\end{enumerate}
+
+An explanation of the Attribute packages specifiers is in order at this point.  The purpose specifier is really just meant as an additional means, beyond the use of "convention", to specify Attribute packages.  One could imagine that the CF convention would want to be able to have Attribute packages divided up in some fashion, which ESMF could then keep track of with the purpose specifier.  It was added with the intention of allowing Attributes, and packages, maximum flexibility.  Take the Field's ESMF standard Attribute package for example.  This package is made up of three nested Attribute packages.  The lowest one is made up of three Attributes with convention=CF and purpose=General.  The next level contains one Attribute with convention=CF but purpose=Extended.  On top of this is the convention=ESG package, also with purpose=General.
