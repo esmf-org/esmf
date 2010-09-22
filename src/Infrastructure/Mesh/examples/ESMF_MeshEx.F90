@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.25 2010/06/29 20:57:49 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.26 2010/09/22 06:27:09 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,11 +37,12 @@ program ESMF_MeshEx
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: name
+  character(ESMF_MAXSTR) :: filename
 
   logical :: correct
   type(ESMF_VM) :: vm
   type(ESMF_Mesh) :: mesh
-
+  
 
 ! The following arrays are used to declare the mesh to the ESMF framework.
   integer :: numNodes, numTotElems, numTriElems, numQuadElems
@@ -413,8 +414,6 @@ program ESMF_MeshEx
   ! endif for skip for >1 proc
   endif 
 
-
-
 !BOE
 !\subsubsection{Example: Creating a Small Mesh on 4 PETs in One Step}
 !
@@ -676,6 +675,120 @@ program ESMF_MeshEx
 
    ! endif for skip for != 4 proc
   endif 
+
+!BOE
+!\subsubsection{Creating a Mesh from a SCRIP Grid file or a ESMF Unstructured Grid file}
+!\label{sec:example:UnstructFromFile}
+!
+! ESMF supports the creation of a Mesh from a 2D unstructured grid defined in a SCRIP format
+! grid file~\cite{ref:SCRIP} or a ESMF format grid file.  Both the SCRIP grid file and the
+! ESMF grid file are in NetCDF format. Here is a sample header from a SCRIP unstructured
+! grid file:
+!\begin{verbatim}
+!netcdf ne4np4-pentagons {
+!dimensions:
+!	grid_size = 866 ;
+!	grid_corners = 5 ;
+!	grid_rank = 1 ;
+!variables:
+!	double grid_area(grid_size) ;
+!		grid_area:units = "radians^2" ;
+!		grid_area:long_name = "area weights" ;
+!	double grid_center_lat(grid_size) ;
+!		grid_center_lat:units = "degrees" ;
+!	double grid_center_lon(grid_size) ;
+!		grid_center_lon:units = "degrees" ;
+!	double grid_corner_lon(grid_size, grid_corners) ;
+!		grid_corner_lon:units = "degrees" ;
+!		grid_corner_lon:_FillValue = -9999. ;
+!	double grid_corner_lat(grid_size, grid_corners) ;
+!		grid_corner_lat:units = "degrees" ;
+!		grid_corner_lat:_FillValue = -9999. ;
+!	double grid_imask(grid_size) ;
+!		grid_imask:_FillValue = -9999. ;
+!	int grid_dims(grid_rank) ;
+!\end{verbatim}
+!
+! The grid cells are organized as a one dimensional array ({\tt grid\_rank = 1}. The
+! cell connection is defined using {\tt grid_\corner_\lat} and {\tt grid_\corner_\lon} with
+! the maximal number of corners defined in {\tt grid\_corner}.  
+! For the SCRIP grid, the data is located at the center of the grid.  On the contrary,
+! in a ESMF Mesh object, the data is located at the corner nodes of a cell.  Therefore,
+! we create a Mesh object by constructing a "dual" mesh using {\tt grid\_center\_lat} and
+! {\tt grid\_center\_lon}.  {\tt grid_imask} is currently not used in the Mesh object.
+! 
+! The following example code shows you how to create a Mesh using a SCRIP file. Note that
+! you have to set the filetype to ESMF_FILEFORMAT_SCRIP.  If the optional argument <\tt convert3D>
+! is set to one, the coordinates will be converted into 3D cartisian first.  If the grid
+! is a global grid and will be used in a regrid operation, this flag should be set to 1.
+!EOE
+
+!BOC
+   filename = 'data/ne4np4-pentagons.nc'
+   mesh = ESMF_MeshCreate(filename, ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=localrc)
+!EOC
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+!BOE
+! We defined a more general unstructured grid file format for the ESMF Mesh.  The major difference of
+! this grid format from the SCRIP grid format is that we define node coordinates in a seperate array
+! </tt nodeCoords> and use index to point to the nodeCoords array when we define the element
+! connectitivities in </tt elementConn>.  In the SCRIP format, the two are combined into 
+! </tt grid\_corner\_lat> and </tt grid\_corner\_lon> arrays instead.  The ESMF file format matches
+! better with how the node and elements are defined in the ESMF Mesh object.  The ESMF format is also
+! more general than the SCRIP format because it supports higher dimension coordinates and more general
+! topologies with mixed number of edges.  Following is a sample header of a ESMF Unstructured Grid.
+!  
+!\begin{verbatim}
+! netcdf ne4np4-esmf {
+! dimensions:	
+!	nodeCount = 866 ;
+!	elementCount = 936 ;
+!	maxNodePElement = 4 ;
+!	coordDim = 2 ;
+!variables:	
+!	double 	nodeCoords(numNode, coordDim);
+!		nodeCoords:units = "degrees,degrees" ;
+!	int elementConn(numElement, maxNodePElement) ;
+!		elementConn:long_name = "Node Indices that define  the element connectivity" ;
+!		elementConn:_FillValue = -1 ;	
+!	byte numElementConn(numElement) ;
+!		numElementConn:long_name = "Number of nodes per element" ;
+!	double centerCoords(numElement, coordDim) ;
+!		centerCoords:units = "degrees" ;
+!	double elementArea(numElement) ;
+!		elementArea:units = "radians^2" ;
+!		elementArea:long_name = "area weights" ;
+!	int  elementMask(numElement) ;
+!		elementMask:_FillValue = -9999. ;
+!// global attributes:
+!		:gridType="unstructured";
+!		:version = "0.9" ;
+!		:inputFile = "ne4np4-pentagons.nc" ;
+!		:timeGenerated = "Fri Apr 16 16:05:24 2010" ;
+!}
+!\end{verbatim}
+!
+! Here is an example of creating a Mesh from a ESMF unstructured grid file. Note you have to set the filetype to
+! ESMF_FILEFORMAT_ESMFMESH.  Similarly from the previous example, we set convert3D to true because this is a
+! global grid.
+!EOE
+
+!BOC
+   filename = 'data/ne4np4-esmf.nc'
+   mesh = ESMF_MeshCreate(filename, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=localrc)
+!
+!EOC
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
 
 !BOE
 !\subsubsection{Removing Mesh Memory}
