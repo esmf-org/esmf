@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.74 2010/09/22 21:39:02 peggyli Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.75 2010/09/22 22:01:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -982,10 +982,10 @@ endif
 !
 ! ESMF supports the creation of a 2D curvilinear Grid using the coordinates 
 ! defined in a SCRIP format Grid file~\cite{ref:SCRIP}. The grid must be a 2D
-! logically rectangular grid with {\tt grid_rank} equal to 2.  The grid center
-! coordinates {\tt grid_center_lat} and {\tt grid_center_lon} are placed in the
-! ESMF_STAGGERLOC_CENTER location.  The {\tt grid_corner_lat} and {\tt grid_corner_lon}
-! are ignored.  {\tt grid_imask} are used to set the ESMF_GRIDITEM_MASK field,
+! logically rectangular grid with {\tt grid\_rank} equal to 2.  The grid center
+! coordinates {\tt grid\_center_lat} and {\tt grid\_center_lon} are placed in the
+! ESMF_STAGGERLOC_CENTER location.  The {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon}
+! are ignored.  {\tt grid\_imask} are used to set the ESMF_GRIDITEM_MASK field,
 ! where a zero value means the cell is masked out.
 ! 
 ! The following example code shows you how to create a 2D Grid using a SCRIP file
@@ -1000,7 +1000,7 @@ endif
 #endif
 
 !BOE
-!  where T42_grid.nc is a 2D global grid of size (128x64) and the Grid is distributed
+!  where T42\_grid.nc is a 2D global grid of size (128x64) and the Grid is distributed
 !  by partitioning the rows evenly over all the PETs.
 !EOE
 
