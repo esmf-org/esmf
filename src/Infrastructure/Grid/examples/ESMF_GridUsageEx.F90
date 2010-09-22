@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.73 2010/09/22 13:59:28 peggyli Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.74 2010/09/22 21:39:02 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -992,10 +992,12 @@ endif
 ! and a row only regular distribution:
 !EOE
 
+#ifdef ESMF_NETCDF
 !BOC
    filename = 'data/T42_grid.nc'
    grid2D = ESMF_GridCreate(filename, (/PetCount,1/), rc=rc)
 !EOC
+#endif
 
 !BOE
 !  where T42_grid.nc is a 2D global grid of size (128x64) and the Grid is distributed
