@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.20 2010/09/15 23:25:47 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.21 2010/09/22 03:34:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -61,8 +61,8 @@ module ESMF_FieldPrMod
 !
 ! - ESMF-public methods:
    public ESMF_FieldPrint              ! Print contents of a Field
-   public ESMF_FieldWrite              ! Write array data in a Field
    public ESMF_FieldRead               ! Read  array data to a Field
+   public ESMF_FieldWrite              ! Write array data in a Field
 
 !------------------------------------------------------------------------------
 
@@ -214,7 +214,89 @@ contains
 
         end subroutine ESMF_FieldPrint
 
+
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRead"
+
+!BOP
+! !IROUTINE:  ESMF_FieldRead - Read the array data in a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRead(field, file, iofmt, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field 
+      character(*), intent(in) :: file 
+      type(ESMF_IOFmtFlag), intent(in), optional :: iofmt 
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Read array data from file and put it into the {ESMF\_Field} object.
+!     This subroutine uses ESMF\_ArrayWrite() to write the array
+!     data to a file. \\
+!
+!   Limitation:
+!   See limitation in ESMF\_ArrayWrite()
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!       An {\tt ESMF\_Field} object.
+!     \item[file]
+!       The name of the file in which field data is read from.
+!     \item[{[iofmt]}]
+!       The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!       of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+        character(len=ESMF_MAXSTR)      :: name
+        type(ESMF_FieldType), pointer   :: fp 
+        type(ESMF_Array)                :: array 
+        integer                         :: i, localrc
+        integer                         :: gridrank, arrayrank
+        type(ESMF_Status)               :: fieldstatus
+        type(ESMF_IOFmtFlag)            :: iofmtd
+
+#ifdef ESMF_PIO
+!       Initialize
+        localrc = ESMF_RC_NOT_IMPL
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! check variables
+        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+        iofmtd = ESMF_IOFMT_NETCDF   ! default format
+        if(present(iofmt)) iofmtd = iofmt
+
+        fp => field%ftypep
+
+        call c_ESMC_GetName(fp%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldGet(field, array=array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        call ESMF_ArrayRead(array, file, variableName=trim(name), &
+          iofmt=iofmtd, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+        ! Return indicating PIO not present
+        if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+        end subroutine ESMF_FieldRead
 
 
 !------------------------------------------------------------------------------
@@ -308,90 +390,6 @@ contains
         end subroutine ESMF_FieldWrite
 !------------------------------------------------------------------------------
 
-
-!------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRead"
-
-!BOP
-! !IROUTINE:  ESMF_FieldRead - Read the array data in a Field
-
-! !INTERFACE:
-      subroutine ESMF_FieldRead(field, file, iofmt, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-      character(*), intent(in) :: file 
-      type(ESMF_IOFmtFlag), intent(in), optional :: iofmt 
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Read array data from file and put it into the {ESMF\_Field} object.
-!     This subroutine uses ESMF\_ArrayWrite() to write the array
-!     data to a file. \\
-!
-!   Limitation:
-!   See limitation in ESMF\_ArrayWrite()
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!       An {\tt ESMF\_Field} object.
-!     \item[file]
-!       The name of the file in which field data is read from.
-!     \item[{[iofmt]}]
-!       The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
-!       of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-        character(len=ESMF_MAXSTR)      :: name
-        type(ESMF_FieldType), pointer   :: fp 
-        type(ESMF_Array)                :: array 
-        integer                         :: i, localrc
-        integer                         :: gridrank, arrayrank
-        type(ESMF_Status)               :: fieldstatus
-        type(ESMF_IOFmtFlag)            :: iofmtd
-
-#ifdef ESMF_PIO
-!       Initialize
-        localrc = ESMF_RC_NOT_IMPL
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ! check variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-        iofmtd = ESMF_IOFMT_NETCDF   ! default format
-        if(present(iofmt)) iofmtd = iofmt
-
-        fp => field%ftypep
-
-        call c_ESMC_GetName(fp%base, name, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        call ESMF_FieldGet(field, array=array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        call ESMF_ArrayRead(array, file, variableName=trim(name), &
-          iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-#else
-        ! Return indicating PIO not present
-        if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
-#endif
-
-        end subroutine ESMF_FieldRead
 
 !------------------------------------------------------------------------------
 

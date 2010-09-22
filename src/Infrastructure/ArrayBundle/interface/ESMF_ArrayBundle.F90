@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.21 2010/09/15 23:25:12 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.22 2010/09/22 03:38:41 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -79,15 +79,15 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleHaloRelease
   public ESMF_ArrayBundleHaloStore
   public ESMF_ArrayBundlePrint
+  public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleRedist
   public ESMF_ArrayBundleRedistStore
   public ESMF_ArrayBundleRedistRelease
   public ESMF_ArrayBundleSMM
   public ESMF_ArrayBundleSMMRelease
   public ESMF_ArrayBundleSMMStore
-  public ESMF_ArrayBundleWrite
-  public ESMF_ArrayBundleRead
   public ESMF_ArrayBundleValidate
+  public ESMF_ArrayBundleWrite
 
 ! - ESMF-internal methods:
   public ESMF_ArrayBundleGetInit
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.21 2010/09/15 23:25:12 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.22 2010/09/22 03:38:41 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -736,125 +736,6 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ArrayBundlePrint
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleWrite()"
-!BOP
-! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
-
-! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, iofmt, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*),     intent(in)              :: file
-    logical,          intent(in) ,  optional  :: singleFile
-    type(ESMF_IOFmtFlag),  intent(in),   optional  :: iofmt
-    integer,          intent(out),  optional  :: rc  
-!         
-!
-! !DESCRIPTION:
-!   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[arraybundle] 
-!     {\tt ESMF\_ArrayBundle} object.
-!   \item[file]
-!    The name of the output file in which Fortran data array is written to.
-!   \item[{[singleFile]}]
-!    A logical flag, the default is TRUE, i.e., all arrays in the bundle 
-!    are written in one single file. If FALSE, each array will be written
-!    in separate files; these files are numbered with the name based on the
-!    argument "file".
-!   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
-!   \item[{[rc]}] 
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    character(len=80), allocatable :: Aname(:)
-    integer :: arrayCount,i
-    type(ESMF_Array), allocatable :: arrayList(:)
-    logical :: singlef
-    character(len=80) :: filename
-    character(len=3) :: cnum
-    type(ESMF_IOFmtFlag)        :: iofmtd
-
-#ifdef ESMF_PIO
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
-
-    ! Check options
-    singlef = .true.
-    if (present(singleFile)) singlef = singleFile
-    iofmtd = ESMF_IOFMT_NETCDF   ! default format
-    if(present(iofmt)) iofmtd = iofmt
-    
-    call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    allocate (Aname(arrayCount))
-    allocate (arrayList(arrayCount))
-    call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (singlef) then
-      ! Get and write the first array in the Bundle
-      call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArrayWrite(arrayList(1), file=file, iofmt=iofmtd, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Get and write the rest of the arrays in the Bundle
-      do i=2,arrayCount
-       call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayWrite(arrayList(i), file=file, append=.true., &
-         iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    else
-      do i=1,arrayCount
-        write(cnum,"(i3.3)") i
-        filename = file // cnum
-        ! Get and write the first array in the Bundle
-        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayWrite(arrayList(i), file=trim(filename),  &
-           iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    endif
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-#else
-    ! Return indicating PIO not present
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
-#endif
- 
-  end subroutine ESMF_ArrayBundleWrite
 !------------------------------------------------------------------------------
 
 
@@ -2202,6 +2083,125 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArrayBundleValidate
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleWrite()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
+
+! !INTERFACE:
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, iofmt, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
+    character(*),     intent(in)              :: file
+    logical,          intent(in) ,  optional  :: singleFile
+    type(ESMF_IOFmtFlag),  intent(in),   optional  :: iofmt
+    integer,          intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle] 
+!     {\tt ESMF\_ArrayBundle} object.
+!   \item[file]
+!    The name of the output file in which Fortran data array is written to.
+!   \item[{[singleFile]}]
+!    A logical flag, the default is TRUE, i.e., all arrays in the bundle 
+!    are written in one single file. If FALSE, each array will be written
+!    in separate files; these files are numbered with the name based on the
+!    argument "file".
+!   \item[{[iofmt]}]
+!    The PIO format. Please see Section~\ref{opt:} for the list of options.
+!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    character(len=80), allocatable :: Aname(:)
+    integer :: arrayCount,i
+    type(ESMF_Array), allocatable :: arrayList(:)
+    logical :: singlef
+    character(len=80) :: filename
+    character(len=3) :: cnum
+    type(ESMF_IOFmtFlag)        :: iofmtd
+
+#ifdef ESMF_PIO
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+
+    ! Check options
+    singlef = .true.
+    if (present(singleFile)) singlef = singleFile
+    iofmtd = ESMF_IOFMT_NETCDF   ! default format
+    if(present(iofmt)) iofmtd = iofmt
+    
+    call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate (Aname(arrayCount))
+    allocate (arrayList(arrayCount))
+    call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (singlef) then
+      ! Get and write the first array in the Bundle
+      call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArrayWrite(arrayList(1), file=file, iofmt=iofmtd, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Get and write the rest of the arrays in the Bundle
+      do i=2,arrayCount
+       call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_ArrayWrite(arrayList(i), file=file, append=.true., &
+         iofmt=iofmtd, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    else
+      do i=1,arrayCount
+        write(cnum,"(i3.3)") i
+        filename = file // cnum
+        ! Get and write the first array in the Bundle
+        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArrayWrite(arrayList(i), file=trim(filename),  &
+           iofmt=iofmtd, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+    ! Return indicating PIO not present
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+ 
+  end subroutine ESMF_ArrayBundleWrite
 !------------------------------------------------------------------------------
 
 
