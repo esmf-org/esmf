@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.319 2010/09/16 18:24:22 garyblock Exp $
+#  $Id: common.mk,v 1.320 2010/09/22 19:33:45 garyblock Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2471,6 +2471,7 @@ run_test_harness_sec:
 	if [ -d harness_config ] ; then \
 	  if [ -f harness_config/$(TESTHARNESSCASE)_test.rc ] ; then \
 	    cp -f harness_config/$(TESTHARNESSCASE)_*.rc $(ESMF_TESTDIR) ; \
+            cp -f harness_config/$(TESTHARNESSCASE)_test.rc $(ESMF_TESTDIR)/test_harness.rc ; \
 	    $(MAKE) htest ; \
 	  else \
 	    echo "FAIL: missing file - harness_config/$(TESTHARNESSCASE)_test.rc" ; \
