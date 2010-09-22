@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.11 2010/09/15 02:35:21 svasquez Exp $
+% $Id: Attribute_pack.tex,v 1.12 2010/09/22 05:51:24 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,8 +63,8 @@ There are many attributes that are used to describe components. There are curren
      {\tt Agency} & An administrative unit of government.& DoD, DOE, DOI, NASA, NOAA, NSF\\
      {\tt Author} & The person who created the content of a book, article, or other source. & N/A\\
      {\tt CodingLanguage} & The computer language in which a unit of software is written. & C, C++, F77, F90, Java\\
-     {\tt ComponentFullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& N/A\\
-     {\tt ComponentShortName} & A version of the component name that contains acronyms & N/A\\
+     {\tt ComponentFullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out. & N/A\\
+     {\tt ComponentShortName} & A version of the component name that contains acronyms. & N/A\\
      {\tt Discipline} & A subject, theme, category, or general area of interest.& Aerosol, Fisheries, Climate, Carbon Cycle, Hydrology, Land, Ocean, Polar, Sediment, Storm Surge, Turbulence, Weather, Wave, Weather Prediction \\
      {\tt Institution} & An organization associated with a model component, simulation, or dataset.& N/A\\
      {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& CCA, ESMF, Flume, FMS, OASIS, SWMF \\
@@ -174,7 +174,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt InstitutionPhysicalAddress} & The address of an organization associated with a model component or simulation. & N/A \\
      {\tt InstitutionURL} & A website of an organization associated with a model component or simulation. & N/A \\
      {\tt InstitutionAbbreviation} & The abbreviation of an organization associated with a model component or simulation. & N/A \\
-     {\tt PrincipalInvestigator} & The scientist in charge of an experiment or research project. & \\
+     {\tt PrincipalInvestigator} & The scientist in charge of an experiment or research project. & N/A \\
      {\tt FundingSource} & The entity that funded a model component or simulation. & N/A\\
      {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. & Author, Principal Investigator, Contact, Center, Funder\\
 \end{tabular}
@@ -190,14 +190,14 @@ There are many attributes that are used to describe components. There are curren
     \begin{itemize}
         \item CIM XML 
     \end{itemize} 
-    \item Descriptipn: This package is used to describe references. Examples include a URL or a scientific reference. 
+    \item Description: This package is used to describe references. Examples include a URL or a scientific reference. 
 \end{itemize}
 
 
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
-     {\tt CitationShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. murphy, 2009) or the title of a web page. & N/A \\
+     {\tt CitationShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\
      {\tt CitationLongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
      {\tt CitationDate} & The date of the citation. & N/A\\
      {\tt CitationPresentationForm} & A description of the type of citation & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
@@ -420,7 +420,7 @@ There are two grid attribute packages in ESMF.
 
 \begin{itemize}
     \item Convention: ESMF
-    \item Purpose: Grid
+    \item Purpose: General
     \item Output Options
     \begin{itemize}
         \item Simple XML
@@ -433,8 +433,8 @@ There are two grid attribute packages in ESMF.
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
-{\tt RegDecompX} &  The number of DEs in X a particular grid is decomposed into.& N/A\\
-{\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into. N/A\\
+{\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& N/A\\
+{\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& N/A\\
 \end{tabular}
 
 
