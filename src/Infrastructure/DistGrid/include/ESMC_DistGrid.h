@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.42 2010/09/16 04:33:44 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.43 2010/09/22 21:10:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ int ESMC_DistGridDestroy(
 //
 // !INTERFACE:
 int ESMC_DistGridPrint(
-  ESMC_DistGrid distgrid
+  ESMC_DistGrid distgrid          // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
