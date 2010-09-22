@@ -5,14 +5,14 @@
 
 The ESMF\_RegridWeightGen application is used to generate regridding weights in an offline mode.
 This program combines the two offline regrid applications in the previous release 
-(\cite{sec:regrid:offline}) into one application.  It takes a source grid file and a destination grid file
+\ref{sec:regrid:offline} into one application.  It takes a source grid file and a destination grid file
 in either the SCRIP format or the ESMF Unstructured grid format, and generate a regridding weight 
 file in the SCRIP format.  It supports bilinear, patch and conservative regridding methods.  
 The source and the destination grids can be either a regularly rectangular grid or an unstructured grid
 including cubed sphere grid.  This application is a parallel application that can be run on any number of PETs.
 
-The command line arguments are all keyword based.  Both the long keyward prefixed with {\tt'--'} or the 
-one character short keyword prefixed with {\tt'-'} are supported.  The format to run the application is 
+The command line arguments are all keyword based.  Both the long keyward prefixed with {\tt '--'} or the 
+one character short keyword prefixed with {\tt '-'} are supported.  The format to run the application is 
 as follows:
 
 \begin{verbatim}
@@ -70,8 +70,8 @@ where
                  be generated.
 \end{verbatim}
 
-In this application, we use {\tt ESMF\_GridCreate}~\cite{example:2DLogRecFromScrip} to create a 
+In this application, we use {\tt ESMF\_GridCreate}~\ref{example:2DLogRecFromScrip} to create a 
 ESMF_Grid object if the source or destination grid is a logically rectangular grid.  We use 
-{\tt ESMF\_MeshCreate}~\cite{sec:example:UnstructFromFile} to create a ESMF_Mesh object if the 
+{\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} to create a ESMF_Mesh object if the 
 source or destination grid is a cubed sphere grid or an unstructured grid.  We then use
 {\tt ESMF_FieldRegridStore} to generate the regridding weight table and indicies table.   
