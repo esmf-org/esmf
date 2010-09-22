@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.27 2010/09/22 13:47:45 peggyli Exp $
+! $Id: ESMF_MeshEx.F90,v 1.28 2010/09/22 21:39:57 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -724,6 +724,7 @@ program ESMF_MeshEx
 ! is a global grid and will be used in a regrid operation, this flag should be set to 1.
 !EOE
 
+#ifdef ESMF_NETCDF
 !BOC
    filename = 'data/ne4np4-pentagons.nc'
    mesh = ESMF_MeshCreate(filename, ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=localrc)
@@ -733,6 +734,7 @@ program ESMF_MeshEx
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+#endif
 
 !BOE
 ! We defined a more general unstructured grid file format for the ESMF Mesh.  In the ESMF file format,
@@ -779,17 +781,17 @@ program ESMF_MeshEx
 ! global grid.
 !EOE
 
+#ifdef ESMF_NETCDF
 !BOC
    filename = 'data/ne4np4-esmf.nc'
    mesh = ESMF_MeshCreate(filename, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=localrc)
-!
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
+#endif
 
 !BOE
 !\subsubsection{Removing Mesh Memory}
