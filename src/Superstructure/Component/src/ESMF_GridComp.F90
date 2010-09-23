@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.134 2010/09/23 05:51:49 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.135 2010/09/23 20:51:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.134 2010/09/23 05:51:49 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.135 2010/09/23 20:51:37 theurich Exp $'
 
 !==============================================================================
 !
@@ -398,9 +398,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINALIC, &
@@ -449,9 +446,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
@@ -695,9 +689,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -745,9 +736,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1041,9 +1029,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1091,9 +1076,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &

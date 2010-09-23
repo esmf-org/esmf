@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.37 2010/09/23 18:48:32 w6ws Exp $
+// $Id: ESMCI_FTable.C,v 1.38 2010/09/23 20:51:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.37 2010/09/23 18:48:32 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.38 2010/09/23 20:51:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -566,6 +566,7 @@ extern "C" {
 // VM-enabled CallBack loop     
 extern "C" {
      
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_FTableCallEntryPointVMHop"
 static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
@@ -614,7 +615,9 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   cargo->esmfrc[mytid] = ESMF_SUCCESS;
   return NULL;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 // call a function through VM
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablecallentrypointvm"
@@ -687,14 +690,21 @@ void FTN(c_esmc_ftablecallentrypointvm)(
          
   ESMCI::cargotype *cargo = new ESMCI::cargotype;
   strcpy(cargo->name, name);    // copy trimmed type string
+  delete[] name;  // delete memory that "newtrim" allocated above
   cargo->ftable = ftable;       // pointer to function table
   cargo->rcCount = 1;           // default
   cargo->esmfrc = new int[1];
   cargo->userrc = new int[1];
-  cargo->esmfrc[0] = ESMF_SUCCESS; // initialize return code
-  cargo->userrc[0] = 0;            // initialize user return code
-  *vm_cargo=(void*)cargo;       // store pointer to the cargo structure
-  delete[] name;  // delete memory that "newtrim" allocated above
+  cargo->esmfrc[0] = ESMF_SUCCESS;  // initialize return code
+  cargo->userrc[0] = 0;             // initialize user return code
+  cargo->previousCargo = *vm_cargo; // support recursion
+  cargo->previousParentFlag = vmplan->parentVMflag;    // support threaded rec.
+  *vm_cargo=(void*)cargo;           // store pointer to the cargo structure
+  
+  if (cargo->previousCargo != NULL){
+    // this is a recursive method invocation
+    vmplan->parentVMflag = 1; // indicate that this is already child's VM
+  }
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
@@ -704,7 +714,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // ... if the child VM uses threads (multi-threading or single-threading) 
   // then this parent PET continues running concurrently to the child PET in the
   // same VAS! In that case the return codes in cargo are not valid here!
-  // The status returned by VMEnter() indicates that success of entering the
+  // The status returned by VM::enter() indicates that success of entering the
   // child VM, not failure or success of the callback.
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
@@ -712,7 +722,9 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_compwait"
 void FTN(c_esmc_compwait)(
@@ -750,14 +762,17 @@ void FTN(c_esmc_compwait)(
     return;
   if (userrc) *userrc = cargo->userrc[0];
   
-  // delete cargo structure
+  // delete cargo structure and handle recursion
   delete [] cargo->esmfrc;
   delete [] cargo->userrc;
+  *vm_cargo = cargo->previousCargo; // bring back previous cargo structure
+  vmplan->parentVMflag = cargo->previousParentFlag;   // previous value
   delete cargo;
   
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
+//-----------------------------------------------------------------------------
   
 } // extern "C"
 //==============================================================================
@@ -966,7 +981,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   // ...now the component's VM is started up and placed on hold.
   
   // call into register routine using the component's VM
-  void *vm_cargo;
+  void *vm_cargo = NULL;
   enum method reg = SETREGISTER;
   FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
     &vm_cargo, &tabptr, &reg, NULL, &localrc);
@@ -1060,21 +1075,38 @@ int FTable::getEntry(
       break;
   }
   if (i==funccount) i=-1; // indicate entry not found
+  
+if (i==-1)
+printf("gjt: failed attempt to look up method: %s\n", name);
 
   if (i == -1){
     // name was not found in function table -> check if name contains "IC"
-    const char *ic = strstr(name, "IC");
+    char const *ic = strstr(name, "IC");
     if (ic){
       // this was a failed attempt look up interface component method
       // -> try actual component method instead
-//printf("gjt: failed attempt to look up IC method -> try actual method\n");
-      int n = ic - name;  // number of characters before "IC"
-      if (n < 0) n = -n;  // just in case memory goes the other way
+      int len = strlen(name);
+      char *tempname = new char[len];
+      char *b = tempname;
+      char const *a = name;
+      for (int l=0; l<len+1; l++){
+        if (a!=ic && a!=ic+1){
+          *b = *a;
+          b++;
+        }
+        a++;
+      }
+printf("gjt: failed attempt to look up IC method -> try actual method: %s\n",
+tempname);
+      
       for (i=0; i<funccount; i++) {
-        if (!strncmp(name, funcs[i].funcname, n))
+        if (!strcmp(tempname, funcs[i].funcname))
           break;
       }
       if (i==funccount) i=-1; // indicate entry not found
+      delete [] tempname;
+if (i==-1)
+printf("gjt: failed 2nd attempt to look up method: %s\n", name);
     }
   }
   

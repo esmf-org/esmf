@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.17 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_FTable.h,v 1.18 2010/09/23 20:51:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -147,11 +147,13 @@ class FTable {
 };
 
 typedef struct{
-  char name[160];     // trimmed type string
-  FTable *ftable;     // pointer to function table
-  int rcCount;        // number of return codes in esmfrc and userrc
-  int *esmfrc;        // return codes of esmf call back method (all threads)
-  int *userrc;        // return codes of registered user method (all threads)
+  char name[160];       // trimmed type string
+  FTable *ftable;       // pointer to function table
+  int rcCount;          // number of return codes in esmfrc and userrc
+  int *esmfrc;          // return codes of esmf call back method (all threads)
+  int *userrc;          // return codes of registered user method (all threads)
+  void *previousCargo;  // support for recursive entering of methods
+  int previousParentFlag; // support for recursive entering of methods
 }cargotype;
 
 

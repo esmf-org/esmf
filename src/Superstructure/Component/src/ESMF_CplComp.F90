@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.119 2010/09/23 05:51:49 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.120 2010/09/23 20:51:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.119 2010/09/23 05:51:49 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.120 2010/09/23 20:51:37 theurich Exp $'
 
 !==============================================================================
 !
@@ -382,9 +382,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -433,9 +430,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -457,8 +451,8 @@ contains
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompGet(cplcomp, name, config, configFile, clock, vm, &
-    contextflag, currentMethod, currentPhase, rc)
+  subroutine ESMF_CplCompGet(cplcomp, name, config, configFile, clock, &
+    localPet, petCount, contextflag, currentMethod, currentPhase, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(inout)         :: cplcomp
@@ -466,10 +460,12 @@ contains
     type(ESMF_Config),      intent(out), optional :: config
     character(len=*),       intent(out), optional :: configFile
     type(ESMF_Clock),       intent(out), optional :: clock
-    type(ESMF_VM),          intent(out), optional :: vm
+    integer,                intent(out), optional :: localPet
+    integer,                intent(out), optional :: petCount
     type(ESMF_ContextFlag), intent(out), optional :: contextflag
     type(ESMF_Method),      intent(out), optional :: currentMethod
     integer,                intent(out), optional :: currentPhase
+    type(ESMF_VM),          intent(out), optional :: vm
     integer,                intent(out), optional :: rc
 
 !
@@ -492,8 +488,10 @@ contains
 !   Return the configuration filename for this {\tt ESMF\_CplComp}.
 ! \item[{[clock]}]
 !   Return the private clock for this {\tt ESMF\_CplComp}.
-! \item[{[vm]}]
-!   Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+! \item[{[localPet]}]
+!   Return the local PET id withing the {\tt ESMF\_GridComp} object.
+! \item[{[petCount]}]
+!   Return the number of PETs in the the {\tt ESMF\_GridComp} object.
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_CplComp}.
 !   See section \ref{opt:contextflag} for a complete list of valid flags.
@@ -502,6 +500,8 @@ contains
 !   See section \ref{opt:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
+! \item[{[vm]}]
+!   Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -519,7 +519,8 @@ contains
     ! call Comp method
     call ESMF_CompGet(cplcomp%compp, name, vm=vm, contextflag=contextflag, &
       clock=clock, configFile=configFile, config=config, &
-      currentMethod=currentMethod, currentPhase=currentPhase, rc=localrc)
+      currentMethod=currentMethod, currentPhase=currentPhase, &
+      localPet=localPet, petCount=petCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -663,9 +664,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -714,9 +712,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1010,9 +1005,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1060,9 +1052,6 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
