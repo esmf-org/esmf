@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.49 2010/09/15 23:26:07 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.50 2010/09/23 04:30:11 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1824,7 +1824,8 @@ end function
 !      in separate files; these files are numbered with the name based on the
 !      argument "file".
 !     \item[{[iofmt]}]
-!      The PIO format. Please see Section~\ref{opt:} for the list of options.
+!      The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!      of options.
 !      If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2399,7 +2400,8 @@ end function
 !      in separate files; these files are numbered with the name based on the
 !      argument "file".
 !     \item[{[iofmt]}]
-!      The PIO format. Please see Section~\ref{opt:} for the list of options.
+!      The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!      of options.
 !      If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
