@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.5 2010/09/17 05:46:30 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.6 2010/09/23 22:15:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -48,6 +48,8 @@ module ESMF_ArrayHaMod
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
+  use ESMF_ArrayGetMod      ! contains the ESMF_ArrayGet procedures
+  use ESMF_ArrayIOMod       ! contains the ESMF_ArrayReadIntl procedures
   
   implicit none
 
@@ -64,6 +66,7 @@ module ESMF_ArrayHaMod
   public ESMF_ArrayHaloRelease
   public ESMF_ArrayHaloStore
   public ESMF_ArrayPrint
+  public ESMF_ArrayRead
   public ESMF_ArrayRedist
   public ESMF_ArrayRedistRelease
   public ESMF_ArrayRedistStore
@@ -74,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.5 2010/09/17 05:46:30 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.6 2010/09/23 22:15:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -452,6 +455,232 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ArrayPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRead"
+!BOP
+! !IROUTINE: ESMF_ArrayRead - Read Array data from a file.
+!
+! !INTERFACE:
+  subroutine ESMF_ArrayRead(array, file, variableName, iofmt, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Array),     intent(inout)         :: array
+    character(*),         intent(in)            :: file
+    character(*),         intent(in),  optional :: variableName
+    type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
+    integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Read Array data from file and put it into the {ESMF\_Array} object.
+! 
+!   Limitations:
+!   \begin{itemize}
+!     \item Only 1 DE per PET supported.
+!     \item No support for ESMF\_COMM=mpiuni mode.
+!   \end{itemize}
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[array]
+!    The {\tt ESMF\_Array} object through which the read data is returned.
+!   \item[file]
+!    The name of the file from which Array data is read from.
+!   \item[{[variableName]}]
+!    Variable name in the file; default is the "name" of Array.
+!    Use this argument only in the IO format (such as NetCDF) that
+!    supports variable name. If the IO format does not support this (
+!    such as binary format), ESMF will return error code.
+!   \item[{[iofmt]}]
+!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! Local vars
+    integer :: localrc                   ! local return code
+    integer :: localtk
+    integer :: rank
+    character(len=80) :: varname
+    type(ESMF_IOFmtFlag) :: iofmt_internal
+    character(len=10) :: piofmt
+
+    type(ESMF_TypeKind)             :: typekind
+
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+#ifdef ESMF_PIO
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
+
+    ! Handle IO format
+    iofmt_internal = ESMF_IOFMT_NETCDF   ! default format
+    if (present(iofmt)) iofmt_internal = iofmt
+
+    if (iofmt_internal == ESMF_IOFMT_NETCDF) then
+    ! NETCDF format selected
+#ifdef ESMF_PNETCDF
+    piofmt = "pnc"  ! PNETCDF first choice to write NETCDF format
+#elif ESMF_NETCDF
+    piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
+#else
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "NETCDF or PNETCDF libraries are missingfor this format choice", &
+       ESMF_CONTEXT, rc)
+    return
+#endif
+
+    else if (iofmt_internal == ESMF_IOFMT_BIN) then
+
+    ! binary format selected
+    piofmt = "bin"
+    if (present(variableName)) then
+      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+      "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
+       ESMF_CONTEXT, rc)
+      return
+    endif
+
+    else
+
+    ! format option that is not supported
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "this format is not currently supported by the ESMF IO layer", &
+       ESMF_CONTEXT, rc)
+    return
+
+    endif
+
+    !
+    ! Obtain typekind and rank
+    call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if(present(variableName)) varname = variableName
+
+    ! Call a T/K/R specific interface in order to create the proper
+    !  type of F90 pointer, allocate the space, set the values in the
+    !  Array object, and return.  (The routine this code is calling is
+    !  generated by macro.)
+
+    localtk = typekind%dkind
+
+    !! calling routines generated from macros by the preprocessor
+
+    select case (localtk)
+      !
+      case (ESMF_TYPEKIND_I4%dkind)
+        ! The PIO data type is PIO_int
+        select case(rank)
+          case (1)
+            call ESMF_ArrayReadIntl1DI4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (2)
+            call ESMF_ArrayReadIntl2DI4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (3)
+            call ESMF_ArrayReadIntl3DI4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (4)
+            call ESMF_ArrayReadIntl4DI4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (5)
+            call ESMF_ArrayReadIntl5DI4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case default
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+              ESMF_CONTEXT, rc)
+            return
+        end select
+
+      case (ESMF_TYPEKIND_R4%dkind)
+        select case(rank)
+        ! The PIO data type is PIO_real
+          case (1)
+            call ESMF_ArrayReadIntl1DR4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (2)
+            call ESMF_ArrayReadIntl2DR4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (3)
+            call ESMF_ArrayReadIntl3DR4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (4)
+            call ESMF_ArrayReadIntl4DR4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (5)
+            call ESMF_ArrayReadIntl5DR4(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case default
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+              ESMF_CONTEXT, rc)
+            return
+        end select
+
+      case (ESMF_TYPEKIND_R8%dkind)
+        ! The PIO data type is PIO_double
+        select case(rank)
+          case (1)
+            call ESMF_ArrayReadIntl1DR8(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (2)
+            call ESMF_ArrayReadIntl2DR8(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (3)
+            call ESMF_ArrayReadIntl3DR8(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (4)
+            call ESMF_ArrayReadIntl4DR8(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case (5)
+            call ESMF_ArrayReadIntl5DR8(array, file, varname, piofmt, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          case default
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+              ESMF_CONTEXT, rc)
+            return
+        end select
+
+      case default
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
+          ESMF_CONTEXT, rc)
+        return
+
+    end select
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+#else
+    ! Return indicating PIO not present
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+  end subroutine ESMF_ArrayRead
 !------------------------------------------------------------------------------
 
 
