@@ -359,7 +359,7 @@ end subroutine ESMF_ScripGetVar
 ! !INTERFACE:
 subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcFile, dstFile, srcIsScrip, dstIsScrip,&
-				      title, method, rc)
+				      title, method, srcArea, dstArea,rc)
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: wgtFile
@@ -371,6 +371,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       logical, optional, intent(in) :: dstIsScrip
       character(len=*), optional, intent(in) :: title
       character(len=*), optional, intent(in) :: method
+      real(ESMF_KIND_R8),optional, intent(in) :: srcArea(:),dstArea(:)
       integer, optional :: rc
 
       integer :: total, localCount(1)
@@ -1020,27 +1021,42 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE, rc)) return
         endif
 
+
          ! Write area_a
-         ! Just set these to 1.0, because not testing conservative yet
-         allocate(area(srcDim))         
-         area=0.0
          ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, area)          
-         if (CDFCheckError (ncStatus, &
-           ESMF_METHOD, &
-           ESMF_SRCLINE, rc)) return
-         deallocate(area)
+         if (present(srcArea)) then
+           ncStatus=nf90_put_var(ncid,VarId, srcArea)          
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE, rc)) return 
+         else
+          ! Just set these to 1.0, because not provided
+           allocate(area(srcDim))         
+           area=1.0
+           ncStatus=nf90_put_var(ncid,VarId, area)          
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE, rc)) return
+           deallocate(area)
+         endif
 
          ! Write area_b
-         ! Just set these to 1.0, because not testing conservative yet
-         allocate(area(dstDim))         
-         area=0.0
          ncStatus=nf90_inq_varid(ncid,"area_b",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, area)          
-         if (CDFCheckError (ncStatus, &
-           ESMF_METHOD, &
-           ESMF_SRCLINE, rc)) return
-         deallocate(area)
+         if (present(dstArea)) then
+           ncStatus=nf90_put_var(ncid,VarId, dstArea)          
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE, rc)) return 
+         else
+          ! Just set these to 1.0, because not provided
+           allocate(area(dstDim))         
+           area=1.0
+           ncStatus=nf90_put_var(ncid,VarId, area)          
+           if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE, rc)) return
+           deallocate(area)
+         endif
 
          ! Write frac_a
          allocate(frac(srcDim))         
