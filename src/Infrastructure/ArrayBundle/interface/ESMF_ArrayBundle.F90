@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.22 2010/09/22 03:38:41 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.23 2010/09/23 04:37:25 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.22 2010/09/22 03:38:41 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.23 2010/09/23 04:37:25 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -743,7 +743,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRead()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRead - Write ArrayBundle arrays
+! !IROUTINE: ESMF_ArrayBundleRead - Read in ArrayBundle content
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleRead(arraybundle, file, singleFile, iofmt, rc)
@@ -771,7 +771,8 @@ contains
 !    in separate files; these files are numbered with the name based on the
 !    argument "file".
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
+!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!    of options.
 !    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2090,7 +2091,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleWrite()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle arrays
+! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle content in file
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, iofmt, rc)
@@ -2118,7 +2119,8 @@ contains
 !    in separate files; these files are numbered with the name based on the
 !    argument "file".
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:} for the list of options.
+!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!    of options.
 !    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
