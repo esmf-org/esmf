@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.24 2010/09/23 22:15:37 theurich Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.25 2010/09/23 23:35:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,6 +63,8 @@ module ESMF_ArrayIOMod
 ^endif
   implicit none
 
+^ifdef ESMF_PIO  
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
@@ -80,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.24 2010/09/23 22:15:37 theurich Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.25 2010/09/23 23:35:47 theurich Exp $'
 
 !==============================================================================
 
@@ -107,7 +109,6 @@ contains
 !------------------------------------------------------------------------------
 ! Internally used subroutines that only exist if ESMF_PIO is defined.
 
-^ifdef ESMF_PIO
 
   subroutine check_pioerr(ierr, localPet, file, line, str1, str2)
 
