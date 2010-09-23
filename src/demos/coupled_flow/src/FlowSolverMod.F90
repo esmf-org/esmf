@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.12 2010/09/17 20:43:41 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.13 2010/09/23 21:12:50 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -115,13 +115,13 @@
 !
 ! Register the callback routines.
 !
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=Flow_Init1, phase=1, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=Flow_Init2, phase=2, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=FlowSolve, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=Flow_Final, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       print *, "FlowSolverMod: Registered Initialize, Run, and Finalize routines"
@@ -398,21 +398,21 @@
       !
       ! Update export state with needed fields
       !
-      ! TODO: determine if relinking is needed
-      !do i=1, datacount
+      ! relink the rest of the Fields
+      do i=2, datacount
 
-      !  ! check isneeded flag here
-      !  if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
-      !     cycle
-      !  endif
+        ! check isneeded flag here
+        if (.not. ESMF_StateIsNeeded(export_state, itemName=datanames(i), rc=rc)) then 
+           cycle
+        endif
 
-      !  ! Set export data in export state
-      !  call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
-      !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      !  call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
-      !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        ! Set export data in export state
+        call ESMF_StateGet(import_state, itemName=datanames(i), field=thisfield, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        call ESMF_StateAdd(export_state, field=thisfield, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      !enddo
+      enddo
 
       rc = ESMF_SUCCESS
 
@@ -1675,19 +1675,26 @@
 !
 ! And now test output to a file
 !
-      call ESMF_FieldWrite(field_u, filename, rc=status)
+      write(filename, 20)  "U_velocity", file_no, "nc"
+      call ESMF_FieldWrite(field_u, file=filename, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      call ESMF_FieldWrite(field_v, filename, append=.true., rc=status)
+      write(filename, 20)  "V_velocity", file_no, "nc"
+      call ESMF_FieldWrite(field_v, file=filename, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      call ESMF_FieldWrite(field_sie, filename, append=.true., rc=status)
+      write(filename, 20)  "V_velocity", file_no, "nc"
+      call ESMF_FieldWrite(field_v, file=filename, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+
+      write(filename, 20)  "SIE", file_no, "nc"
+      call ESMF_FieldWrite(field_sie, file=filename, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! First time through output two more files
 !
       if(file_no .eq. 1) then
-        call ESMF_FieldWrite(field_flag, filename, append=.true., rc=status)
+        call ESMF_FieldWrite(field_flag, file="FLAG.nc", rc=status)
         if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
         do j = jmin, jmax
@@ -1695,13 +1702,13 @@
             de(i,j) = pet_id
           enddo
         enddo
-        call ESMF_FieldWrite(field_de, filename, append=.true., rc=status)
+        call ESMF_FieldWrite(field_de, file="DE.nc", rc=status)
         if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
- 20   format(a,".",I3.3)
+ 20   format(a,".",I3.3,".",a)
 
       end subroutine FlowPrint
 

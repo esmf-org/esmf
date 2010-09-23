@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.5 2010/08/25 17:23:23 feiliu Exp $
+! $Id: FlowArraysMod.F90,v 1.6 2010/09/23 21:12:50 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -81,9 +81,9 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: haloWidth(2), haloLWidth(2), haloUWidth(2)
+      integer :: haloLWidth(2), haloUWidth(2)
       type(ESMF_ArraySpec) :: arrayspec
-      integer, dimension(2) :: lb, ub
+      integer, dimension(2) :: tlb, tub, clb, cub
 !
 ! Set initial values
 !
@@ -99,7 +99,8 @@
 !
 ! create fields and get pointers to data
 !
-      haloWidth = 1
+      haloLWidth = 0
+      haloUWidth = 2
 !BOP
 !
 ! !DESCRIPTION:
@@ -118,7 +119,7 @@
 !     location (relloc) at the cell centers:
 !\begin{verbatim}
       field_sie  = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="SIE", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="SIE", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !\end{verbatim}
 !     Once the Field has been created, we get a pointer to the Array
@@ -132,61 +133,61 @@
 !EOP
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="U", rc=status)
+                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/1,2/), name="U", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_u, farrayPtr=u, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="V", rc=status)
+                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/2,1/), name="V", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_v, farrayPtr=v, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rho  = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHO", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="RHO", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rho, farrayPtr=rho, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhoi = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOI", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="RHOI", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhoi, farrayPtr=rhoi, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOU", rc=status)
+                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/1,2/), name="RHOU", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhou, farrayPtr=rhou, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="RHOV", rc=status)
+                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/2,1/), name="RHOV", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhov, farrayPtr=rhov, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_p    = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="P", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="P", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_p, farrayPtr=p, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="Q", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="Q", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_q, farrayPtr=q, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_flag = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="FLAG", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="FLAG", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_flag, farrayPtr=flag, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_de   = ESMF_FieldCreate(grid, arrayspec, &
-                   maxHaloLWidth=haloWidth, maxHaloUWidth=haloWidth, name="DE", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="DE", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_de, farrayPtr=de, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
@@ -198,24 +199,21 @@
 !
 ! set some of the scalars from Field information
 !
-      call ESMF_FieldGet(field_de, &
-                        maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, &
-                        rc=status)
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGetBounds(field_de, &
-                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
+           totalLBound=tlb, totalUBound=tub, &
+           rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       ! Computational region: data unique to this DE
-      imin = lb(1) + haloLWidth(1)
-      imax = ub(1) - haloUWidth(1)
-      jmin = lb(2) + haloLWidth(2)
-      jmax = ub(2) - haloUWidth(2)
+      imin = tlb(1)+1
+      imax = tub(1)-1
+      jmin = tlb(2)+1
+      jmax = tub(2)-1
       ! Total region: data plus the halo widths
-      imin_t = lb(1) 
-      imax_t = ub(1)
-      jmin_t = lb(2)
-      jmax_t = ub(2)
+      imin_t = tlb(1) 
+      imax_t = tub(1)
+      jmin_t = tlb(2)
+      jmax_t = tub(2)
 
       if(rcpresent) rc = ESMF_SUCCESS
 

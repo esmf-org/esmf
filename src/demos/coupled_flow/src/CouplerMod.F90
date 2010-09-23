@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.7 2010/08/26 17:17:27 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.8 2010/09/23 21:12:50 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -66,11 +66,11 @@
 
       ! Register the callback routines.
 
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=coupler_init, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, coupler_run, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=coupler_run, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, coupler_final, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=coupler_final, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       print *, "CouplerMod: Registered Initialize, Run, and Finalize routines"

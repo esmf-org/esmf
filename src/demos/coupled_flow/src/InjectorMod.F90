@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.11 2010/09/17 20:43:41 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.12 2010/09/23 21:12:50 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -94,13 +94,13 @@
         !
         !  This Component has a 2 phase initialization, and a single
         !   phase run and finalize.
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init1, 1, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=injector_init1, phase=1, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, injector_init2, 2, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=injector_init2, phase=2, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, injector_run, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=injector_run, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, injector_final, rc=rc)
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=injector_final, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
         print *, "InjectorMod: Registered Initialize, Run, and Finalize routines"
@@ -356,19 +356,19 @@
 
       ! Update any required fields in the export state
       ! Ojbects are referenced now, no need for relinking
-      !do i=1, datacount
+      do i=2, datacount
 
-      !   ! check isneeded flag here
-      !   if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
-      !       cycle
-      !   endif
+         ! check isneeded flag here
+         if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
+             cycle
+         endif
 
-      !   call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
-      !   if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      !   !call ESMF_StateAdd(exportState, thisfield, rc=rc)
-      !   !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+         call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+         call ESMF_StateAdd(exportState, thisfield, rc=rc)
+         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      !enddo
+      enddo
 
       rc = ESMF_SUCCESS
 
