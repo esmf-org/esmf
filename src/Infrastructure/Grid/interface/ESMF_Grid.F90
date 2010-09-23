@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.159 2010/09/22 22:32:31 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.160 2010/09/23 04:36:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.159 2010/09/22 22:32:31 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.160 2010/09/23 04:36:22 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3176,6 +3176,133 @@ end subroutine ESMF_GridConvertIndex
 end function ESMF_GridCreateFrmScripDistGrd
 
 
+
+! Internal subroutine to convert the 2D corner coordinate arrays which contain all the corners
+! surrounding each center point into a 1D Array without repeats. 
+! This assumes that all the corners are in the same order around each center
+subroutine convert_corner_arrays_to_1D(dim1,dim2,cornerX2D,cornerY2D,cornerX,cornerY, rc)
+ integer :: dim1,dim2
+ real(ESMF_KIND_R8),  allocatable:: cornerX2D(:,:),cornerY2D(:,:)
+ real(ESMF_KIND_R8),  allocatable:: cornerX(:),cornerY(:)
+ integer :: rc
+ integer :: i,j
+ real(ESMF_KIND_R8) :: tol=0.000000000001
+ integer :: topCorner
+ integer :: btmCorner
+ logical :: matches
+ integer :: count
+
+ ! Figure out which corner indice is the top row of corners
+ ! It won't match any of the neighbors corners
+ TopCorner=-1
+ do i=1,4
+
+    ! See if it matches nbr to the right
+    matches=.false.
+    do j=1,4
+       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
+           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+          matches=.true.
+	  exit
+       endif
+    enddo
+    if (matches) cycle 
+
+    ! See if it matches nbr to the below
+    matches=.false.
+    do j=1,4
+       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
+           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+          matches=.true.
+	  exit
+       endif
+    enddo
+    if (matches) cycle 
+
+   ! See if it matches nbr to the below and to the right
+    matches=.false.
+    do j=1,4
+       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+2))<tol) .and. &
+           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+2))<tol)) then
+          matches=.true.
+	  exit
+       endif
+    enddo
+    if (matches) cycle 
+
+    ! Doesn't match anyone
+    TopCorner=i
+
+    ! Exit the loop
+    exit
+ enddo
+
+  ! Make sure we found a corner
+  if (TopCorner .eq. -1) then
+     call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
+	  ESMF_CONTEXT, rc)
+     return
+  endif
+
+
+ ! Figure out which corner indice is the bottom row of corners
+ ! It will match the one below , but not the one to the right
+ BtmCorner=-1
+ do i=1,4
+
+    ! See if it matches nbr to the right
+    matches=.false.
+    do j=1,4
+       if ((abs(cornerX2D(i,1)-cornerX2D(j,2))<tol) .and. &
+           (abs(cornerY2D(i,1)-cornerY2D(j,2))<tol)) then
+          matches=.true.
+	  exit
+       endif
+    enddo
+    if (matches) cycle 
+
+    ! See if it matches nbr to the below
+    matches=.false.
+    do j=1,4
+       if ((abs(cornerX2D(i,1)-cornerX2D(j,dim1+1))<tol) .and. &
+           (abs(cornerY2D(i,1)-cornerY2D(j,dim1+1))<tol)) then
+          matches=.true.
+	  exit
+       endif
+    enddo
+
+    ! correct matching so should be BtmCorner
+    if (matches) then 
+       BtmCorner=i
+       exit
+    endif
+
+ enddo
+
+  ! Make sure we found a corner
+  if (BtmCorner .eq. -1) then
+     call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
+	  ESMF_CONTEXT, rc)
+     return
+  endif
+
+  ! Set Corner info
+  count=size(cornerX2D,2)
+  do i=1,count
+     cornerX(i)=cornerX2D(TopCorner,i)
+     cornerY(i)=cornerY2D(TopCorner,i)
+  enddo
+
+  do i=1,dim1
+     cornerX(i+count)=cornerX2D(BtmCorner,count-dim1+i)
+     cornerY(i+count)=cornerY2D(BtmCorner,count-dim1+i)
+  enddo
+
+ ! return success
+ rc=ESMF_SUCCESS
+
+end subroutine convert_corner_arrays_to_1D
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScripReg"
@@ -3183,7 +3310,7 @@ end function ESMF_GridCreateFrmScripDistGrd
 ! !IROUTINE: ESMF_GridCreate Create a ESMF_Grid from a SCRIP grid file with a regular distribution
 
 ! !INTERFACE:
-  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, rc)
+  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, addCornerStagger, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScripReg
@@ -3193,6 +3320,7 @@ end function ESMF_GridCreateFrmScripDistGrd
     character(len=*), intent(in)                :: filename
     integer, intent(in)                         :: regDecomp(:)
     type(ESMF_DecompFlag), intent(in),optional  :: decompflag(:)
+    logical, intent(in), optional               :: addCornerStagger
     integer, intent(out), optional              :: rc
 
 ! !DESCRIPTION:
@@ -3218,6 +3346,9 @@ end function ESMF_GridCreateFrmScripDistGrd
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
+! \item[{[addCornerStagger]}]
+!      Uses the information in the SCRIP file to add the Corner stagger to 
+!      the Grid. If not specified, defaults to false. 
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3233,16 +3364,22 @@ end function ESMF_GridCreateFrmScripDistGrd
     integer :: DimId, VarId
     real(ESMF_KIND_R8) :: rad2deg
     real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
+    real(ESMF_KIND_R8),  allocatable:: cornerX2D(:,:),cornerY2D(:,:)
+    real(ESMF_KIND_R8),  allocatable:: cornerX(:),cornerY(:)
     type(ESMF_Grid)  :: grid
     type(ESMF_Array) :: array
     real(ESMF_KIND_R8), allocatable :: coord2D(:,:)
+    real(ESMF_KIND_R8), allocatable :: corner2D(:,:)
     type(ESMF_VM) :: vm
-    integer :: numDim, minInd(2,1), maxInd(2,1), buf(1), msgbuf(3)
+    integer :: numDim, minInd(2,1), maxInd(2,1), buf(1), msgbuf(4)
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_DecompFlag):: decompflagLocal(2)
     integer :: localrc
     integer :: PetNo, PetCnt
-  
+    logical :: localAddCornerStagger
+    integer :: grid_corners
+    integer :: maxIndex(2)
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3264,34 +3401,52 @@ end function ESMF_GridCreateFrmScripDistGrd
         decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
     endif
 
+    if (present(addCornerStagger)) then
+        localAddCornerStagger=addCornerStagger
+    else
+        localAddCornerStagger=.false.
+    endif
+
     ! Get the grid rank and dimensions from the SCRIP file on PET 0, broadcast the
     ! data to all the PETs
     if (PetNo == 0) then
        call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
-			  grid_size=totalpoints, rc=localrc)
+			  grid_size=totalpoints, grid_corners=grid_corners, rc=localrc)
+
+       ! write(*,*) "totalpoints=",totalpoints
+
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
        ! broadcast the values to other PETs
        msgbuf(1)=totaldims
        msgbuf(2)=dims(1)
        msgbuf(3)=dims(2)
-       call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+       msgbuf(4)=grid_corners
+       call ESMF_VMBroadcast(vm, msgbuf, 4, 0, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+      call ESMF_VMBroadcast(vm, msgbuf, 4, 0, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(dims(2))
       totaldims = msgbuf(1)
       dims(1)=msgbuf(2)
       dims(2)=msgbuf(3)
+      grid_corners=msgbuf(4)
     endif  
 
     ! if grid_rank is not equal to 2, return error 
     ! Does SCRIP allow 3D datasets?  What will be the format??
     if (totaldims /= 2) then
 	call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
+	  ESMF_CONTEXT, rc)
+	return
+    endif
+
+    ! if user wants corners and there aren't 4 then error
+    if (localAddCornerStagger .and. (grid_corners /= 4)) then
+	call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG,"- The SCRIP file has grid_corners/=4, so can't add Grid corners", &
 	  ESMF_CONTEXT, rc)
 	return
     endif
@@ -3304,19 +3459,38 @@ end function ESMF_GridCreateFrmScripDistGrd
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
-      ! Get the cell_center lat and lan, if in radians, convert to degree
-      allocate(coordX(totalpoints), coordY(totalpoints))
-      call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
-          grid_center_lat=coordY, convertToDeg=.TRUE., rc=rc)
+      ! Get the coordinate information from the SCRIP file, if in radians, convert to degrees
+      if (localAddCornerStagger) then ! Get centers and corners
+          allocate(coordX(totalpoints), coordY(totalpoints))
+          allocate(cornerX2D(grid_corners,totalpoints), cornerY2D(grid_corners,totalpoints))
+
+          call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
+                 grid_center_lat=coordY, grid_corner_lon=cornerX2D, &
+                 grid_corner_lat=cornerY2D, convertToDeg=.TRUE., rc=rc)
+
+          allocate(cornerX(dims(1)*(dims(2)+1)), cornerY(dims(1)*(dims(2)+1)))
+
+          call convert_corner_arrays_to_1D(dims(1),dims(2), cornerX2D,cornerY2D, &
+                  cornerX,cornerY, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+          deallocate(cornerX2D, cornerY2D)          
+     else ! get just centers
+          allocate(coordX(totalpoints), coordY(totalpoints))
+          call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
+                 grid_center_lat=coordY, convertToDeg=.TRUE., rc=rc)
+      endif
     endif
 
     ! Create Grid based on the input distgrid
     grid = ESMF_GridCreate(distgrid=distgrid, &
-		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
 		indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
 		destroyDELayout=.true., rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
+    
     ! Set coordinate tables 
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
@@ -3347,9 +3521,55 @@ end function ESMF_GridCreateFrmScripDistGrd
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
-    if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
-    
+
+    if (PetNo == 0) then
+      deallocate(coord2D, coordX, coordY)
+    endif
+
+    ! Put Corners into coordinates
+    if (localAddCornerStagger) then 
+        call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+       ! Longitude
+        call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+  	       array = array, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rc)) return
+
+        call ESMF_GridGet(grid,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex)
+        write(*,*) "maxIndex=",maxIndex
+
+        if (PetNo == 0) then
+           allocate(corner2D(dims(1),dims(2)+1))
+           corner2D = RESHAPE(cornerX,(/dims(1), dims(2)+1/))
+        endif
+
+       call ESMF_ArrayScatter(array, corner2D, rootPet=0, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rc)) return
+
+       ! Latitude
+       call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+	      array = array, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rc)) return
+       if (PetNo == 0) then
+           corner2D = RESHAPE(cornerY,(/dims(1), dims(2)+1/))
+       endif
+
+       call ESMF_ArrayScatter(array, corner2D, rootPet=0, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rc)) return
+
+       if (PetNo == 0) then
+          deallocate(corner2D, cornerX, cornerY)
+       endif
+    endif
+
     ESMF_GridCreateFrmScripReg = grid
+
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
