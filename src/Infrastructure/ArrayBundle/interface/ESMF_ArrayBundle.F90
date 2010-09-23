@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.25 2010/09/23 19:28:57 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.26 2010/09/23 19:31:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.25 2010/09/23 19:28:57 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.26 2010/09/23 19:31:25 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -773,8 +773,8 @@ contains
 !    A logical flag, the default is TRUE, i.e., all Arrays in the bundle 
 !    are stored in one single file. If FALSE, each Array is stored 
 !    in separate files; these files are numbered with the name based on the
-!    argument "file". That is, a set of files are named: [file_name]001,
-!    [file_name]002, [file_name]003,...
+!    argument "file". That is, a set of files are named: [file\_name]001,
+!    [file\_name]002, [file\_name]003,...
 !   \item[{[iofmt]}]
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !    of options.
@@ -2126,8 +2126,8 @@ contains
 !    A logical flag, the default is TRUE, i.e., all arrays in the bundle 
 !    are written in one single file. If FALSE, each array will be written
 !    in separate files; these files are numbered with the name based on the
-!    argument "file". That is, a set of files are named: [file_name]001,
-!    [file_name]002, [file_name]003,...
+!    argument "file". That is, a set of files are named: [file\_name]001,
+!    [file\_name]002, [file\_name]003,...
 !   \item[{[iofmt]}]
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !    of options.
