@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.5 2010/09/22 14:36:33 eschwab Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.6 2010/09/23 01:13:18 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -95,6 +95,22 @@
 
 %\subsection{Overall Design and Implementation Notes}
 %\input{ESMF_implnotes}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Applications}
+\end{htmlonly}
+\part{Applications}
+
+\label{part:Applications}
+
+\input{Applications}
+
+%\input{ESMF_InfoC}
+
+\input{ESMF_Info}
+
+\input{ESMF_RegridWeightGen}
 
 \newpage
 \begin{htmlonly}
