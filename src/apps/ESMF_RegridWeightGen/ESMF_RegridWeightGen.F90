@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.2 2010/09/22 22:41:39 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.3 2010/09/23 23:01:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,7 +22,6 @@ program ESMF_RegridWeightGen
       sequence
         character(len=256) :: srcfile, dstfile,  wgtfile
         logical :: srcIsScrip,dstIsScrip, srcIsReg, dstIsReg
-        logical :: conservFlag
         character(len=40) :: method
         integer :: pole
       end type
@@ -43,12 +42,18 @@ program ESMF_RegridWeightGen
       integer            :: index
       integer            :: pole
       integer, pointer   :: dims(:)
-      logical            :: conservFlag, convert3D
+      logical            :: convert3D
+      logical            :: isConserve
+      logical            :: addCorners,convertToDual
+      type(ESMF_MeshLoc) :: meshLoc
       logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg, typeSetFlag
       type(CommandArgs)  :: mycommand
       character, allocatable :: commandbuf(:)
       integer            :: command_len
       character(len=256) :: methodStr
+      real(ESMF_KIND_R8), pointer :: srcArea(:)
+      real(ESMF_KIND_R8), pointer :: dstArea(:)
+
 
       !------------------------------------------------------------------------
       ! Initialize ESMF
@@ -113,17 +118,6 @@ program ESMF_RegridWeightGen
          endif
          mycommand%method = method
     	
-         conservFlag = .false.
-         call ESMF_UtilGetArgIndex('-c',index,rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--conservation',index,rc)
-         if (index == -1) then
-           print *, 'use default conservative flag: off'
-         else
-           call ESMF_UtilGetArg(index+1,flag)
-           if (trim(flag) .eq. 'on' .or. trim(flag) .eq. 'ON') conservFlag = .true.
-         endif
-         mycommand%conservFlag = conservFlag
-
          call ESMF_UtilGetArgIndex('-p',index,rc)
          if (index == -1) call ESMF_UtilGetArgIndex('--pole',index,rc)
          if (index == -1) then
@@ -222,6 +216,7 @@ program ESMF_RegridWeightGen
          mycommand%dstIsScrip = dstIsScrip
          mycommand%srcIsReg = srcIsReg
          mycommand%dstIsReg = dstIsReg
+	print *, "Starting weight generation with these inputs: "
 	print *, "  Source File: ", trim(srcfile)
 	print *, "  Destination File: ", trim(dstfile)
   	print *, "  Weight File: ", trim(wgtfile)
@@ -237,12 +232,7 @@ program ESMF_RegridWeightGen
         else
 	        print *, "  Destination Grid is an unstructured grid"
         endif
-        print *, "Regrid Method: ", method
-        if (conservFlag) then
-	        print *, "  Conservative is ON"
-        else
-                print *, "  Conservative is OFF"
-        endif
+        print *, "  Regrid Method: ", method
 
         inquire(iolength=command_len) mycommand
         command_len = command_len * 4
@@ -265,7 +255,6 @@ program ESMF_RegridWeightGen
         dstfile = mycommand%dstfile
         wgtfile = mycommand%wgtfile
         method = mycommand%method
-        conservFlag = mycommand%conservFlag
         srcIsScrip = mycommand%srcIsScrip
         srcIsReg  = mycommand%srcIsReg
         dstIsScrip = mycommand%dstIsScrip
@@ -273,27 +262,51 @@ program ESMF_RegridWeightGen
         pole = mycommand%pole
      endif
 
+
+     ! Set flag to say if we're conservative
+     isConserve=.false.
+     if (trim(method) .eq. 'conserve') then
+        isConserve=.true.
+     endif
+
+     ! Set some varibles for File I/O needed by conservative
+     addCorners=.false.
+     convertToDual=.true.
+     meshLoc=ESMF_MESHLOC_NODE
+     if (isConserve) then
+        addCorners=.true.
+        convertToDual=.false.
+        meshLoc=ESMF_MESHLOC_ELEMENT
+     endif
+
+
      !Read in the srcfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh
      if (srcIsScrip) then
 	if(srcIsReg) then
-	   srcGrid = ESMF_GridCreate(trim(srcfile),(/PetCnt,1/),rc=rc)
+           srcGrid = ESMF_GridCreate(trim(srcfile),(/PetCnt,1/), addCornerStagger=addCorners, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     	   srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	else
-           srcMesh = ESMF_MeshCreate(trim(srcfile), ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=rc)
+           srcMesh = ESMF_MeshCreate(trim(srcfile), ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+                       convertToDual=convertToDual, rc=rc)
+
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-           srcField = CreateFieldFromMesh(srcMesh, rc)
+           !srcField = CreateFieldFromMesh(srcMesh, rc)
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+           srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	endif
       else
 	! if srcfile is not SCRIP, it is always unstructured
-	srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=rc)
+	srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
+                    rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-        srcField = CreateFieldFromMesh(srcMesh, rc)
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+        srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
 	if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
@@ -301,39 +314,30 @@ program ESMF_RegridWeightGen
      ! ESMF_Grid or ESMF_Mesh)
      if (dstIsScrip) then
 	if(dstIsReg) then
-	   dstGrid = ESMF_GridCreate(dstfile,(/PetCnt,1/),rc=rc)
+           dstGrid = ESMF_GridCreate(trim(dstfile),(/PetCnt,1/), addCornerStagger=addCorners, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
     	   dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	else
-           dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=rc)
+           dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+                       convertToDual=convertToDual, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-           dstField = CreateFieldFromMesh(dstMesh,rc)
+           dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	endif
       else
 	! if dstfile is not SCRIP, it is always unstructured
-	dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=rc)
+	dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
+                    rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-        dstField = CreateFieldFromMesh(dstMesh, rc)
+        dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
+
       maskvals(1) = 0
       if (trim(method) .eq. 'bilinear') then
-        if (conservflag) then
-        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
-	    indicies=indicies, weights=weights, &
-            regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
-	    regridConserve = ESMF_REGRID_CONSERVE_ON, &
-	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
-	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-            methodStr = "Bilinear Regridding with Conservative Correction"
-
-	else 
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
@@ -341,20 +345,8 @@ program ESMF_RegridWeightGen
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
 	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-            methodStr = "Bilinear Regridding"
-        endif
+            methodStr = "Bilinear remapping"
       else if (trim(method) .eq. 'patch') then
-        if (conservflag) then
-        call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
-	    indicies=indicies, weights=weights, &
-            regridMethod = ESMF_REGRID_METHOD_PATCH, &
-	    regridConserve = ESMF_REGRID_CONSERVE_ON, &
-	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
-	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-            methodStr = "Patch Regridding with Conservative Correction"
-	else 
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
@@ -362,22 +354,76 @@ program ESMF_RegridWeightGen
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
 	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-            methodStr = "Patch Regridding"
-        endif
+            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
+      else if (trim(method) .eq. 'conserve') then
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
+	    indicies=indicies, weights=weights, &
+            regridMethod = ESMF_REGRID_METHOD_CONSERVE, &
+	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
+	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            methodStr = "Conservative remapping"
       else ! nothing recognizable so report error
 	     print *, 'The -method is not a recognized interpolation method.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
+
+      ! Compute areas if conservative
+      ! Area only valid on PET 0 right now, when parallel Array
+      ! write works, then make area io parallel
+      if (isConserve) then
+         if (srcIsReg) then
+            call computeAreaGrid(srcGrid, PetNo, srcArea, rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
+
+         if (dstIsReg) then
+            call computeAreaGrid(dstGrid, PetNo, dstArea, rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
+      endif
+
+
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
-         call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
-	      srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	      dstIsScrip=dstIsScrip, method = methodStr, rc=rc)
-         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         if (isConserve) then
+            call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
+	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
+	           dstIsScrip=dstIsScrip, method = methodStr, &
+                   srcArea=srcArea, dstArea=dstArea, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
+	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
+	           dstIsScrip=dstIsScrip, method = methodStr, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
       else 
 	 call ESMF_OutputScripWeightFile(wgtfile, weights, indicies, rc=rc)
          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      endif
+
+
+      ! Get rid of conservative arrays
+      if (isConserve) then
+         if (PetNo == 0) then
+	    deallocate(srcArea)
+	    deallocate(dstArea)
+         endif
+      endif
+
+      ! Output success
+      if (PetNo==0) then
+         write(*,*)
+         write(*,*) "Completed weight generation successfully."
       endif
 
       call ESMF_Finalize()
@@ -385,53 +431,169 @@ program ESMF_RegridWeightGen
 
 contains
 
-function CreateFieldFromMesh(mesh, rc)
 
-      type(ESMF_Field):: CreateFieldFromMesh
-   
-      type(ESMF_Mesh)          :: mesh
-      integer                  :: rc
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! AREA ONLY VALID ON PET 0
+subroutine computeAreaGrid(grid, petNo, area, rc)
+  type(ESMF_Grid) :: grid
+  integer :: petNo
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: area(:)
 
-! Local Variables
-      type(ESMF_Field)       :: field
-      type(ESMF_ArraySpec)   :: arraySpec
-      type(ESMF_Array)       :: array
-      type(ESMF_DistGrid)    :: nodeDG
-      integer                :: totalNodes, totalCells, count
-      integer, allocatable   :: nodeIds(:)
-     
-      ! check the MeshGet
-      call ESMF_MeshGet(mesh, nodalDistgrid=nodeDG, &
-            numOwnedNodes=totalNodes, numOwnedElements=totalCells, rc=rc)
-      if (rc /= ESMF_SUCCESS) return
+  type(ESMF_Field) :: areaField
+  type(ESMF_ArraySpec) ::arrayspec
+  integer :: minIndex(2), maxIndex(2), gridDims(2)
+  real (ESMF_KIND_R8), pointer :: area2D(:,:)
+  integer :: localrc
 
-      ! print *, 'PE nodeDG elemDG',PetNo, totalNodes, totalCells
-      
-      ! get node information from nodeDG
-      allocate(nodeIds(totalNodes))
-      call ESMF_DistGridGet(nodeDG, 0, seqIndexList=nodeIds, elementCount=count, rc=rc)
-      if (rc /= ESMF_SUCCESS) return
+  ! Setup Arrayspec
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
 
-      ! *************************************************************      
-      ! get vertex data
-      ! Create a field using the Mesh and an ESMF Array 
-      call ESMF_ArraySpecSet(arraySpec, rank=1, typekind=ESMF_TYPEKIND_R8, rc=rc)
-      if (rc /= ESMF_SUCCESS) return
+  ! Create a field on the grid to hold the areas
+  areaField=ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, name="area", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
 
-      array = ESMF_ArrayCreate(arraySpec, nodeDG, computationalEdgeLWidth=(/0/), &
-	computationalEdgeUWidth=(/0/), rc=rc)
-      if (rc /= ESMF_SUCCESS) return
+  ! compute areas
+  call ESMF_FieldRegridGetArea(areaField, regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+ if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
 
-      ! Create a field using the array and mesh
-      field = ESMF_FieldCreate(mesh, array, rc=rc)
-      if (rc /= ESMF_SUCCESS) return
 
-      CreateFieldFromMesh = field
-      rc = ESMF_SUCCESS
+  ! Get size of Grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
       return
+  endif
 
-end function CreateFieldFromMesh
+  ! Grid size
+  gridDims(1)=maxIndex(1)-minIndex(1)+1
+  gridDims(2)=maxIndex(2)-minIndex(2)+1
 
 
+     ! Allocate memory for area
+     allocate(area2D(gridDims(1),gridDims(2)))
+
+     ! Get area onto PET 0
+     call ESMF_FieldGather(areaField, farray=area2D, rootPet=0, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+         rc=localrc
+        return
+     endif
+ 
+     ! Only do this part on PET 0
+     if (petNo .eq. 0) then
+
+        ! Allocate memory for area
+        allocate(area(gridDims(1)*gridDims(2)))
+
+        ! flatten area
+        area=RESHAPE(area2D,(/gridDims(1)*gridDims(2)/))
+
+     endif
+
+     ! deallocate memory for 2D area
+     deallocate(area2D)
+
+end subroutine computeAreaGrid
+
+
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! AREA ONLY VALID ON PET 0
+subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: VM
+  integer :: petNo,petCnt
+  real (ESMF_KIND_R8), pointer :: area(:)
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: localArea(:)
+  integer :: localrc
+  integer :: localElemCount,i
+  integer (ESMF_KIND_I4) :: localCount(1)
+  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+  integer :: totalCount
+ 
+  ! Get local size of mesh areas before split
+  call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, rc=localrc)  
+  if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+  endif
+
+  ! allocate space for areas
+  allocate(localArea(localElemCount))
+
+  ! Get local Areas
+  call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+  endif
+
+  
+  ! Allocate List of counts
+  allocate(globalCount(petCnt))
+
+  ! Get List of counts
+  localCount(1)=localElemCount
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+  endif
+
+  ! Calculate Displacements
+  allocate(globalDispl(petCnt))
+  if (petNo==0) then
+     globalDispl(1)=0
+     do i=2,petCnt
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+     enddo
+  else
+    globalDispl=0
+  endif
+
+
+  ! Sum size
+  if (petNo==0) then
+    totalCount=0
+    do i=1,petCnt
+       totalCount=totalCount+globalCount(i)
+    enddo
+  else 
+    totalCount=1 ! Because I'm not sure what happens
+                 ! if array is not allocated in VM
+  endif
+
+  ! Allocate final area list
+  allocate(area(totalCount))
+
+  ! Gather all areas
+  call ESMF_VMGatherV(vm,sendData=localArea, sendCount=localElemCount,&
+         recvData=area,recvCounts=globalCount,recvOffsets=globalDispl,&
+         root=0, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+  endif  
+
+  ! Get rid of helper variables
+  deallocate(localArea) 
+  deallocate(globalCount)
+  deallocate(globalDispl)
+  if (petNo .ne. 0) deallocate(area)
+
+end subroutine computeAreaMesh
 
 end program ESMF_RegridWeightGen
