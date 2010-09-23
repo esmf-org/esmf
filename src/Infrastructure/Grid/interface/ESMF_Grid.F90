@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.160 2010/09/23 04:36:22 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.161 2010/09/23 22:50:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.160 2010/09/23 04:36:22 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.161 2010/09/23 22:50:22 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3539,7 +3539,6 @@ end subroutine convert_corner_arrays_to_1D
             ESMF_CONTEXT, rc)) return
 
         call ESMF_GridGet(grid,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex)
-        write(*,*) "maxIndex=",maxIndex
 
         if (PetNo == 0) then
            allocate(corner2D(dims(1),dims(2)+1))
