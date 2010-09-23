@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.89 2010/09/16 18:53:00 samsoncheung Exp $
+% $Id: ESMF_install.tex,v 1.90 2010/09/23 17:28:20 samsoncheung Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -210,40 +210,27 @@ typical case where {\tt ESMF\_XERCES} is set to "standard", {\tt ESMF\_XERCES\_L
 \subsubsection{PIO}
 \label{sec:pio}
 ESMF provides the ability to read and write data in both binary and
-NetCDF formats through a third-party IO software, ParallelIO (PIO).
-The following environment variables enable, and specify the name and 
-location of the desired PIO library and associated header files:
+NetCDF formats through a third-party IO software, 
+\htmladdnormallink{ParallelIO (PIO)}{http://code.google.com/p/parallelio/} .
+The following environment variable enable the functionality of the PIO
+library. The binary format is supported as long as the MPI_IO
+is enable. To enable the feature of NetCDF IO format, the
+{\tt ESMF\_PNETCDF} (see 6.3.3) and/or {\tt ESMF\_NETCDF} (see 6.3.2)
+must be enabled. 
+
 
 \begin{description}
 \item[ESMF\_PIO] Possible value: "not set" (default), internal, external
-
-When defined, enables the use of PIO.
 
 \begin{description}
 \item["not set"] (default): PIO-dependent features will be disabled.
 
 \item[internal] PIO-dependent features will be enabled and they use the PIO
-library that built with ESMF.  However, this internal PIO does not 
-support mpiuni mode.
+library that built with ESMF.  
 
-\item[external] PIO-dependent features will be enabled and they relied on
-an external PIO library that built separately the user.  Thus, the library and 
-its path should be set via environment variables {\tt ESMF\_PIO\_LIBS}
-and {\tt ESMF\_PIO\_LIBPATH}.
 \end{description}
 
-\item[ESMF\_PIO\_LIBPATH] Typical value: /usr/local/lib (no default)
-
-Specifies the path where the PIO library file is located.
-
-\item[ESMF\_PIO\_LIBS] Typical value: -lpio; it is default
-when {\tt ESMF\_PIO} is set to external.
 \end{description}
-
-If {\tt ESMF\_PIO} is enabled, it supports the IO format of binary 
-and NetCDF files.  To enable the feature of NetCDF IO format, the
-{\tt ESMF\_PNETCDF} (see 6.3.3) and/or {\tt ESMF\_NETCDF} (see 6.3.2)
-should be enabled.
 
 
 \subsection{ESMF Environment Variables}
