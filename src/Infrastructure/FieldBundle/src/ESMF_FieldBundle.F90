@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.51 2010/09/23 18:07:34 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.52 2010/09/23 19:16:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1814,7 +1814,7 @@ end function
 !
 !   Limitation:
 !     Assume 1 DE per Pet
-!     Not support in ESMF_COMM=mpiuni mode
+!     Not support in ESMF\_COMM=mpiuni mode
 !
 !     The arguments are:
 !     \begin{description}
@@ -1826,8 +1826,8 @@ end function
 !      A logical flag, the default is TRUE, i.e., all Fields in the bundle 
 !      are stored in one single file. If FALSE, each Field is stored 
 !      in separate files; these files are numbered with the name based on the
-!      argument "file". That is, a set of files are named: [file_name]001,
-!      [file_name]002, [file_name]003,...
+!      argument "file". That is, a set of files are named: [file\_name]001,
+!      [file\_name]002, [file\_name]003,...
 !     \item[{[iofmt]}]
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.
@@ -2394,7 +2394,7 @@ end function
 !
 !   Limitation:
 !     Assume 1 DE per Pet
-!     Not support in ESMF_COMM=mpiuni mode
+!     Not support in ESMF\_COMM=mpiuni mode
 !
 !     The arguments are:
 !     \begin{description}
@@ -2406,8 +2406,8 @@ end function
 !      A logical flag, the default is TRUE, i.e., all arrays in the bundle 
 !      are written in one single file. If FALSE, each array will be written
 !      in separate files; these files are numbered with the name based on the
-!      argument "file". That is, a set of files are named: [file_name]001,
-!      [file_name]002, [file_name]003,...
+!      argument "file". That is, a set of files are named: [file\_name]001,
+!      [file\_name]002, [file\_name]003,...
 !     \item[{[iofmt]}]
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.
