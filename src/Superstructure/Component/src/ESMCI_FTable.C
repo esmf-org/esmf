@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.36 2010/09/23 05:51:49 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.37 2010/09/23 18:48:32 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.36 2010/09/23 05:51:49 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.37 2010/09/23 18:48:32 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1063,7 +1063,7 @@ int FTable::getEntry(
 
   if (i == -1){
     // name was not found in function table -> check if name contains "IC"
-    char *ic = strstr(name, "IC");
+    const char *ic = strstr(name, "IC");
     if (ic){
       // this was a failed attempt look up interface component method
       // -> try actual component method instead
