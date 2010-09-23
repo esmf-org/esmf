@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.50 2010/09/23 04:30:11 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.51 2010/09/23 18:07:34 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1797,34 +1797,39 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRead"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRead - Read arrays to a FieldBundle form file 
+! !IROUTINE: ESMF_FieldBundleRead - Read Fields to a FieldBundle from file(s) 
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleRead(bundle, file, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
-      character(*), intent(in)              :: file
-      logical,      intent(in) ,  optional  :: singleFile
+      type(ESMF_FieldBundle), intent(inout)         :: bundle
+      character(*), intent(in)                      :: file
+      logical,      intent(in) ,  optional          :: singleFile
       type(ESMF_IOFmtFlag), intent(in) ,  optional  :: iofmt
-      integer,      intent(out),  optional  :: rc
+      integer,      intent(out),  optional          :: rc
 !
 ! !DESCRIPTION:
-!     Read arrays from file(s) to FieldBundle 
+!     Read Field data to a FieldBundle object from file(s).
+!
+!   Limitation:
+!     Assume 1 DE per Pet
+!     Not support in ESMF_COMM=mpiuni mode
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item[file]
-!      The name of the file in which field bundle data is read from.
+!      The name of the file from which Field bundle data is read from.
 !     \item[{[singleFile]}]
-!      A logical flag, the default is TRUE, i.e., all arrays in the bundle 
-!      are stored in one single file. If FALSE, each array is stored 
+!      A logical flag, the default is TRUE, i.e., all Fields in the bundle 
+!      are stored in one single file. If FALSE, each Field is stored 
 !      in separate files; these files are numbered with the name based on the
-!      argument "file".
+!      argument "file". That is, a set of files are named: [file_name]001,
+!      [file_name]002, [file_name]003,...
 !     \item[{[iofmt]}]
-!      The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.
 !      If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
@@ -2372,35 +2377,39 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleWrite"
 !BOP
-! !IROUTINE: ESMF_FieldBundleWrite - Save the Field arrays in a netCDF file.
+! !IROUTINE: ESMF_FieldBundleWrite - Write the Fields into a file.
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleWrite(bundle, file, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
-      character(*), intent(in)              :: file
-      logical,      intent(in) ,  optional  :: singleFile
+      type(ESMF_FieldBundle), intent(inout)         :: bundle
+      character(*), intent(in)                      :: file
+      logical,      intent(in) ,  optional          :: singleFile
       type(ESMF_IOFmtFlag), intent(in) ,  optional  :: iofmt
-      integer,      intent(out),  optional  :: rc
+      integer,      intent(out),  optional          :: rc
 !
 ! !DESCRIPTION:
-!      Used to write data to persistent storage in a variety of formats.  
-!      (see WriteRestart/ReadRestart for quick data dumps.)
+!      Write the Fields into a file.
+!
+!   Limitation:
+!     Assume 1 DE per Pet
+!     Not support in ESMF_COMM=mpiuni mode
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item[file]
-!      The name of the output file in which field bundle data is written to.
+!      The name of the output file to which field bundle data is written to.
 !     \item[{[singleFile]}]
 !      A logical flag, the default is TRUE, i.e., all arrays in the bundle 
 !      are written in one single file. If FALSE, each array will be written
 !      in separate files; these files are numbered with the name based on the
-!      argument "file".
+!      argument "file". That is, a set of files are named: [file_name]001,
+!      [file_name]002, [file_name]003,...
 !     \item[{[iofmt]}]
-!      The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.
 !      If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !     \item [{[rc]}]
