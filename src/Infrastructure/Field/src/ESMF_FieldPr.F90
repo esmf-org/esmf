@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.21 2010/09/22 03:34:04 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.22 2010/09/23 04:33:36 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -234,8 +234,8 @@ contains
 !
 ! !DESCRIPTION:
 !     Read array data from file and put it into the {ESMF\_Field} object.
-!     This subroutine uses ESMF\_ArrayWrite() to write the array
-!     data to a file. \\
+!     This subroutine uses ESMF\_ArrayRead() to read the array
+!     data from a file. \\
 !
 !   Limitation:
 !   See limitation in ESMF\_ArrayWrite()
@@ -320,7 +320,7 @@ contains
 ! !DESCRIPTION:
 !     Write the array data in the {ESMF\_Field} object to file.
 !     This subroutine uses ESMF\_ArrayWrite() to write array
-!     data to a netCDF file.
+!     data to a file.
 !
 !   Limitation:
 !   See limitation in ESMF\_ArrayWrite()
