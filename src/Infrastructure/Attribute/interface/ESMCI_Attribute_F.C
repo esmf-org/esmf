@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.36 2010/09/16 19:16:41 w6ws Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.37 2010/09/23 05:59:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.36 2010/09/16 19:16:41 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.37 2010/09/23 05:59:26 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2030,7 +2030,8 @@ extern "C" {
                                      int *schemaFileNameLen,
                                      const char *schemaFileName,
                                      int *status,
-                                     ESMCI_FortranStrLenArg fileName_l) {
+                                     ESMCI_FortranStrLenArg fnlen,
+                                     ESMCI_FortranStrLenArg sfnlen) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributeread()"
 
