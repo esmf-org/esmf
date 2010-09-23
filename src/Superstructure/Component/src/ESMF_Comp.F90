@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.198 2010/09/15 01:56:45 w6ws Exp $
+! $Id: ESMF_Comp.F90,v 1.199 2010/09/23 05:51:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,14 +100,19 @@ module ESMF_CompMod
   end type
 
   type(ESMF_Method), parameter :: &
-    ESMF_SETNONE          = ESMF_Method(0), &
-    ESMF_SETINIT          = ESMF_Method(1), &
-    ESMF_SETRUN           = ESMF_Method(2), &
-    ESMF_SETFINAL         = ESMF_Method(3), &
-    ESMF_SETWRITERESTART  = ESMF_Method(4), &
-    ESMF_SETREADRESTART   = ESMF_Method(5), &
-    ESMF_SETVM            = ESMF_Method(6), &
-    ESMF_SETSERVICES      = ESMF_Method(7)
+    ESMF_SETNONE            = ESMF_Method(0), &
+    ESMF_SETINIT            = ESMF_Method(1), &
+    ESMF_SETRUN             = ESMF_Method(2), &
+    ESMF_SETFINAL           = ESMF_Method(3), &
+    ESMF_SETWRITERESTART    = ESMF_Method(4), &
+    ESMF_SETREADRESTART     = ESMF_Method(5), &
+    ESMF_SETINITIC          = ESMF_Method(6), &
+    ESMF_SETRUNIC           = ESMF_Method(7), &
+    ESMF_SETFINALIC         = ESMF_Method(8), &
+    ESMF_SETWRITERESTARTIC  = ESMF_Method(9), &
+    ESMF_SETREADRESTARTIC   = ESMF_Method(10), &
+    ESMF_SETVM              = ESMF_Method(11), &
+    ESMF_SETSERVICES        = ESMF_Method(12)
     
 !------------------------------------------------------------------------------
 ! ! ESMF Phase number
@@ -206,6 +211,8 @@ module ESMF_CompMod
     ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
   public ESMF_Method, ESMF_SETNONE, ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL
   public ESMF_SETWRITERESTART, ESMF_SETREADRESTART
+  public ESMF_SETINITIC, ESMF_SETRUNIC, ESMF_SETFINALIC
+  public ESMF_SETWRITERESTARTIC, ESMF_SETREADRESTARTIC
   public ESMF_SETVM, ESMF_SETSERVICES
   
   public ESMF_SINGLEPHASE     ! deprecated!!!!
@@ -248,7 +255,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.198 2010/09/15 01:56:45 w6ws Exp $'
+    '$Id: ESMF_Comp.F90,v 1.199 2010/09/23 05:51:49 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1047,7 +1054,7 @@ contains
 ! !INTERFACE:
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, gridcomptype, grid, clock, dirPath, configFile, &
-    config, ctype, currentMethod, currentPhase, rc)
+    config, ctype, currentMethod, currentPhase, localPet, petCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -1066,6 +1073,8 @@ contains
     type(ESMF_CompType),     intent(out), optional :: ctype
     type(ESMF_Method),       intent(out), optional :: currentMethod
     integer,                 intent(out), optional :: currentPhase
+    integer,                 intent(out), optional :: localPet
+    integer,                 intent(out), optional :: petCount
     integer,                 intent(out), optional :: rc
 
 !
@@ -1168,6 +1177,20 @@ contains
 
     if (present(currentPhase)) then
       currentPhase = compp%currentPhase
+    endif
+    
+    if (present(localPet)) then
+      call ESMF_VMGet(compp%vm, localPet=localPet, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(petCount)) then
+      call ESMF_VMGet(compp%vm, petCount=petCount, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
     endif
 
     ! Return successfully

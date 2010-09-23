@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.14 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Comp.C,v 1.15 2010/09/23 05:51:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.14 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.15 2010/09/23 05:51:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -192,6 +192,21 @@ int Comp::setEntryPoint(
     break;
   case ESMCI::SETREADRESTART:
     methodString = "ReadRestart";
+    break;
+  case ESMCI::SETINITIC:
+    methodString = "InitializeIC";
+    break;
+  case ESMCI::SETRUNIC:
+    methodString = "RunIC";
+    break;
+  case ESMCI::SETFINALIC:
+    methodString = "FinalizeIC";
+    break;
+  case ESMCI::SETWRITERESTARTIC:
+    methodString = "WriteRestartIC";
+    break;
+  case ESMCI::SETREADRESTARTIC:
+    methodString = "ReadRestartIC";
     break;
   case ESMCI::SETREGISTER:
     methodString = "Register";

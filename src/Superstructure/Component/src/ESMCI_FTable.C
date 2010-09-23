@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.35 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_FTable.C,v 1.36 2010/09/23 05:51:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.35 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.36 2010/09/23 05:51:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -136,6 +136,21 @@ extern "C" {
       break;
     case ESMCI::SETREADRESTART:
       methodString = "ReadRestart";
+      break;
+    case ESMCI::SETINITIC:
+      methodString = "InitializeIC";
+      break;
+    case ESMCI::SETRUNIC:
+      methodString = "RunIC";
+      break;
+    case ESMCI::SETFINALIC:
+      methodString = "FinalizeIC";
+      break;
+    case ESMCI::SETWRITERESTARTIC:
+      methodString = "WriteRestartIC";
+      break;
+    case ESMCI::SETREADRESTARTIC:
+      methodString = "ReadRestartIC";
       break;
     case ESMCI::SETREGISTER:
       methodString = "Register";
@@ -345,6 +360,21 @@ extern "C" {
       break;
     case ESMCI::SETREADRESTART:
       methodString = "ReadRestart";
+      break;
+    case ESMCI::SETINITIC:
+      methodString = "InitializeIC";
+      break;
+    case ESMCI::SETRUNIC:
+      methodString = "RunIC";
+      break;
+    case ESMCI::SETFINALIC:
+      methodString = "FinalizeIC";
+      break;
+    case ESMCI::SETWRITERESTARTIC:
+      methodString = "WriteRestartIC";
+      break;
+    case ESMCI::SETREADRESTARTIC:
+      methodString = "ReadRestartIC";
       break;
     case ESMCI::SETREGISTER:
       methodString = "Register";
@@ -623,6 +653,21 @@ void FTN(c_esmc_ftablecallentrypointvm)(
     break;
   case ESMCI::SETREADRESTART:
     methodString = "ReadRestart";
+    break;
+  case ESMCI::SETINITIC:
+    methodString = "InitializeIC";
+    break;
+  case ESMCI::SETRUNIC:
+    methodString = "RunIC";
+    break;
+  case ESMCI::SETFINALIC:
+    methodString = "FinalizeIC";
+    break;
+  case ESMCI::SETWRITERESTARTIC:
+    methodString = "WriteRestartIC";
+    break;
+  case ESMCI::SETREADRESTARTIC:
+    methodString = "ReadRestartIC";
     break;
   case ESMCI::SETREGISTER:
     methodString = "Register";
@@ -990,7 +1035,13 @@ int FTable::getEntry(
   int *rc) {             // out, return code
 //
 // !DESCRIPTION:
-//    Returns the named entry
+//  Returns the index into the function table that matches "name". A linear
+//  search is used, which is sufficient for typically very small function
+//  table sizes.
+//  One added feature this look-up routine also provides is a secondary
+//  search for the actual method name in case that "name" was _not_ found,
+//  _and_ "name" contained the substring "IC" which indicates that this
+//  would have been a look-up for an interface component method.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1009,6 +1060,23 @@ int FTable::getEntry(
       break;
   }
   if (i==funccount) i=-1; // indicate entry not found
+
+  if (i == -1){
+    // name was not found in function table -> check if name contains "IC"
+    char *ic = strstr(name, "IC");
+    if (ic){
+      // this was a failed attempt look up interface component method
+      // -> try actual component method instead
+//printf("gjt: failed attempt to look up IC method -> try actual method\n");
+      int n = ic - name;  // number of characters before "IC"
+      if (n < 0) n = -n;  // just in case memory goes the other way
+      for (i=0; i<funccount; i++) {
+        if (!strncmp(name, funcs[i].funcname, n))
+          break;
+      }
+      if (i==funccount) i=-1; // indicate entry not found
+    }
+  }
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1251,9 +1319,10 @@ int FTable::setFuncArgs(
   int i = getEntry(name, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc; // bail out
+  
   if (i == -1){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-    "unknown function name", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "unknown function name", 
+      &rc);
     return rc; // bail out
   }
 

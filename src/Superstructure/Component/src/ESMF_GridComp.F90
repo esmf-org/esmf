@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.133 2010/09/15 22:27:40 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.134 2010/09/23 05:51:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -61,12 +61,15 @@ module ESMF_GridCompMod
   public ESMF_GridCompCreate
   public ESMF_GridCompDestroy
   public ESMF_GridCompFinalize
+  public ESMF_GridCompFinalizeAct
   public ESMF_GridCompGet
   public ESMF_GridCompInitialize
+  public ESMF_GridCompInitializeAct
   public ESMF_GridCompIsPetLocal
   public ESMF_GridCompPrint
   public ESMF_GridCompReadRestart
   public ESMF_GridCompRun
+  public ESMF_GridCompRunAct
   public ESMF_GridCompSet
   public ESMF_GridCompSetEntryPoint
   public ESMF_GridCompSetServices
@@ -86,7 +89,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.133 2010/09/15 22:27:40 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.134 2010/09/23 05:51:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -400,7 +403,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -415,13 +418,65 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompFinalizeAct"
+!BOPI
+! !IROUTINE: ESMF_GridCompFinalizeAct - Call the GridComp's finalize routine
+!
+! !INTERFACE:
+  recursive subroutine ESMF_GridCompFinalizeAct(gridcomp, importState, &
+    exportState, clock, phase, blockingflag, userRc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: userRc
+    integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt ESMF\_GridCompFinalize} but no redirection through the
+! Interface Component method, instead directly call into the actual method.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    ! call Comp method
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompFinalizeAct
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompGet"
 !BOP
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, grid, config, &
-    configFile, clock, vm, contextflag, currentMethod, currentPhase, rc)
+    configFile, clock, localPet, petCount, contextflag, currentMethod, &
+    currentPhase, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
@@ -431,10 +486,12 @@ contains
     type(ESMF_Config),       intent(out), optional :: config
     character(len=*),        intent(out), optional :: configFile
     type(ESMF_Clock),        intent(out), optional :: clock
-    type(ESMF_VM),           intent(out), optional :: vm
+    integer,                 intent(out), optional :: localPet
+    integer,                 intent(out), optional :: petCount
     type(ESMF_ContextFlag),  intent(out), optional :: contextflag
     type(ESMF_Method),       intent(out), optional :: currentMethod
     integer,                 intent(out), optional :: currentPhase
+    type(ESMF_VM),           intent(out), optional :: vm
     integer,                 intent(out), optional :: rc
 
 !
@@ -462,8 +519,10 @@ contains
 !   Return the configuration filename for this {\tt ESMF\_GridComp}.
 ! \item[{[clock]}]
 !   Return the private clock for this {\tt ESMF\_GridComp}.
-! \item[{[vm]}]
-!   Return the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+! \item[{[localPet]}]
+!   Return the local PET id withing the {\tt ESMF\_GridComp} object.
+! \item[{[petCount]}]
+!   Return the number of PETs in the the {\tt ESMF\_GridComp} object.
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_GridComp}.
 !   See section \ref{opt:contextflag} for a complete list of valid flags.
@@ -472,6 +531,8 @@ contains
 !   See section \ref{opt:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_GridComp} execution.
+! \item[{[vm]}]
+!   Return the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -490,7 +551,8 @@ contains
     call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
       gridcomptype=gridcomptype, grid=grid, clock=clock, &
       configFile=configFile, config=config, currentMethod=currentMethod, &
-      currentPhase=currentPhase, rc=localrc)
+      currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
+      rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -637,7 +699,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -647,6 +709,56 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompInitialize
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompInitializeAct"
+!BOPI
+! !IROUTINE: ESMF_GridCompInitializeAct - Call the GridComp's initialize routine
+
+! !INTERFACE:
+  recursive subroutine ESMF_GridCompInitializeAct(gridcomp, importState, &
+    exportState, clock, phase, blockingflag, userRc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: userRc
+    integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt ESMF\_GridCompInitialize} but no redirection through the
+! Interface Component method, instead directly call into the actual method.
+!   
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompInitializeAct
 !------------------------------------------------------------------------------
 
 
@@ -933,7 +1045,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -943,6 +1055,56 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompRun
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompRunAct"
+!BOPI
+! !IROUTINE: ESMF_GridCompRunAct - Call the GridComp's run routine
+!
+! !INTERFACE:
+  recursive subroutine ESMF_GridCompRunAct(gridcomp, importState, exportState,&
+    clock, phase, blockingflag, userRc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: userRc
+    integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt ESMF\_GridCompRun} but no redirection through the
+! Interface Component method, instead directly call into the actual method.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompRunAct
 !------------------------------------------------------------------------------
 
 

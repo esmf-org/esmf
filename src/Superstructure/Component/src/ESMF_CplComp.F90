@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.118 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_CplComp.F90,v 1.119 2010/09/23 05:51:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -60,12 +60,15 @@ module ESMF_CplCompMod
   public ESMF_CplCompCreate
   public ESMF_CplCompDestroy
   public ESMF_CplCompFinalize
+  public ESMF_CplCompFinalizeAct
   public ESMF_CplCompGet
   public ESMF_CplCompInitialize
+  public ESMF_CplCompInitializeAct
   public ESMF_CplCompIsPetLocal
   public ESMF_CplCompPrint
   public ESMF_CplCompReadRestart
   public ESMF_CplCompRun
+  public ESMF_CplCompRunAct
   public ESMF_CplCompSet
   public ESMF_CplCompSetEntryPoint
   public ESMF_CplCompSetServices
@@ -85,7 +88,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.118 2010/03/04 18:57:45 svasquez Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.119 2010/09/23 05:51:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -383,7 +386,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -393,6 +396,57 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompFinalize
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompFinalizeAct"
+!BOPI
+! !IROUTINE: ESMF_CplCompFinalizeAct - Call the CplComp's finalize routine
+!
+! !INTERFACE:
+  recursive subroutine ESMF_CplCompFinalizeAct(cplcomp, importState, exportState, &
+    clock, phase, blockingflag, userRc, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: userRc
+    integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt ESMF\_CplCompFinalize} but no redirection through the
+! Interface Component method, instead directly call into the actual method.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompFinalizeAct
 !------------------------------------------------------------------------------
 
 
@@ -613,7 +667,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -623,6 +677,57 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompInitialize
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompInitializeAct"
+!BOPI
+! !IROUTINE: ESMF_CplCompInitializeAct - Call the CplComp's initialize routine
+!
+! !INTERFACE:
+  recursive subroutine ESMF_CplCompInitializeAct(cplcomp, importState, &
+    exportState, clock, phase, blockingflag, userRc, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: userRc
+    integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt ESMF\_CplCompInitialize} but no redirection through the
+! Interface Component method, instead directly call into the actual method.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompInitializeAct
 !------------------------------------------------------------------------------
 
 
@@ -909,7 +1014,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
@@ -919,6 +1024,56 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompRun
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompRunAct"
+!BOPI
+! !IROUTINE: ESMF_CplCompRunAct - Call the CplComp's run routine
+!
+! !INTERFACE:
+  recursive subroutine ESMF_CplCompRunAct(cplcomp, importState, exportState, &
+    clock, phase, blockingflag, userRc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    integer,                 intent(in),    optional :: phase
+    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(out),   optional :: userRc
+    integer,                 intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Same as {\tt ESMF\_CplCompRun} but no redirection through the
+! Interface Component method, instead directly call into the actual method.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                     ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,importState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,exportState,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
+      importState=importState, exportState=exportState, clock=clock, &
+      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompRunAct
 !------------------------------------------------------------------------------
 
 
