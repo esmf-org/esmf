@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.24 2010/09/23 19:08:52 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.25 2010/09/23 19:22:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -237,7 +237,7 @@ contains
 !
 !   Limitation:
 !     Assume 1 DE per Pet
-!     Not support in ESMF_COMM=mpiuni mode
+!     Not support in ESMF\_COMM=mpiuni mode
 !
 !     The arguments are:
 !     \begin{description}
