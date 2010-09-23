@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.34 2009/01/08 15:38:14 theurich Exp $ 
+# $Id: makefile,v 1.35 2010/09/23 22:58:02 theurich Exp $ 
 
 ALL: build_here 
 
 AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldSetCo.F90 ESMF_FieldCreate.F90
 SOURCEC	  = 
-SOURCEF	  = ESMF_Field.F90 ESMF_FieldPr.F90 $(AUTOGEN) ESMF_FieldRegrid.F90
+SOURCEF	  = ESMF_Field.F90 ESMF_FieldPr.F90 $(AUTOGEN) ESMF_FieldRegrid.F90 ESMF_FieldWr.F90 
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
