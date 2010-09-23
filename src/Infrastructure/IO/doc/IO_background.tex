@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.22 2010/09/22 22:47:00 samsoncheung Exp $
+% $Id: IO_background.tex,v 1.23 2010/09/23 00:13:42 theurich Exp $
 
 %\subsection{Background}
 
@@ -16,7 +16,7 @@ document.
 
 \subsection{I/O architecture}
 
-The future development of ESMF IO would include an ESMF_IO object that
+The future development of ESMF IO would include an ESMF\_IO object that
 combines other ESMF objects, such as Components, States, FieldBundles,
 ArrayBundles, Fields, Arrays, Grids, as well as Array and Attributes to 
 perform robust and unified input/output system.
@@ -78,7 +78,7 @@ perform robust and unified input/output system.
 The metadata IO is handled via ESMF Attribute object. The third
 party software Xerces Library is integrated with ESMF to provide
 the ability to read and write Attribute data in XML file format.
-To enable this capability, the environment variable ESMF_XERCES should be
+To enable this capability, the environment variable ESMF\_XERCES should be
 set. Details can be founds in ESMF User Guide, Third Party Libraries
 in "Building and Installing ESMF.
 
@@ -134,10 +134,10 @@ first developed by the team under CCSM Software Engineering Group at NCAR
 contents in the following ESMF objects are performed by PIO:
 
 \begin{description}
-\item[-] ESMF_Array (ref)
-\item[-] ESMF_ArrayBundle (ref)
-\item[-] ESMF_Field (ref)
-\item[-] ESMF_FieldBundle (ref)
+\item[-] ESMF\_Array (ref)
+\item[-] ESMF\_ArrayBundle (ref)
+\item[-] ESMF\_Field (ref)
+\item[-] ESMF\_FieldBundle (ref)
 \end{description}
 
 Two formats are supported, namely, binary format and NetCDF format.  
