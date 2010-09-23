@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.41 2010/09/22 21:42:56 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.42 2010/09/23 04:33:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.41 2010/09/22 21:42:56 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.42 2010/09/23 04:33:38 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -75,6 +75,17 @@ module ESMF_MeshMod
     integer :: numOwnedElements
     integer :: spatialDim
     integer :: parametricDim
+
+    ! Info about Split elements if created from a file
+    ! Eventually may allow this even if not created 
+    ! from a file
+    logical :: hasSplitElem
+    integer :: splitElemStart
+    integer :: splitElemCount
+    integer,pointer :: splitElemMap(:)
+    integer :: origElemStart
+    integer :: origElemCount
+
     ESMF_INIT_DECLARE
   end type
 
@@ -168,6 +179,10 @@ module ESMF_MeshMod
   public ESMF_MeshDeserialize
   public ESMF_MeshFindPnt
   public ESMF_MeshGetElemArea
+  public ESMF_MeshGetOrigElemArea
+  public ESMF_MeshGetElemSplit
+  public ESMF_MeshMergeSplitSrcInd
+  public ESMF_MeshMergeSplitDstInd
   public operator(.eq.), operator(.ne.) 
 
 !EOPI
@@ -176,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.41 2010/09/22 21:42:56 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.42 2010/09/23 04:33:38 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -392,6 +407,9 @@ module ESMF_MeshMod
 
     ! Go to next stage 
     mesh%createStage=3
+
+    ! Set as fully created 
+    mesh%hasSplitElem=.false.
 
     ! Set as fully created 
     mesh%isFullyCreated=.true.
@@ -739,6 +757,9 @@ module ESMF_MeshMod
     ! The C side has been created
     ESMF_MeshCreate1Part%isCMeshFreed=.false.
 
+    ! Can't happen here
+    ESMF_MeshCreate1Part%hasSplitElem=.false.
+
     ! Set as fully created 
     ESMF_MeshCreate1Part%isFullyCreated=.true.
 
@@ -762,7 +783,7 @@ module ESMF_MeshMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, filetype, convert3D, rc)
+    function ESMF_MeshCreateFromFile(filename, filetype, convert3D, convertToDual, rc)
 !
 !
 ! !RETURN VALUE:
@@ -771,6 +792,7 @@ module ESMF_MeshMod
     character(len=*), intent(in)              :: filename
     type(ESMF_FileFormatType), intent(in)     :: filetype
     logical, intent(in), optional             :: convert3D
+    logical, intent(in), optional             :: convertToDual
     integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
@@ -784,6 +806,9 @@ module ESMF_MeshMod
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
+!   \item[convertToDual] 
+!         if TRUE, the mesh will be converted to it's dual. If not specified,
+!         defaults to true. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -791,16 +816,26 @@ module ESMF_MeshMod
 !EOPI
 !------------------------------------------------------------------------------
     logical::  localConvert3D      ! local flag
+    logical::  localConvertToDual      ! local flag
     integer::  localrc
 
+    ! Set Defaults
     if (present(convert3D)) then
 	localConvert3D = convert3D
     else
 	localConvert3D = .false.
     endif
 
+    if (present(convertToDual)) then
+	localConvertToDual = convertToDual
+    else
+	localConvertToDual = .true.
+    endif
+
+
     if (filetype .eq. ESMF_FILEFORMAT_SCRIP) then
-	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D,localrc)
+	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
+          localConvertToDual, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetype .eq. ESMF_FILEFORMAT_ESMFMESH) then
@@ -1041,6 +1076,18 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
 
+    ! Set split element info
+    ! Assume for now that there are
+    ! split elements eventually 
+    ! check and set flag appropriately    
+    Mesh%hasSplitElem=.true.
+    allocate(mesh%splitElemMap(TotalElements))
+    Mesh%splitElemStart=myStartElmt+1  ! position of first element
+    Mesh%splitElemCount=TotalElements
+    Mesh%origElemStart=startElmt+1  ! position of first element
+    Mesh%origElemCount=ElemCnt
+
+
     ! the node number is 0 based, need to change it to 1 based
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
@@ -1055,6 +1102,7 @@ end function ESMF_MeshCreateFromFile
            do i=1,3
               ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
 	   end do
+           Mesh%splitElemMap(ElemNo)=j+myStartElmt
            ElemNo=ElemNo+1
            ConnNo=ConnNo+3
 	elseif (elmtNum(j)==4) then
@@ -1063,6 +1111,7 @@ end function ESMF_MeshCreateFromFile
            do i=1,4
               ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
 	   end do
+           Mesh%splitElemMap(ElemNo)=j+myStartElmt
            ElemNo=ElemNo+1
 	   ConnNo=ConnNo+4
 	else
@@ -1073,6 +1122,7 @@ end function ESMF_MeshCreateFromFile
              ElemConn (ConnNo+1) = NodeUsed(elementConn(1,j))
              ElemConn (ConnNo+2) = NodeUsed(elementConn(2+k,j))
              ElemConn (ConnNo+3) = NodeUsed(elementConn(3+k,j))
+             Mesh%splitElemMap(ElemNo)=j+myStartElmt	
              ElemNo=ElemNo+1
 	     ConnNo=ConnNo+3
 	   end do
@@ -1087,6 +1137,9 @@ end function ESMF_MeshCreateFromFile
     call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! NEED TO SET THIS HERE, BECAUSE MEshAddElements sets it to false
+    Mesh%hasSplitElem=.true.
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn)
@@ -1107,7 +1160,7 @@ end function ESMF_MeshCreateFromUnstruct
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromScrip(filename, convert3D, rc)
+    function ESMF_MeshCreateFromScrip(filename, convert3D, convertToDual, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1115,6 +1168,7 @@ end function ESMF_MeshCreateFromUnstruct
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
     logical, intent(in)                       :: convert3D
+    logical, intent(in), optional             :: convertToDual
     integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
@@ -1126,6 +1180,9 @@ end function ESMF_MeshCreateFromUnstruct
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
+!   \item[convertToDual] 
+!         if TRUE, the mesh will be converted to it's dual. If not specified,
+!         defaults to true. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1145,6 +1202,17 @@ end function ESMF_MeshCreateFromUnstruct
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Default convert to dual
+    if (present(convertToDual)) then
+       if (convertToDual) then
+          dualflag=1
+       else
+          dualflag=0
+       endif
+    else
+      dualflag=1
+    endif
+
     ! get global vm information
     !
     call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -1162,7 +1230,6 @@ end function ESMF_MeshCreateFromUnstruct
         ! this is a serial call into C code for now
         scrip_file_len = len_trim(filename)
         esmf_file_len = len_trim(esmffilename)
-        dualflag = 1
         call c_ConvertSCRIP(filename, scrip_file_len, &
           esmffilename, esmf_file_len, dualflag, localrc )
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1249,6 +1316,9 @@ end function ESMF_MeshCreateFromScrip
     ESMF_MeshCreateFromPointer%isCMeshFreed=.false.
 
     ! Set as fully created 
+    ESMF_MeshCreateFromPointer%hasSplitElem=.false.
+
+    ! Set as fully created 
     ESMF_MeshCreateFromPointer%isFullyCreated=.true.
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -1308,6 +1378,11 @@ end function ESMF_MeshCreateFromScrip
          call ESMF_DistgridDestroy(mesh%element_distgrid, rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Get rid of split element map
+         if (mesh%hasSplitElem) then
+            deallocate(mesh%splitElemMap)
+         endif
 
          ! Set this for consistancies sake
           mesh%isFullyCreated=.false.
@@ -2030,6 +2105,441 @@ end function ESMF_MeshCreateFromScrip
   end subroutine ESMF_MeshGetElemArea
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetOrigElemArea()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetOrigElemArea - Find area of elements in mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshGetOrigElemArea(mesh, areaList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    real(ESMF_KIND_R8), pointer                     :: areaList(:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   For a Mesh with split elements, get the area of the original 
+!   unsplit element
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [areaList]
+!         Areas for the mesh elements will be put here
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                             :: localrc      ! local return code
+    real(ESMF_KIND_R8), pointer         :: origAreaList(:)
+    integer                             :: i,m
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh doesn't have split elements then just get
+    ! current areas
+    if (.not. mesh%hasSplitElem) then
+       call ESMF_MeshGetElemArea(mesh, areaList, rc=localrc)    
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       if  (present(rc)) rc = ESMF_SUCCESS
+       return 
+    endif    
+
+
+    ! check size of areaList
+    if (size(areaList) .lt. mesh%origElemCount) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- area list too small to hold element areas", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! Allocate array to hold split areas
+    allocate(origAreaList(mesh%numOwnedElements))
+
+    ! Get split areas
+    call ESMF_MeshGetElemArea(mesh, origAreaList, rc=localrc)    
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Put the areas back together
+    areaList=0.0_ESMF_KIND_R8
+    do i=1,mesh%splitElemCount
+	m=mesh%splitElemMap(i)
+       areaList(m)=areaList(m)+origAreaList(i)
+    enddo
+    
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshGetOrigElemArea
+!------------------------------------------------------------------------------
+
+
+! -----------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetElemSplit"
+!BOPI
+! !IROUTINE: ESMF_MeshGetElemSplit - Get element split information from a Mesh
+!
+! !INTERFACE:
+      subroutine ESMF_MeshGetElemSplit(mesh, splitElemStart, splitElemCount, &
+               splitElemMap, origElemStart,origElemCount, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(inout)            :: mesh
+    integer, intent(out),optional             :: splitElemStart
+    integer, intent(out),optional             :: splitElemCount
+    integer,  pointer, optional               :: splitElemMap(:)
+    integer, intent(out),optional             :: origElemStart
+    integer, intent(out),optional             :: origElemCount
+    integer, intent(out), optional            :: rc
+
+!
+! !DESCRIPTION:
+!   Get element split information from a mesh.
+!
+! The arguments are:
+! \begin{description}
+! \item [mesh]
+! Mesh object to retrieve information from.
+! \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+      integer  :: localrc
+      localrc = ESMF_SUCCESS
+
+      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh does not have split information
+     if (.not. mesh%hasSplitElem) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh does not have split information", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! copy split Element Map
+    if (present(splitElemMap)) then
+       if (size(splitElemMap) .lt. size(mesh%splitElemMap)) then
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- splitElemMap input parameter wrong size ", & 
+                 ESMF_CONTEXT, rc) 
+          return 
+       endif            	
+  
+       splitElemMap(:)=mesh%splitElemMap(:)
+    endif
+
+    if (present(splitElemStart)) splitElemStart=mesh%splitElemStart
+    if (present(splitElemCount)) splitElemCount=mesh%splitElemCount
+    if (present(origElemStart))  origElemStart=mesh%origElemStart
+    if (present(origElemCount))  origElemCount=mesh%origElemCount    
+
+    if (present(rc)) rc = localrc
+
+    end subroutine ESMF_MeshGetElemSplit
+
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshMergeSplitSrcInd()"
+!BOPI
+! !IROUTINE: ESMF_MeshMergeSplitSrcInd - Merge Split Source Sparse Mat Src Ind
+!
+! !INTERFACE:
+    subroutine ESMF_MeshMergeSplitSrcInd(mesh, indices, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    integer(ESMF_KIND_I4), intent(inout)            :: indices(:,:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   For a Mesh with split elements, merge source indices
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [indices]
+!         indices in which the source will be merged
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer  :: localrc      ! local return code
+    integer  :: indCount
+    integer  :: i,m
+    integer  :: localPet, petCount
+    type(ESMF_VM) :: vm
+    integer (ESMF_KIND_I4) :: localCount(1)
+    integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+    integer (ESMF_KIND_I4),pointer :: globalSplitElemMap(:)
+    integer :: totalCount
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh doesn't have split elements then just leave
+    if (.not. mesh%hasSplitElem) then
+        if  (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif    
+
+    ! Get size of list
+    indCount=size(indices,2)
+
+    ! If list is of size 0 then leave
+    if (indCount < 1) then
+        if  (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif
+
+    ! Get VM
+    call ESMF_VMGetCurrent(vm,rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get VM info
+    call ESMF_VMGet(vm, localPet=localPet, &
+           petcount=petCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !!! Need whole split list so allgather it !!!
+
+    ! Allocate List of counts
+    allocate(globalCount(petCount))
+
+    ! Get List of counts
+    localCount(1)=size(mesh%splitElemMap)
+    call ESMF_VMAllGather(vm,localCount,globalCount,count=1,rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Calculate Displacements
+    allocate(globalDispl(petCount))
+    globalDispl(1)=0
+    do i=2,petCount
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+    enddo
+
+    ! Sum size
+    totalCount=0
+    do i=1,petCount
+       totalCount=totalCount+globalCount(i)
+    enddo
+  
+    ! Allocate final area list
+    allocate(globalSplitElemMap(totalCount))
+
+    ! Gather all areas
+    call ESMF_VMAllGatherV(vm,sendData=mesh%splitElemMap, sendCount=size(mesh%splitElemMap),&
+         recvData=globalSplitElemMap,recvCounts=globalCount,recvOffsets=globalDispl,&
+         rc=localrc)
+
+
+    ! Get rid of helper variables
+    deallocate(globalCount)
+    deallocate(globalDispl)
+
+    ! Loop processing indices
+    do i=1,indCount
+       indices(1,i)=globalSplitElemMap(indices(1,i))
+    enddo
+
+    ! Get rid of global Map
+    deallocate(globalSplitElemMap)
+    
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshMergeSplitSrcInd
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshMergeSplitDstInd()"
+!BOPI
+! !IROUTINE: ESMF_MeshMergeSplitDstInd - Merge Split Sparse Mat Dst Ind
+!
+! !INTERFACE:
+    subroutine ESMF_MeshMergeSplitDstInd(mesh, factorList, indices, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    real(ESMF_KIND_R8), intent(inout)               :: factorList(:) 
+    integer(ESMF_KIND_I4),intent(inout)             :: indices(:,:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   For a Mesh with split elements, merge source indices
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [factorList]
+!         factorList in which the dst will be merged
+!   \item [indices]
+!         indices in which the dst will be merged
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer  :: localrc      ! local return code
+    integer  :: indCount
+    integer  :: i,m, split_dst_id, orig_dst_id
+    integer  :: split_dst_pos, orig_dst_pos
+
+    real(ESMF_KIND_R8), pointer         :: origAreaList(:)
+    real(ESMF_KIND_R8), pointer         :: splitAreaList(:)
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh doesn't have split elements then just leave
+    if (.not. mesh%hasSplitElem) then
+        if  (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif    
+
+    ! Get size of list
+    indCount=size(indices,2)
+
+    ! If list is of size 0 then leave
+    if (indCount < 1) then
+        if  (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif
+ 
+    ! Allocate array to hold split areas
+    allocate(splitAreaList(mesh%numOwnedElements))
+
+    ! Get split areas
+    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return   
+
+    ! Allocate array to hold orig areas (before split)
+    allocate(origAreaList(mesh%origElemCount))
+
+    ! Get split areas
+    call ESMF_MeshGetOrigElemArea(mesh, origAreaList, rc=localrc)    
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return   
+
+
+    ! Loop changing indices and weights
+    do i=1,indCount
+       split_dst_id=indices(2,i)
+       split_dst_pos=split_dst_id-mesh%splitElemStart+1
+       orig_dst_id=mesh%splitElemMap(split_dst_pos)
+       orig_dst_pos=orig_dst_id-mesh%origElemStart+1
+
+       ! Set new index
+       indices(2,i)=orig_dst_id
+
+       ! Set new weight
+       factorList(i)=(factorList(i)*splitAreaList(split_dst_pos))/ &
+                      origAreaList(orig_dst_pos)                                       
+    enddo
+  
+  ! Get rid of area lists
+    deallocate(splitAreaList)
+    deallocate(origAreaList)
+
+    ! return success
+    if  (present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_MeshMergeSplitDstInd
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
