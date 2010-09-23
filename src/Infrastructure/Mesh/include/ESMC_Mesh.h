@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.28 2010/09/23 18:46:04 svasquez Exp $
+// $Id: ESMC_Mesh.h,v 1.29 2010/09/23 19:27:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -40,8 +40,6 @@
 
 #if defined (__cplusplus)
 extern "C" {
-#endif
-
 #endif
 
 // Class declaration type
