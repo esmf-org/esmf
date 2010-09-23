@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.6 2010/09/23 01:13:18 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.7 2010/09/23 21:00:27 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -149,7 +149,7 @@
 
 \newpage
 
-#include "../Infrastructure/FieldBundle/doc/FieldBundle_crefdoc.ctex"
+%#include "../Infrastructure/FieldBundle/doc/FieldBundle_crefdoc.ctex"
 
 #include "../Infrastructure/Field/doc/Field_crefdoc.ctex"
 
