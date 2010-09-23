@@ -1,0 +1,35 @@
+% $Id: AppDriver_creqmethodsintro.tex,v 1.1 2010/09/23 17:43:05 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+There are a few methods that every ESMF application must contain. First,
+{\tt ESMC\_Initialize()} and {\tt ESMC\_Finalize()} are in complete analogy 
+to {\tt MPI\_Init()} and {\tt MPI\_Finalize()} known from MPI. All ESMF
+programs, serial or parallel, must initialize the ESMF system at the beginning,
+and finalize it at the end of execution. The behavior of calling any
+ESMF method before {\tt ESMC\_Initialize()}, or after {\tt ESMC\_Finalize()}
+is undefined.
+
+Second, every ESMF Component that is accessed by an ESMF application requires
+that its set services routine is called through
+{\tt ESMC\_<Grid/Cpl>CompSetServices()}. The Component must implement
+one public entry point, its set services routine, that can be called
+through the {\tt ESMC\_<Grid/Cpl>CompSetServices()} library routine. The
+Component set services routine is responsible for setting entry points
+for the standard ESMF Component methods Initialize, Run, and Finalize.
+
+Finally, the Component library call {\tt ESMC\_<Grid/Cpl>CompSetVM()} can
+optionally be issues {\em before} calling
+{\tt ESMC\_<Grid/Cpl>CompSetServices()}. Similar to 
+{\tt ESMC\_<Grid/Cpl>CompSetServices()}, the {\tt ESMC\_<Grid/Cpl>CompSetVM()}
+call requires a public entry point into the Component. It allows the Component
+to adjust certain aspects of its execution environment, i.e. its own VM, before
+it is started up.
+
+The following sections discuss the above mentioned aspects in more detail.
