@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.42 2010/09/23 04:33:38 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.43 2010/09/23 20:09:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.42 2010/09/23 04:33:38 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.43 2010/09/23 20:09:32 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.42 2010/09/23 04:33:38 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.43 2010/09/23 20:09:32 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1856,6 +1856,7 @@ end function ESMF_MeshCreateFromScrip
 
       ! Set values who's values are implied by the fact 
       ! that this is a proxy mesh
+      ESMF_MeshDeserialize%hasSplitElem=.false.
       ESMF_MeshDeserialize%isFullyCreated=.true.
       ESMF_MeshDeserialize%createStage=3
       ESMF_MeshDeserialize%numOwnedNodes=0
