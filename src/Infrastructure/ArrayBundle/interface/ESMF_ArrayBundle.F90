@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.23 2010/09/23 04:37:25 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.24 2010/09/23 18:41:59 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.23 2010/09/23 04:37:25 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.24 2010/09/23 18:41:59 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -743,7 +743,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRead()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRead - Read in ArrayBundle content
+! !IROUTINE: ESMF_ArrayBundleRead - Read Arrays to an ArrayBundle from file(s)
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleRead(arraybundle, file, singleFile, iofmt, rc)
@@ -757,21 +757,26 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!   Read internal information of the specified {\tt ESMF\_ArrayBundle} object.
+!   Read Array data to an ArrayBundle object from file(s)
+!
+!   Limitation:
+!     Assume 1 DE per Pet
+!     Not support in ESMF_COMM=mpiuni mode
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[arraybundle] 
 !     {\tt ESMF\_ArrayBundle} object.
 !   \item[file]
-!    The name of the output file in which Fortran data array is read from.
+!    The name of the file from which Array bundle data is read from.
 !   \item[{[singleFile]}]
-!    A logical flag, the default is TRUE, i.e., all arrays in the bundle 
-!    are stored in one single file. If FALSE, each array is stored 
+!    A logical flag, the default is TRUE, i.e., all Arrays in the bundle 
+!    are stored in one single file. If FALSE, each Array is stored 
 !    in separate files; these files are numbered with the name based on the
-!    argument "file".
+!    argument "file". That is, a set of files are named: [file_name]001,
+!    [file_name]002, [file_name]003,...
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !    of options.
 !    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}] 
@@ -2091,7 +2096,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleWrite()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleWrite - Write ArrayBundle content in file
+! !IROUTINE: ESMF_ArrayBundleWrite - Write the Arrays into a file
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, iofmt, rc)
@@ -2105,21 +2110,26 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
+!   Write the Arrays into a file.
+!
+!   Limitation:
+!     Assume 1 DE per Pet
+!     Not support in ESMF_COMM=mpiuni mode
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[arraybundle] 
 !     {\tt ESMF\_ArrayBundle} object.
 !   \item[file]
-!    The name of the output file in which Fortran data array is written to.
+!    The name of the output file to which array bundle data is written to.
 !   \item[{[singleFile]}]
 !    A logical flag, the default is TRUE, i.e., all arrays in the bundle 
 !    are written in one single file. If FALSE, each array will be written
 !    in separate files; these files are numbered with the name based on the
-!    argument "file".
+!    argument "file". That is, a set of files are named: [file_name]001,
+!    [file_name]002, [file_name]003,...
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list
+!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !    of options.
 !    If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}] 
