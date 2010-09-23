@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.43 2010/09/23 20:09:32 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.44 2010/09/23 22:48:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.43 2010/09/23 20:09:32 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.44 2010/09/23 22:48:34 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.43 2010/09/23 20:09:32 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.44 2010/09/23 22:48:34 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2138,7 +2138,7 @@ end function ESMF_MeshCreateFromScrip
 !EOPI
 !------------------------------------------------------------------------------
     integer                             :: localrc      ! local return code
-    real(ESMF_KIND_R8), pointer         :: origAreaList(:)
+    real(ESMF_KIND_R8), pointer         :: splitAreaList(:)
     integer                             :: i,m
 
     ! initialize return code; assume routine not implemented
@@ -2184,20 +2184,23 @@ end function ESMF_MeshCreateFromScrip
     endif    
 
     ! Allocate array to hold split areas
-    allocate(origAreaList(mesh%numOwnedElements))
+    allocate(splitAreaList(mesh%splitElemCount))
 
     ! Get split areas
-    call ESMF_MeshGetElemArea(mesh, origAreaList, rc=localrc)    
+    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Put the areas back together
     areaList=0.0_ESMF_KIND_R8
     do i=1,mesh%splitElemCount
-	m=mesh%splitElemMap(i)
-       areaList(m)=areaList(m)+origAreaList(i)
+	m=mesh%splitElemMap(i)-mesh%origElemStart+2
+       areaList(m)=areaList(m)+splitAreaList(i)
     enddo
     
+    ! Allocate array to hold split areas
+    deallocate(splitAreaList)
+
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
     
@@ -2521,9 +2524,9 @@ end function ESMF_MeshCreateFromScrip
     ! Loop changing indices and weights
     do i=1,indCount
        split_dst_id=indices(2,i)
-       split_dst_pos=split_dst_id-mesh%splitElemStart+1
+       split_dst_pos=split_dst_id-mesh%splitElemStart+2
        orig_dst_id=mesh%splitElemMap(split_dst_pos)
-       orig_dst_pos=orig_dst_id-mesh%origElemStart+1
+       orig_dst_pos=orig_dst_id-mesh%origElemStart+2
 
        ! Set new index
        indices(2,i)=orig_dst_id
