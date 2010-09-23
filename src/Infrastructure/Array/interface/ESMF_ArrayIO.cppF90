@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.22 2010/09/23 15:25:04 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.23 2010/09/23 21:01:55 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.22 2010/09/23 15:25:04 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.23 2010/09/23 21:01:55 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -108,7 +108,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayRead"
 !BOP
-! !IROUTINE: ESMF_ArrayRead - Read Array data.
+! !IROUTINE: ESMF_ArrayRead - Read Array data from a file.
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayRead(array, file, variableName, iofmt, rc)
@@ -121,21 +121,25 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Read array data from file and put it into the {ESMF\_Array} object.
+!   Read Array data from file and put it into the {ESMF\_Array} object.
 ! 
 !   Limitation:  
 !    Assume 1 DE per Pet 
+!    Not support in ESMF\_COMM=mpiuni mode
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[array]
 !    The {\tt ESMF\_Array} object through which the read data is returned.
 !   \item[file]
-!    The name of the output file in which array data is read from.
+!    The name of the file from which Array data is read from.
 !   \item[{[variableName]}]
-!    Variable name in the output file; default is the "name" of array
+!    Variable name in the file; default is the "name" of Array.
+!    Use this argument only in the IO format (such as NetCDF) that
+!    supports variable name. If the IO format does not support this (
+!    such as binary format), ESMF will return error code.
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -328,7 +332,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayWrite"
 !BOP
-! !IROUTINE: ESMF_ArrayWrite - Write Array data
+! !IROUTINE: ESMF_ArrayWrite - Write Array data into a file.
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayWrite(array, file, variableName, append, iofmt, rc)
@@ -342,23 +346,28 @@ contains
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Write the array data in the {ESMF\_Array} object to file.
+!   Write the array data in the {ESMF\_Array} object to a file.
 !
 !   Limitation:
 !     Assume 1 DE per Pet
+!     Not support in ESMF\_COMM=mpiuni mode
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[array]
 !    The {\tt ESMF\_Array} object that contains the data to be written.
 !   \item[file]
-!    The name of the file being written.
+!    The name of the output file to which Array data is written to.
 !   \item[{[variableName]}]
-!    Variable name written in the output file; default is the "name" of array
+!    Variable name in the output file; default is the "name" of Array.
+!    Use this argument only in the IO format (such as NetCDF) that
+!    supports variable name. If the IO format does not support this (
+!    such as binary format), ESMF will return error code.
 !   \item[{[append]}]
-!    A logical flag: append data to an existing file, default is false.
+!    Logical: if true, data is appended to an existing file,
+!    default is false.
 !   \item[{[iofmt]}]
-!    The PIO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
