@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.201 2010/09/16 19:16:41 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.202 2010/09/23 21:29:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.201 2010/09/16 19:16:41 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.202 2010/09/23 21:29:27 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -6073,8 +6073,8 @@ module ESMF_StateMod
 	    if (ESMF_LogMsgFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
-            if (lfound .and. sp%datalist(i)%otype == ESMF_STATEITEM_STATE) then
-              sp_local => sp%datalist(i)%datap%spp
+            if (lfound .and. sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE) then
+              sp_local => sp%datalist(lindex)%datap%spp
               call find_pathed_item_worker (sp_local, itempath_local(slashpos+1:),  &
                                        lfound, lindex, litem)
             else
