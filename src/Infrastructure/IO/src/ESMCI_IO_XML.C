@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.13 2010/09/20 05:53:07 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.14 2010/09/23 05:58:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.13 2010/09/20 05:53:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.14 2010/09/23 05:58:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -933,6 +933,8 @@ namespace ESMCI{
                     // Base id increment for non-distributed,
                     // non-reconcilable objects such as IO.
     attr = ESMC_NULL_POINTER;
+    fileName[0] = '\0';
+    schemaFileName[0] = '\0';
     // create default name "IO_XML<ID>"
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_XML");
     // copy = false;  // TODO: see notes in constructors and destructor below
@@ -973,6 +975,8 @@ namespace ESMCI{
                     // non-reconcilable objects such as IO.
     attr = attribute;
     attr->ESMC_Print(); // TODO: for debug, comment out
+    fileName[0] = '\0';
+    schemaFileName[0] = '\0';
     // create default name "IO_XML<ID>"
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_XML");
     // copy = false;  // TODO: see notes in constructors and destructor below
