@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.24 2010/09/23 18:41:59 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.25 2010/09/23 19:28:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.24 2010/09/23 18:41:59 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.25 2010/09/23 19:28:57 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -761,7 +761,7 @@ contains
 !
 !   Limitation:
 !     Assume 1 DE per Pet
-!     Not support in ESMF_COMM=mpiuni mode
+!     Not support in ESMF\_COMM=mpiuni mode
 !
 !   The arguments are:
 !   \begin{description}
@@ -2114,7 +2114,7 @@ contains
 !
 !   Limitation:
 !     Assume 1 DE per Pet
-!     Not support in ESMF_COMM=mpiuni mode
+!     Not support in ESMF\_COMM=mpiuni mode
 !
 !   The arguments are:
 !   \begin{description}
