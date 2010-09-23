@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.10 2010/07/23 18:57:24 theurich Exp $
+! $Id: ESMF_TypeKindRankMacros.hcppF90,v 1.11 2010/09/23 22:14:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -169,6 +169,89 @@
     module procedure ESMF_##funcname##7DI8 @\
     module procedure ESMF_##funcname##7DR4 @\
     module procedure ESMF_##funcname##7DR8 @\
+^endif @\
+^endif @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+#if 0
+!------------------------------------------------------------------------------
+! Expand a string into each of the T/K/R public symbol blocks
+! Expected use:
+!
+!  TypeKindRankPublicMacro(fred)
+!  public other_explicit_non_TKR_interfaces_to_overload
+!
+!------------------------------------------------------------------------------
+#endif
+
+#define TypeKindRankPublicMacro(funcname) \
+!------------------------------------------------------------------------------ @\
+! <This section created by macro - do not edit directly> @\
+^ifndef PIO_TKR @\
+^ifndef ESMF_NO_INTEGER_1_BYTE @\
+    public ESMF_##funcname##1DI1 @\
+    public ESMF_##funcname##2DI1 @\
+    public ESMF_##funcname##3DI1 @\
+    public ESMF_##funcname##4DI1 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+    public ESMF_##funcname##5DI1 @\
+    public ESMF_##funcname##6DI1 @\
+    public ESMF_##funcname##7DI1 @\
+^endif @\
+^endif @\
+^ifndef ESMF_NO_INTEGER_2_BYTE @\
+    public ESMF_##funcname##1DI2 @\
+    public ESMF_##funcname##2DI2 @\
+    public ESMF_##funcname##3DI2 @\
+    public ESMF_##funcname##4DI2 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+    public ESMF_##funcname##5DI2 @\
+    public ESMF_##funcname##6DI2 @\
+    public ESMF_##funcname##7DI2 @\
+^endif @\
+^endif @\
+^endif @\
+    public ESMF_##funcname##1DI4 @\
+^ifndef PIO_TKR @\
+    public ESMF_##funcname##1DI8 @\
+^endif @\
+    public ESMF_##funcname##1DR4 @\
+    public ESMF_##funcname##1DR8 @\
+    public ESMF_##funcname##2DI4 @\
+^ifndef PIO_TKR @\
+    public ESMF_##funcname##2DI8 @\
+^endif @\
+    public ESMF_##funcname##2DR4 @\
+    public ESMF_##funcname##2DR8 @\
+    public ESMF_##funcname##3DI4 @\
+^ifndef PIO_TKR @\
+    public ESMF_##funcname##3DI8 @\
+^endif @\
+    public ESMF_##funcname##3DR4 @\
+    public ESMF_##funcname##3DR8 @\
+    public ESMF_##funcname##4DI4 @\
+^ifndef PIO_TKR @\
+    public ESMF_##funcname##4DI8 @\
+^endif @\
+    public ESMF_##funcname##4DR4 @\
+    public ESMF_##funcname##4DR8 @\
+^ifndef ESMF_NO_GREATER_THAN_4D @\
+    public ESMF_##funcname##5DI4 @\
+^ifndef PIO_TKR @\
+    public ESMF_##funcname##5DI8 @\
+^endif @\
+    public ESMF_##funcname##5DR4 @\
+    public ESMF_##funcname##5DR8 @\
+^ifndef PIO_TKR @\
+    public ESMF_##funcname##6DI4 @\
+    public ESMF_##funcname##6DI8 @\
+    public ESMF_##funcname##6DR4 @\
+    public ESMF_##funcname##6DR8 @\
+    public ESMF_##funcname##7DI4 @\
+    public ESMF_##funcname##7DI8 @\
+    public ESMF_##funcname##7DR4 @\
+    public ESMF_##funcname##7DR8 @\
 ^endif @\
 ^endif @\
 ! < end macro - do not edit directly >  @\
