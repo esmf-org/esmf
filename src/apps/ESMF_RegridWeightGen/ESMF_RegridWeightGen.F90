@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.3 2010/09/23 23:01:00 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.4 2010/09/24 23:31:06 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -78,6 +78,11 @@ program ESMF_RegridWeightGen
       !   then broadcast the results to the rest of the Pets
       !
       if (PetNo == 0) then
+         call ESMF_UtilGetArgIndex('--help',index)
+         if (index /= -1) then
+	   call PrintUsage()
+	   call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
          call ESMF_UtilGetArgIndex('-s',index)
          if (index == -1) call ESMF_UtilGetArgIndex('--source',index,rc)
          if (index == -1) then
@@ -121,8 +126,8 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('-p',index,rc)
          if (index == -1) call ESMF_UtilGetArgIndex('--pole',index,rc)
          if (index == -1) then
-           print *, 'use default pole: none'
-           pole = 0
+           print *, 'use default pole: All'
+           pole = -1
          else
            call ESMF_UtilGetArg(index+1,flag)
            if (trim(flag) .eq. 'none') pole = 0
@@ -595,5 +600,39 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   if (petNo .ne. 0) deallocate(area)
 
 end subroutine computeAreaMesh
+
+subroutine PrintUsage()
+     print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 
+     print *, "                	     [--destination|-d] dst_grid_filename"
+     print *, "                      [--weight|-w] out_weight_file "
+     print *, "                      [--method|-m] [bilinear|patch|conservative]"
+     print *, "                      [--pole|-p] [all|none|<N>]"
+     print *, "                      --src_type [SCRIP|ESMF]" 
+     print *, "                      --dst_type [SCRIP|ESMF]"
+     print *, "                      -t [SCRIP|ESMF]"
+     print *, "where"
+     print *, "--source or -s - a required argument specifying the source grid file"
+     print *, "                 name"
+     print *, "--destination or -d - a required argument specifying the destination grid"
+     print *, "                      file name"
+     print *, "--weight or -w - a required argument specifying the output regridding weight"
+     print *, "                 file name"
+     print *, "--method or -m - an optional argument specifying which interpolation method is"
+     print *, "                 used.  The default method is bilinear"
+     print *, "--pole or -p - an optional argument indicating what to do with the pole."
+     print *, "                 The default value is all"
+     print *, "--src_type - an optional argument specifying the source grid file type."
+     print *, "             The ESMF type is only available for the unstructured grid."
+     print *, "             The default option is SCRIP."
+     print *, "--dst_type - an optional argument specifying the destination grid file type."
+     print *, "             The ESMF type is only available for the unstructured grid."
+     print *, "             The default option is SCRIP."
+     print *, "-t         - an optional argument specifying the file types for both the source"
+     print *, "             and the destination grid files.  The default option is SCRIP."
+     print *, "             If both -t and --src_type or --dst_type are given at the same time"
+     print *, "             and they disagree with each other, an error message will be"
+     print *, "             generated"
+
+end subroutine PrintUsage
 
 end program ESMF_RegridWeightGen
