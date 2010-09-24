@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.203 2010/09/23 22:53:16 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.204 2010/09/24 20:24:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.203 2010/09/23 22:53:16 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.204 2010/09/24 20:24:30 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -6668,6 +6668,11 @@ module ESMF_StateMod
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
+      call ESMF_UtilMapNameCreate (sp%nameMap, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
       allocate(sp%datalist(sp%alloccount), stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
@@ -6680,6 +6685,12 @@ module ESMF_StateMod
                                          sip%indirect_index, sip%needed, &
                                          sip%ready, sip%valid, sip%reqrestart, &
                                          buffer, offset, localrc)
+
+          call ESMF_UtilMapNameAdd (sp%nameMap,  &
+            name=sip%namep, value=i, rc=localrc)
+          if (ESMF_LogMsgFoundError (localrc,  &
+                                     ESMF_ERR_PASSTHRU,  &
+                                     ESMF_CONTEXT, rc)) return
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
@@ -6694,11 +6705,12 @@ module ESMF_StateMod
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
+                  call ESMF_UtilMapNameDestroy (sp%nameMap)
                   deallocate(sp%datalist)
-                  localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
                   return
                 endif
               endif
+
             case (ESMF_STATEITEM_FIELD%ot)
               sip%datap%fp = ESMF_FieldDeserialize(buffer, offset, &
                 attreconflag=lattreconflag, rc=localrc)
@@ -6711,19 +6723,22 @@ module ESMF_StateMod
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
+                  call ESMF_UtilMapNameDestroy (sp%nameMap)
                   deallocate(sp%datalist)
-                  localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
                   return
                 endif
               endif
+
             case (ESMF_STATEITEM_ARRAY%ot)
               call c_ESMC_ArrayDeserialize(sip%datap%ap, buffer, offset, &
                 lattreconflag, localrc)
               sip%proxyflag = .true.  ! indicate that this is proxy object
+
             case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
               call c_ESMC_ArrayBundleDeserialize(sip%datap%abp, buffer, offset,&
                 lattreconflag, localrc)
               sip%proxyflag = .true.  ! indicate that this is proxy object
+
             case (ESMF_STATEITEM_STATE%ot)
               subsubstate = ESMF_StateDeserialize(vm, buffer, offset, &
                                               attreconflag=lattreconflag, rc=localrc)
@@ -6737,16 +6752,19 @@ module ESMF_StateMod
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
+                  call ESMF_UtilMapNameDestroy (sp%nameMap)
                   deallocate(sp%datalist)
-                  localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
                   return
                 endif
               endif
+
             case (ESMF_STATEITEM_NAME%ot)
               call c_ESMC_StringDeserialize(sip%namep, buffer(1), offset, localrc)
               sip%proxyflag = .true.  ! indicate that this is proxy object
+
             case (ESMF_STATEITEM_INDIRECT%ot)
               continue ! TODO: deserialize
+
             case (ESMF_STATEITEM_UNKNOWN%ot)
               continue ! TODO: deserialize
           end select
