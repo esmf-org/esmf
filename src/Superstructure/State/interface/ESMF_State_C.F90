@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.26 2010/05/10 07:20:55 theurich Exp $
+! $Id: ESMF_State_C.F90,v 1.27 2010/09/24 00:45:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.26 2010/05/10 07:20:55 theurich Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.27 2010/09/24 00:45:38 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -392,6 +392,7 @@
     ! deallocate actual StateClass allocation      
     if (associated(state%statep)) then
       deallocate(state%statep, stat=localrc)
+      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating State", &
         ESMF_CONTEXT, &
         rc)) return
