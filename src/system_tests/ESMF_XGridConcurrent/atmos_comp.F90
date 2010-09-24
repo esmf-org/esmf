@@ -1,4 +1,4 @@
-! $Id: atmos_comp.F90,v 1.2 2010/09/24 13:59:05 w6ws Exp $
+! $Id: atmos_comp.F90,v 1.3 2010/09/24 14:22:51 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,22 +99,18 @@ module atmos_comp
     type(ESMF_Grid)       :: grid
     type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
-    integer               :: petCount, me
+    integer               :: petCount, localPet
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    call ESMF_VMGetGlobal(vm, rc=rc)
-
-    call ESMF_VMGet (vm, localPet=me)
-    print *, "Atmosphere Init starting, myPet =", me
-
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    print *, "Atmosphere Init starting, localPet =", localPet
     
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
