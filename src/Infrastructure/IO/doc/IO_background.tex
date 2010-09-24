@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.23 2010/09/23 00:13:42 theurich Exp $
+% $Id: IO_background.tex,v 1.24 2010/09/24 05:59:18 samsoncheung Exp $
 
 %\subsection{Background}
 
@@ -6,21 +6,23 @@ The ESMF IO provides an unified interface for input and output of
 high level ESMF objects such as Fields.  The system is expected to
 automatically detect file formats at runtime, and to output data in 
 a variety of formats. In the current release, the ESMF IO capability
-is integrated with third-party software such as, Parallel IO (PIO)
-to read and write Fortran array data in binary/NetCDF format and Xerces
+is integrated with third-party software such as, 
+\htmladdnormallink{Parallel IO (PIO)}{http://code.google.com/p/parallelio/}
+to read and write Fortran array data in binary/NetCDF format and 
+\htmladdnormallink{Xerces}{http:xerces.apache.org/xerces-c/} 
 Library to read and write Attribute data in XML format.  Other file IO
 functionalities, such as writing of error and log messages and input of
 configuration parameters from an ASCII file, are not covered in this
 document.
 
 
-\subsection{I/O architecture}
-
-The future development of ESMF IO would include an ESMF\_IO object that
-combines other ESMF objects, such as Components, States, FieldBundles,
-ArrayBundles, Fields, Arrays, Grids, as well as Array and Attributes to 
-perform robust and unified input/output system.
-
+%\subsection{I/O architecture}
+%
+%The future development of ESMF IO would include an ESMF\_IO object that
+%combines other ESMF objects, such as Components, States, FieldBundles,
+%ArrayBundles, Fields, Arrays, Grids, as well as Array and Attributes to 
+%perform robust and unified input/output system.
+%
 
 
 %\subsection{Data models}
@@ -73,7 +75,7 @@ perform robust and unified input/output system.
 %location, and a list of neighbors, if relevant. 
 
 
-\subsection{ESMF Data Attribute}
+\subsection{ESMF Attribute}
 
 The metadata IO is handled via ESMF Attribute object. The third
 party software Xerces Library is integrated with ESMF to provide
@@ -81,6 +83,30 @@ the ability to read and write Attribute data in XML file format.
 To enable this capability, the environment variable ESMF\_XERCES should be
 set. Details can be founds in ESMF User Guide, Third Party Libraries
 in "Building and Installing ESMF.
+
+
+\subsection{Data I/O}
+
+ESMF provides parallel IO capability by integrating a third-party IO
+software, Parallel I/O (PIO). This is a software interface layer, was 
+first developed by the team under CCSM Software Engineering Group at NCAR
+\cite{CESM_Site}. In the current release, the read and write of the 
+contents in the following ESMF objects are performed by PIO:
+
+\begin{description}
+\item[-] ESMF\_Array (ref)
+\item[-] ESMF\_ArrayBundle (ref)
+\item[-] ESMF\_Field (ref)
+\item[-] ESMF\_FieldBundle (ref)
+\end{description}
+
+Two formats are supported, namely, binary format and NetCDF format.  
+It depends on the which environment variables are tuned on when ESMF is built,
+the system is expected to automatically detect file formats at runtime.
+
+Details of the environment variables can be founds in ESMF User Guide, 
+Third Party Libraries in "Building and Installing ESMF.
+
 
 
 \subsection{Data formats}
@@ -123,46 +149,6 @@ provide ESMF metadata on a companion file using for example XML
 %For example, ESMWF has created and employed relational-database based 
 %Observational Data Base (ODB) software \cite{ODB}.  However, such complex 
 %data management systems are beyond the scope of the basic ESMF I/O. 
-
-
-\subsection{Parallel I/O}
-
-ESMF provides parallel IO capability by integrating a third-party IO
-software, Parallel I/O (PIO). This is a software interface layer, was 
-first developed by the team under CCSM Software Engineering Group at NCAR
-\cite{CESM_Site}. In the current release, the read and write of the 
-contents in the following ESMF objects are performed by PIO:
-
-\begin{description}
-\item[-] ESMF\_Array (ref)
-\item[-] ESMF\_ArrayBundle (ref)
-\item[-] ESMF\_Field (ref)
-\item[-] ESMF\_FieldBundle (ref)
-\end{description}
-
-Two formats are supported, namely, binary format and NetCDF format.  
-It depends on the which environment variables are tuned on when ESMF is built,
-the system is expected to automatically detect file formats at runtime.
-
-Details of the environment variables can be founds in ESMF User Guide, 
-Third Party Libraries in "Building and Installing ESMF.
-
-
-
-\subsection{Location}
-
-Input/Output (IO) is part of the ESMF Infrastructure.  It will provide
-efficient utilities to input/output gridded data and observational data
-to and from the disk. A standard API will allow manipulation of multiple
-standard formats.
-
-
-\subsection{Scope}
-
-ESMF IO is meant to be used for standard API and underlying implementation, 
-providing input and outut of gridded data and observational data streams to 
-and from the disk in multiple standard formats. I/O with different levels of 
-parallelism have to be provided.  
 
 
 

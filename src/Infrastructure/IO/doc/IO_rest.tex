@@ -1,9 +1,12 @@
-% $Id: IO_rest.tex,v 1.2 2009/02/20 05:50:00 eschwab Exp $
+% $Id: IO_rest.tex,v 1.3 2010/09/24 05:59:29 samsoncheung Exp $
 
 \begin{enumerate}
 
-\item {\bf Initial ESMF Attributes implementation}  The first version of IO will
-support the ESMF Attributes requirements -- reading and writing Attributes
-from/to XML files.  Future releases will support the remaining IO requirements.
+Currently a small fraction of the formats is implemented by ESMF.  
+The data IO uses by NetCDF and binary formats, and ESMF Attribute
+IO uses XML format.  Different libraries are employed for these 
+different formats and data IO. In the future development, a IO Class
+is defined to provide efficient utilities with a set of standard
+APIs that will allow manipulation of multiple standard formats.
 
 \end{enumerate}
