@@ -1,4 +1,12 @@
-% $Id: Mesh_crefdoc.ctex,v 1.4 2010/09/24 21:54:16 svasquez Exp $
+% $Id: Mesh_crefdoc.ctex,v 1.5 2010/09/24 22:56:57 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,8 +21,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Mesh Design}
-\newcommand{\myauthors}{David Neckels}
+\newcommand{\mytitle}{\Large {\bf Mesh Reference}}
+\newcommand{\myauthors}{\large {\it David Neckels}}
 #endif
 
 #ifdef STANDALONE
@@ -32,6 +40,11 @@
 
 \newpage
 #endif
+
+
+%============================================================================
+% Mesh Class
+%============================================================================
 
 \section{Mesh Class}
 
@@ -72,9 +85,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMC_Mesh_chapi}
+\input{ESMC_Mesh_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Mesh/doc/ESMC_Mesh_chapi}
+\input{../Infrastructure/Mesh/doc/ESMC_Mesh_chapi}
 #endif
 
 #ifdef STANDALONE

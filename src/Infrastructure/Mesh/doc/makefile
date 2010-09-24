@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.2 2010/09/23 22:38:55 svasquez Exp $ 
+# $Id: makefile,v 1.3 2010/09/24 22:56:57 theurich Exp $ 
 
 All: onedoc
 
-LOCDIR = src/Infrastructure/Mesh/doc
+LOCDIR    = src/Infrastructure/Mesh/doc
 
 DVIFILES  = Mesh_refdoc.dvi Mesh_crefdoc.dvi
 PDFFILES  = $(ESMC_DOCDIR)/Mesh_refdoc.pdf $(ESMC_DOCDIR)/Mesh_crefdoc.pdf
@@ -19,7 +19,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
-TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../interface/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../interface/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f))))
@@ -38,14 +38,13 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)  Mesh_desc.tex Mesh_usage.tex Mesh_rest.tex Mesh_implnotes.tex
-
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Mesh_desc.tex
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
-CLEANDIRS   = Mesh_refdoc Mesh_crefdoc$(HTMLFILES)
+DIRS        = 
+CLEANDIRS   = Mesh_refdoc Mesh_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Mesh_refdoc.tex Mesh_crefdoc $(PDFFILES)
+              Mesh_refdoc.tex Mesh_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

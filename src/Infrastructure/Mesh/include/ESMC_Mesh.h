@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.29 2010/09/23 19:27:19 eschwab Exp $
+// $Id: ESMC_Mesh.h,v 1.30 2010/09/24 22:56:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ ESMC_Mesh ESMC_MeshCreate(
 // !DESCRIPTION:
 //
 //  This call is the first part of the three part mesh create sequence. This call sets the dimension of the elements 
-//  in the mesh (}\tt parametricDim}) and the number of coordinate dimensions in the mesh ({\tt spatialDim}). 
+//  in the mesh ({\tt parametricDim}) and the number of coordinate dimensions in the mesh ({\tt spatialDim}). 
 //  The next step is to call {\tt ESMC\_MeshAddNodes()} (??) to add the nodes and then 
 //  {\tt ESMC\_MeshAddElements(}) (??) 
 //  to add the elements and finalize the mesh. 
@@ -112,9 +112,9 @@ int ESMC_MeshCreateDistGrids(
 //  Description to be added.
 //  \item[elemDistGrid]
 //  Description to be added.
-//  \item[num_nodes]
+//  \item[num\_nodes]
 //  Description to be added.
-//  \item[num_elements]
+//  \item[num\_elements]
 //  Description to be added.
 //  \end{description}
 //
@@ -231,7 +231,7 @@ int ESMC_MeshAddElements(
 //   \begin{description}
 //   \item[mesh]
 //         Mesh object.        
-//   \item[num_elems]
+//   \item[num\_elems]
 //         Description to be added.
 //   \item [elementIds]
 //          An array containing the global ids of the elements to be created on this PET.
@@ -334,11 +334,11 @@ int ESMC_MeshGetNumNodes(
 // \begin{description}
 // \item[mesh]
 //     The mesh
-//  \item[num_nodes]
+//  \item[num\_nodes]
 //     The number of nodes in the mesh.
 //  \end{description}
 //
-//EOPI
+//EOP
 //------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_MeshGetNumElements - Get the number of elements in a mesh
@@ -359,7 +359,7 @@ int ESMC_MeshGetNumElements(
 // \begin{description}
 // \item[mesh]
 //     The mesh
-//  \item[num_elems]
+//  \item[num\_elems]
 //     The number of elements in the meah.
 //   \end{description}
 //
