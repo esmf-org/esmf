@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.1 2010/08/12 22:32:29 feiliu Exp $
+! $Id: land_comp.F90,v 1.2 2010/09/24 13:56:52 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,12 +99,15 @@ module land_comp
     type(ESMF_Grid)       :: grid
     type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
-    integer               :: petCount
+    integer               :: petCount, me
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    print *, "Land Init starting"
+    call ESMF_VMGetGlobal(vm, rc=rc)
+
+    call ESMF_VMGet (vm, localPet=me)
+    print *, "Land Init starting, myPet =", me
 
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)

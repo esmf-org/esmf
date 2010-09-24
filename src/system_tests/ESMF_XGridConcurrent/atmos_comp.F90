@@ -1,4 +1,4 @@
-! $Id: atmos_comp.F90,v 1.1 2010/08/12 22:32:29 feiliu Exp $
+! $Id: atmos_comp.F90,v 1.2 2010/09/24 13:59:05 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,13 +99,16 @@ module atmos_comp
     type(ESMF_Grid)       :: grid
     type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
-    integer               :: petCount
+    integer               :: petCount, me
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    print *, "Atmosphere Init starting"
+    call ESMF_VMGetGlobal(vm, rc=rc)
+
+    call ESMF_VMGet (vm, localPet=me)
+    print *, "Atmosphere Init starting, myPet =", me
 
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
