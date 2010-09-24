@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.2 2010/09/08 17:20:23 w6ws Exp $
+! $Id: coupler_comp.F90,v 1.3 2010/09/24 13:48:25 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -107,11 +107,15 @@ module coupler_comp
     type(ESMF_XGridSpec) :: sparseMatA2X(2), sparseMatX2B(1)
     real(ESMF_KIND_R8)   :: centroid(12,2), area(12)
     real(ESMF_KIND_R8), pointer         :: xfptr(:)
+    integer :: me
 
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    print *, "User Coupler Init starting"
+    call ESMF_VMGetGlobal(vm, rc=rc)
+
+    call ESMF_VMGet (vm, localPet=me)
+    print *, "User Coupler Init starting, myPet =", me
 
     !call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
     !if (rc/=ESMF_SUCCESS) return ! bail out
