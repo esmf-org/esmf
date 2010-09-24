@@ -1,4 +1,4 @@
-% $Id: DELayout_desc.tex,v 1.11 2009/09/14 21:42:58 theurich Exp $
+% $Id: DELayout_desc.tex,v 1.12 2010/09/24 18:30:11 eschwab Exp $
 
 The DELayout class provides an additional layer of abstraction on top of the Virtual Machine (VM) layer. DELayout does this by introducing DEs (Decomposition Elements) as logical resource units. The DELayout object keeps track of the relationship between its DEs and the resources of the associated VM object. 
 
@@ -8,7 +8,7 @@ Contrary to the number of PETs and VASs contained in a VM object, which are fixe
 
 The simplest case, however, is where the DELayout contains the same number of DEs as there are PETs in the associated VM context. In this case the DELayout may be used to re-label the hardware and operating system resources held by the VM. For instance, it is possible to order the resources so that specific DEs have best available communication paths. The DELayout will map the DEs to the PETs of the VM according to the resource details provided by the VM instance. 
 
-Furthermore, general DE to PET mapping can be used to offer computational resources with finer granularity than the VM does. The DELayout can be queried for computational and communication capacities of DEs and DE pairs, respectively. This information can be used to best utilize the DE resources when partitioning the computational problem. In combination with other ESMF classes general DE to PET mapping can be used to realize cache blocking, communication hiding and dynamic load balancing.
+Furthermore, general DE to PET mapping can be used to offer computational resources with finer granularity than the VM does. The DELayout can be queried for computational and communication capacities of DEs and DE pairs, respectively. This information can be used to best utilize the DE resources when partitioning the computational problem. In combination with other ESMF classes, general DE to PET mapping can be used to realize cache blocking, communication hiding and dynamic load balancing.
 
 Finally, the DELayout layer offers primitives that allow a work queue style dynamic load balancing between DEs.
 
