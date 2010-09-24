@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.8 2010/09/23 01:15:31 theurich Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.9 2010/09/24 21:29:44 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -12,14 +12,14 @@ file in the SCRIP format.  It supports bilinear, patch and conservative regriddi
 The source and the destination grids can be either a regularly rectangular grid or an unstructured grid
 including cubed sphere grid.  This application is a parallel application that can be run on any number of PETs.
 
-In this application, we use {\tt ESMF\_GridCreate}~\ref{example:2DLogRecFromScrip} to create a 
+In this application, we use {\tt ESMF\_GridCreate}~\ref{sec:example:2DLogRecFromScrip} to create a 
 ESMF\_Grid object if the source or destination grid is a logically rectangular grid.  We put the cell center 
 coordinates of the input grid at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) and we map the 2D coordinates
 into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} while calling 
 {\tt ESMF\_FieldRegridStore()}.   We use 
 {\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} to create a ESMF\_Mesh object if the 
 source or destination grid is a cubed sphere grid or an unstructured grid. We set {\tt cartisian3D} flag to {\tt TRUE} to
-convert the 2D coordinates into 2D Cartesian coordinates while calling {\tt ESMF\_MeshCreate()}. We then use
+convert the 2D coordinates into 3D Cartesian coordinates while calling {\tt ESMF\_MeshCreate()}. We then use
 {\tt ESMF\_FieldRegridStore()} to generate the regridding weight table and indicies table.   
 
 The regridding occurs in 3D to avoid
