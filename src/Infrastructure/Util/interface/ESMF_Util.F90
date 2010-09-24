@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.35 2010/09/15 01:18:46 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.36 2010/09/24 02:17:58 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.35 2010/09/15 01:18:46 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.36 2010/09/24 02:17:58 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -144,6 +144,12 @@
     integer :: localrc
 
     localrc = ESMF_FAILURE
+
+    if (this%this%ptr == 0) then
+      if (present (rc))  &
+        rc = ESMF_RC_PTR_NULL
+      return
+    end if
 
     call c_esmc_mapname_add (this, trim (name), value, localrc)
 
@@ -215,6 +221,12 @@
 
     localrc = ESMF_FAILURE
 
+    if (this%this%ptr == 0) then
+      if (present (rc))  &
+        rc = ESMF_RC_PTR_NULL
+      return
+    end if
+
     call c_esmc_mapname_destroy (this, localrc)
 
     if (present (rc))  &
@@ -262,6 +274,12 @@
 
     localrc = ESMF_FAILURE
 
+    if (this%this%ptr == 0) then
+      if (present (rc))  &
+        rc = ESMF_RC_PTR_NULL
+      return
+    end if
+
     call c_esmc_mapname_lookup (this, trim (name),  &
                                 value, localfoundFlag, localrc)
     foundflag = localfoundflag
@@ -303,13 +321,26 @@
 
     localrc = ESMF_FAILURE
 
+    if (this%this%ptr == 0) then
+      if (present (title)) then
+        print *, trim (title)
+      else
+        print *, "ESMF_UtilMapNamePrint:"
+      end if
+      print *, " *** NULL MapName pointer ***"
+
+      if (present (rc))  &
+        rc = ESMF_SUCCESS
+      return
+    end if
+
     call ESMF_IOUnitFlush (0, rc=rc)
     call ESMF_IOUnitFlush (6, rc=rc)
 
     if (present (title)) then
       call c_esmc_mapname_print (this, trim (title), localrc)
     else
-      call c_esmc_mapname_print (this, "ESMF_UtilMapNamePrint", localrc)
+      call c_esmc_mapname_print (this, "ESMF_UtilMapNamePrint:", localrc)
     end if
 
     if (present (rc))  &
@@ -349,6 +380,12 @@
 
     localrc = ESMF_FAILURE
 
+    if (this%this%ptr == 0) then
+      if (present (rc))  &
+        rc = ESMF_RC_PTR_NULL
+      return
+    end if
+
     call c_esmc_mapname_remove (this, trim (name), localrc)
 
     if (present (rc))  &
@@ -387,6 +424,13 @@
     integer :: localrc
 
     localrc = ESMF_FAILURE
+
+    if (this%this%ptr == 0) then
+      ESMF_UtilMapNameSize = 0
+      if (present (rc))  &
+        rc = ESMF_SUCCESS
+      return
+    end if
 
     call c_esmc_mapname_sizeget (this, ESMF_UtilMapNameSize, localrc)
 
