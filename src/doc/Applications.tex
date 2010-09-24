@@ -1,23 +1,24 @@
-% $Id: Applications.tex,v 1.5 2010/09/23 16:49:02 theurich Exp $
+% $Id: Applications.tex,v 1.6 2010/09/24 22:02:46 rokuingh Exp $
+
 
 The main product delivered by ESMF is the ESMF library that allows application
 developers to write programs based on the ESMF API. In addition to the 
 programming library, ESMF distributions come with a small set of applications
-that are of general interest to the ESMF community. These applications utilize
+that are of general interest to the community. These applications utilize
 the ESMF library to implement features such as printing general information
 about the ESMF installation, or generating regrid weight files. The provided
-ESMF applications are intented to be used as standard command line tools.
+ESMF applications are intended to be used as standard command line tools.
 
-The bundled ESMF applications are built and installed during the usual ESMF
-installation process, which is described in detail in the ESMF User's Guide section "Building and Installing the ESMF". After the installation the
-applications will be located in the binary directory that was specified during
-the installation. The exact installation specific path is available to the user
-via the {\tt esmf.mk} mechanism in form of the Makefile variable
-{\tt ESMF\_APPSDIR}. The ESMF User's Guide discusses the
-{\tt esmf.mk} mechanism in more detail in section "Compiling and Linking User
-Code against an ESMF Installation".
+The bundled ESMF applications are built and installed during the ESMF installation 
+process; this process is described in the User's Guide.  After a successful 
+installation the application executables will reside in the ESMF\_APPSDIR, 
+where they can be accessed and run as command line utilities.  Each of the applications
+supports the standard \verb+ --help + command line argument to provide a brief
+description of how to invoke the executable.  The following sections provide 
+in-depth documention of each of the ESMF bundled applications.
 
-The following sections provide in-depth documentation of the bundled ESMF
-applications. In addition, each application supports the standard \verb+ --help + command line argument, providing a brief description of how to invoke
-the program.
+
+%The bundled ESMF applications are built and installed during the usual ESMF installation process, which is described in detail in the ESMF User's Guide section "Building and Installing the ESMF". After the installation the applications will be located in the binary directory that was specified during the installation. The exact installation specific path is available to the user via the {\tt esmf.mk} mechanism in form of the Makefile variable {\tt ESMF\_APPSDIR}. The ESMF User's Guide discusses the {\tt esmf.mk} mechanism in more detail in section "Compiling and Linking User Code against an ESMF Installation".
+
+%The following sections provide in-depth documentation of the bundled ESMF applications. In addition, each application supports the standard \verb+ --help + command line argument, providing a brief description of how to invoke the program.
 
