@@ -1,0 +1,11 @@
+% $Id: ESMC_infrautiloverview.tex,v 1.1 2010/09/24 05:36:38 eschwab Exp $
+
+\section{Overview of Infrastructure Utility Classes}
+
+The ESMF utilities are a set of tools for quickly assembling modeling applications.  The Time Management Library provides utilities for time and time interval representation, as well as a higher-level utility, a clock, that controls model time stepping.
+
+ESMF Configuration Management is based on NASA DAO's Inpak package, a collection of routines for accessing files containing input parameters stored in an ASCII format.
+
+The ESMF LogErr class consists of a method for writing error, warning, and informational messages to a default Log file that is created during ESMF initialization.
+
+The ESMF VM (Virtual Machine) class provides methods for querying information about a VM. A VM is a generic representation of hardware and system software resources. There is exactly one VM object per ESMF Component, providing the execution environment for the Component code. The VM class handles all resource management tasks for the Component class and provides a description of the underlying configuration of the compute resources used by a Component.  In addition to resource description and management, the VM class offers the lowest level of ESMF communication methods.
