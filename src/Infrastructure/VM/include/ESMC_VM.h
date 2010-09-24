@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.54 2010/09/16 04:33:44 theurich Exp $
+// $Id: ESMC_VM.h,v 1.55 2010/09/24 05:15:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ ESMC_VM ESMC_VMGetGlobal(
 //
 //  The {\tt ESMC\_VMGetGlobal()} call provides access to information about the
 //  global execution context via the global VM. This call is necessary because
-//  ESMF does not created a global ESMF Component during
+//  ESMF does not create a global ESMF Component during
 //  {\tt ESMC\_Initialize()} that could be queried for information about
 //  the global execution context of an ESMF application.
 //  
