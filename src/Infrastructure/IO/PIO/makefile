@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2010/06/21 16:20:52 theurich Exp $
+# $Id: makefile,v 1.7 2010/09/24 04:26:24 theurich Exp $
 
 ALL: build_here 
 
@@ -7,10 +7,8 @@ CPPFLAGS += -D_USEBOX
 #TODO: set following flag conditionally once ESMF build configs handle MPI2
 CPPFLAGS += -DNO_MPI2
 
-ifneq ($(ESMF_COMM),mpiuni)
-ifneq ($(ESMF_COMM),mvapich)
+ifdef ESMF_MPIIO
 CPPFLAGS += -DUSEMPIIO
-endif
 endif
 
 ifdef ESMF_NETCDF

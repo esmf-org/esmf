@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.6 2010/09/23 22:15:37 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.7 2010/09/24 04:26:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.6 2010/09/23 22:15:37 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.7 2010/09/24 04:26:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -527,36 +527,43 @@ contains
     if (present(iofmt)) iofmt_internal = iofmt
 
     if (iofmt_internal == ESMF_IOFMT_NETCDF) then
-    ! NETCDF format selected
+      ! NETCDF format selected
 #ifdef ESMF_PNETCDF
-    piofmt = "pnc"  ! PNETCDF first choice to write NETCDF format
+      piofmt = "pnc"  ! PNETCDF first choice to write NETCDF format
 #elif ESMF_NETCDF
-    piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
+      piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
 #else
-    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
-      "NETCDF or PNETCDF libraries are missingfor this format choice", &
-       ESMF_CONTEXT, rc)
-    return
+      call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+        "ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
+        ESMF_CONTEXT, rc)
+      return
 #endif
 
     else if (iofmt_internal == ESMF_IOFMT_BIN) then
 
-    ! binary format selected
-    piofmt = "bin"
-    if (present(variableName)) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
-      "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
-       ESMF_CONTEXT, rc)
+#ifdef ESMF_MPIIO
+      ! binary format selected
+      piofmt = "bin"
+      if (present(variableName)) then
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+          "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
+          ESMF_CONTEXT, rc)
+        return
+      endif
+#else
+      call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+        "ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
+        ESMF_CONTEXT, rc)
       return
-    endif
+#endif
 
     else
 
-    ! format option that is not supported
-    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
-      "this format is not currently supported by the ESMF IO layer", &
-       ESMF_CONTEXT, rc)
-    return
+      ! format option that is not supported
+      call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+        "this format is not currently supported by the ESMF IO layer", &
+        ESMF_CONTEXT, rc)
+      return
 
     endif
 

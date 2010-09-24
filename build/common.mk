@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.321 2010/09/22 23:46:55 theurich Exp $
+#  $Id: common.mk,v 1.322 2010/09/24 04:26:23 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1080,6 +1080,14 @@ ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(ESMF_PIO_LIBPATH)
 endif
 endif
 endif
+
+ifneq ($(ESMF_COMM),mpiuni)
+ifneq ($(ESMF_COMM),mvapich)
+ESMF_MPIIO = supported
+CPPFLAGS += -DESMF_MPIIO
+endif
+endif
+
 
 #-------------------------------------------------------------------------------
 # Set the correct MPIRUN command with appropriate options

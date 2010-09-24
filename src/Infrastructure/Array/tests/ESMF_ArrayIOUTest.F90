@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.21 2010/09/15 05:04:29 eschwab Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.22 2010/09/24 04:26:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#ifdef ESMF_PIO
+#if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -313,7 +313,7 @@ program ESMF_ArrayIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#ifdef ESMF_PIO
+#if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -356,7 +356,7 @@ program ESMF_ArrayIOUTest
   enddo
   enddo
   enddo
-#ifdef ESMF_PIO
+#if (defined ESMF_PIO && defined ESMF_MPIIO)
   write(*,*)"Maximum Error (With Halo case) = ", Maxvalue(1)
   call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
 #else
