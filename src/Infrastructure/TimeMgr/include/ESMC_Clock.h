@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.64 2010/09/22 05:52:34 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.65 2010/09/25 02:44:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -50,6 +50,32 @@ typedef struct {
 //-----------------------------------------------------------------------------
 
 // Class API
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_ClockAdvance - Advance a Clock's current time by one time step
+
+//
+// !INTERFACE:
+int ESMC_ClockAdvance(
+  ESMC_Clock clock   // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Advances the {\tt ESMC\_Clock}'s current time by one time step.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[clock]
+//    {\tt ESMC\_Clock} object to be advanced.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -147,32 +173,6 @@ int ESMC_ClockGet(
 //    The current simulation time.
 //  \item[{[advanceCount]}]
 //    The number of times the {\tt ESMC\_Clock} has been advanced.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_ClockAdvance - Advance a Clock's current time by one time step
-
-//
-// !INTERFACE:
-int ESMC_ClockAdvance(
-  ESMC_Clock clock   // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Advances the {\tt ESMC\_Clock}'s current time by one time step.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[clock]
-//    {\tt ESMC\_Clock} object to be advanced.
 //  \end{description}
 //
 //EOP

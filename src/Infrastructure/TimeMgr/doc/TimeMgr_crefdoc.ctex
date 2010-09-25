@@ -1,4 +1,4 @@
-% $Id: TimeMgr_crefdoc.ctex,v 1.9 2010/09/23 21:01:36 svasquez Exp $ 
+% $Id: TimeMgr_crefdoc.ctex,v 1.10 2010/09/25 02:44:27 eschwab Exp $ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE
@@ -39,9 +39,9 @@
 
 \section{Time Manager Utility}
 #ifdef STANDALONE
-\input{TimeMgr_desc}
+\input{TimeMgr_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeMgr_desc}
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_cdesc}
 #endif
 
 %\section{Abbreviations Table}
@@ -73,9 +73,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Calendar_desc}
+\input{Calendar_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_desc}
+\input{../Infrastructure/TimeMgr/doc/Calendar_cdesc}
 #endif
 
 \subsection{Calendar Options}
@@ -123,9 +123,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Time_desc}
+\input{Time_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_desc}
+\input{../Infrastructure/TimeMgr/doc/Time_cdesc}
 #endif
 
 %\subsection{Use and Examples}
@@ -159,9 +159,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{TimeInterval_desc}
+\input{TimeInterval_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_desc}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_cdesc}
 #endif
 
 %\subsection{Use and Examples}
@@ -206,9 +206,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Clock_desc}
+\input{Clock_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_desc}
+\input{../Infrastructure/TimeMgr/doc/Clock_cdesc}
 #endif
 
 %\subsection{Clock Options}
@@ -249,9 +249,9 @@
 
 #\subsection{Description}
 #ifdef STANDALONE
-#\input{Alarm_desc}
+#\input{Alarm_cdesc}
 #elif defined(CONSTITUENT)
-#\input{../Infrastructure/TimeMgr/doc/Alarm_desc}
+#\input{../Infrastructure/TimeMgr/doc/Alarm_cdesc}
 #endif
 
 %\subsection{Alarm Options}

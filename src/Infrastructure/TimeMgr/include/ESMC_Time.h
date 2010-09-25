@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.58 2010/09/22 05:52:34 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.59 2010/09/25 02:44:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,48 +52,6 @@ typedef struct {
 //-----------------------------------------------------------------------------
 
 // Class API
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_TimeSet - Initialize or set a Time
-//
-// !INTERFACE:
-int ESMC_TimeSet(
-  ESMC_Time *time,                       // inout
-  ESMC_I4 yy,                            // in
-  ESMC_I4 h,                             // in
-  ESMC_Calendar calendar,                // in
-  enum ESMC_CalendarType calendartype,   // in
-  int timeZone                           // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Initializes an {\tt ESMC\_Time} with a set of user-specified units.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[time]
-//    {\tt ESMC\_Time} object to initialize or set.
-//  \item[yy]
-//    Integer year (>= 32-bit).
-//  \item[h]
-//    Integer hours.
-//  \item[calendar]
-//    Associated {\tt ESMC\_Calendar}.  If not created, defaults to calendar
-//    {\tt ESMC\_CAL\_NOCALENDAR} or default specified in
-//    {\tt ESMC\_Initialize()}.  If created, has precedence over
-//    calendarType below.
-//  \item[calendarType]
-//    Specifies associated {\tt ESMC\_Calendar} if calendar argument above
-//    not created.  More convenient way of specifying a built-in calendar type.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -153,6 +111,48 @@ int ESMC_TimePrint(
 //  \begin{description}
 //  \item[time]
 //    {\tt ESMC\_Time} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeSet - Initialize or set a Time
+//
+// !INTERFACE:
+int ESMC_TimeSet(
+  ESMC_Time *time,                       // inout
+  ESMC_I4 yy,                            // in
+  ESMC_I4 h,                             // in
+  ESMC_Calendar calendar,                // in
+  enum ESMC_CalendarType calendartype,   // in
+  int timeZone                           // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Initializes an {\tt ESMC\_Time} with a set of user-specified units.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[time]
+//    {\tt ESMC\_Time} object to initialize or set.
+//  \item[yy]
+//    Integer year (>= 32-bit).
+//  \item[h]
+//    Integer hours.
+//  \item[calendar]
+//    Associated {\tt ESMC\_Calendar}.  If not created, defaults to calendar
+//    {\tt ESMC\_CAL\_NOCALENDAR} or default specified in
+//    {\tt ESMC\_Initialize()}.  If created, has precedence over
+//    calendarType below.
+//  \item[calendarType]
+//    Specifies associated {\tt ESMC\_Calendar} if calendar argument above
+//    not created.  More convenient way of specifying a built-in calendar type.
 //  \end{description}
 //
 //EOP

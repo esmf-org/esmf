@@ -1,0 +1,16 @@
+% $Id: TimeInterval_cdesc.tex,v 1.1 2010/09/25 02:44:27 eschwab Exp $
+
+\label{sec:TimeInterval}
+A TimeInterval represents a period between time instants. 
+It can be either positive or negative.
+
+There are TimeInterval methods defined for setting and getting 
+a TimeInterval, for printing the contents of a TimeInterval.
+
+The class used to represent time instants in ESMF is Time, 
+and this class is frequently used in operations along with 
+TimeIntervals.  The Clock class, for example, advances model time by 
+incrementing a Time with a TimeInterval. 
+
+TimeIntervals are used by other parts of the ESMF timekeeping 
+system, such as Clocks; see Section~\ref{sec:Clock}.

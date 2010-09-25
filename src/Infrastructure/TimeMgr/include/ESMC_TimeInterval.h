@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.58 2010/09/22 05:52:35 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.59 2010/09/25 02:44:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,35 +63,6 @@ typedef struct {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_TimeIntervalSet - Initialize or set a TimeInterval
-//
-// !INTERFACE:
-int ESMC_TimeIntervalSet(
-  ESMC_TimeInterval *timeinterval,   // inout
-  ESMC_I4 h                          // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Sets the value of the {\tt ESMC\_TimeInterval} in units specified by
-//  the user.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[timeinterval]
-//    {\tt ESMC\_TimeInterval} object to initialize or set.
-//  \item[h]
-//    Integer hours.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE: ESMC_TimeIntervalGet - Get a TimeInterval value
 //
 // !INTERFACE:
@@ -141,6 +112,35 @@ int ESMC_TimeIntervalPrint(
 //  \begin{description}
 //  \item[timeinterval]
 //    {\tt ESMC\_TimeInterval} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_TimeIntervalSet - Initialize or set a TimeInterval
+//
+// !INTERFACE:
+int ESMC_TimeIntervalSet(
+  ESMC_TimeInterval *timeinterval,   // inout
+  ESMC_I4 h                          // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Sets the value of the {\tt ESMC\_TimeInterval} in units specified by
+//  the user.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[timeinterval]
+//    {\tt ESMC\_TimeInterval} object to initialize or set.
+//  \item[h]
+//    Integer hours.
 //  \end{description}
 //
 //EOP
