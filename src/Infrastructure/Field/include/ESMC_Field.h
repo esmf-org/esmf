@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.26 2010/09/15 19:27:38 feiliu Exp $
+// $Id: ESMC_Field.h,v 1.27 2010/09/25 02:48:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -142,25 +142,27 @@ int ESMC_FieldDestroy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_FieldPrint - Print the internal information of a Field
+// !IROUTINE: ESMC_FieldGetArray - Get the internal Array stored in the Field
 //
 // !INTERFACE:
-int ESMC_FieldPrint(
-  ESMC_Field field      // in
+ESMC_Array ESMC_FieldGetArray(
+  ESMC_Field field,     // in
+  int *rc               // out
 );
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  The ESMC_Array object stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
-//  Print the internal information within this {\tt ESMC\_Field}.
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  Get the internal Array stored in the {\tt ESMC\_Field}.
 //
 //  The arguments are:
 //  \begin{description}
 //  \item[field]
-//    Print contents of this {\tt ESMC\_Field}.
+//    Get the internal Array stored in this {\tt ESMC\_Field}.
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
 //EOP
@@ -187,34 +189,6 @@ ESMC_Mesh ESMC_FieldGetMesh(
 //  \begin{description}
 //  \item[field]
 //    Get the internal Mesh stored in this {\tt ESMC\_Field}.
-//  \item[{[rc]}]
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_FieldGetArray - Get the internal Array stored in the Field
-//
-// !INTERFACE:
-ESMC_Array ESMC_FieldGetArray(
-  ESMC_Field field,     // in
-  int *rc               // out
-);
-
-// !RETURN VALUE:
-//  The ESMC_Array object stored in the ESMC_Field.
-//
-// !DESCRIPTION:
-//
-//  Get the internal Array stored in the {\tt ESMC\_Field}.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[field]
-//    Get the internal Array stored in this {\tt ESMC\_Field}.
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
@@ -253,6 +227,31 @@ void *ESMC_FieldGetPtr(
 //EOP
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldPrint - Print the internal information of a Field
+//
+// !INTERFACE:
+int ESMC_FieldPrint(
+  ESMC_Field field      // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Print the internal information within this {\tt ESMC\_Field}.
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[field]
+//    Print contents of this {\tt ESMC\_Field}.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 #if defined (__cplusplus)
 } // extern "C"

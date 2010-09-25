@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.30 2010/09/24 22:56:57 theurich Exp $
+// $Id: ESMC_Mesh.h,v 1.31 2010/09/25 02:48:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -48,151 +48,7 @@ typedef struct{
 }ESMC_Mesh;
 
 // Class API
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_MeshCreate - Create a Mesh as a 3 step process 
-//
-// !INTERFACE:
-ESMC_Mesh ESMC_MeshCreate(
-  int *parametricDim,         // in
-  int *spatialDim,            // in
-  int *rc                     // out
-);
-// !RETURN VALUE:
-//  type(ESMC\_Mesh)         :: ESMC\_MeshCreate3Part
-//
-// !DESCRIPTION:
-//
-//  This call is the first part of the three part mesh create sequence. This call sets the dimension of the elements 
-//  in the mesh ({\tt parametricDim}) and the number of coordinate dimensions in the mesh ({\tt spatialDim}). 
-//  The next step is to call {\tt ESMC\_MeshAddNodes()} (??) to add the nodes and then 
-//  {\tt ESMC\_MeshAddElements(}) (??) 
-//  to add the elements and finalize the mesh. 
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[parametricDim]
-//    Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would have a parametric dimension 
-//    of 2, whereas a Mesh constructed of cubes would have one of 3.)
-//  \item[spatialDim]
-//  The number of coordinate dimensions needed to describe the locations of the nodes making up the Mesh. For a 
-//  manifold, the spatial dimesion can be larger than the parametric dim (e.g. the 2D 
-//  surface of a sphere in 3D space), 
-//   but it can't be smaller. 
-//  \item[rc]
-//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
-//
-// !INTERFACE:
-int ESMC_MeshCreateDistGrids(
-  ESMC_Mesh mesh,             // in
-  int* nodeDistGrid,          // in
-  int* elemDistGrid,          // in
-  int *num_nodes,             // in
-  int *num_elements           // in
-);
 
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Description to be added.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[mesh]
-//    Mesh object.
-//  \item[nodeDistGrid]
-//  Description to be added.
-//  \item[elemDistGrid]
-//  Description to be added.
-//  \item[num\_nodes]
-//  Description to be added.
-//  \item[num\_elements]
-//  Description to be added.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_MeshDestroy - Destroy a Mesh
-//
-// !INTERFACE:
-int ESMC_MeshDestroy(
-  ESMC_Mesh *mesh             // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//  Destroy the Mesh. This call removes all internal memory associated with {\tt mesh}. After this call mesh will no longer be usable. 
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[mesh]
-//    Mesh object whose memory is to be freed. 
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_MeshAddNodes - Add nodes to a Mesh 
-//
-// !INTERFACE:
-int ESMC_MeshAddNodes(
-  ESMC_Mesh mesh,          // inout
-  int *num_nodes,          // in
-  int *nodeIds,            // in
-  double *nodeCoords,      // in
-  int *nodeOwners          // in
-);
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//   This call is the second part of the three part mesh create
-//   sequence and should be called after the mesh's dimensions are set
-//   using {\tt ESMC\_MeshCreate()}.
-//   This call adds the nodes to the
-//   mesh. The next step is to call {\tt ESMC\_MeshAddElements()}.
-//
-//   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and
-//   {\tt nodeOwners} describe the nodes to be created on this PET.
-//   The description for a particular node lies at the same index location in
-//   {\tt nodeIds} and {\tt nodeOwners}. Each entry
-//   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
-//   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$.
-//
-//   \begin{description}
-//   \item[mesh]
-//     Mesh object.
-//   \item [nodeIds]
-//     Description to be added.
-//   \item[nodeCoords]
-//          An array containing the physical coordinates of the nodes to be created on this
-//          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's
-//          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
-//          so that the coordinates for a node lie in sequence in memory. (e.g. for a
-//          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
-//          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3),
-//          etc.).
-//   \item[nodeOwners]
-//         An array containing the PETs that own the nodes to be created on this PET.
-//         If the node is shared with another PET, the value
-//         may be a PET other than the current one. Only nodes owned by this PET
-//         will have PET local entries in a Field created on the Mesh. This input consists of
-//         a 1D array the size of the number of nodes on this PET.
-//   \end{description}
-//
-//EOP
 //------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_MeshAddElements - Add elements to a Mesh
@@ -205,7 +61,6 @@ int ESMC_MeshAddElements(
   int *elementTypes,        // in
   int *elementConn          // in
 );
-
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -261,6 +116,161 @@ int ESMC_MeshAddElements(
 //
 //EOP
 //------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshAddNodes - Add nodes to a Mesh 
+//
+// !INTERFACE:
+int ESMC_MeshAddNodes(
+  ESMC_Mesh mesh,          // inout
+  int *num_nodes,          // in
+  int *nodeIds,            // in
+  double *nodeCoords,      // in
+  int *nodeOwners          // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//   This call is the second part of the three part mesh create
+//   sequence and should be called after the mesh's dimensions are set
+//   using {\tt ESMC\_MeshCreate()}.
+//   This call adds the nodes to the
+//   mesh. The next step is to call {\tt ESMC\_MeshAddElements()}.
+//
+//   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and
+//   {\tt nodeOwners} describe the nodes to be created on this PET.
+//   The description for a particular node lies at the same index location in
+//   {\tt nodeIds} and {\tt nodeOwners}. Each entry
+//   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
+//   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$.
+//
+//   \begin{description}
+//   \item[mesh]
+//     Mesh object.
+//   \item [nodeIds]
+//     Description to be added.
+//   \item[nodeCoords]
+//          An array containing the physical coordinates of the nodes to be created on this
+//          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's
+//          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+//          so that the coordinates for a node lie in sequence in memory. (e.g. for a
+//          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
+//          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3),
+//          etc.).
+//   \item[nodeOwners]
+//         An array containing the PETs that own the nodes to be created on this PET.
+//         If the node is shared with another PET, the value
+//         may be a PET other than the current one. Only nodes owned by this PET
+//         will have PET local entries in a Field created on the Mesh. This input consists of
+//         a 1D array the size of the number of nodes on this PET.
+//   \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshCreate - Create a Mesh as a 3 step process 
+//
+// !INTERFACE:
+ESMC_Mesh ESMC_MeshCreate(
+  int *parametricDim,         // in
+  int *spatialDim,            // in
+  int *rc                     // out
+);
+// !RETURN VALUE:
+//  type(ESMC\_Mesh)         :: ESMC\_MeshCreate3Part
+//
+// !DESCRIPTION:
+//
+//  This call is the first part of the three part mesh create sequence. This call sets the dimension of the elements 
+//  in the mesh ({\tt parametricDim}) and the number of coordinate dimensions in the mesh ({\tt spatialDim}). 
+//  The next step is to call {\tt ESMC\_MeshAddNodes()} (??) to add the nodes and then 
+//  {\tt ESMC\_MeshAddElements(}) (??) 
+//  to add the elements and finalize the mesh. 
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[parametricDim]
+//    Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would have a parametric dimension 
+//    of 2, whereas a Mesh constructed of cubes would have one of 3.)
+//  \item[spatialDim]
+//  The number of coordinate dimensions needed to describe the locations of the nodes making up the Mesh. For a 
+//  manifold, the spatial dimesion can be larger than the parametric dim (e.g. the 2D 
+//  surface of a sphere in 3D space), 
+//   but it can't be smaller. 
+//  \item[rc]
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
+//
+// !INTERFACE:
+int ESMC_MeshCreateDistGrids(
+  ESMC_Mesh mesh,             // in
+  int* nodeDistGrid,          // in
+  int* elemDistGrid,          // in
+  int *num_nodes,             // in
+  int *num_elements           // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Description to be added.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[mesh]
+//    Mesh object.
+//  \item[nodeDistGrid]
+//  Description to be added.
+//  \item[elemDistGrid]
+//  Description to be added.
+//  \item[num\_nodes]
+//  Description to be added.
+//  \item[num\_elements]
+//  Description to be added.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshDestroy - Destroy a Mesh
+//
+// !INTERFACE:
+int ESMC_MeshDestroy(
+  ESMC_Mesh *mesh             // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Destroy the Mesh. This call removes all internal memory associated with {\tt mesh}. After this call mesh will no longer be usable. 
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[mesh]
+//    Mesh object whose memory is to be freed. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_MeshFreeMemory - Remove a Mesh and its memory
 //
@@ -289,56 +299,7 @@ int ESMC_MeshFreeMemory(
 //
 //EOP
 //------------------------------------------------------------------------------
-//BOPI
-// !IROUTINE: ESMC_MeshWrite - Write a Mesh to a VTK file
-//
-// !INTERFACE:
-int ESMC_MeshWrite(
-  ESMC_Mesh mesh,            // in
-  const char* fname          // in
-);
 
-
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-//
-// !DESCRIPTION:
-//   Write a mesh to VTK file.
-//
-// The arguments are:
-//   \begin{description}
-//   \item [mesh]
-//         The mesh.
-//   \item[filename]
-//         The name of the output file.
-//   \end{description}
-//
-//EOPI
-//------------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_MeshGetNumNodes - Get the number of nodes in a mesh
-//
-// !INTERFACE:
-int ESMC_MeshGetNumNodes(
-  ESMC_Mesh mesh,          // in
-  int* num_nodes           // out
-);
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-//
-// !DESCRIPTION:
-// Query the number of nodes in a mesh.
-// The arguments are:
-// \begin{description}
-// \item[mesh]
-//     The mesh
-//  \item[num\_nodes]
-//     The number of nodes in the mesh.
-//  \end{description}
-//
-//EOP
 //------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_MeshGetNumElements - Get the number of elements in a mesh
@@ -366,6 +327,61 @@ int ESMC_MeshGetNumElements(
 //EOP
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetNumNodes - Get the number of nodes in a mesh
+//
+// !INTERFACE:
+int ESMC_MeshGetNumNodes(
+  ESMC_Mesh mesh,          // in
+  int* num_nodes           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+//
+// !DESCRIPTION:
+// Query the number of nodes in a mesh.
+// The arguments are:
+// \begin{description}
+// \item[mesh]
+//     The mesh
+//  \item[num\_nodes]
+//     The number of nodes in the mesh.
+//  \end{description}
+//
+//EOP
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOPI
+// !IROUTINE: ESMC_MeshWrite - Write a Mesh to a VTK file
+//
+// !INTERFACE:
+int ESMC_MeshWrite(
+  ESMC_Mesh mesh,            // in
+  const char* fname          // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+//
+// !DESCRIPTION:
+//   Write a mesh to VTK file.
+//
+// The arguments are:
+//   \begin{description}
+//   \item [mesh]
+//         The mesh.
+//   \item[filename]
+//         The name of the output file.
+//   \end{description}
+//
+//EOPI
+//------------------------------------------------------------------------------
+
 // Associated methods
 
 //BOPI
@@ -379,6 +395,7 @@ int ESMC_MeshVTKHeader(
   int *conn_size
 );
 //EOPI
+
 //BOPI
 // !IROUTINE: ESMC_MeshVTKBody
 //
@@ -392,7 +409,6 @@ int ESMC_MeshVTKBody(
   int *elemType, 
   int *elemConn
 );
-
 //EOPI
 
 // Associated enum types

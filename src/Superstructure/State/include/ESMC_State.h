@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.33 2010/09/22 22:13:32 w6ws Exp $
+// $Id: ESMC_State.h,v 1.34 2010/09/25 02:48:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -41,6 +41,60 @@ extern "C" {
 typedef void* ESMC_State;
 
 // Class API
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_StateAddArray - Add an Array object to a State
+//
+// !INTERFACE:
+int ESMC_StateAddArray(
+  ESMC_State state,   // in
+  ESMC_Array array    // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Add an Array object to a {\tt ESMC\_State} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[state]
+//    The State object.
+//  \item[array]
+//    The Array object to be included within the State.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_StateAddField - Add a Field object to a State
+//
+// !INTERFACE:
+int ESMC_StateAddField(
+  ESMC_State state,   // in
+  ESMC_Field field    // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Add an Array object to a {\tt ESMC\_State} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[state]
+//    The State object.
+//  \item[array]
+//    The Array object to be included within the State.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -90,84 +144,6 @@ int ESMC_StateDestroy(
 //  \begin{description}
 //  \item[state]
 //    The State to be destroyed.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_StatePrint - Print the contents of a State
-//
-// !INTERFACE:
-int ESMC_StatePrint(
-  ESMC_State state    // in
-);
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Prints the contents of a {\tt ESMC\_State} object.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[state]
-//    The State to be printed.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_StateAddArray - Add an Array object to a State
-//
-// !INTERFACE:
-int ESMC_StateAddArray(
-  ESMC_State state,   // in
-  ESMC_Array array    // in
-);
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Add an Array object to a {\tt ESMC\_State} object.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[state]
-//    The State object.
-//  \item[array]
-//    The Array object to be included within the State.
-//  \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_StateAddArray - Add a Field object to a State
-//
-// !INTERFACE:
-int ESMC_StateAddField(
-  ESMC_State state,   // in
-  ESMC_Field field    // in
-);
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Add an Array object to a {\tt ESMC\_State} object.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[state]
-//    The State object.
-//  \item[array]
-//    The Array object to be included within the State.
 //  \end{description}
 //
 //EOP
@@ -230,6 +206,30 @@ int ESMC_StateGetField(
 //    The name of the desired Field object.
 //  \item[array]
 //    A pointer to the Field object.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_StatePrint - Print the contents of a State
+//
+// !INTERFACE:
+int ESMC_StatePrint(
+  ESMC_State state    // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Prints the contents of a {\tt ESMC\_State} object.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[state]
+//    The State to be printed.
 //  \end{description}
 //
 //EOP
