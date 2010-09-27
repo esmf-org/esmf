@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.9 2010/09/24 21:29:44 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.10 2010/09/27 23:13:07 rokuingh Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -10,7 +10,8 @@ It takes a source grid file and a destination grid file
 in either the SCRIP format or the ESMF Unstructured grid format, and generate a regridding weight 
 file in the SCRIP format.  It supports bilinear, patch and conservative regridding methods.  
 The source and the destination grids can be either a regularly rectangular grid or an unstructured grid
-including cubed sphere grid.  This application is a parallel application that can be run on any number of PETs.
+including cubed sphere grid.  This application is a parallel application that can be run 
+on any number of PETs.  This application is used in the \htmladdnormallink{ESMF\_RegridWeightGenCheck external use case}{http://www.earthsystemmodeling.org/developers/test/euc/ESMF_RegridWeightGenCheck_euc.shtml}.
 
 In this application, we use {\tt ESMF\_GridCreate}~\ref{sec:example:2DLogRecFromScrip} to create a 
 ESMF\_Grid object if the source or destination grid is a logically rectangular grid.  We put the cell center 
