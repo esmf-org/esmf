@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.161 2010/09/23 22:50:22 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.162 2010/09/27 20:57:33 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.161 2010/09/23 22:50:22 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.162 2010/09/27 20:57:33 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3182,9 +3182,10 @@ end function ESMF_GridCreateFrmScripDistGrd
 ! This assumes that all the corners are in the same order around each center
 subroutine convert_corner_arrays_to_1D(dim1,dim2,cornerX2D,cornerY2D,cornerX,cornerY, rc)
  integer :: dim1,dim2
- real(ESMF_KIND_R8),  allocatable:: cornerX2D(:,:),cornerY2D(:,:)
- real(ESMF_KIND_R8),  allocatable:: cornerX(:),cornerY(:)
+ real(ESMF_KIND_R8) :: cornerX2D(:,:),cornerY2D(:,:)
+ real(ESMF_KIND_R8) :: cornerX(:),cornerY(:)
  integer :: rc
+
  integer :: i,j
  real(ESMF_KIND_R8) :: tol=0.000000000001
  integer :: topCorner
