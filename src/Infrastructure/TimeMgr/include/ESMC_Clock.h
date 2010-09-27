@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.65 2010/09/25 02:44:28 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.66 2010/09/27 22:36:18 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@ typedef struct {
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ClockAdvance - Advance a Clock's current time by one time step
 
 //
@@ -74,11 +74,11 @@ int ESMC_ClockAdvance(
 //    {\tt ESMC\_Clock} object to be advanced.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ClockCreate - Create a Clock
 //
 // !INTERFACE:
@@ -119,11 +119,11 @@ ESMC_Clock ESMC_ClockCreate(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ClockDestroy - Destroy a Clock
 //
 // !INTERFACE:
@@ -144,11 +144,11 @@ int ESMC_ClockDestroy(
 //    Destroy contents of this {\tt ESMC\_Clock}.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ClockGet - Get a Clock's properties
 //
 // !INTERFACE:
@@ -175,11 +175,11 @@ int ESMC_ClockGet(
 //    The number of times the {\tt ESMC\_Clock} has been advanced.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ClockPrint - Print the contents of a Clock
 //
 // !INTERFACE:
@@ -201,7 +201,7 @@ int ESMC_ClockPrint(
 //    {\tt ESMC\_Clock} object to be printed.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

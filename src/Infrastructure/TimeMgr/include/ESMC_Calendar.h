@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.74 2010/09/22 05:52:34 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.75 2010/09/27 22:36:18 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@ typedef struct {
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_CalendarCreate - Create a Calendar
 //
 // !INTERFACE:
@@ -101,11 +101,11 @@ ESMC_Calendar ESMC_CalendarCreate(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_CalendarDestroy - Destroy a Calendar
 //
 // !INTERFACE:
@@ -126,11 +126,11 @@ int ESMC_CalendarDestroy(
 //    Destroy contents of this {\tt ESMC\_Calendar}.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_CalendarPrint - Print a Calendar
 //
 // !INTERFACE:
@@ -151,7 +151,7 @@ int ESMC_CalendarPrint(
 //    {\tt ESMC\_Calendar} object to be printed.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

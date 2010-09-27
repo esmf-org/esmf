@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.80 2010/09/22 22:11:30 w6ws Exp $
+// $Id: ESMC_LogErr.h,v 1.81 2010/09/27 22:40:25 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ void *ptr;
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_LogWrite - Write an entry into the Log file
 //
 // !INTERFACE:
@@ -76,7 +76,7 @@ int ESMC_LogWrite(
 //    or ESMF\_LOG\_ERROR.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

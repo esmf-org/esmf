@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.55 2010/09/24 05:15:21 eschwab Exp $
+// $Id: ESMC_VM.h,v 1.56 2010/09/27 22:42:47 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@ typedef struct{
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_VMGet - Get VM internals
 //
 // !INTERFACE:
@@ -99,11 +99,11 @@ int ESMC_VMGet(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_VMGetCurrent - Get current VM
 //
 // !INTERFACE:
@@ -144,11 +144,11 @@ ESMC_VM ESMC_VMGetCurrent(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_VMGetGlobal - Get global VM
 //
 // !INTERFACE:
@@ -184,11 +184,11 @@ ESMC_VM ESMC_VMGetGlobal(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_VMPrint - Print a VM
 //
 // !INTERFACE:
@@ -208,7 +208,7 @@ int ESMC_VMPrint(
 //    {\tt ESMC\_VM} object to be printed.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
