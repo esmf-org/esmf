@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.5 2010/09/27 16:51:02 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.5 2010/09/27 16:51:02 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -695,7 +695,6 @@ void norm_poly3D(int num_p, double *p) {
     // Get dst coords
     get_elem_coords(dst_elem, dst_cfield, 3, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
 
-
     // if no nodes then exit
     if (num_dst_nodes<1) return;
 
@@ -715,16 +714,6 @@ void norm_poly3D(int num_p, double *p) {
       Throw() << "Destination Element has 0 area";
     }
     
-#if 0
-    printf("coords  "); 
-    for (int i=0; i<dst_coords.size(); i++) {
-      if (i%2==0) printf("[");
-      printf("  %f ",dst_coords[i]);
-      if (i%2==1) printf("]");
-    }
-    printf("\n");
-#endif
-
 
     // Declaration for dst polygon
     int num_src_nodes;
@@ -752,7 +741,6 @@ void norm_poly3D(int num_p, double *p) {
       }
 
 
-
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_src_nodes, src_coords);
       
@@ -766,13 +754,6 @@ void norm_poly3D(int num_p, double *p) {
       if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
 	Throw() << " src and dst poly size too big for temp buffer";
       }
-
-
-#if 0
-      if ((dst_elem->get_id()==173) && (src_elem->get_id()==409)) {
-	debug=true;
-      }
-#endif
 
 
       // Intersect src with dst element
@@ -833,6 +814,12 @@ void norm_poly3D(int num_p, double *p) {
    
       //      debug=false;
 
+      if (sintd_area < 0.0) {
+	(*valid)[i]=0;
+	(*wgts)[i]=0.0;
+	continue;
+      }
+
 #if 0
       if ((dst_elem->get_id()==3460) && (src_elem->get_id()==211)) {
          printf("sintd_area=%f %d dst_area=%f \n",sintd_area,num_sintd_nodes,dst_area);
@@ -840,8 +827,14 @@ void norm_poly3D(int num_p, double *p) {
 #endif
 
       // calc weight
+      double weight=sintd_area/dst_area;
+     
+      // make sure weight is not bigger than 1
+      if (weight > 1.0) weight = 1.0;
+
+      // return weight
       (*valid)[i]=1;
-      (*wgts)[i]=sintd_area/dst_area;
+      (*wgts)[i]=weight;
     }
 
 #undef  MAX_NUM_POLY_NODES

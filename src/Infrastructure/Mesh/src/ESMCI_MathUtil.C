@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.5 2010/09/27 16:51:02 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.4 2010/09/22 22:27:28 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.5 2010/09/27 16:51:02 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -226,72 +226,10 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
 
 
-//    w
-//    | \
-//    |   \
-//    |     \
-//    u------v
-//    ^
-//    | --- angle being calculated
-//      
-
 #if 0
-  double angle(double *u, double *v, double *w) {
-#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
-#define NORM2(a) (a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 
-  double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
+  ///////////// This way of calculating great circle area doesn't work very well for small polygons ///////////
 
-  double cosb=u[0]*w[0]+u[1]*w[1]+u[2]*w[2];
-
-  double cosc=v[0]*w[0]+v[1]*w[1]+v[2]*w[2];
-
-  //  printf("a=%f b=%f c=%f \n",cosa,cosb,cosc);
-
-  double tmp_vec[3];
-
-  CROSS_PRODUCT3D(tmp_vec,u,v);
-  double sina=NORM2(tmp_vec);
-
-  CROSS_PRODUCT3D(tmp_vec,u,w);
-  double sinb=NORM2(tmp_vec);
-
-
-#if 0
-    if (debug) {
-        printf("u=[%f %f %f] ",u[0],u[1],u[2]);
-        printf("v=[%f %f %f] ",v[0],v[1],v[2]);
-        printf("w=[%f %f %f] ",w[0],w[1],w[2]);
-	//        printf("sina=%f sinb=%f ",sina,sinb);
-	printf("sina*sinb=%f ",sina*sinb);
-	printf("cosc-(cosa*cosb)=%f ",cosc-(cosa*cosb));
-	printf("cosc-(cosa*cosb)/sina*sinb=%30.27f ",(cosc-(cosa*cosb))/(sina*sinb));
-        printf("angle=%f \n",acos((cosc-(cosa*cosb))/(sina*sinb)));
-
-
-    }
-#endif
-
-
-
-    // Calculate the cosine of the angle we're calculating
-    // using spherical trigonometry formula
-    double cos_angle=(cosc-(cosa*cosb))/sqrt(sina*sinb);
-
-   // If we've gone a little out of bounds due to round off, shift back
-   if (cos_angle > 1.0) cos_angle=1.0;
-   if (cos_angle < -1.0) cos_angle=-1.0;
-
-   // return angle
-   return acos(cos_angle);
-
-#undef CROSS_PRODUCT3D
-#undef NORM
-}
-
-#endif
-
-#if 1
 
 //    w
 //    | \
@@ -309,26 +247,11 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
   double cosc=v[0]*w[0]+v[1]*w[1]+v[2]*w[2];
 
-  //  printf("a=%f b=%f c=%f \n",cosa,cosb,cosc);
 
   double sina=sqrt(1.0-cosa*cosa);
 
   double sinb=sqrt(1.0-cosb*cosb);
 
-#if 0
-    if (debug) {
-        printf("u=[%f %f %f] ",u[0],u[1],u[2]);
-        printf("v=[%f %f %f] ",v[0],v[1],v[2]);
-        printf("w=[%f %f %f] ",w[0],w[1],w[2]);
-	//        printf("sina=%f sinb=%f ",sina,sinb);
-	printf("sina*sinb=%f ",sina*sinb);
-	printf("cosc-(cosa*cosb)=%f ",cosc-(cosa*cosb));
-	printf("cosc-(cosa*cosb)/sina*sinb=%30.27f ",(cosc-(cosa*cosb))/(sina*sinb));
-        printf("angle=%f \n",acos((cosc-(cosa*cosb))/(sina*sinb)));
-
-
-    }
-#endif
 
     // Calculate the cosine of the angle we're calculating
     // using spherical trigonometry formula
@@ -342,8 +265,6 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
    return acos(cos_angle);
 
 }
-#endif
-
 
 // Compute the great circle area of a polygon on a sphere
 double great_circle_area(int n, double *pnts) {
@@ -362,6 +283,60 @@ double great_circle_area(int n, double *pnts) {
 
   // return area
   return sum-(((double)(n-2))*((double)M_PI));
+}
+#endif
+
+
+
+  double tri_area(double *u, double *v, double *w) {
+#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+#define NORM(a) sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+
+  double tmp_vec[3];
+
+  CROSS_PRODUCT3D(tmp_vec,u,v);
+  double sina=NORM(tmp_vec);
+  double a=asin(sina);
+
+  CROSS_PRODUCT3D(tmp_vec,u,w);
+  double sinb=NORM(tmp_vec);
+  double b=asin(sinb);
+
+  CROSS_PRODUCT3D(tmp_vec,w,v);
+  double sinc=NORM(tmp_vec);
+  double c=asin(sinc);
+
+  double s=0.5*(a+b+c);
+
+  double t = tan ( s / 2.0 ) * tan ( ( s - a ) / 2.0 ) * 
+             tan ( ( s - b ) / 2.0 ) * tan ( ( s - c ) / 2.0 );
+
+  double area= std::abs ( 4.0 * atan ( sqrt (std::abs ( t ) ) ) );
+
+  return area;
+
+#undef CROSS_PRODUCT3D
+#undef NORM
+}
+
+
+// Compute the great circle area of a polygon on a sphere
+double great_circle_area(int n, double *pnts) {
+
+  // sum areas around polygon
+  double sum=0.0;
+  double *pnt0=pnts;
+  for (int i=1; i<n-1; i++) {
+    // points that make up a side of polygon
+    double *pnt1=pnts+3*i;
+    double *pnt2=pnts+3*(i+1);
+
+    // compute angle for pnt1
+    sum += tri_area(pnt0, pnt1, pnt2);
+  }
+
+  // return area
+  return sum;
 }
 
 
