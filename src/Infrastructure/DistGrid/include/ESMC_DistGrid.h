@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.43 2010/09/22 21:10:04 theurich Exp $
+// $Id: ESMC_DistGrid.h,v 1.44 2010/09/27 22:29:52 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ typedef struct{
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_DistGridCreate - Create a DistGrid
 //
 // !INTERFACE:
@@ -76,11 +76,11 @@ ESMC_DistGrid ESMC_DistGridCreate(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_DistGridDestroy - Destroy a DistGrid
 //
 // !INTERFACE:
@@ -100,11 +100,11 @@ int ESMC_DistGridDestroy(
 //    {\tt ESMC\_DistGrid} object to be destroyed.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_DistGridPrint - Print a DistGrid
 //
 // !INTERFACE:
@@ -124,7 +124,7 @@ int ESMC_DistGridPrint(
 //    {\tt ESMC\_DistGrid} object to be destroyed.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

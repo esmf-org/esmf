@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.h,v 1.18 2010/09/16 04:33:44 theurich Exp $
+// $Id: ESMC_ArraySpec.h,v 1.19 2010/09/27 22:25:38 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ typedef struct{
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ArraySpecGet - Get values from an ArraySpec
 //
 // !INTERFACE:
@@ -73,11 +73,11 @@ int ESMC_ArraySpecGet(
 //    Array typekind. See section ?? for valid values.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_ArraySpecSet - Set values for an ArraySpec
 //
 // !INTERFACE:
@@ -103,7 +103,7 @@ int ESMC_ArraySpecSet(
 //    Array typekind. See section ?? for valid values.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

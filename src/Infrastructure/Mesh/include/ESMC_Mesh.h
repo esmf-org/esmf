@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.31 2010/09/25 02:48:39 eschwab Exp $
+// $Id: ESMC_Mesh.h,v 1.32 2010/09/27 22:28:11 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ typedef struct{
 // Class API
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshAddElements - Add elements to a Mesh
 //
 // !INTERFACE:
@@ -114,11 +114,11 @@ int ESMC_MeshAddElements(
 //         elementConn(2), etc.).
 //   \end{description}
 //
-//EOP
+//!EOP
 //------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshAddNodes - Add nodes to a Mesh 
 //
 // !INTERFACE:
@@ -168,11 +168,11 @@ int ESMC_MeshAddNodes(
 //         a 1D array the size of the number of nodes on this PET.
 //   \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshCreate - Create a Mesh as a 3 step process 
 //
 // !INTERFACE:
@@ -206,11 +206,11 @@ ESMC_Mesh ESMC_MeshCreate(
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
 //
 // !INTERFACE:
@@ -243,11 +243,11 @@ int ESMC_MeshCreateDistGrids(
 //  Description to be added.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshDestroy - Destroy a Mesh
 //
 // !INTERFACE:
@@ -267,11 +267,11 @@ int ESMC_MeshDestroy(
 //    Mesh object whose memory is to be freed. 
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshFreeMemory - Remove a Mesh and its memory
 //
 // !INTERFACE:
@@ -297,11 +297,11 @@ int ESMC_MeshFreeMemory(
 // Mesh object whose memory is to be freed.
 // \end{description}
 //
-//EOP
+//!EOP
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshGetNumElements - Get the number of elements in a mesh
 //
 // !INTERFACE:
@@ -324,11 +324,11 @@ int ESMC_MeshGetNumElements(
 //     The number of elements in the meah.
 //   \end{description}
 //
-//EOP
+//!EOP
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_MeshGetNumNodes - Get the number of nodes in a mesh
 //
 // !INTERFACE:
@@ -351,11 +351,11 @@ int ESMC_MeshGetNumNodes(
 //     The number of nodes in the mesh.
 //  \end{description}
 //
-//EOP
+//!EOP
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOPI
+//!BOPI
 // !IROUTINE: ESMC_MeshWrite - Write a Mesh to a VTK file
 //
 // !INTERFACE:
@@ -379,12 +379,12 @@ int ESMC_MeshWrite(
 //         The name of the output file.
 //   \end{description}
 //
-//EOPI
+//!EOPI
 //------------------------------------------------------------------------------
 
 // Associated methods
 
-//BOPI
+//!BOPI
 // !IROUTINE: ESMC_MeshVTKHeader
 //
 // !INTERFACE:
@@ -394,9 +394,9 @@ int ESMC_MeshVTKHeader(
   int *num_node,
   int *conn_size
 );
-//EOPI
+//!EOPI
 
-//BOPI
+//!BOPI
 // !IROUTINE: ESMC_MeshVTKBody
 //
 // !INTERFACE:
@@ -409,7 +409,7 @@ int ESMC_MeshVTKBody(
   int *elemType, 
   int *elemConn
 );
-//EOPI
+//!EOPI
 
 // Associated enum types
 typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,

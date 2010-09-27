@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.27 2010/09/25 02:48:39 eschwab Exp $
+// $Id: ESMC_Field.h,v 1.28 2010/09/27 22:22:22 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ typedef void * ESMC_Field;
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_FieldCreate - Create a Field
 //
 // !INTERFACE:
@@ -111,11 +111,11 @@ ESMC_Field ESMC_FieldCreate(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_FieldDestroy - Destroy a Field
 //
 // !INTERFACE:
@@ -137,11 +137,11 @@ int ESMC_FieldDestroy(
 //    Destroy contents of this {\tt ESMC\_Field}.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_FieldGetArray - Get the internal Array stored in the Field
 //
 // !INTERFACE:
@@ -165,11 +165,11 @@ ESMC_Array ESMC_FieldGetArray(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_FieldGetMesh - Get the internal Mesh stored in the Field
 //
 // !INTERFACE:
@@ -193,11 +193,11 @@ ESMC_Mesh ESMC_FieldGetMesh(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_FieldGetPtr - Get the internal Fortran data pointer stored in the Field
 //
 // !INTERFACE:
@@ -224,11 +224,11 @@ void *ESMC_FieldGetPtr(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_FieldPrint - Print the internal information of a Field
 //
 // !INTERFACE:
@@ -250,7 +250,7 @@ int ESMC_FieldPrint(
 //    Print contents of this {\tt ESMC\_Field}.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #if defined (__cplusplus)
