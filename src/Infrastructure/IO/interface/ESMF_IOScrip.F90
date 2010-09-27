@@ -1030,9 +1030,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE, rc)) return 
          else
-          ! Just set these to 1.0, because not provided
+          ! Just set these to 0.0, because not provided
            allocate(area(srcDim))         
-           area=1.0
+           area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)          
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
@@ -1048,9 +1048,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE, rc)) return 
          else
-          ! Just set these to 1.0, because not provided
+          ! Just set these to 0.0, because not provided
            allocate(area(dstDim))         
-           area=1.0
+           area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)          
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
