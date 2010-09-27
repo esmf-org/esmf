@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.31 2010/09/22 20:51:41 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.32 2010/09/27 22:13:17 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ typedef void* ESMC_GridComp;
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompCreate - Create a Gridded Component
 //
 // !INTERFACE:
@@ -95,11 +95,11 @@ ESMC_GridComp ESMC_GridCompCreate(
 //   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompDestroy - Destroy a Gridded Component
 //
 // !INTERFACE:
@@ -121,11 +121,11 @@ int ESMC_GridCompDestroy(
 //    routines after being destroyed. 
 // \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompFinalize - Finalize a Gridded Component
 //
 // !INTERFACE:
@@ -170,11 +170,11 @@ int ESMC_GridCompFinalize(
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompGetInternalState - Get the Internal State of a Gridded Component
 //
 // !INTERFACE:
@@ -209,11 +209,11 @@ void *ESMC_GridCompGetInternalState(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 // \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompInitialize - Initialize a Gridded Component
 //
 // !INTERFACE:
@@ -258,11 +258,11 @@ int ESMC_GridCompInitialize(
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompPrint - Print the contents of a GridComp
 //
 // !INTERFACE:
@@ -285,11 +285,11 @@ int ESMC_GridCompPrint(
 //    Print options are not yet supported, pass NULL.
 // \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompRun - Run a Gridded Component
 //
 // !INTERFACE:
@@ -334,11 +334,11 @@ int ESMC_GridCompRun(
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompSetEntryPoint - Set user routine as entry point for standard Component method
 //
 // !INTERFACE:
@@ -373,11 +373,11 @@ int ESMC_GridCompSetEntryPoint(
 //    The phase number for multi-phase methods.
 //  \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompSetInternalState - Set the Internal State of a Gridded Component
 //
 // !INTERFACE:
@@ -413,11 +413,11 @@ int ESMC_GridCompSetInternalState(
 //    Pointer to private data block to be stored.
 // \end{description}
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//!BOP
 // !IROUTINE: ESMC_GridCompSetServices - Call user routine to register GridComp methods
 //
 // !INTERFACE:
@@ -451,7 +451,7 @@ int ESMC_GridCompSetServices(
 //  calls to {\tt ESMC\_GridCompSetEntryPoint()} to preset callback routines for
 //  standard Component Initialize(), Run() and Finalize() methods. 
 //
-//EOP
+//!EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
