@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.14 2010/09/28 17:30:30 w6ws Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.15 2010/09/28 18:05:01 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,6 +34,7 @@ int main(void){
   const char* fileName2= "ESMF_Resource_File_Sample2.rc";  // file name
   char name[80];
   char failMsg[80];
+  int linecount, colcount;
   int result = 0;
   int rc = ESMF_RC_NOT_IMPL;
   int unique = 0;
@@ -85,6 +86,15 @@ int main(void){
   strcpy(name, "ConfigValidate Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigValidate (cf, ESMC_ArgLast);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Get Config object array dimensions
+  strcpy(name, "ConfigGetDim Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigGetDim (cf, &linecount, &colcount, ESMC_ArgLast);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
  
