@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.13 2010/09/08 23:16:01 w6ws Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.14 2010/09/28 17:30:30 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,6 +76,15 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigLoadFile(cf, fileName2, ESMCI_ConfigArgUniqueID, unique,
     ESMC_ArgLast);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Validate the Config object
+  strcpy(name, "ConfigValidate Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigValidate (cf, ESMC_ArgLast);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
  
