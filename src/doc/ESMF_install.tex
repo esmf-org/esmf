@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.92 2010/09/27 06:00:05 eschwab Exp $
+% $Id: ESMF_install.tex,v 1.93 2010/09/28 03:33:23 eschwab Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -52,7 +52,7 @@ other systems, the default is OFF.
 \item[{\tt "OFF"}] (default on most system): Disables LAPACK-dependent code, regardless of system.
  
 \item[{\tt "mkl"}] Use the Intel MKL library.  Sets {\tt ESMF\_LAPACK\_LIBS} to
-{\tt "-lmkl\_lapack -lmkl"} unless it is already defined in the user 
+{\tt "-lmkl\_lapack -lmkl"}, unless it is already defined in the user 
 environment.
 
 \item[{\tt "netlib"}] (default for PGI): Sets {\tt ESMF\_LAPACK\_LIBS} to 
@@ -106,7 +106,7 @@ environment variables will also be used, if defined.
 {\tt "-lnetcdf\_c++ -lnetcdf"}.  This option is useful when the Fortran and 
 C bindings are archived together in the same library file, alongside the 
 always separate C++ bindings library file.  The {\tt ESMF\_NETLIB\_INCLUDE} 
-and {\tt ESMF\_NETCDF\_LIBPATH} environment variables will be also used, 
+and {\tt ESMF\_NETCDF\_LIBPATH} environment variables will also be used, 
 if defined.
 
 \item[{\it <userstring>}] If set, {\tt ESMF\_NETCDF\_INCLUDE}, 
@@ -133,7 +133,7 @@ The default value depends on the setting of {\tt ESMF\_NETCDF}.  For the
 typical case where {\tt ESMF\_NETCDF} is set to {\tt "standard"}, 
 {\tt ESMF\_NETCDF\_LIBS} is set to {\tt "-lnetcdf\_c++ -lnetcdf"}.  
 When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS} 
-is set to {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf}.
+is set to {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.
 \end{description}
 
 \subsubsection{PNETCDF}
@@ -156,7 +156,7 @@ The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 
 \item[{\tt "standard"}] {\tt ESMF\_PNETCDF\_LIBS} will be set to 
 {\tt "-lpnetcdf"}.  The {\tt ESMF\_PNETCDF\_INCLUDE} and 
-{\tt ESMF\_PNETCDF\_LIBPATH} environment variables will be also used, 
+{\tt ESMF\_PNETCDF\_LIBPATH} environment variables will also be used, 
 if defined.
 
 \item[{\it <userstring>}] If set, {\tt ESMF\_PNETCDF\_INCLUDE},
@@ -185,7 +185,7 @@ ESMF provides the ability to read and write data in both binary and
 NetCDF formats through a third-party IO software library, 
 \htmladdnormallink{ParallelIO (PIO)}{http://code.google.com/p/parallelio/}. 
 The following environment variable enables the functionality of the PIO 
-library. The binary format is supported as long as MPI\_IO 
+library. The binary format is supported when MPI\_IO 
 is enabled. To enable NetCDF IO format, the 
 {\tt ESMF\_PNETCDF} (see \ref{sec:pnetcdf}) and/or 
 {\tt ESMF\_NETCDF} (see \ref{sec:netcdf}) 
@@ -209,9 +209,9 @@ PIO library that is included and built with ESMF.
 \subsubsection{XERCES}
 \label{sec:xerces}
 ESMF provides the ability to read and write Attribute data in XML file format 
-via the \htmladdnormallink{XERCES}{http://xerces.apache.org/xerces-c/} library.
-The following environment variables enable, and specify the name and location
-of the desired XERCES library and associated header files:
+via the \htmladdnormallink{XERCES C++}{http://xerces.apache.org/xerces-c/} 
+library.  The following environment variables enable, and specify the name 
+and location of the desired XERCES C++ library and associated header files:
 
 \begin{description}
 
@@ -225,7 +225,7 @@ The {\tt ESMF\_XERCES\_INCLUDE}, {\tt ESMF\_XERCES\_LIBPATH}, and
 
 \item[{\tt "standard"}] {\tt ESMF\_XERCES\_LIBS} will be set to 
 {\tt "-lxerces-c"}.  The {\tt ESMF\_XERCES\_INCLUDE} and 
-{\tt ESMF\_XERCES\_LIBPATH} environment variables will be also used, 
+{\tt ESMF\_XERCES\_LIBPATH} environment variables will also be used, 
 if defined.
 
 \item[{\it <userstring>}] If set, {\tt ESMF\_XERCES\_INCLUDE}, 
@@ -236,15 +236,15 @@ variables will be used, if defined.
 \item[ESMF\_XERCES\_INCLUDE] Typical value: {\tt /usr/local/include} 
 (no default).
 
-Specifies the path where the XERCES header files are located.
+Specifies the path where the XERCES C++ header files are located.
 
 \item[ESMF\_XERCES\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
 
-Specifies the path where the XERCES library file is located.
+Specifies the path where the XERCES C++ library file is located.
 
 \item[ESMF\_XERCES\_LIBS] Typical value: {\tt "-lxerces-c"} (no default).
 
-Specifies the linker directives needed to link the XERCES library to
+Specifies the linker directives needed to link the XERCES C++ library to
 the application.
 
 The default value depends on the setting of {\tt ESMF\_XERCES}.  For the
