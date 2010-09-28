@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.1 2010/09/23 22:59:04 theurich Exp $
+! $Id: ESMF_FieldWr.F90,v 1.2 2010/09/28 22:48:49 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -71,15 +71,16 @@ contains
 ! !IROUTINE:  ESMF_FieldWrite - Write the Field data into a file
 
 ! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, file, append, iofmt, rc)
+      subroutine ESMF_FieldWrite(field, file, append, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-      character(*), intent(in) :: file 
-      logical, intent(in), optional :: append
-      type(ESMF_IOFmtFlag), intent(in), optional :: iofmt
-      integer, intent(out), optional :: rc
+      type(ESMF_Field),     intent(inout)         :: field 
+      character(*),         intent(in)            :: file 
+      logical,              intent(in),  optional :: append
+      integer,              intent(in),  optional :: timeslice
+      type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
+      integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Write the Field data in a {ESMF\_Field} object to a file.
@@ -97,6 +98,10 @@ contains
 !     \item[{[append]}]
 !        Logical: if true, data is appended to an existing file,
 !        default is false.
+!     \item[{[timeslice]}]
+!        NetCDF IO format supports an "unlimited" dimension to allow
+!        data to grow along that dimension, usually the time dimension. 
+!        This argument is the nth slice of that time dimension.
 !     \item[{[iofmt]}]
 !        The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !        of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
@@ -108,7 +113,7 @@ contains
         character(len=ESMF_MAXSTR)      :: name
         type(ESMF_FieldType), pointer   :: fp 
         type(ESMF_Array)                :: array 
-        integer                         :: i, localrc
+        integer                         :: time, i, localrc
         integer                         :: gridrank, arrayrank
         logical                         :: appended
         type(ESMF_Status)               :: fieldstatus
@@ -125,6 +130,9 @@ contains
         appended = .false.
         if(present(append)) appended = append
 
+        time = -1   ! default, no time dimension
+        if (present(timeslice)) time = timeslice
+
         iofmtd = ESMF_IOFMT_NETCDF   ! default format
         if(present(iofmt)) iofmtd = iofmt
 
@@ -140,7 +148,7 @@ contains
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayWrite(array, file, variableName=trim(name), &
-          append=appended, iofmt=iofmtd, rc=localrc)
+          append=appended, timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
