@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2010/09/13 05:50:47 eschwab Exp $
+! $Id: user_model2.F90,v 1.6 2010/09/28 05:56:53 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -128,10 +128,10 @@ module user_model2
     call ESMF_AttributeSet(comp, 'IndividualName', &
       'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'IndividualPhysicalAddress', &
+    call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Meteorology University of Reading Earley Gate, Reading UK',&
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'IndividualEmailAddress', &
+    call ESMF_AttributeSet(comp, 'EmailAddress', &
       'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &

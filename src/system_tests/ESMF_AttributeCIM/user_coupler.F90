@@ -130,9 +130,7 @@ module user_coupler
       'climate models will allow us to capture climate processes and ' // &
       'weather systems in much greater detail.', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'Version', &
-      'HiGEM', convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'YearReleased', &
+    call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
@@ -217,10 +215,10 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'IndividualName', &
       'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'IndividualPhysicalAddress', &
+    call ESMF_AttributeSet(comp, 'PhysicalAddress', &
       'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'IndividualEmailAddress', &
+    call ESMF_AttributeSet(comp, 'EmailAddress', &
       'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.6 2010/09/13 05:50:47 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.7 2010/09/28 05:55:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -162,9 +162,7 @@ program ESMF_AttributeCIMEx
         'climate models will allow us to capture climate processes and ' // &
         'weather systems in much greater detail.', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'Version', &
-        'HiGEM', convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'YearReleased', &
+      call ESMF_AttributeSet(cplcomp, 'ReleaseDate', &
         '2009', &
           convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ModelType', &
@@ -243,10 +241,10 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(cplcomp, 'IndividualName', &
        'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'IndividualPhysicalAddress', &
+      call ESMF_AttributeSet(cplcomp, 'PhysicalAddress', &
        'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'IndividualEmailAddress', &
+      call ESMF_AttributeSet(cplcomp, 'EmailAddress', &
        'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ResponsiblePartyRole', &
@@ -261,7 +259,7 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp1, 'ComponentLongName', &
                              'Atmosphere component of the HiGEM model', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, 'YearReleased', &
+      call ESMF_AttributeSet(gridcomp1, 'ReleaseDate', &
         '2009', &
           convention=convCIM, purpose=purpComp, rc=rc)
 
@@ -269,10 +267,10 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp1, 'IndividualName', &
        'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, 'IndividualPhysicalAddress', &
+      call ESMF_AttributeSet(gridcomp1, 'PhysicalAddress', &
        'Department of Meteorology University of Reading Earley Gate, Reading UK', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp1, 'IndividualEmailAddress', &
+      call ESMF_AttributeSet(gridcomp1, 'EmailAddress', &
        'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'ResponsiblePartyRole', &
@@ -295,10 +293,10 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp3, 'IndividualName', &
        'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp3, 'IndividualPhysicalAddress', &
+      call ESMF_AttributeSet(gridcomp3, 'PhysicalAddress', &
        'Department of Meteorology University of Reading Earley Gate, Reading UK', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp3, 'IndividualEmailAddress', &
+      call ESMF_AttributeSet(gridcomp3, 'EmailAddress', &
        'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'ResponsiblePartyRole', &
@@ -320,10 +318,10 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp2, 'IndividualName', &
        'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp2, 'IndividualPhysicalAddress', &
+      call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
        'Department of Meteorology University of Reading Earley Gate, Reading UK', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp2, 'IndividualEmailAddress', &
+      call ESMF_AttributeSet(gridcomp2, 'EmailAddress', &
        'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'ResponsiblePartyRole', &
@@ -338,13 +336,13 @@ program ESMF_AttributeCIMEx
 
 !BOC
       ! DMS_emi CF-Extended Attributes
-      call ESMF_AttributeSet(DMS_emi, 'Name', 'DMS_emi', &
+      call ESMF_AttributeSet(DMS_emi, 'VariableShortName', 'DMS_emi', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(DMS_emi, 'StandardName', 'DMS_emissions', &
+      call ESMF_AttributeSet(DMS_emi, 'VariableStandardName', 'DMS_emissions', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(DMS_emi, 'LongName', 'DMS emissions', &
+      call ESMF_AttributeSet(DMS_emi, 'VariableLongName', 'DMS emissions', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(DMS_emi, 'Units', 'unknown', &
+      call ESMF_AttributeSet(DMS_emi, 'VariableUnits', 'unknown', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! DMS_emi CIM Attributes
       call ESMF_AttributeSet(DMS_emi, 'InputType', 'boundaryCondition', &
@@ -364,7 +362,7 @@ program ESMF_AttributeCIMEx
            convention=convCIM, purpose=purpField, rc=rc)
 
       ! UM CF-Extended Attributes
-      call ESMF_AttributeSet(UM, 'Name', 'UM_Initial_1960', &
+      call ESMF_AttributeSet(UM, 'VariableShortName', 'UM_Initial_1960', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! UM CIM Attributes
       call ESMF_AttributeSet(UM, 'InputType', 'initialCondition', &
@@ -376,15 +374,15 @@ program ESMF_AttributeCIMEx
            convention=convCIM, purpose=purpField, rc=rc)
     
       ! OH CF-Extended Attributes
-      call ESMF_AttributeSet(OH, 'Name', 'OH_Conc_1900', &
+      call ESMF_AttributeSet(OH, 'VariableShortName', 'OH_Conc_1900', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(OH, 'StandardName', &
+      call ESMF_AttributeSet(OH, 'VariableStandardName', &
                                  'OH_Concentrations', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(OH, 'LongName', &
+      call ESMF_AttributeSet(OH, 'VariableLongName', &
                                  'seasonal_oxidant_conc', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(OH, 'Units', 'unknown', &
+      call ESMF_AttributeSet(OH, 'VariableUnits', 'unknown', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! OH CIM Attributes
       call ESMF_AttributeSet(OH, 'InputType', 'boundaryCondition', &
@@ -404,13 +402,13 @@ program ESMF_AttributeCIMEx
            convention=convCIM, purpose=purpField, rc=rc)
     
       ! Orog CF-Extended Attributes
-      call ESMF_AttributeSet(Orog, 'Name', 'UM_Orog_n320', &
+      call ESMF_AttributeSet(Orog, 'VariableShortName', 'UM_Orog_n320', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Orog, 'StandardName', 'Height', &
+      call ESMF_AttributeSet(Orog, 'VariableStandardName', 'Height', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Orog, 'LongName', 'Orography', &
+      call ESMF_AttributeSet(Orog, 'VariableLongName', 'Orography', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Orog, 'Units', 'unknown', &
+      call ESMF_AttributeSet(Orog, 'VariableUnits', 'unknown', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! Orog CIM Attributes
       call ESMF_AttributeSet(Orog, 'InputType', 'initialCondition', &
@@ -422,13 +420,13 @@ program ESMF_AttributeCIMEx
            convention=convCIM, purpose=purpField, rc=rc)
     
       ! Ozone CF-Extended Attributes
-      call ESMF_AttributeSet(Ozone, 'Name', 'Global_O3_mon', &
+      call ESMF_AttributeSet(Ozone, 'VariableShortName', 'Global_O3_mon', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Ozone, 'StandardName', 'Ozone', &
+      call ESMF_AttributeSet(Ozone, 'VariableStandardName', 'Ozone', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Ozone, 'LongName', 'Ozone', &
+      call ESMF_AttributeSet(Ozone, 'VariableLongName', 'Ozone', &
            convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Ozone, 'Units', 'unknown', &
+      call ESMF_AttributeSet(Ozone, 'VariableUnits', 'unknown', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! Ozone CIM Attributes
       call ESMF_AttributeSet(Ozone, 'InputType', 'boundaryCondition', &
@@ -448,7 +446,7 @@ program ESMF_AttributeCIMEx
            convention=convCIM, purpose=purpField, rc=rc)
     
       ! SST CF-Extended Attributes
-      call ESMF_AttributeSet(SST, 'Name', 'SST', &
+      call ESMF_AttributeSet(SST, 'VariableShortName', 'SST', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! SST CIM Attributes
       call ESMF_AttributeSet(SST, 'InputType', 'initialCondition', &

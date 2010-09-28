@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.6 2010/09/15 04:59:53 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.7 2010/09/28 05:55:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.6 2010/09/15 04:59:53 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.7 2010/09/28 05:55:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -672,7 +672,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 2nd attribute value within the last CIM RP package
-    call ESMF_AttributeSet(gridcomp2, 'IndividualPhysicalAddress', &
+    call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
       'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -682,7 +682,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 3rd attribute value within the last CIM RP package
-    call ESMF_AttributeSet(gridcomp2, 'IndividualEmailAddress', &
+    call ESMF_AttributeSet(gridcomp2, 'EmailAddress', &
                                        'g.m.devine@reading.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -692,7 +692,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 4th attribute value within the last CIM RP package
-    call ESMF_AttributeSet(gridcomp2, 'IndividualURL', &
+    call ESMF_AttributeSet(gridcomp2, 'OnlineResource', &
                                      'www.nerc.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -806,19 +806,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 4th <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'Version', 'HiGEM', &
-                           convention='CIM 1.0', &
-                           purpose='Model Component Simulation Description', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 4th <modelComponent> attribute value in CIM component package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set the 5th <modelComponent> attribute value within the CIM component
-    !   package
-    call ESMF_AttributeSet(gridcomp3, 'YearReleased', '2009', &
+    call ESMF_AttributeSet(gridcomp3, 'ReleaseDate', '2009', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -828,7 +816,7 @@ program ESMF_AttributeXMLUTest
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 6th <modelComponent> attribute value within the CIM component
+    ! Set the 5th <modelComponent> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ModelType', 'AerosolEmissionAndConc', &
                            attrAttribute=.true., &
@@ -1220,7 +1208,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 2nd attribute value within the CIM RP package
-    call ESMF_AttributeSet(gridcomp3, 'IndividualPhysicalAddress', &
+    call ESMF_AttributeSet(gridcomp3, 'PhysicalAddress', &
       'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1230,7 +1218,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 3rd attribute value within the CIM RP package
-    call ESMF_AttributeSet(gridcomp3, 'IndividualEmailAddress', &
+    call ESMF_AttributeSet(gridcomp3, 'EmailAddress', &
                                        'g.m.devine@reading.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"

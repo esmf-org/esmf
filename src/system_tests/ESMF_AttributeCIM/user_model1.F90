@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2010/09/15 19:52:01 rokuingh Exp $
+! $Id: user_model1.F90,v 1.4 2010/09/28 05:56:53 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -119,7 +119,7 @@ module user_model1
     call ESMF_AttributeSet(comp, 'ComponentLongName', &
       'Atmosphere component of the HiGEM model', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'YearReleased', &
+    call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -128,10 +128,10 @@ module user_model1
     call ESMF_AttributeSet(comp, 'IndividualName', &
       'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'IndividualPhysicalAddress', &
+    call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Meteorology University of Reading Earley Gate, Reading UK',&
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'IndividualEmailAddress', &
+    call ESMF_AttributeSet(comp, 'EmailAddress', &
       'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
@@ -233,7 +233,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
 #if 0
-    call ESMF_AttributeRemove(comp, name="YearReleased", &
+    call ESMF_AttributeRemove(comp, name="ReleaseDate", &
       purpose=purpComp, convention=convCIM ,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     attrVal = "Test change"
