@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.25 2010/09/23 23:35:47 theurich Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.26 2010/09/28 22:46:52 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.25 2010/09/23 23:35:47 theurich Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.26 2010/09/28 22:46:52 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -142,15 +142,15 @@ contains
   end subroutine check_pioerr
 
   subroutine WriteHeader(FileObj,vname,puttag,nxyz,dimid_xyz,spacedim)
-  
+
     implicit none
-    
+
     type (File_desc_t), intent(inout) :: FileObj
     integer, intent(in) :: spacedim
     integer, intent(in) :: nxyz(spacedim)
     integer, intent(out) :: dimid_xyz(spacedim)
     character(*)        :: vname
-    integer, intent(in) :: puttag  !(1 put att; 0 no att)
+    integer, intent(in) :: puttag  !(0 put att; 1 no att)
 
     character(len=80) :: text
     character(len=3) :: cdim
@@ -230,12 +230,13 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayWriteIntl" @\
-  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, file_exists, piofmt, rc) @\
+  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, file_exists, time, piofmt, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: file @\
     character(*),               intent(in)              :: varname @\
     logical,                    intent(in)              :: file_exists @\
+    integer,                    intent(in)              :: time @\
     character(*),               intent(in)              :: piofmt @\
     integer,                    intent(out),  optional  :: rc @\
 @\
@@ -245,9 +246,11 @@ contains
     integer, allocatable :: pioDofList(:) @\
     integer :: petCount,localPet,mpic @\
     mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farraywr @\
-    integer :: dimC @\
+    integer :: timestart(mrank+1), timecount(mrank+1) @\
+    integer :: dimC, time_len, dimid_time @\
     integer, allocatable :: gDimsIndex(:), dimid_xyz(:) @\
     integer, allocatable :: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:) @\
+    logical  ::  isfilepresent @\
 @\
     ! PIO VARIABLES: @\
     type (iosystem_desc_t) :: PIOSYS @\
@@ -314,7 +317,11 @@ contains
 @\
     do i=1,dimC @\
       gDimsIndex(i) = maxIndexPDimPPatch(i,1)-minIndexPDimPPatch(i,1)+1 @\
+      timecount(i) = gDimsIndex(i) @\
     enddo @\
+    timestart=1 @\
+    timecount(dimC+1) = 1 @\
+    time_len = 0 @\
 @\
 @\
     !-------------------------------------- @\
@@ -376,14 +383,33 @@ contains
     !------------ @\
     ! Open file{s} @\
     !------------ @\
+    ! @\
+    ! Check if a file exists @\
+    Inquire (file=trim(file), exist=isfilepresent) @\
+    call ESMF_VMBarrier(vm_opt, rc=localrc) @\
+    ! @\
     mode = pio_64bit_offset @\
     if (file_exists .and. piofmt.ne.'bin') then @\
+      ! For bundle append @\
       pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,trim(file),mode=PIO_write) @\
       pioerr = PIO_redef(FileObj) @\
       call WriteHeader(FileObj,varname,1,gDimsIndex,dimid_xyz,dimC) @\
     else @\
-      pioerr = PIO_CreateFile(PIOSYS,FileObj,fmtiotype,trim(file)) @\
-      if(piofmt .ne. 'bin') call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
+      if(isfilepresent .and. time.ge.0) then   ! This is for "timeslice"  @\
+        pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,trim(file), & @\
+                 mode=PIO_write) @\
+        pioerr = PIO_inq_dimid(FileObj,'time', dimid_time) @\
+        pioerr = PIO_inq_dimlen(FileObj, dimid_time, time_len) @\
+        pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
+    !    pioerr = PIO_inq_vardimid(FileObj, vard, dimid_xyz) @\
+      else @\
+        ! For beginning and creating a file @\
+        pioerr = PIO_CreateFile(PIOSYS,FileObj,fmtiotype,trim(file)) @\
+        if(piofmt .ne. 'bin') then @\
+         call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
+        endif @\
+        if (time.gt.0) pioerr = PIO_def_dim(FileObj,'time',PIO_unlimited,dimid_time) @\
+      endif @\
     endif @\
     !TODO: need error checking here! @\
 @\
@@ -392,20 +418,29 @@ contains
     !----------------------------------- @\
     ! Output are dimid_x,dimid_y,dimid_z @\
 @\
-    ! Set Frame to '1' in the PIO descriptor file @\
-    ! one = 1 @\
-    ! call PIO_SetFrame(vard,one) @\
-    !TODO: need error checking here! @\
-@\
     if(piofmt .ne. 'bin') then @\
     localrc = 1 @\
-    pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz,vard) @\
-    call check_pioerr(pioerr, localPet,  & @\
+    ! Comes in when append mode or file does not exist @\
+    if(file_exists .or. .not.isfilepresent) then  @\
+      if(time.gt.0) then @\
+       pioerr = PIO_def_var(FileObj,varname,basepiotype, (/dimid_xyz,dimid_time/),vard) @\
+      else @\
+       pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz ,vard) @\
+      endif @\
+       call check_pioerr(pioerr, localPet,  & @\
        __FILE__,  & @\
        __LINE__, " defvar") @\
-    !TODO: need error checking here! @\
-    pioerr = PIO_enddef(FileObj) @\
-    !TODO: need error checking here! @\
+       !TODO: need error checking here! @\
+       pioerr = PIO_enddef(FileObj) @\
+       !TODO: need error checking here! @\
+    endif @\
+    endif @\
+@\
+    if(time.gt.0) then @\
+    ! Set Frame to '1' in the PIO descriptor file @\
+    timestart(dimC+1) = time_len + 1 @\
+    one = timestart(dimC+1) @\
+    call PIO_SetFrame(vard,one) @\
     endif @\
 @\
     !------------------------- @\
