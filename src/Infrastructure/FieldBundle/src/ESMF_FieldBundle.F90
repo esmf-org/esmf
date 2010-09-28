@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.53 2010/09/23 22:58:02 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.54 2010/09/28 22:49:42 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -2381,14 +2381,15 @@ end function
 ! !IROUTINE: ESMF_FieldBundleWrite - Write the Fields into a file.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(bundle, file, singleFile, iofmt, rc)
+      subroutine ESMF_FieldBundleWrite(bundle, file, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)         :: bundle
-      character(*), intent(in)                      :: file
-      logical,      intent(in) ,  optional          :: singleFile
-      type(ESMF_IOFmtFlag), intent(in) ,  optional  :: iofmt
-      integer,      intent(out),  optional          :: rc
+      character(*),           intent(in)            :: file
+      logical,                intent(in),  optional :: singleFile
+      integer,                intent(in),  optional :: timeslice
+      type(ESMF_IOFmtFlag),   intent(in),  optional :: iofmt
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Write the Fields into a file.
@@ -2409,6 +2410,11 @@ end function
 !      in separate files; these files are numbered with the name based on the
 !      argument "file". That is, a set of files are named: [file\_name]001,
 !      [file\_name]002, [file\_name]003,...
+!     \item[{[timeslice]}]
+!      NetCDF IO format supports an "unlimited" dimension to allow
+!      data to grow along that dimension, usually the time dimension. 
+!      This argument is the nth slice of that time dimension. 
+!      No "unlimited" dimension will be set when this argument is negative.
 !     \item[{[iofmt]}]
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.
@@ -2422,7 +2428,7 @@ end function
       character(len=ESMF_MAXSTR) :: filename
       type(ESMF_FieldBundleType), pointer :: btype
       type(ESMF_Field), allocatable :: fieldList(:)
-      integer :: i, fieldCount
+      integer :: i, fieldCount, time
       logical :: singlef
       character(len=3)              :: cnum
       type(ESMF_IOFmtFlag)          :: iofmtd
@@ -2445,6 +2451,8 @@ end function
       if (present(singleFile)) singlef = singleFile
       iofmtd = ESMF_IOFMT_NETCDF
       if(present(iofmt)) iofmtd = iofmt
+      time = -1   ! default, no time dimension
+      if (present(timeslice)) time = timeslice
 
       btype => bundle%btypep
       write (*, *)  "  Field count = ", btype%field_count
@@ -2457,7 +2465,8 @@ end function
        call ESMF_FieldBundleGet(bundle, fieldIndex=1 , field=fieldList(1), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_FieldWrite(fieldList(1), file=file, iofmt=iofmtd, rc=localrc)
+       call ESMF_FieldWrite(fieldList(1), file=file, timeslice=time, &
+            iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2467,7 +2476,7 @@ end function
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldWrite(fieldList(i), file=file, append=.true., &
-           iofmt=iofmtd, rc=localrc)
+           timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
@@ -2480,7 +2489,7 @@ end function
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldWrite(fieldList(i), file=trim(filename), &
-           iofmt=iofmtd, rc=localrc)
+           timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        enddo

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.26 2010/09/23 19:31:25 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.27 2010/09/28 22:47:56 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.26 2010/09/23 19:31:25 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.27 2010/09/28 22:47:56 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -2099,14 +2099,15 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleWrite - Write the Arrays into a file
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, iofmt, rc)
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*),     intent(in)              :: file
-    logical,          intent(in) ,  optional  :: singleFile
-    type(ESMF_IOFmtFlag),  intent(in),   optional  :: iofmt
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_ArrayBundle), intent(in)              :: arraybundle
+    character(*),           intent(in)              :: file
+    logical,                intent(in),   optional  :: singleFile
+    integer,                intent(in),   optional  :: timeslice
+    type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
+    integer,                intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -2128,6 +2129,10 @@ contains
 !    in separate files; these files are numbered with the name based on the
 !    argument "file". That is, a set of files are named: [file\_name]001,
 !    [file\_name]002, [file\_name]003,...
+!   \item[{[timeslice]}]
+!    NetCDF IO format supports an "unlimited" dimension to allow
+!    data to grow along that dimension, usually the time dimension. 
+!    This argument is the nth slice of that time dimension.
 !   \item[{[iofmt]}]
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !    of options.
@@ -2140,7 +2145,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     character(len=80), allocatable :: Aname(:)
-    integer :: arrayCount,i
+    integer :: arrayCount,i,time
     type(ESMF_Array), allocatable :: arrayList(:)
     logical :: singlef
     character(len=80) :: filename
@@ -2160,6 +2165,8 @@ contains
     if (present(singleFile)) singlef = singleFile
     iofmtd = ESMF_IOFMT_NETCDF   ! default format
     if(present(iofmt)) iofmtd = iofmt
+    time = -1   ! default, no time dimension
+    if (present(timeslice)) time = timeslice
     
     call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2176,7 +2183,7 @@ contains
       call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArrayWrite(arrayList(1), file=file, iofmt=iofmtd, rc=localrc)
+      call ESMF_ArrayWrite(arrayList(1), file=file, timeslice=time, iofmt=iofmtd, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2185,8 +2192,8 @@ contains
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayWrite(arrayList(i), file=file, append=.true., &
-         iofmt=iofmtd, rc=localrc)
+       call ESMF_ArrayWrite(arrayList(i), file=file, timeslice=time, &
+         append=.true., iofmt=iofmtd, rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
@@ -2199,7 +2206,7 @@ contains
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayWrite(arrayList(i), file=trim(filename),  &
-           iofmt=iofmtd, rc=localrc)
+           timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
