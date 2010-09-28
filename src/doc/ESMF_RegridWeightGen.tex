@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.10 2010/09/27 23:13:07 rokuingh Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.11 2010/09/28 21:11:46 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -82,17 +82,19 @@ one character short keyword prefixed with {\tt '-'} are supported.  The format t
 as follows:
 
 \begin{verbatim}
-ESMF_RegridWeightGen  [--source|-s] src_grid_filename 
+ESMF_RegridWeightGen  [--help]
+                      [--source|-s] src_grid_filename 
                       [--destination|-d] dst_grid_filename 
                       [--weight|-w] out_weight_file 
-                      [--method|-m] [bilinear|patch|conservative] 
+                      [--method|-m] [bilinear|patch|conserve] 
                       [--pole|-p] [all|none|1|2|..] 
                       --src_type [SCRIP|ESMF] 
                       --dst_type [SCRIP|ESMF]
                       -t [SCRIP|ESMF]
 
 where
-  --source or -s -- a required argument specifying the source grid file name
+  --help         - print the usage message 
+  --source or -s - a required argument specifying the source grid file name
 
   --destination or -d - a required argument specifying the destination grid file name
 
