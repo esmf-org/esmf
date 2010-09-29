@@ -1,4 +1,4 @@
-! $Id.F90,v 1.22 2007/09/05 18:31:55 oehmke Exp $
+! $Id: ESMF_IOScrip.F90,v 1.8 2010/09/29 23:29:41 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
