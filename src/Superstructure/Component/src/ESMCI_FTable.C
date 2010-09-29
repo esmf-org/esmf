@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.38 2010/09/23 20:51:37 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.39 2010/09/29 20:19:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.38 2010/09/23 20:51:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.39 2010/09/29 20:19:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -70,6 +70,8 @@ extern "C" {
   
   void FTN(f_esmf_fortranudtpointersize)(int *size);
   void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+  
+  void FTN(esmf_complianceicregister)(void *comp, int *rc);
 }
 //==============================================================================
 
@@ -1486,6 +1488,19 @@ int FTable::callVFuncPtr(
       if (userrc) func->funcintarg = *userrc;
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
       (*vf)((void *)comp, &(func->funcintarg));
+      // conditionally call into compliance IC for register
+      if (!strcmp(name, "Register")){
+        char const *envComplianceCheck =
+          VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+        bool complianceCheckFlag = true;  // initialize to internal compl. check
+        if (envComplianceCheck != NULL){
+          complianceCheckFlag &= strcmp(envComplianceCheck, "off"); // turn off
+          complianceCheckFlag &= strcmp(envComplianceCheck, "OFF"); // turn off
+        }
+        if (complianceCheckFlag)
+          FTN(esmf_complianceicregister)((void *)comp, &(func->funcintarg));
+      }
+      
       if (userrc) *userrc = func->funcintarg;
       break;
     }
