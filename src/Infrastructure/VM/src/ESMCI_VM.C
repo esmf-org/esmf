@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.19 2010/06/23 23:01:10 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.20 2010/09/29 19:50:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -38,6 +38,8 @@
 
 // include higher level, 3rd party or system headers
 #include <vector>
+#include <string>
+#include <cstdlib>
 #include "ESMF_Pthread.h"
 
 // include ESMF headers
@@ -54,7 +56,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.19 2010/06/23 23:01:10 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.20 2010/09/29 19:50:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -101,6 +103,9 @@ static int vmKeyWidth = 0;      // width in units of 8-bit chars
 static int vmKeyOff = 0;        // extra bits in last char (bits to be ignored)
 static int matchTableBound = 0; // upper bound of currently filled entries
 static int matchTableIndex = 0; // process wide index for non-thread based VMs
+// ESMF runtime environment variables
+static vector<string> esmfRuntimeEnv;
+static vector<string> esmfRuntimeEnvValue;
 //-----------------------------------------------------------------------------
 
 
@@ -1237,7 +1242,8 @@ void VM::addObject(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::addFObject()"
 //BOPI
-// !IROUTINE:  ESMCI::VM::addFObject - Add Fortran object to table for garb col. //
+// !IROUTINE:  ESMCI::VM::addFObject - Add Fortran object to table for garb col.
+//
 // !INTERFACE:
 void VM::addFObject(
 //
@@ -1269,6 +1275,39 @@ void VM::addFObject(
   void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
   FTN(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
   matchTable_FObjects[i][size].objectID = objectID;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::getenv()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::getenv - get environment variable
+// !INTERFACE:
+char const *VM::getenv(
+//
+// !RETURN VALUE:
+//    pointer to value or NULL
+//
+// !ARGUMENTS:
+//
+  char const *name){
+//
+// !DESCRIPTION:
+//    Access environment variables in the global VM object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int count = esmfRuntimeEnv.size();
+  int i;
+  for (i=0; i<count; i++)
+    if (!esmfRuntimeEnv[i].compare(name)) break;
+  if (i == count)
+    return NULL;  // no match found, bail out
+  
+  // match found
+  return esmfRuntimeEnvValue[i].c_str();
 }
 //-----------------------------------------------------------------------------
 
@@ -1322,7 +1361,55 @@ VM *VM::initialize(
   matchTable_BaseIDCount[matchTableBound] = 0;        // reset
   matchTable_Objects[matchTableBound].reserve(1000);  // start w/ 1000 obj
   matchTable_FObjects[matchTableBound].reserve(1000); // start w/ 1000 obj
+  
+  // obtain ESMF runtime environment
+  if (GlobalVM->getLocalPet() == 0){
+    char const *esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK";
+    char const *esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK_OBJ";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
       
+    int count = esmfRuntimeEnv.size();
+    GlobalVM->broadcast(&count, sizeof(int), 0);
+    int *length = new int[2];
+    for (int i=0; i<count; i++){
+      length[0] = esmfRuntimeEnv[i].length();
+      length[1] = esmfRuntimeEnvValue[i].length();
+      GlobalVM->broadcast(length, 2*sizeof(int), 0);
+      GlobalVM->broadcast((void *)esmfRuntimeEnv[i].c_str(),
+        length[0]*sizeof(char), 0);
+      GlobalVM->broadcast((void *)esmfRuntimeEnvValue[i].c_str(),
+        length[1]*sizeof(char), 0);
+    }
+    delete [] length;
+  }else{
+    int count;
+    GlobalVM->broadcast(&count, sizeof(int), 0);
+    int *length = new int[2];
+    for (int i=0; i<count; i++){
+      GlobalVM->broadcast(length, 2*sizeof(int), 0);
+      char *temp = new char[length[0]+1];
+      GlobalVM->broadcast((void *)temp, length[0]*sizeof(char), 0);
+      temp[length[0]] = '\0'; // terminate C style string
+      esmfRuntimeEnv.push_back(temp);
+      delete [] temp;
+      temp = new char[length[1]+1];
+      GlobalVM->broadcast((void *)temp, length[1]*sizeof(char), 0);
+      temp[length[1]] = '\0'; // terminate C style string
+      esmfRuntimeEnvValue.push_back(temp);
+      delete [] temp;
+    }
+    delete [] length;
+  }
+
   // set vmID
   vmKeyWidth = GlobalVM->getNpets()/8;
   vmKeyOff   = GlobalVM->getNpets()%8;
