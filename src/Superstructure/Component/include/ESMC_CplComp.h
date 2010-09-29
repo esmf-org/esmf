@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.27 2010/09/27 22:17:20 svasquez Exp $
+// $Id: ESMC_CplComp.h,v 1.28 2010/09/29 22:33:51 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ typedef void* ESMC_CplComp;
 // Class API
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompCreate - Create a Coupler Component
 //
 // !INTERFACE:
@@ -81,11 +81,11 @@ ESMC_CplComp ESMC_CplCompCreate(
 //   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompDestroy - Destroy a Coupler Component
 //
 // !INTERFACE:
@@ -107,11 +107,11 @@ int ESMC_CplCompDestroy(
 //    routines after being destroyed. 
 // \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompFinalize - Finalize a Coupler Component
 //
 // !INTERFACE:
@@ -156,11 +156,11 @@ int ESMC_CplCompFinalize(
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompGetInternalState - Get the internal State of a Coupler Component
 //
 // !INTERFACE:
@@ -195,11 +195,11 @@ void *ESMC_CplCompGetInternalState(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 // \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompInitialize - Initialize a Coupler Component
 //
 // !INTERFACE:
@@ -244,11 +244,11 @@ int ESMC_CplCompInitialize(
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompPrint - Print a Coupler Component
 //
 // !INTERFACE:
@@ -271,11 +271,11 @@ int ESMC_CplCompPrint(
 //    Print options are not yet supported, pass NULL.
 // \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompRun - Run a Coupler Component
 //
 // !INTERFACE:
@@ -320,11 +320,11 @@ int ESMC_CplCompRun(
 //    Return code set by {\tt userRoutine} before returning.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompSetEntryPoint - Set the Entry point of a Coupler Component
 //
 // !INTERFACE:
@@ -359,11 +359,11 @@ int ESMC_CplCompSetEntryPoint(
 //    The phase number for multi-phase methods.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompSetInternalState - Set the internal State of a Coupler Component
 //
 // !INTERFACE:
@@ -399,11 +399,11 @@ int ESMC_CplCompSetInternalState(
 //    Pointer to private data block to be stored.
 // \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_CplCompSetServices - Destroy a Coupler Component
 //
 // !INTERFACE:
@@ -437,7 +437,7 @@ int ESMC_CplCompSetServices(
 //  calls to {\tt ESMC\_CplCompSetEntryPoint()} to preset callback routines for
 //  standard Component Initialize(), Run() and Finalize() methods. 
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
