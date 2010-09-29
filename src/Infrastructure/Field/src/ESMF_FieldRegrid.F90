@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.43 2010/09/17 03:13:32 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.44 2010/09/29 03:38:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.43 2010/09/17 03:13:32 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.44 2010/09/29 03:38:40 oehmke Exp $'
 
 !==============================================================================
 !
@@ -264,7 +264,8 @@ contains
                                        dstField, dstMaskValues,        &
                                        unmappedDstAction,              &
                                        routeHandle, indicies, weights, & 
-                                       regridMethod, regridConserve,   &
+                                       regridMethod,                   &
+                                       regridPoleType, regridPoleNPnts, & 
                                        regridScheme, rc)
 !
 ! !RETURN VALUE:
@@ -279,7 +280,8 @@ contains
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
       type(ESMF_RegridMethod), intent(in), optional   :: regridMethod
-      type(ESMF_RegridConserve), intent(in), optional :: regridConserve
+      type(ESMF_RegridPole), intent(in), optional     :: regridPoleType
+      integer, intent(in),optional                    :: regridPoleNPnts
       integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
 !
@@ -327,11 +329,16 @@ contains
 !           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or 
 !           {\tt ESMF\_REGRID\_METHOD\_PATCH}. If not specified, defaults 
 !           to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
-!     \item [{[regridConserve]}]
-!           The mass conservation correction, options are 
-!           {\tt ESMF\_REGRID\_CONSERVE\_OFF} or 
-!           {\tt ESMF\_REGRID\_CONSERVE\_ON}. If not specified, defaults 
-!           to {\tt ESMF\_REGRID\_CONSERVE\_OFF}. 
+!     \item [{[regridPoleType]}]
+!           Which type of artificial pole
+!           to construct on the source Grid for regridding. 
+!           If not specified, defaults 
+!           to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
+!     \item [{[regridPoleNPnts]}]
+!           If {\tt regridPoleType} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
+!           This parameter indicates how many points should be averaged
+!           over. Must be specified if {\tt regridPoleType} is 
+!           {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !     \item [{[regridScheme]}]
 !           Whether to convert to spherical coordinates 
 !           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
@@ -345,7 +352,6 @@ contains
         integer :: localrc
         integer              :: lregridScheme
         type(ESMF_RegridMethod) :: lregridMethod
-        type(ESMF_RegridConserve) :: lregridConserve
         integer              :: isSphere
         type(ESMF_GeomType)  :: srcgeomtype
         type(ESMF_GeomType)  :: dstgeomtype
@@ -360,11 +366,13 @@ contains
         type(ESMF_MeshLoc)   :: meshloc
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
         integer              :: gridDimCount
+        type(ESMF_RegridPole):: localRegridPoleType
+        integer              :: localRegridPoleNPnts
+
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
 
         ! global vm for now
         call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -394,19 +402,6 @@ contains
             return
         endif
 
-        ! Handle optional method argument
-        if (present(regridMethod)) then
-           lregridMethod=regridMethod
-        else     
-           lregridMethod=ESMF_REGRID_METHOD_BILINEAR
-        endif
-
-        ! Handle optional conserve argument
-        if (present(regridConserve)) then
-           lregridConserve=regridConserve
-        else     
-           lregridConserve=ESMF_REGRID_CONSERVE_OFF
-        endif
 
         ! Will eventually determine scheme either as a parameter or from properties
         ! of the source grid
@@ -414,6 +409,72 @@ contains
           lregridScheme = regridScheme
         else
           lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+        endif
+
+
+
+        ! Handle optional method argument
+        if (present(regridMethod)) then
+           lregridMethod=regridMethod
+        else     
+           lregridMethod=ESMF_REGRID_METHOD_BILINEAR
+        endif
+
+
+        ! Handle optional pole argument
+        if (lregridScheme .eq. ESMF_REGRID_SCHEME_NATIVE) then
+           if (present(regridPoleType)) then
+              if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
+                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_SCHEME_NATIVE", & 
+                  ESMF_CONTEXT, rc) 
+                 return
+              endif
+           else     
+               localRegridPoleType=ESMF_REGRIDPOLE_NONE
+           endif
+        else
+           if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+              if (present(regridPoleType)) then
+                 if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
+                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                    "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_METHOD_CONSERVE", & 
+                    ESMF_CONTEXT, rc) 
+                   return
+                 endif
+              else    
+                 localRegridPoleType=ESMF_REGRIDPOLE_NONE
+              endif
+           else 
+              if (present(regridPoleType)) then
+                 localRegridPoleType=regridPoleType
+              else    
+                 localRegridPoleType=ESMF_REGRIDPOLE_ALLAVG
+              endif
+           endif
+        endif
+
+        if (localRegridPoleType .eq. ESMF_REGRIDPOLE_NPNTAVG) then
+           if (.not. present(regridPoleNPnts)) then
+                       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- RegridPoleNPnts must be specified if regridPoleType is ESMF_REGRIDPOLE_NPNTAVG", & 
+                 ESMF_CONTEXT, rc) 
+            return
+           else 
+             if (regridPoleNPnts < 1) then
+               call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+              "- RegridPoleNPnts must be >=1 ", & 
+                 ESMF_CONTEXT, rc) 
+            return
+            endif
+           endif
+        endif
+
+        ! Set subject to the defaults error checked above
+        if (present(regridPoleNPnts)) then
+           localRegridPoleNPnts=regridPoleNPnts
+        else     
+           localRegridPoleNPnts=1
         endif
 
 
@@ -464,7 +525,7 @@ contains
 
           ! Convert Grid to Mesh
           srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, &
-                      srcMaskValues, lregridConserve, rc=localrc)
+                      srcMaskValues, ESMF_REGRID_CONSERVE_OFF, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -537,7 +598,7 @@ contains
 
           ! Convert Grid to Mesh
           dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, &
-                      dstMaskValues, lregridConserve, rc=localrc)
+                      dstMaskValues, ESMF_REGRID_CONSERVE_OFF, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
@@ -568,7 +629,9 @@ contains
 
         ! call into the Regrid mesh interface
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              lregridMethod, lregridConserve, lregridScheme, &
+              lregridMethod, &
+              localRegridPoleType, localRegridPoleNPnts, &
+              lregridScheme, &
               unmappedDstAction, routeHandle, &
               indicies, weights, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
