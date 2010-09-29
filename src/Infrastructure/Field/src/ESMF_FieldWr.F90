@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.2 2010/09/28 22:48:49 samsoncheung Exp $
+! $Id: ESMF_FieldWr.F90,v 1.3 2010/09/29 16:16:07 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -102,6 +102,7 @@ contains
 !        NetCDF IO format supports an "unlimited" dimension to allow
 !        data to grow along that dimension, usually the time dimension. 
 !        This argument is the nth slice of that time dimension.
+!        No "unlimited" dimension will be set when this argument is negative.
 !     \item[{[iofmt]}]
 !        The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !        of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
