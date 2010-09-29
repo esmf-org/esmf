@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.25 2010/09/27 22:38:28 svasquez Exp $
+// $Id: ESMC_Config.h,v 1.26 2010/09/29 22:49:38 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ typedef struct {
 // prototypes for the ESMC_Config API
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigCreate - Create a Config object
 //
 // !INTERFACE:
@@ -86,11 +86,11 @@ ESMC_Config ESMC_ConfigCreate(
 //     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigDestroy - Destroy a Config object
 //
 // !INTERFACE:
@@ -110,11 +110,11 @@ int ESMC_ConfigDestroy(
 //     Already created {\tt ESMC\_Config} object to destroy.
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigFindLabel - Find a label
 //
 // !INTERFACE:
@@ -144,11 +144,11 @@ int ESMC_ConfigFindLabel(
 //     Identifying label. 
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigGetDim - Get table sizes
 //
 // !INTERFACE:
@@ -177,11 +177,11 @@ int ESMC_ConfigGetDim(
 //     Identifying label (optional).
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigGetLen - Get the length of the line in words
 //
 // !INTERFACE:
@@ -207,11 +207,11 @@ int ESMC_ConfigGetLen(
 //     Identifying label.  If not specified, use the current line (optional).
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigLoadFile - Load resource file into memory
 //
 // !INTERFACE:
@@ -241,11 +241,11 @@ int ESMC_ConfigLoadFile(
 //     error code set if duplicates found (optional).
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigNextLine - Find next line
 //
 // !INTERFACE:
@@ -268,12 +268,12 @@ int ESMC_ConfigNextLine(
 //     not found.
 //   \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //int ESMC_ConfigGetChar(ESMC_Config config, char* value, ...);
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE:  ESMC_ConfigValidate - Validate a Config object
 //
 // !INTERFACE:
@@ -305,7 +305,7 @@ int ESMC_ConfigValidate(
 //       constitutes being "used."
 //   \end{description}
 //
-//!EOP
+//EOP
 
 // The following are not currently implemented:
 int ESMC_ConfigGetAttribute(
