@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.35 2010/09/27 22:19:55 svasquez Exp $
+// $Id: ESMC_State.h,v 1.36 2010/09/29 22:36:57 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ typedef void* ESMC_State;
 // Class API
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StateAddArray - Add an Array object to a State
 //
 // !INTERFACE:
@@ -66,11 +66,11 @@ int ESMC_StateAddArray(
 //    The Array object to be included within the State.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StateAddField - Add a Field object to a State
 //
 // !INTERFACE:
@@ -93,11 +93,11 @@ int ESMC_StateAddField(
 //    The Array object to be included within the State.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StateCreate - Create an Array
 //
 // !INTERFACE:
@@ -122,11 +122,11 @@ ESMC_State ESMC_StateCreate(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StateDestroy - Destroy a State
 //
 // !INTERFACE:
@@ -146,11 +146,11 @@ int ESMC_StateDestroy(
 //    The State to be destroyed.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StateGetArray - Obtains an Array object from a State
 //
 // !INTERFACE:
@@ -177,11 +177,11 @@ int ESMC_StateGetArray(
 //    A pointer to the Array object.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StateGetField - Obtains a Field object from a State
 //
 // !INTERFACE:
@@ -208,11 +208,11 @@ int ESMC_StateGetField(
 //    A pointer to the Field object.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_StatePrint - Print the contents of a State
 //
 // !INTERFACE:
@@ -232,7 +232,7 @@ int ESMC_StatePrint(
 //    The State to be printed.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

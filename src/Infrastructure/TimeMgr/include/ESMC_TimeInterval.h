@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.60 2010/09/27 22:36:18 svasquez Exp $
+// $Id: ESMC_TimeInterval.h,v 1.61 2010/09/29 22:48:10 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@ typedef struct {
 // Class API
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_TimeIntervalGet - Get a TimeInterval value
 //
 // !INTERFACE:
@@ -89,11 +89,11 @@ int ESMC_TimeIntervalGet(
 //    Double precision hours.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_TimeIntervalPrint - Print a TimeInterval
 //
 // !INTERFACE:
@@ -114,11 +114,11 @@ int ESMC_TimeIntervalPrint(
 //    {\tt ESMC\_TimeInterval} object to be printed.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_TimeIntervalSet - Initialize or set a TimeInterval
 //
 // !INTERFACE:
@@ -143,7 +143,7 @@ int ESMC_TimeIntervalSet(
 //    Integer hours.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus

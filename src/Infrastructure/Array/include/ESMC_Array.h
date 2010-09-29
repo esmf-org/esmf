@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.117 2010/09/27 22:24:10 svasquez Exp $
+// $Id: ESMC_Array.h,v 1.118 2010/09/29 22:40:05 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ typedef struct{
 // Class API
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_ArrayCreate - Create an Array
 //
 // !INTERFACE:
@@ -82,11 +82,11 @@ ESMC_Array ESMC_ArrayCreate(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
   
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_ArrayDestroy - Destroy an Array
 //
 // !INTERFACE:
@@ -106,11 +106,11 @@ int ESMC_ArrayDestroy(
 //    {\tt ESMC\_Array} object to be destroyed.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_ArrayGetName - Get the name of an Array
 //
 // !INTERFACE:
@@ -133,11 +133,11 @@ const char *ESMC_ArrayGetName(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_ArrayGetPtr - Get pointer to Array data.
 //
 // !INTERFACE:
@@ -163,11 +163,11 @@ void *ESMC_ArrayGetPtr(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_ArrayPrint - Print an Array
 //
 // !INTERFACE:
@@ -187,7 +187,7 @@ int ESMC_ArrayPrint(
 //    {\tt ESMC\_Array} object to be printed.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.60 2010/09/27 22:36:18 svasquez Exp $
+// $Id: ESMC_Time.h,v 1.61 2010/09/29 22:48:10 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ typedef struct {
 // Class API
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_TimeGet - Get a Time value
 //
 // !INTERFACE:
@@ -88,11 +88,11 @@ int ESMC_TimeGet(
 //    Associated {\tt ESMC\_CalendarType}.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_TimePrint - Print a Time
 //
 // !INTERFACE:
@@ -113,11 +113,11 @@ int ESMC_TimePrint(
 //    {\tt ESMC\_Time} object to be printed.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//!BOP
+//BOP
 // !IROUTINE: ESMC_TimeSet - Initialize or set a Time
 //
 // !INTERFACE:
@@ -155,7 +155,7 @@ int ESMC_TimeSet(
 //    not created.  More convenient way of specifying a built-in calendar type.
 //  \end{description}
 //
-//!EOP
+//EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
