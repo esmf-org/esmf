@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.4 2010/06/29 20:57:48 svasquez Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.5 2010/09/29 04:31:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -299,7 +299,7 @@ program ESMF_CubedSphereRegridEx
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
-	    regridConserve = ESMF_REGRID_CONSERVE_ON, &
+!	    regridConserve = ESMF_REGRID_CONSERVE_ON, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
             if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
         else
@@ -307,7 +307,7 @@ program ESMF_CubedSphereRegridEx
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
-	    regridConserve = ESMF_REGRID_CONSERVE_ON, &
+!	    regridConserve = ESMF_REGRID_CONSERVE_ON, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=status)
             if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 	endif
