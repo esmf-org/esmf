@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.1 2010/09/01 23:38:16 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.2 2010/09/29 23:28:18 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ int init_bucket(int num_cells) {
     factor *=2;
     len = num_cells/total;
   }
-  printf("total number of buckets: %d\n", total);
+  //  printf("total number of buckets: %d\n", total);
   totalbuckets = total;
   interval = factor;
   bucket = (FIELD**)malloc(sizeof(FIELD*)*totalbuckets);
@@ -372,7 +372,7 @@ void FTN(c_convertscrip)(
   }
   totalnodes = nextrank-1;
 
-  fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
+  // fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
   free(cornerlats);
   free(cornerlons);
 
@@ -403,7 +403,7 @@ void FTN(c_convertscrip)(
 	if (cells[i1+j]==cells[i1+k]) {
 	  // the two vertices belong to one cell, over-counted
 	  totalneighbors[cells[i1+j]-1]--;
-	  printf("duplicate vertex at %d: vertex %d\n", i, cells[i1+j]);
+	  //printf("duplicate vertex at %d: vertex %d\n", i, cells[i1+j]);
 	  break;
 	}
       }
@@ -438,7 +438,7 @@ void FTN(c_convertscrip)(
       maxconnection=totalneighbors[i];
   }
 
-  printf("Maximal connection per vertex is %d\n", maxconnection);
+  //printf("Maximal connection per vertex is %d\n", maxconnection);
 
   if (*dualflag == 0) {
     // create the output netcdf file
