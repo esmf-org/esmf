@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.102 2010/09/17 05:46:30 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.103 2010/09/29 03:54:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -608,6 +608,21 @@
            ESMF_REGRID_METHOD_CONSERVE    = ESMF_RegridMethod(2)
 
 !------------------------------------------------------------------------------
+
+      type ESMF_RegridPole
+      sequence
+!  private
+         integer :: regridpole
+      end type
+
+
+      type(ESMF_RegridPole), parameter :: &
+           ESMF_REGRIDPOLE_NONE    =  ESMF_RegridPole(0), &
+           ESMF_REGRIDPOLE_ALLAVG  =  ESMF_RegridPole(1), &
+           ESMF_REGRIDPOLE_NPNTAVG =  ESMF_RegridPole(2), &
+           ESMF_REGRIDPOLE_TEETH   =  ESMF_RegridPole(3)
+
+!------------------------------------------------------------------------------
 !
 !
       type ESMF_RegridConserve
@@ -697,6 +712,12 @@
        public ESMF_RegridMethod,   ESMF_REGRID_METHOD_BILINEAR, &
                                    ESMF_REGRID_METHOD_PATCH, &
                                    ESMF_REGRID_METHOD_CONSERVE
+
+       public ESMF_RegridPole,  ESMF_REGRIDPOLE_NONE, &
+                                ESMF_REGRIDPOLE_ALLAVG, &
+                                ESMF_REGRIDPOLE_NPNTAVG, &
+                                ESMF_REGRIDPOLE_TEETH
+
        public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
                                    ESMF_REGRID_CONSERVE_ON
 
@@ -762,6 +783,7 @@ interface operator (.eq.)
   module procedure ESMF_rfeq
   module procedure ESMF_unmappedActioneq
   module procedure ESMF_ioeq
+  module procedure ESMF_RegridPoleEq
 end interface
 
 interface operator (.ne.)
@@ -774,6 +796,7 @@ interface operator (.ne.)
   module procedure ESMF_tnfne
   module procedure ESMF_frne
   module procedure ESMF_unmappedActionne
+  module procedure ESMF_RegridPoleNe
 end interface
 
 interface assignment (=)
@@ -1161,6 +1184,21 @@ function ESMF_unmappedActionne(uma1, uma2)
 end function
 
 
+!------------------------------------------------------------------------------
+! function to compare two ESMF_RegridPole types
 
+function ESMF_RegridPoleEq(rp1, rp2)
+ logical ESMF_RegridPoleEq
+ type(ESMF_RegridPole), intent(in) :: rp1, rp2
+
+ ESMF_RegridPoleEq = (rp1%regridpole .eq. rp2%regridpole)
+end function
+
+function ESMF_RegridPoleNe(rp1, rp2)
+ logical ESMF_RegridPoleNe
+ type(ESMF_RegridPole), intent(in) :: rp1, rp2
+
+ ESMF_RegridPoleNe = (rp1%regridpole .ne. rp2%regridpole)
+end function
 
       end module ESMF_UtilTypesMod
