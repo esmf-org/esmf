@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.148 2010/09/17 03:13:32 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.149 2010/09/29 03:37:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.148 2010/09/17 03:13:32 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.149 2010/09/29 03:37:28 oehmke Exp $'
 
 !==============================================================================
 !
@@ -247,7 +247,9 @@ end function my_xor
 ! !INTERFACE:
       subroutine ESMF_RegridStore(srcMesh, srcArray, &
                  dstMesh, dstArray, &
-                 regridMethod, regridConserve, regridScheme, &
+                 regridMethod, &
+                 regridPoleType, regridPoleNPnts, &
+                 regridScheme, &
                  unmappedDstAction, routehandle, &
                  indicies, weights, &
                  rc)
@@ -258,7 +260,8 @@ end function my_xor
       type(ESMF_Mesh), intent(inout)         :: dstMesh
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      type(ESMF_RegridConserve), intent(in), optional :: regridConserve
+      type(ESMF_RegridPole), intent(in)      :: regridPoleType
+      integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
       type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
@@ -300,7 +303,6 @@ end function my_xor
 !     \end{description}
 !EOPI
        integer :: localrc
-       type(ESMF_StaggerLoc) :: staggerLoc
        type(ESMF_VM)        :: vm
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
@@ -336,32 +338,17 @@ end function my_xor
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-       ! Choose the stagger.  Perhaps eventually this can be more configurable,
-       ! but for now, conserve = node, bilinear = center
-       if (regridMethod .eq. ESMF_REGRID_METHOD_BILINEAR) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       elseif (regridMethod .eq. ESMF_REGRID_METHOD_PATCH) then
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       else
-         staggerLoc = ESMF_STAGGERLOC_CENTER
-       endif
-
        has_rh = 0
        has_iw = 0
        if (present(routehandle)) has_rh = 1
        if (present(indicies)) has_iw = 1
-
-       if (present(regridConserve)) then
-          localregridConserve=regridConserve
-       else
-          localregridConserve=ESMF_REGRID_CONSERVE_OFF
-       endif
 
        if (present(unmappedDstAction)) then
           localunmappedDstAction=unmappedDstAction
        else
           localunmappedDstAction=ESMF_UNMAPPEDACTION_ERROR
        endif
+
 
        ! Make sure the srcMesh has its internal bits in place
        call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
@@ -388,9 +375,10 @@ end function my_xor
        endif
 
        ! Call through to the C++ object that does the work
-       call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, staggerLoc,  &
-                   dstMesh%this, dstArray, staggerLoc%staggerloc, &
-                   regridMethod, localregridConserve%regridconserve, &
+       call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, &
+                   dstMesh%this, dstArray, &
+                   regridMethod,  &
+                   regridPoleType, regridPoleNPnts, &    
                    regridScheme, localunmappedDstAction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
