@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.3 2010/08/12 18:05:10 feiliu Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.4 2010/09/29 00:12:37 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -101,7 +101,7 @@ program ESMF_XGridSerialSTest
   cname1 = "land"
   ! use petList to define land on all PET
   land = ESMF_GridCompCreate(name=cname1, rc=localrc)
-  print *, "Created component ", trim(cname2), "rc =", localrc
+  print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
