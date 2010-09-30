@@ -1,5 +1,5 @@
 #!/bin/ksh 
-# $Id: mpirun.sge.batch,v 1.7 2010/09/24 17:31:51 svasquez Exp $
+# $Id: mpirun.sge.batch,v 1.8 2010/09/30 19:43:45 svasquez Exp $
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.
@@ -28,7 +28,9 @@ then
 fi
 
 export np=$2
-export prog=$3
+export TNAME=$3
+shift 2
+prog=$*
 
 export working_dir=`pwd`
 
@@ -91,7 +93,7 @@ do
 done
 
 # move job output file to stdout.
-mv -f esmf_test.o$proc_id  $prog.stdout
+mv -f esmf_test.o$proc_id  $TNAME.stdout
 
 
 # Clean up
