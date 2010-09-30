@@ -1,4 +1,4 @@
-! $Id: ESMF_StateSet.F90,v 1.5 2010/08/27 04:38:03 w6ws Exp $
+! $Id: ESMF_StateSet.F90,v 1.6 2010/09/30 19:27:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -22,6 +22,8 @@
 ! INCLUDES
 !------------------------------------------------------------------------------
 #include "ESMF.h"
+
+#define ESMF_ENABLESTATENEEDED
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateSetMod - State Set Module
@@ -61,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateSet.F90,v 1.5 2010/08/27 04:38:03 w6ws Exp $'
+      '$Id: ESMF_StateSet.F90,v 1.6 2010/09/30 19:27:30 w6ws Exp $'
 
 !==============================================================================
 ! 

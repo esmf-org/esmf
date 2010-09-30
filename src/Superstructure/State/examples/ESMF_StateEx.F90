@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.33 2010/06/29 22:29:41 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.34 2010/09/30 19:27:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -26,6 +26,8 @@
     ! ESMF Framework module
     use ESMF_Mod
     implicit none
+
+#define ESMF_ENABLESTATENEEDED
 
     ! Local variables
     integer :: rc
