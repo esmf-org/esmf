@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.55 2010/09/23 22:58:02 theurich Exp $
+% $Id: Field_refdoc.ctex,v 1.56 2010/09/30 19:37:43 oehmke Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -41,6 +41,14 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_desc}
 #endif
+
+\subsection{Field Options}
+#ifdef STANDALONE
+\input{Field_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/Field_options}
+#endif
+
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

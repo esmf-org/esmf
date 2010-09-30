@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.44 2010/09/29 03:38:40 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.45 2010/09/30 19:37:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.44 2010/09/29 03:38:40 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.45 2010/09/30 19:37:43 oehmke Exp $'
 
 !==============================================================================
 !
@@ -325,15 +325,13 @@ contains
 !     \item [{[weights]}] 
 !           The weights for the sparse matrix.
 !     \item [{[regridMethod]}]
-!           The type of regrid. Options are 
-!           {\tt ESMF\_REGRID\_METHOD\_BILINEAR} or 
-!           {\tt ESMF\_REGRID\_METHOD\_PATCH}. If not specified, defaults 
-!           to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
+!           The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
+!           valid options. If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
 !     \item [{[regridPoleType]}]
 !           Which type of artificial pole
-!           to construct on the source Grid for regridding. 
-!           If not specified, defaults 
-!           to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
+!           to construct on the source Grid for regridding. Only valid when {\tt regridScheme} is set to 
+!           {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see Section~\ref{opt:regridpole} for a list of
+!           valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
 !     \item [{[regridPoleNPnts]}]
 !           If {\tt regridPoleType} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !           This parameter indicates how many points should be averaged
