@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.4 2010/09/30 05:35:13 eschwab Exp $
+! $Id: ESMF_FieldWr.F90,v 1.5 2010/09/30 20:16:30 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -85,6 +85,9 @@ contains
 !
 ! !DESCRIPTION:
 !     Write the Field data in a {ESMF\_Field} object to a file.
+!     For this API to be functional, the environment variable "ESMF_PIO" 
+!     should be set to "internal" when ESMF library is built. 
+!     Please see Section~\ref{io:dataio}.
 !
 !   Limitation:
 !     Assume 1 DE per Pet
