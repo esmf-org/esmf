@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.64 2010/09/13 23:45:44 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.65 2010/09/30 18:16:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.64 2010/09/13 23:45:44 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.65 2010/09/30 18:16:54 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -568,7 +568,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Add an ESMF standard Attribute package.  See Section~\ref{desc:AttPacks}
+!     Add an ESMF standard Attribute package.  See Section~\ref{sec:AttPacks}
 !     for a description of Attribute packages and their conventions, purposes,
 !     and object types.
 !
@@ -621,7 +621,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package to <object>.  
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
@@ -679,7 +679,7 @@ contains
 !     Add a custom Attribute package, with one or more nested Attribute
 !     packages, to <object>.  Allows for building full multiple-child Attribute
 !     hierarchies (multi-child trees).
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
@@ -745,7 +745,7 @@ contains
 !     Add a custom Attribute package, with a single nested Attribute
 !     package, to <object>.  Allows for building single-child Attribute
 !     hierarchies (single-child trees).
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
@@ -873,7 +873,7 @@ contains
 !     Return an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     Attribute is not found.  See Section~\ref{desc:AttPacks} for a
+!     Attribute is not found.  See Section~\ref{sec:AttPacks} for a
 !     description of Attribute packages and their conventions, purposes,
 !     and object types.
 !
@@ -955,7 +955,7 @@ contains
 !     Return an Attribute value from the <object>, or from the Attribute package
 !     specified by {\tt convention} and {\tt purpose}.  A default value 
 !     argument may be given if a return code is not desired when the 
-!     Attribute is not found.  See Section~\ref{desc:AttPacks} for a
+!     Attribute is not found.  See Section~\ref{sec:AttPacks} for a
 !     description of Attribute packages and their conventions, purposes,
 !     and object types.
 !
@@ -1542,7 +1542,7 @@ contains
 !     ESMF-supplied Attribute package.  If present, the convention and purpose
 !     specify an Attribute package which is used to filter the reading to just
 !     those attributes belonging to the Attribute package. 
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
 !     Requires the third party Xerces C++ XML Parser library to be installed,
@@ -1597,7 +1597,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on <object>.
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
@@ -1661,7 +1661,7 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an 
 !     Attribute package.  The Attribute has a {\tt name} and either 
 !     a {\tt value}, and a {\tt convention} and {\tt purpose}.  
-!     See Section~\ref{desc:AttPacks} for a description of Attribute packages
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
@@ -1734,7 +1734,7 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an 
 !     Attribute package.  The Attribute has a {\tt name} and a 
 !     {\tt valueList}, with an {\tt itemCount}, and a {\tt convention}
-!     and {\tt purpose}.  See Section~\ref{desc:AttPacks} for a description
+!     and {\tt purpose}.  See Section~\ref{sec:AttPacks} for a description
 !     of Attribute packages and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
@@ -1845,7 +1845,7 @@ contains
 !     the convention, purpose, and object type of the associated Attributes.  Either
 !     tab-delimited or xml format is acheived by using {\tt attwriteflag}.  
 !     Currently, only ESMF/ESG/CF Field Attribute packages can be written in
-!     tab-delimited format.  See Section~\ref{desc:AttPacks} for a description
+!     tab-delimited format.  See Section~\ref{sec:AttPacks} for a description
 !     of Attribute packages and their conventions, purposes, and object types.
 !
 !     Note:  For an object type of {\tt ESMF\_GridComp}, convention='WaterML',
