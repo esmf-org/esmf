@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.5 2010/09/30 00:12:16 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.6 2010/09/30 19:41:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,14 +17,6 @@ program ESMF_RegridWeightGen
       use ESMF_IOScripMod
 
       implicit none
-
-      type CommandArgs
-      sequence
-        character(len=256) :: srcfile, dstfile,  wgtfile
-        logical :: srcIsScrip,dstIsScrip, srcIsReg, dstIsReg
-        character(len=40) :: method
-        integer :: pole
-      end type
 
       integer            :: rc
       type(ESMF_VM)      :: vm
@@ -48,13 +40,11 @@ program ESMF_RegridWeightGen
       logical            :: addCorners,convertToDual
       type(ESMF_MeshLoc) :: meshLoc
       logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg, typeSetFlag
-      type(CommandArgs)  :: mycommand
-      character, allocatable :: commandbuf(:)
-      integer            :: command_len
       character(len=256) :: methodStr
       real(ESMF_KIND_R8), pointer :: srcArea(:)
       real(ESMF_KIND_R8), pointer :: dstArea(:)
-
+      character(len=256) :: commandbuf1(3)
+      integer            :: commandbuf2(6)
 
       !------------------------------------------------------------------------
       ! Initialize ESMF
@@ -91,7 +81,6 @@ program ESMF_RegridWeightGen
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
            call ESMF_UtilGetArg(index+1,srcfile)
-           mycommand%srcfile = srcfile
          endif
       
          call ESMF_UtilGetArgIndex('-d',index,rc)
@@ -101,7 +90,6 @@ program ESMF_RegridWeightGen
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
            call ESMF_UtilGetArg(index+1,dstfile)
-           mycommand%dstfile = dstfile
          endif
           
          call ESMF_UtilGetArgIndex('-w',index,rc)
@@ -111,7 +99,6 @@ program ESMF_RegridWeightGen
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else	
            call ESMF_UtilGetArg(index+1,wgtfile)
-           mycommand%wgtfile = wgtfile
          endif
 
          call ESMF_UtilGetArgIndex('-m',index,rc)
@@ -122,7 +109,6 @@ program ESMF_RegridWeightGen
          else
            call ESMF_UtilGetArg(index+1,method)
          endif
-         mycommand%method = method
     	
          poleptrs = -1
          call ESMF_UtilGetArgIndex('-p',index,rc)
@@ -153,8 +139,6 @@ program ESMF_RegridWeightGen
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
-
-         mycommand%pole = poleptrs
 
          typeSetFlag = .false. 
          srcIsScrip = .true.
@@ -234,10 +218,6 @@ program ESMF_RegridWeightGen
              dstIsReg = .false.
            endif
 	 endif
-         mycommand%srcIsScrip = srcIsScrip
-         mycommand%dstIsScrip = dstIsScrip
-         mycommand%srcIsReg = srcIsReg
-         mycommand%dstIsReg = dstIsReg
 	print *, "Starting weight generation with these inputs: "
 	print *, "  Source File: ", trim(srcfile)
 	print *, "  Destination File: ", trim(dstfile)
@@ -263,32 +243,62 @@ program ESMF_RegridWeightGen
 	       print *, "  Pole option: ", poleptrs
         endif
 
-        inquire(iolength=command_len) mycommand
-        command_len = command_len * 4
-        allocate(commandbuf(command_len))
-        commandbuf = transfer(mycommand, mold=commandbuf)
+        ! Group the command line arguments and broadcast to other PETs
+        commandbuf1(1)=srcfile
+        commandbuf1(2)=dstfile
+        commandbuf1(3)=wgtfile
 
         ! Broadcast the command line arguments to all the PETs
-        call ESMF_VMBroadcast(vm, commandbuf, command_len, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+        commandbuf2(:)=0
+        if (srcIsScrip) commandbuf2(1)=1
+        if (srcIsReg)   commandbuf2(2)=1
+        if (dstIsScrip) commandbuf2(3)=1
+        if (dstIsReg)   commandbuf2(4)=1
+        if (method .eq. 'patch') commandbuf2(5)=1
+        if (method .eq. 'conserve') commandbuf2(5)=2
+        commandbuf2(6)=poleptrs
+        call ESMF_VMBroadcast(vm, commandbuf2, 6, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
      else
- 
-        inquire(iolength=command_len) mycommand
-        command_len = command_len * 4
-        allocate(commandbuf(command_len))
-
-        call ESMF_VMBroadcast(vm, commandbuf, command_len, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-        mycommand = transfer(commandbuf, mold=mycommand)
-        srcfile = mycommand%srcfile
-        dstfile = mycommand%dstfile
-        wgtfile = mycommand%wgtfile
-        method = mycommand%method
-        srcIsScrip = mycommand%srcIsScrip
-        srcIsReg  = mycommand%srcIsReg
-        dstIsScrip = mycommand%dstIsScrip
-        dstIsReg  = mycommand%dstIsReg
-        poleptrs = mycommand%pole
+        srcfile = commandbuf1(1)
+        dstfile = commandbuf1(2)
+        wgtfile = commandbuf1(3)
+
+        call ESMF_VMBroadcast(vm, commandbuf2, 6, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (commandbuf2(1)==1) then
+           srcIsScrip = .true.
+        else
+           srcIsScrip = .false.
+        end if
+        if (commandbuf2(2)==1) then
+           srcIsReg = .true.
+        else
+           srcIsReg = .false.
+        end if
+        if (commandbuf2(3)==1) then
+           dstIsScrip = .true.
+        else
+           dstIsScrip = .false.
+        end if
+        if (commandbuf2(4)==1) then
+           dstIsReg = .true.
+        else
+           dstIsReg = .false.
+        end if
+        if (commandbuf2(5)==0) then
+	   method = 'bilinear'
+        else if (commandbuf2(5)==1) then
+           method = 'patch'
+        else
+           method = 'conserve'
+        end if
+        poleptrs = commandbuf2(6)
         if (poleptrs == -1) then 
 	   pole=ESMF_REGRIDPOLE_ALLAVG
         elseif (poleptrs ==  0) then
