@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.40 2010/09/30 04:15:21 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.41 2010/09/30 19:46:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.40 2010/09/30 04:15:21 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.41 2010/09/30 19:46:04 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1497,7 +1497,12 @@ int FTable::callVFuncPtr(
           complianceCheckFlag &= strcmp(envVar, "OFF"); // turn off
         }
         if (complianceCheckFlag){
-#ifdef ESMF_NO_DLFCN
+          
+//TODO: for now disable the DLFCN based lookup until we correctly build PIC
+//TODO: on all combos for which we have DLFCN enabled
+#define ESMF_NO_DLFCNdummy
+          
+#ifdef ESMF_NO_DLFCNdummy
           FTN(esmf_complianceicregister)((void *)comp, &(func->funcintarg));
 #else
           
