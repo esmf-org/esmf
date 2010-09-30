@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.55 2010/09/30 05:35:13 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.56 2010/09/30 20:19:54 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1813,6 +1813,9 @@ end function
 !
 ! !DESCRIPTION:
 !     Read Field data to a FieldBundle object from file(s).
+!     For this API to be functional, the environment variable "ESMF_PIO"
+!     should be set to "internal" when ESMF library is built.
+!     Please see Section~\ref{io:dataio}.
 !
 !   Limitation:
 !     Assume 1 DE per Pet
@@ -2394,7 +2397,9 @@ end function
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Write the Fields into a file.
+!      Write the Fields into a file. For this API to be functional, 
+!      the environment variable "ESMF_PIO" should be set to "internal"
+!      when ESMF library is built. Please see Section~\ref{io:dataio}.
 !
 !   Limitation:
 !     Assume 1 DE per Pet
