@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.26 2010/09/29 22:49:38 svasquez Exp $
+// $Id: ESMC_Config.h,v 1.27 2010/09/30 20:49:55 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ typedef struct {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigCreate - Create a Config object
+// !IROUTINE: ESMC_ConfigCreate - Create a Config object
 //
 // !INTERFACE:
 ESMC_Config ESMC_ConfigCreate(
@@ -91,7 +91,7 @@ ESMC_Config ESMC_ConfigCreate(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigDestroy - Destroy a Config object
+// !IROUTINE: ESMC_ConfigDestroy - Destroy a Config object
 //
 // !INTERFACE:
 int ESMC_ConfigDestroy(
@@ -115,7 +115,7 @@ int ESMC_ConfigDestroy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigFindLabel - Find a label
+// !IROUTINE: ESMC_ConfigFindLabel - Find a label
 //
 // !INTERFACE:
 int ESMC_ConfigFindLabel(
@@ -149,7 +149,7 @@ int ESMC_ConfigFindLabel(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigGetDim - Get table sizes
+// !IROUTINE: ESMC_ConfigGetDim - Get table sizes
 //
 // !INTERFACE:
 int ESMC_ConfigGetDim(
@@ -182,7 +182,7 @@ int ESMC_ConfigGetDim(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigGetLen - Get the length of the line in words
+// !IROUTINE: ESMC_ConfigGetLen - Get the length of the line in words
 //
 // !INTERFACE:
 int ESMC_ConfigGetLen(
@@ -212,7 +212,7 @@ int ESMC_ConfigGetLen(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigLoadFile - Load resource file into memory
+// !IROUTINE: ESMC_ConfigLoadFile - Load resource file into memory
 //
 // !INTERFACE:
 int ESMC_ConfigLoadFile(
@@ -246,7 +246,7 @@ int ESMC_ConfigLoadFile(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigNextLine - Find next line
+// !IROUTINE: ESMC_ConfigNextLine - Find next line
 //
 // !INTERFACE:
 int ESMC_ConfigNextLine(
@@ -274,7 +274,7 @@ int ESMC_ConfigNextLine(
 //int ESMC_ConfigGetChar(ESMC_Config config, char* value, ...);
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ConfigValidate - Validate a Config object
+// !IROUTINE: ESMC_ConfigValidate - Validate a Config object
 //
 // !INTERFACE:
 int ESMC_ConfigValidate(

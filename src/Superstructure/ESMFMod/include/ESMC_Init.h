@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.20 2010/07/23 02:10:41 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.21 2010/09/30 20:50:46 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ extern "C" {
 #endif
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
+// !IROUTINE: ESMC_Initialize - Initialize the ESMF Framework
 //
 // !INTERFACE:
   int ESMC_Initialize(
@@ -92,7 +92,7 @@ extern "C" {
 #endif
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Finalize - Finanalize the ESMF Framework
+// !IROUTINE: ESMC_Finalize - Finanalize the ESMF Framework
 //
 // !INTERFACE:
   int ESMC_Finalize(void);
