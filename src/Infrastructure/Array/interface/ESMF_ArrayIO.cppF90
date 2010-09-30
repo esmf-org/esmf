@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.26 2010/09/28 22:46:52 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.27 2010/09/30 18:05:16 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.26 2010/09/28 22:46:52 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.27 2010/09/30 18:05:16 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -408,7 +408,12 @@ contains
         if(piofmt .ne. 'bin') then @\
          call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
         endif @\
+^ifdef ESMF_NETCDF @\
         if (time.gt.0) pioerr = PIO_def_dim(FileObj,'time',PIO_unlimited,dimid_time) @\
+^elif ESMF_NETCDF @\
+        if (time.gt.0) pioerr = PIO_def_dim(FileObj,'time',PIO_unlimited,dimid_time) @\
+^else @\
+^endif @\
       endif @\
     endif @\
     !TODO: need error checking here! @\
