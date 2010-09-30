@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.20 2010/09/29 19:50:24 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.21 2010/09/30 04:15:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.20 2010/09/29 19:50:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.21 2010/09/30 04:15:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -1370,7 +1370,13 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-    esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK_OBJ";
+    esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCEICOBJECT";
+    esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
+    if (esmfRuntimeVarValue){
+      esmfRuntimeEnv.push_back(esmfRuntimeVarName);
+      esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
+    }
+    esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCEICREGISTER";
     esmfRuntimeVarValue = std::getenv(esmfRuntimeVarName);
     if (esmfRuntimeVarValue){
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.39 2010/09/29 20:19:28 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.40 2010/09/30 04:15:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.39 2010/09/29 20:19:28 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.40 2010/09/30 04:15:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1078,8 +1078,8 @@ int FTable::getEntry(
   }
   if (i==funccount) i=-1; // indicate entry not found
   
-if (i==-1)
-printf("gjt: failed attempt to look up method: %s\n", name);
+//if (i==-1)
+//printf("gjt: failed attempt to look up method: %s\n", name);
 
   if (i == -1){
     // name was not found in function table -> check if name contains "IC"
@@ -1098,8 +1098,8 @@ printf("gjt: failed attempt to look up method: %s\n", name);
         }
         a++;
       }
-printf("gjt: failed attempt to look up IC method -> try actual method: %s\n",
-tempname);
+//printf("gjt: failed attempt to look up IC method -> try actual method: %s\n",
+//tempname);
       
       for (i=0; i<funccount; i++) {
         if (!strcmp(tempname, funcs[i].funcname))
@@ -1107,8 +1107,8 @@ tempname);
       }
       if (i==funccount) i=-1; // indicate entry not found
       delete [] tempname;
-if (i==-1)
-printf("gjt: failed 2nd attempt to look up method: %s\n", name);
+//if (i==-1)
+//printf("gjt: failed 2nd attempt to look up method: %s\n", name);
     }
   }
   
@@ -1490,15 +1490,45 @@ int FTable::callVFuncPtr(
       (*vf)((void *)comp, &(func->funcintarg));
       // conditionally call into compliance IC for register
       if (!strcmp(name, "Register")){
-        char const *envComplianceCheck =
-          VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+        char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
         bool complianceCheckFlag = true;  // initialize to internal compl. check
-        if (envComplianceCheck != NULL){
-          complianceCheckFlag &= strcmp(envComplianceCheck, "off"); // turn off
-          complianceCheckFlag &= strcmp(envComplianceCheck, "OFF"); // turn off
+        if (envVar != NULL){
+          complianceCheckFlag &= strcmp(envVar, "off"); // turn off
+          complianceCheckFlag &= strcmp(envVar, "OFF"); // turn off
         }
-        if (complianceCheckFlag)
+        if (complianceCheckFlag){
+#ifdef ESMF_NO_DLFCN
           FTN(esmf_complianceicregister)((void *)comp, &(func->funcintarg));
+#else
+          
+#define QUOTEMACRO_(x) #x
+#define QUOTEMACRO(x) QUOTEMACRO_(x)
+          
+          envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
+          void *lib;
+          lib = dlopen(envVar, RTLD_LAZY);  // envVar==NULL -> look into exe
+          if (lib == NULL){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              "- shared object not found", &rc);
+            return rc;
+          }
+          envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICREGISTER");
+          void *pointer;
+          if (envVar != NULL)
+            pointer = (void *)dlsym(lib, envVar);
+          else
+            pointer = (void *)dlsym(lib,
+              QUOTEMACRO(FTN(esmf_complianceicregister)) );
+          if (pointer == NULL){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              "- compliance IC register routine not found", &rc);
+            return rc;
+          }
+          
+          VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
+          (*vf)((void *)comp, &(func->funcintarg));
+#endif
+        }
       }
       
       if (userrc) *userrc = func->funcintarg;
@@ -2027,9 +2057,9 @@ namespace ESMCI {
     return rc;
 #else
     void *lib;
-    if (shobj.length()>0){
+    if (shobj.length()>0)
       lib = dlopen(shobj.c_str(), RTLD_LAZY);
-    }else
+    else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
