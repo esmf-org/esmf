@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.3 2010/09/29 16:16:07 samsoncheung Exp $
+! $Id: ESMF_FieldWr.F90,v 1.4 2010/09/30 05:35:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -68,6 +68,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldWrite"
 
 !BOP
+! \label{api:FieldWrite}
 ! !IROUTINE:  ESMF_FieldWrite - Write the Field data into a file
 
 ! !INTERFACE:

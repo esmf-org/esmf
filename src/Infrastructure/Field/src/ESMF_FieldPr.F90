@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.27 2010/09/23 22:58:02 theurich Exp $
+! $Id: ESMF_FieldPr.F90,v 1.28 2010/09/30 05:35:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -219,6 +219,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldRead"
 
 !BOP
+! \label{api:FieldRead}
 ! !IROUTINE:  ESMF_FieldRead - Read the Field data from a file
 
 ! !INTERFACE:

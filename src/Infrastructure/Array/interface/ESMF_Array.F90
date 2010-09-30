@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.123 2010/09/28 22:45:50 samsoncheung Exp $
+! $Id: ESMF_Array.F90,v 1.124 2010/09/30 05:35:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.123 2010/09/28 22:45:50 samsoncheung Exp $'
+    '$Id: ESMF_Array.F90,v 1.124 2010/09/30 05:35:13 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1243,6 +1243,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayWrite"
 !BOP
+! \label{api:ArrayWrite}
 ! !IROUTINE: ESMF_ArrayWrite - Write Array data into a file.
 !
 ! !INTERFACE:

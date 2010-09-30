@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.27 2010/09/28 22:47:56 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.28 2010/09/30 05:35:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.27 2010/09/28 22:47:56 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.28 2010/09/30 05:35:13 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -743,6 +743,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRead()"
 !BOP
+! \label{api:ArrayBundleRead}
 ! !IROUTINE: ESMF_ArrayBundleRead - Read Arrays to an ArrayBundle from file(s)
 
 ! !INTERFACE:
@@ -2096,6 +2097,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleWrite()"
 !BOP
+! \label{api:ArrayBundleWrite}
 ! !IROUTINE: ESMF_ArrayBundleWrite - Write the Arrays into a file
 
 ! !INTERFACE:
