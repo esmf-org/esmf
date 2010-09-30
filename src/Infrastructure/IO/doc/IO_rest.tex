@@ -1,8 +1,9 @@
-% $Id: IO_rest.tex,v 1.4 2010/09/25 02:54:00 eschwab Exp $
+% $Id: IO_rest.tex,v 1.5 2010/09/30 05:38:02 eschwab Exp $
 
-Currently a small fraction of the formats is implemented by ESMF.  
-The data IO uses NetCDF and binary formats, and ESMF Attribute
+Currently a small fraction of the anticipated data formats is implemented by 
+ESMF.  The data IO uses NetCDF and MPI\_IO binary formats, and ESMF Attribute
 IO uses XML format.  Different libraries are employed for these 
 different formats.  In future development, a more centralized IO technique
 will likely be defined to provide efficient utilities with a set of standard
-APIs that will allow manipulation of multiple standard formats.
+APIs that will allow manipulation of multiple standard formats.  Also, the 
+ability to automatically detect file formats at runtime will be developed.
