@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.4 2010/09/24 23:31:06 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.5 2010/09/30 00:12:16 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,8 @@ program ESMF_RegridWeightGen
       character(len=40)  :: method, flag
       integer(ESMF_KIND_I4) :: maskvals(1)
       integer            :: index
-      integer            :: pole
+      type(ESMF_RegridPole) :: pole
+      integer            :: poleptrs
       integer, pointer   :: dims(:)
       logical            :: convert3D
       logical            :: isConserve
@@ -123,21 +124,37 @@ program ESMF_RegridWeightGen
          endif
          mycommand%method = method
     	
+         poleptrs = -1
          call ESMF_UtilGetArgIndex('-p',index,rc)
          if (index == -1) call ESMF_UtilGetArgIndex('--pole',index,rc)
          if (index == -1) then
-           print *, 'use default pole: All'
-           pole = -1
+	   if (method .eq. 'conserve') then
+              print *, 'use default pole: None'
+              pole = ESMF_REGRIDPOLE_NONE
+	      poleptrs = 0
+	   else
+              print *, 'use default pole: All'
+              pole = ESMF_REGRIDPOLE_ALLAVG
+           endif
          else
            call ESMF_UtilGetArg(index+1,flag)
-           if (trim(flag) .eq. 'none') pole = 0
-           if (trim(flag) .eq. 'all') then
-             pole = -1
+           if (trim(flag) .eq. 'none') then
+	     pole = ESMF_REGRIDPOLE_NONE
+	     poleptrs = 0
+           else if (trim(flag) .eq. 'all') then
+             pole = ESMF_REGRIDPOLE_ALLAVG
            else 
-             read(flag,'(i4)') pole
+             read(flag,'(i4)') poleptrs
+             pole = ESMF_REGRIDPOLE_NPNTAVG
+           endif
+	   if ((method .eq. 'conserve') .and. &
+	       (pole .ne. ESMF_REGRIDPOLE_NONE)) then
+	     print *, 'Conserve method only works with no pole'
+             call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
-         mycommand%pole = pole
+
+         mycommand%pole = poleptrs
 
          typeSetFlag = .false. 
          srcIsScrip = .true.
@@ -238,6 +255,13 @@ program ESMF_RegridWeightGen
 	        print *, "  Destination Grid is an unstructured grid"
         endif
         print *, "  Regrid Method: ", method
+        if (pole .eq. ESMF_REGRIDPOLE_NONE) then
+	       print *, "  Pole option: NONE"
+	elseif (pole .eq. ESMF_REGRIDPOLE_ALLAVG) then
+	       print *, "  Pole option: ALL"
+	else
+	       print *, "  Pole option: ", poleptrs
+        endif
 
         inquire(iolength=command_len) mycommand
         command_len = command_len * 4
@@ -264,7 +288,14 @@ program ESMF_RegridWeightGen
         srcIsReg  = mycommand%srcIsReg
         dstIsScrip = mycommand%dstIsScrip
         dstIsReg  = mycommand%dstIsReg
-        pole = mycommand%pole
+        poleptrs = mycommand%pole
+        if (poleptrs == -1) then 
+	   pole=ESMF_REGRIDPOLE_ALLAVG
+        elseif (poleptrs ==  0) then
+           pole=ESMF_REGRIDPOLE_NONE
+	else
+           pole=ESMF_REGRIDPOLE_NPNTAVG 
+        endif
      endif
 
 
@@ -342,12 +373,14 @@ program ESMF_RegridWeightGen
 
 
       maskvals(1) = 0
+      if (poleptrs <= 0) poleptrs = 1
       if (trim(method) .eq. 'bilinear') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
+            regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
 	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
             methodStr = "Bilinear remapping"
@@ -357,6 +390,7 @@ program ESMF_RegridWeightGen
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
+            regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
 	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
@@ -366,6 +400,7 @@ program ESMF_RegridWeightGen
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_CONSERVE, &
+            regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = ESMF_REGRID_SCHEME_FULL3D, rc=rc)
 	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
             methodStr = "Conservative remapping"
