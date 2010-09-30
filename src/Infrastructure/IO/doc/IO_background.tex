@@ -1,19 +1,19 @@
-% $Id: IO_background.tex,v 1.26 2010/09/29 23:09:02 samsoncheung Exp $
+% $Id: IO_background.tex,v 1.27 2010/09/30 05:37:48 eschwab Exp $
 
 %\subsection{Background}
 
 The ESMF IO provides an unified interface for input and output of
-high level ESMF objects such as Fields.  The system is expected to
-automatically detect file formats at runtime, and to output data in 
-a variety of formats. In the current release, the ESMF IO capability
-is integrated with third-party software such as, 
+high level ESMF objects such as Fields.  In the current release, the ESMF IO 
+capability is integrated with third-party software such as 
 \htmladdnormallink{Parallel IO (PIO)}{http://code.google.com/p/parallelio/}
-to read and write Fortran array data in binary/NetCDF format and 
+to read and write Fortran array data in MPI\_IO binary or NetCDF format, and 
 \htmladdnormallink{Xerces}{http:xerces.apache.org/xerces-c/} 
 Library to read and write Attribute data in XML format.  Other file IO
-functionalities, such as writing of error and log messages and input of
-configuration parameters from an ASCII file, are not covered in this
-document.
+functionalities, such as writing of error and log messages, input of
+configuration parameters from an ASCII file, and lower-level IO utilites are 
+covered in different sections of this document.  See the LogErr Class 
+\ref{sec:LogErr}, the Config Class \ref{sec:Config}, and the Fortran 
+I/O Utilities, \ref{sec:IOUtil} respectively.
 
 
 %\subsection{I/O architecture}
@@ -74,46 +74,42 @@ document.
 %containing information about location, field values associated with this 
 %location, and a list of neighbors, if relevant. 
 
-
 \subsection{ESMF Attribute}
 
-The metadata IO is handled via ESMF Attribute object. The third
-party software Xerces Library is integrated with ESMF to provide
+Metadata IO is handled via the ESMF Attribute class. The third
+party software Xerces C++ Library is used by ESMF to provide
 the ability to read and write Attribute data in XML file format.
-To enable this capability, the environment variable ESMF\_XERCES should be
-set. Details can be founds in ESMF User Guide, Third Party Libraries
-in "Building and Installing ESMF.
+To enable this capability, the environment variable ESMF\_XERCES must be
+set. Details can be found in the ESMF User Guide, "Building and Installing the ESMF", "Third Party Libraries".
 
 
 \subsection{Data I/O}
 
-ESMF provides parallel IO capability by integrating a third-party IO
-software, Parallel I/O (PIO). This is a software interface layer, was 
-first developed by the team under 
-\htmladdnormallink{CESM Software Engineering Group}{http://www.cesm.ucar.edu/cseg/}
-NCAR. In the current release, the read and write of the
-contents in the following ESMF objects are performed by PIO:
+ESMF provides parallel data IO capability by integrating a third-party IO
+software library, Parallel I/O (PIO). This is a software interface layer that
+was first developed by a team under the \htmladdnormallink{CESM Software Engineering Group}{http://www.cesm.ucar.edu/cseg/} at NCAR.  In the current release, reading and writing the contents of the following ESMF objects are performed by PIO:
 
 \begin{description}
-\item ESMF\_Array  (See section \ref{Array:IO})
-\item ESMF\_ArrayBundle  (See section \ref{ArrayBundle:IO})
-\item ESMF\_Field  (See section \ref{Field:IO})
-\item ESMF\_FieldBundle  (See section \ref{FieldBundle:IO})
+\item[\tt ESMF\_Array] See {\tt ESMF\_ArrayRead()} \ref{api:ArrayRead} and 
+{\tt ESMF\_ArrayWrite()} \ref{api:ArrayWrite}.
+\item[\tt ESMF\_ArrayBundle] See {\tt ESMF\_ArrayBundleRead()} 
+\ref{api:ArrayBundleRead} and 
+{\tt ESMF\_ArrayBundleWrite()} \ref{api:ArrayBundleWrite}.
+\item[\tt ESMF\_Field] See {\tt ESMF\_FieldRead()} \ref{api:FieldRead} and 
+{\tt ESMF\_FieldWrite()} \ref{api:FieldWrite}.
+\item[\tt ESMF\_FieldBundle] See {\tt ESMF\_FieldBundleRead()} 
+\ref{api:FieldBundleRead} and {\tt ESMF\_FieldBundleWrite()} 
+\ref{api:FieldBundleWrite}.
 \end{description}
 
-Two formats are supported, namely, binary format and NetCDF format.  
-It depends on the which environment variables are tuned on when ESMF is built,
-the system is expected to automatically detect file formats at runtime.
-
-Details of the environment variables can be founds in ESMF User Guide, 
-Third Party Libraries in "Building and Installing ESMF".
-
+Two formats are supported, namely, binary format (MPI\_IO) and NetCDF format. 
+The environment variables that are enabled when ESMF is built determine the format.  Details about the environment variables can be found in ESMF User Guide, 
+"Building and Installing the ESMF", "Third Party Libraries".
 
 
 \subsection{Data formats}
 
-Several standard formats are currently used in Earth Science modeling
-for input/output of data:
+Two standard formats are currently used within ESMF for input/output of data:
 
 \begin{description}
 \item[\bf NetCDF] Network Common Data Form (NetCDF) is an interface for 
@@ -137,10 +133,8 @@ A natural way for a machine to represent data is to use a native
 binary data representation. There are two choices of ordering of bytes
 (so-called {\it Big Endian} and {\it Little Endian}), and a lot of
 ambiguity in representing floating point data. The latter, however, is
-specified, if IEEE Floating Point Standard 754 is satisfied
-(\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). It is desirable
-to be able to use efficient native representation, and optionally
-provide ESMF metadata on a companion file using for example XML
+specified, if IEEE Floating Point Standard 754 is satisfied.
+(\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). 
 \cite{XML-W3C}.
 
 \end{description}
@@ -150,7 +144,3 @@ provide ESMF metadata on a companion file using for example XML
 %For example, ESMWF has created and employed relational-database based 
 %Observational Data Base (ODB) software \cite{ODB}.  However, such complex 
 %data management systems are beyond the scope of the basic ESMF I/O. 
-
-
-
-
