@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.76 2010/09/22 22:12:35 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.77 2010/09/30 21:04:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -981,26 +981,28 @@ endif
 ! In A SCRIP file}\label{sec:example:2DLogRecFromScrip}
 !
 ! ESMF supports the creation of a 2D curvilinear Grid using the coordinates 
-! defined in a SCRIP format Grid file~\cite{ref:SCRIP}. The grid must be a 2D
-! logically rectangular grid with {\tt grid\_rank} equal to 2.  The grid center
-! coordinates {\tt grid\_center\_lat} and {\tt grid\_center\_lon} are placed in the
-! ESMF\_STAGGERLOC\_CENTER location.  The {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon}
-! are ignored.  {\tt grid\_imask} are used to set the ESMF\_GRIDITEM\_MASK field,
-! where a zero value means the cell is masked out.
+! defined in a SCRIP format Grid file~\cite{ref:SCRIP}. The grid contained in the 
+! file must be a 2D logically rectangular grid with {\tt grid\_rank} in the file set
+! to 2.  The center coordinates variables {\tt grid\_center\_lat} and {\tt grid\_center\_lon} in the file
+! are placed in the ESMF\_STAGGERLOC\_CENTER location.  If the parameter {\tt addCornerStagger}
+! in the {\tt ESMF\_GridCreate} call is set to .true., then 
+! the variables {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} in the file
+! are used to set the ESMF\_STAGGERLOC\_CORNER coordinates, otherwise they are ignored.
+! The values in the {\tt grid\_imask} variable in the file are used to set the ESMF\_GRIDITEM\_MASK in the Grid.
 ! 
-! The following example code shows you how to create a 2D Grid using a SCRIP file
-! and a row only regular distribution:
+! The following example code shows you how to create a 2D Grid with both center and corner coordinates
+! using a SCRIP file and a row only regular distribution:
 !EOE
 
 #ifdef ESMF_NETCDF
 !BOC
-   filename = 'data/T42_grid.nc'
-   grid2D = ESMF_GridCreate(filename, (/PetCount,1/), rc=rc)
+   grid2D = ESMF_GridCreate(filename="data/T42_grid.nc", regDecomp=(/PetCount,1/), &
+              addCornerStagger=.true., rc=rc)
 !EOC
 #endif
 
 !BOE
-!  where T42\_grid.nc is a 2D global grid of size (128x64) and the Grid is distributed
+!  Where T42\_grid.nc is a 2D global grid of size (128x64) and the resulting Grid is distributed
 !  by partitioning the rows evenly over all the PETs.
 !EOE
 
