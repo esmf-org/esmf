@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.13 2010/09/23 21:12:50 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.14 2010/09/30 18:51:29 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -265,19 +265,12 @@
         minIndex = global_nmin, &
         maxIndex = global_nmax, &
         rc = rc)
-! TODO: restore the following code:
-! Partially restored, need a way to determine coordinate range
-!      call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-!                              globalCellCountPerDim=global_nmax, &
-!                              minGlobalCoordPerDim=global_min_coord, &
-!                              maxGlobalCoordPerDim=global_max_coord, rc=rc)
-!      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 !
 ! Extract and calculate some other quantities
 !
-      counts(1) = global_nmax(1) - global_nmin(1)
-      counts(2) = global_nmax(2) - global_nmin(2)
+      counts(1) = global_nmax(1) - global_nmin(1) + 1
+      counts(2) = global_nmax(2) - global_nmin(2) + 1
       x_min = 0.0 !global_min_coord(1)
       y_min = 0.0 !global_min_coord(2)
       x_max = 2.e+5 !global_max_coord(1)
@@ -398,7 +391,7 @@
       !
       ! Update export state with needed fields
       !
-      ! relink the rest of the Fields
+      ! TODO: determine if relinking is needed
       do i=2, datacount
 
         ! check isneeded flag here
@@ -505,14 +498,6 @@
 ! First, get size of delayout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      !call ESMF_GridGet(grid, distgrid=distgrid, rc=status)
-      !if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-      !call ESMF_DistGridGet(distgrid, delayout=layout, rc=status)
-      !if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-      !call ESMF_DELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
-      !                         rc=status)
-      !call ESMF_DELayoutGetDELocalInfo(layout, de_id, coord=pos, rc=status)
-
       ncounts = 1
       de_id = 0
       pos = 1
@@ -523,8 +508,8 @@
 !
 ! Set all cells to 0 by default
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           flag(i,j) = 0.0
         enddo
       enddo
@@ -532,8 +517,8 @@
 ! Left boundary
 !
       if (x.eq.1) then
-        do j = jmin_t, jmax_t
-          do i = imin_t, imin-1
+        do j = jmin_tc, jmax_tc
+          do i = imin_tc, imin_ec-1
             flag(i,j) = 1.0
           enddo
         enddo
@@ -542,8 +527,8 @@
 ! Right boundary
 !
       if (x.eq.nx) then
-        do j = jmin_t, jmax_t
-          do i = imax+1, imax_t
+        do j = jmin_tc, jmax_tc
+          do i = imax_ec+1, imax_tc
             flag(i,j) = 2.0
           enddo
         enddo
@@ -552,8 +537,8 @@
 ! Bottom boundary
 !
       if (y.eq.1) then
-        do j = jmin_t, jmin-1
-          do i = imin_t, imax_t
+        do j = jmin_tc, jmin_ec-1
+          do i = imin_tc, imax_tc
             flag(i,j) = 3.0
           enddo
         enddo
@@ -562,31 +547,37 @@
 ! Top boundary
 !
       if (y.eq.ny) then
-        do j = jmax+1, jmax_t
-          do i = imin_t, imax_t
+        do j = jmax_ec+1, jmax_tc
+          do i = imin_tc, imax_tc
             flag(i,j) = 4.0
           enddo
         enddo
-        do i = imin_t, imax_t
-          if (flag(i,jmax).eq.0.0) flag(i,jmax) = 5.0
+        do i = imin_tc, imax_tc
+          if (flag(i,jmax_ec).eq.0.0) flag(i,jmax_ec) = 5.0
         enddo
       endif
 !
 ! set up initial velocities 
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+! u has uneven halo in i direction
+      do j = jmin_te1, jmax_te1
+        do i = imin_te1, imax_te1
           u(i,j) = u0
-          v(i,j) = v0
           rhou(i,j) = rho0*u0
+        enddo
+      enddo
+! v has uneven halo in j direction
+      do j = jmin_te2, jmax_te2
+        do i = imin_te2, imax_te2
+          v(i,j) = v0
           rhov(i,j) = rho0*v0
         enddo
       enddo
 !
 ! set up initial state properties
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           p(i,j) = (gamma-1.0) * rho0 * sie0
           q(i,j) = q0
           sie(i,j) = sie0
@@ -598,13 +589,19 @@
 ! initialize inlet parameters TODO:  assume for now only left boundary
 !                                    can be inflow
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           if (flag(i,j).eq.1.0) then
             rho(i,j) = rhoin
             sie(i,j) = siein
-            u(i,j) = uin
             rhoi(i,j) = rhoin*siein
+          endif
+        enddo
+      enddo
+      do j = jmin_te1, jmax_te1
+        do i = imin_te1, imax_te1
+          if (flag(i,j).eq.1.0) then
+            u(i,j) = uin
             rhou(i,j) = rhoin*uin
           endif
         enddo
@@ -617,17 +614,11 @@
           global(1,2) = j
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
-            ! TODO: restore
-            ! cheat for now on 1 PET
-            !call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER,&
-            !                          global2d=global, local2d=local, rc=status)
             local = global
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
-  ! TODO:  The above two lines are junk, making up for the halo width which is
-  !        no longer in Grid. GlobalToLocal should be an Array method
             if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
-              flag(local(1,1),local(1,2)) = -1
+              flag(local(1,1)-1,local(1,2)-1) = -1
             endif
           enddo
         enddo
@@ -639,28 +630,24 @@
         do j = 1, 2 
           global(1,1) = i
           global(1,2) = j
-          ! TODO: restore
-          ! cheat for now on 1 PET
-          !call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER, &
-          !                            global2d=global, local2d=local, rc=status)
           local = global
           if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
           if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
-! TODO:  The above two lines are junk, making up for the halo width which is
-!        no longer in Grid. GlobalToLocal should be an Array method
           if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
-            flag(local(1,1),local(1,2)) = 10
+            flag(local(1,1)-1,local(1,2)-1) = 10
           endif
         enddo
       enddo
 !
 ! obstacle normal boundary conditions
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           if (flag(i,j) .eq. -1.0) then
             u(i,j) = 0.0
             rhou(i,j) = 0.0
+          endif
+          if (flag(i,j) .eq. -1.0) then
             v(i,j) = 0.0
             rhov(i,j) = 0.0
           endif
@@ -677,8 +664,8 @@
 !
 ! obstacle tangential boundary conditions for free-slip
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           if (flag(i,j).eq.-1.0 .and. flag(i,j+1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
             u(i,j) = u(i,j+1)
             rhou(i,j) = rhou(i,j+1)
@@ -804,8 +791,8 @@
 ! Copy injection values from exclusive domain into ghost cells
 ! and set other physical parameters to be consistent
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           if (flag(i,j).eq.10) then
             if (flag(i,j-1).eq.10) then
               sie(i,j-1) = sie(i,j)
@@ -930,8 +917,8 @@
 !
 ! calculate RHOU's and RHOV's
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           u_ij  = 0.5 * (u(i-1,j) + u(i,j))
           u_ipj = 0.5 * (u(i+1,j) + u(i,j))
           if (u_ij .ge. 0.0) then
@@ -984,8 +971,8 @@
 !\end{verbatim}
 !EOP
 
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           v_ij  = 0.5 * (v(i,j-1) + v(i,j))
           v_ijp = 0.5 * (v(i,j+1) + v(i,j))
           if (v_ij .ge. 0.0) then
@@ -1071,8 +1058,8 @@
 !    
 ! calculate RHOI's
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           if (flag(i,j).ge.0.0) then
           if (u(i-1,j) .ge. 0.0) then
             rhoiu_m = u(i-1,j) * rhoi(i-1,j)
@@ -1119,19 +1106,19 @@
 !
 !  add boundary conditions to RHOI's
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           if (flag(i,j).eq.1.0) then
             rhoi(i,j) = rhoin*siein 
           endif
           if (flag(i,j).eq.2.0) then
-            rhoi(i,j) = rhoi(imax,j)
+            rhoi(i,j) = rhoi(imax_ec,j)
           endif
           if (flag(i,j).eq.3.0) then
-            rhoi(i,j) = rhoi(i,jmin)
+            rhoi(i,j) = rhoi(i,jmin_ec)
           endif
           if (flag(i,j).eq.4.0) then
-            rhoi(i,j) = rhoi(i,jmax)
+            rhoi(i,j) = rhoi(i,jmax_ec)
           endif
         enddo
       enddo
@@ -1174,7 +1161,7 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real(kind=ESMF_KIND_R4), dimension(imax,jmax) :: rho_new
+      real(kind=ESMF_KIND_R4), dimension(imax_ec,jmax_ec) :: rho_new
       real(kind=ESMF_KIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p
 !
 ! Set initial values
@@ -1191,8 +1178,8 @@
 !    
 ! determine new densities
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           if (u(i-1,j).ge.0.0) then
             rhou_m = u(i-1,j)*rho(i-1,j)
           else
@@ -1220,8 +1207,8 @@
 !
 !  update densities and internal energies
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           rho(i,j) = rho_new(i,j)
           if (rho_new(i,j).gt.0.0) sie(i,j) = rhoi(i,j)/rho_new(i,j)
         enddo
@@ -1229,21 +1216,21 @@
 !
 !  add boundary conditions  WARNING: these are not general
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           if (flag(i,j).eq.1.0) then
-            sie(i,j) = 2.*siein - sie(imin,j)
-            rho(i,j) = 2.*rhoin - rho(imin,j)
+            sie(i,j) = 2.*siein - sie(imin_ec,j)
+            rho(i,j) = 2.*rhoin - rho(imin_ec,j)
           endif
           if (flag(i,j).eq.2.0) then
-            sie(i,j) = sie(imax,j)
-            rho(i,j) = rho(imax,j)
+            sie(i,j) = sie(imax_ec,j)
+            rho(i,j) = rho(imax_ec,j)
           endif
           if (flag(i,j).eq.3.0) then
-            sie(i,j) = sie(i,jmin)
+            sie(i,j) = sie(i,jmin_ec)
           endif
           if (flag(i,j).eq.4.0) then
-            sie(i,j) = sie(i,jmax)
+            sie(i,j) = sie(i,jmax_ec)
           endif
           if (flag(i,j).eq.-1.0) then
             sie(i,j) = sieobs
@@ -1311,23 +1298,28 @@
 !
 !  update velocities
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           rhoav = 0.5*(rho(i,j) + rho(i+1,j))
           if (rhoav.gt.0.0) u(i,j) = rhou(i,j)/rhoav
         enddo
       enddo
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           rhoav = 0.5*(rho(i,j) + rho(i,j+1))
           if (rhoav.gt.0.0) v(i,j) = rhov(i,j)/rhoav
+        enddo
+      enddo
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
+          omega(i,j) = (v(i,j+1)-v(i,j))/dx - (u(i+1,j)-u(i,j))/dy
         enddo
       enddo
 !
 !  add boundary conditions  WARNING: these are not general
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           if (flag(i,j).eq.1.0) then
             u(i,j) = uin
             rhou(i,j) = uin*rho(i,j)
@@ -1335,17 +1327,17 @@
             rhov(i,j) = 0.0
           endif
           if (flag(i,j).eq.2.0) then
-            u(i,j) = u(imax,j)
-            v(i,j) = v(imax,j)
+            u(i,j) = u(imax_ec,j)
+            v(i,j) = v(imax_ec,j)
           endif
           if (flag(i,j).eq.3.0) then
-            u(i,j) = u(i,jmin)
+            u(i,j) = u(i,jmin_ec)
             rhou(i,j) = u(i,j)*rho(i,j)
             v(i,j) = 0.0
             rhov(i,j) = 0.0
           endif
           if (flag(i,j).eq.4.0) then
-            u(i,j) = u(i,jmax)
+            u(i,j) = u(i,jmax_ec)
             rhou(i,j) = u(i,j)*rho(i,j)
             v(i,j) = 0.0
             rhov(i,j) = 0.0
@@ -1363,8 +1355,8 @@
 !
 ! obstacle normal boundary conditions
 !
-      do j = jmin_t, jmax
-        do i = imin_t, imax
+      do j = jmin_tc, jmax_ec
+        do i = imin_tc, imax_ec
           if (flag(i,j) .eq. -1.0) then
             u(i,j) = 0.0
             rhou(i,j) = 0.0
@@ -1384,8 +1376,8 @@
 !
 ! obstacle tangential boundary conditions for free-slip
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_ec, jmax_ec
+        do i = imin_ec, imax_ec
           if (flag(i,j).eq.-1.0 .and. flag(i,j+1).ne.-1.0 .and. flag(i+1,j).eq.-1.0) then
             u(i,j) = u(i,j+1)
             rhou(i,j) = rhou(i,j+1)
@@ -1474,13 +1466,13 @@
 !
 !  new pressures and viscosities
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           p(i,j) = (gamma-1.0)*rho(i,j)*sie(i,j)
         enddo
       enddo
-      do j = jmin, jmax_t
-        do i = imin, imax_t
+      do j = jmin_ec, jmax_tc
+        do i = imin_ec, imax_tc
           q(i,j) = q0*rho(i,j)*uin*sqrt(dx**2+dy**2)*((u(i-1,j)-u(i,j))/dx &
                                                      +(v(i,j-1)-v(i,j))/dy)
           q(i,j) = max(q(i,j), 0.0)
@@ -1489,19 +1481,19 @@
 !
 !  add boundary conditions
 !
-      do j = jmin_t, jmax_t
-        do i = imin_t, imax_t
+      do j = jmin_tc, jmax_tc
+        do i = imin_tc, imax_tc
           if (flag(i,j).eq.2.0) then
-            p(i,j) = p(imax,j)
-            q(i,j) = q(imax,j)
+            p(i,j) = p(imax_ec,j)
+            q(i,j) = q(imax_ec,j)
           endif
           if (flag(i,j).eq.3.0) then
-            p(i,j) = p(i,jmin)
-            q(i,j) = q(i,jmin)
+            p(i,j) = p(i,jmin_ec)
+            q(i,j) = q(i,jmin_ec)
           endif
           if (flag(i,j).eq.4.0) then
-            p(i,j) = p(i,jmax)
-            q(i,j) = q(i,jmax)
+            p(i,j) = p(i,jmax_ec)
+            q(i,j) = q(i,jmax_ec)
           endif
         enddo
       enddo
@@ -1648,11 +1640,14 @@
       type(ESMF_Array) :: outarray
       type(ESMF_VM) :: vm
       character(len=ESMF_MAXSTR) :: filename
+      logical :: append
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
       rcpresent = .FALSE.
+      append = .true.
+      if(file_no == 1) append = .false.
 !
 ! Initialize return code
 !
@@ -1683,8 +1678,8 @@
       call ESMF_FieldWrite(field_v, file=filename, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      write(filename, 20)  "V_velocity", file_no, "nc"
-      call ESMF_FieldWrite(field_v, file=filename, rc=status)
+      write(filename, 20)  "OMEGA", file_no, "nc"
+      call ESMF_FieldWrite(field_omega, file=filename, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       write(filename, 20)  "SIE", file_no, "nc"
@@ -1697,8 +1692,8 @@
         call ESMF_FieldWrite(field_flag, file="FLAG.nc", rc=status)
         if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-        do j = jmin, jmax
-          do i = imin, imax
+        do j = jmin_ec, jmax_ec
+          do i = imin_ec, imax_ec
             de(i,j) = pet_id
           enddo
         enddo

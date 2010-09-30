@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.6 2010/09/23 21:12:50 feiliu Exp $
+! $Id: FlowArraysMod.F90,v 1.7 2010/09/30 18:51:29 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -25,7 +25,7 @@
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-      real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: sie, u, v
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: sie, u, v, omega
       real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: rho, rhoi, rhou, rhov
       real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: p, q, flag, de
       integer, dimension(4), save :: nbc
@@ -34,17 +34,23 @@
 ! Fields
 !
       public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-                field_rhov, field_p, field_q, field_flag, field_de, halohandle
+                field_rhov, field_p, field_q, field_flag, field_de, halohandle, &
+                field_omega
 
       type(ESMF_Field), save :: field_sie, field_u, field_v, field_rho, field_rhoi, &
                                 field_rhou, field_rhov, field_p, field_q, field_flag, &
-                                field_de
+                                field_de, field_omega
       type(ESMF_RouteHandle), save :: halohandle
 !
 ! scalars here
 !
-      public :: imin, imax, jmin, jmax
-      public :: imin_t, imax_t, jmin_t, jmax_t
+      public :: imin_ec, imax_ec, jmin_ec, jmax_ec
+      public :: imin_tc, imax_tc, jmin_tc, jmax_tc
+      public :: imin_ee1, imax_ee1, jmin_ee1, jmax_ee1
+      public :: imin_te1, imax_te1, jmin_te1, jmax_te1
+      public :: imin_ee2, imax_ee2, jmin_ee2, jmax_ee2
+      public :: imin_te2, imax_te2, jmin_te2, jmax_te2
+
       public :: printout
       public :: nobsdesc
       public :: iflo_min, iflo_max
@@ -54,8 +60,14 @@
       public :: gamma, akb
       public :: q0, u0, v0, sie0, rho0
       public :: sieobs
-      integer :: imin, imax, jmin, jmax
-      integer :: imin_t, imax_t, jmin_t, jmax_t
+
+      integer :: imin_ec, imax_ec, jmin_ec, jmax_ec
+      integer :: imin_tc, imax_tc, jmin_tc, jmax_tc
+      integer :: imin_ee1, imax_ee1, jmin_ee1, jmax_ee1
+      integer :: imin_te1, imax_te1, jmin_te1, jmax_te1
+      integer :: imin_ee2, imax_ee2, jmin_ee2, jmax_ee2
+      integer :: imin_te2, imax_te2, jmin_te2, jmax_te2
+
       integer :: printout
       integer :: nobsdesc
       integer :: iflo_min, iflo_max
@@ -83,7 +95,7 @@
       logical :: rcpresent
       integer :: haloLWidth(2), haloUWidth(2)
       type(ESMF_ArraySpec) :: arrayspec
-      integer, dimension(2) :: tlb, tub, clb, cub
+      integer, dimension(2) :: lb, ub, tlb, tub
 !
 ! Set initial values
 !
@@ -99,8 +111,8 @@
 !
 ! create fields and get pointers to data
 !
-      haloLWidth = 0
-      haloUWidth = 2
+      haloLWidth = 1
+      haloUWidth = 1
 !BOP
 !
 ! !DESCRIPTION:
@@ -133,13 +145,13 @@
 !EOP
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
-                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/1,2/), name="U", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="U", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_u, farrayPtr=u, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
-                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/2,1/), name="V", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="V", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_v, farrayPtr=v, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
@@ -157,13 +169,13 @@
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
-                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/1,2/), name="RHOU", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="RHOU", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhou, farrayPtr=rhou, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE2, &
-                   maxHaloLWidth=(/0,0/), maxHaloUWidth=(/2,1/), name="RHOV", rc=status)
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="RHOV", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_rhov, farrayPtr=rhov, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
@@ -172,6 +184,12 @@
                    maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="P", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       call ESMF_FieldGet(field_p, farrayPtr=p, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+
+      field_omega= ESMF_FieldCreate(grid, arrayspec, &
+                   maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="OMEGA", rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+      call ESMF_FieldGet(field_omega, farrayPtr=omega, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, &
@@ -197,23 +215,59 @@
         return
       endif
 !
-! set some of the scalars from Field information
+! get bounds information from Field DE for center stagger
 !
       call ESMF_FieldGetBounds(field_de, &
-           totalLBound=tlb, totalUBound=tub, &
-           rc=status)
+                        totalLBound=tlb, totalUBound=tub, &
+                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
       ! Computational region: data unique to this DE
-      imin = tlb(1)+1
-      imax = tub(1)-1
-      jmin = tlb(2)+1
-      jmax = tub(2)-1
+      imin_ec = lb(1)
+      imax_ec = ub(1)
+      jmin_ec = lb(2)
+      jmax_ec = ub(2)
       ! Total region: data plus the halo widths
-      imin_t = tlb(1) 
-      imax_t = tub(1)
-      jmin_t = tlb(2)
-      jmax_t = tub(2)
+      imin_tc = tlb(1) 
+      imax_tc = tub(1)
+      jmin_tc = tlb(2)
+      jmax_tc = tub(2)
+!
+! get bounds information from Field U for edge1 stagger
+!
+      call ESMF_FieldGetBounds(field_u, &
+                        totalLBound=tlb, totalUBound=tub, &
+                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+
+      ! Computational region: data unique to this DE
+      imin_ee1 = lb(1)
+      imax_ee1 = ub(1)
+      jmin_ee1 = lb(2)
+      jmax_ee1 = ub(2)
+      ! Total region: data plus the halo widths
+      imin_te1 = tlb(1) 
+      imax_te1 = tub(1)
+      jmin_te1 = tlb(2)
+      jmax_te1 = tub(2)
+!
+! get bounds information from Field V for edge2 stagger
+!
+      call ESMF_FieldGetBounds(field_v, &
+                        totalLBound=tlb, totalUBound=tub, &
+                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
+      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
+
+      ! Computational region: data unique to this DE
+      imin_ee2 = lb(1)
+      imax_ee2 = ub(1)
+      jmin_ee2 = lb(2)
+      jmax_ee2 = ub(2)
+      ! Total region: data plus the halo widths
+      imin_te2 = tlb(1) 
+      imax_te2 = tub(1)
+      jmin_te2 = tlb(2)
+      jmax_te2 = tub(2)
 
       if(rcpresent) rc = ESMF_SUCCESS
 

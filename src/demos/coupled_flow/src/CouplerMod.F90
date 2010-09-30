@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.8 2010/09/23 21:12:50 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.9 2010/09/30 18:51:29 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -19,6 +19,8 @@
     module global_data
       use ESMF_Mod
       type(ESMF_RouteHandle), save :: fromFlow_rh, fromInject_rh
+      type(ESMF_RouteHandle), save :: fromFlowe1_rh, fromInjecte1_rh
+      type(ESMF_RouteHandle), save :: fromFlowe2_rh, fromInjecte2_rh
     end module
 
     module CouplerMod
@@ -128,6 +130,7 @@
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+    ! Center Stagger
     call ESMF_StateGet(importState, name=statename, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     call ESMF_StateGet(importState, "SIE", src_field, rc=rc)
@@ -135,6 +138,7 @@
     call ESMF_StateGet(exportState, "SIE", dst_field, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+    ! Compute routehandle
     if (trim(statename) .eq. "FlowSolver Feedback") then
       call ESMF_StateSetNeeded(importState, "SIE", ESMF_NEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
@@ -166,6 +170,44 @@
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     endif
+
+    ! Edge1 Stagger
+    !call ESMF_StateGet(importState, name=statename, rc=rc)
+    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !call ESMF_StateGet(importState, "U", src_field, rc=rc)
+    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !call ESMF_StateGet(exportState, "U", dst_field, rc=rc)
+    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !if (trim(statename) .eq. "FlowSolver Feedback") then
+    !  call ESMF_FieldRedistStore(src_field, dst_field, &
+    !                             routehandle=fromFlowe1_rh, rc=rc)
+    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !endif
+    !if (trim(statename) .eq. "Injection Feedback") then
+    !  call ESMF_FieldRedistStore(src_field, dst_field, &
+    !                             routehandle=fromInjecte1_rh, rc=rc)
+    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    !endif
+
+    !! Edge2 Stagger
+    !call ESMF_StateGet(importState, name=statename, rc=rc)
+    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !call ESMF_StateGet(importState, "V", src_field, rc=rc)
+    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !call ESMF_StateGet(exportState, "V", dst_field, rc=rc)
+    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !if (trim(statename) .eq. "FlowSolver Feedback") then
+    !  call ESMF_FieldRedistStore(src_field, dst_field, &
+    !                             routehandle=fromFlowe2_rh, rc=rc)
+    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    !endif
+    !if (trim(statename) .eq. "Injection Feedback") then
+    !  call ESMF_FieldRedistStore(src_field, dst_field, &
+    !                             routehandle=fromInjecte2_rh, rc=rc)
+    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+    !endif
 
     print *, "Coupler Init returning"
    
@@ -256,8 +298,8 @@
 !   The following piece of code provides an example of calling the data
 !   redistribution routine  between two Fields in the Coupler Component.  
 !   Unlike regrid, which translates between
-!   different IGrids, redist translates between different DELayouts on
-!   the same IGrid.   The first two lines get the Fields from the 
+!   different Grids, redist translates between different DELayouts on
+!   the same Grid.   The first two lines get the Fields from the 
 !   States, each corresponding to a different subcomponent.  One is
 !   an Export State and the other is an Import State.
 !
@@ -270,7 +312,7 @@
 !
 !   The redist routine uses information contained in the Fields and the
 !   Coupler VM object to call the communication routines to move the data.
-!   Because many Fields may share the same IGrid association, the same
+!   Because many Fields may share the same Grid association, the same
 !   routing information may be needed repeatedly.  Route information is 
 !   saved so the precomputed information can be retained.  The following 
 !   is an example of a Field redist call:

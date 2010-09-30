@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.10 2010/09/17 17:01:13 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.11 2010/09/30 18:51:29 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -239,6 +239,7 @@
       grid = ESMF_GridCreateShapeTile(maxIndex=counts, &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
+                             gridEdgeLWidth=(/0,0/), &
                              name="source grid", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       ! u
