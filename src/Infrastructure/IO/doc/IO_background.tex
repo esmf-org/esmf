@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.27 2010/09/30 05:37:48 eschwab Exp $
+% $Id: IO_background.tex,v 1.28 2010/09/30 20:25:14 samsoncheung Exp $
 
 %\subsection{Background}
 
@@ -87,7 +87,12 @@ set. Details can be found in the ESMF User Guide, "Building and Installing the E
 
 ESMF provides parallel data IO capability by integrating a third-party IO
 software library, Parallel I/O (PIO). This is a software interface layer that
-was first developed by a team under the \htmladdnormallink{CESM Software Engineering Group}{http://www.cesm.ucar.edu/cseg/} at NCAR.  In the current release, reading and writing the contents of the following ESMF objects are performed by PIO:
+was first developed by a team under the \htmladdnormallink{CESM Software Engineering Group}{http://www.cesm.ucar.edu/cseg/} at NCAR.
+In order to use this parallel IO capability, the environment variable ESMF\_PIO should
+be set to "internal".  As mentioned above, MPI_IO binary or NetCDF formats 
+are supported; the environment variables ESMF\_NETCDF or/and ESMF\_PNETCDF
+should be set to "standard" to enable NetCDF IO format.
+In the current release, reading and writing the contents of the following ESMF objects are performed by PIO:
 
 \begin{description}
 \item[\tt ESMF\_Array] See {\tt ESMF\_ArrayRead()} \ref{api:ArrayRead} and 
