@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.5 2010/09/27 16:51:02 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.6 2010/09/30 16:58:46 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.5 2010/09/27 16:51:02 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.6 2010/09/30 16:58:46 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -370,7 +370,7 @@ double great_circle_area(int n, double *pnts) {
 
 void remove_0len_edges3D(int *num_p, double *p) {
 
-#define EQUAL_TOL 1E-7
+#define EQUAL_TOL 1E-15
 #define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
                            (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&	\
                            (std::abs(p1[2]-p2[2]) < EQUAL_TOL))
