@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.124 2010/09/30 05:35:13 eschwab Exp $
+! $Id: ESMF_Array.F90,v 1.125 2010/09/30 20:15:36 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.124 2010/09/30 05:35:13 eschwab Exp $'
+    '$Id: ESMF_Array.F90,v 1.125 2010/09/30 20:15:36 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -1259,7 +1259,9 @@ contains
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Write the Array data into a file.
+!   Write the Array data into a file. For this API to be functional, the 
+!   environment variable "ESMF_PIO" should be set to "internal" when ESMF
+!   library is built. Please see Section~\ref{io:dataio}. 
 !
 !   Limitations:
 !   \begin{itemize}
