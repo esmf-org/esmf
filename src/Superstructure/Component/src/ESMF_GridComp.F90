@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.135 2010/09/23 20:51:37 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.136 2010/10/01 00:05:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.135 2010/09/23 20:51:37 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.136 2010/10/01 00:05:07 theurich Exp $'
 
 !==============================================================================
 !
@@ -737,7 +737,7 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
       phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
