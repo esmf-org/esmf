@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.100 2010/10/01 23:06:04 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.101 2010/10/01 23:20:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.100 2010/10/01 23:06:04 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.101 2010/10/01 23:20:13 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1817,59 +1817,59 @@ print *, ' '
           isLBound=isLBound, isUBound=isUBound, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-     if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
-     if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+     if ((.not. isLBound(1)) .or. (.not. isLBound(2))) correct=.false. 
+     if ((isUBound(1)) .or. (isUBound(2))) correct=.false. 
 
      call ESMF_GridGet(grid, localDE=1, & 
           isLBound=isLBound, isUBound=isUBound, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-     if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
-     if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+     if ((isLBound(1)) .or. (.not. isLBound(2))) correct=.false. 
+     if ((.not. isUBound(1)) .or. (isUBound(2))) correct=.false. 
 
      call ESMF_GridGet(grid, localDE=2, & 
           isLBound=isLBound, isUBound=isUBound, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-     if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
-     if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+     if ((.not. isLBound(1)) .or. (isLBound(2))) correct=.false. 
+     if ((isUBound(1)) .or. (.not. isUBound(2))) correct=.false. 
 
      call ESMF_GridGet(grid, localDE=3, & 
           isLBound=isLBound, isUBound=isUBound, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-     if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
-     if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+     if ((isLBound(1)) .or. (isLBound(2))) correct=.false. 
+     if ((.not. isUBound(1)) .or. (.not. isUBound(2))) correct=.false. 
 
    else if (petCount .eq. 4) then
      if (localPet .eq. 0) then
         call ESMF_GridGet(grid, localDE=0, & 
            isLBound=isLBound, isUBound=isUBound, rc=localrc)
+        if ((.not. isLBound(1)) .or. (.not. isLBound(2))) correct=.false. 
+        if ((isUBound(1)) .or. (isUBound(2))) correct=.false. 
 
-        if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
-        if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
      else if (localPet .eq. 1) then
         call ESMF_GridGet(grid, localDE=0, & 
              isLBound=isLBound, isUBound=isUBound, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-        if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
-        if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+        if ((isLBound(1)) .or. (.not. isLBound(2))) correct=.false. 
+        if ((.not. isUBound(1)) .or. (isUBound(2))) correct=.false. 
      else if (localPet .eq. 2) then
         call ESMF_GridGet(grid, localDE=0, & 
              isLBound=isLBound, isUBound=isUBound, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-        if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
-        if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+        if ((.not. isLBound(1)) .or. (isLBound(2))) correct=.false. 
+        if ((isUBound(1)) .or. (.not. isUBound(2))) correct=.false. 
      else if (localPet .eq. 3) then
 
         call ESMF_GridGet(grid, localDE=0, & 
              isLBound=isLBound, isUBound=isUBound, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-        if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
-        if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+        if ((isLBound(1)) .or. (isLBound(2))) correct=.false. 
+        if ((.not. isUBound(1)) .or. (.not. isUBound(2))) correct=.false. 
      endif
    endif
 
