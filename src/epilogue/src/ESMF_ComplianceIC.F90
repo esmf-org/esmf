@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.3 2010/10/01 16:12:13 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.4 2010/10/01 19:12:13 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -30,7 +30,7 @@ module ESMF_ComplianceICMod
 !   !  The setvm routine is used by the child component to set VM properties
 !   !TODO:  currently the setvmIC() is _not_ hooked into the ESMF callback 
 
-  subroutine setvmIC(comp, rc)
+  recursive subroutine setvmIC(comp, rc)
     type(ESMF_GridComp)   :: comp
     integer, intent(out)  :: rc
     
@@ -52,7 +52,7 @@ module ESMF_ComplianceICMod
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
  
-  subroutine registerIC(comp, rc)
+  recursive subroutine registerIC(comp, rc)
     type(ESMF_GridComp)   :: comp
     integer, intent(out)  :: rc
 
@@ -184,7 +184,7 @@ module ESMF_ComplianceICMod
 !-------------------------------------------------------------------------
 !   !   Initialization routine.
     
-  subroutine ic_init(comp, importState, exportState, clock, rc)
+  recursive subroutine ic_init(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: comp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -194,6 +194,7 @@ module ESMF_ComplianceICMod
     integer                 :: userrc
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
+    type(ESMF_Clock)        :: clockCopy
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -225,6 +226,13 @@ module ESMF_ComplianceICMod
     ! compliance check exportState
     call checkState(prefix, referenceName="exportState", state=exportState, &
       rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    ! compliance check clock usage
+    call clockUsageIncoming(prefix, clock, clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -278,14 +286,21 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    ! Component Attributes should be set up -> ready to output
-    call ESMF_AttributeWrite(comp, convention='CIM 1.0', &
-      purpose='Model Component Simulation Description', &
-      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+    ! compliance check clock usage
+    call clockUsageOutgoing(prefix, clock, clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+
+    ! Component Attributes should be set up -> ready to output
+!    call ESMF_AttributeWrite(comp, convention='CIM 1.0', &
+!      purpose='Model Component Simulation Description', &
+!      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+!    if (ESMF_LogFoundError(rc, &
+!      line=__LINE__, &
+!      file=__FILE__)) &
+!      return  ! bail out
     
     
     call ESMF_LogWrite(trim(prefix)//"Stop InitializeEpilogue.", &
@@ -304,7 +319,7 @@ module ESMF_ComplianceICMod
 !-------------------------------------------------------------------------
 !   !  Run routine
  
-  subroutine ic_run(comp, importState, exportState, clock, rc)
+  recursive subroutine ic_run(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: comp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -413,7 +428,7 @@ module ESMF_ComplianceICMod
 !-------------------------------------------------------------------------
 !   !  Finalize routine
  
-  subroutine ic_final(comp, importState, exportState, clock, rc)
+  recursive subroutine ic_final(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: comp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -524,12 +539,14 @@ module ESMF_ComplianceICMod
 ! IC HELPER ROUTINES:
 !-------------------------------------------------------------------------
 
-  subroutine prefixString(comp, prefix, rc)
-    type(ESMF_GridComp)         :: comp
-    character(*), intent(inout) :: prefix
-    integer, intent(out)        :: rc
+  recursive subroutine prefixString(comp, prefix, rc)
+    type(ESMF_GridComp)                       :: comp
+    character(*),       intent(inout)         :: prefix
+    integer,            intent(out), optional :: rc
 
     character(ESMF_MAXSTR) :: compName
+    
+    if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_GridCompGet(comp, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -543,11 +560,11 @@ module ESMF_ComplianceICMod
 
 !-------------------------------------------------------------------------
 
-  subroutine checkState(prefix, referenceName, state, rc)
-    character(*), intent(in)    :: prefix
-    character(*), intent(in)    :: referenceName
-    type(ESMF_State)            :: state
-    integer, intent(out)        :: rc
+  recursive subroutine checkState(prefix, referenceName, state, rc)
+    character(*), intent(in)              :: prefix
+    character(*), intent(in)              :: referenceName
+    type(ESMF_State)                      :: state
+    integer,      intent(out), optional   :: rc
       
     logical                               :: stateValid
     integer                               :: itemCount, item
@@ -556,6 +573,8 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: tempString
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
     type(ESMF_StateItemType), allocatable :: stateitemtypeList(:)
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
     stateValid = .true.
     ! Ensure that the State is a valid object
@@ -662,12 +681,133 @@ module ESMF_ComplianceICMod
         
         deallocate(stateitemtypeList)
         deallocate(itemNameList)
-      ! Ensure that neither Arrays nor ArrayBundles are passed through the State
-!                                itemNameList, stateitemtypeList, rc)
       endif
     endif      
   end subroutine
 
+!-------------------------------------------------------------------------
+
+  recursive subroutine clockUsageIncoming(prefix, clock, clockCopy, rc)
+    character(*), intent(in)                :: prefix
+    type(ESMF_Clock), intent(in)            :: clock
+    type(ESMF_Clock), intent(inout)         :: clockCopy
+    integer,          intent(out), optional :: rc
+    
+    logical                                 :: clockValid
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    clockValid = .true.
+    ! Ensure that the Clock is a valid object
+    if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) then
+      call ESMF_LogWrite(trim(prefix)//" ==> The incoming clock is invalid!", &
+        ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      clockValid = .false.
+    endif
+    
+    if (clockValid) then
+      clockCopy = ESMF_ClockCreate(clock, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+    
+  end subroutine
+
+!-------------------------------------------------------------------------
+
+  recursive subroutine clockUsageOutgoing(prefix, clock, clockCopy, rc)
+    character(*), intent(in)                :: prefix
+    type(ESMF_Clock), intent(in)            :: clock
+    type(ESMF_Clock), intent(inout)         :: clockCopy
+    integer,          intent(out), optional :: rc
+    
+    logical                                 :: clockValid
+    logical                                 :: clockModified
+    
+    character (ESMF_MAXSTR) :: name, nameCopy
+    type(ESMF_TimeInterval) :: timeStep, timeStepCopy
+    type(ESMF_Time)         :: startTime, startTimeCopy
+    type(ESMF_Time)         :: stopTime, stopTimeCopy
+    type(ESMF_TimeInterval) :: runDuration, runDurationCopy
+    real(ESMF_KIND_R8)      :: runTimeStepCount, runTimeStepCountCopy
+    type(ESMF_Time)         :: refTime, refTimeCopy
+    type(ESMF_Time)         :: currTime, currTimeCopy
+    integer(ESMF_KIND_I8)   :: advanceCount, advanceCountCopy
+    type(ESMF_Direction)    :: direction, directionCopy
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    clockValid = .true.
+    ! Ensure that the Clock is a valid object
+    if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) clockValid = .false.
+    
+    
+    
+    if (clockValid) then
+      clockModified = .false.
+      
+      call ESMF_ClockGet(clock, name=name, timeStep=timeStep, &
+        startTime=startTime, stopTime=stopTime, runDuration=runDuration, &
+        runTimeStepCount=runTimeStepCount, refTime=refTime, currTime=currTime, &
+        advanceCount=advanceCount, direction=direction, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    
+      call ESMF_ClockGet(clockCopy, name=nameCopy, timeStep=timeStepCopy, &
+        startTime=startTimeCopy, stopTime=stopTimeCopy, runDuration=runDurationCopy, &
+        runTimeStepCount=runTimeStepCountCopy, refTime=refTimeCopy, currTime=currTimeCopy, &
+        advanceCount=advanceCountCopy, direction=directionCopy, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      if (name /= nameCopy) clockModified = .true.
+      if (timeStep /= timeStepCopy) clockModified = .true.
+      if (startTime /= startTimeCopy) clockModified = .true.
+      if (stopTime /= stopTimeCopy) clockModified = .true.
+      if (runDuration /= runDurationCopy) clockModified = .true.
+      if (runTimeStepCount /= runTimeStepCountCopy) clockModified = .true.
+      if (refTime /= refTimeCopy) clockModified = .true.
+      if (currTime /= currTimeCopy) clockModified = .true.
+      if (advanceCount /= advanceCountCopy) clockModified = .true.
+      if (direction /= directionCopy) clockModified = .true.
+    
+      if (clockModified) then
+        call ESMF_LogWrite(trim(prefix)//" ==> The incoming clock was modified!", &
+          ESMF_LOG_ERROR, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      else
+        call ESMF_LogWrite(trim(prefix)//" The incoming clock was not modified.", &
+          ESMF_LOG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+      
+      call ESMF_ClockDestroy(clockCopy, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+    endif
+    
+  end subroutine
+    
+!-------------------------------------------------------------------------
 
 
 end module ESMF_ComplianceICMod
@@ -676,7 +816,7 @@ end module ESMF_ComplianceICMod
 !-------------------------------------------------------------------------
 ! The register routine of internal ICs must be available as an external routine
 
-subroutine ESMF_ComplianceICRegister(comp, rc)
+recursive subroutine ESMF_ComplianceICRegister(comp, rc)
   use ESMF_Mod
   use ESMF_ComplianceICMod
   implicit none
