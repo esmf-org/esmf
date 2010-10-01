@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.162 2010/09/27 20:57:33 w6ws Exp $
+! $Id: ESMF_Grid.F90,v 1.163 2010/10/01 18:54:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.162 2010/09/27 20:57:33 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.163 2010/10/01 18:54:31 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3007,9 +3007,10 @@ end subroutine ESMF_GridConvertIndex
 ! !DESCRIPTION:
 ! This function creates a {\tt ESMF\_Grid} object using the grid definition from
 ! a SCRIP grid file. The grid distribution is defined by a DistGrid object. The
-! topology of the distgrid has to match with the grid topology defined in the
-! file.  The grid defined int the file has to be a 2D logically rectangular
-! grid. 
+! distrgrid has to match the grid  defined in the file.  This means the distgrid 
+! should consist of one 2D tile with the same size in each dimension as the grid in the file.
+! The grid defined in the file has to be a 2D logically rectangular grid (i.e. {\tt grid\_rank}
+! in the file needs to be 2).
 !
 ! The arguments are:
 ! \begin{description}
@@ -3331,8 +3332,8 @@ end subroutine convert_corner_arrays_to_1D
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompflag} indicates how the division into DEs is to
 ! occur.  The default is to divide the range as evenly as possible.
-! The grid defined int the file has to be a 2D logically rectangular
-! grid. 
+! The grid defined in the file has to be a 2D logically rectangular
+! grid (i.e. {\tt grid\_rank} in the file needs to be 2).
 !
 ! The arguments are:
 ! \begin{description}
