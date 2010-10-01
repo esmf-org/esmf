@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.4 2010/10/01 19:12:13 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.5 2010/10/01 19:41:47 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -21,6 +21,8 @@ module ESMF_ComplianceICMod
   implicit none
   
   private
+  
+  integer, save :: ccfDepth = 1 ! component control flow depth
   
   public setvmIC, registerIC
         
@@ -247,6 +249,7 @@ module ESMF_ComplianceICMod
       
     ! Stop Compliance Checking: InitializePrologue
     !---------------------------------------------------------------------------
+    ccfDepth = ccfDepth + 1
 
     call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
       userRc=userrc, rc=rc)
@@ -260,6 +263,7 @@ module ESMF_ComplianceICMod
       return ! bail out
     endif
    
+    ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializeEpilogue
     
@@ -374,6 +378,7 @@ module ESMF_ComplianceICMod
       
     ! Stop Compliance Checking: RunPrologue
     !---------------------------------------------------------------------------
+    ccfDepth = ccfDepth + 1
 
     call ESMF_GridCompRunAct(comp, importState, exportState, clock, &
       userRc=userrc, rc=rc)
@@ -386,6 +391,7 @@ module ESMF_ComplianceICMod
       return ! bail out
     endif
 
+    ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunEpilogue
     
@@ -483,6 +489,7 @@ module ESMF_ComplianceICMod
       
     ! Stop Compliance Checking: FinalizePrologue
     !---------------------------------------------------------------------------
+    ccfDepth = ccfDepth + 1
 
     call ESMF_GridCompFinalizeAct(comp, importState, exportState, clock, &
       userRc=userrc, rc=rc)
@@ -495,6 +502,7 @@ module ESMF_ComplianceICMod
       return ! bail out
     endif
 
+    ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizeEpilogue
     
@@ -554,7 +562,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    prefix = "COMPLIANCECHECKER:"//trim(compName)//":"
+    prefix = "COMPLIANCECHECKER:"//repeat("##", ccfDepth)//":"//trim(compName)//":"
 
   end subroutine    
 
@@ -746,8 +754,6 @@ module ESMF_ComplianceICMod
     clockValid = .true.
     ! Ensure that the Clock is a valid object
     if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) clockValid = .false.
-    
-    
     
     if (clockValid) then
       clockModified = .false.
