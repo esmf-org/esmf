@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.323 2010/09/24 04:49:04 theurich Exp $
+#  $Id: common.mk,v 1.324 2010/10/01 00:09:03 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3343,7 +3343,7 @@ endif
 # file.  It is assumed that the module name occurs on the same line as the use
 # keyword.  Multiple use statements on the same line are not recognized.
 define MOD_FUNC
-$(filter-out $(addsuffix .o,$(basename $(1))), \
+$(filter-out $(addsuffix .o,$(basename $(1))) ESMF_.o, \
   $(sort \
     $(shell awk  '/^ *use  *ESMF_/' $(1) \
           | sed 's/^ *use  *ESMF_/ESMF_/' \

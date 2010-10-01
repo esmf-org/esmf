@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.1 2010/09/29 20:16:29 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.2 2010/10/01 00:09:03 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -11,23 +11,20 @@
 
 module ESMF_ComplianceICMod
 
-  ! ESMF Framework modules 
-  ! -> use explicit Mods b/c internal IC must compile during ESMF build
-  use ESMF_UtilTypesMod
-  use ESMF_LogErrMod
-  use ESMF_GridCompMod
-  use ESMF_CompMod
-  use ESMF_StateMod
-  use ESMF_ClockMod
+  ! ESMF module
+  use ESMF_Mod
 
   implicit none
   
   private
   
-  public ESMF_GridComp, ESMF_CplComp  ! make available for the external API
   public setvmIC, registerIC
         
   contains
+
+!-------------------------------------------------------------------------
+!   !  The setvm routine is used by the child component to set VM properties
+!   !TODO:  currently the setvmIC() is _not_ hooked into the ESMF callback 
 
   subroutine setvmIC(comp, rc)
     type(ESMF_GridComp)   :: comp
@@ -57,18 +54,25 @@ module ESMF_ComplianceICMod
 
     ! Initialize user return code
     rc = ESMF_SUCCESS
+    
+    ! IMPORTANT: As an InterfaceComponent the code must ensure:
+    ! 1) That the return code from the actual child method is returned to the 
+    !    parent (note that this is not currently possible for the register)
 
     ! This code is being executed _after_ the actual Component Register call
 
     print *, "entering registerIC"
+    
+    !---------------------------------------------------------------------------
+    ! Start Compliance Checking
+    
+    ! Stop Compliance Checking
+    !---------------------------------------------------------------------------
 
-    ! Register the callback routines.
-
-!TODO: commented out for testing the IC behavior
-!
-!    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, userRoutine=ic_init, &
-!      rc=rc)
-!    if (rc/=ESMF_SUCCESS) return ! bail out
+    ! Register the IC callback routines.
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, userRoutine=ic_init, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUNIC, userRoutine=ic_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -97,7 +101,21 @@ module ESMF_ComplianceICMod
     print *, "entering ic_init"
 
     call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
    
+    !---------------------------------------------------------------------------
+    ! Start Compliance Checking
+    
+    ! the Component attributes should be set up, ready to output
+    
+!    call ESMF_AttributeWrite(comp, convention='CIM 1.0', &
+!      purpose='Model Component Simulation Description', &
+!      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+!    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Stop Compliance Checking
+    !---------------------------------------------------------------------------
+
     print *, "leaving ic_init"
 
   end subroutine ic_init
@@ -156,6 +174,7 @@ end module ESMF_ComplianceICMod
 ! The register routine of internal ICs must be available as an external routine
 
 subroutine ESMF_ComplianceICRegister(comp, rc)
+  use ESMF_Mod
   use ESMF_ComplianceICMod
   implicit none
   type(ESMF_GridComp)   :: comp
