@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.44 2010/09/23 22:48:34 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.45 2010/10/01 18:55:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.44 2010/09/23 22:48:34 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.45 2010/10/01 18:55:40 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.44 2010/09/23 22:48:34 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.45 2010/10/01 18:55:40 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -779,7 +779,7 @@ module ESMF_MeshMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFile()"
 !BOP
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file SCRIP format or ESMF Unstructured grid file
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a file
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -794,21 +794,25 @@ module ESMF_MeshMod
     logical, intent(in), optional             :: convert3D
     logical, intent(in), optional             :: convertToDual
     integer, intent(out), optional            :: rc
-!
+! 
 ! !DESCRIPTION:
-!   Create a mesh from a grid file defined in SCRIP format or in ESMF Unstructured grid format.
+!   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
+!   format files, allows the dual of the mesh to be created. 
 !
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
 !   \item[filetype] 
-!         ESMF\_FILEFORMAT\_SCRIP or ESMF\_FILEFORMAT\_ESMFMESH
+!         The file type of the grid file to be read, please see Section~\ref{sec:mesh:opt:fileformat}
+!         for a list of valid options. 
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
 !   \item[convertToDual] 
-!         if TRUE, the mesh will be converted to it's dual. If not specified,
-!         defaults to true. 
+!         if TRUE, the mesh will be converted to its dual. If not specified,
+!         defaults to true. Converting to dual is not supported with
+!         file type {\tt ESMF\_FILEFORMAT\_ESMFMESH}, so when using that file type
+!         this parameter has no effect.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
