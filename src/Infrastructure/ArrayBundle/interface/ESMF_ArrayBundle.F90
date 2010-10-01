@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.29 2010/09/30 20:23:00 samsoncheung Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.30 2010/10/01 05:59:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.29 2010/09/30 20:23:00 samsoncheung Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.30 2010/10/01 05:59:57 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -750,39 +750,40 @@ contains
   subroutine ESMF_ArrayBundleRead(arraybundle, file, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(*),     intent(in)              :: file
-    logical,          intent(in) ,  optional  :: singleFile
-    type(ESMF_IOFmtFlag),  intent(in),   optional  :: iofmt
-    integer,          intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    character(*),           intent(in)             :: file
+    logical,                intent(in),  optional  :: singleFile
+    type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
+    integer,                intent(out), optional  :: rc
 !         
 !
 ! !DESCRIPTION:
-!   Read Array data to an ArrayBundle object from file(s)
-!   For this API to be functional, the environment variable "ESMF_PIO"
-!   should be set to "internal" when ESMF library is built.
-!   Please see Section~\ref{io:dataio}.
+!   Read Array data to an ArrayBundle object from file(s).
+!   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
+!   should be set to "internal" when the ESMF library is built.
+!   Please see the section on Data I/O,~\ref{io:dataio}.
 !
-!   Limitation:
-!     Assume 1 DE per Pet
-!     Not support in ESMF\_COMM=mpiuni mode
+!   Limitations:
+!   \begin{itemize}
+!     \item Only 1 DE per PET supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[arraybundle] 
-!     {\tt ESMF\_ArrayBundle} object.
+!     An {\tt ESMF\_ArrayBundle} object.
 !   \item[file]
-!    The name of the file from which Array bundle data is read from.
+!     The name of the file from which ArrayBundle data is read.
 !   \item[{[singleFile]}]
-!    A logical flag, the default is TRUE, i.e., all Arrays in the bundle 
-!    are stored in one single file. If FALSE, each Array is stored 
-!    in separate files; these files are numbered with the name based on the
-!    argument "file". That is, a set of files are named: [file\_name]001,
-!    [file\_name]002, [file\_name]003,...
+!     A logical flag, the default is .true., i.e., all Arrays in the bundle 
+!     are stored in one single file. If .false., each Array is stored 
+!     in separate files; these files are numbered with the name based on the
+!     argument "file". That is, a set of files are named: [file\_name]001,
+!     [file\_name]002, [file\_name]003,...
 !   \item[{[iofmt]}]
-!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
-!    of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!     The IO format. Please see Section~\ref{opt:iofmtflag} for the list
+!     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2117,33 +2118,36 @@ contains
 !
 ! !DESCRIPTION:
 !   Write the Arrays into a file. For this API to be functional,
-!   the environment variable "ESMF_PIO" should be set to "internal"
-!   when ESMF library is built. Please see Section~\ref{io:dataio}.
+!   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+!   when the ESMF library is built. Please see the section on 
+!   Data I/O,~\ref{io:dataio}.
 !
-!   Limitation:
-!     Assume 1 DE per Pet
-!     Not support in ESMF\_COMM=mpiuni mode
+!   Limitations:
+!   \begin{itemize}
+!     \item Only 1 DE per PET supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[arraybundle] 
-!     {\tt ESMF\_ArrayBundle} object.
+!     An {\tt ESMF\_ArrayBundle} object.
 !   \item[file]
-!    The name of the output file to which array bundle data is written to.
+!     The name of the output file to which array bundle data is written.
 !   \item[{[singleFile]}]
-!    A logical flag, the default is TRUE, i.e., all arrays in the bundle 
-!    are written in one single file. If FALSE, each array will be written
-!    in separate files; these files are numbered with the name based on the
-!    argument "file". That is, a set of files are named: [file\_name]001,
-!    [file\_name]002, [file\_name]003,...
+!     A logical flag, the default is .true., i.e., all arrays in the bundle 
+!     are written in one single file. If .false., each array will be written
+!     in separate files; these files are numbered with the name based on the
+!     argument "file". That is, a set of files are named: [file\_name]001,
+!     [file\_name]002, [file\_name]003,...
 !   \item[{[timeslice]}]
-!    NetCDF IO format supports an "unlimited" dimension to allow
-!    data to grow along that dimension, usually the time dimension. 
-!    This argument is the nth slice of that time dimension.
+!     NetCDF IO format supports an "unlimited" dimension to allow
+!     data to grow along that dimension, usually the time dimension. 
+!     This argument is the nth slice of that time dimension.
+!     No "unlimited" dimension will be set when this argument is negative.
 !   \item[{[iofmt]}]
-!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list
-!    of options.
-!    If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!     The IO format. Please see Section~\ref{opt:iofmtflag} for the list
+!     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

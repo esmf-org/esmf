@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.29 2010/09/30 20:16:06 samsoncheung Exp $
+! $Id: ESMF_FieldPr.F90,v 1.30 2010/10/01 05:59:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -220,40 +220,42 @@ contains
 
 !BOP
 ! \label{api:FieldRead}
-! !IROUTINE:  ESMF_FieldRead - Read the Field data from a file
+! !IROUTINE:  ESMF_FieldRead - Read Field data from a file
 
 ! !INTERFACE:
       subroutine ESMF_FieldRead(field, file, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-      character(*), intent(in) :: file 
-      type(ESMF_IOFmtFlag), intent(in), optional :: iofmt 
-      integer, intent(out), optional :: rc
+      type(ESMF_Field),     intent(inout)          :: field 
+      character(*),         intent(in)             :: file 
+      type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt 
+      integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-!     Read Field data from a file and put it into a {ESMF\_Field} object.
-!     For this API to be functional, the environment variable "ESMF_PIO"
-!     should be set to "internal" when ESMF library is built.
-!     Please see Section~\ref{io:dataio}.
+!   Read Field data from a file and put it into an {ESMF\_Field} object.
+!   For this API to be functional, the environment variable {\tt ESMF\_PIO}
+!   should be set to "internal" when the ESMF library is built.
+!   Please see the section on Data I/O,~\ref{io:dataio}.
 !
-!   Limitation:
-!     Assume 1 DE per Pet
-!     Not support in ESMF\_COMM=mpiuni mode
+!   Limitations:
+!   \begin{itemize}
+!     \item Only 1 DE per PET supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!       An {\tt ESMF\_Field} object.
-!     \item[file]
-!       The name of the file from which Field data is read.
-!     \item[{[iofmt]}]
-!       The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
-!       of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
-!     \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [field]
+!     The {\tt ESMF\_Field} object in which the read data is returned.
+!   \item[file]
+!     The name of the file from which Field data is read.
+!   \item[{[iofmt]}]
+!     The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
+!     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
         character(len=ESMF_MAXSTR)      :: name

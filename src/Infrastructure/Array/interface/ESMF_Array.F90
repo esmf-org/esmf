@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.125 2010/09/30 20:15:36 samsoncheung Exp $
+! $Id: ESMF_Array.F90,v 1.126 2010/10/01 05:59:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.125 2010/09/30 20:15:36 samsoncheung Exp $'
+    '$Id: ESMF_Array.F90,v 1.126 2010/10/01 05:59:56 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1250,39 +1250,40 @@ contains
   subroutine ESMF_ArrayWrite(array, file, variableName, append, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),     intent(inout)         :: array
-    character(*),         intent(in)            :: file
-    character(*),         intent(in),  optional :: variableName
-    logical,              intent(in),  optional :: append
-    integer,              intent(in),  optional :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
-    integer,              intent(out), optional :: rc
+    type(ESMF_Array),     intent(inout)          :: array
+    character(*),         intent(in)             :: file
+    character(*),         intent(in),  optional  :: variableName
+    logical,              intent(in),  optional  :: append
+    integer,              intent(in),  optional  :: timeslice
+    type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
+    integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-!   Write the Array data into a file. For this API to be functional, the 
-!   environment variable "ESMF_PIO" should be set to "internal" when ESMF
-!   library is built. Please see Section~\ref{io:dataio}. 
+!   Write Array data into a file. For this API to be functional, the 
+!   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+!   the ESMF library is built.  Please see the section on 
+!   Data I/O,~\ref{io:dataio}. 
 !
 !   Limitations:
 !   \begin{itemize}
 !     \item Only 1 DE per PET supported.
-!     \item No support for ESMF\_COMM=mpiuni mode.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[array]
-!    The {\tt ESMF\_Array} object that contains the data to be written.
+!    The {\tt ESMF\_Array} object that contains data to be written.
 !   \item[file]
-!    The name of the output file to which Array data is written to.
+!    The name of the output file to which Array data is written.
 !   \item[{[variableName]}]
 !    Variable name in the output file; default is the "name" of Array.
 !    Use this argument only in the IO format (such as NetCDF) that
-!    supports variable name. If the IO format does not support this (
-!    such as binary format), ESMF will return error code.
+!    supports variable name. If the IO format does not support this 
+!    (such as binary format), ESMF will return an error code.
 !   \item[{[append]}]
-!    Logical: if true, data is appended to an existing file,
-!    default is false.
+!    Logical: if .true., data is appended to an existing file;
+!    default is .false.
 !   \item[{[timeslice]}]
 !    NetCDF IO format supports an "unlimited" dimension to allow
 !    data to grow along that dimension, usually the time dimension. 
@@ -1290,7 +1291,7 @@ contains
 !    No "unlimited" dimension will be set when this argument is negative.
 !   \item[{[iofmt]}]
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
-!    of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}

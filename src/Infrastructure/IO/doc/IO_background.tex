@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.28 2010/09/30 20:25:14 samsoncheung Exp $
+% $Id: IO_background.tex,v 1.29 2010/10/01 05:59:57 eschwab Exp $
 
 %\subsection{Background}
 
@@ -83,38 +83,44 @@ To enable this capability, the environment variable ESMF\_XERCES must be
 set. Details can be found in the ESMF User Guide, "Building and Installing the ESMF", "Third Party Libraries".
 
 
+\label{io:dataio}
 \subsection{Data I/O}
 
-ESMF provides parallel data IO capability by integrating a third-party IO
-software library, Parallel I/O (PIO). This is a software interface layer that
-was first developed by a team under the \htmladdnormallink{CESM Software Engineering Group}{http://www.cesm.ucar.edu/cseg/} at NCAR.
-In order to use this parallel IO capability, the environment variable ESMF\_PIO should
-be set to "internal".  As mentioned above, MPI_IO binary or NetCDF formats 
-are supported; the environment variables ESMF\_NETCDF or/and ESMF\_PNETCDF
-should be set to "standard" to enable NetCDF IO format.
-In the current release, reading and writing the contents of the following ESMF objects are performed by PIO:
+ESMF provides interfaces for high performance, parallel I/O using ESMF data
+objects such as Arrays and Fields.  Currently ESMF supports I/O of binary and
+NetCDF files.  The current ESMF implementation relies on the 
+\htmladdnormallink{Parallel I/O (PIO)}{http://web.ncar.teragrid.org/~dennis/pio\_doc/html} library developed as a collaboration between NCAR and DOE 
+laboratories.  PIO is built as part of the ESMF build when the environment 
+variable ESMF\_PIO is set to "internal"; by default it is not set.
+When PIO is built with ESMF, the ESMF methods internally call the PIO 
+interfaces.  When PIO is not built with ESMF, the ESMF methods are 
+non-operable (no-op) stubs that simply return with a return code of
+ESMF\_RC\_LIB\_NOT\_PRESENT.  Details about the environment variables can be 
+found in ESMF User Guide, "Building and Installing the ESMF", 
+"Third Party Libraries".
+
+In the current release, the following methods support parallel I/O using PIO:
 
 \begin{description}
-\item[\tt ESMF\_Array] See {\tt ESMF\_ArrayRead()} \ref{api:ArrayRead} and 
-{\tt ESMF\_ArrayWrite()} \ref{api:ArrayWrite}.
-\item[\tt ESMF\_ArrayBundle] See {\tt ESMF\_ArrayBundleRead()} 
-\ref{api:ArrayBundleRead} and 
-{\tt ESMF\_ArrayBundleWrite()} \ref{api:ArrayBundleWrite}.
-\item[\tt ESMF\_Field] See {\tt ESMF\_FieldRead()} \ref{api:FieldRead} and 
-{\tt ESMF\_FieldWrite()} \ref{api:FieldWrite}.
-\item[\tt ESMF\_FieldBundle] See {\tt ESMF\_FieldBundleRead()} 
-\ref{api:FieldBundleRead} and {\tt ESMF\_FieldBundleWrite()} 
-\ref{api:FieldBundleWrite}.
+\item {\tt ESMF\_ArrayRead()}, section \ref{api:ArrayRead}.
+\item {\tt ESMF\_ArrayWrite()}, section \ref{api:ArrayWrite}.
+\item {\tt ESMF\_ArrayBundleRead()}, section \ref{api:ArrayBundleRead}.
+\item {\tt ESMF\_ArrayBundleWrite()}, section \ref{api:ArrayBundleWrite}.
+\item {\tt ESMF\_FieldRead()}, section \ref{api:FieldRead}.
+\item {\tt ESMF\_FieldWrite()}, section \ref{api:FieldWrite}.
+\item {\tt ESMF\_FieldBundleRead()}, section \ref{api:FieldBundleRead}.
+\item {\tt ESMF\_FieldBundleWrite()}, section \ref{api:FieldBundleWrite}.
 \end{description}
-
-Two formats are supported, namely, binary format (MPI\_IO) and NetCDF format. 
-The environment variables that are enabled when ESMF is built determine the format.  Details about the environment variables can be found in ESMF User Guide, 
-"Building and Installing the ESMF", "Third Party Libraries".
 
 
 \subsection{Data formats}
 
-Two standard formats are currently used within ESMF for input/output of data:
+Two formats are supported, namely, NetCDF and binary (MPI\_IO). 
+The environment variables that are enabled when ESMF is built determine the 
+format.  The environment variables ESMF\_NETCDF or/and ESMF\_PNETCDF should be 
+set to "standard" to enable NetCDF IO format.  Details about the environment 
+variables can be found in ESMF User Guide, "Building and Installing the ESMF", 
+"Third Party Libraries".
 
 \begin{description}
 \item[\bf NetCDF] Network Common Data Form (NetCDF) is an interface for 

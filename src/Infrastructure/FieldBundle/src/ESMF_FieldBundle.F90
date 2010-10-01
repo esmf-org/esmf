@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.56 2010/09/30 20:19:54 samsoncheung Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.57 2010/10/01 05:59:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1805,38 +1805,39 @@ end function
       subroutine ESMF_FieldBundleRead(bundle, file, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout)         :: bundle
-      character(*), intent(in)                      :: file
-      logical,      intent(in) ,  optional          :: singleFile
-      type(ESMF_IOFmtFlag), intent(in) ,  optional  :: iofmt
-      integer,      intent(out),  optional          :: rc
+      type(ESMF_FieldBundle), intent(inout)           :: bundle
+      character(*),           intent(in)              :: file
+      logical,                intent(in),   optional  :: singleFile
+      type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
+      integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !     Read Field data to a FieldBundle object from file(s).
-!     For this API to be functional, the environment variable "ESMF_PIO"
-!     should be set to "internal" when ESMF library is built.
-!     Please see Section~\ref{io:dataio}.
+!     For this API to be functional, the environment variable {\tt ESMF\_PIO} 
+!     should be set to "internal" when the ESMF library is built.
+!     Please see the section on Data I/O,~\ref{io:dataio}.
 !
-!   Limitation:
-!     Assume 1 DE per Pet
-!     Not support in ESMF\_COMM=mpiuni mode
+!     Limitations:
+!     \begin{itemize}
+!       \item Only 1 DE per PET supported.
+!       \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!     \end{itemize}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item[file]
-!      The name of the file from which Field bundle data is read from.
+!      The name of the file from which FieldBundle data is read.
 !     \item[{[singleFile]}]
-!      A logical flag, the default is TRUE, i.e., all Fields in the bundle 
-!      are stored in one single file. If FALSE, each Field is stored 
+!      A logical flag, the default is .true., i.e., all Fields in the bundle 
+!      are stored in one single file. If .false., each Field is stored 
 !      in separate files; these files are numbered with the name based on the
 !      argument "file". That is, a set of files are named: [file\_name]001,
 !      [file\_name]002, [file\_name]003,...
 !     \item[{[iofmt]}]
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
-!      of options.
-!      If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!      of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2383,37 +2384,40 @@ end function
 #define ESMF_METHOD "ESMF_FieldBundleWrite"
 !BOP
 ! \label{api:FieldBundleWrite}
-! !IROUTINE: ESMF_FieldBundleWrite - Write the Fields into a file.
+! !IROUTINE: ESMF_FieldBundleWrite - Write the Fields into a file
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleWrite(bundle, file, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout)         :: bundle
-      character(*),           intent(in)            :: file
-      logical,                intent(in),  optional :: singleFile
-      integer,                intent(in),  optional :: timeslice
-      type(ESMF_IOFmtFlag),   intent(in),  optional :: iofmt
-      integer,                intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)          :: bundle
+      character(*),           intent(in)             :: file
+      logical,                intent(in),  optional  :: singleFile
+      integer,                intent(in),  optional  :: timeslice
+      type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
+      integer,                intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !      Write the Fields into a file. For this API to be functional, 
-!      the environment variable "ESMF_PIO" should be set to "internal"
-!      when ESMF library is built. Please see Section~\ref{io:dataio}.
+!      the environment variable {\tt ESMF\_PIO} should be set to "internal"
+!      when the ESMF library is built.  Please see the section on 
+!      Data I/O,~\ref{io:dataio}.
 !
-!   Limitation:
-!     Assume 1 DE per Pet
-!     Not support in ESMF\_COMM=mpiuni mode
+!     Limitations:
+!     \begin{itemize}
+!       \item Only 1 DE per PET supported.
+!       \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!     \end{itemize}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item[file]
-!      The name of the output file to which field bundle data is written to.
+!      The name of the output file to which field bundle data is written.
 !     \item[{[singleFile]}]
-!      A logical flag, the default is TRUE, i.e., all arrays in the bundle 
-!      are written in one single file. If FALSE, each array will be written
+!      A logical flag, the default is .true., i.e., all arrays in the bundle 
+!      are written in one single file. If .false., each array will be written
 !      in separate files; these files are numbered with the name based on the
 !      argument "file". That is, a set of files are named: [file\_name]001,
 !      [file\_name]002, [file\_name]003,...
@@ -2424,8 +2428,7 @@ end function
 !      No "unlimited" dimension will be set when this argument is negative.
 !     \item[{[iofmt]}]
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
-!      of options.
-!      If not present, defaults to ESMF\_IOFMT\_NETCDF.
+!      of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

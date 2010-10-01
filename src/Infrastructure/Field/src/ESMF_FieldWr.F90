@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.5 2010/09/30 20:16:30 samsoncheung Exp $
+! $Id: ESMF_FieldWr.F90,v 1.6 2010/10/01 05:59:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -69,50 +69,52 @@ contains
 
 !BOP
 ! \label{api:FieldWrite}
-! !IROUTINE:  ESMF_FieldWrite - Write the Field data into a file
+! !IROUTINE:  ESMF_FieldWrite - Write Field data into a file
 
 ! !INTERFACE:
       subroutine ESMF_FieldWrite(field, file, append, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field),     intent(inout)         :: field 
-      character(*),         intent(in)            :: file 
-      logical,              intent(in),  optional :: append
-      integer,              intent(in),  optional :: timeslice
-      type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
-      integer,              intent(out), optional :: rc
+      type(ESMF_Field),     intent(inout)          :: field 
+      character(*),         intent(in)             :: file 
+      logical,              intent(in),  optional  :: append
+      integer,              intent(in),  optional  :: timeslice
+      type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
+      integer,              intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-!     Write the Field data in a {ESMF\_Field} object to a file.
-!     For this API to be functional, the environment variable "ESMF_PIO" 
-!     should be set to "internal" when ESMF library is built. 
-!     Please see Section~\ref{io:dataio}.
+!   Write Field data into a file.  For this API to be functional, the 
+!   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+!   the ESMF library is built.  Please see the section on 
+!   Data I/O,~\ref{io:dataio}.
 !
-!   Limitation:
-!     Assume 1 DE per Pet
-!     Not support in ESMF\_COMM=mpiuni mode
+!   Limitations:
+!   \begin{itemize}
+!     \item Only 1 DE per PET supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!        An {\tt ESMF\_Field} object.
-!     \item[file]
-!        The name of the output file to which Field data is written to.
-!     \item[{[append]}]
-!        Logical: if true, data is appended to an existing file,
-!        default is false.
-!     \item[{[timeslice]}]
-!        NetCDF IO format supports an "unlimited" dimension to allow
-!        data to grow along that dimension, usually the time dimension. 
-!        This argument is the nth slice of that time dimension.
-!        No "unlimited" dimension will be set when this argument is negative.
-!     \item[{[iofmt]}]
-!        The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
-!        of options. If not present, defaults to ESMF\_IOFMT\_NETCDF.
-!     \item [{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [field]
+!     The {\tt ESMF\_Field} object that contains data to be written.
+!   \item[file]
+!     The name of the output file to which Field data is written.
+!   \item[{[append]}]
+!     Logical: if .true., data is appended to an existing file;
+!     default is .false.
+!   \item[{[timeslice]}]
+!     NetCDF IO format supports an "unlimited" dimension to allow
+!     data to grow along that dimension, usually the time dimension. 
+!     This argument is the nth slice of that time dimension.
+!     No "unlimited" dimension will be set when this argument is negative.
+!   \item[{[iofmt]}]
+!     The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
+!     of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
         character(len=ESMF_MAXSTR)      :: name
