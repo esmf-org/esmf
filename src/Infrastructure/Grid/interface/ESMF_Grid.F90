@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.163 2010/10/01 18:54:31 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.164 2010/10/01 23:06:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.163 2010/10/01 18:54:31 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.164 2010/10/01 23:06:04 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -326,7 +326,8 @@ end interface
       module procedure ESMF_GridGetPLocalDePSloc
       module procedure ESMF_GridGetPSloc
       module procedure ESMF_GridGetIndex
-      
+      module procedure ESMF_GridGetPLocalDe
+       
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_GridGet} functions.   
@@ -6512,6 +6513,111 @@ end subroutine ESMF_GridGetDefault
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD  
+#define ESMF_METHOD "ESMF_GridGetPLocalDe"
+!BOP
+! !IROUTINE: ESMF_GridGet - Get information about a particular DE in a Grid
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGet()
+      subroutine ESMF_GridGetPLocalDe(grid, localDe, &
+          isLBound,isUBound, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      integer,                intent(in)            :: localDe
+      logical,                intent(out), optional :: isLBound(:)
+      logical,                intent(out), optional :: isUBound(:)
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! This call gets information about a particular local DE in a Grid. 
+!
+!The arguments are:
+!\begin{description}
+!\item[{grid}]
+!    Grid to get the information from.
+!\item[{[localDe]}]
+!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
+!\item[{[isLBound]}]
+!     Upon return, for each dimension this indicates if the DE is a lower bound of the Grid.
+!     {\tt isLBound} must be allocated to be of size equal to the Grid dimCount.
+!\item[{[isUBound]}]
+!     Upon return, for each dimension this indicates if the DE is an upper bound of the Grid.
+!     {\tt isUBound} must be allocated to be of size equal to the Grid dimCount.
+!\item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!\end{description}
+!
+!EOP
+
+    integer :: localrc ! local error status
+    integer :: isLBoundTmp(ESMF_MAXDIM)
+    integer :: isUBoundTmp(ESMF_MAXDIM) 
+    integer :: dimCount,i
+
+    ! Initialize return code
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! Get Grid Dimension
+    call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Error check input
+    if (present(isLBound)) then
+       if (size(isLBound) < dimCount) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, & 
+              "- isLBound must have at least the same size as the grid dimCount", & 
+              ESMF_CONTEXT, rc) 
+	  return
+       endif
+    endif
+
+    if (present(isUBound)) then
+       if (size(isUBound) < dimCount) then
+           call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, & 
+              "- isUBound must have at least the same size as the grid dimCount", & 
+              ESMF_CONTEXT, rc) 
+	  return
+       endif
+    endif
+
+
+    ! Call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_GridGetPLocalDe(grid, localDE, &
+      dimCount, isLBoundTmp, isUBoundTmp, localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Process return values
+    if (present(isLBound)) then
+       isLBound=.false.
+       do i=1,dimCount
+          if (isLBoundTmp(i) .eq. 1) isLBound(i)=.true.
+       enddo
+    endif
+
+    if (present(isUBound)) then
+       isUBound=.false.
+       do i=1,dimCount
+          if (isUBoundTmp(i) .eq. 1) isUBound(i)=.true.
+       enddo
+    endif
+
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetPLocalDe
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD  

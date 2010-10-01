@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.99 2010/05/07 02:49:38 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.100 2010/10/01 23:06:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.99 2010/05/07 02:49:38 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.100 2010/10/01 23:06:04 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -68,8 +68,8 @@ program ESMF_GridCreateUTest
   type(ESMF_StaggerLoc)          :: staggerloc8
   integer :: minIndex(3), maxIndex(3) 
   integer :: celw(3),ceuw(3)
-
-
+  logical :: isLBound(2),isUBound(2)
+  integer :: petMap2D(2,2,1)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -1786,6 +1786,101 @@ print *, ' '
   call ESMF_Test((((rc.eq.ESMF_SUCCESS).and.correct) .or. xercesNotPresent), &
                     name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Checking isLBound and isUBound functionality"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  if (petCount .eq. 4) then
+     petMap2D(:,1,1)=(/0,1/)
+     petMap2D(:,2,1)=(/2,3/)
+
+     grid=ESMF_GridCreateShapeTile(maxIndex=(/8,8/),regDecomp=(/2,2/), &
+            petMap=petMap2D,rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  else
+     grid=ESMF_GridCreateShapeTile(maxIndex=(/8,8/),regDecomp=(/2,2/), &
+            rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  endif
+
+  ! init flag
+  correct=.true.
+
+  ! get check info
+  if (petCount .eq. 1) then
+     call ESMF_GridGet(grid, localDE=0, & 
+          isLBound=isLBound, isUBound=isUBound, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
+     if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+
+     call ESMF_GridGet(grid, localDE=1, & 
+          isLBound=isLBound, isUBound=isUBound, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
+     if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+
+     call ESMF_GridGet(grid, localDE=2, & 
+          isLBound=isLBound, isUBound=isUBound, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
+     if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+
+     call ESMF_GridGet(grid, localDE=3, & 
+          isLBound=isLBound, isUBound=isUBound, rc=localrc)
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
+     if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+
+   else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+        call ESMF_GridGet(grid, localDE=0, & 
+           isLBound=isLBound, isUBound=isUBound, rc=localrc)
+
+        if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
+        if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+     else if (localPet .eq. 1) then
+        call ESMF_GridGet(grid, localDE=0, & 
+             isLBound=isLBound, isUBound=isUBound, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+        if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .false.)) correct=.false. 
+        if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .true.)) correct=.false. 
+     else if (localPet .eq. 2) then
+        call ESMF_GridGet(grid, localDE=0, & 
+             isLBound=isLBound, isUBound=isUBound, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+        if ((isLBound(1) .eq. .false.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
+        if ((isUBound(1) .eq. .true.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+     else if (localPet .eq. 3) then
+
+        call ESMF_GridGet(grid, localDE=0, & 
+             isLBound=isLBound, isUBound=isUBound, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+        if ((isLBound(1) .eq. .true.) .or. (isLBound(2) .eq. .true.)) correct=.false. 
+        if ((isUBound(1) .eq. .false.) .or. (isUBound(2) .eq. .false.)) correct=.false. 
+     endif
+   endif
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
 
 
   !-----------------------------------------------------------------------------

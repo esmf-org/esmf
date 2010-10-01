@@ -2067,6 +2067,84 @@ extern "C" {
 
 
   ///////////////////////////////////////////////////////////////////////////////////
+   void FTN(c_esmc_gridgetplocalde)(ESMCI::Grid **_grid, 
+				   int *_localDE, 
+				   int *_dimCount,
+                                   int *_isLBound,
+                                   int *_isUBound,
+                                   int *_rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetplocaldepsloc()"
+    int localrc;
+    int dimCount;
+    int localDE,staggerloc;
+    ESMCI::Grid *grid;
+
+    // Get Grid pointer
+    grid=*_grid;
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+    if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
+
+
+    // Check grid status
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // localDE
+    if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
+      localDE=0;
+    } else {
+      localDE=*_localDE; // already 0 based 
+    }
+
+
+     // Input Error Checking
+    if ((localDE < 0) || (localDE >=grid->getDistGrid()->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+   }
+  
+  // Get Grid DimCount
+  dimCount=grid->getDimCount();
+  
+  // Make sure dimCount match
+  if (*_dimCount != dimCount) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+      "- input arrays not the correct size to hold results ", ESMC_NOT_PRESENT_FILTER(_rc));
+    return;
+  }
+  
+  // Fill in the output arrays
+  for (int i=0; i<dimCount; i++) {
+    if (grid->isLBndNT(localDE,i)) _isLBound[i]=1;
+    else  _isLBound[i]=0;
+    if (grid->isUBndNT(localDE,i)) _isUBound[i]=1;
+    else  _isUBound[i]=0;
+  }
+  
+  // return successfully
+  if (_rc!=NULL) *_rc = ESMF_SUCCESS;
+  
+}
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
   
   void FTN(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
 				int *_staggerloc,  
