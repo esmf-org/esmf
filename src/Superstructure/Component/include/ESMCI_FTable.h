@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.18 2010/09/23 20:51:37 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.19 2010/10/01 16:12:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -142,6 +142,7 @@ class FTable {
     ~FTable(void);
     static void newtrim(char const *oldc, int clen, int *phase, int *nstate,
       char **newc);
+    static char const *methodString(enum ESMCI::method method);
   private: 
     int query(int *nfuncp, int *ndatap);
 };

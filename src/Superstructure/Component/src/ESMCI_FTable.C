@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.41 2010/09/30 19:46:04 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.42 2010/10/01 16:12:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.41 2010/09/30 19:46:04 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.42 2010/10/01 16:12:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -122,44 +122,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-    char const *methodString;
-    switch(*method){
-    case ESMCI::SETINIT:
-      methodString = "Initialize";
-      break;
-    case ESMCI::SETRUN:
-      methodString = "Run";
-      break;
-    case ESMCI::SETFINAL:
-      methodString = "Finalize";
-      break;
-    case ESMCI::SETWRITERESTART:
-      methodString = "WriteRestart";
-      break;
-    case ESMCI::SETREADRESTART:
-      methodString = "ReadRestart";
-      break;
-    case ESMCI::SETINITIC:
-      methodString = "InitializeIC";
-      break;
-    case ESMCI::SETRUNIC:
-      methodString = "RunIC";
-      break;
-    case ESMCI::SETFINALIC:
-      methodString = "FinalizeIC";
-      break;
-    case ESMCI::SETWRITERESTARTIC:
-      methodString = "WriteRestartIC";
-      break;
-    case ESMCI::SETREADRESTARTIC:
-      methodString = "ReadRestartIC";
-      break;
-    case ESMCI::SETREGISTER:
-      methodString = "Register";
-      break;
-    default:
-      break;
-    }
+    char const *methodString = ESMCI::FTable::methodString(*method);
     
     int slen = strlen(methodString);
     char *fname;
@@ -346,44 +309,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     
-    char const *methodString;
-    switch(*method){
-    case ESMCI::SETINIT:
-      methodString = "Initialize";
-      break;
-    case ESMCI::SETRUN:
-      methodString = "Run";
-      break;
-    case ESMCI::SETFINAL:
-      methodString = "Finalize";
-      break;
-    case ESMCI::SETWRITERESTART:
-      methodString = "WriteRestart";
-      break;
-    case ESMCI::SETREADRESTART:
-      methodString = "ReadRestart";
-      break;
-    case ESMCI::SETINITIC:
-      methodString = "InitializeIC";
-      break;
-    case ESMCI::SETRUNIC:
-      methodString = "RunIC";
-      break;
-    case ESMCI::SETFINALIC:
-      methodString = "FinalizeIC";
-      break;
-    case ESMCI::SETWRITERESTARTIC:
-      methodString = "WriteRestartIC";
-      break;
-    case ESMCI::SETREADRESTARTIC:
-      methodString = "ReadRestartIC";
-      break;
-    case ESMCI::SETREGISTER:
-      methodString = "Register";
-      break;
-    default:
-      break;
-    }
+    char const *methodString = ESMCI::FTable::methodString(*method);
     
     int slen = strlen(methodString);
     char *fname;
@@ -395,6 +321,40 @@ extern "C" {
       return;
     
     delete[] fname;  // delete memory that "newtrim" allocated above
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getentrypointphasecount"
+  void FTN(c_esmc_getentrypointphasecount)(void *ptr,
+    enum ESMCI::method *method, int *phaseCount, int *rc){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    
+    char const *methodString = ESMCI::FTable::methodString(*method);
+    
+    ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
+    
+    int slen = strlen(methodString);
+    int phase = 0;  // initialize
+    int i;
+
+    do{
+      ++phase;
+      char *fname;
+      ESMCI::FTable::newtrim(methodString, slen, &phase, NULL, &fname);
+      
+      i = tabptr->getEntry(fname, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+        return; // bail out
+      
+      delete[] fname;  // delete memory that "newtrim" allocated above
+      
+    }while (i != -1);
+    
+    *phaseCount = phase - 1;
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -642,44 +602,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   if (rc) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
-  char const *methodString;
-  switch(*method){
-  case ESMCI::SETINIT:
-    methodString = "Initialize";
-    break;
-  case ESMCI::SETRUN:
-    methodString = "Run";
-    break;
-  case ESMCI::SETFINAL:
-    methodString = "Finalize";
-    break;
-  case ESMCI::SETWRITERESTART:
-    methodString = "WriteRestart";
-    break;
-  case ESMCI::SETREADRESTART:
-    methodString = "ReadRestart";
-    break;
-  case ESMCI::SETINITIC:
-    methodString = "InitializeIC";
-    break;
-  case ESMCI::SETRUNIC:
-    methodString = "RunIC";
-    break;
-  case ESMCI::SETFINALIC:
-    methodString = "FinalizeIC";
-    break;
-  case ESMCI::SETWRITERESTARTIC:
-    methodString = "WriteRestartIC";
-    break;
-  case ESMCI::SETREADRESTARTIC:
-    methodString = "ReadRestartIC";
-    break;
-  case ESMCI::SETREGISTER:
-    methodString = "Register";
-    break;
-  default:
-    break;
-  }
+  char const *methodString = ESMCI::FTable::methodString(*method);
 
   int slen = strlen(methodString);
   ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &name);
@@ -1857,6 +1780,51 @@ void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
 }
 //==============================================================================
 
+
+//==============================================================================
+char const *FTable::methodString(enum ESMCI::method method){
+  switch(method){
+  case ESMCI::SETINIT:
+    return "Initialize";
+    break;
+  case ESMCI::SETRUN:
+    return "Run";
+    break;
+  case ESMCI::SETFINAL:
+    return "Finalize";
+    break;
+  case ESMCI::SETWRITERESTART:
+    return "WriteRestart";
+    break;
+  case ESMCI::SETREADRESTART:
+    return "ReadRestart";
+    break;
+  case ESMCI::SETINITIC:
+    return "InitializeIC";
+    break;
+  case ESMCI::SETRUNIC:
+    return "RunIC";
+    break;
+  case ESMCI::SETFINALIC:
+    return "FinalizeIC";
+    break;
+  case ESMCI::SETWRITERESTARTIC:
+    return "WriteRestartIC";
+    break;
+  case ESMCI::SETREADRESTARTIC:
+    return "ReadRestartIC";
+    break;
+  case ESMCI::SETREGISTER:
+    return "Register";
+    break;
+  default:
+    break;
+  }
+  return NULL;
+}
+//==============================================================================
+
+  
 } // namespace ESMCI
 
 

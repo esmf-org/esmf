@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.136 2010/10/01 00:05:07 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.137 2010/10/01 16:12:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,6 +63,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompFinalize
   public ESMF_GridCompFinalizeAct
   public ESMF_GridCompGet
+  public ESMF_GridCompGetEPPhaseCount
   public ESMF_GridCompInitialize
   public ESMF_GridCompInitializeAct
   public ESMF_GridCompIsPetLocal
@@ -89,7 +90,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.136 2010/10/01 00:05:07 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.137 2010/10/01 16:12:13 theurich Exp $'
 
 !==============================================================================
 !
@@ -554,6 +555,59 @@ contains
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompGet
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompGetEPPhaseCount"
+!BOPI
+! !IROUTINE: ESMF_GridCompGetEPPhaseCount - Get number of phases of an entry point
+!
+! !INTERFACE:
+  subroutine ESMF_GridCompGetEPPhaseCount(gridcomp, method, phaseCount, rc)
+
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in)   :: gridcomp
+    type(ESMF_Method),   intent(in)   :: method
+    integer,             intent(out)  :: phaseCount
+    integer, intent(out), optional    :: rc 
+!
+! !DESCRIPTION:
+! Get phaseCount
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   An {\tt ESMF\_GridComp} object.
+! \item[method]
+!   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
+!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method} 
+!   for a complete list of valid method options.
+! \item[phaseCount]
+!   The number of phases for {\tt method}.
+! \item[{[rc]}] 
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+  
+    call c_ESMC_GetEntryPointPhaseCount(gridcomp, method, phaseCount, localrc)
+    if (ESMF_LogMsgFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
 !------------------------------------------------------------------------------
 
 
