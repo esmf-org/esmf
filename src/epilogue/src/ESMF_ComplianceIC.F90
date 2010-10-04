@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.6 2010/10/04 16:38:52 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.7 2010/10/04 19:16:33 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -931,7 +931,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
-    character(ESMF_MAXSTR)                :: value
+    character(10*ESMF_MAXSTR)             :: value
     character(ESMF_MAXSTR)                :: defaultvalue
 
     defaultvalue = "ComplianceICdefault"
@@ -1044,7 +1044,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
-    character(ESMF_MAXSTR)                :: value
+    character(10*ESMF_MAXSTR)             :: value
     character(ESMF_MAXSTR)                :: defaultvalue
 
     defaultvalue = "ComplianceICdefault"
