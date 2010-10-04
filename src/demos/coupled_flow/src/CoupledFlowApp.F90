@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.11 2010/09/30 18:51:29 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.12 2010/10/04 19:55:34 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -197,11 +197,11 @@
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
-      call ESMF_TimeSet(startTime, yy=2010, mm=s_month, dd=s_day, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=s_month, dd=s_day, &
                         h=s_hour, m=s_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_TimeSet(stopTime, yy=2010, mm=e_month, dd=e_day, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=e_month, dd=e_day, &
                         h=e_hour, m=e_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}

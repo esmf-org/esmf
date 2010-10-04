@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.12 2010/09/30 18:51:29 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.13 2010/10/04 19:55:34 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -389,9 +389,11 @@
 !   subcomponents will be described by these States.
 !
 !\begin{verbatim}
-    INimp = ESMF_StateCreate("Injection Input", ESMF_STATE_IMPORT,  rc=rc)
+    INimp = ESMF_StateCreate(statename="Injection Input", statetype=ESMF_STATE_IMPORT, &
+        rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATE_EXPORT, rc=rc)
+    INexp = ESMF_StateCreate(statename="Injection Feedback", statetype=ESMF_STATE_EXPORT, &
+        rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !\end{verbatim}
 !EOP
@@ -406,9 +408,11 @@
     !
     ! Create import/export states for FlowSolver Component
     !
-    FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATE_IMPORT, rc=rc)
+    FSimp = ESMF_StateCreate(statename="FlowSolver Input", statetype=ESMF_STATE_IMPORT, &
+        rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATE_EXPORT, rc=rc)
+    FSexp = ESMF_StateCreate(statename="FlowSolver Feedback ", statetype=ESMF_STATE_EXPORT, &
+        rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     !

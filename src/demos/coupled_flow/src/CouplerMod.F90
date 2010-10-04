@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.10 2010/10/04 14:05:05 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.11 2010/10/04 19:55:34 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -130,7 +130,7 @@
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-    ! Center Stagger
+    ! Use placeholder SIE
     call ESMF_StateGet(importState, name=statename, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     call ESMF_StateGet(importState, "SIE", src_field, rc=rc)

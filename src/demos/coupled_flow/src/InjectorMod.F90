@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.12 2010/09/23 21:12:50 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.13 2010/10/04 19:55:34 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -275,22 +275,36 @@
       call ESMF_StateAdd(importState, field_flag, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      ! This is adding names only to the export list, marked by default
+      ! This is adding names only to the export list, marked
       !  as "not needed". The coupler will mark the ones needed based
       !  on the requirements of the component(s) this is coupled to.
       call ESMF_StateAdd(exportState, "SIE", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "SIE", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "U", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "U", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "V", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "V", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "RHO", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "RHO", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "P", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "P", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "Q", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "Q", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "FLAG", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(exportState, "FLAG", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 ! Give the export state an initial set of values for the SIE Field.

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.15 2010/10/04 14:05:05 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.16 2010/10/04 19:55:34 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -309,24 +309,38 @@
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(import_state, field_flag, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!
-! This is adding names only to the export list, marked by default
-! as "not needed".  The coupler will mark the ones needed based
-! on the requirements of the component(s) this is coupled to.
-!
-      call ESMF_StateAdd(export_state, "SIE", rc)
+      !
+      ! This is adding names only to the export list, marked
+      ! as "not needed".  The coupler will mark the ones needed based
+      ! on the requirements of the component(s) this is coupled to.
+      !
+      call ESMF_StateAdd(export_state, "SIE", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateAdd(export_state, "U", rc)
+      call ESMF_StateSetNeeded(export_state, "SIE", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateAdd(export_state, "V", rc)
+      call ESMF_StateAdd(export_state, "U", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateAdd(export_state, "RHO", rc)
+      call ESMF_StateSetNeeded(export_state, "U", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateAdd(export_state, "P", rc)
+      call ESMF_StateAdd(export_state, "V", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateAdd(export_state, "Q", rc)
+      call ESMF_StateSetNeeded(export_state, "V", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateAdd(export_state, "FLAG", rc)
+      call ESMF_StateAdd(export_state, "RHO", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(export_state, "RHO", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(export_state, "P", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(export_state, "P", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(export_state, "Q", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(export_state, "Q", ESMF_NOTNEEDED, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateAdd(export_state, "FLAG", rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_StateSetNeeded(export_state, "FLAG", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 ! Give the export state an initial set of values for the SIE Field.
@@ -1643,20 +1657,16 @@
 !
 ! And now test output to a file
 !
-      write(filename, 20)  "U_velocity", file_no, "nc"
-      call ESMF_FieldWrite(field_u, file=filename, rc=status)
+      call ESMF_FieldWrite(field_u, file="U_velocity.nc", timeslice=file_no, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      write(filename, 20)  "V_velocity", file_no, "nc"
-      call ESMF_FieldWrite(field_v, file=filename, rc=status)
+      call ESMF_FieldWrite(field_v, file="V_velocity.nc", timeslice=file_no, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      write(filename, 20)  "OMEGA", file_no, "nc"
-      call ESMF_FieldWrite(field_omega, file=filename, rc=status)
+      call ESMF_FieldWrite(field_omega, file="OMEGA.nc", timeslice=file_no, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      write(filename, 20)  "SIE", file_no, "nc"
-      call ESMF_FieldWrite(field_sie, file=filename, rc=status)
+      call ESMF_FieldWrite(field_sie, file="SIE.nc", timeslice=file_no, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 !
 ! First time through output two more files
