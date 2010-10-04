@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.26 2010/09/30 19:27:30 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.27 2010/10/04 00:37:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.26 2010/09/30 19:27:30 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.27 2010/10/04 00:37:25 svasquez Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -315,16 +315,16 @@ end module
       call ESMF_StateSetNeeded(state3, sname, ESMF_NEEDED, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Marking an item needed"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !Call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      !name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_xUTest      
       ! Querying if an item is needed, using sname from above
       isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Querying if an item is needed"
-      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (.not. isNeeded)), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (.not. isNeeded)), &
+                      !name, failMsg, result, ESMF_SRCLINE)
 #endif
       !------------------------------------------------------------------------
       !EX_UTest      
