@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.7 2010/09/30 18:51:29 feiliu Exp $
+! $Id: InjectArraysMod.F90,v 1.8 2010/10/04 14:05:05 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -78,7 +78,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: haloLWidth(2), haloUWidth(2)
       type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(2) :: lb, ub, tlb, tub
@@ -86,12 +85,10 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -186,7 +183,7 @@
       jmin_t = tlb(2)
       jmax_t = tub(2)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine InjectArraysAlloc
 
@@ -199,17 +196,14 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -236,12 +230,7 @@
       call ESMF_FieldDestroy(field_flag, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in InjectArraysDealloc"
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine InjectArraysDealloc
 

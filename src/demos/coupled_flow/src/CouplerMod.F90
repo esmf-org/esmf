@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.9 2010/09/30 18:51:29 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.10 2010/10/04 14:05:05 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -170,44 +170,6 @@
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     endif
-
-    ! Edge1 Stagger
-    !call ESMF_StateGet(importState, name=statename, rc=rc)
-    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !call ESMF_StateGet(importState, "U", src_field, rc=rc)
-    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !call ESMF_StateGet(exportState, "U", dst_field, rc=rc)
-    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !if (trim(statename) .eq. "FlowSolver Feedback") then
-    !  call ESMF_FieldRedistStore(src_field, dst_field, &
-    !                             routehandle=fromFlowe1_rh, rc=rc)
-    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !endif
-    !if (trim(statename) .eq. "Injection Feedback") then
-    !  call ESMF_FieldRedistStore(src_field, dst_field, &
-    !                             routehandle=fromInjecte1_rh, rc=rc)
-    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
-    !endif
-
-    !! Edge2 Stagger
-    !call ESMF_StateGet(importState, name=statename, rc=rc)
-    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !call ESMF_StateGet(importState, "V", src_field, rc=rc)
-    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !call ESMF_StateGet(exportState, "V", dst_field, rc=rc)
-    !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !if (trim(statename) .eq. "FlowSolver Feedback") then
-    !  call ESMF_FieldRedistStore(src_field, dst_field, &
-    !                             routehandle=fromFlowe2_rh, rc=rc)
-    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-    !endif
-    !if (trim(statename) .eq. "Injection Feedback") then
-    !  call ESMF_FieldRedistStore(src_field, dst_field, &
-    !                             routehandle=fromInjecte2_rh, rc=rc)
-    !  if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
-    !endif
 
     print *, "Coupler Init returning"
    

@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.7 2010/09/30 18:51:29 feiliu Exp $
+! $Id: FlowArraysMod.F90,v 1.8 2010/10/04 14:05:05 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -92,7 +92,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: haloLWidth(2), haloUWidth(2)
       type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(2) :: lb, ub, tlb, tub
@@ -100,12 +99,10 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -269,7 +266,7 @@
       jmin_te2 = tlb(2)
       jmax_te2 = tub(2)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowArraysAlloc
 
@@ -282,17 +279,14 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -326,7 +320,7 @@
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowArraysDealloc
 

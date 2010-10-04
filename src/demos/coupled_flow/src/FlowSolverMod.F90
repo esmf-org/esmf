@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.14 2010/09/30 18:51:29 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.15 2010/10/04 14:05:05 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -441,7 +441,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j, n, x, y, nx, ny, ncounts(2), pos(2), de_id
       integer, dimension(1,2) :: local, global
       real(ESMF_KIND_R8) :: s_
@@ -452,12 +451,10 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -708,7 +705,7 @@
       endif
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowInit
 
@@ -896,7 +893,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
       real(kind=ESMF_KIND_R4) :: u_ij, u_ipj, rhouu_m, rhouu_p
       real(kind=ESMF_KIND_R4) :: v_ipjm, v_ipjp, rhouv_p, rhouv_m
@@ -906,12 +902,10 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -1011,7 +1005,7 @@
       endif
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
   
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowRhoVel
 
@@ -1039,7 +1033,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
       real(kind=ESMF_KIND_R4) :: rhoiu_m, rhoiu_p, rhoiv_m, rhoiv_p
       real(kind=ESMF_KIND_R4) :: dsiedx2, dsiedy2
@@ -1047,12 +1040,10 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !    
@@ -1131,7 +1122,7 @@
       endif
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowRhoI
 
@@ -1159,7 +1150,6 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
       real(kind=ESMF_KIND_R4), dimension(imax_ec,jmax_ec) :: rho_new
       real(kind=ESMF_KIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p
@@ -1167,12 +1157,10 @@
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !    
@@ -1252,7 +1240,7 @@
       endif
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowRho
 
@@ -1280,19 +1268,16 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
       real(kind=ESMF_KIND_R4) :: rhoav
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -1420,7 +1405,7 @@
       endif
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowVel
 
@@ -1449,18 +1434,15 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -1511,7 +1493,7 @@
       endif
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowState
 
@@ -1539,18 +1521,15 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       real :: scale, c
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -1588,7 +1567,7 @@
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
       end subroutine FlowStability
 
@@ -1634,25 +1613,19 @@
 ! Local variables
 !
       integer :: status
-      logical :: rcpresent
       integer :: i, j, pet_id
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_VM) :: vm
       character(len=ESMF_MAXSTR) :: filename
-      logical :: append
 !
 ! Set initial values
 !
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      append = .true.
-      if(file_no == 1) append = .false.
 !
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -1701,7 +1674,7 @@
         if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if(present(rc)) rc = ESMF_SUCCESS
 
  20   format(a,".",I3.3,".",a)
 
