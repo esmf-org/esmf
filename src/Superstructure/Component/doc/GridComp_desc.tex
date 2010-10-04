@@ -1,4 +1,4 @@
-% $Id: GridComp_desc.tex,v 1.12 2010/03/04 18:57:45 svasquez Exp $
+% $Id: GridComp_desc.tex,v 1.13 2010/10/04 22:35:06 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -13,64 +13,57 @@
 
 In Earth system modeling, the most natural way to think about an ESMF 
 Gridded Component, or {\tt ESMF\_GridComp}, is as a piece of code 
-representing a particular physical domain; for example, an atmospheric 
+representing a particular physical domain, such as an atmospheric 
 model or an ocean model.  Gridded Components may also represent individual
 processes, such as radiation or chemistry.  It's up to the application
 writer to decide how deeply to ``componentize.''
 
 Earth system software components tend to share a number of basic 
-features.  Most ingest and produce a variety of physical fields; refer to 
+features.  Most ingest and produce a variety of physical fields, refer to 
 a (possibly noncontiguous) spatial region and a grid that is 
-partitioned across a set of computational resources; and require 
-a clock, usually for stepping a governing set of PDEs forward in time.  
+partitioned across a set of computational resources, and require 
+a clock for things like stepping a governing set of PDEs forward in time.  
 Most can also be divided into distinct initialize, run, and finalize 
 computational phases.  These common characteristics are used 
 within ESMF to define a Gridded Component data structure that 
 is tailored for Earth system modeling and yet is still flexible
 enough to represent a variety of domains.
 
-A well-designed Gridded Component does not store information 
+A well designed Gridded Component does not store information 
 internally about how it couples to other Gridded Components.  That
 allows it to be used in different contexts without changes to source
 code.  The idea here is to avoid situations in which slightly
 different versions of the same model source are maintained for use in 
 different contexts - standalone vs. coupled versions, for example.
-Data is passed between Gridded Components using an intermediary 
-Coupler Component, described in Section \ref{sec:CplComp}.
+Data is passed in and out of Gridded Components using an ESMF State,
+this is described in Section \ref{sec:State}.
 
 An ESMF Gridded Component has two parts, one which is user-written
 and another which is part of the framework.  The user-written
 part is software that represents a physical domain or performs some
 other computational function.  It forms the body of the Gridded 
 Component.  It may be a piece of legacy code, or it may be developed 
-expressly for use with the ESMF.  It must contain routines with
+expressly for use with ESMF.  It must contain routines with
 standard ESMF interfaces that can be called to initialize, run, and
 finalize the Gridded Component.  These routines can have separate 
 callable phases, such as distinct first and second initialization steps.
 
-The part provided by ESMF is the Gridded Component derived type 
-itself, {\tt ESMF\_GridComp}.  An {\tt ESMF\_GridComp} must be created 
+ESMF provides the Gridded Component derived type, 
+{\tt ESMF\_GridComp}.  An {\tt ESMF\_GridComp} must be created 
 for every portion of the application that will be represented 
-as a separate component; for example, in a climate model, there may 
+as a separate component.  For example, in a climate model, there may 
 be Gridded Components representing the land, ocean, sea ice, and 
 atmosphere.  If the application contains an ensemble of identical 
 Gridded Components, every one has its own associated {\tt ESMF\_GridComp}.
 Each Gridded Component has its own name and is allocated
 a set of computational resources, in the form of an ESMF Virtual
-Machine, or VM.
+Machine, or {\tt VM}.
 
 The user-written part of a Gridded Component is associated with an
-{\tt ESMF\_GridComp} derived type through a routine called SetServices.
+{\tt ESMF\_GridComp} derived type through a routine called 
+{\tt ESMF_SetServices()}.
 This is a routine that the user must write, and declare public.
 Inside the SetServices routine the user must call  
-{\tt ESMF\_SetEntryPoint} methods that associate a standard ESMF 
-operation with the name of the corresponding Fortran subroutine in their user code.  
-
-
-
-
-
-
-
-
-
+{\tt ESMF\_SetEntryPoint()} methods that associate a standard ESMF 
+operation with the name of the corresponding Fortran subroutine 
+in their user code.

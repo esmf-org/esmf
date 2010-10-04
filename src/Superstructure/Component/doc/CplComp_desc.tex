@@ -1,4 +1,4 @@
-% $Id: CplComp_desc.tex,v 1.12 2010/03/04 18:57:45 svasquez Exp $
+% $Id: CplComp_desc.tex,v 1.13 2010/10/04 22:35:06 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,26 +24,27 @@ This enables the Gridded Components in the application to be
 used in multiple contexts; that is, used in different coupled 
 configurations without changes to their source code. 
 For example, the same atmosphere might in one case be coupled 
-to an ocean in a hurricane prediction model, and in another
-coupled to a data assimilation system for numerical weather 
-prediction.
+to an ocean in a hurricane prediction model, and to a 
+data assimilation system for numerical weather prediction in
+another.  A single Coupler Component can couple 
+two or more Gridded Components.
 
 Like Gridded Components, Coupler Components have two parts, one
 that is provided by the user and another that is part of the 
 framework.  The user-written portion of the software is the coupling
 code necessary for a particular exchange between Gridded Components.  
+This portion of the Coupler Component code must be divided into 
+separately callable initialize, run, and finalize methods.  The 
+interfaces for these methods are prescribed by ESMF.
+
 The term ``user-written'' is somewhat misleading here, since within 
 a Coupler Component the user can leverage ESMF infrastructure 
 software for regridding, redistribution, lower-level communications, 
 calendar management, and other functions.  However, ESMF is unlikely 
 to offer all the software necessary to customize a data transfer
-between Gridded Components.  ESMF does not currently offer tools 
-for unit tranformations or time averaging operations, so users 
-must manage those operations themseves.
-
-The user-written Coupler Component code must be divided into 
-separately callable initialize, run, and finalize methods.  The 
-interfaces for these methods are prescribed by ESMF.
+between Gridded Components.  For instance, ESMF does not currently 
+offer tools for unit tranformations or time averaging operations, 
+so users must manage those operations themselves.
 
 The second part of a Coupler Component is the {\tt ESMF\_CplComp}
 derived type within ESMF.  The user must create one of these types
@@ -53,16 +54,12 @@ atmospheric model.  \footnote{It is not necessary to create
 a Coupler Component for each individual data {\it transfer.}}
 
 The user-written part of a Coupler Component is associated with an
-{\tt ESMF\_CplComp} derived type through a routine called SetServices.
-This is a routine that the user must write, and declare public.
-Inside the SetServices routine the user must call 
-{\tt ESMF\_SetEntryPoint} methods that associate a standard ESMF 
+{\tt ESMF\_CplComp} derived type through a routine called 
+{\tt ESMF_SetServices()}.
+This is a routine that the user must write and declare public.
+Inside the {\tt ESMF_SetServices()} routine the user must call 
+{\tt ESMF\_SetEntryPoint()} methods that associate a standard ESMF 
 operation with the name of the corresponding Fortran subroutine in 
 their user code.  For example, a user routine called ``couplerInit''
 might be associated with the standard initialize routine in a 
 Coupler Component.
-
-Coupler Components can be written to transform data between a 
-pair of Gridded Components, or a single Coupler Component can couple 
-more than two Gridded Components.
-
