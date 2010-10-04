@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.5 2010/10/01 19:41:47 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.6 2010/10/04 16:38:52 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -29,6 +29,7 @@ module ESMF_ComplianceICMod
   contains
 
 !-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 !   !  The setvm routine is used by the child component to set VM properties
 !   !TODO:  currently the setvmIC() is _not_ hooked into the ESMF callback 
 
@@ -49,6 +50,7 @@ module ESMF_ComplianceICMod
 
   end subroutine
 
+!-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
@@ -184,6 +186,7 @@ module ESMF_ComplianceICMod
   end subroutine
 
 !-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 !   !   Initialization routine.
     
   recursive subroutine ic_init(comp, importState, exportState, clock, rc)
@@ -273,6 +276,13 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+      
+    ! compliance check Component metadata
+    call checkComponentMetadata(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     
     ! compliance check importState
     call checkState(prefix, referenceName="importState", state=importState, &
@@ -320,6 +330,7 @@ module ESMF_ComplianceICMod
   end subroutine ic_init
 
 
+!-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !   !  Run routine
  
@@ -431,6 +442,7 @@ module ESMF_ComplianceICMod
   end subroutine ic_run
 
 
+!-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !   !  Finalize routine
  
@@ -562,7 +574,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    prefix = "COMPLIANCECHECKER:"//repeat("##", ccfDepth)//":"//trim(compName)//":"
+    prefix = "COMPLIANCECHECKER:"//repeat("|->", ccfDepth)//":"//trim(compName)//":"
 
   end subroutine    
 
@@ -581,6 +593,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: tempString
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
     type(ESMF_StateItemType), allocatable :: stateitemtypeList(:)
+    type(ESMF_Field)                      :: field
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -649,7 +662,7 @@ module ESMF_ComplianceICMod
             write (tempString, *) item, " [FIELDBUNDLE] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAY) then
             call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
-              " contains an ESMF_Array object", ESMF_LOG_ERROR, rc=rc)
+              " contains an ESMF_Array object!", ESMF_LOG_ERROR, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=__FILE__)) &
@@ -657,7 +670,7 @@ module ESMF_ComplianceICMod
             write (tempString, *) item, " [ARRAY] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
             call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
-              " contains an ESMF_ArrayBundle object", ESMF_LOG_ERROR, rc=rc)
+              " contains an ESMF_ArrayBundle object!", ESMF_LOG_ERROR, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=__FILE__)) &
@@ -685,12 +698,389 @@ module ESMF_ComplianceICMod
             file=__FILE__)) &
             return  ! bail out
           
+          ! check metadata compliance            
+          if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
+            ! compliance check Field metadata
+            call ESMF_StateGet(state, itemName=itemNameList(item), &
+              field=field, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+            call checkFieldMetadata(prefix, field=field, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+          endif
+          
         enddo
         
         deallocate(stateitemtypeList)
         deallocate(itemNameList)
       endif
     endif      
+  end subroutine
+
+!-------------------------------------------------------------------------
+
+  recursive subroutine checkComponentMetadata(prefix, comp, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_GridComp)                   :: comp
+    integer,      intent(out), optional   :: rc
+    
+    character(ESMF_MAXSTR)                :: attributeName
+    character(ESMF_MAXSTR)                :: convention
+    character(ESMF_MAXSTR)                :: purpose
+      
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! set CIM convention and purpose specifiers
+    convention = "CIM 1.0"
+    purpose = "Model Component Simulation Description"
+    
+    attributeName = "ComponentShortName"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "ComponentLongName"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "ComponentDescription"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "ModelType"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "ReleaseDate"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "PreviousVersion"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "CitationShortTitle"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "CitationLongTitle"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "CitationDate"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "CitationPresentationForm"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "CitationDOI"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "IndividualName"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "OranizationName"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "EmailAddress"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "PhysicalAddress"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "InstitutionName"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "FundingSource"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "PrincipalInvestigator"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "Author"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "URL"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+  end subroutine
+    
+    
+  recursive subroutine checkComponentAttribute(prefix, comp, attributeName, &
+    convention, purpose, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_GridComp)                   :: comp
+    character(*), intent(in)              :: attributeName
+    character(*), intent(in)              :: convention
+    character(*), intent(in)              :: purpose
+    integer,      intent(out), optional   :: rc
+    
+    character(ESMF_MAXSTR)                :: value
+    character(ESMF_MAXSTR)                :: defaultvalue
+
+    defaultvalue = "ComplianceICdefault"
+
+    call ESMF_AttributeGet(comp, name=attributeName, value=value, &
+      defaultvalue=defaultvalue, convention=convention, purpose=purpose, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    if (trim(value) == trim(defaultvalue)) then
+      ! attribute not present
+      call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+        trim(attributeName)//"> is NOT present!", ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    else if (len_trim(value) == 0) then
+      ! attribute present but not set
+      call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+        trim(attributeName)//"> is NOT set!", ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    else
+      ! attribute present and set
+      call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+        trim(attributeName)//"> is present and set.", ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+    
+  end subroutine
+
+!-------------------------------------------------------------------------
+
+  recursive subroutine checkFieldMetadata(prefix, field, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_Field)                      :: field
+    integer,      intent(out), optional   :: rc
+    
+    character(ESMF_MAXSTR)                :: attributeName
+    character(ESMF_MAXSTR)                :: convention
+    character(ESMF_MAXSTR)                :: purpose
+      
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! set CIM convention and purpose specifiers
+    convention = "CIM 1.0"
+    purpose = "Inputs Description"
+    
+    attributeName = "VariableShortName"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "VariableLongName"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "VariableStandardName"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "VariableUnits"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    attributeName = "VariableIntent"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+  end subroutine
+    
+    
+  recursive subroutine checkFieldAttribute(prefix, field, attributeName, &
+    convention, purpose, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_Field)                      :: field
+    character(*), intent(in)              :: attributeName
+    character(*), intent(in)              :: convention
+    character(*), intent(in)              :: purpose
+    integer,      intent(out), optional   :: rc
+    
+    character(ESMF_MAXSTR)                :: value
+    character(ESMF_MAXSTR)                :: defaultvalue
+
+    defaultvalue = "ComplianceICdefault"
+
+    call ESMF_AttributeGet(field, name=attributeName, value=value, &
+      defaultvalue=defaultvalue, convention=convention, purpose=purpose, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    if (trim(value) == trim(defaultvalue)) then
+      ! attribute not present
+      call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+        trim(attributeName)//"> is NOT present!", ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    else if (len_trim(value) == 0) then
+      ! attribute present but not set
+      call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
+        trim(attributeName)//"> is NOT set!", ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    else
+      ! attribute present and set
+      call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+        trim(attributeName)//"> is present and set.", ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+    
   end subroutine
 
 !-------------------------------------------------------------------------

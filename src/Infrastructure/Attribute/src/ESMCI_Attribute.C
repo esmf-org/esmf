@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.78 2010/09/28 05:55:02 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.79 2010/10/04 16:38:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.78 2010/09/28 05:55:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.79 2010/10/04 16:38:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2328,21 +2328,30 @@ namespace ESMCI {
     return localrc;
   }
   else {
-    // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
-        "Attribute not typekind CHARACTER", &localrc);
-      return localrc;
-    }
+    
+    if (AttributeIsSet(name)) {
+      // attribute present and set
+      
+      // simple sanity checks
+      if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+          "Attribute not typekind CHARACTER", &localrc);
+        return localrc;
+      }
 
-    // simple sanity checks
-    if (attr->items != 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF, 
-        "Attribute not single value", &localrc);
-      return localrc;
-    }
+      // simple sanity checks
+      if (attr->items != 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF, 
+          "Attribute not single value", &localrc);
+        return localrc;
+      }
 
-    *value = attr->vcp;
+      *value = attr->vcp;
+    }else{
+      // attribute present but not set
+      *value = "";  // empty string
+    }
+      
   }
   
   return ESMF_SUCCESS;
@@ -2633,7 +2642,15 @@ namespace ESMCI {
       "Could not locate the Attribute", &localrc);
     return localrc;
   }
-    
+  
+  // check whether this Attribute has been set
+  if (!AttributeIsSet(name)) {
+    // not set -> return in a sensible way
+    for (i=0; i<count; i++)
+      lens[i] = 0;
+    return ESMF_SUCCESS;
+  }
+  
   // check that this is a char Attribute
   if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
