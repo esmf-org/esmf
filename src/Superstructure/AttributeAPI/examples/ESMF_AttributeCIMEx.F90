@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.7 2010/09/28 05:55:58 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.8 2010/10/05 05:22:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -50,6 +50,7 @@ program ESMF_AttributeCIMEx
       type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: gridcomp1, gridcomp2, gridcomp3
       character(ESMF_MAXSTR)  :: convCIM, purpComp, purpField, purpPlatform
+      character(ESMF_MAXSTR)  :: convISO, purpCitation
       
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -113,6 +114,8 @@ program ESMF_AttributeCIMEx
       purpComp = 'Model Component Simulation Description'
       purpField = 'Inputs Description'
       purpPlatform = 'Platform Description'
+      convISO = 'ISO 19115'
+      purpCitation = 'Citation Description'
 
       ! Add CIM Attribute package to Components
       !   convention = 'CIM 1.0'
@@ -248,8 +251,33 @@ program ESMF_AttributeCIMEx
        'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ResponsiblePartyRole', &
-       'author', &
+       'Principal Investigator', &
         convention=convCIM, purpose=purpComp, rc=rc)
+
+      ! Citation attributes
+      call ESMF_AttributeSet(cplcomp, 'CitationShortTitle', &
+       'Shaffrey_2009', &
+        convention=convISO, purpose=purpCitation, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'CitationLongTitle', &
+       'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
+       'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
+       'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
+       'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
+       'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
+       'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
+       'The New U.K. High Resolution Global Environment Model - Model ' // &
+       'description and basic evaluation. Journal of Climate, 22 (8). ' // &
+       '1861-1896.', &
+        convention=convISO, purpose=purpCitation, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'CitationDate', &
+       '2009', &
+        convention=convISO, purpose=purpCitation, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'CitationPresentationForm', &
+       'Online Refereed', &
+        convention=convISO, purpose=purpCitation, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'CitationDOI', &
+       'doi:10.1175/2008JCLI2508.1', &
+        convention=convISO, purpose=purpCitation, rc=rc)
 
       !
       !  Child component attributes, set on gridcomp1, child of cplcomp
@@ -263,18 +291,18 @@ program ESMF_AttributeCIMEx
         '2009', &
           convention=convCIM, purpose=purpComp, rc=rc)
 
-      ! Responsible party attributes (for Principal Investigator)
+      ! Responsible party attributes (for Author)
       call ESMF_AttributeSet(gridcomp1, 'IndividualName', &
-       'Gerard Devine', &
+       'John Doe', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'PhysicalAddress', &
-       'Department of Meteorology University of Reading Earley Gate, Reading UK', &
+       'Department of Meteorology University of ABC', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'EmailAddress', &
-       'g.m.devine@reading.ac.uk', &
+       'john.doe@uabc.edu', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'ResponsiblePartyRole', &
-       'author', &
+       'Author', &
         convention=convCIM, purpose=purpComp, rc=rc)
 
       !
@@ -289,18 +317,18 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(cplcomp, 'ModelType', &
         'AtmosDynamicalCore', convention=convCIM, purpose=purpComp, rc=rc)
 
-      ! Responsible party attributes (for Principal Investigator)
+      ! Responsible party attributes (for Contact)
       call ESMF_AttributeSet(gridcomp3, 'IndividualName', &
-       'Gerard Devine', &
+       'Jane Doe', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'PhysicalAddress', &
-       'Department of Meteorology University of Reading Earley Gate, Reading UK', &
+       'Department of Meteorology University of DEF', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'EmailAddress', &
-       'g.m.devine@reading.ac.uk', &
+       'jane.doe@udef.edu', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'ResponsiblePartyRole', &
-       'author', &
+       'Contact', &
         convention=convCIM, purpose=purpComp, rc=rc)
 
       !
@@ -314,18 +342,18 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(cplcomp, 'ModelType', &
         'AtmosphericChemistry', convention=convCIM, purpose=purpComp, rc=rc)
 
-      ! Responsible party attributes (for Principal Investigator)
-      call ESMF_AttributeSet(gridcomp2, 'IndividualName', &
-       'Gerard Devine', &
+      ! Responsible party attributes (for Center)
+      call ESMF_AttributeSet(gridcomp2, 'OrganizationName', &
+       'GHI', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
-       'Department of Meteorology University of Reading Earley Gate, Reading UK', &
+       'Department of Meteorology University of GHI', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'EmailAddress', &
-       'g.m.devine@reading.ac.uk', &
+       'info@ughi.edu', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'ResponsiblePartyRole', &
-       'author', &
+       'Center', &
         convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
 
