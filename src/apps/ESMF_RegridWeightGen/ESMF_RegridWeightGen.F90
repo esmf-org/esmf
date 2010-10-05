@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.6 2010/09/30 19:41:30 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.7 2010/10/05 22:27:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -363,11 +363,14 @@ program ESMF_RegridWeightGen
            dstGrid = ESMF_GridCreate(trim(dstfile),(/PetCnt,1/), addCornerStagger=addCorners, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     	   dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	else
            dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
                        convertToDual=convertToDual, rc=rc)
+	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
            dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -376,6 +379,8 @@ program ESMF_RegridWeightGen
 	! if dstfile is not SCRIP, it is always unstructured
 	dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
                     rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
         dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -419,7 +424,6 @@ program ESMF_RegridWeightGen
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
-
       ! Compute areas if conservative
       ! Area only valid on PET 0 right now, when parallel Array
       ! write works, then make area io parallel
@@ -430,6 +434,8 @@ program ESMF_RegridWeightGen
          else
             call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            call ESMF_MeshMergeSplitSrcInd(srcMesh,indicies,rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          endif
 
          if (dstIsReg) then
@@ -437,6 +443,8 @@ program ESMF_RegridWeightGen
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
             call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            call ESMF_MeshMergeSplitDstInd(dstMesh,weights,indicies,rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          endif
       endif
@@ -573,25 +581,54 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   integer (ESMF_KIND_I4) :: localCount(1)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
   integer :: totalCount
+  logical :: hasSplitElem
  
-  ! Get local size of mesh areas before split
-  call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, rc=localrc)  
+  ! Find out if elements are split
+  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)  
   if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return
   endif
 
-  ! allocate space for areas
-  allocate(localArea(localElemCount))
-
-  ! Get local Areas
-  call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
+  ! Get area depending on split elements
+  if (hasSplitElem) then 
+     ! Get local size of mesh areas before split
+     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
+            rc=localrc)  
+    if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return
+    endif
+
+    ! allocate space for areas
+    allocate(localArea(localElemCount))
+
+    ! Get local Areas
+    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
+    if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+     endif
+  else 
+     ! Get local size of mesh areas
+     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
+            rc=localrc)  
+    if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+    endif
+
+    ! allocate space for areas
+    allocate(localArea(localElemCount))
+
+    ! Get local Areas
+    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
+    if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+     endif
   endif
 
-  
   ! Allocate List of counts
   allocate(globalCount(petCnt))
 
