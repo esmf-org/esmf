@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.11 2010/10/04 19:55:34 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.12 2010/10/05 21:43:00 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -224,14 +224,18 @@
         ! (this makes some eager error-checking compilers happy.)
         rc = ESMF_FAILURE
 
-        datacount = 7
+        !datacount = 7
+        !datanames(1) = "SIE"
+        !datanames(2) = "U"
+        !datanames(3) = "V"
+        !datanames(4) = "RHO"
+        !datanames(5) = "P"
+        !datanames(6) = "Q"
+        !datanames(7) = "FLAG"
+        datacount = 3
         datanames(1) = "SIE"
-        datanames(2) = "U"
-        datanames(3) = "V"
-        datanames(4) = "RHO"
-        datanames(5) = "P"
-        datanames(6) = "Q"
-        datanames(7) = "FLAG"
+        datanames(2) = "V"
+        datanames(3) = "RHO"
 
         ! In this case, the coupling is symmetric - you call redist going
         ! both ways - so we only care about the coupling direction in order 

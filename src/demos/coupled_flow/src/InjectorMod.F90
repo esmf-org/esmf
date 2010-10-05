@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.13 2010/10/04 19:55:34 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.14 2010/10/05 21:43:00 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -280,31 +280,17 @@
       !  on the requirements of the component(s) this is coupled to.
       call ESMF_StateAdd(exportState, "SIE", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "SIE", ESMF_NOTNEEDED, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "U", rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "U", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "V", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "V", ESMF_NOTNEEDED, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "RHO", rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "RHO", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "P", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "P", ESMF_NOTNEEDED, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "Q", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "Q", ESMF_NOTNEEDED, rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       call ESMF_StateAdd(exportState, "FLAG", rc=rc)
-      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(exportState, "FLAG", ESMF_NOTNEEDED, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
 ! Give the export state an initial set of values for the SIE Field.
@@ -349,9 +335,10 @@
 !     \end{description}
 !
 !EOPI
-      integer :: i, datacount
+      integer :: i, datacount, count
       character(len=ESMF_MAXSTR), dimension(7) :: datanames
       type(ESMF_Field) :: thisfield
+      type(ESMF_StateItemType) :: itemtype
 
       !
       ! Set initial values
@@ -370,17 +357,24 @@
 
       ! Update any required fields in the export state
       ! Ojbects are referenced now, no need for relinking
-      do i=2, datacount
+      do i=1, datacount
 
          ! check isneeded flag here
          if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
              cycle
          endif
 
-         call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+         ! add Field from importState to exportState if it doesn't exist in exportState
+         call ESMF_StateGet(exportState, itemSearch=datanames(i), itemCount=count, rc=rc)
          if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-         call ESMF_StateAdd(exportState, thisfield, rc=rc)
+         call ESMF_StateGet(exportState, name=datanames(i), stateitemtype=itemtype, rc=rc)
          if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+         if((count .lt. 1) .or. (itemtype .eq. ESMF_STATEITEM_NAME)) then 
+             call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+             if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+             call ESMF_StateAdd(exportState, thisfield, rc=rc)
+             if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+         endif
 
       enddo
 
@@ -428,12 +422,15 @@
         type(ESMF_Field) :: local_sie, local_v, local_rho, local_flag
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_sie, data_v
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_rho, data_flag
+        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: exp_sie, exp_v
+        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: exp_rho, exp_flag
         type(ESMF_Time) :: currtime
         type(injectdata), pointer :: datablock
         type(wrapper) :: wrap
 
-        integer :: i, j, datacount
+        integer :: i, j, datacount, count
         character(len=ESMF_MAXSTR), dimension(7) :: datanames
+        type(ESMF_StateItemType) :: itemtype
 
 
         ! All possible export data fields.
@@ -452,7 +449,7 @@
         datablock => wrap%ptr
 
 
-        ! Get the Field and FieldBundle data from the State that we might update
+        ! Get the Field data from the State that we might update
         call ESMF_StateGet(importState, "SIE", local_sie, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
         call ESMF_StateGet(importState, "V", local_v, rc=rc)
@@ -475,6 +472,21 @@
       
         call ESMF_FieldGet(local_flag, farrayPtr=data_flag, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+        ! Do the same for export Fields
+        call ESMF_StateGet(exportState, "SIE", local_sie, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        call ESMF_StateGet(exportState, "V", local_v, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        call ESMF_StateGet(exportState, "RHO", local_rho, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+        call ESMF_FieldGet(local_sie, farrayPtr=exp_sie, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        call ESMF_FieldGet(local_v, farrayPtr=exp_v, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        call ESMF_FieldGet(local_rho, farrayPtr=exp_rho, rc=rc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
           
         ! Update values.  Flag = 10 means override values with our own.
 
@@ -491,6 +503,9 @@
                   data_sie(i,j) = datablock%inject_energy
                   data_v(i,j) = datablock%inject_velocity
                   data_rho(i,j) = datablock%inject_density
+                  exp_sie(i,j) = datablock%inject_energy
+                  exp_v(i,j) = datablock%inject_velocity
+                  exp_rho(i,j) = datablock%inject_density
                 endif
               enddo
             enddo
@@ -504,6 +519,9 @@
                   data_sie(i,j) = 200.0
                   data_v(i,j) = 0.0
                   data_rho(i,j) = 6.0
+                  exp_sie(i,j) = 200.0
+                  exp_v(i,j) = 0.0
+                  exp_rho(i,j) = 6.0
                 endif
               enddo
             enddo
@@ -512,19 +530,26 @@
  
         ! Update any required fields in the export state
         ! TODO: determine if relinking is needed
-        !do i=1, datacount
+        do i=1, datacount
 
-        !   ! check isneeded flag here
-        !   if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
-        !       cycle
-        !   endif
+           ! check isneeded flag here
+           if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
+               cycle
+           endif
 
-        !   call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
-        !   if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        !   call ESMF_StateAdd(exportState, thisfield, rc=rc)
-        !   if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+           ! add Field from importState to exportState if it doesn't exist in exportState
+           call ESMF_StateGet(exportState, itemSearch=datanames(i), itemCount=count, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+           call ESMF_StateGet(exportState, name=datanames(i), stateitemtype=itemtype, rc=rc)
+           if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+           if((count .lt. 1) .or. (itemtype .eq. ESMF_STATEITEM_NAME)) then 
+             call ESMF_StateGet(importState, datanames(i), thisfield, rc=rc)
+             if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+             call ESMF_StateAdd(exportState, thisfield, rc=rc)
+             if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+           endif
 
-        !enddo
+        enddo
 
       rc = ESMF_SUCCESS
 

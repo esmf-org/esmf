@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.13 2010/10/04 19:55:34 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.14 2010/10/05 21:43:00 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -514,9 +514,9 @@
         if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
   
         ! Couple export state of Injector to import of FlowSolver
-        !call ESMF_CplCompRun(cpl, INexp, FSimp, localclock, rc=rc, userRc=urc)
-        !if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        !if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
+        call ESMF_CplCompRun(cpl, INexp, FSimp, localclock, rc=rc, userRc=urc)
+        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+        if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
   
         ! Advance the time
         call ESMF_ClockAdvance(localclock, rc=rc)
