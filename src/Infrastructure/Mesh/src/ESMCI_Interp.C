@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.27 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.28 2010/10/05 22:26:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.27 2010/09/17 03:13:32 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.28 2010/10/05 22:26:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -246,6 +246,7 @@ void IWeights::Prune(const Mesh &mesh, const MEField<> *mask) {
   }
   
 }
+
 
 /*----------------------------------------------------------------*/
 // Interp:
@@ -1048,13 +1049,17 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
   
   if (is_parallel) mat_transfer_parallel(fpair_num, iw); else mat_transfer_serial(fpair_num, iw);
   
-  // Migrate weights back to row decomposition
-  if (is_parallel) {
-    iw.Migrate(dstmesh);
-  }
+  // Migrate weights back to row decomposition 
+  // (use node or elem migration depending on interpolation)
+  if (!has_cnsrv) {
+    if (is_parallel) {
+      iw.Migrate(dstmesh);
+    }
+  } else {
+    if (is_parallel) {
+      iw.MigrateToElem(dstmesh);
+    }
 
-#if 1
-  if (has_cnsrv) {
     WMat::WeightMap::iterator wi = iw.begin_row(), we = iw.end_row();
     for (; wi != we; ++wi) {
       const WMat::Entry &w = wi->first;
@@ -1072,7 +1077,6 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
       } // for j      
     } // for wi
   }
-#endif
 }
 
 

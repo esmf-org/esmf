@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.20 2010/09/29 03:35:10 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.21 2010/10/05 22:26:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.20 2010/09/29 03:35:10 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.21 2010/10/05 22:26:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -116,10 +116,6 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
                   int *regridPoleType, int *regridPoleNPnts, 
                   int *regridScheme, int *unmappedaction) {
 
-  // Conflict management
-  //  int regridPoleType = ESMC_REGRID_POLETYPE_ALL;
-  //  int regridPoleNPnts = 0;
-
     // Conservative regridding
     switch (*regridConserve) {
     case (ESMC_REGRID_CONSERVE_ON): {
@@ -145,7 +141,11 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
         Throw() << "Regridding error" << std::endl;
 
       // Remove non-locally owned weights (assuming destination mesh decomposition)
-      wts.Prune(dstmesh, 0);
+
+      // This prune won't work for conserve
+      // because wghts not on nodes, earlier mask code shouldn't allow weights
+      // at this point anyways. 
+      if(*regridMethod != ESMC_REGRID_METHOD_CONSERVE) wts.Prune(dstmesh, 0);
 
     } break;
 

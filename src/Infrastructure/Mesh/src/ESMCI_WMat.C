@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.12 2010/09/16 20:23:57 w6ws Exp $
+// $Id: ESMCI_WMat.C,v 1.13 2010/10/05 22:26:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.12 2010/09/16 20:23:57 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.13 2010/10/05 22:26:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -171,6 +171,7 @@ void WMat::Print(std::ostream &os) {
   
 }
 
+// Migrate WMat based on mesh's node ids
 //void WMat::Migrate(CommRel &crel) {
 void WMat::Migrate(Mesh &mesh) { 
   Trace __trace("WMat::Migrate(Mesh &mesh)");
@@ -216,6 +217,55 @@ for (; wi != we; ++wi) {
   return;
   
 }
+
+// Migrate WMat based on mesh's element ids
+//void WMat::Migrate(CommRel &crel) {
+void WMat::MigrateToElem(Mesh &mesh) { 
+  Trace __trace("WMat::Migrate(Mesh &mesh)");
+  
+  // Gather pole constraints
+  {
+    std::vector<UInt> mesh_dist, iw_dist;
+    
+    Context c; c.set(Attr::ACTIVE_ID);
+    Attr a(MeshObj::ELEMENT, c);
+    getMeshGIDS(mesh, a, mesh_dist);
+    GetRowGIDS(iw_dist);
+    
+    Migrator mig(mesh_dist.size(), mesh_dist.size() > 0 ? &mesh_dist[0] : NULL, 0,
+        iw_dist.size(), iw_dist.size() > 0 ? &iw_dist[0] : NULL);
+    
+    mig.Migrate(*this);
+    
+//#define CHECK_WEIGHT_MIG
+#ifdef CHECK_WEIGHT_MIG
+// Check something: should have 1 to 1 coresp ids and entries
+for (UInt i = 0; i < mesh_dist.size(); i++) {
+  Entry ent(mesh_dist[i]);
+  WeightMap::iterator wi = weights.lower_bound(ent);
+  if (wi == weights.end() || wi->first.id != ent.id)
+    Throw() << "Did not find id:" << ent.id << std::endl;
+}
+// And the other way
+std::sort(mesh_dist.begin(), mesh_dist.end());
+WeightMap::iterator wi = weights.begin(), we = weights.end();
+for (; wi != we; ++wi) {
+  std::vector<UInt>::iterator lb =
+    std::lower_bound(mesh_dist.begin(), mesh_dist.end(), wi->first.id);
+  
+  if (lb == mesh_dist.end() || *lb != wi->first.id)
+    Throw() << "Weight entry:" << wi->first.id << " not a mesh id!";
+}
+#endif
+  
+    
+  }
+  
+  return;
+  
+}
+
+
   
 void WMat::clear() {
   

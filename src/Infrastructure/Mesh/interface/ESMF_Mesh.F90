@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.45 2010/10/01 18:55:40 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.46 2010/10/05 22:26:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.45 2010/10/01 18:55:40 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.46 2010/10/05 22:26:51 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.45 2010/10/01 18:55:40 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.46 2010/10/05 22:26:51 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -928,6 +928,10 @@ end function ESMF_MeshCreateFromFile
     integer                             :: sndBuf(1)
     type(ESMF_VM)                       :: vm
     type(ESMF_Mesh)                     :: Mesh
+    integer(ESMF_KIND_I4)               :: localSplitElems(1)
+    integer(ESMF_KIND_I4)               :: globalSplitElems(1)
+    logical                             :: existSplitElems
+
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1080,17 +1084,32 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
 
-    ! Set split element info
-    ! Assume for now that there are
-    ! split elements eventually 
-    ! check and set flag appropriately    
-    Mesh%hasSplitElem=.true.
-    allocate(mesh%splitElemMap(TotalElements))
-    Mesh%splitElemStart=myStartElmt+1  ! position of first element
-    Mesh%splitElemCount=TotalElements
-    Mesh%origElemStart=startElmt+1  ! position of first element
-    Mesh%origElemCount=ElemCnt
+    ! figure out if there are split elements globally
+    !! Fake logical allreduce .or. with MAX
+    if (totalElements .gt. ElemCnt) then
+       localSplitElems(1)=1
+    else 
+       localSplitElems(1)=0
+    endif
+    call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_MAX, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return    
+    if (globalSplitElems(1) .eq. 1) then
+       existSplitElems=.true.
+    else 
+       existSplitElems=.false.
+    endif
 
+
+    ! Set split element info
+    if (existSplitElems) then    
+       Mesh%hasSplitElem=.true.
+       allocate(mesh%splitElemMap(TotalElements))
+       Mesh%splitElemStart=myStartElmt+1  ! position of first element
+       Mesh%splitElemCount=TotalElements
+       Mesh%origElemStart=startElmt  ! position of first element
+       Mesh%origElemCount=ElemCnt
+    endif
 
     ! the node number is 0 based, need to change it to 1 based
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
@@ -1106,7 +1125,7 @@ end function ESMF_MeshCreateFromFile
            do i=1,3
               ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
 	   end do
-           Mesh%splitElemMap(ElemNo)=j+myStartElmt
+           if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
            ElemNo=ElemNo+1
            ConnNo=ConnNo+3
 	elseif (elmtNum(j)==4) then
@@ -1115,7 +1134,7 @@ end function ESMF_MeshCreateFromFile
            do i=1,4
               ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
 	   end do
-           Mesh%splitElemMap(ElemNo)=j+myStartElmt
+           if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
            ElemNo=ElemNo+1
 	   ConnNo=ConnNo+4
 	else
@@ -1126,7 +1145,7 @@ end function ESMF_MeshCreateFromFile
              ElemConn (ConnNo+1) = NodeUsed(elementConn(1,j))
              ElemConn (ConnNo+2) = NodeUsed(elementConn(2+k,j))
              ElemConn (ConnNo+3) = NodeUsed(elementConn(3+k,j))
-             Mesh%splitElemMap(ElemNo)=j+myStartElmt	
+             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
              ElemNo=ElemNo+1
 	     ConnNo=ConnNo+3
 	   end do
@@ -1143,7 +1162,11 @@ end function ESMF_MeshCreateFromFile
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! NEED TO SET THIS HERE, BECAUSE MEshAddElements sets it to false
-    Mesh%hasSplitElem=.true.
+    if (existSplitElems) then
+       Mesh%hasSplitElem=.true.
+    else
+       Mesh%hasSplitElem=.false.
+    endif
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn)
@@ -2128,7 +2151,8 @@ end function ESMF_MeshCreateFromScrip
 !
 ! !DESCRIPTION:
 !   For a Mesh with split elements, get the area of the original 
-!   unsplit element
+!   unsplit element. If not split elements then just get Mesh areas.
+!  
 !
 !   \begin{description}
 !   \item [mesh]
@@ -2198,9 +2222,11 @@ end function ESMF_MeshCreateFromScrip
     ! Put the areas back together
     areaList=0.0_ESMF_KIND_R8
     do i=1,mesh%splitElemCount
-	m=mesh%splitElemMap(i)-mesh%origElemStart+2
+       m=mesh%splitElemMap(i)-mesh%origElemStart+1
        areaList(m)=areaList(m)+splitAreaList(i)
     enddo
+
+    
     
     ! Allocate array to hold split areas
     deallocate(splitAreaList)
@@ -2219,12 +2245,13 @@ end function ESMF_MeshCreateFromScrip
 ! !IROUTINE: ESMF_MeshGetElemSplit - Get element split information from a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshGetElemSplit(mesh, splitElemStart, splitElemCount, &
+      subroutine ESMF_MeshGetElemSplit(mesh, hasSplitElem, splitElemStart, splitElemCount, &
                splitElemMap, origElemStart,origElemCount, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(inout)            :: mesh
+    logical, intent(out), optional            :: hasSplitElem
     integer, intent(out),optional             :: splitElemStart
     integer, intent(out),optional             :: splitElemCount
     integer,  pointer, optional               :: splitElemMap(:)
@@ -2234,7 +2261,9 @@ end function ESMF_MeshCreateFromScrip
 
 !
 ! !DESCRIPTION:
-!   Get element split information from a mesh.
+!   Get element split information from a mesh. Will complain if anything is asked
+!   for involving splitElements if no split elements are present, except for hasSplitElem.
+!   TODO: make this transparent to presence of splitElements
 !
 ! The arguments are:
 ! \begin{description}
@@ -2258,30 +2287,35 @@ end function ESMF_MeshCreateFromScrip
        return 
     endif    
 
-    ! If mesh does not have split information
-     if (.not. mesh%hasSplitElem) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
-                 "- the mesh does not have split information", & 
-                 ESMF_CONTEXT, rc) 
-       return 
-    endif    
 
-    ! copy split Element Map
-    if (present(splitElemMap)) then
-       if (size(splitElemMap) .lt. size(mesh%splitElemMap)) then
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+    if (present(hasSplitElem))   hasSplitElem=mesh%hasSplitElem
+
+    if (mesh%hasSplitElem) then 
+      if (present(splitElemStart)) splitElemStart=mesh%splitElemStart
+      if (present(splitElemCount)) splitElemCount=mesh%splitElemCount
+      if (present(origElemStart))  origElemStart=mesh%origElemStart
+      if (present(origElemCount))  origElemCount=mesh%origElemCount    
+
+      ! copy split Element Map
+      if (present(splitElemMap)) then
+         if (size(splitElemMap) .lt. size(mesh%splitElemMap)) then
+            call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
                  "- splitElemMap input parameter wrong size ", & 
                  ESMF_CONTEXT, rc) 
-          return 
-       endif            	
+            return 
+         endif            	
   
-       splitElemMap(:)=mesh%splitElemMap(:)
+        splitElemMap(:)=mesh%splitElemMap(:)
+      endif
+    else
+      if (present(splitElemStart) .or. present(splitElemCount) .or. &
+          present(origElemStart)  .or. present(origElemCount) .or. &
+          present(splitElemMap)) then
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has no split elements", & 
+                 ESMF_CONTEXT, rc) 
+      endif 
     endif
-
-    if (present(splitElemStart)) splitElemStart=mesh%splitElemStart
-    if (present(splitElemCount)) splitElemCount=mesh%splitElemCount
-    if (present(origElemStart))  origElemStart=mesh%origElemStart
-    if (present(origElemCount))  origElemCount=mesh%origElemCount    
 
     if (present(rc)) rc = localrc
 
@@ -2298,21 +2332,21 @@ end function ESMF_MeshCreateFromScrip
 ! !IROUTINE: ESMF_MeshMergeSplitSrcInd - Merge Split Source Sparse Mat Src Ind
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshMergeSplitSrcInd(mesh, indices, rc)
+    subroutine ESMF_MeshMergeSplitSrcInd(mesh, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)                     :: mesh
-    integer(ESMF_KIND_I4), intent(inout)            :: indices(:,:)
+    integer(ESMF_KIND_I4), intent(inout)            :: factorIndexList(:,:)
     integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
-!   For a Mesh with split elements, merge source indices
+!   For a Mesh with split elements, merge source factorIndexList
 !
 !   \begin{description}
 !   \item [mesh]
 !         The mesh.
-!   \item [indices]
-!         indices in which the source will be merged
+!   \item [factorIndexList]
+!         factorIndexList in which the source will be merged
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2359,13 +2393,7 @@ end function ESMF_MeshCreateFromScrip
     endif    
 
     ! Get size of list
-    indCount=size(indices,2)
-
-    ! If list is of size 0 then leave
-    if (indCount < 1) then
-        if  (present(rc)) rc = ESMF_SUCCESS
-       return
-    endif
+    indCount=size(factorIndexList,1)
 
     ! Get VM
     call ESMF_VMGetCurrent(vm,rc=localrc)
@@ -2406,7 +2434,7 @@ end function ESMF_MeshCreateFromScrip
     ! Allocate final area list
     allocate(globalSplitElemMap(totalCount))
 
-    ! Gather all areas
+    ! Gather all factorIndexList
     call ESMF_VMAllGatherV(vm,sendData=mesh%splitElemMap, sendCount=size(mesh%splitElemMap),&
          recvData=globalSplitElemMap,recvCounts=globalCount,recvOffsets=globalDispl,&
          rc=localrc)
@@ -2416,9 +2444,9 @@ end function ESMF_MeshCreateFromScrip
     deallocate(globalCount)
     deallocate(globalDispl)
 
-    ! Loop processing indices
+    ! Loop processing factorIndexList
     do i=1,indCount
-       indices(1,i)=globalSplitElemMap(indices(1,i))
+       factorIndexList(i,1)=globalSplitElemMap(factorIndexList(i,1))
     enddo
 
     ! Get rid of global Map
@@ -2438,24 +2466,24 @@ end function ESMF_MeshCreateFromScrip
 ! !IROUTINE: ESMF_MeshMergeSplitDstInd - Merge Split Sparse Mat Dst Ind
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshMergeSplitDstInd(mesh, factorList, indices, rc)
+    subroutine ESMF_MeshMergeSplitDstInd(mesh, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)                     :: mesh
     real(ESMF_KIND_R8), intent(inout)               :: factorList(:) 
-    integer(ESMF_KIND_I4),intent(inout)             :: indices(:,:)
+    integer(ESMF_KIND_I4),intent(inout)             :: factorIndexList(:,:)
     integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
-!   For a Mesh with split elements, merge source indices
+!   For a Mesh with split elements, merge source factorIndexList
 !
 !   \begin{description}
 !   \item [mesh]
 !         The mesh.
 !   \item [factorList]
 !         factorList in which the dst will be merged
-!   \item [indices]
-!         indices in which the dst will be merged
+!   \item [factorIndexList]
+!         factorIndexList in which the dst will be merged
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2500,14 +2528,9 @@ end function ESMF_MeshCreateFromScrip
     endif    
 
     ! Get size of list
-    indCount=size(indices,2)
+    indCount=size(factorIndexList,1)
 
-    ! If list is of size 0 then leave
-    if (indCount < 1) then
-        if  (present(rc)) rc = ESMF_SUCCESS
-       return
-    endif
- 
+
     ! Allocate array to hold split areas
     allocate(splitAreaList(mesh%numOwnedElements))
 
@@ -2525,21 +2548,25 @@ end function ESMF_MeshCreateFromScrip
       ESMF_CONTEXT, rcToReturn=rc)) return   
 
 
-    ! Loop changing indices and weights
+    ! Loop changing factorIndexList and weights
     do i=1,indCount
-       split_dst_id=indices(2,i)
-       split_dst_pos=split_dst_id-mesh%splitElemStart+2
+       split_dst_id=factorIndexList(i,2)
+       split_dst_pos=split_dst_id-mesh%splitElemStart+1
        orig_dst_id=mesh%splitElemMap(split_dst_pos)
-       orig_dst_pos=orig_dst_id-mesh%origElemStart+2
+       orig_dst_pos=orig_dst_id-mesh%origElemStart+1
+
+!       write(*,*) i,"b:",factorIndexList(i,2),"a:",orig_dst_id,"  ", &
+!                  (splitAreaList(split_dst_pos))/origAreaList(orig_dst_pos)                                       
 
        ! Set new index
-       indices(2,i)=orig_dst_id
+       factorIndexList(i,2)=orig_dst_id
 
        ! Set new weight
        factorList(i)=(factorList(i)*splitAreaList(split_dst_pos))/ &
                       origAreaList(orig_dst_pos)                                       
     enddo
-  
+
+
   ! Get rid of area lists
     deallocate(splitAreaList)
     deallocate(origAreaList)

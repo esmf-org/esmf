@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.h,v 1.7 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_WMat.h,v 1.8 2010/10/05 22:26:51 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -103,6 +103,7 @@ public:
    * mesh.
    */
   void Migrate(Mesh &mesh);
+  void MigrateToElem(Mesh &mesh);
   
   // Return the number of rows that use this id
   UInt NumRows(long id) const;
