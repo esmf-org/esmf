@@ -1,28 +1,30 @@
-% $Id: Field_desc.tex,v 1.7 2010/06/25 18:13:54 feiliu Exp $
+% $Id: Field_desc.tex,v 1.8 2010/10/05 23:52:50 rokuingh Exp $
 
 An ESMF Field represents a physical field, such as temperature.
 The motivation for including Fields in ESMF is that bundles of 
 Fields are the entities that are normally exchanged when coupling
 Components.  
 
-The ESMF Field class contains distributed, discretized field data, a reference 
-to its associated grid, and metadata.  The Field class maintains the
-relationship of how a data array maps onto a grid (e.g. one item per
+The ESMF Field class contains distributed and discretized field data, a reference 
+to its associated grid, and metadata.  The Field class stores the grid {\it staggering}
+for that physical field.
+This is the relationship of how the data array of a fieldmaps onto a grid 
+(e.g. one item per
 cell located at the cell center, one item per cell located at the NW
-corner,  one item per cell vertex, ...).  This means that different Fields
+corner,  one item per cell vertex, etc.).  This means that different Fields
 which are on the same underlying ESMF Grid but have different
 staggerings can share the same Grid object without needing to replicate
 it multiple times. 
 
 Fields can be added to States for use in inter-Component
 data communications.  Fields can also be added to FieldBundles,
-which are currently defined as groups of Fields on the same underlying
-grid.  One motivation for FieldBundles is convenience; another is the
-ability to perform optimized collective data transfers.  
+which are groups of Fields on the same underlying Grid.  
+One motivation for packing Fields into FieldBundles is convenience; 
+another is the ability to perform optimized collective data transfers.  
 
-Field communications, including data redistribution, regriding, scatter,
-gather, sparse-matrix matmul, and halo update, are enabled in this release.
-
+Field communication capabilities include: data redistribution, regridding, scatter,
+gather, sparse-matrix multiplication, and halo update.  These are discussed
+in more detail in the documentation for the specific method calls.  
 ESMF does not currently support vector fields, so the components of 
 a vector field must be stored as separate Field objects.  
 

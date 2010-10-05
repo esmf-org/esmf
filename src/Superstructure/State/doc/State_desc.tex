@@ -1,4 +1,4 @@
-% $Id: State_desc.tex,v 1.16 2010/03/04 18:57:46 svasquez Exp $
+% $Id: State_desc.tex,v 1.17 2010/10/05 23:52:04 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -11,9 +11,9 @@
 %\subsection{Description}
 
 A State contains the data and metadata to be transferred between 
-ESMF components.  It is an important class, because it defines a 
+ESMF Components.  It is an important class, because it defines a 
 standard for how data is represented in data transfers between Earth
-science Components.  The 
+science components.  The 
 State construct is a rational compromise between a fully prescribed 
 interface - one that would dictate what specific fields should be 
 transferred between components - and an interface in which data structures
@@ -24,13 +24,15 @@ An import State contains data that is necessary for a Gridded Component
 or Coupler Component to execute, and an export State contains the data
 that a Gridded Component or Coupler Component can make available.
 
-States can contain Arrays, ArrayBundles, Fields, FieldBundles, and other States.  They
-cannot directly contain Fortran arrays.   Objects in a State must span
+States can contain Arrays, ArrayBundles, Fields, FieldBundles, 
+and other States.  They cannot directly contain Fortran arrays.   
+Objects in a State must span
 the VM on which they are running.  For sequentially executing components
 which run on the same set of PETs this happens by calling the object
 create methods on each PET, creating the object in unison.   For
 concurrently executing components which are running on subsets of PETs,
-an additional reconcile method is provided by the ESMF to broadcast information
+an additional method, called {\tt ESMF\_StateReconcile()}, is provided by
+ESMF to broadcast information
 about objects which were created in sub-components.
 
 State methods include creation and deletion, adding and retrieving 
