@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.7 2010/09/28 05:55:58 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.8 2010/10/05 05:23:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.7 2010/09/28 05:55:58 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.8 2010/10/05 05:23:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -692,7 +692,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 4th attribute value within the last CIM RP package
-    call ESMF_AttributeSet(gridcomp2, 'OnlineResource', &
+    call ESMF_AttributeSet(gridcomp2, 'URL', &
                                      'www.nerc.ac.uk', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
