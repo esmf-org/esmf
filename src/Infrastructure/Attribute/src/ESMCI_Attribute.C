@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.79 2010/10/04 16:38:52 theurich Exp $
+// $Id: ESMCI_Attribute.C,v 1.80 2010/10/05 05:19:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.79 2010/10/04 16:38:52 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.80 2010/10/05 05:19:57 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -419,9 +419,9 @@ namespace ESMCI {
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("ModelType", "CIM 1.0",
                             "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("OnlineResource", "CIM 1.0",
-                            "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("ReleaseDate", "CIM 1.0",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("URL", "CIM 1.0",
                             "Model Component Simulation Description", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -504,14 +504,46 @@ namespace ESMCI {
       //
       localrc = AttPackAddAttribute("CitationDate", "ISO 19115",
                             "Citation Description", object);
+      localrc = AttPackSet("CitationDate",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Citation Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("CitationDOI", "ISO 19115",
                             "Citation Description", object);
+      localrc = AttPackSet("CitationDOI",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Citation Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("CitationLongTitle", "ISO 19115",
                             "Citation Description", object);
+      localrc = AttPackSet("CitationLongTitle",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Citation Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("CitationPresentationForm", "ISO 19115",
                             "Citation Description", object);
+      localrc = AttPackSet("CitationPresentationForm",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Citation Description",
+         object, NULL, NULL);
+
       localrc = AttPackAddAttribute("CitationShortTitle", "ISO 19115",
                             "Citation Description", object);
+      localrc = AttPackSet("CitationShortTitle",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Citation Description",
+         object, NULL, NULL);
+
+      localrc = AttPackAddAttribute("CitationURL", "ISO 19115",
+                            "Citation Description", object);
+      localrc = AttPackSet("CitationURL",
+         ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Citation Description",
+         object, NULL, NULL);
+
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
 
@@ -550,17 +582,9 @@ namespace ESMCI {
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("OnlineResource", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackSet("OnlineResource", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
-         object, NULL, NULL);
-
       localrc = AttPackAddAttribute("OrganizationName", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("OrganizationName", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
-         object, NULL, NULL);
+      // don't set OrganizationName to empty => default output is IndividualName
 
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
@@ -580,6 +604,12 @@ namespace ESMCI {
       localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, &attrAttr);
+
+      localrc = AttPackAddAttribute("URL", "ISO 19115",
+                                      "Responsible Party Description", object);
+      localrc = AttPackSet("URL", ESMC_TYPEKIND_CHARACTER, 1,
+         &empty, "ISO 19115", "Responsible Party Description",
+         object, NULL, NULL);
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -4052,7 +4082,7 @@ namespace ESMCI {
       const string &purpose,           //  in - purpose
       const string &object,            //  in - object
       const string &varobj,            //  in - variable object
-      const string &basename) const {        //  in - basename
+      const string &basename) const {  //  in - basename
 //
 // !DESCRIPTION:
 //    Print the contents of an {\tt Attribute}.  Expected to be
@@ -4843,14 +4873,18 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
 
+  // <citation> nodes
+  localrc = attpack->AttributeWriteCIMcitation(io_xml, indent);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+ 
   // <composition><coupling> (all fields, written only in top-level component)
   if (callCount == 1) {
-    localrc = io_xml->writeStartElement("composition", "", 3, 0);
+    localrc = io_xml->writeStartElement("composition", "", 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
     localrc = AttributeWriteCIMcomposition(io_xml);
 
-    localrc = io_xml->writeEndElement("composition", 3);
+    localrc = io_xml->writeEndElement("composition", 4);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
 
@@ -5127,7 +5161,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteCIMRP"
 //BOPI
-// !IROUTINE:  AttributeWriteCIMRP - Write contents of a CIM {\tt Attribute} package ResponsibleParty package
+// !IROUTINE:  AttributeWriteCIMRP - Write contents of a CIM {\tt Attribute} package ResponsibleParty record
 //
 // !INTERFACE:
       int Attribute::AttributeWriteCIMRP(
@@ -5157,16 +5191,23 @@ namespace ESMCI {
           attpack->attrPurpose.compare("Responsible Party Description")==0))
       continue; // skip non-RPs
 
-    // TODO:  currently works for Individual flavors of RP:  Author, Contact,
-    //        PrincipalInvestigator.  Need to implement for Organization 
-    //        flavors:  Center and Funder.
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:CI_ResponsibleParty", "", ++indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
-    if (attpack->AttributeIsSet("IndividualName")) {
+    // only output if set by user
+    if (attpack->AttributeIsSet("OrganizationName")) {
+      localrc = attpack->AttributeGet("OrganizationName", &value);
+      localrc = io_xml->writeStartElement("gmd:organisationName", "", ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:organisationName", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    } else if (attpack->AttributeIsSet("IndividualName")) {
+      // default output is IndividualName
       localrc = attpack->AttributeGet("IndividualName", &value);
       localrc = io_xml->writeStartElement("gmd:individualName", "", ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5227,8 +5268,8 @@ namespace ESMCI {
     localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
-    if (attpack->AttributeIsSet("OnlineResource")) {
-      localrc = attpack->AttributeGet("OnlineResource", &value);
+    if (attpack->AttributeIsSet("URL")) {
+      localrc = attpack->AttributeGet("URL", &value);
       localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     } else { // output empty tag (required)
@@ -5290,6 +5331,102 @@ namespace ESMCI {
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMRP
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWritecitation"
+//BOPI
+// !IROUTINE:  AttributeWriteCIMcitation - Write contents of a CIM {\tt Attribute} package Citation record
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteCIMcitation(
+// // !RETURN VALUE: //    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      IO_XML *io_xml,      //  in - io pointer to write
+      int indent) const {  //  in - starting indent level
+//
+// !DESCRIPTION:
+//    Print the contents of a CIM {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  int localrc;
+  Attribute *attpack = NULL;
+  string value;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // write out all nested Citations
+  for(int i=0; i<packList.size(); i++) {
+    attpack = packList.at(i);
+    if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
+          attpack->attrPurpose.compare("Citation Description")==0))
+      continue; // skip non-Citations
+
+    // citation header
+    localrc = io_xml->writeStartElement("citation", "", indent, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    localrc = io_xml->writeStartElement("gmd:CI_Citation", "", ++indent, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+
+    if (attpack->AttributeIsSet("CitationShortTitle")) {
+      localrc = attpack->AttributeGet("CitationShortTitle", &value);
+      localrc = io_xml->writeStartElement("gmd:title", "", ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:title", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    }
+    if (attpack->AttributeIsSet("CitationDate")) {
+      localrc = attpack->AttributeGet("CitationDate", &value);
+      localrc = io_xml->writeElement("gmd:date", value, indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    }
+    if (attpack->AttributeIsSet("CitationPresentationForm")) {
+      localrc = attpack->AttributeGet("CitationPresentationForm", &value);
+      localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", "", ++indent,
+                                     2, "codeList", "",
+                                     "codeListValue", value.c_str());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    }
+    if (attpack->AttributeIsSet("CitationDOI")) {
+      localrc = attpack->AttributeGet("CitationDOI", &value);
+      localrc = io_xml->writeStartElement("gmd:otherCitationDetails", "", 
+                                          indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    }
+    if (attpack->AttributeIsSet("CitationLongTitle")) {
+      localrc = attpack->AttributeGet("CitationLongTitle", &value);
+      localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:collectiveTitle", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    }
+    // citation footer
+    localrc = io_xml->writeEndElement("gmd:CI_Citation", --indent);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+
+    localrc = io_xml->writeEndElement("citation", --indent);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+
+  } // end for each nested package
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteCIMcitation
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteCIMcomposition"
