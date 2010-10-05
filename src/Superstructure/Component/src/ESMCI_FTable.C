@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.42 2010/10/01 16:12:13 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.43 2010/10/05 03:56:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.42 2010/10/01 16:12:13 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.43 2010/10/05 03:56:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1414,10 +1414,10 @@ int FTable::callVFuncPtr(
       // conditionally call into compliance IC for register
       if (!strcmp(name, "Register")){
         char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
-        bool complianceCheckFlag = true;  // initialize to internal compl. check
+        bool complianceCheckFlag = false;  // default internal compl. check off
         if (envVar != NULL){
-          complianceCheckFlag &= strcmp(envVar, "off"); // turn off
-          complianceCheckFlag &= strcmp(envVar, "OFF"); // turn off
+          complianceCheckFlag |= strcmp(envVar, "on");  // turn on
+          complianceCheckFlag |= strcmp(envVar, "ON");  // turn on
         }
         if (complianceCheckFlag){
           
