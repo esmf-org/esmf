@@ -1,4 +1,4 @@
-% $Id: CplComp_desc.tex,v 1.13 2010/10/04 22:35:06 rokuingh Exp $
+% $Id: CplComp_desc.tex,v 1.14 2010/10/05 23:44:12 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -55,9 +55,9 @@ a Coupler Component for each individual data {\it transfer.}}
 
 The user-written part of a Coupler Component is associated with an
 {\tt ESMF\_CplComp} derived type through a routine called 
-{\tt ESMF_SetServices()}.
+{\tt ESMF\_SetServices()}.
 This is a routine that the user must write and declare public.
-Inside the {\tt ESMF_SetServices()} routine the user must call 
+Inside the {\tt ESMF\_SetServices()} routine the user must call 
 {\tt ESMF\_SetEntryPoint()} methods that associate a standard ESMF 
 operation with the name of the corresponding Fortran subroutine in 
 their user code.  For example, a user routine called ``couplerInit''
