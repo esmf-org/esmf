@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.2 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.3 2010/10/05 19:33:06 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -150,8 +150,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  
  // We save the nodes in a linear list so that we can access then as such
  // for cell creation.
- //TODO: NEED MAX LID METHOD SOON ->Bob
- std::vector<MeshObj*> nodevect(100000);
+ std::map<UInt,MeshObj*> nodemap;
  std::map<UInt,UInt> ngid2lid;
  
  UInt local_node_num = 0, local_elem_num = 0;
@@ -217,8 +216,8 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
            owned_shared.insert(lb, gid);
        }
        
-       // Put node into vector
-       nodevect[lid]=node;    
+       // Put node into map
+       nodemap[lid]=node;    
      }
      
    } // gni
@@ -264,8 +263,8 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
          node=&*mi; 
        }
        
-       // Put node into vector
-       nodevect[lid]=node;    
+       // Put node into map
+       nodemap[lid]=node;    
      }
    } // gni
   
@@ -322,7 +321,7 @@ Par::Out() << "Cell:" << cell->get_id() << " uses nodes:";
 
      // Get Nodes via Local IDs
      for (UInt n = 0; n < ctopo->num_nodes; ++n) {
-       nodes[n] = nodevect[cnrList[n]];
+       nodes[n] = nodemap[cnrList[n]];
 #ifdef G2M_DBG
 Par::Out() << nodes[n]->get_id() << " ";
 #endif
