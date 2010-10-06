@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.12 2010/10/05 21:43:00 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.13 2010/10/06 15:40:42 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -224,14 +224,6 @@
         ! (this makes some eager error-checking compilers happy.)
         rc = ESMF_FAILURE
 
-        !datacount = 7
-        !datanames(1) = "SIE"
-        !datanames(2) = "U"
-        !datanames(3) = "V"
-        !datanames(4) = "RHO"
-        !datanames(5) = "P"
-        !datanames(6) = "Q"
-        !datanames(7) = "FLAG"
         datacount = 3
         datanames(1) = "SIE"
         datanames(2) = "V"

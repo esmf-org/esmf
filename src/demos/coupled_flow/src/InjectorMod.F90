@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.14 2010/10/05 21:43:00 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.15 2010/10/06 15:40:42 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -360,7 +360,7 @@
       do i=1, datacount
 
          ! check isneeded flag here
-         if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
+         if (.not. ESMF_StateIsNeeded(exportState, datanames(i), rc)) then 
              cycle
          endif
 
@@ -463,29 +463,11 @@
         !  the existing data (not a copy).
         call ESMF_FieldGet(local_sie, farrayPtr=data_sie, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-            
         call ESMF_FieldGet(local_v, farrayPtr=data_v, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      
         call ESMF_FieldGet(local_rho, farrayPtr=data_rho, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      
         call ESMF_FieldGet(local_flag, farrayPtr=data_flag, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
-        ! Do the same for export Fields
-        call ESMF_StateGet(exportState, "SIE", local_sie, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_StateGet(exportState, "V", local_v, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_StateGet(exportState, "RHO", local_rho, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-
-        call ESMF_FieldGet(local_sie, farrayPtr=exp_sie, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_FieldGet(local_v, farrayPtr=exp_v, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_FieldGet(local_rho, farrayPtr=exp_rho, rc=rc)
         if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
           
         ! Update values.  Flag = 10 means override values with our own.
@@ -503,9 +485,6 @@
                   data_sie(i,j) = datablock%inject_energy
                   data_v(i,j) = datablock%inject_velocity
                   data_rho(i,j) = datablock%inject_density
-                  exp_sie(i,j) = datablock%inject_energy
-                  exp_v(i,j) = datablock%inject_velocity
-                  exp_rho(i,j) = datablock%inject_density
                 endif
               enddo
             enddo
@@ -519,9 +498,6 @@
                   data_sie(i,j) = 200.0
                   data_v(i,j) = 0.0
                   data_rho(i,j) = 6.0
-                  exp_sie(i,j) = 200.0
-                  exp_v(i,j) = 0.0
-                  exp_rho(i,j) = 6.0
                 endif
               enddo
             enddo
@@ -529,7 +505,7 @@
         endif 
  
         ! Update any required fields in the export state
-        ! TODO: determine if relinking is needed
+        ! Fields from same components share same memory space
         do i=1, datacount
 
            ! check isneeded flag here

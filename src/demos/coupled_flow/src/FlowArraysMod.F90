@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.8 2010/10/04 14:05:05 feiliu Exp $
+! $Id: FlowArraysMod.F90,v 1.9 2010/10/06 15:40:42 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -44,12 +44,8 @@
 !
 ! scalars here
 !
-      public :: imin_ec, imax_ec, jmin_ec, jmax_ec
-      public :: imin_tc, imax_tc, jmin_tc, jmax_tc
-      public :: imin_ee1, imax_ee1, jmin_ee1, jmax_ee1
-      public :: imin_te1, imax_te1, jmin_te1, jmax_te1
-      public :: imin_ee2, imax_ee2, jmin_ee2, jmax_ee2
-      public :: imin_te2, imax_te2, jmin_te2, jmax_te2
+      public :: imin, imax, jmin, jmax
+      public :: imin_t, imax_t, jmin_t, jmax_t
 
       public :: printout
       public :: nobsdesc
@@ -61,12 +57,8 @@
       public :: q0, u0, v0, sie0, rho0
       public :: sieobs
 
-      integer :: imin_ec, imax_ec, jmin_ec, jmax_ec
-      integer :: imin_tc, imax_tc, jmin_tc, jmax_tc
-      integer :: imin_ee1, imax_ee1, jmin_ee1, jmax_ee1
-      integer :: imin_te1, imax_te1, jmin_te1, jmax_te1
-      integer :: imin_ee2, imax_ee2, jmin_ee2, jmax_ee2
-      integer :: imin_te2, imax_te2, jmin_te2, jmax_te2
+      integer :: imin, imax, jmin, jmax
+      integer :: imin_t, imax_t, jmin_t, jmax_t
 
       integer :: printout
       integer :: nobsdesc
@@ -219,52 +211,16 @@
                         exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
 
-      ! Computational region: data unique to this DE
-      imin_ec = lb(1)
-      imax_ec = ub(1)
-      jmin_ec = lb(2)
-      jmax_ec = ub(2)
+      ! Exclusive region: data unique to this DE, can be used as source for halo operation
+      imin = lb(1)
+      imax = ub(1)
+      jmin = lb(2)
+      jmax = ub(2)
       ! Total region: data plus the halo widths
-      imin_tc = tlb(1) 
-      imax_tc = tub(1)
-      jmin_tc = tlb(2)
-      jmax_tc = tub(2)
-!
-! get bounds information from Field U for edge1 stagger
-!
-      call ESMF_FieldGetBounds(field_u, &
-                        totalLBound=tlb, totalUBound=tub, &
-                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-
-      ! Computational region: data unique to this DE
-      imin_ee1 = lb(1)
-      imax_ee1 = ub(1)
-      jmin_ee1 = lb(2)
-      jmax_ee1 = ub(2)
-      ! Total region: data plus the halo widths
-      imin_te1 = tlb(1) 
-      imax_te1 = tub(1)
-      jmin_te1 = tlb(2)
-      jmax_te1 = tub(2)
-!
-! get bounds information from Field V for edge2 stagger
-!
-      call ESMF_FieldGetBounds(field_v, &
-                        totalLBound=tlb, totalUBound=tub, &
-                        exclusiveLBound=lb, exclusiveUBound=ub, rc=status)
-      if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-
-      ! Computational region: data unique to this DE
-      imin_ee2 = lb(1)
-      imax_ee2 = ub(1)
-      jmin_ee2 = lb(2)
-      jmax_ee2 = ub(2)
-      ! Total region: data plus the halo widths
-      imin_te2 = tlb(1) 
-      imax_te2 = tub(1)
-      jmin_te2 = tlb(2)
-      jmax_te2 = tub(2)
+      imin_t = tlb(1) 
+      imax_t = tub(1)
+      jmin_t = tlb(2)
+      jmax_t = tub(2)
 
       if(present(rc)) rc = ESMF_SUCCESS
 
