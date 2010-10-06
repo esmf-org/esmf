@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.7 2010/10/05 22:27:26 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.8 2010/10/06 17:10:44 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -199,7 +199,8 @@ program ESMF_RegridWeightGen
 
         ! Should I have only PetNO=0 to open the file and find out the size?
          if (srcIsScrip) then
-	   call ESMF_ScripInq(srcfile, grid_dims=dims)
+	   call ESMF_ScripInq(srcfile, grid_dims=dims, rc=rc)
+	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
            ! size(dims) == 1 is a unstructured grid
            ! size(dims) == 2 is a regular grid
            if (size(dims) == 2) then
@@ -209,7 +210,8 @@ program ESMF_RegridWeightGen
            endif
 	 endif
      	 if (dstIsScrip) then
-	   call ESMF_ScripInq(dstfile, grid_dims=dims)
+	   call ESMF_ScripInq(dstfile, grid_dims=dims, rc=rc)
+           if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
            ! size(dims) == 1 is a unstructured grid
            ! size(dims) == 2 is a regular grid
            if (size(dims) == 2) then
