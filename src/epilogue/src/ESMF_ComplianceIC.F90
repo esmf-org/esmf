@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.7 2010/10/04 19:16:33 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.8 2010/10/06 04:36:44 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -588,12 +588,14 @@ module ESMF_ComplianceICMod
       
     logical                               :: stateValid
     integer                               :: itemCount, item
+    integer                               :: fieldCount, fitem
     character(ESMF_MAXSTR)                :: name
     type(ESMF_StateType)                  :: statetype
     character(ESMF_MAXSTR)                :: tempString
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
     type(ESMF_StateItemType), allocatable :: stateitemtypeList(:)
     type(ESMF_Field)                      :: field
+    type(ESMF_FieldBundle)                :: fieldbundle
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -712,6 +714,42 @@ module ESMF_ComplianceICMod
               line=__LINE__, &
               file=__FILE__)) &
               return  ! bail out
+          else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
+            call ESMF_StateGet(state, itemName=itemNameList(item), &
+              fieldbundle=fieldbundle, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+            call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=__FILE__)) &
+              return  ! bail out
+            do fitem=1, fieldCount
+              call ESMF_FieldBundleGet(fieldbundle, fieldIndex=fitem, &
+                field=field, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=__FILE__)) &
+                return  ! bail out
+              call ESMF_FieldGet(field, name=name, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=__FILE__)) &
+                return  ! bail out
+              call ESMF_LogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
+                trim(name), ESMF_LOG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=__FILE__)) &
+                return  ! bail out
+              call checkFieldMetadata(prefix, field=field, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=__FILE__)) &
+                return  ! bail out
+            enddo
           endif
           
         enddo
@@ -729,11 +767,20 @@ module ESMF_ComplianceICMod
     type(ESMF_GridComp)                   :: comp
     integer,      intent(out), optional   :: rc
     
+    type(ESMF_CompType)                   :: comptype
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
       
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! skip the metadata check if this is not a Gridded Component
+    call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    if (comptype /= ESMF_COMPTYPE_GRID) return
     
     ! set CIM convention and purpose specifiers
     convention = "CIM 1.0"
@@ -792,7 +839,9 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-      
+
+#if 0
+! skip Citation* attributes as per Cecelia 10/05/10      
     attributeName = "CitationShortTitle"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -837,7 +886,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-      
+#endif
+
     attributeName = "IndividualName"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -847,7 +897,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "OranizationName"
+    attributeName = "OrganizationName"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
