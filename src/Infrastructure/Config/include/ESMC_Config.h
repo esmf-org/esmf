@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.27 2010/09/30 20:49:55 svasquez Exp $
+// $Id: ESMC_Config.h,v 1.28 2010/10/06 19:42:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -177,6 +177,9 @@ int ESMC_ConfigGetDim(
 //     Identifying label (optional).
 //   \end{description}
 //
+//  Due to this method accepting optional arguments, the final argument
+//  must be {\tt ESMC\_ArgLast}.
+//
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -206,6 +209,9 @@ int ESMC_ConfigGetLen(
 //   \item [{[label]}]
 //     Identifying label.  If not specified, use the current line (optional).
 //   \end{description}
+//
+//  Due to this method accepting optional arguments, the final argument
+//  must be {\tt ESMC\_ArgLast}.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -240,6 +246,9 @@ int ESMC_ConfigLoadFile(
 //     If specified as true, uniqueness of labels are checked and 
 //     error code set if duplicates found (optional).
 //   \end{description}
+//
+//  Due to this method accepting optional arguments, the final argument
+//  must be {\tt ESMC\_ArgLast}.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -304,6 +313,9 @@ int ESMC_ConfigValidate(
 //       {\tt ESMC\_ConfigGetAttribute()} or {\tt ESMC\_ConfigGetChar()}
 //       constitutes being "used."
 //   \end{description}
+//
+//  Due to this method accepting optional arguments, the final argument
+//  must be {\tt ESMC\_ArgLast}.
 //
 //EOP
 
