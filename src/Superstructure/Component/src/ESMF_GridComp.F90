@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.137 2010/10/01 16:12:13 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.138 2010/10/06 04:35:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.137 2010/10/01 16:12:13 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.138 2010/10/06 04:35:22 theurich Exp $'
 
 !==============================================================================
 !
@@ -471,7 +471,7 @@ contains
 ! !INTERFACE:
   subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, grid, config, &
     configFile, clock, localPet, petCount, contextflag, currentMethod, &
-    currentPhase, vm, rc)
+    currentPhase, comptype, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
@@ -486,6 +486,7 @@ contains
     type(ESMF_ContextFlag),  intent(out), optional :: contextflag
     type(ESMF_Method),       intent(out), optional :: currentMethod
     integer,                 intent(out), optional :: currentPhase
+    type(ESMF_CompType),     intent(out), optional :: comptype
     type(ESMF_VM),           intent(out), optional :: vm
     integer,                 intent(out), optional :: rc
 
@@ -526,6 +527,9 @@ contains
 !   See section \ref{opt:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_GridComp} execution.
+! \item[{[comptype]}]
+!   Return the Component type: {\tt ESMF\_COMPTYPE\_GRID} or 
+!   {\tt ESMF\_COMPTYPE\_CPL}.
 ! \item[{[vm]}]
 !   Return the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
 ! \item[{[rc]}]
@@ -547,7 +551,7 @@ contains
       gridcomptype=gridcomptype, grid=grid, clock=clock, &
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
-      rc=localrc)
+      ctype=comptype, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
