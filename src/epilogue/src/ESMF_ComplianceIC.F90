@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.8 2010/10/06 04:36:44 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.9 2010/10/06 13:09:34 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -237,7 +237,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
       
     ! compliance check clock usage
-    call clockUsageIncoming(prefix, clock, clockCopy, rc=rc)
+    call clockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -301,7 +301,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
 
     ! compliance check clock usage
-    call clockUsageOutgoing(prefix, clock, clockCopy, rc=rc)
+    call clockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -324,7 +324,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    ! Stop Compliance Checking: InitializePrologue
+    ! Stop Compliance Checking: InitializeEpilogue
     !---------------------------------------------------------------------------
 
   end subroutine ic_init
@@ -344,6 +344,7 @@ module ESMF_ComplianceICMod
     integer                 :: userrc
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
+    type(ESMF_Clock)        :: clockCopy
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -380,6 +381,13 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
+    ! compliance check clock usage
+    call clockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     call ESMF_LogWrite(trim(prefix)//"Stop RunPrologue.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -429,6 +437,13 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
+    ! compliance check clock usage
+    call clockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     call ESMF_LogWrite(trim(prefix)//"Stop RunEpilogue.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -436,7 +451,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    ! Stop Compliance Checking: RunPrologue
+    ! Stop Compliance Checking: RunEpilogue
     !---------------------------------------------------------------------------
 
   end subroutine ic_run
@@ -456,6 +471,7 @@ module ESMF_ComplianceICMod
     integer                 :: userrc
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
+    type(ESMF_Clock)        :: clockCopy
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -487,6 +503,13 @@ module ESMF_ComplianceICMod
     ! compliance check exportState
     call checkState(prefix, referenceName="exportState", state=exportState, &
       rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! compliance check clock usage
+    call clockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -541,6 +564,13 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
+    ! compliance check clock usage
+    call clockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     call ESMF_LogWrite(trim(prefix)//"Stop FinalizeEpilogue.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -548,7 +578,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    ! Stop Compliance Checking: FinalizePrologue
+    ! Stop Compliance Checking: FinalizeEpilogue
     !---------------------------------------------------------------------------
 
   end subroutine ic_final
