@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.13 2010/10/06 15:40:42 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.14 2010/10/06 16:23:13 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -139,14 +139,15 @@
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     ! Compute routehandle
+    ! Since state items are needed by default, mark Fields not needed during coupling
     if (trim(statename) .eq. "FlowSolver Feedback") then
-      call ESMF_StateSetNeeded(importState, "SIE", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "U", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(importState, "V", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "P", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "Q", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       call ESMF_FieldRedistStore(src_field, dst_field, &
@@ -156,13 +157,13 @@
     endif
 
     if (trim(statename) .eq. "Injection Feedback") then
-      call ESMF_StateSetNeeded(importState, "SIE", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "U", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(importState, "V", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "P", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(importState, "RHO", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "Q", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NOTNEEDED, rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
       call ESMF_FieldRedistStore(src_field, dst_field, &
@@ -224,10 +225,14 @@
         ! (this makes some eager error-checking compilers happy.)
         rc = ESMF_FAILURE
 
-        datacount = 3
+        datacount = 7
         datanames(1) = "SIE"
-        datanames(2) = "V"
-        datanames(3) = "RHO"
+        datanames(2) = "U"
+        datanames(3) = "V"
+        datanames(4) = "RHO"
+        datanames(5) = "P"
+        datanames(6) = "Q"
+        datanames(7) = "FLAG"
 
         ! In this case, the coupling is symmetric - you call redist going
         ! both ways - so we only care about the coupling direction in order 
