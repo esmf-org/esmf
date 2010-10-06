@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.118 2010/09/09 16:58:40 theurich Exp $
+# $Id: makefile,v 1.119 2010/10/06 20:15:43 feiliu Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -405,9 +405,9 @@ deletelibs: chkopts_basic
 #	$(MAKE) BOPT=$(BOPT) demos
 #
 ## ESMF_COUPLED_FLOW_uni/demo target.
-#ESMF_COUPLED_FLOW_uni: chkopts build_libs chkdir_tests
-#	cd src/demos/coupled_flow ;\
-#	$(MAKE) BOPT=$(BOPT) demos_uni
+ESMF_COUPLED_FLOW_uni: chkopts build_libs chkdir_tests
+	cd src/demos/coupled_flow ;\
+	$(MAKE) BOPT=$(BOPT) demos_uni
 
 
 # ------------------------------------------------------------------

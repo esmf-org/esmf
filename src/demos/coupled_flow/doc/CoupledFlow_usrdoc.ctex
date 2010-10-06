@@ -1,4 +1,4 @@
-% $Id: CoupledFlow_usrdoc.ctex,v 1.1 2007/06/12 04:54:24 cdeluca Exp $
+% $Id: CoupledFlow_usrdoc.ctex,v 1.2 2010/10/06 20:15:43 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -38,14 +38,14 @@
 #ifdef STANDALONE
 \input{flow_intro}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/flow_intro}
+\input{../demos/coupled_flow/doc/flow_intro}
 #endif
 
 %\section{Major Pieces}
 #ifdef STANDALONE
 \input{flow_pieces}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/flow_pieces}
+\input{../demos/coupled_flow/doc/flow_pieces}
 #endif
 
 \section{Framework Usage Details}
@@ -53,50 +53,50 @@
 #ifdef STANDALONE
 \input{CoupledFlowApp_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/CoupledFlowApp_fapi}
+\input{../demos/coupled_flow/doc/CoupledFlowApp_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{CoupledFlowDemo_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/CoupledFlowDemo_fapi}
+\input{../demos/coupled_flow/doc/CoupledFlowDemo_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{FlowSolverMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/FlowSolverMod_fapi}
+\input{../demos/coupled_flow/doc/FlowSolverMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{FlowArraysMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/FlowArraysMod_fapi}
+\input{../demos/coupled_flow/doc/FlowArraysMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{CouplerMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/CouplerMod_fapi}
+\input{../demos/coupled_flow/doc/CouplerMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{InjectorMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/InjectorMod_fapi}
+\input{../demos/coupled_flow/doc/InjectorMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{InjectArraysMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../demo/coupled_flow/doc/InjectArraysMod_fapi}
+\input{../demos/coupled_flow/doc/InjectArraysMod_fapi}
 #endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %\input{flow_res}
 %#elif defined(CONSTITUENT)
-%\input{../demo/coupled_flow/doc/flow_res}
+%\input{../demos/coupled_flow/doc/flow_res}
 %#endif
 
 
