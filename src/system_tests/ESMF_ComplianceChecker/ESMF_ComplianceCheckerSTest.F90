@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.1 2010/10/04 16:44:01 theurich Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.2 2010/10/06 04:37:21 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -212,7 +212,8 @@ program ESMF_ComplianceCheckerSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
  
-  call ESMF_CplCompInitialize(cpl, userRc=userrc, rc=localrc)
+  call ESMF_CplCompInitialize(cpl, importState=dummyState, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

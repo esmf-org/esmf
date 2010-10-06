@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2010/10/04 16:44:01 theurich Exp $
+! $Id: user_model2.F90,v 1.2 2010/10/06 04:37:21 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -114,6 +114,7 @@ module user_model2
     ! Local variables
     integer               :: localPet
     type(ESMF_Field)      :: field
+    type(ESMF_FieldBundle):: fieldbundle
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -136,6 +137,24 @@ module user_model2
     call ESMF_StateAdd(exportState, field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
+    fieldbundle = ESMF_FieldBundleCreate(name="myTestFieldBundle", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(exportState, fieldbundle, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    field = ESMF_FieldCreateEmpty(name="myTestField 1 in Bundle", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+   
+    call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    field = ESMF_FieldCreateEmpty(name="myTestField 2 in Bundle", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     print *, localPet, "User Comp2 Init returning"
 
   end subroutine user_init

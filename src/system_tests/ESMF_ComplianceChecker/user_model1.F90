@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2010/10/04 16:44:01 theurich Exp $
+! $Id: user_model1.F90,v 1.2 2010/10/06 04:37:21 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -153,6 +153,9 @@ module user_model1
       convention="CIM 1.0", purpose="Inputs Description", &
       rc=rc)
    
+    call ESMF_ClockAdvance(clock, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
     print *, localPet, "User Comp1 Init returning"
 
   end subroutine user_init
