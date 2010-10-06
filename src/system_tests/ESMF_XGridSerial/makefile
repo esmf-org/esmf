@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2010/07/27 15:11:33 feiliu Exp $ 
+# $Id: makefile,v 1.2 2010/10/06 20:57:36 w6ws Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,5 +31,5 @@ CLOBBERDIRS =
 
 
 RUN_XGridSerial:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=XGridSerial NP=6 stest
+	$(MAKE) TNAME=XGridSerial NP=6 stest
 
