@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2010/10/04 16:44:01 theurich Exp $ 
+# $Id: makefile,v 1.2 2010/10/06 13:00:45 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,5 +31,5 @@ CLOBBERDIRS =
 
 
 RUN_ComplianceChecker:
-	$(MAKE) TNAME=ComplianceChecker NP=6 stest
+	env ESMF_RUNTIME_COMPLIANCECHECK=on $(MAKE) TNAME=ComplianceChecker NP=6 stest
 
