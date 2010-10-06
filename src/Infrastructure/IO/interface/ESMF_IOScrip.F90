@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.8 2010/09/29 23:29:41 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.9 2010/10/06 17:09:45 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -181,7 +181,9 @@
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
     return
 #endif
 
@@ -372,7 +374,9 @@ end subroutine ESMF_ScripInq
     if(present(rc)) rc = ESMF_SUCCESS
     return
 #else
-    if(present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
     return
 #endif
     
@@ -1304,7 +1308,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     if (present(rc)) rc = ESMF_SUCCESS
     return
 #else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
 #endif
 
     return
@@ -1402,7 +1408,9 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
 #endif
 
     return
@@ -1556,7 +1564,9 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
       ESMF_SRCLINE, &
       rc)) return
 #else
-    rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
     return
 #endif
 
@@ -1636,7 +1646,9 @@ subroutine ESMF_EsmfGetVerts(ncid, numElements, numNodePElement, numNodes, &
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
     return
 #endif
 end subroutine ESMF_EsmfGetVerts
@@ -1674,7 +1686,9 @@ function CDFCheckError (ncStatus, module, fileName, lineNo,rc)
        return
     end if
 #else
-    if (present(rc))rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
     return
 #endif
 
