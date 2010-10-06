@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2010/10/06 04:37:21 theurich Exp $
+! $Id: user_model2.F90,v 1.3 2010/10/06 14:14:09 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -84,9 +84,9 @@ module user_model2
     call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=user_init, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-!    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=user_run, &
-!      rc=rc)
-!    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=user_run, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 !    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=user_final, &
 !      rc=rc)
 !    if (rc/=ESMF_SUCCESS) return ! bail out
@@ -115,6 +115,7 @@ module user_model2
     integer               :: localPet
     type(ESMF_Field)      :: field
     type(ESMF_FieldBundle):: fieldbundle
+    type(ESMF_Clock)      :: clockInternal
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -153,6 +154,12 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    clockInternal = ESMF_ClockCreate(clock, rc=rc)  ! make a copy of incoming
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    call ESMF_GridCompSet(comp, clock=clockInternal, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, localPet, "User Comp2 Init returning"

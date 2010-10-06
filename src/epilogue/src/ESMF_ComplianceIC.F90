@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.9 2010/10/06 13:09:34 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.10 2010/10/06 14:14:08 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -307,6 +307,14 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
+    ! compliance check internal Clock
+    call checkInternalClock(prefix, comp=comp, clock=clock, &
+      mustReachStop=.false., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
     ! Component Attributes should be set up -> ready to output
 !    call ESMF_AttributeWrite(comp, convention='CIM 1.0', &
 !      purpose='Model Component Simulation Description', &
@@ -444,6 +452,14 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
+    ! compliance check internal Clock
+    call checkInternalClock(prefix, comp=comp, clock=clock, &
+      mustReachStop=.true., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
     call ESMF_LogWrite(trim(prefix)//"Stop RunEpilogue.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -571,6 +587,14 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
+    ! compliance check internal Clock
+    call checkInternalClock(prefix, comp=comp, clock=clock, &
+      mustReachStop=.true., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
     call ESMF_LogWrite(trim(prefix)//"Stop FinalizeEpilogue.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1178,7 +1202,7 @@ module ESMF_ComplianceICMod
     clockValid = .true.
     ! Ensure that the Clock is a valid object
     if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) then
-      call ESMF_LogWrite(trim(prefix)//" ==> The incoming clock is invalid!", &
+      call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
         ESMF_LOG_ERROR, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -1258,14 +1282,14 @@ module ESMF_ComplianceICMod
       if (direction /= directionCopy) clockModified = .true.
     
       if (clockModified) then
-        call ESMF_LogWrite(trim(prefix)//" ==> The incoming clock was modified!", &
+        call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
           ESMF_LOG_ERROR, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=__FILE__)) &
           return  ! bail out
       else
-        call ESMF_LogWrite(trim(prefix)//" The incoming clock was not modified.", &
+        call ESMF_LogWrite(trim(prefix)//" The incoming Clock was not modified.", &
           ESMF_LOG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -1283,6 +1307,139 @@ module ESMF_ComplianceICMod
     
   end subroutine
     
+!-------------------------------------------------------------------------
+
+  recursive subroutine checkInternalClock(prefix, comp, clock, mustReachStop, &
+    rc)
+    character(*), intent(in)                :: prefix
+    type(ESMF_GridComp)                     :: comp
+    type(ESMF_Clock), intent(in)            :: clock
+    logical,          intent(in)            :: mustReachStop
+    integer,          intent(out), optional :: rc
+    
+    logical                                 :: clockValid
+    logical                                 :: clockInternalValid
+    type(ESMF_Clock)                        :: clockInternal
+    logical                                 :: clockMatch
+    
+    character (ESMF_MAXSTR) :: name, nameInt
+    type(ESMF_TimeInterval) :: timeStep, timeStepInt
+    type(ESMF_Time)         :: startTime, startTimeInt
+    type(ESMF_Time)         :: stopTime, stopTimeInt
+    type(ESMF_TimeInterval) :: runDuration, runDurationInt
+    real(ESMF_KIND_R8)      :: runTimeStepCount, runTimeStepCountInt
+    type(ESMF_Time)         :: refTime, refTimeInt
+    type(ESMF_Time)         :: currTime, currTimeInt
+    integer(ESMF_KIND_I8)   :: advanceCount, advanceCountInt
+    type(ESMF_Direction)    :: direction, directionInt
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    clockInternalValid = .true.
+    ! Ensure that the internalClock is a valid object
+    if (ESMF_ClockGetInit(clockInternal) /= ESMF_INIT_CREATED) &
+      clockInternalValid = .false.
+
+    if (.not.clockInternalValid) then
+      call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
+        ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      return
+    endif
+    
+    clockValid = .true.
+    ! Ensure that the Clock is a valid object
+    if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) &
+      clockValid = .false.
+    
+    if (.not.clockValid) then
+      call ESMF_LogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
+        ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      return
+    endif
+      
+    call ESMF_ClockGet(clock, name=name, timeStep=timeStep, &
+      startTime=startTime, stopTime=stopTime, runDuration=runDuration, &
+      runTimeStepCount=runTimeStepCount, refTime=refTime, currTime=currTime, &
+      advanceCount=advanceCount, direction=direction, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
+    call ESMF_ClockGet(clockInternal, name=nameInt, timeStep=timeStepInt, &
+      startTime=startTimeInt, stopTime=stopTimeInt, runDuration=runDurationInt, &
+      runTimeStepCount=runTimeStepCountInt, refTime=refTimeInt, currTime=currTimeInt, &
+      advanceCount=advanceCountInt, direction=directionInt, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
+    clockMatch = .true. ! initialize
+      
+    if (startTimeInt /= startTime) then
+      call ESMF_LogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
+        ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      clockMatch = .false.
+    endif
+      
+    if (stopTimeInt /= stopTime) then
+      call ESMF_LogWrite(trim(prefix)//" ==> stopTime of internal Clock does not match Clock!", &
+        ESMF_LOG_ERROR, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      clockMatch = .false.
+    endif
+        
+    if (clockMatch) then
+      call ESMF_LogWrite(trim(prefix)//" The internal Clock matches incoming Clock.", &
+        ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
+
+    if (mustReachStop) then
+      if (currTimeInt /= stopTimeInt) then
+        call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
+          ESMF_LOG_ERROR, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      else
+        call ESMF_LogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
+          ESMF_LOG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+    endif
+  
+  end subroutine
+
 !-------------------------------------------------------------------------
 
 
