@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.16 2010/10/07 18:04:40 murphysj Exp $
+% $Id: Attribute_pack.tex,v 1.17 2010/10/07 19:39:51 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -158,8 +158,7 @@ A\\
         \item CIM XML 
     \end{itemize} 
     \item Description: This package is used to describe contacts, authors, institutions, and funding agencies. 
-    \item Usage: The Responsible Party package is unique in that the user should first select the type of Responsible Party they wish to define. This is done via
-the ResponsiblePartyRole attribute. Then, depending upon the role chosen, either an OrganizationName or IndividualName along with the corresponding attribute (e.g. FundingSource) is set. In a future release of ESMF, the user will not need to set the OrganizationName or IndividualName, which are used only in the output. This will happen automatically by ESMF.  
+    \item Usage: The Responsible Party package is unique in that the user should first select the type of Responsible Party they wish to define. This is done via the ResponsiblePartyRole attribute.Then value is set using the name attribute.  
 \end{itemize}
 
 
@@ -167,14 +166,10 @@ the ResponsiblePartyRole attribute. Then, depending upon the role chosen, either
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
-     {\tt Author} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
      {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A \\
-     {\tt FundingSource} & The entity that funded a model component or simulation. & N/A\\
-     {\tt IndividualName} & The name with an author, contact, or principal investigator responsible party type. & N/A \\
-     {\tt OrganizationName} & The name of an organization associated with a funding source or centre. & N/A \\
+     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator responsible party type. & N/A \\
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
-     {\tt PrincipalInvestigator} & The scientist in charge of an experiment or research project. & N/A \\
-     {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. & Author, Principal Investigator, Contact, Center, Funder\\
+     {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. & Author, PI, Contact, Center, Funder\\
      {\tt URL} & A URL of an individual or organization. & N/A \\
 \end{tabular}
 
@@ -234,7 +229,7 @@ There is currently only 1 predefined State-level Attribute package:
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
-    {\tt StateIntent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history outout. & Export,Import \\
+    {\tt Intent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history outout. & Export,Import \\
 \end{tabular}
 
 
@@ -315,7 +310,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
-     {\tt VariableIntent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & Export,Import\\
+     {\tt Intent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & Export,Import\\
 \end{tabular}
 
 
@@ -445,13 +440,12 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
      \hline\hline
      {\tt Agency} & An administrative unit of government.& ESG Basic Component\\
-     {\tt Author} & The person who created the content of a book, article, or other source. & ESG Basic Component\\
      {\tt CodingLanguage} & The computer language in which a unit of software is written. & ESG Basic Component\\
      {\tt CompilerName} & The brand of the software that takes source code and turns it into an executable.& CIM Platform\\
      {\tt CompilerVersion} & The specific configuration value of the software used to take source code and turn it into executable code. & CIM Platform\\
-     {\tt ComponentShortName} & A version of the component name that contains acronyms. & CIM Main\\
-     {\tt ComponentLongName} & A version of the component name with all acronyms spelled out. & CIM Main\\
-     {\tt ComponentDescription} & A multi-line description of the component. & CIM Main \\
+     {\tt ShortName} & A version of the component name that contains acronyms. & CIM Main\\
+     {\tt LongName} & A version of the component name with all acronyms spelled out. & CIM Main\\
+     {\tt Description} & A multi-line description of the component. & CIM Main \\
      {\tt Date} & The date of the citation. & CIM Citation\\
      {\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & Gridspec\\ 
      {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid.& Gridspec \\
@@ -460,11 +454,11 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESG Basic Component\\
      {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere". & Gridspec \\
      {\tt GridType} & A text description of the grid that uses common terminology. & Gridspec \\
-     {\tt IndividualName} & The person designated to provide information about a model component. & CIM Responsible Party\\
-     {\tt Type} & The form of the input condition (e.g. initial condition or boundary condition). &  CIM Inputs \\
+     {\tt ResponsiblePartyName} & The person designated to provide information about a model component. & CIM Responsible Party\\
+     {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  CIM Inputs \\
      {\tt CouplingSource} & The component the input condition is coming from. & CIM Inputs\\ 
      {\tt CouplingTarget} & The component the input condition is going to. & CIM Inputs\\ 
-     {\tt InputTechnique} & The software package or mechanism used to transfer and transform data between model components. & CIM Inputs\\ 
+     {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CIM Inputs\\ 
      {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & CIM Inputs\\ 
      {\tt SpatialRegriddingType} & Characteristics of the scheme used to interpolate a field from one grid (source grid) to another (target grid).& CIM Inputs\\ 
      {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & CIM Inputs\\ 
@@ -507,16 +501,11 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt SimulationRationale} & The reason for performing an experiment. & CIM Main\\
      {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & CIM Main\\ 
      {\tt SimulationShortName} & The name of the simulation. & CIM Main\\
-     {\tt StateIntent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history outout. & ESMF State\\
+     {\tt Intent} & An indication of whether a field or state is imported into or exported from a particular model component. This refers to coupling, and not history outout. & ESMF State, ESMF Field\\
      {\tt StandardName} & The approved CF standard name for a variable if it exists &  CF Extended\\
      {\tt YearReleased} & The year a model component was issued. & CIM Main\\
      {\tt URL} & URL of the object being described. Exists in multple packages & CIM Responsible Party, CIM Main, CIM Citation\\
      {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package & CF General\\
-
-
-
-     {\tt VariableIntent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & ESG Field\\
-
      {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & ESG Basic Component, CIM Main\\ 
 
 \end{tabular}
