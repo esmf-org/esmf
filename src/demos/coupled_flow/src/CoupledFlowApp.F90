@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.12 2010/10/04 19:55:34 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.13 2010/10/07 16:08:09 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -262,17 +262,15 @@
         coordDim=2, fptr=CoordY, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      !print *, lbound(CoordX), ubound(CoordX)
-      !print *, lbound(CoordY), ubound(CoordY)
       dx = (x_max-x_min)/i_max
       dy = (y_max-y_min)/j_max
       coordX(1) = x_min + dx/2
       coordY(1) = y_min + dy/2
-      do i = 2, i_max-1
+      do i = 2, i_max
         coordX(i) = coordX(i-1) + dx
       enddo
-      do j = 2, j_max-1
-        coordY(i) = coordY(j-1) + dy
+      do j = 2, j_max
+        coordY(j) = coordY(j-1) + dy
       enddo
 
       ! Get pointer reference to internal coordinate for U
@@ -286,17 +284,15 @@
         coordDim=2, fptr=CoordY, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      !print *, lbound(CoordX), ubound(CoordX)
-      !print *, lbound(CoordY), ubound(CoordY)
       dx = (x_max-x_min)/i_max
       dy = (y_max-y_min)/j_max
-      coordX(1) = x_min
+      coordX(1) = x_min + dx
       coordY(1) = y_min + dy/2
       do i = 2, i_max
         coordX(i) = coordX(i-1) + dx
       enddo
-      do j = 2, j_max-1
-        coordY(i) = coordY(j-1) + dy
+      do j = 2, j_max
+        coordY(j) = coordY(j-1) + dy
       enddo
 
       ! Get pointer reference to internal coordinate for V
@@ -310,17 +306,15 @@
         coordDim=2, fptr=CoordY, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      !print *, lbound(CoordX), ubound(CoordX)
-      !print *, lbound(CoordY), ubound(CoordY)
       dx = (x_max-x_min)/i_max
       dy = (y_max-y_min)/j_max
       coordX(1) = x_min + dx/2
-      coordY(1) = y_min
-      do i = 2, i_max-1
+      coordY(1) = y_min + dy
+      do i = 2, i_max
         coordX(i) = coordX(i-1) + dx
       enddo
       do j = 2, j_max
-        coordY(i) = coordY(j-1) + dy
+        coordY(j) = coordY(j-1) + dy
       enddo
 
 !\end{verbatim}

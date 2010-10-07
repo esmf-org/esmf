@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.18 2010/10/06 15:40:42 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.19 2010/10/07 16:08:09 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -170,9 +170,8 @@
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXDIM) :: global_max_coord
-      real :: x_min, x_max, y_min, y_max
-      integer, dimension(2) :: global_nmax, global_nmin
-      integer :: counts(2)
+      integer :: counts(2), elb(2), eub(2)
+      real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
                        printout, sieobs, nobsdesc, iobs_min, iobs_max, &
@@ -261,22 +260,26 @@
       call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-      call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        minIndex = global_nmin, &
-        maxIndex = global_nmax, &
-        rc = rc)
-
 !
 ! Extract and calculate some other quantities
 !
-      counts(1) = global_nmax(1) - global_nmin(1) + 1
-      counts(2) = global_nmax(2) - global_nmin(2) + 1
-      x_min = 0.0 !global_min_coord(1)
-      y_min = 0.0 !global_min_coord(2)
-      x_max = 2.e+5 !global_max_coord(1)
-      y_max = 5.e+4 !global_max_coord(2)
-      dx = (x_max - x_min)/counts(1)  ! Should be calls to PhysGrid eventually
-      dy = (y_max - y_min)/counts(2)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridGet(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        exclusiveLBound=elb, exclusiveUBound=eub, &
+        rc = rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, fptr=CoordX, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      call ESMF_GridGetCoord(grid, localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, fptr=CoordY, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+
+      dx = (CoordX(eub(1))-CoordX(elb(1)))/(eub(1)-elb(1))
+      dy = (CoordY(eub(2))-CoordY(elb(2)))/(eub(2)-elb(2))
+
 !
 ! Initialize the data
 !
