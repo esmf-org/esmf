@@ -1,5 +1,5 @@
 
-\section{ESMF\_COUPLED\_FLOW Demonstration Program}
+\section{ESMF COUPLED\_FLOW Demonstration Program}
 \label{sec:demo}
 
 \subsection{Introduction}
@@ -9,23 +9,23 @@ demonstation program which uses the ESMF Framework,
 including use of both the 
 Superstructure and Infrastructure.
 
-\subsection{ESMF\_COUPLED\_FLOW Description}
+\subsection{ESMF COUPLED\_FLOW Description}
  
-The {\tt ESMF\_COUPLED\_FLOW} application is comprised of two ESMF 
+The {\tt ESMF COUPLED\_FLOW} application is comprised of two ESMF 
 {\tt Gridded Components} and a {\tt Coupler Component}.  
 The first {\tt Gridded Component}, {\tt FlowSolver}, solves the compressible 
 time-dependent fluid flow equations.  The algorithm 
-applies an explicit solution technique to a staggered, Arakawa C igrid 
-that is cartesian and uniform.  State variables, including density, 
+applies an explicit finite difference technique to a staggered, Arakawa C igrid 
+that is Cartesian and uniform.  State variables, including density, 
 pressure, viscosity and temperature, are located at cell-centers, while 
-velocities are located at cell faces.  This component is initialized 
+velocities are located at the north and east cell faces.  This component is initialized 
 with a steady-state, one-dimensional flow.  The second {\tt Gridded 
-Component}, {\tt Injector}, injects fluid into the first normal to the 
+Component}, {\tt Injector}, injects tracer fluid into the first component normal to the 
 flow along 
 one of the boundaries.  The injected fluid can have arbitrary velocity, 
 temperature, density and duration, effectively setting some of 
 the boundary conditions for the first component.  The {\tt FlowSolver} and 
-{\tt Injector Components} sit on different cartesian igrids.  The
+{\tt Injector Components} sit on different Cartesian igrids.  The
 {\tt Coupler Component} redistributes boundary condition data from 
 the {\tt Injector} to the {\tt FlowSolver}.
 

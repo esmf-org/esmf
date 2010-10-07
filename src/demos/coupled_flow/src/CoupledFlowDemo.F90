@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.14 2010/10/05 21:43:00 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.15 2010/10/07 19:28:28 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -243,12 +243,17 @@
 
     ! print *, minIndex, maxIndex
     ! Injector Flow Grid
+!BOP
+! Create the Injector Grid
+!\begin{verbatim}
     gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ mid, by2 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              gridEdgeLWidth=(/0,0/), &
                              name="Injector grid", rc=rc)
+!\end{verbatim}
+!EOP
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridIN, &
@@ -306,12 +311,17 @@
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     ! FlowSolver Grid
+!BOP
+! Create the FlowSolver Grid
+!\begin{verbatim}
     gridFS = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ quart, by4 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              gridEdgeLWidth=(/0,0/), &
                              name="Flow Solver grid", rc=rc)
+!\end{verbatim}
+!EOP
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridGetCoord(gridTop, &

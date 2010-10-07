@@ -10,7 +10,7 @@ is no direct communication between the subcomponents; all
 interactions are mediated by the top level Gridded Component.
 
 Each component communicates via Initialize, run, and finalize
-subroutine calls.  These go through the ESMF where
+subroutine calls.  These go through the ESMF library where
 they are checked for validity, default values are supplied,
 and only those components involved in the computation are
 invoked.

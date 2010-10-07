@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.13 2010/10/07 16:08:09 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.14 2010/10/07 19:28:28 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -248,10 +248,10 @@
       ! v
       call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_EDGE2, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      ! p
+      ! sie, p, q, rho, flag
       call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-      ! Get pointer reference to internal coordinate for p
+      ! Get pointer reference to internal coordinate array
       ! Compute center stagger coordinate values
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CENTER, &
@@ -274,7 +274,7 @@
       enddo
 
       ! Get pointer reference to internal coordinate for U
-      ! Compute edge1 (U) coordinate values
+      ! Compute edge1 east stagger (U) coordinate values
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_EDGE1, &
         coordDim=1, fptr=CoordX, rc=rc)
@@ -296,7 +296,7 @@
       enddo
 
       ! Get pointer reference to internal coordinate for V
-      ! Compute edge1 (V) coordinate values
+      ! Compute edge2 north stagger (V) coordinate values
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_EDGE2, &
         coordDim=1, fptr=CoordX, rc=rc)
@@ -327,7 +327,7 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Create and initialize a State to use for both import and export.
+!  Create and initialize a dummy State to use for both import and export.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -340,6 +340,9 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
+!BOP
+! Init, Run, and Finalize sections of the Coupled Flow Component
+!\begin{verbatim}
       call ESMF_GridCompInitialize(compGridded, flowstate, flowstate, &
                                                                  clock, rc=rc, userRc=urc)
       print *, "Coupled Flow Component Initialize finished, rc =", rc, urc
@@ -355,7 +358,8 @@
       print *, "Coupled Flow Component Finalize finished, rc =", rc, urc
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
- 
+!\end{verbatim}
+!EOP
  
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -364,6 +368,9 @@
 !------------------------------------------------------------------------------
 !     Clean up
 
+!BOP
+! Clean up the objects previously created.
+!\begin{verbatim}
       call ESMF_StateDestroy(flowstate, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
@@ -375,6 +382,8 @@
 
       call ESMF_GridCompDestroy(compGridded, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+!\end{verbatim}
+!EOP
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -403,7 +412,12 @@
       ! it is being used and on some platforms that prevents messages from
       ! reaching their destination files.
 
+!BOP
+! Call ESMF_Finalize at the end of an ESMF application.
+!\begin{verbatim}
       call ESMF_Finalize(rc=rc)
+!\end{verbatim}
+!EOP
 
       end program ESMF_ApplicationWrapper
     
