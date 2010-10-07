@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.15 2010/10/07 19:28:28 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.16 2010/10/07 21:14:04 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -244,7 +244,7 @@
     ! print *, minIndex, maxIndex
     ! Injector Flow Grid
 !BOP
-! Create the Injector Grid
+! Create the Injector Grid:
 !\begin{verbatim}
     gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ mid, by2 /), &
@@ -307,12 +307,17 @@
           coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+!BOP
+! Set the Injector Grid in the Injector Component:
+!\begin{verbatim}
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+!\end{verbatim}
+!EOP
 
     ! FlowSolver Grid
 !BOP
-! Create the FlowSolver Grid
+! Create the FlowSolver Grid:
 !\begin{verbatim}
     gridFS = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ quart, by4 /), &
@@ -384,8 +389,13 @@
           coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
+!BOP
+! Set the FlowSolver Grid in the FlowSolver Component:
+!\begin{verbatim}
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+!\end{verbatim}
+!EOP
 
     !
     ! Create import/export states for Injection Component

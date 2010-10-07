@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.14 2010/10/07 19:28:28 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.15 2010/10/07 21:14:04 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -341,7 +341,7 @@
 !------------------------------------------------------------------------------
  
 !BOP
-! Init, Run, and Finalize sections of the Coupled Flow Component
+! Init, Run, and Finalize sections of the Coupled Flow Component:
 !\begin{verbatim}
       call ESMF_GridCompInitialize(compGridded, flowstate, flowstate, &
                                                                  clock, rc=rc, userRc=urc)
@@ -369,7 +369,7 @@
 !     Clean up
 
 !BOP
-! Clean up the objects previously created.
+! Clean up the objects previously created:
 !\begin{verbatim}
       call ESMF_StateDestroy(flowstate, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
@@ -413,7 +413,7 @@
       ! reaching their destination files.
 
 !BOP
-! Call ESMF_Finalize at the end of an ESMF application.
+! Call ESMF_Finalize at the end of an ESMF application:
 !\begin{verbatim}
       call ESMF_Finalize(rc=rc)
 !\end{verbatim}
