@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.17 2010/10/07 19:39:51 murphysj Exp $
+% $Id: Attribute_pack.tex,v 1.18 2010/10/07 22:38:54 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt Agency} & An administrative unit of government.& DoD, DOE, DOI, NASA, NOAA, NSF\\
      {\tt Author} & The person who created the content of a book, article, or other source. & N/A\\
      {\tt CodingLanguage} & The computer language in which a unit of software is written. & C, C++, F77, F90, Java\\
-     {\tt ComponentFullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out. & N/A\\
+     {\tt ComponentLongName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out. & N/A\\
      {\tt ComponentShortName} & A version of the component name that contains acronyms. & N/A\\
      {\tt Discipline} & A subject, theme, category, or general area of interest.& Aerosol, Fisheries, Climate, Carbon Cycle, Hydrology, Land, Ocean, Polar, Sediment, Storm Surge, Turbulence, Weather, Wave, Weather Prediction \\
      {\tt Institution} & An organization associated with a model component, simulation, or dataset.& N/A\\
@@ -104,13 +104,12 @@ There are many attributes that are used to describe components. There are curren
      {\tt PreviousVersion} & Name of the previous version of a model or model component. & N/A\\ 
      {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & N/A \\ 
      {\tt ReleaseDate} & The date a model component was issued. & N/A \\
-     {\tt SimulationDuration} & The length of time a simulation runs.&  N/
+     {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
      {\tt ShortName} & A version of the component name that contains acronyms. & N/A \\
-A\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
      {\tt SimulationRationale} & The reason for performing an experiment. & N/A\\
-     {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & N/A\\ 
      {\tt SimulationShortName} & The name of the simulation. & N/A \\
+     {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & N/A\\ 
      {\tt URL} & A URL associated with a model component & N/A \\
 \end{tabular}
 
@@ -333,14 +332,14 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
-    {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & N/A\\ 
+    {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
     {\tt CouplingSource} & The component the input condition is coming from. & N/A \\ 
+    {\tt CouplingTarget} & The component the input condition is going to. & N/A \\ 
+    {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & N/A\\ 
     {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Conservative, Non-conservative, None\\ 
     {\tt SpatialRegriddingType} & Characteristics of the scheme used to interpolate a field from one grid (source grid) to another (target grid).& 2D-FirstOrder, 2D-SecondOrder, 3D-FirstOrder, 3D-SecondOrder\\ 
-    {\tt CouplingTarget} & The component the input condition is going to. & N/A \\ 
     {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared\\ 
     {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time accumulation, Time averaged\\ 
-    {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
 \end{tabular}
 
 
@@ -487,10 +486,10 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & Gridspec \\ 
      {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & Gridspec\\ 
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & CIM Responsible Party\\
-     {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESG Basic Component \\
-     {\tt PresentationForm} & A description of the type of citation & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy & CIM Citation\\
+     {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESG Basic Component\\
+     {\tt PresentationForm} & A description of the type of citation. & CIM Citation\\
      {\tt PreviousVersion} & Name of the previous version of a model or model component. & CIM Main\\ 
-     {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & CIM Main \\
+     {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & CIM Main\\
      {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& N/A\\
      {\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& N/A\\
      {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. &  CIM Responsible Party\\ 
