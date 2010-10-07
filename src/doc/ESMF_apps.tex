@@ -1,5 +1,31 @@
-% $Id: ESMF_apps.tex,v 1.1 2010/09/27 23:13:31 rokuingh Exp $
+% $Id: ESMF_apps.tex,v 1.2 2010/10/07 23:29:41 rokuingh Exp $
 
-Where do you find the ESMF\_APPSDIR?
+The ESMF bundled applications are command line tools that are included
+with the ESMF library distribution.  They can be used for tasks like
+printing general information about an ESMF installation, or generating
+regrid weight files.  These applications need to be built, it is also
+handy to set up a path alias to them, before they 
+can be used as standard command line tools.
 
-\htmladdnormallink{external use cases}{http://www.earthsystemmodeling.org/developers/test/euc/}
+The applications are built in the process of installing ESMF.  Refer 
+to section \ref{InstallESMF} for instructions on how to complete the 
+installation process.  Once ESMF is installed, the {\tt ESMF\_APPSDIR} 
+variable, available in the esmf.mk file,
+will point to the directory containing the application command line 
+tools.  There are two options at this point: 1. add the {\tt ESMF\_APPSDIR}
+directory to the local {\tt PATH} environment variable or 2. set the 
+{\tt ESMF\_APPSDIR} environment variable from esmf.mk in the local 
+environment.  On the bash shell this would be:
+
+1. "export PATH=\$PATH:[value of ESMF\_APPSDIR from esmf.mk]"
+
+2. "export ESMF\_APPSDIR=[value of ESMF\_APPSDIR from esmf.mk]"
+
+There is a --help option available on the command line for each 
+of these applications.  This will give information on the proper
+arguments needed to use the applications.  These applications can
+also be used as part of a larger user application, refer to the 
+
+\htmladdnormallink{external demos}{http://www.earthsystemmodeling.org/developers/test/euc/}
+
+for more some examples.  

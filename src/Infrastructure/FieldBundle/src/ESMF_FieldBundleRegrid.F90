@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.6 2010/09/30 19:38:09 oehmke Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.7 2010/10/07 23:30:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.6 2010/09/30 19:38:09 oehmke Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.7 2010/10/07 23:30:38 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -71,7 +71,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRegrid()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRegrid - Execute an FieldBundle Regrid operation
+! !IROUTINE: ESMF_FieldBundleRegrid - Execute a FieldBundle regrid operation
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, routehandle, zeroflag, checkflag, rc)
@@ -160,8 +160,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRegridRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRegridRelease - Release resources associated with FieldBundle 
-! Regrid operation
+! !IROUTINE: ESMF_FieldBundleRegridRelease - Release resources associated with a FieldBundle regrid operation
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegridRelease(routehandle, rc)
@@ -171,7 +170,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with FieldBundle Regrid operation. After this call
+!   Release resouces associated with a FieldBundle regrid operation. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -206,7 +205,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRegridStore()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute an FieldBundle Regrid operation
+! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, regridMethod, &
@@ -221,7 +220,7 @@ contains
     integer,                intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
-!   Store an FieldBundle Regrid operation over the data in {\tt srcFieldBundle} and
+!   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
 !   {\tt dstFieldBundle} pair. 
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
@@ -241,7 +240,7 @@ contains
 !
 !   \begin{description}
 !   \item [srcFieldbundle]
-!     Source {\tt ESMF\_FieldBundle} containing data to be Regridded.
+!     Source {\tt ESMF\_FieldBundle} containing data to be regridded.
 !   \item [dstFieldbundle]
 !     Destination {\tt ESMF\_FieldBundle}.
 !   \item [{[regridMethod]}]

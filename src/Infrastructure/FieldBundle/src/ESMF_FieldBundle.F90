@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.57 2010/10/01 05:59:57 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.58 2010/10/07 23:30:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -658,7 +658,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreateNFNone"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields no Grid
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields and no Grid
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
@@ -731,7 +731,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreateNFGrid"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields, but a Grid
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields but a Grid
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
@@ -835,7 +835,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreateNFMesh"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields, but a Mesh
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields but a Mesh
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
@@ -926,7 +926,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreateNFLS"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields, but a LocStream
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields but a LocStream
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()

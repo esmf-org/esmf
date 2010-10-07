@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.14 2010/06/30 22:19:26 w6ws Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.15 2010/10/07 23:30:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.14 2010/06/30 22:19:26 w6ws Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.15 2010/10/07 23:30:38 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -80,7 +80,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRedist()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRedist - Execute an FieldBundle redistribution
+! !IROUTINE: ESMF_FieldBundleRedist - Execute a FieldBundle redistribution
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, routehandle, checkflag, rc)
@@ -242,7 +242,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRedistRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with FieldBundle 
+! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with a FieldBundle 
 ! redistribution
 !
 ! !INTERFACE:
@@ -253,7 +253,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an FieldBundle redistribution. After this call
+!   Release resouces associated with a FieldBundle redistribution. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -286,7 +286,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution 
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution 
 ! with local factor argument 
 ! 
 ! !INTERFACE: 
@@ -304,7 +304,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 ! 
-! Store an FieldBundle redistribution operation from {\tt srcFieldBundle} to {\tt dstFieldBundle}. 
+! Store a FieldBundle redistribution operation from {\tt srcFieldBundle} to {\tt dstFieldBundle}. 
 ! PETs that
 ! specify a {\tt factor} argument must use the <type><kind> overloaded interface. Other 
 ! PETs call into the interface without {\tt factor} argument. If multiple PETs specify 
@@ -373,7 +373,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleRedistStoreI4" 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
@@ -471,7 +471,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleRedistStoreI8" 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
@@ -566,7 +566,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleRedistStoreR4"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
@@ -661,7 +661,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleRedistStoreR8"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
@@ -754,7 +754,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution with local factor argument 
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution with local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleRedistStore() 
@@ -770,7 +770,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 !
-! Store an FieldBundle redistribution operation from {\tt srcFieldBundle}
+! Store a FieldBundle redistribution operation from {\tt srcFieldBundle}
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and
@@ -839,7 +839,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleRedistStoreNF" 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute FieldBundle redistribution
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.13 2010/06/30 22:19:26 w6ws Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.14 2010/10/07 23:30:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.13 2010/06/30 22:19:26 w6ws Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.14 2010/10/07 23:30:38 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -80,7 +80,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSMM()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleSMM - Execute an FieldBundle sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMM - Execute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, zeroflag, checkflag, rc)
@@ -258,7 +258,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSMMRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleSMMRelease - Release resources associated with FieldBundle 
+! !IROUTINE: ESMF_FieldBundleSMMRelease - Release resources associated with a FieldBundle 
 ! sparse matrix multiplication
 !
 ! !INTERFACE:
@@ -269,7 +269,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an FieldBundle sparse matrix multiplication. After this call
+!   Release resouces associated with a FieldBundle sparse matrix multiplication. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -302,7 +302,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication 
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication 
 ! with local factor argument 
 ! 
 ! !INTERFACE: 
@@ -320,7 +320,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 ! 
-! Store an FieldBundle sparse matrix multiplication operation from {\tt srcFieldBundle}
+! Store a FieldBundle sparse matrix multiplication operation from {\tt srcFieldBundle}
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and
@@ -411,7 +411,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreI4" 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
@@ -505,7 +505,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreI8" 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
@@ -599,7 +599,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreR4"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
@@ -693,7 +693,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreR8"
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
@@ -785,7 +785,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication with local factor argument 
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication with local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
@@ -800,7 +800,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 !
-! Store an FieldBundle sparse matrix multiplication operation from {\tt srcFieldBundle}
+! Store a FieldBundle sparse matrix multiplication operation from {\tt srcFieldBundle}
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and
@@ -863,7 +863,7 @@ contains
 #undef  ESMF_METHOD 
 #define ESMF_METHOD "ESMF_FieldBundleSMMStoreNF" 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute FieldBundle sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()

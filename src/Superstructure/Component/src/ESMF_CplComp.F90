@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.120 2010/09/23 20:51:37 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.121 2010/10/07 23:30:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.120 2010/09/23 20:51:37 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.121 2010/10/07 23:30:04 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -122,7 +122,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompCreate"
 !BOP
-! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Component
+! !IROUTINE: ESMF_CplCompCreate - Create a CplComp
 !
 ! !INTERFACE:
   recursive function ESMF_CplCompCreate(name, config, configFile, clock, &
@@ -728,9 +728,9 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompIsPetLocal"
+#define ESMF_METHOD "ESMF_CplCompIsPETLocal"
 !BOP
-! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this component is to execute on the calling PET.
+! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this CplComp is to execute on the calling PET
 !
 ! !INTERFACE:
   recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
@@ -1443,7 +1443,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVM"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVM - Call user routine to set CplComp VM properies
+! !IROUTINE: ESMF_CplCompSetVM - Call user routine to set CplComp VM properties
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompSetVM(cplcomp, userRoutine, userRc, rc)
@@ -1613,7 +1613,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxPEs"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Set VM for Coupler Component to associate max PEs with PETs.
+! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Set VM for CplComp to associate max PEs with PETs
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, pref_intra_process, &
@@ -1683,7 +1683,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxThreads"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Set VM for Gridded Component with multi-threaded PETs.
+! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Set VM for CplComp with multi-threaded PETs
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, pref_intra_process, &
@@ -1754,7 +1754,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMinThreads"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set VM for Coupler Component with reduced threading level.
+! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set VM for CplComp with reduced threading level
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, pref_intra_process, &

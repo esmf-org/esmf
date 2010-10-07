@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.4 2010/05/20 17:53:34 feiliu Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.5 2010/10/07 23:30:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.4 2010/05/20 17:53:34 feiliu Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.5 2010/10/07 23:30:38 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -71,7 +71,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleHalo()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleHalo - Execute an FieldBundle halo operation
+! !IROUTINE: ESMF_FieldBundleHalo - Execute a FieldBundle halo operation
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleHalo(fieldBundle, routehandle, checkflag, rc)
@@ -164,7 +164,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleHaloRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleHaloRelease - Release resources associated with FieldBundle 
+! !IROUTINE: ESMF_FieldBundleHaloRelease - Release resources associated with a FieldBundle 
 ! halo operation
 !
 ! !INTERFACE:
@@ -175,7 +175,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an FieldBundle halo operation. After this call
+!   Release resouces associated with a FieldBundle halo operation. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -210,7 +210,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleHaloStore()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleHaloStore - Precompute an FieldBundle halo operation
+! !IROUTINE: ESMF_FieldBundleHaloStore - Precompute a FieldBundle halo operation
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleHaloStore(fieldBundle, routehandle, rc)
@@ -221,7 +221,7 @@ contains
     integer,                intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
-!   Store an FieldBundle halo operation over the data in {\tt fieldBundle}. By 
+!   Store a FieldBundle halo operation over the data in {\tt fieldBundle}. By 
 !   definition, all elements in the total Field regions that lie
 !   outside the exclusive regions will be considered potential destination
 !   elements for halo. However, only those elements that have a corresponding

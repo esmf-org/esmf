@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.138 2010/10/06 04:35:22 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.139 2010/10/07 23:30:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.138 2010/10/06 04:35:22 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.139 2010/10/07 23:30:04 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -124,7 +124,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompCreate"
 !BOP
-! !IROUTINE: ESMF_GridCompCreate - Create a Gridded Component
+! !IROUTINE: ESMF_GridCompCreate - Create a GridComp
 !
 ! !INTERFACE:
   recursive function ESMF_GridCompCreate(name, gridcomptype, grid, config, &
@@ -812,7 +812,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompIsPetLocal"
 !BOP
-! !IROUTINE: ESMF_GridCompIsPetLocal - Inquire if this component is to execute on the calling PET.
+! !IROUTINE: ESMF_GridCompIsPETLocal - Inquire if this GridComp is to execute on the calling PET
 !
 ! !INTERFACE:
   recursive function ESMF_GridCompIsPetLocal(gridcomp, rc)
@@ -1232,7 +1232,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetEntryPoint"
 !BOP
-! !IROUTINE: ESMF_GridCompSetEntryPoint - Set user routine as entry point for standard Component method
+! !IROUTINE: ESMF_GridCompSetEntryPoint - Set user routine as entry point for standard GridComp method
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetEntryPoint(gridcomp, method, userRoutine, phase, rc)
@@ -1534,7 +1534,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVM"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVM - Call user routine to set GridComp VM properies
+! !IROUTINE: ESMF_GridCompSetVM - Call user routine to set GridComp VM properties
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompSetVM(gridcomp, userRoutine, userRc, rc)
@@ -1610,7 +1610,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMShObj"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVM - Call user routine, located in shared object, to set GridComp VM properies
+! !IROUTINE: ESMF_GridCompSetVM - Call user routine, located in shared object, to set GridComp VM properties
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetVM()
@@ -1705,7 +1705,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxPEs"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Set VM for Gridded Component to associate max PEs with PETs.
+! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Set VM for GridComp to associate max PEs with PETs
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, max, pref_intra_process, &
@@ -1775,7 +1775,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxThreads"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Set VM for Gridded Component with multi-threaded PETs.
+! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Set VM for GridComp with multi-threaded PETs
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, max, pref_intra_process, &
@@ -1846,7 +1846,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMinThreads"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVMMinThreads - Set VM for Gridded Component with reduced threading level.
+! !IROUTINE: ESMF_GridCompSetVMMinThreads - Set VM for GridComp with reduced threading level
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetVMMinThreads(gridcomp, max, pref_intra_process, &
