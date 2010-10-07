@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.55 2010/06/18 16:25:33 svasquez Exp $
+# $Id: build_rules.mk,v 1.56 2010/10/07 16:13:33 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -195,4 +195,4 @@ ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 ############################################################
 # 3rd party code dependency: PIO
 #
-ESMF_PIODEFAULT = internal
+#TODO: commented out for 5.1.0 release: ESMF_PIODEFAULT = internal

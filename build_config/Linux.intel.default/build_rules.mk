@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.87 2010/06/21 16:42:42 theurich Exp $
+# $Id: build_rules.mk,v 1.88 2010/10/07 16:13:33 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -217,4 +217,4 @@ ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 ############################################################
 # 3rd party code dependency: PIO
 #
-ESMF_PIODEFAULT = internal
+#TODO: commented out for 5.1.0 release: ESMF_PIODEFAULT = internal
