@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.205 2010/09/30 19:27:30 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.206 2010/10/07 18:32:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,6 +25,7 @@ module ESMF_StateMod
 #include "ESMF.h"
 
 #define ESMF_ENABLESTATENEEDED
+! define ESMF_ENABLENAMEMAP
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateMod - Data exchange between components
@@ -99,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.205 2010/09/30 19:27:30 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.206 2010/10/07 18:32:35 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -4333,10 +4334,12 @@ module ESMF_StateMod
         stypep%datacount = 0
         nullify(stypep%datalist)
 
+#if defined (ESMF_ENABLENAMEMAP)
         call ESMF_UtilMapNameCreate (stypep%nameMap, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+#endif
 
         ! create methodTable object
         call c_ESMC_MethodTableCreate(stypep%methodTable, localrc)
@@ -4416,11 +4419,13 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLENAMEMAP)
           ! destroy the nameMap
           call ESMF_UtilMapNameDestroy (stypep%nameMap, rc=localrc)
           if (ESMF_LogMsgFoundError (localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+#endif
         endif
 
         ! Set as deleted
@@ -4615,11 +4620,13 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, "getting name from routehandle", &
                                       ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#endif
 
             nextitem%datap%rp = routehandles(i)
 
@@ -4829,11 +4836,13 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, "getting name from array", &
                                       ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#endif
 
             nextitem%datap%ap = arrays(i)
  
@@ -5043,11 +5052,13 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, "getting name from arraybundle", &
                                       ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#endif
 
             nextitem%datap%abp = arraybundles(i)
  
@@ -5258,11 +5269,13 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#endif
 
             nextitem%datap%fp = fields(i)
  
@@ -5543,11 +5556,13 @@ module ESMF_StateMod
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
 
+#if defined (ESMF_NAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#endif
 
            nextitem%datap%fbp = bundles(i)
 
@@ -5862,6 +5877,7 @@ module ESMF_StateMod
               return
             end if
 
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
@@ -5871,6 +5887,7 @@ module ESMF_StateMod
               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
               return
             end if
+#endif
 
             nextitem%datap%spp => states(i)%statep
  
@@ -5960,6 +5977,10 @@ module ESMF_StateMod
       type(ESMF_StateClass), pointer  :: nested_sp
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: usenested_lookup
+#if !defined (ESMF_ENABLENAMEMAP)
+      type(ESMF_StateItem), pointer :: nextitem0
+      integer :: i0, dcount0
+#endif
 
       ! Initialize return code.  Assume failure until success assured.
       localrc = ESMF_RC_NOT_IMPL
@@ -5997,12 +6018,24 @@ module ESMF_StateMod
          call find_pathed_item_worker (stypep, lpath=dataname,  &
              lfound=itemfound, lindex=itemindex, litem=dataitem)
       else
+#if defined (ESMF_ENABLENAMEMAP)
 	call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
             value=itemindex, foundFlag=itemfound,  &
             rc=localrc)
 	if (ESMF_LogMsgFoundError (localrc,  &
                                    ESMF_ERR_PASSTHRU,  &
                                    ESMF_CONTEXT, rc)) return
+#else
+        dcount0 = stypep%datacount
+        do, i0=1, dcount0
+          nextitem0 => stypep%datalist(i0)
+          if (nextitem0%namep == dataname) then
+            itemindex = i0
+            exit
+          end if
+        end do
+        itemfound = i0 <= dcount0
+#endif
 
 	if (itemfound) then
           if (present(dataitem)) dataitem => stypep%datalist(itemindex)
@@ -6036,8 +6069,11 @@ module ESMF_StateMod
           type(ESMF_StateItem), pointer, optional   :: litem
 
           type(ESMF_StateClass), pointer  :: sp_local
-          integer       :: i
           integer       :: lrc
+#if !defined (ESMF_ENABLENAMEMAP)
+	  type(ESMF_StateItem), pointer :: nextitem1
+	  integer :: i1, dcount1
+#endif
 
 !          print *, 'find_nested_item_worker: entered'
 
@@ -6045,16 +6081,28 @@ module ESMF_StateMod
 
           lfound = .false.
 
+#if defined (ESMF_ENABLENAMEMAP)
           call ESMF_UtilMapNameLookup (sp%nameMap, name=dataname,  &
               value=lindex, foundFlag=lfound,  &
               rc=lrc)
 	  if (ESMF_LogMsgFoundError (lrc,  &
                                      ESMF_ERR_PASSTHRU,  &
                                      ESMF_CONTEXT, rc)) return
+#else
+          dcount1 = sp%datacount
+          do, i1=1, dcount1
+            nextitem1 => stypep%datalist(i1)
+            if (nextitem1%namep == dataname) then
+              itemindex = i1
+              exit
+            end if
+          end do
+          itemfound = i1 <= dcount1
+#endif
           if (.not. lfound) then
-            do, i=1, sp%datacount
-              if (sp%datalist(i)%otype == ESMF_STATEITEM_STATE) then
-        	sp_local => sp%datalist(i)%datap%spp
+            do, i1=1, sp%datacount
+              if (sp%datalist(i1)%otype == ESMF_STATEITEM_STATE) then
+        	sp_local => sp%datalist(i1)%datap%spp
                 call find_nested_item_worker (sp_local, lfound, lindex, litem)
                 if (lfound) exit
               end if
@@ -6083,20 +6131,24 @@ module ESMF_StateMod
           type(ESMF_StateClass), pointer  :: sp_local
           character(len (lpath)) :: itempath_local
           integer :: slashpos
-          integer :: i
+          integer :: i1
           integer :: lrc
+#if !defined (ESMF_ENABLENAMEMAP)
+	  type(ESMF_StateItem), pointer :: nextitem1
+	  integer :: dcount1
+#endif
 
           ! print *, 'find_pathed_item_worker: entered.  lpath = ', lpath
 
         ! Strip leading slashes
 
-          do, i=1, len (lpath)
-            if (lpath(i:i) /= '/') exit
+          do, i1=1, len (lpath)
+            if (lpath(i1:i1) /= '/') exit
           end do
-          if (i > len (lpath)) then
+          if (i1 > len (lpath)) then
              itempath_local = lpath
           else
-             itempath_local = lpath(i:)
+             itempath_local = lpath(i1:)
           end if
 
           slashpos = index (itempath_local, '/')
@@ -6107,12 +6159,24 @@ module ESMF_StateMod
 
           if (slashpos > 0) then
             ! Midway through the path, so only a State name is valid
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local(:slashpos-1),  &
         	                       value=lindex, foundFlag=lfound,  &
         	                       rc=lrc)
 	    if (ESMF_LogMsgFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#else
+            dcount1 = stypep%datacount
+            do, i1=1, dcount1
+              nextitem1 => sp%datalist(i1)
+              if (nextitem1%namep == itempath_local(:slashpos-1)) then
+        	itemindex = i1
+        	exit
+              end if
+            end do
+            itemfound = i1 <= dcount1
+#endif
             if (lfound .and. sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE) then
               sp_local => sp%datalist(lindex)%datap%spp
               call find_pathed_item_worker (sp_local, itempath_local(slashpos+1:),  &
@@ -6125,12 +6189,24 @@ module ESMF_StateMod
 
           else
             ! End of path, so any item is OK
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local,  &
         	                       value=lindex, foundFlag=lfound,  &
         	                       rc=lrc)
 	    if (ESMF_LogMsgFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#else
+            dcount1 = sp%datacount
+            do, i1=1, dcount1
+              nextitem1 => stypep%datalist(i1)
+              if (nextitem1%namep == itempath_local) then
+        	itemindex = i1
+        	exit
+              end if
+            end do
+            itemfound = i1 <= dcount1
+#endif
             if (present (litem)) then
               if (lfound) then
         	litem => sp%datalist(lindex)
@@ -6298,11 +6374,13 @@ module ESMF_StateMod
             ! Add name
             nextitem%namep = namelist(i)
 
+#if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
+#endif
 
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
@@ -6671,10 +6749,12 @@ module ESMF_StateMod
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLENAMEMAP)
       call ESMF_UtilMapNameCreate (sp%nameMap, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
+#endif
 
       allocate(sp%datalist(sp%alloccount), stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
@@ -6689,11 +6769,14 @@ module ESMF_StateMod
                                          sip%ready, sip%valid, sip%reqrestart, &
                                          buffer, offset, localrc)
 
+#if defined (ESMF_ENABLENAMEMAP)
+! print *, 'StateDeserialize: Adding name: ', trim (sip%namep), ' at location: ', i
           call ESMF_UtilMapNameAdd (sp%nameMap,  &
             name=sip%namep, value=i, rc=localrc)
           if (ESMF_LogMsgFoundError (localrc,  &
                                      ESMF_ERR_PASSTHRU,  &
                                      ESMF_CONTEXT, rc)) return
+#endif
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
@@ -6708,7 +6791,9 @@ module ESMF_StateMod
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
+#if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
+#endif
                   deallocate(sp%datalist)
                   return
                 endif
@@ -6726,7 +6811,9 @@ module ESMF_StateMod
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
+#if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
+#endif
                   deallocate(sp%datalist)
                   return
                 endif
@@ -6755,7 +6842,9 @@ module ESMF_StateMod
                 if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) then
+#if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
+#endif
                   deallocate(sp%datalist)
                   return
                 endif
