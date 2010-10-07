@@ -1,7 +1,7 @@
-! $Id: CoupledFlowApp.F90,v 1.15 2010/10/07 21:14:04 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.16 2010/10/07 23:33:03 eschwab Exp $
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOE
 !
 ! !MODULE: CoupledFlowApp.F90 - Main program source file for demo
 !
@@ -11,7 +11,7 @@
 !  all other Components.
 !
 !
-!EOP
+!EOE
 
     program ESMF_ApplicationWrapper
 
@@ -56,7 +56,7 @@
     namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
                      s_month, s_day, s_hour, s_min, &
                      e_month, e_day, e_hour, e_min
-!BOP
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsubsection{Namelist Input Parameters for CoupledFlowApp:}
@@ -95,7 +95,7 @@
 !           Simulation end time minute (integer).
 !     \end{description}
 !
-!EOP
+!EOE
 
     ! Return codes for error checks
     integer :: rc, urc
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 !
 
-!BOP
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsubsection{Example of Initializing the Framework:}
@@ -117,13 +117,14 @@
 !     for logging can be set, and the default global VM can be returned.
 !     Here we are setting the default Calendar to be Gregorian, and getting
 !     back the global VM:
-!\begin{verbatim}
+!EOE
+
+!BOC
     ! Initialize ESMF, get the default Global VM, and set
     ! the default calendar to be Gregorian.
     call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP 
+!EOC 
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -155,13 +156,11 @@
 !------------------------------------------------------------------------------
 !
 
-!BOP
-!\begin{verbatim}
+!BOC
     ! Create the top level Gridded Component.
     compGridded = ESMF_GridCompCreate(name="Coupled Flow Demo", rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP 
+!EOC 
 
     print *, "Comp Creates finished"
 
@@ -181,7 +180,7 @@
 !  Create and initialize a clock, and a grid.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsubsection{Example of Calendar and Clock Creation and Usage:}
@@ -190,13 +189,13 @@
 !     the Demo.  Note that the Gregorian calendar was set as the default in
 !     the ESMF\_Initialize() call above.  As shown in this example, we first
 !     initialize a time interval (timestep) to 2 seconds:
-!\begin{verbatim}
+!EOE
+
+!BOC
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
-!\begin{verbatim}
       call ESMF_TimeSet(startTime, yy=2003, mm=s_month, dd=s_day, &
                         h=s_hour, m=s_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
@@ -204,21 +203,22 @@
       call ESMF_TimeSet(stopTime, yy=2003, mm=e_month, dd=e_day, &
                         h=e_hour, m=e_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
 !     With the time interval, start time, and stop time set above, the Clock can
 !     now be created:
-!\begin{verbatim}
       clock = ESMF_ClockCreate(timeStep=timeStep, startTime=startTime, &
                                stopTime=stopTime, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
 !     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
 !     current time from the start time by the timestep.
-!EOP 
+!EOC 
+
+!BOE
       !
       ! Create the Grid and attach it to the Component
       !
-!BOP
+!EOE
+
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsubsection{Example of Grid Creation:}
@@ -229,7 +229,9 @@
 !  Grid spans the Application's PET list, while the type of the Grid is 
 !  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
 !  The Grid name is set to "source grid":
-!\begin{verbatim}
+!EOE
+
+!BOC
       counts(1) = i_max
       counts(2) = j_max
       g_min(1) = x_min
@@ -317,32 +319,34 @@
         coordY(j) = coordY(j-1) + dy
       enddo
 
-!\end{verbatim}
 !     The Grid can then be attached to the Gridded Component with a set call:
-!\begin{verbatim}
      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
+!BOE
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !  Create and initialize a dummy State to use for both import and export.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+!EOE
 
+!BOC
       flowstate = ESMF_StateCreate("Coupled Flow State", rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+!EOC
      
+!BOE
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !  Init, Run, and Finalize section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+!EOE
  
-!BOP
+!BOC
 ! Init, Run, and Finalize sections of the Coupled Flow Component:
-!\begin{verbatim}
       call ESMF_GridCompInitialize(compGridded, flowstate, flowstate, &
                                                                  clock, rc=rc, userRc=urc)
       print *, "Coupled Flow Component Initialize finished, rc =", rc, urc
@@ -358,19 +362,19 @@
       print *, "Coupled Flow Component Finalize finished, rc =", rc, urc
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
       if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
-!\end{verbatim}
-!EOP
+!EOC
  
+!BOE
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !     Destroy section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !     Clean up
+!EOE
 
-!BOP
+!BOC
 ! Clean up the objects previously created:
-!\begin{verbatim}
       call ESMF_StateDestroy(flowstate, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
@@ -382,8 +386,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -412,12 +415,10 @@
       ! it is being used and on some platforms that prevents messages from
       ! reaching their destination files.
 
-!BOP
+!BOC
 ! Call ESMF_Finalize at the end of an ESMF application:
-!\begin{verbatim}
       call ESMF_Finalize(rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       end program ESMF_ApplicationWrapper
     
