@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.24 2010/07/07 01:07:35 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.25 2010/10/08 23:05:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.24 2010/07/07 01:07:35 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.25 2010/10/08 23:05:48 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -257,7 +257,7 @@ end function
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateByTKR"
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray explicitly specifying TKR arguments.
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray by explicitly specifying TKR arguments
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
@@ -409,7 +409,7 @@ end function
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateBySpec"
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray specifying an ArraySpec
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray by specifying an ArraySpec
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
@@ -488,7 +488,7 @@ end function
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateCopy"
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray from existing one
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray from pre-existing LocalArray
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
