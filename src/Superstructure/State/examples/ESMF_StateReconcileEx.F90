@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.28 2010/06/29 22:29:41 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.29 2010/10/08 20:16:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -18,8 +18,11 @@ use ESMF_Mod
 contains
 
 !BOE
-!\subsubsection{Initialization and SetServices Routines}
+!\subsubsection{{\tt ESMF\_StateReconcile()} usage}
 !  
+! The set services routines are used to tell ESMF which routine
+! hold the user code for the initialize, run, and finalize
+! blocks of user level Components.
 ! These are the separate subroutines called by the code below.
 !EOE
 
@@ -124,7 +127,6 @@ end module ESMF_StateReconcileEx_Mod
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Creating Components on subsets of the current PET list}
 !      
 !  A Component can be created which will run only on a subset of the
 !  current PET list.
@@ -154,7 +156,6 @@ end module ESMF_StateReconcileEx_Mod
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Invoking Components on a subset of the Parent PETs}
 !   
 !  Here we register the subroutines which should be called for initialization.
 !  Then we call ESMF\_GridCompInitialize() on all PETs, but the code runs
@@ -195,7 +196,6 @@ end module ESMF_StateReconcileEx_Mod
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Using State Reconcile}
 !   
 ! Now we have {\tt state1} containing {\tt field1} on PETs 0 and 1, and
 ! {\tt state1} containing {\tt field2} on PETs 2 and 3.  For the code

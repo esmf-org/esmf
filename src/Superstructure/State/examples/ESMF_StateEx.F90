@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.34 2010/09/30 19:27:30 w6ws Exp $
+! $Id: ESMF_StateEx.F90,v 1.35 2010/10/08 20:16:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -15,14 +15,6 @@
 !------------------------------------------------------------------------------
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-!BOC
-! !PROGRAM: ESMF_StateEx - State creation and operation
-!
-! !DESCRIPTION:
-!
-! This program shows examples of State creation and manipulation
-!-----------------------------------------------------------------------------
-
     ! ESMF Framework module
     use ESMF_Mod
     implicit none
@@ -35,7 +27,6 @@
     !type(ESMF_Field) :: field1
     type(ESMF_FieldBundle) :: bundle1, bundle2
     type(ESMF_State) :: state1, state2, state3
-!EOC
     integer :: finalrc
     finalrc = ESMF_SUCCESS
 
@@ -44,19 +35,11 @@
                      defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 
 !-------------------------------------------------------------------------
-!BOE
-!\subsubsection{Empty State Create}
-!      
-!  Creation of an empty {\tt ESMF\_State}, which will be added to later.
-!EOE
- 
     print *, "State Example 1: Import State"
 
     ! This will probably be called from inside the Component Init code
-!BOC
     statename = "Atmosphere"
     state1 = ESMF_StateCreate(statename, statetype=ESMF_STATE_IMPORT, rc=rc)  
-!EOC
     print *, "State Create returned, name = ", trim(statename)
 
     ! Data would be added here and the State reused inside the run
@@ -67,7 +50,7 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Adding Items to a State}
+!\subsubsection{Add items to a State}
 !   
 !  Creation of an empty {\tt ESMF\_State}, and adding an {\tt ESMF\_FieldBundle}
 !  to it.  Note that the {\tt ESMF\_FieldBundle} does not get destroyed when
@@ -119,7 +102,7 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Adding Placeholders to a State}
+!\subsubsection{Add placeholders to a State}
 !   
 ! If a component could potentially produce a large number of optional
 ! items, one strategy is to add the names only of those objects to the
@@ -158,7 +141,7 @@
 !-------------------------------------------------------------------------
 #if defined (ESMF_ENABLESTATENEEDED)
 !BOE
-!\subsubsection{Marking an Item Needed}
+!\subsubsection{Mark an item {\tt NEEDED}}
 !   
 ! How to set the {\tt NEEDED} state of an item.
 !EOE
@@ -177,7 +160,7 @@
 
 !-------------------------------------------------------------------------
 !BOE
-!\subsubsection{Creating a Needed Item}
+!\subsubsection{Create a {\tt NEEDED} item}
 !   
 ! Query an item for the {\tt NEEDED} status, and creating an item on demand.
 ! Similar flags exist for "Ready", "Valid", and "Required for Restart",

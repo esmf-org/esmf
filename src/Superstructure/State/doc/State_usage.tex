@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.16 2010/03/04 18:57:46 svasquez Exp $
+% $Id: State_usage.tex,v 1.17 2010/10/08 20:16:03 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -103,4 +103,18 @@ to be a data source or destination for a regrid or data redistribution
 operation.  There is an option to turn off metadata reconciliation in the 
 {\tt ESMF\_StateReconcile} call.
 
+\subsubsection{State create and destroy}
 
+States can be created and destroyed at any time during
+application execution.  The {\tt ESMF\_StateCreate()} routine
+can take many different combinations of optional arguments.  Refer
+to the API description for all possible methods of creating a State.
+An empty State can be created by providing only a name and type for
+the intended State:
+
+{\tt state = ESMF\_StateCreate(statename, statetype=ESMF\_STATE\_IMPORT, rc=rc)}
+
+When finished with an {\tt ESMF\_State}, the {\tt ESMF\_StateDestroy} method
+removes it.  However, the objects inside the {\tt ESMF\_State}
+created externally should be destroyed separately,
+since objects can be added to more than one {\tt ESMF\_State}.
