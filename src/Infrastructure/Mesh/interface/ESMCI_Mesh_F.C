@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.47 2010/10/08 15:38:51 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.48 2010/10/08 15:58:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.47 2010/10/08 15:38:51 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.48 2010/10/08 15:58:16 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -358,12 +358,11 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
       int seq = ni->get_data_index();
 
       if (seq >= num_nodes){
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-	   "- seq is larger or equal to num_nodes", &localrc);
-	return localrc;
-      }
+	int localrc;
+	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- node index is larger or equal to num_nodes", &localrc))  throw localrc;
+         }
       
-
       all_nodes[seq] = &*ni;
 
     }
