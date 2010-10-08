@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.20 2010/07/07 20:48:46 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.21 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -174,7 +174,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Get Grid and Array and other information from a Field}
+!\subsubsection{Get Grid, Array, and other information from a Field}
 !\label{sec:field:usage:field_get_default}
 !
 !  A user can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 
@@ -205,7 +205,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create Field with Grid, typekind, and rank}
+!\subsubsection{Create a Field with a Grid, typekind, and rank}
 !\label{sec:field:usage:create_grid_tkr}
 !
 !  A user can create an {\tt ESMF\_Field} from an {\tt ESMF\_Grid} and
@@ -260,7 +260,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create Field with Grid and Arrayspec}
+!\subsubsection{Create a Field with a Grid and Arrayspec}
 !\label{sec:field:usage:create_grid_arrayspec}
 !
 !  A user can create an {\tt ESMF\_Field} from an {\tt ESMF\_Grid} and a
@@ -358,7 +358,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create Field with Grid and Array}
+!\subsubsection{Create a Field with a Grid and Array}
 !\label{sec:field:usage:create_grid_array}
 !
 !  A user can create an {\tt ESMF\_Field} from an {\tt ESMF\_Grid} and a 
@@ -456,8 +456,8 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 7D Field with 5D Grid and 2D ungridded bounds
-! from Fortran data array}
+!\subsubsection{Create a 7D Field with a 5D Grid and 2D ungridded bounds
+! from a Fortran data array}
 !\label{sec:field:usage:create_5dgrid_7dptr_2dungridded}
 !
 ! In this example, we will show how to create a 7D Field from a 5D {\tt

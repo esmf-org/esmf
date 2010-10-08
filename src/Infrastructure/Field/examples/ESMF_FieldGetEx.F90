@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.14 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.15 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Get Fortran data pointer, Bounds, and Counts information from a Field}
+!\subsubsection{Get a Fortran data pointer, bounds, and counts information from a Field}
 !\label{sec:field:usage:field_get_dataptr}
 !
 !  User can get various bounds and counts information from a {\tt ESMF\_Field}
@@ -144,7 +144,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Get Grid and Array and other information from a Field}
+!\subsubsection{Get a Grid, Array, and other information from a Field}
 !\label{sec:field:usage:field_get_default}
 !
 !  User can get the internal {\tt ESMF\_Grid} and {\tt ESMF\_Array} 

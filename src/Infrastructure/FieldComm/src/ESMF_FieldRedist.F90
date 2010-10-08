@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.21 2010/05/07 22:42:23 w6ws Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.22 2010/10/08 17:30:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.21 2010/05/07 22:42:23 w6ws Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.22 2010/10/08 17:30:59 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -75,7 +75,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRedist()"
 !BOP
-! !IROUTINE: ESMF_FieldRedist - Execute an Field redistribution
+! !IROUTINE: ESMF_FieldRedist - Execute a Field redistribution
 !
 ! !INTERFACE:
   subroutine ESMF_FieldRedist(srcField, dstField, routehandle, checkflag, rc)
@@ -195,7 +195,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Field redistribution. After this call
+!   Release resouces associated with a Field redistribution. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -228,7 +228,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution with local factor argument 
+! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution with a local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 
@@ -563,7 +563,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution without local factor argument 
+! !IROUTINE: ESMF_FieldRedistStore - Precompute Field redistribution without a local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 

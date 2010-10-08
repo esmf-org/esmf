@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.3 2010/04/08 22:43:38 theurich Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.4 2010/10/08 17:30:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.3 2010/04/08 22:43:38 theurich Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.4 2010/10/08 17:30:59 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -96,7 +96,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHalo()"
 !BOP
-! !IROUTINE: ESMF_FieldHalo - Execute an FieldHalo operation
+! !IROUTINE: ESMF_FieldHalo - Execute a FieldHalo operation
 !
 ! !INTERFACE:
   subroutine ESMF_FieldHalo(field, routehandle, commflag, &
@@ -189,7 +189,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated with Field halo operation
+! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated with a Field halo operation
 !
 ! !INTERFACE:
   subroutine ESMF_FieldHaloRelease(routehandle, rc)
@@ -199,7 +199,7 @@ contains
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Field halo operation.
+!   Release resouces associated with a Field halo operation.
 !   After this call {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -236,7 +236,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldHaloStore()"
 !BOP
-! !IROUTINE: ESMF_FieldHaloStore - Store an FieldHalo operation
+! !IROUTINE: ESMF_FieldHaloStore - Store a FieldHalo operation
 !
 ! !INTERFACE:
     subroutine ESMF_FieldHaloStore(field, routehandle, halostartregionflag, &
@@ -251,7 +251,7 @@ contains
     integer,                intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
-!   Store an Field halo operation over the data in {\tt field}. By default,
+!   Store a Field halo operation over the data in {\tt field}. By default,
 !   i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth} and
 !   {\tt haloUDepth}, all elements in the total Field region that lie outside
 !   the exclusive region will be considered potential destination elements for

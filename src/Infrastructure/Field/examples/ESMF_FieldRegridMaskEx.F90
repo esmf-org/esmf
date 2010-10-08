@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.8 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.9 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.8 2010/06/29 19:43:19 svasquez Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.9 2010/10/08 17:30:37 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -273,7 +273,7 @@ program ESMF_FieldRegridEx
 
 !BOE
 !
-!\subsubsection{Creating a Regrid Operator Using Masks}
+!\subsubsection{Precompute a regridding operation using masks}
 ! As before, to create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldRegridStore()} routine. 
 ! However, in this case we apply masking to the regrid operation. 
@@ -361,7 +361,7 @@ program ESMF_FieldRegridEx
 
 !BOE
 !
-!\subsubsection{Regrid Troubleshooting Guide}
+!\subsubsection{Regrid troubleshooting guide}
 !
 ! The below is a list of problems users commonly encounter with regridding and potential solutions. 
 ! This is by no means an exhaustive list, so if none of these problems fit your case, or if the solutions

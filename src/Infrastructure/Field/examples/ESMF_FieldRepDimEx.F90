@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.7 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.8 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field with replicated dimension}
+!\subsubsection{Create a Field with replicated dimensions}
 !\label{sec:field:usage:create_repdim}
 !
 !  In this example an {\tt ESMF\_Field} with replicated dimension is created from an {\tt ESMF\_Grid} and 

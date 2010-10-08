@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.6 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.7 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -116,7 +116,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field on arbitrarily distributed Grid}
+!\subsubsection{Create a Field on an arbitrarily distributed Grid}
 !\label{sec:field:usage:createArbGrid}
 !
 !  With the introduction of Field on arbitrarily distributed Grid, Field has two kinds of dimension
@@ -180,7 +180,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Field on arbitrarily distributed Grid with replicated dimension and ungridded bounds}
+!\subsubsection{Create a Field on an arbitrarily distributed Grid with replicated dimensions and ungridded bounds}
 !\label{sec:field:usage:createArbGridRep}
 !
 !  The next example is slightly more complicated in

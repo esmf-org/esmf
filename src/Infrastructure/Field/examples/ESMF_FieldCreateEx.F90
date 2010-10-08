@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.97 2010/07/08 13:50:54 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.98 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 2D Field with 2D Grid and Fortran data array}
+!\subsubsection{Create a 2D Field with a 2D Grid and a Fortran data array}
 !\label{sec:field:usage:create_2darray}
 !
 !  A user can create an {\tt ESMF\_Field} directly from an {\tt ESMF\_Grid} and an intrinsic 
@@ -156,7 +156,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 2D Field with 2D Grid and Fortran data pointer}
+!\subsubsection{Create a 2D Field with a 2D Grid and a Fortran data pointer}
 !\label{sec:field:usage:create_2dptr}
 !
 ! The setup of this example is similar to the previous section except 
@@ -186,7 +186,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array}
+!\subsubsection{Create a 3D Field with a 2D Grid and a 3D Fortran data array}
 !\label{sec:field:usage:create_2dgrid_3dptr}
 !
 !  This example demonstrates a typical use of {\tt ESMF\_Field} combining
@@ -287,7 +287,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array with gridToFieldMap}
+!\subsubsection{Create a 3D Field with a 2D Grid and a 3D Fortran data array with the gridToFieldMap argument}
 !\label{sec:field:usage:create_2dgrid_3dptr_map}
 !
 !  Building upon the previous example, we will create a 3D Field from
@@ -341,7 +341,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create 3D Field with 2D Grid and 3D Fortran data array with halos}
+!\subsubsection{Create a 3D Field with a 2D Grid and a 3D Fortran data array with halos}
 !\label{sec:field:usage:create_2dgrid_3dptr_map_halo}
 !
 !  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}, 

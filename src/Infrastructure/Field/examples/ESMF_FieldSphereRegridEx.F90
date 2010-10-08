@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.24 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.25 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.24 2010/06/29 19:43:19 svasquez Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.25 2010/10/08 17:30:37 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -293,7 +293,7 @@ program ESMF_FieldSphereRegridEx
 
 !BOE
 !
-!\subsubsection{Creating a Regrid Operator from two Fields}
+!\subsubsection{Precompute a regridding operation between two Fields}
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldSphereRegridStore()} routine.  In this example we
 ! choose the {\tt ESMF_REGRID_METHOD_BILIONEAR} regridding method for
@@ -331,7 +331,7 @@ program ESMF_FieldSphereRegridEx
 
 !BOE
 !
-!\subsubsection{Applying the Regrid Operator to a pair of Fields}
+!\subsubsection{Apply a regridding operation to a pair of Fields}
 ! The {\tt ESMF\_FieldSphereRegrid} subroutine calls {\tt ESMF\_ArraySparseMatMul}
 ! and performs a regrid from source to destination field.
 !EOE
@@ -349,7 +349,7 @@ program ESMF_FieldSphereRegridEx
 
 !BOE
 ! 
-!\subsubsection{Release a Regrid Operator}
+!\subsubsection{Release the stored information for a regridding operation}
 !EOE
 
 !BOC

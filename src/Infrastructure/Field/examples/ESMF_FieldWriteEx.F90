@@ -110,7 +110,7 @@
   endif
   
 !BOE
-!\subsubsection{Write Field data to a netCDF File}
+!\subsubsection{Write Field data to a NetCDF file}
 
 ! This example shows how to set the options and write an {\tt ESMF\_Field}
 ! out to a netCDF file.

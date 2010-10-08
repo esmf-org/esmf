@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.45 2010/09/30 19:37:43 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.46 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.45 2010/09/30 19:37:43 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.46 2010/10/08 17:30:37 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -116,7 +116,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldRegridRun"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegrid - Apply the regrid operator
+! !IROUTINE: ESMF_FieldRegrid - Compute a regridding operation
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegrid()
@@ -221,7 +221,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldRegridRelease"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by regrid object
+! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by a regridding operation
 !
 ! !INTERFACE:
       subroutine ESMF_FieldRegridRelease(routeHandle, rc)
@@ -256,7 +256,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldRegridStoreNX"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegridStore - Store regrid and return RouteHandle and weights
+! !IROUTINE: ESMF_FieldRegridStore - Precompute a Field regridding operation and return a RouteHandle and weights
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
@@ -660,7 +660,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldRegridStoreX"
 
 !BOP
-! !IROUTINE: ESMF_FieldRegridStore - Store regrid and return RouteHandle using XGrid
+! !IROUTINE: ESMF_FieldRegridStore - Precompute a Field regridding operation and return a RouteHandle using XGrid
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()

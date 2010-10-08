@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.20 2010/09/13 23:45:44 rokuingh Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.21 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.20 2010/09/13 23:45:44 rokuingh Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.21 2010/10/08 17:30:37 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -326,7 +326,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 #define FieldSetCommitGridPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from Grid started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field pointer from Grid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -663,7 +663,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 #define FieldSetCommitLSPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from LocStream started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field pointer from LocStream started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -933,7 +933,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 #define FieldSetCommitMeshPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from Mesh started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field pointer from Mesh started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -1209,7 +1209,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 #define FieldSetCommitXGPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field from XGrid started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Finishes creating Field pointer from XGrid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\

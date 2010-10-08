@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.33 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.34 2010/10/08 17:30:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.33 2010/06/29 19:43:19 svasquez Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.34 2010/10/08 17:30:37 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -240,7 +240,7 @@ program ESMF_FieldRegridEx
   enddo    ! lDE
 
 !BOE
-!\subsubsection{Field Regrid}
+!\subsubsection{Field regridding}
 ! 
 ! The Field regrid operation moves data between Fields which lie on different Grids. In order to do this the data in
 ! the source Field is interpolated to the destination Grid and then put into the destination Field. In ESMF the regrid operation
@@ -335,7 +335,7 @@ program ESMF_FieldRegridEx
 !
 ! The following sections give examples of using the regridding functionality.
 !
-!\subsubsection{Creating a Regrid Operator from two Fields}
+!\subsubsection{Precompute a regridding operation between two Fields}
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldRegridStore()} routine.  In this example we
 ! choose the {\tt ESMF\_REGRID\_METHOD\_BILINEAR} regridding method.  Other
@@ -358,7 +358,7 @@ program ESMF_FieldRegridEx
 
 !BOE
 !
-!\subsubsection{Applying the Regrid Operator to a pair of Fields}
+!\subsubsection{Apply a regridding operation between a pair of Fields}
 ! The {\tt ESMF\_FieldRegrid} subroutine calls {\tt ESMF\_ArraySparseMatMul}
 ! and performs a regrid from source to destination field.
 !EOE
@@ -371,7 +371,7 @@ program ESMF_FieldRegridEx
 
 !BOE
 ! 
-!\subsubsection{Release a Regrid Operator}
+!\subsubsection{Release the stored information for a regridding operation}
 !EOE
 
 !BOC
