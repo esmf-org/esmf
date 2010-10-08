@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleHaloEx.F90,v 1.2 2010/06/29 18:44:44 svasquez Exp $
+! $Id: ESMF_ArrayBundleHaloEx.F90,v 1.3 2010/10/08 21:41:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ program ESMF_ArrayBundleHaloEx
   endif
   
 !BOE
-! \subsubsection{Communication - Halo}
+! \subsubsection{Halo communication}
 !
 ! One of the most fundamental communication pattern in domain decomposition
 ! codes is the {\em halo} operation. The ESMF Array class supports halos

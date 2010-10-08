@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.8 2010/06/29 18:44:44 svasquez Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.9 2010/10/08 21:41:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_ArrayBundleEx
   endif
   
 !BOE
-! \subsubsection{ArrayBundle creation from a list of Arrays}
+! \subsubsection{Create an ArrayBundle from a list of Arrays}
 !
 ! First create a Fortran array of two {\tt ESMF\_Array} objects.
 !EOE

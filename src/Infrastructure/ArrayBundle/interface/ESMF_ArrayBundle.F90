@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.30 2010/10/01 05:59:57 eschwab Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.31 2010/10/08 21:41:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.30 2010/10/01 05:59:57 eschwab Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.31 2010/10/08 21:41:59 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -287,7 +287,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleDestroy()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleDestroy - Destroy ArrayBundle object
+! !IROUTINE: ESMF_ArrayBundleDestroy - Destroy an ArrayBundle
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleDestroy(arraybundle, rc)
@@ -343,7 +343,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGet()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Get list of Arrays out of an ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleGet - Get a list of Arrays out of an ArrayBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()
@@ -512,7 +512,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleHaloRelease()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleHaloRelease - Release resources associated with ArrayBundle halo operation
+! !IROUTINE: ESMF_ArrayBundleHaloRelease - Release resources associated with an ArrayBundle halo operation
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleHaloRelease(routehandle, rc)
@@ -1583,7 +1583,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with factorList arguments
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1688,7 +1688,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with factorList arguments
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1952,7 +1952,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication without local factors
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication without factorList arguments
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
