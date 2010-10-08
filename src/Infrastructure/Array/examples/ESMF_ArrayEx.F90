@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.61 2010/09/14 15:56:14 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.62 2010/10/08 22:27:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@ program ESMF_ArrayEx
   endif
   
 !BOE
-! \subsubsection{Array creation with automatic memory allocation}
+! \subsubsection{Create Array with automatic memory allocation}
 !
 ! In the examples of the previous sections the user provided memory allocations
 ! for each of the DE-local regions for an Array object. The user was able to 
@@ -900,7 +900,7 @@ program ESMF_ArrayEx
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   
 !BOE
-! \subsubsection{1D and 3D Arrays}
+! \subsubsection{Create 1D and 3D Arrays}
 !
 ! All previous examples were written for the 2D case. There is, however, no
 ! restriction within the Array or DistGrid class that limits the dimensionality
