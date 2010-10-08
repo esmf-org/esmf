@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.40 2010/10/08 20:41:29 rokuingh Exp $
+! $Id: ESMF_CplEx.F90,v 1.41 2010/10/08 21:27:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !EOC
 
 !BOP
-!\subsubsection{Implement a user-code {\tt Run()} routine}
+!\subsubsection{Implement a user-code {\tt Run} routine}
 ! 
 ! \label{sec:CplRun}
 !
