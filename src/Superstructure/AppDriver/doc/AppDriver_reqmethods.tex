@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.16 2010/03/04 18:57:45 svasquez Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.17 2010/10/08 20:41:29 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsubsection{User-Code SetServices Method}
+\subsubsection{User-code {\tt SetServices} method}
 
 Many programs call some library routines.  The library
 documentation must explain what the routine name is, what arguments 
@@ -51,7 +51,7 @@ calls into the user-code set services, after the Component's VM has been
 started up.
 
 
-\subsubsection{User-Code Initialize, Run, and Finalize Methods}
+\subsubsection{User-code {\tt Initialize}, {\tt Run}, and {\tt Finalize} methods}
 
 The required standard ESMF Component methods, for which user-code entry
 points must be set, are Initialize, Run, and Finalize. Currently optional,
@@ -76,7 +76,7 @@ See sections \ref{sec:GridInitialize}, \ref{sec:GridRun},
 standard ESMF Component methods.
 
 
-\subsubsection{User-Code SetVM Method}
+\subsubsection{User-code {\tt SetVM} method}
 \label{sec:AppDriverSetVM}
 
 When the AppDriver or parent component code calls

@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.45 2010/06/29 22:06:55 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.46 2010/10/08 20:41:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 !-------------------------------------------------------------------------
 !BOP
-!\subsubsection{Implementing a User-Code SetServices Routine}
+!\subsubsection{Implement a user-code {\tt SetServices} routine}
 ! 
 ! \label{sec:GridSetServ}
 !
@@ -69,7 +69,7 @@
 !EOC
 
 !BOP
-!\subsubsection{Implementing a User-Code Initialize Routine}
+!\subsubsection{Implement a user-code {\tt Initialize} routine}
 ! 
 ! \label{sec:GridInitialize}
 !
@@ -111,7 +111,7 @@
 !EOC
 
 !BOP
-!\subsubsection{Implementing a User-Code Run Routine}
+!\subsubsection{Implement a user-code {\tt Run} routine}
 ! 
 ! \label{sec:GridRun}
 !
@@ -158,7 +158,7 @@
 !EOC
 
 !BOP
-!\subsubsection{Implementing a User-Code Finalize Routine}
+!\subsubsection{Implement a user-code {\tt Finalize} routine}
 ! 
 ! \label{sec:GridFinalize}
 !
@@ -195,7 +195,7 @@
 
 !-------------------------------------------------------------------------
 !BOP
-!\subsubsection{Implementing a User-Code SetVM Routine}
+!\subsubsection{Implement a user-code {\tt SetVM} routine}
 ! 
 ! \label{sec:GridSetVM}
 !
