@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.13 2010/06/29 18:52:23 svasquez Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.14 2010/10/08 23:07:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOP
-!\subsubsection{Setting ArraySpec Values}
+!\subsubsection{Set ArraySpec values}
 
 ! This example shows how to set values in an {\tt ESMF\_ArraySpec}.
 !EOP
@@ -63,7 +63,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOP
-!\subsubsection{Getting ArraySpec Values}
+!\subsubsection{Get ArraySpec values}
 
 ! This example shows how to query an {\tt ESMF\_ArraySpec}.
 !EOP
