@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.16 2010/10/07 21:14:04 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.17 2010/10/08 15:25:43 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -508,7 +508,11 @@
      integer          :: urc
 
 
-     ! make our own local copy of the clock
+!BOP
+! Advancing in time with ESMF clock, the coupled flow component calls
+! the run methods of the gridded components and coupler component sequentially:
+!\begin{verbatim}
+     ! Make our own local copy of the clock
      localclock = ESMF_ClockCreate(clock, rc=rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
@@ -552,9 +556,16 @@
      print *, "Run Loop End time"
      call ESMF_ClockPrint(localclock, "currtime string", rc=rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+!\end{verbatim}
+!EOP
  
+!BOP
+! At the end of run method, destroy the clock used to iterate through time:
+!\begin{verbatim}
      call ESMF_ClockDestroy(localclock, rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+!\end{verbatim}
+!EOP
 
 end subroutine coupledflow_run
 
