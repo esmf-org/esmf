@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.14 2010/10/06 16:23:13 feiliu Exp $
+! $Id: CouplerMod.F90,v 1.15 2010/10/08 20:27:57 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -254,7 +254,7 @@
            endif
 
            !print *, "processing field ", trim(datanames(i)), " as needed"
-!BOP
+!BOE
 ! !DESCRIPTION:
 ! \subsubsection{Example of Redist Usage:}
 !
@@ -266,12 +266,12 @@
 !   States, each corresponding to a different subcomponent.  One is
 !   an Export State and the other is an Import State.
 !
-!\begin{verbatim}
+!BOC
            call ESMF_StateGet(importState, datanames(i), srcfield, rc=rc)
            if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
            call ESMF_StateGet(exportState, datanames(i), dstfield, rc=rc)
            if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
+!EOC
 !
 !   The redist routine uses information contained in the Fields and the
 !   Coupler VM object to call the communication routines to move the data.
@@ -280,11 +280,11 @@
 !   saved so the precomputed information can be retained.  The following 
 !   is an example of a Field redist call:
 !
-!\begin{verbatim}
+!BOC
            call ESMF_FieldRedist(srcfield, dstfield, routehandle, rc=rc)
            if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
         enddo
  

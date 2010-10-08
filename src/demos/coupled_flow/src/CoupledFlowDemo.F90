@@ -1,7 +1,7 @@
-! $Id: CoupledFlowDemo.F90,v 1.17 2010/10/08 15:25:43 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.18 2010/10/08 20:27:57 feiliu Exp $
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOE
 !
 ! !MODULE: CoupledFlowDemo.F90 - Top level Gridded Component source
 !
@@ -11,7 +11,7 @@
 !   It contains 2 nested subcomponents and 1 Coupler Component which does 
 !   two-way coupling between the subcomponents.
 !
-!EOP
+!EOE
 !------------------------------------------------------------------------------
 !
 !
@@ -73,24 +73,24 @@
 !
 !EOPI
 
-!BOP
+!BOE
 !  !DESCRIPTION:
 ! \subsubsection{Example of Set Services Usage:}
 !
 !   The following code registers with ESMF 
 !   the subroutines to be called to Init, Run, and Finalize this component.
-!\begin{verbatim}
-        ! Register the callback routines.
+!BOC
+    ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=coupledflow_init, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=coupledflow_run, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=coupledflow_final, rc=rc)
-        if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=coupledflow_init, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=coupledflow_run, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=coupledflow_final, rc=rc)
+    if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
         print *, "CoupledFlowDemo: Registered Initialize, Run, and Finalize routines"
 
     end subroutine
@@ -171,8 +171,8 @@
 
     ! Create the 2 model components and coupler. 
 
-!BOP
-! !DESCRIPTION:
+!BOE
+!
 ! \subsubsection{Example of Component Creation:}
 !
 !   The following code creates 2 Gridded Components on the same set of PETs 
@@ -180,7 +180,7 @@
 !   of the Grids useds by these Components will have a different connectivity.
 !   It also creates a Coupler Component on the same PET set.
 !
-!\begin{verbatim}
+!BOC
     cnameIN = "Injector model"
     INcomp = ESMF_GridCompCreate(name=cnameIN, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
@@ -192,8 +192,8 @@
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
     print *, "Comp Creates finished"
 
@@ -243,17 +243,17 @@
 
     ! print *, minIndex, maxIndex
     ! Injector Flow Grid
-!BOP
+!BOE
 ! Create the Injector Grid:
-!\begin{verbatim}
+!BOC
     gridIN = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ mid, by2 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              gridEdgeLWidth=(/0,0/), &
                              name="Injector grid", rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridSetCoord(gridIN, &
@@ -307,26 +307,26 @@
           coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-!BOP
+!BOE
 ! Set the Injector Grid in the Injector Component:
-!\begin{verbatim}
+!BOC
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
     ! FlowSolver Grid
-!BOP
+!BOE
 ! Create the FlowSolver Grid:
-!\begin{verbatim}
+!BOC
     gridFS = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
                              regDecomp=(/ quart, by4 /), &
                              coordDep1=(/1/), &
                              coordDep2=(/2/), &
                              gridEdgeLWidth=(/0,0/), &
                              name="Flow Solver grid", rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
     call ESMF_GridGetCoord(gridTop, &
@@ -389,34 +389,34 @@
           coordDim=2, array=CoordY, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 
-!BOP
+!BOE
 ! Set the FlowSolver Grid in the FlowSolver Component:
-!\begin{verbatim}
+!BOC
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
     !
     ! Create import/export states for Injection Component
     !
-!BOP
-! !DESCRIPTION:
+!BOE
+!
 ! \subsubsection{Example of State Creation:}
 !
 !   The following code creates Import and Export States for the
 !   Injection subcomponent.  All information being passed between
 !   subcomponents will be described by these States.
 !
-!\begin{verbatim}
+!BOC
     INimp = ESMF_StateCreate(statename="Injection Input", statetype=ESMF_STATE_IMPORT, &
         rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     INexp = ESMF_StateCreate(statename="Injection Feedback", statetype=ESMF_STATE_EXPORT, &
         rc=rc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
     ! 
     ! Initialize the injector component, first phase 
     !
@@ -508,10 +508,10 @@
      integer          :: urc
 
 
-!BOP
+!BOE
 ! Advancing in time with ESMF clock, the coupled flow component calls
 ! the run methods of the gridded components and coupler component sequentially:
-!\begin{verbatim}
+!BOC
      ! Make our own local copy of the clock
      localclock = ESMF_ClockCreate(clock, rc=rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
@@ -556,16 +556,16 @@
      print *, "Run Loop End time"
      call ESMF_ClockPrint(localclock, "currtime string", rc=rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
  
-!BOP
+!BOE
 ! At the end of run method, destroy the clock used to iterate through time:
-!\begin{verbatim}
+!BOC
      call ESMF_ClockDestroy(localclock, rc)
      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
 end subroutine coupledflow_run
 

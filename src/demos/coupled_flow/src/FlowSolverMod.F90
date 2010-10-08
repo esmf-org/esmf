@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.19 2010/10/07 16:08:09 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.20 2010/10/08 20:27:57 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -963,9 +963,9 @@
 !
 ! Update RHOU with Halo
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+!
 ! \subsubsection{Example of FieldHalo Usage:}
 !
 !     The following piece of code provides an example of haloing the data in a
@@ -973,15 +973,16 @@
 !     updated completely; i.e. the user cannot specify halo width or side 
 !     separately.
 !     Field halo uses a Route object to transfer data from the exclusive
-!     computational domain of one DE to the halo region of another.
-!\begin{verbatim}
+!     domain of one DE to the halo region of another.
+!BOC
       call ESMF_FieldHalo(field_rhou, halohandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhou halo"
+        if(present(rc)) rc = status
         return
       endif
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
       do j = jmin, jmax
         do i = imin, imax

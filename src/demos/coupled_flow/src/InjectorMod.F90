@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.15 2010/10/06 15:40:42 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.16 2010/10/08 20:27:57 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -164,7 +164,7 @@
       namelist /input/ on_month, on_day, on_hour, on_min, &
                        off_month, off_day, off_hour, off_min, &
                        in_energy, in_velocity, in_rho
-!BOP
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsection{Namelist Input Parameters for Injector:}
@@ -197,7 +197,7 @@
 !           Density of the injector flow.
 !     \end{description}
 !
-!EOP
+!EOE
       !
       ! Set initial values
       !

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.17 2010/10/08 15:25:43 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.18 2010/10/08 20:27:57 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -194,8 +194,8 @@
 !BOC
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!     And then we set the start time and stop time to input values for the month,
-!     day, and hour (assuming the year to be 2003):
+      !And then we set the start time and stop time to input values for the month,
+      !day, and hour (assuming the year to be 2003):
       call ESMF_TimeSet(startTime, yy=2003, mm=s_month, dd=s_day, &
                         h=s_hour, m=s_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
@@ -203,20 +203,18 @@
       call ESMF_TimeSet(stopTime, yy=2003, mm=e_month, dd=e_day, &
                         h=e_hour, m=e_min, s=0, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!     With the time interval, start time, and stop time set above, the Clock can
-!     now be created:
+      !With the time interval, start time, and stop time set above, the Clock can
+      !now be created:
       clock = ESMF_ClockCreate(timeStep=timeStep, startTime=startTime, &
                                stopTime=stopTime, rc=rc)
       if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
-!     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
-!     current time from the start time by the timestep.
+      !Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
+      !current time from the start time by the timestep.
 !EOC 
 
-!BOE
-      !
-      ! Create the Grid and attach it to the Component
-      !
-!EOE
+!
+! Create the Grid and attach it to the Component:
+!
 
 !BOE
 !
@@ -319,9 +317,9 @@
         coordY(j) = coordY(j-1) + dy
       enddo
 
-!     The Grid can then be attached to the Gridded Component with a set call:
-     call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
-     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
+      !The Grid can then be attached to the Gridded Component with a set call:
+      call ESMF_GridCompSet(compGridded, grid=grid, rc=rc)
+      if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
 !EOC
 
 !------------------------------------------------------------------------------
@@ -414,7 +412,7 @@
       ! reaching their destination files.
 
 !BOC
-! Call ESMF_Finalize at the end of an ESMF application:
+      !Call ESMF_Finalize at the end of an ESMF application:
       call ESMF_Finalize(rc=rc)
 !EOC
 

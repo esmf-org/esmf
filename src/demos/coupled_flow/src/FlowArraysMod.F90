@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.9 2010/10/06 15:40:42 feiliu Exp $
+! $Id: FlowArraysMod.F90,v 1.10 2010/10/08 20:27:57 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -102,7 +102,7 @@
 !
       haloLWidth = 1
       haloUWidth = 1
-!BOP
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsubsection{Example of Field Creation and Array Usage:}
@@ -112,26 +112,26 @@
 !     designates the rank, type, and kind of the data.  First initialize the
 !     ArraySpec with rank 2 for a two-dimensional array
 !     and kind ESMF\_KIND\_R4:
-!\begin{verbatim}
+!BOC
       call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-!\end{verbatim}
+!EOC
 !     Next, create a Field named "SIE" using the ArraySpec with a relative
-!     location (relloc) at the cell centers:
-!\begin{verbatim}
+!     stagger at the cell centers (by default):
+!BOC
       field_sie  = ESMF_FieldCreate(grid, arrayspec, &
                    maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="SIE", rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-!\end{verbatim}
-!     Once the Field has been created, we get a pointer to the Array
-!     data (the Fortran 90 array), and call it "sie".
+!EOC
+!     Once the Field has been created, we get a pointer to
+!     the Fortran 90 array data, and call it "sie".
 !     Inside the Component "sie" can be used like an array made by an
-!     F90 allocation but will reference the data inside "field\_sie."
-!\begin{verbatim}
+!     F90 allocation but will reference the data inside "field_sie."
+!BOC
       call ESMF_FieldGet(field_sie, farrayPtr=sie, rc=status)
       if(status /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=status)
-!\end{verbatim}
-!EOP
+!EOC
+!EOE
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_EDGE1, &
                    maxHaloLWidth=haloLWidth, maxHaloUWidth=haloUWidth, name="U", rc=status)
