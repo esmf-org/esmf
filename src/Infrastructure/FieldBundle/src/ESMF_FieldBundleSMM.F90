@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.14 2010/10/07 23:30:38 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.15 2010/10/08 21:40:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.14 2010/10/07 23:30:38 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.15 2010/10/08 21:40:53 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -302,8 +302,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication 
-! with local factor argument 
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication with factorList arguments
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
@@ -785,7 +784,7 @@ contains
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication with local factor argument 
+! !IROUTINE: ESMF_FieldBundleSMMStore - Precompute a FieldBundle sparse matrix multiplication without factorList arguments
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
