@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.18 2010/04/12 21:31:11 w6ws Exp $
+// $Id: ESMC_Mesh.C,v 1.19 2010/10/08 15:38:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.18 2010/04/12 21:31:11 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.19 2010/10/08 15:38:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -42,19 +42,14 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreate()"
-ESMC_Mesh ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc){
+ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-
+  // Init Mesh
   ESMC_Mesh mesh;
-
-  // Initialize the parallel environment for mesh (if not already done)
   mesh.ptr = NULL;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
-    return mesh; // bail out
 
   // call into ESMCI method
   mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, &localrc);
@@ -71,23 +66,19 @@ ESMC_Mesh ESMC_MeshCreate(int *parametricDim, int *spatialDim, int *rc){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddNodes"
-int ESMC_MeshAddNodes(ESMC_Mesh mesh, int *num_nodes, int *nodeIds,
+int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   double *nodeCoords, int *nodeOwners){
   
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
   
   // call into ESMCI method
-  localrc = mep->addNodes(num_nodes, nodeIds, nodeCoords, nodeOwners);
+  localrc = mep->addNodes(nodeCount, nodeIds, nodeCoords, nodeOwners);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
@@ -101,23 +92,18 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int *num_nodes, int *nodeIds,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddElements()"
-int ESMC_MeshAddElements(ESMC_Mesh mesh, int *num_elems, int *elementIds,
+int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   int *elementTypes, int *elementConn){
    
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
-
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
   
   // call into ESMCI method
-  localrc = mep->addElements(num_elems, elementIds, elementTypes, elementConn);
+  localrc = mep->addElements(elementCount, elementIds, elementTypes, elementConn);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
@@ -137,11 +123,6 @@ int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid,
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
@@ -168,22 +149,13 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+  // Do destroy
+  localrc= MeshCXX::destroy(&((MeshCXX *)mesh->ptr));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+    return rc;  // bail out    
 
-  // typecast into ESMCI type
-  MeshCXX* mep = (MeshCXX*)(mesh->ptr);
-  
-  delete mep; // call MeshCXX destructor
-
-  // invalidate pointer
-  mesh->ptr = NULL;
-    
   // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
+  return ESMF_SUCCESS;
 }
 //--------------------------------------------------------------------------
 
@@ -196,11 +168,6 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
@@ -219,30 +186,18 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetNumNodes()"
-int ESMC_MeshGetNumNodes(ESMC_Mesh mesh, int* num_nodes){
+#define ESMC_METHOD "ESMC_MeshGetLocalNodeCount()"
+int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
   
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
-
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
   
   // call into ESMCI method
-  try{
-    *num_nodes = mep->numNodes();
-    localrc = ESMF_SUCCESS;
-  }catch(...) {
-    localrc = ESMF_FAILURE;
-  }
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  *num_nodes = mep->numNodes();
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -253,30 +208,18 @@ int ESMC_MeshGetNumNodes(ESMC_Mesh mesh, int* num_nodes){
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_MeshGetNumElements()"
-int ESMC_MeshGetNumElements(ESMC_Mesh mesh, int* num_elems){
+#define ESMC_METHOD "ESMC_MeshGetLocalElementCount()"
+int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int* num_elems){
   
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
-
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
   
   // call into ESMCI method
-  try{
-    *num_elems = mep->numElements();
-    localrc = ESMF_SUCCESS;
-  }catch(...) {
-    localrc = ESMF_FAILURE;
-  }
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  *num_elems = mep->numElements();
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -293,11 +236,6 @@ int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
 
   // call into ESMCI method
   localrc = MeshVTKHeader(fname, num_elem, num_node, conn_size);
@@ -321,11 +259,6 @@ int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
-
   // call into ESMCI method
   localrc = MeshVTKBody(fname, nodeId, nodeCoord, nodeOwner, elemId, elemType,
     elemConn);
@@ -347,12 +280,6 @@ int ESMC_MeshWrite(ESMC_Mesh mesh, const char* filename){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
-  // Initialize the parallel environment for mesh (if not already done)
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
-
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);

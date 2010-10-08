@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.h,v 1.11 2010/06/15 23:10:16 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.h,v 1.12 2010/10/08 15:38:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,9 +25,11 @@ namespace ESMCI {
     MeshCXX();
     ~MeshCXX();
 
-    static MeshCXX* create(int*, int*, int*);
-    int addElements(int*, int*, int*, int*);
-    int addNodes(int*, int*, double*, int*);
+    static MeshCXX* create(int, int, int*);
+    static int destroy(MeshCXX **);
+
+    int addElements(int, int*, int*, int*);
+    int addNodes(int, int*, double*, int*);
     std::vector<int> getNodeGIDS();
     int createDistGrids(int*, int*, int*, int*);
     int meshWrite(const char*);

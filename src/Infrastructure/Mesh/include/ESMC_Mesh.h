@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.33 2010/09/29 22:43:38 svasquez Exp $
+// $Id: ESMC_Mesh.h,v 1.34 2010/10/08 15:38:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -47,16 +47,24 @@ typedef struct{
   void *ptr;
 }ESMC_Mesh;
 
+
+// MESH ELEMENT TYPES
+#define ESMC_MESHELEMTYPE_TRI  5
+#define ESMC_MESHELEMTYPE_QUAD 9
+#define ESMC_MESHELEMTYPE_TETRA 10
+#define ESMC_MESHELEMTYPE_HEX  12
+
+
 // Class API
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshAddElements - Add elements to a Mesh
+// !IROUTINE: ESMC_MeshAddElements - Add elements to a Mesh \label{sec:mesh:capi:meshaddelements}
 //
 // !INTERFACE:
 int ESMC_MeshAddElements(
   ESMC_Mesh mesh,           // inout 
-  int *num_elems,           // in
+  int  elementCount,        // in
   int *elementIds,          // in
   int *elementTypes,        // in
   int *elementConn          // in
@@ -68,8 +76,8 @@ int ESMC_MeshAddElements(
 // !DESCRIPTION:
 //   This call is the third and last part of the three part mesh create
 //   sequence and should be called after the mesh is created with {\tt ESMF\_MeshCreate()}
-//   (\ref{sec:mesh:api:meshcreate})
-//   and after the nodes are added with {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes}).
+//   (\ref{sec:mesh:capi:meshcreate})
+//   and after the nodes are added with {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:capi:meshaddnodes}).
 //   This call adds the elements to the
 //   mesh and finalizes the create. After this call the Mesh is usable, for
 //   example a Field may be built on the created Mesh object and
@@ -85,17 +93,17 @@ int ESMC_MeshAddElements(
 //
 //   \begin{description}
 //   \item[mesh]
-//         Mesh object.        
-//   \item[num\_elems]
-//         Description to be added.
-//   \item [elementIds]
+//          Mesh object.        
+//   \item[elementCount]
+//          The number of elements on this PET. 
+//   \item[elementIds]
 //          An array containing the global ids of the elements to be created on this PET.
-//          This input consists of a 1D array the size of the number of elements on this PET.
+//          This input consists of a 1D array of size {\tt elementCount}.
 //   \item[elementTypes]
 //          An array containing the types of the elements to be created on this PET. The types used
 //          must be appropriate for the parametric dimension of the Mesh. Please see
-//          Section ?? for the list of options. This input consists of
-//          a 1D array the size of the number of elements on this PET.
+//          Section~\ref{sec:mesh:opt:elemtype} for the list of options. This 
+//          input consists of a 1D array of size {\tt elementCount}.
 //   \item[elementConn]
 //         An array containing the indexes of the sets of nodes to be connected together to form the
 //         elements to be created on this PET. The entries in this list are NOT node global ids,
@@ -105,7 +113,7 @@ int ESMC_MeshAddElements(
 //         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. passed into the
 //         {\tt ESMC\_MeshAddNodes()} call on this PET. It is also
 //         important to note that the order of the nodes in an element connectivity list
-//         matters. Please see Section ?? for diagrams illustrating
+//         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
 //         the correct order of nodes in a element. This input consists of a 1D array with
 //         a total size equal to the sum of the number of nodes in each element on
 //         this PET. The number of nodes in each element is implied by its element type in
@@ -119,12 +127,12 @@ int ESMC_MeshAddElements(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshAddNodes - Add nodes to a Mesh 
+// !IROUTINE: ESMC_MeshAddNodes - Add nodes to a Mesh \label{sec:mesh:capi:meshaddnodes}
 //
 // !INTERFACE:
 int ESMC_MeshAddNodes(
   ESMC_Mesh mesh,          // inout
-  int *num_nodes,          // in
+  int nodeCount,           // in
   int *nodeIds,            // in
   double *nodeCoords,      // in
   int *nodeOwners          // in
@@ -138,7 +146,7 @@ int ESMC_MeshAddNodes(
 //   sequence and should be called after the mesh's dimensions are set
 //   using {\tt ESMC\_MeshCreate()}.
 //   This call adds the nodes to the
-//   mesh. The next step is to call {\tt ESMC\_MeshAddElements()}.
+//   mesh. The next step is to call {\tt ESMC\_MeshAddElements()} (\ref{sec:mesh:capi:meshcreate}).
 //
 //   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and
 //   {\tt nodeOwners} describe the nodes to be created on this PET.
@@ -150,22 +158,25 @@ int ESMC_MeshAddNodes(
 //   \begin{description}
 //   \item[mesh]
 //     Mesh object.
+//   \item[nodeCount]
+//     The number of nodes on this PET. 
 //   \item [nodeIds]
-//     Description to be added.
+//         An array containing the global ids of the nodes to be created on this PET. 
+//        This input consists of a 1D array the size of the number of nodes on this PET (i.e. {\tt nodeCount}).
 //   \item[nodeCoords]
 //          An array containing the physical coordinates of the nodes to be created on this
-//          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's
-//          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
+//          PET. The coordinates in this array are ordered
 //          so that the coordinates for a node lie in sequence in memory. (e.g. for a
 //          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(0) and
 //          nodeCoords(1), the coordinates for node 2 are in nodeCoords(2) and nodeCoords(3),
-//          etc.).
+//          etc.). This input consists of a 1D array the size of {\tt nodeCount} times the Mesh's
+//          spatial dimension ({\tt spatialDim}).
 //   \item[nodeOwners]
 //         An array containing the PETs that own the nodes to be created on this PET.
 //         If the node is shared with another PET, the value
 //         may be a PET other than the current one. Only nodes owned by this PET
-//         will have PET local entries in a Field created on the Mesh. This input consists of
-//         a 1D array the size of the number of nodes on this PET.
+//         will have PET local entries in a Field created on the Mesh. This 
+//         input consists of a 1D array the size of the number of nodes on this PET (i.e. {\tt nodeCount}).
 //   \end{description}
 //
 //EOP
@@ -173,12 +184,12 @@ int ESMC_MeshAddNodes(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshCreate - Create a Mesh as a 3 step process 
+// !IROUTINE: ESMC_MeshCreate - Create a Mesh as a 3 step process \label{sec:mesh:capi:meshcreate}
 //
 // !INTERFACE:
 ESMC_Mesh ESMC_MeshCreate(
-  int *parametricDim,         // in
-  int *spatialDim,            // in
+  int parametricDim,         // in
+  int spatialDim,            // in
   int *rc                     // out
 );
 // !RETURN VALUE:
@@ -188,8 +199,8 @@ ESMC_Mesh ESMC_MeshCreate(
 //
 //  This call is the first part of the three part mesh create sequence. This call sets the dimension of the elements 
 //  in the mesh ({\tt parametricDim}) and the number of coordinate dimensions in the mesh ({\tt spatialDim}). 
-//  The next step is to call {\tt ESMC\_MeshAddNodes()} (??) to add the nodes and then 
-//  {\tt ESMC\_MeshAddElements(}) (??) 
+//  The next step is to call {\tt ESMC\_MeshAddNodes()} (\ref{sec:mesh:capi:meshaddnodes}) to add the nodes and then 
+//  {\tt ESMC\_MeshAddElements(})  (\ref{sec:mesh:capi:meshaddelements}) 
 //  to add the elements and finalize the mesh. 
 //
 //  The arguments are:
@@ -210,16 +221,16 @@ ESMC_Mesh ESMC_MeshCreate(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
 //
 // !INTERFACE:
 int ESMC_MeshCreateDistGrids(
   ESMC_Mesh mesh,             // in
-  int* nodeDistGrid,          // in
-  int* elemDistGrid,          // in
-  int *num_nodes,             // in
-  int *num_elements           // in
+  int *nodeDistGrid,          // in
+  int *elemDistGrid,          // in
+  int *nodeCount,             // in
+  int *elementCount           // in
 );
 
 // !RETURN VALUE:
@@ -237,13 +248,13 @@ int ESMC_MeshCreateDistGrids(
 //  Description to be added.
 //  \item[elemDistGrid]
 //  Description to be added.
-//  \item[num\_nodes]
+//  \item[nodeCount]
 //  Description to be added.
-//  \item[num\_elements]
+//  \item[elementCount]
 //  Description to be added.
 //  \end{description}
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -286,8 +297,8 @@ int ESMC_MeshFreeMemory(
 // !DESCRIPTION:
 //    This call removes the portions of {\tt mesh} which contain connection and coordinate
 //    information. After this call, Fields build on {\tt mesh} will no longer be usable
-//    as part of an {\tt ESMC\_FieldRegridStore()} operation. However, after this call
-//    Fields built on {\tt mesh} can still be used in an {\tt ESMC\_FieldRegrid()}
+//    as part of an {\tt ESMF\_FieldRegridStore()} operation. However, after this call
+//    Fields built on {\tt mesh} can still be used in an {\tt ESMF\_FieldRegrid()}
 //    operation if the routehandle was generated beforehand. New Fields may also
 //    be built on {\tt mesh} after this call.
 //
@@ -302,12 +313,12 @@ int ESMC_MeshFreeMemory(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetNumElements - Get the number of elements in a mesh
+// !IROUTINE: ESMC_MeshGetLocalElementCount - Get the number of elements in a mesh owned by the current PET.
 //
 // !INTERFACE:
-int ESMC_MeshGetNumElements(
+int ESMC_MeshGetLocalElementCount(
   ESMC_Mesh mesh,           // in
-  int* num_elems            // out
+  int *elementCount         // out
 );
 
 // !RETURN VALUE:
@@ -315,26 +326,26 @@ int ESMC_MeshGetNumElements(
 //
 //
 // !DESCRIPTION:
-// Query the number of elements in a mesh.
+// Query the number of elements in a mesh owned by the local PET.
 // The arguments are:
 // \begin{description}
 // \item[mesh]
 //     The mesh
-//  \item[num\_elems]
-//     The number of elements in the meah.
-//   \end{description}
+// \item[elementCount]
+//     The number of elements on this PET. 
+// \end{description}
 //
 //EOP
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetNumNodes - Get the number of nodes in a mesh
+// !IROUTINE: ESMC_MeshGetLocalNodeCount - Get the number of nodes in a mesh owned by the current PET.
 //
 // !INTERFACE:
-int ESMC_MeshGetNumNodes(
+int ESMC_MeshGetLocalNodeCount(
   ESMC_Mesh mesh,          // in
-  int* num_nodes           // out
+  int *nodeCount           // out
 );
 
 // !RETURN VALUE:
@@ -342,14 +353,14 @@ int ESMC_MeshGetNumNodes(
 //
 //
 // !DESCRIPTION:
-// Query the number of nodes in a mesh.
+// Query the number of nodes in a mesh owned by the local PET.
 // The arguments are:
 // \begin{description}
 // \item[mesh]
 //     The mesh
-//  \item[num\_nodes]
-//     The number of nodes in the mesh.
-//  \end{description}
+// \item[nodeCount]
+//     The number of nodes on this PET. 
+// \end{description}
 //
 //EOP
 //------------------------------------------------------------------------------
@@ -411,9 +422,6 @@ int ESMC_MeshVTKBody(
 );
 //EOPI
 
-// Associated enum types
-typedef enum {ESMC_MESHELEMENT_QUAD=0, ESMC_MESHELEMENT_TRI=1,
-  ESMC_MESHELEMENT_HEX=2, ESMC_MESHELEMENT_TET=3} ESMF_MeshElement;
 
 #if defined (__cplusplus)
 } // extern "C"

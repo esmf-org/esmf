@@ -1,4 +1,4 @@
-% $Id: Mesh_crefdoc.ctex,v 1.5 2010/09/24 22:56:57 theurich Exp $
+% $Id: Mesh_crefdoc.ctex,v 1.6 2010/10/08 15:38:51 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,16 +50,16 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Mesh_desc}
+\input{Mesh_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Mesh/doc/Mesh_desc}
+\input{../Infrastructure/Mesh/doc/Mesh_cdesc}
 #endif
 
-%\subsection{Mesh Options}
+\subsection{Mesh Options}
 #ifdef STANDALONE
-%\input{Mesh_options}
+\input{Mesh_coptions}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Mesh/doc/Mesh_options}
+\input{../Infrastructure/Mesh/doc/Mesh_coptions}
 #endif
 
 %\subsection{Use and Examples}

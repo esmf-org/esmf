@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.46 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.47 2010/10/08 15:38:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.46 2010/09/17 03:13:32 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.47 2010/10/08 15:38:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -357,7 +357,12 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 
       int seq = ni->get_data_index();
 
-      ThrowRequire(seq < num_nodes);
+      if (seq >= num_nodes){
+	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+	   "- seq is larger or equal to num_nodes", &localrc);
+	return localrc;
+      }
+      
 
       all_nodes[seq] = &*ni;
 
@@ -369,7 +374,6 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
     for (int e = 0; e < *num_elems; ++e) {
 
     // Get/deduce the element topology
-    //printf("mesh.spatial_dim() = %d\n", mesh.spatial_dim() );
     const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
 
     int nnodes = topo->num_nodes;

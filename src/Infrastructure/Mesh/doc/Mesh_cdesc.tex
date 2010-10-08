@@ -1,4 +1,4 @@
-% $Id: Mesh_desc.tex,v 1.4 2010/10/08 15:38:51 oehmke Exp $
+% $Id: Mesh_cdesc.tex,v 1.1 2010/10/08 15:38:51 oehmke Exp $
 
 Unstructured grids are commonly used in the computational solution of Partial Differential equations.  These are especially useful for problems that involve complex geometry, where using the less flexible structured grids can
 result in grid representation of regions where no computation is needed.  Finite
@@ -6,15 +6,15 @@ element and finite volume methods map naturally to unstructured grids and are us
 in hydrology, ocean modeling, and many other applications.
 
 In order to provide support for application codes using unstructured grids, the ESMF library provides a class for representing 
-unstructured grids called the {\bf Mesh}. Fields can be created on a Mesh to hold data. Fields created on a Mesh can also be used 
-as either the source or destination or both of an interpolaton (i.e. an {\tt ESMF\_FieldRegridStore()} call) in ESMF allowing data to be 
-moved to or from or between unstructured grids. This section describes the Mesh and how to create and use them in ESMF. 
+unstructured grids called the {\bf Mesh}. Fields can be created on a Mesh to hold data. In Fortran, Fields created on a Mesh can also be used 
+as either the source or destination or both of an interpolaton (i.e. an {\tt ESMF\_FieldRegridStore()} call). This capability is currently
+not supported with the C interface, however, if the C Field is passed via a State to a component written in Fortran then the regridding
+can be performed there. The rest of this section describes the Mesh class and how to create and use them in ESMF. 
 
 \subsubsection{Mesh Representation in ESMF}
 
 A Mesh in ESMF is described in terms of {\bf nodes} and {\bf elements}. A node is a point in space which represents where the coordinate 
-information in a Mesh is located. An element is a higher dimensional shape constructed of nodes. Elements give a Mesh its shape and define 
-the relationship of the nodes to one another. Field data may be located on a Mesh's nodes or it's elements. 
+information in a Mesh is located. An element is a higher dimensional shape constructed of nodes. Elements give a Mesh its shape and define the relationship of the nodes to one another. Field data may be located on a Mesh's nodes or it's elements. 
 
 \subsubsection{Supported Meshes}
 

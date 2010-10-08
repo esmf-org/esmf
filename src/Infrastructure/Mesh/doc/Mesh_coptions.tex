@@ -1,0 +1,80 @@
+% $Id: Mesh_coptions.tex,v 1.1 2010/10/08 15:38:51 oehmke Exp $
+
+\subsubsection{ESMC\_MeshElemType}
+\label{sec:mesh:opt:elemtype}
+
+ {\sf DESCRIPTION:\\}
+ An ESMF Mesh can be constructed from a combination of different elements. The type of elements that can
+be used in a Mesh depends on the Mesh's parameteric dimension, which is set during Mesh creation. The
+following are the valid Mesh element types for each valid Mesh parametric dimension (2D or 3D) .
+
+\medskip
+
+\begin{verbatim}
+
+                     3                          4 ---------- 3
+                    / \                         |            |  
+                   /   \                        |            |
+                  /     \                       |            |
+                 /       \                      |            |
+                /         \                     |            |
+               1 --------- 2                    1 ---------- 2
+
+           ESMC_MESHELEMTYPE_TRI            ESMC_MESHELEMTYPE_QUAD
+
+     2D element types (numbers are the order for elementConn during Mesh create)
+
+\end{verbatim}
+
+For a Mesh with parametric dimension of 2 the valid element types (illustrated above) are:
+
+\smallskip
+
+\begin{tabular}{|l|c|l|}
+\hline
+Element Type &  Number of Nodes  & Description \\
+\hline
+ESMC\_MESHELEMTYPE\_TRI  & 3 & A triangle \\
+ESMC\_MESHELEMTYPE\_QUAD & 4 & A quadrilateral (e.g. a rectangle) \\
+\hline
+\end{tabular}
+
+\medskip
+\medskip
+
+\begin{verbatim}
+                                            
+                 3                               8---------------7
+                /|\                             /|              /|
+               / | \                           / |             / |
+              /  |  \                         /  |            /  |
+             /   |   \                       /   |           /   |
+            /    |    \                     5---------------6    |
+           4-----|-----2                    |    |          |    |
+            \    |    /                     |    4----------|----3
+             \   |   /                      |   /           |   /
+              \  |  /                       |  /            |  /
+               \ | /                        | /             | /
+                \|/                         |/              |/
+                 1                          1---------------2
+
+       ESMC_MESHELEMTYPE_TETRA             ESMC_MESHELEMTYPE_HEX  
+
+  3D element types (numbers are the order for elementConn during Mesh create)
+
+\end{verbatim}
+
+For a Mesh with parametric dimension of 3 the valid element types (illustrated above) are:
+
+\smallskip
+
+\begin{tabular}{|l|c|l|}
+\hline
+Element Type & Number of Nodes & Description \\
+\hline
+ESMC\_MESHELEMTYPE\_TETRA & 4 & A tetrahedron (CAN'T BE USED IN REGRID) \\
+ESMC\_MESHELEMTYPE\_HEX  & 8 & A hexahedron (e.g. a cube) \\
+\hline
+\end{tabular}
+
+
