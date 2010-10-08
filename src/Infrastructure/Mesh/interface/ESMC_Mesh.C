@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.19 2010/10/08 15:38:51 oehmke Exp $
+// $Id: ESMC_Mesh.C,v 1.20 2010/10/08 16:30:36 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.19 2010/10/08 15:38:51 oehmke Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.20 2010/10/08 16:30:36 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -149,10 +149,16 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // Get MeshCXX pointer
+  MeshCXX *mep=(MeshCXX *)mesh->ptr;
+
   // Do destroy
-  localrc= MeshCXX::destroy(&((MeshCXX *)mesh->ptr));
+  localrc= MeshCXX::destroy(&mep);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out    
+
+  // Set to NULL
+  mesh->ptr=NULL;
 
   // return successfully
   return ESMF_SUCCESS;
