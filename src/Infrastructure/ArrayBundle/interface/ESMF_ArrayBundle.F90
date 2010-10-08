@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.31 2010/10/08 21:41:59 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.32 2010/10/08 22:28:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.31 2010/10/08 21:41:59 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.32 2010/10/08 22:28:55 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1583,7 +1583,7 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with factorList arguments
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1688,7 +1688,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreI4()"
 !BOPI
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with factorList arguments
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication with local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
@@ -1952,7 +1952,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSMMStoreNF()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication without factorList arguments
+! !IROUTINE: ESMF_ArrayBundleSMMStore - Precompute an ArrayBundle sparse matrix multiplication without local factors
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
