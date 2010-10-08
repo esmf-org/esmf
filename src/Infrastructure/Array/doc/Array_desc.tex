@@ -1,7 +1,25 @@
-% $Id: Array_desc.tex,v 1.6 2008/05/21 22:14:17 theurich Exp $
+% $Id: Array_desc.tex,v 1.7 2010/10/08 22:45:35 rokuingh Exp $
 
-The Array class is an alternative to the Field class for representing distributed, structured data.  Unlike Fields, which are built to carry grid coordinate information, Arrays can only carry information about the {\it indices} associated with grid cells.  Since they do not have coordinate information, Arrays cannot be used to calculate interpolation weights.  However, if the user can supply interpolation weights (using a package such as SCRIP), the Array sparse matrix multiply operation can be used to apply the weights and transfer data to the new grid.  Arrays can also perform redistribution, scatter, and gather operations.
+The Array class is an alternative to the Field class for representing 
+distributed, structured data.  Unlike Fields, which are built to carry 
+grid coordinate information, Arrays can only carry information about the 
+{\it indices} associated with grid cells.  Since they do not have coordinate 
+information, Arrays cannot be used to calculate interpolation weights.  
+However, if the user can supply interpolation weights, the Array sparse 
+matrix multiply operation can be used to apply the weights and transfer 
+data to the new grid.  Arrays can also perform redistribution, scatter, 
+and gather communication operations.
 
-Like Fields, Arrays can be added to a State and used in inter-component data communications.  Arrays can also be grouped together into ArrayBundles so that collective operations can be performed on the whole group.  One motivation for this is convenience; another is the ability to schedule optimized, collective data transfers.   
+Like Fields, Arrays can be added to a State and used in inter-Component 
+data communications.  Arrays can also be grouped together into ArrayBundles 
+so that collective operations can be performed on the whole group.  One 
+motivation for this is convenience; another is the ability to schedule 
+optimized, collective data transfers.   
 
-From a technical standpoint, the {\tt ESMF\_Array} class is an index space based, distributed data storage class. It provides DE-local memory allocations within DE-centric index regions and defines the relationship to the index space described by DistGrid. The Array class offers common communication patterns within the index space formalism. As part of the ESMF index space layer Array has close relationship to the DistGrid and DELayout classes.
+From a technical standpoint, the {\tt ESMF\_Array} class is an index space 
+based, distributed data storage class. It provides DE-local memory allocations 
+within DE-centric index regions and defines the relationship to the index 
+space described by the {\tt ESMF\_DistGrid}. The Array class offers common 
+communication patterns within the index space formalism. As part of the ESMF 
+index space layer, Array has close relationship to the DistGrid and DELayout 
+classes.
