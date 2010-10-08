@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.206 2010/10/07 18:32:35 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.207 2010/10/08 17:39:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@ module ESMF_StateMod
 #include "ESMF.h"
 
 #define ESMF_ENABLESTATENEEDED
-! define ESMF_ENABLENAMEMAP
+! #define ESMF_ENABLENAMEMAP
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateMod - Data exchange between components
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.206 2010/10/07 18:32:35 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.207 2010/10/08 17:39:14 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -6069,10 +6069,11 @@ module ESMF_StateMod
           type(ESMF_StateItem), pointer, optional   :: litem
 
           type(ESMF_StateClass), pointer  :: sp_local
+          integer       :: i1
           integer       :: lrc
 #if !defined (ESMF_ENABLENAMEMAP)
 	  type(ESMF_StateItem), pointer :: nextitem1
-	  integer :: i1, dcount1
+	  integer :: dcount1
 #endif
 
 !          print *, 'find_nested_item_worker: entered'
