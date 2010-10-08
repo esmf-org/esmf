@@ -1,4 +1,4 @@
-% $Id: FieldBundle_usage.tex,v 1.3 2008/05/21 22:14:29 theurich Exp $
+% $Id: FieldBundle_usage.tex,v 1.4 2010/10/08 17:38:33 rokuingh Exp $
 
 %\subsection{Use and Examples}
 
@@ -6,7 +6,7 @@ Examples of creating, destroying and accessing FieldBundles and their
 constituent Fields are provided in this section, along with some
 notes on FieldBundle methods.
 
-\subsubsection{FieldBundle Creation}
+\subsubsection{FieldBundle Ccreation}
 
 After creating multiple Fields, a FieldBundle
 can be created by passing a list of the Fields into the 
@@ -14,14 +14,14 @@ method {\tt ESMF\_FieldBundleCreate()}.  The FieldBundle will contain
 references to the Fields.  An empty FieldBundle can also be created
 and Fields added one at a time or in groups.
 
-\subsubsection{Accessing FieldBundle Data}
+\subsubsection{Accessing FieldBundle data}
 
 To access data in a FieldBundle the user can provide a Field
 name and retrieve the Field's Fortran data pointer.  Alternatively,
 the user can retrieve the data in the form of an ESMF 
 Field and use the Field-level interfaces.
 
-\subsubsection{FieldBundle Deletion}
+\subsubsection{FieldBundle deletion}
 
 The user must call {\tt ESMF\_FieldBundleDestroy()} before 
 deleting any of the Fields it contains.  Because Fields
