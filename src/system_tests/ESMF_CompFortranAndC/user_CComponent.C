@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.12 2009/10/26 23:15:26 theurich Exp $
+// $Id: user_CComponent.C,v 1.13 2010/10/08 15:39:45 oehmke Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -70,7 +70,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   printf("local ptr[0] = %g\n", ptr[0]);
   
   // Create a Mesh from VTK file
-  mesh = ESMC_MeshCreate(&pdim, &sdim, rc);
+  mesh = ESMC_MeshCreate(pdim, sdim, rc);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Read input files' header data
@@ -97,11 +97,11 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   }
   
   // Add node information to the mesh
-  *rc = ESMC_MeshAddNodes(mesh, &num_node, nodeId, nodeCoord, nodeOwner);
+  *rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Add element information to the mesh
-  *rc = ESMC_MeshAddElements(mesh, &num_elem, elemId, elemType, elemConn);
+  *rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // garbage collection of temporary variables used to create Mesh object
