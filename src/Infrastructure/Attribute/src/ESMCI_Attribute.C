@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.81 2010/10/09 03:03:19 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.82 2010/10/09 03:46:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.81 2010/10/09 03:03:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.82 2010/10/09 03:46:09 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4822,23 +4822,23 @@ namespace ESMCI {
   localrc = io_xml->writeStartElement("modelComponent", "", indent, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
-  if (attpack->AttributeIsSet("ComponentShortName")) {
-    localrc = attpack->AttributeGet("ComponentShortName", &value);
+  if (attpack->AttributeIsSet("ShortName")) {
+    localrc = attpack->AttributeGet("ShortName", &value);
     localrc = io_xml->writeElement("shortName", value, ++indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("ComponentLongName")) {
-    localrc = attpack->AttributeGet("ComponentLongName", &value);
+  if (attpack->AttributeIsSet("LongName")) {
+    localrc = attpack->AttributeGet("LongName", &value);
     localrc = io_xml->writeElement("longName", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("ComponentDescription")) {
-    localrc = attpack->AttributeGet("ComponentDescription", &value);
+  if (attpack->AttributeIsSet("Description")) {
+    localrc = attpack->AttributeGet("Description", &value);
     localrc = io_xml->writeElement("description", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
 
-  localrc = io_xml->writeElement("componentProperties", "", indent, 0);
+  localrc = io_xml->writeElement("componentProperties", "", ++indent, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeElement("numericalProperties", "", indent, 0);
@@ -5050,9 +5050,9 @@ namespace ESMCI {
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("MachineName") &&
-      attpack->AttributeIsSet("MachineCompiler")) {
+      attpack->AttributeIsSet("CompilerName")) {
     localrc = attpack->AttributeGet("MachineName", &machineName);
-    localrc = attpack->AttributeGet("MachineCompiler", &compilerName);
+    localrc = attpack->AttributeGet("CompilerName", &compilerName);
     localrc = io_xml->writeElement("shortName", machineName + compilerName, 4, 0);
     localrc = io_xml->writeElement("longName", "Machine " + machineName +
                                    " and compiler " + compilerName, 4, 0);
@@ -5071,8 +5071,8 @@ namespace ESMCI {
     localrc = io_xml->writeElement("machineName", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineHardwareType")) {
-    localrc = attpack->AttributeGet("MachineHardwareType", &value);
+  if (attpack->AttributeIsSet("MachineSystem")) {
+    localrc = attpack->AttributeGet("MachineSystem", &value);
     localrc = io_xml->writeElement("machineSystem", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
@@ -5104,22 +5104,22 @@ namespace ESMCI {
     localrc = io_xml->writeElement("machineCoresPerProcessor", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineProcessor")) {
-    localrc = attpack->AttributeGet("MachineProcessor", &value);
+  if (attpack->AttributeIsSet("MachineProcessorType")) {
+    localrc = attpack->AttributeGet("MachineProcessorType", &value);
     localrc = io_xml->writeElement("machineProcessorType", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
 
   localrc = io_xml->writeEndElement("machine", 4);
 
-  if (attpack->AttributeIsSet("MachineCompiler")) {
-    localrc = attpack->AttributeGet("MachineCompiler", &value);
+  if (attpack->AttributeIsSet("CompilerName")) {
+    localrc = attpack->AttributeGet("CompilerName", &value);
     localrc = io_xml->writeStartElement("compiler", "", 4, 0);
     localrc = io_xml->writeElement("compilerName", value, 5, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
-  if (attpack->AttributeIsSet("MachineCompilerVersion")) {
-    localrc = attpack->AttributeGet("MachineCompilerVersion", &value);
+  if (attpack->AttributeIsSet("CompilerVersion")) {
+    localrc = attpack->AttributeGet("CompilerVersion", &value);
     localrc = io_xml->writeElement("compilerVersion", value, 5, 0);
     localrc = io_xml->writeEndElement("compiler", 4);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5181,25 +5181,32 @@ namespace ESMCI {
     localrc = io_xml->writeStartElement("gmd:CI_ResponsibleParty", "", ++indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
-    // only output if set by user
-    if (attpack->AttributeIsSet("OrganizationName")) {
-      localrc = attpack->AttributeGet("OrganizationName", &value);
-      localrc = io_xml->writeStartElement("gmd:organisationName", "", ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      localrc = io_xml->writeEndElement("gmd:organisationName", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-    } else if (attpack->AttributeIsSet("IndividualName")) {
-      // default output is IndividualName
-      localrc = attpack->AttributeGet("IndividualName", &value);
-      localrc = io_xml->writeStartElement("gmd:individualName", "", ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      localrc = io_xml->writeEndElement("gmd:individualName", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
+      localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
+      if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
+      if (value == "center" || value == "funder") {
+        if (attpack->AttributeIsSet("Name")) {
+          localrc = attpack->AttributeGet("Name", &value);
+          localrc = io_xml->writeStartElement("gmd:organisationName", "", ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeEndElement("gmd:organisationName", --indent);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        }
+      } else if (value == "PI" || value == "author" || value == "contact") {
+        if (attpack->AttributeIsSet("Name")) {
+          localrc = attpack->AttributeGet("Name", &value);
+          localrc = io_xml->writeStartElement("gmd:individualName", "", ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeEndElement("gmd:individualName", --indent);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        }
+      }
     }
+
     // contactInfo header
     localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5276,7 +5283,7 @@ namespace ESMCI {
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
       localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
-      transform(value.begin(), value.end(), value.begin(), ::tolower);
+      if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
       if (value == "center") value = "centre";
       localrc = io_xml->writeStartElement("gmd:role", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5294,8 +5301,8 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
     // get initials from IndividualName
-    if (attpack->AttributeIsSet("IndividualName")) {
-      localrc = attpack->AttributeGet("IndividualName", &value);
+    if (attpack->AttributeIsSet("Name")) {
+      localrc = attpack->AttributeGet("Name", &value);
       char s[2*ESMF_MAXSTR], abbr[ESMF_MAXSTR], *p;
       int i;
       strcpy(s, value.c_str());
@@ -5357,8 +5364,8 @@ namespace ESMCI {
     localrc = io_xml->writeStartElement("gmd:CI_Citation", "", ++indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
-    if (attpack->AttributeIsSet("CitationShortTitle")) {
-      localrc = attpack->AttributeGet("CitationShortTitle", &value);
+    if (attpack->AttributeIsSet("ShortTitle")) {
+      localrc = attpack->AttributeGet("ShortTitle", &value);
       localrc = io_xml->writeStartElement("gmd:title", "", ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -5366,13 +5373,13 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:title", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     }
-    if (attpack->AttributeIsSet("CitationDate")) {
-      localrc = attpack->AttributeGet("CitationDate", &value);
+    if (attpack->AttributeIsSet("Date")) {
+      localrc = attpack->AttributeGet("Date", &value);
       localrc = io_xml->writeElement("gmd:date", value, indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     }
-    if (attpack->AttributeIsSet("CitationPresentationForm")) {
-      localrc = attpack->AttributeGet("CitationPresentationForm", &value);
+    if (attpack->AttributeIsSet("PresentationForm")) {
+      localrc = attpack->AttributeGet("PresentationForm", &value);
       localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", "", ++indent,
@@ -5382,8 +5389,8 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     }
-    if (attpack->AttributeIsSet("CitationDOI")) {
-      localrc = attpack->AttributeGet("CitationDOI", &value);
+    if (attpack->AttributeIsSet("DOI")) {
+      localrc = attpack->AttributeGet("DOI", &value);
       localrc = io_xml->writeStartElement("gmd:otherCitationDetails", "", 
                                           indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5392,8 +5399,8 @@ namespace ESMCI {
       localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     }
-    if (attpack->AttributeIsSet("CitationLongTitle")) {
-      localrc = attpack->AttributeGet("CitationLongTitle", &value);
+    if (attpack->AttributeIsSet("LongTitle")) {
+      localrc = attpack->AttributeGet("LongTitle", &value);
       localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -5449,14 +5456,14 @@ namespace ESMCI {
             attpack->attrObject.compare("field")==0)) {
         continue; // skip non-CIM fields
       } else {
-        if (attpack->AttributeIsSet("InputType")) {
-          localrc = attpack->AttributeGet("InputType", &value);
-          localrc = io_xml->writeStartElement("coupling", "", 4, 2,
+        if (attpack->AttributeIsSet("CouplingPurpose")) {
+          localrc = attpack->AttributeGet("CouplingPurpose", &value);
+          localrc = io_xml->writeStartElement("coupling", "", 5, 2,
                        "fullySpecified", "false", "purpose", value.c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
         }
-        if (attpack->AttributeIsSet("InputFrequency")) {
-          localrc = attpack->AttributeGet("InputFrequency", &value);
+        if (attpack->AttributeIsSet("Frequency")) {
+          localrc = attpack->AttributeGet("Frequency", &value);
           char s[2*ESMF_MAXSTR], *freq, *units;
           strcpy(s, value.c_str());
           freq = strtok(s, " ");
@@ -5471,48 +5478,48 @@ namespace ESMCI {
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
             return ESMF_FAILURE;
           }
-          localrc = io_xml->writeStartElement("timeProfile", "", 5, 1, "units", units);
-          localrc = io_xml->writeElement("rate", freq, 6, 0);
-          localrc = io_xml->writeEndElement("timeProfile", 5);
+          localrc = io_xml->writeStartElement("timeProfile", "", 6, 1, "units", units);
+          localrc = io_xml->writeElement("rate", freq, 7, 0);
+          localrc = io_xml->writeEndElement("timeProfile", 6);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
         }
-        if (attpack->AttributeIsSet("InputSpatialRegriddingMethod")) {
-          localrc = attpack->AttributeGet("InputSpatialRegriddingMethod", &value);
-          localrc = io_xml->writeStartElement("spatialRegridding", "", 5, 1,
+        if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
+          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value);
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 6, 1,
                                               value.c_str(), "true");
         }
-        if (attpack->AttributeIsSet("InputSpatialRegriddingType")) {
-          localrc = attpack->AttributeGet("InputSpatialRegriddingType", &value);
-          localrc = io_xml->writeElement("spatialRegriddingOrder", value, 6, 0);
-          localrc = io_xml->writeEndElement("spatialRegridding", 5);
+        if (attpack->AttributeIsSet("SpatialRegriddingType")) {
+          localrc = attpack->AttributeGet("SpatialRegriddingType", &value);
+          localrc = io_xml->writeElement("spatialRegriddingOrder", value, 7, 0);
+          localrc = io_xml->writeEndElement("spatialRegridding", 6);
         }
-        if (attpack->AttributeIsSet("InputTimeTransformationType")) {
-          localrc = attpack->AttributeGet("InputTimeTransformationType", &value);
-          localrc = io_xml->writeStartElement("timeTransformation", "", 5, 0);
-          localrc = io_xml->writeElement("mappingType", "", 6, 1,
+        if (attpack->AttributeIsSet("TimeTransformationType")) {
+          localrc = attpack->AttributeGet("TimeTransformationType", &value);
+          localrc = io_xml->writeStartElement("timeTransformation", "", 6, 0);
+          localrc = io_xml->writeElement("mappingType", "", 7, 1,
                                          "value", value.c_str());
-          localrc = io_xml->writeEndElement("timeTransformation", 5);
+          localrc = io_xml->writeEndElement("timeTransformation", 6);
         }
-        if (attpack->AttributeIsSet("InputTargetComponent")) {
-          localrc = attpack->AttributeGet("InputTargetComponent", &value);
-          localrc = io_xml->writeStartElement("couplingTarget", "", 5, 0);
-          localrc = io_xml->writeStartElement("reference", "", 6, 0);
-          localrc = io_xml->writeElement("name", value, 7, 0);
-          localrc = io_xml->writeEndElement("reference", 6);
-          localrc = io_xml->writeEndElement("couplingTarget", 5);
-        }
-        if ((ap = attpack->AttPackGetAttribute("VariableShortName")) != NULL) {
-          localrc = ap->parent->AttributeGet("VariableShortName", &value);
-          localrc = io_xml->writeStartElement("connection", "", 5, 0);
-          localrc = io_xml->writeStartElement("connectionTarget", "", 6, 0);
+        if (attpack->AttributeIsSet("TargetComponent")) {
+          localrc = attpack->AttributeGet("TargetComponent", &value);
+          localrc = io_xml->writeStartElement("couplingTarget", "", 6, 0);
           localrc = io_xml->writeStartElement("reference", "", 7, 0);
           localrc = io_xml->writeElement("name", value, 8, 0);
           localrc = io_xml->writeEndElement("reference", 7);
-          localrc = io_xml->writeEndElement("connectionTarget", 6);
-          localrc = io_xml->writeEndElement("connection", 5);
+          localrc = io_xml->writeEndElement("couplingTarget", 6);
+        }
+        if ((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) {
+          localrc = ap->parent->AttributeGet("ShortName", &value);
+          localrc = io_xml->writeStartElement("connection", "", 6, 0);
+          localrc = io_xml->writeStartElement("connectionTarget", "", 7, 0);
+          localrc = io_xml->writeStartElement("reference", "", 8, 0);
+          localrc = io_xml->writeElement("name", value, 9, 0);
+          localrc = io_xml->writeEndElement("reference", 8);
+          localrc = io_xml->writeEndElement("connectionTarget", 7);
+          localrc = io_xml->writeEndElement("connection", 6);
         }
 
-        localrc = io_xml->writeEndElement("coupling", 4);
+        localrc = io_xml->writeEndElement("coupling", 5);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
       }
     }
