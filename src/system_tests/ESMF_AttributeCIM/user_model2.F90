@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.6 2010/09/28 05:56:53 eschwab Exp $
+! $Id: user_model2.F90,v 1.7 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,10 +113,10 @@ module user_model2
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttributeSet(comp, 'ComponentShortName', &
+    call ESMF_AttributeSet(comp, 'ShortName', &
       'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'ComponentLongName', &
+    call ESMF_AttributeSet(comp, 'LongName', &
       'Atmospheric chemistry component of HiGEM', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
@@ -125,7 +125,7 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Principal Investigator)
-    call ESMF_AttributeSet(comp, 'IndividualName', &
+    call ESMF_AttributeSet(comp, 'Name', &
       'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
@@ -135,7 +135,7 @@ module user_model2
       'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'author', &
+      'PI', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -151,29 +151,29 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! OH CF-Extended Attributes
-    call ESMF_AttributeSet(OH, 'VariableShortName', 'OH_Conc_1900', &
+    call ESMF_AttributeSet(OH, 'ShortName', 'OH_Conc_1900', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'VariableStandardName', 'OH_Concentrations', &
+    call ESMF_AttributeSet(OH, 'StandardName', 'OH_Concentrations', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'VariableLongName', 'seasonal_oxidant_conc', &
+    call ESMF_AttributeSet(OH, 'LongName', 'seasonal_oxidant_conc', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'VariableUnits', 'unknown', &
+    call ESMF_AttributeSet(OH, 'Units', 'unknown', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! OH CIM Attributes
-    call ESMF_AttributeSet(OH, 'InputType', 'boundaryCondition', &
+    call ESMF_AttributeSet(OH, 'CouplingPurpose', 'boundaryCondition', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'InputTargetComponent', 'HiGEM_AtmosChem', &
+    call ESMF_AttributeSet(OH, 'CouplingTarget', 'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'InputSpatialRegriddingMethod', &
+    call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
                                'conservativeSpatialRegridding', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'InputSpatialRegriddingType', 'TBD', &
+    call ESMF_AttributeSet(OH, 'SpatialRegriddingType', 'TBD', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'InputFrequency', '15 minutes', &
+    call ESMF_AttributeSet(OH, 'Frequency', '15 minutes', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'InputTimeTransformationType', &
+    call ESMF_AttributeSet(OH, 'TimeTransformationType', &
                                'TimeInterpolation', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -184,22 +184,22 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Orog CF-Extended Attributes
-    call ESMF_AttributeSet(Orog, 'VariableShortName', 'UM_Orog_n320', &
+    call ESMF_AttributeSet(Orog, 'ShortName', 'UM_Orog_n320', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'VariableStandardName', 'Height', &
+    call ESMF_AttributeSet(Orog, 'StandardName', 'Height', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'VariableLongName', 'Orography', &
+    call ESMF_AttributeSet(Orog, 'LongName', 'Orography', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'VariableUnits', 'unknown', &
+    call ESMF_AttributeSet(Orog, 'Units', 'unknown', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Orog CIM Attributes
-    call ESMF_AttributeSet(Orog, 'InputType', 'initialCondition', &
+    call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'initialCondition', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'InputTargetComponent', 'HiGEM_Atmos', &
+    call ESMF_AttributeSet(Orog, 'CouplingTarget', 'HiGEM_Atmos', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'InputTimeTransformationType', 'Exact', &
+    call ESMF_AttributeSet(Orog, 'TimeTransformationType', 'Exact', &
         convention=convCIM, purpose=purpField, rc=rc)
    
     ! Create a FieldBundle for the two Fields

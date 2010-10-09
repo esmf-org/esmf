@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.22 2010/09/16 20:49:43 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.23 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -242,10 +242,10 @@ module ESMF_AttributeUpdateMod
     convCC = 'CustomConvention'
     convESMF = 'ESMF'
     purpGen = 'General'
-    name1 = 'VariableShortName'
-    name2 = 'VariableStandardName'
-    name3 = 'VariableLongName'
-    name4 = 'VariableUnits'
+    name1 = 'ShortName'
+    name2 = 'StandardName'
+    name3 = 'LongName'
+    name4 = 'Units'
  
     value1 = 'DPEDT'
     value2 = 'tendency_of_air_pressure'
@@ -597,9 +597,9 @@ module ESMF_AttributeUpdateMod
 
     convESMF = 'ESMF'
     purpGen = 'General'
-    name2 = 'VariableStandardName'
+    name2 = 'StandardName'
     value2 = 'default_standard_name'
-    name3 = 'VariableLongName'
+    name3 = 'LongName'
     
     purp2 = 'Extended'
     attrList(1) = 'Coordinates'

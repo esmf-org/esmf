@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.15 2010/09/14 05:58:05 eschwab Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.16 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -188,10 +188,10 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-      name1 = 'VariableShortName'
-      name2 = 'VariableStandardName'
-      name3 = 'VariableLongName'
-      name4 = 'VariableUnits'
+      name1 = 'ShortName'
+      name2 = 'StandardName'
+      name3 = 'LongName'
+      name4 = 'Units'
       
       ! DPEDT
       value1 = 'DPEDT'

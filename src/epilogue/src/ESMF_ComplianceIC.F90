@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.10 2010/10/06 14:14:08 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.11 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -840,7 +840,7 @@ module ESMF_ComplianceICMod
     convention = "CIM 1.0"
     purpose = "Model Component Simulation Description"
     
-    attributeName = "ComponentShortName"
+    attributeName = "ShortName"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -849,7 +849,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "ComponentLongName"
+    attributeName = "LongName"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -858,7 +858,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "ComponentDescription"
+    attributeName = "Description"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -896,7 +896,7 @@ module ESMF_ComplianceICMod
 
 #if 0
 ! skip Citation* attributes as per Cecelia 10/05/10      
-    attributeName = "CitationShortTitle"
+    attributeName = "ShortTitle"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -905,7 +905,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "CitationLongTitle"
+    attributeName = "LongTitle"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -914,7 +914,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "CitationDate"
+    attributeName = "Date"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -923,7 +923,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "CitationPresentationForm"
+    attributeName = "PresentationForm"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -932,7 +932,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "CitationDOI"
+    attributeName = "DOI"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -942,16 +942,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
 #endif
 
-    attributeName = "IndividualName"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "OrganizationName"
+    attributeName = "Name"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -970,42 +961,6 @@ module ESMF_ComplianceICMod
       return  ! bail out
       
     attributeName = "PhysicalAddress"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "InstitutionName"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "FundingSource"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "PrincipalInvestigator"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "Author"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1091,7 +1046,7 @@ module ESMF_ComplianceICMod
     convention = "CIM 1.0"
     purpose = "Inputs Description"
     
-    attributeName = "VariableShortName"
+    attributeName = "ShortName"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1100,7 +1055,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "VariableLongName"
+    attributeName = "LongName"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1109,7 +1064,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "VariableStandardName"
+    attributeName = "StandardName"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1118,7 +1073,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "VariableUnits"
+    attributeName = "Units"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1127,7 +1082,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "VariableIntent"
+    attributeName = "Intent"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.57 2010/09/16 20:23:59 rokuingh Exp $
+! $Id: user_model1.F90,v 1.58 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -126,10 +126,10 @@ module user_model1
     ! Initialize variables
     conv = 'ESMF'
     purp = 'General'
-    name1 = 'VariableShortName'
-    name2 = 'VariableStandardName'
-    name3 = 'VariableLongName'
-    name4 = 'VariableUnits'
+    name1 = 'ShortName'
+    name2 = 'StandardName'
+    name3 = 'LongName'
+    name4 = 'Units'
  
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'DPEDT'
@@ -386,9 +386,9 @@ module user_model1
 
     conv = 'ESMF'
     purp = 'General'
-    name2 = 'VariableStandardName'
+    name2 = 'StandardName'
     value2 = 'DefaultStandardName'
-    name3 = 'VariableLongName'
+    name3 = 'LongName'
     
     purp2 = 'Extended'
     attrList(1) = 'Coordinates'

@@ -116,13 +116,13 @@ module user_coupler
     purpComp = 'Model Component Simulation Description'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
 
-    call ESMF_AttributeSet(comp, 'ComponentShortName', &
+    call ESMF_AttributeSet(comp, 'ShortName', &
       'HiGEM', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'ComponentLongName', &
+    call ESMF_AttributeSet(comp, 'LongName', &
       'UK High Resolution Global Environment Model', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'ComponentDescription', &
+    call ESMF_AttributeSet(comp, 'Description', &
       'HiGEM brings together expertise from NERC, the UK academic ' // &
       'community and the Met Office in a concerted UK effort to ' // &
       'develop coupled climate models with increased horizontal ' // &
@@ -174,6 +174,12 @@ module user_coupler
 
     ! Platform description attributes
     purpPlatform = 'Platform Description'
+    call ESMF_AttributeSet(comp, 'CompilerName', &
+      'Pathscale', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
+    call ESMF_AttributeSet(comp, 'CompilerVersion', &
+      '3.0', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
     call ESMF_AttributeSet(comp, 'MachineName', &
       'HECToR', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
@@ -182,7 +188,7 @@ module user_coupler
       'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
       'system known as BlackWidow, and storage systems.', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
-    call ESMF_AttributeSet(comp, 'MachineHardwareType', &
+    call ESMF_AttributeSet(comp, 'MachineSystem', &
       'Parallel', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
     call ESMF_AttributeSet(comp, 'MachineOperatingSystem', &
@@ -200,19 +206,13 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'MachineCoresPerProcessor', &
       '4', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
-    call ESMF_AttributeSet(comp, 'MachineProcessor', &
+    call ESMF_AttributeSet(comp, 'MachineProcessorType', &
       'AMD X86_64', &
-        convention=convCIM, purpose=purpPlatform, rc=rc)
-    call ESMF_AttributeSet(comp, 'MachineCompiler', &
-      'Pathscale', &
-        convention=convCIM, purpose=purpPlatform, rc=rc)
-    call ESMF_AttributeSet(comp, 'MachineCompilerVersion', &
-      '3.0', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Responsible party attributes (for Principal Investigator)
-    call ESMF_AttributeSet(comp, 'IndividualName', &
+    call ESMF_AttributeSet(comp, 'Name', &
       'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
@@ -222,7 +222,7 @@ module user_coupler
       'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'author', &
+      'Author', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.1 2010/09/17 20:50:00 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.2 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -211,10 +211,10 @@ module ESMF_AttributeUpdateUTestMod
     convCC = 'CustomConvention'
     convESMF = 'ESMF'
     purpGen = 'General'
-    name1 = 'VariableShortName'
-    name2 = 'VariableStandardName'
-    name3 = 'VariableLongName'
-    name4 = 'VariableUnits'
+    name1 = 'ShortName'
+    name2 = 'StandardName'
+    name3 = 'LongName'
+    name4 = 'Units'
 
     value1 = 'field'
     value2 = 'tendency_of_air_pressure'
@@ -326,9 +326,9 @@ module ESMF_AttributeUpdateUTestMod
 
     convESMF = 'ESMF'
     purpGen = 'General'
-    name2 = 'VariableStandardName'
+    name2 = 'StandardName'
     value2 = 'default_standard_name'
-    name3 = 'VariableLongName'
+    name3 = 'LongName'
 
     purp2 = 'Extended'
     attrList(1) = 'Coordinates'
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.1 2010/09/17 20:50:00 rokuingh Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.2 2010/10/09 03:01:06 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -628,9 +628,9 @@ program ESMF_AttributeUpdateUTest
     ! Now we can start doing some testing
     convESMF = 'ESMF'
     purpGen = 'General'
-    name2 = 'VariableStandardName'
+    name2 = 'StandardName'
     value2 = 'default_standard_name'
-    name3 = 'VariableLongName'
+    name3 = 'LongName'
 
     purp2 = 'Extended'
     attrList(1) = 'Coordinates'

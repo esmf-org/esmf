@@ -9,10 +9,10 @@
           <xsd:complexType>
             <xsd:sequence>
               <!-- for (conv,purp) = (CF, Extended) -->
-              <xsd:element name="VariableStandardName" type="xsd:string"/>
-              <xsd:element name="VariableLongName" type="xsd:string"/>
-              <xsd:element name="VariableShortName" type="xsd:string"/>
-              <xsd:element name="VariableUnits" type="xsd:string"/>
+              <xsd:element name="StandardName" type="xsd:string"/>
+              <xsd:element name="LongName" type="xsd:string"/>
+              <xsd:element name="ShortName" type="xsd:string"/>
+              <xsd:element name="Units" type="xsd:string"/>
             </xsd:sequence>
             <xsd:attribute name="convention" type="xsd:string" use="required"/>
             <xsd:attribute name="purpose" type="xsd:string" use="required"/>

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.8 2010/10/05 05:23:17 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.9 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.8 2010/10/05 05:23:17 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.9 2010/10/09 03:01:06 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -578,7 +578,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st attribute value within the 1st CIM RP package
     ordinal = 1
-    call ESMF_AttributeSet(gridcomp2, 'IndividualName', 'Bugs Bunny', &
+    call ESMF_AttributeSet(gridcomp2, 'Name', 'Bugs Bunny', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -592,7 +592,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st attribute value within the 2nd CIM RP package
     ordinal = 2
-    call ESMF_AttributeSet(gridcomp2, 'IndividualName', 'Pink Panther', &
+    call ESMF_AttributeSet(gridcomp2, 'Name', 'Pink Panther', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -606,7 +606,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Get the 1st attribute value within the 2nd CIM RP package
     ordinal = 2
-    call ESMF_AttributeGet(gridcomp2, 'IndividualName', value=attrValue, &
+    call ESMF_AttributeGet(gridcomp2, 'Name', value=attrValue, &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -621,7 +621,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Get the 1st attribute value within the 1st CIM RP package
     ordinal = 1
-    call ESMF_AttributeGet(gridcomp2, 'IndividualName', value=attrValue, &
+    call ESMF_AttributeGet(gridcomp2, 'Name', value=attrValue, &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -636,13 +636,13 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Get the 1st attribute value within the 2nd CIM RP package
     !  default ordinal=2 (last one)
-    call ESMF_AttributeGet(gridcomp2, 'IndividualName', value=attrValue, &
+    call ESMF_AttributeGet(gridcomp2, 'Name', value=attrValue, &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get 1st attribute value in 2nd CIM RP package test (default ordinal=2"
+    write(name, *) "Get 1st attribute value in 2nd CIM RP package test (default ordinal=2)"
     call ESMF_Test((attrValue=='Pink Panther' .and. rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !print *, "attrValue = ", attrValue
 
@@ -660,7 +660,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 1st attribute value within the last CIM RP package
-    call ESMF_AttributeSet(gridcomp2, 'IndividualName', 'Gerard Devine', &
+    call ESMF_AttributeSet(gridcomp2, 'Name', 'Gerard Devine', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -764,7 +764,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'ComponentShortName', 'HiGEM', &
+    call ESMF_AttributeSet(gridcomp3, 'ShortName', 'HiGEM', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -776,7 +776,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'ComponentLongName', 'UK High Resolution Global Environment Model', &
+    call ESMF_AttributeSet(gridcomp3, 'LongName', 'UK High Resolution Global Environment Model', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -788,7 +788,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 3rd <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'ComponentDescription',  &
+    call ESMF_AttributeSet(gridcomp3, 'Description',  &
       'HiGEM brings together expertise from NERC, the UK academic ' // &
       'community and the Met Office in a concerted UK effort to ' // &
       'develop coupled climate models with increased horizontal ' // &
@@ -1030,7 +1030,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 5th <platform> attribute value within the CIM platform
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'MachineProcessor', &
+    call ESMF_AttributeSet(gridcomp3, 'MachineProcessorType', &
       'AMD X86_64', &
                            convention='CIM 1.0', &
                            purpose='Platform Description', &
@@ -1069,7 +1069,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 8th <platform> attribute value within the CIM platform
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'MachineCompiler', &
+    call ESMF_AttributeSet(gridcomp3, 'CompilerName', &
       'Pathscale', &
                            convention='CIM 1.0', &
                            purpose='Platform Description', &
@@ -1082,7 +1082,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 9th <platform> attribute value within the CIM platform
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'MachineCompilerVersion', &
+    call ESMF_AttributeSet(gridcomp3, 'CompilerVersion', &
       '3.0', &
                            convention='CIM 1.0', &
                            purpose='Platform Description', &
@@ -1108,7 +1108,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 11th <platform> attribute value within the CIM platform
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'MachineHardwareType', &
+    call ESMF_AttributeSet(gridcomp3, 'MachineSystem', &
       'Parallel', &
                            convention='CIM 1.0', &
                            purpose='Platform Description', &
@@ -1123,7 +1123,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <citation> attribute value within the CIM citation
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'CitationShortTitle', &
+    call ESMF_AttributeSet(gridcomp3, 'ShortTitle', &
       'Shaffrey_2009', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
@@ -1136,7 +1136,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd <citation> attribute value within the CIM citation
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'CitationLongTitle', &
+    call ESMF_AttributeSet(gridcomp3, 'LongTitle', &
       'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
       'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
       'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
@@ -1157,7 +1157,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 3rd <citation> attribute value within the CIM citation
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'CitationDate', &
+    call ESMF_AttributeSet(gridcomp3, 'Date', &
       '2009?(not in sample file)', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
@@ -1170,7 +1170,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 4th <citation> attribute value within the CIM citation
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'CitationPresentationForm', &
+    call ESMF_AttributeSet(gridcomp3, 'PresentationForm', &
       'Online Refereed', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
@@ -1183,7 +1183,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 5th <citation> attribute value within the CIM citation
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'CitationDOI', &
+    call ESMF_AttributeSet(gridcomp3, 'DOI', &
       'doi:10.1175/2008JCLI2508.1', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
@@ -1199,7 +1199,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st attribute value within the CIM RP package
     ! This sets <gmd:individualName> and <gmd:role> codeListValue='author'
     !call ESMF_AttributeSet(gridcomp3, 'PrincipalInvestigator','Gerard Devine', &
-    call ESMF_AttributeSet(gridcomp3, 'IndividualName','Gerard Devine', &
+    call ESMF_AttributeSet(gridcomp3, 'Name','Gerard Devine', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 1st attribute value in last CIM RP package test"
@@ -1262,7 +1262,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'VariableShortName', 'DMS_emi', &
+    call ESMF_AttributeSet(field1, 'ShortName', 'DMS_emi', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
                            rc=rc)
@@ -1274,7 +1274,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'InputType', 'boundaryCondition', &
+    call ESMF_AttributeSet(field1, 'CouplingPurpose', 'boundaryCondition', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
                            rc=rc)
@@ -1291,7 +1291,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 8th <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'InputSpatialRegriddingMethod', &
+    call ESMF_AttributeSet(field1, 'SpatialRegriddingMethod', &
      'conservativeSpatialRegridding', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
@@ -1304,7 +1304,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 9th <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'InputSpatialRegriddingType', &
+    call ESMF_AttributeSet(field1, 'SpatialRegriddingType', &
      'TBD', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
@@ -1317,7 +1317,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 10th <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'InputFrequency', &
+    call ESMF_AttributeSet(field1, 'Frequency', &
      '15 minutes', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
@@ -1330,7 +1330,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 11th <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'InputTimeTransformationType', &
+    call ESMF_AttributeSet(field1, 'TimeTransformationType', &
      'TimeAverage', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &

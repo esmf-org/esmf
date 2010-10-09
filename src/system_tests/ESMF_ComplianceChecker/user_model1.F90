@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2010/10/06 13:09:34 theurich Exp $
+! $Id: user_model1.F90,v 1.4 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -148,7 +148,7 @@ module user_model1
     call ESMF_AttributeAdd(field, convention="CIM 1.0", &
       purpose="Inputs Description", rc=rc)
     
-    call ESMF_AttributeSet(field, name="VariableLongName", &
+    call ESMF_AttributeSet(field, name="LongName", &
       value="ExchangeCorrelationEnergy", &
       convention="CIM 1.0", purpose="Inputs Description", &
       rc=rc)

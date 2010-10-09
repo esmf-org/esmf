@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2010/09/28 05:56:53 eschwab Exp $
+! $Id: user_model1.F90,v 1.5 2010/10/09 03:01:06 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,10 +113,10 @@ module user_model1
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttributeSet(comp, 'ComponentShortName', &
+    call ESMF_AttributeSet(comp, 'ShortName', &
       'HiGEM_Atmos', &
         convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'ComponentLongName', &
+    call ESMF_AttributeSet(comp, 'LongName', &
       'Atmosphere component of the HiGEM model', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
@@ -125,7 +125,7 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Principal Investigator)
-    call ESMF_AttributeSet(comp, 'IndividualName', &
+    call ESMF_AttributeSet(comp, 'Name', &
       'Gerard Devine', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
@@ -135,7 +135,7 @@ module user_model1
       'g.m.devine@reading.ac.uk', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'author', &
+      'Author', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -151,30 +151,30 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! DMS_emi CF-Extended Attributes
-    call ESMF_AttributeSet(DMS_emi, 'VariableShortName', 'DMS_emi', &
+    call ESMF_AttributeSet(DMS_emi, 'ShortName', 'DMS_emi', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'VariableStandardName', 'DMS_emissions', &
+    call ESMF_AttributeSet(DMS_emi, 'StandardName', 'DMS_emissions', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'VariableLongName', 'DMS emissions', &
+    call ESMF_AttributeSet(DMS_emi, 'LongName', 'DMS emissions', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'VariableUnits', 'unknown', &
+    call ESMF_AttributeSet(DMS_emi, 'Units', 'unknown', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! DMS_emi CIM Attributes
-    call ESMF_AttributeSet(DMS_emi, 'InputType', 'boundaryCondition', &
+    call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', 'boundaryCondition', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'InputTargetComponent', &
+    call ESMF_AttributeSet(DMS_emi, 'CouplingTarget', &
                                     'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'InputSpatialRegriddingMethod', &
+    call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
                                     'conservativeSpatialRegridding', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'InputSpatialRegriddingType', 'TBD', &
+    call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingType', 'TBD', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'InputFrequency', '15 minutes', &
+    call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 minutes', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'InputTimeTransformationType', &
+    call ESMF_AttributeSet(DMS_emi, 'TimeTransformationType', &
                                     'TimeAverage', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -185,16 +185,16 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! UM CF-Extended Attributes
-    call ESMF_AttributeSet(UM, 'VariableShortName', 'UM_Initial_1960', &
+    call ESMF_AttributeSet(UM, 'ShortName', 'UM_Initial_1960', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! UM CIM Attributes
-    call ESMF_AttributeSet(UM, 'InputType', 'initialCondition', &
+    call ESMF_AttributeSet(UM, 'CouplingPurpose', 'initialCondition', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(UM, 'InputTargetComponent', 'HiGEM_AtmosChem', &
+    call ESMF_AttributeSet(UM, 'CouplingTarget', 'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(UM, 'InputTimeTransformationType', 'Exact', &
+    call ESMF_AttributeSet(UM, 'TimeTransformationType', 'Exact', &
         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -237,7 +237,7 @@ module user_model1
       purpose=purpComp, convention=convCIM ,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     attrVal = "Test change"
-    call ESMF_AttributeSet(comp, name="IndividualName", &
+    call ESMF_AttributeSet(comp, name="Name", &
       value=attrVal, &
       convention=convCIM, purpose=purpComp, rc=rc)
 #endif
