@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.80 2010/10/05 05:19:57 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.81 2010/10/09 03:03:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.80 2010/10/05 05:19:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.81 2010/10/09 03:03:19 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -267,9 +267,9 @@ namespace ESMCI {
       localrc = AttPackCreateCustom("CF", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("VariableLongName", "CF", "General",object);
-      localrc = AttPackAddAttribute("VariableShortName", "CF", "General", object);
-      localrc = AttPackAddAttribute("VariableUnits", "CF", "General", object);
+      localrc = AttPackAddAttribute("LongName", "CF", "General",object);
+      localrc = AttPackAddAttribute("ShortName", "CF", "General", object);
+      localrc = AttPackAddAttribute("Units", "CF", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -280,7 +280,7 @@ namespace ESMCI {
       localrc = AttPackNest("CF", "Extended", object, "CF", "General");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("VariableStandardName", "CF", "Extended", object);
+      localrc = AttPackAddAttribute("StandardName", "CF", "Extended", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -289,7 +289,7 @@ namespace ESMCI {
       localrc = AttPackNest("ESG", "General", object, "CF", "Extended");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("VariableIntent", "ESG", "General", object);
+      localrc = AttPackAddAttribute("Intent", "ESG", "General", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
@@ -305,21 +305,21 @@ namespace ESMCI {
                             "CF", "Extended");
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("InputFrequency", "CIM 1.0",
+      localrc = AttPackAddAttribute("CouplingPurpose", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputSourceComponent", "CIM 1.0",
+      localrc = AttPackAddAttribute("CouplingSource", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputSpatialRegriddingMethod", "CIM 1.0",
+      localrc = AttPackAddAttribute("CouplingTarget", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputSpatialRegriddingType", "CIM 1.0",
+      localrc = AttPackAddAttribute("Frequency", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputTargetComponent", "CIM 1.0",
+      localrc = AttPackAddAttribute("SpatialRegriddingMethod", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputTechnique", "CIM 1.0",
+      localrc = AttPackAddAttribute("SpatialRegriddingType", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputTimeTransformationType", "CIM 1.0",
+      localrc = AttPackAddAttribute("Technique", "CIM 1.0",
                             "Inputs Description", object);
-      localrc = AttPackAddAttribute("InputType", "CIM 1.0",
+      localrc = AttPackAddAttribute("TimeTransformationType", "CIM 1.0",
                             "Inputs Description", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -330,7 +330,7 @@ namespace ESMCI {
     localrc = AttPackCreateCustom("ESMF", "General", object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
-    localrc = AttPackAddAttribute("StateIntent", "ESMF", "General", object);
+    localrc = AttPackAddAttribute("Intent", "ESMF", "General", object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           &localrc)) return localrc;
 
@@ -411,15 +411,15 @@ namespace ESMCI {
       //  1 <modelComponent> in separate <CIMRecord>, also
       //    1 within each <childComponent>
       //
-      localrc = AttPackAddAttribute("ComponentDescription", "CIM 1.0",
+      localrc = AttPackAddAttribute("Description", "CIM 1.0",
                             "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("ComponentLongName", "CIM 1.0",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("ComponentShortName", "CIM 1.0",
+      localrc = AttPackAddAttribute("LongName", "CIM 1.0",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("ModelType", "CIM 1.0",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("ReleaseDate", "CIM 1.0",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("ShortName", "CIM 1.0",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("URL", "CIM 1.0",
                             "Model Component Simulation Description", object);
@@ -474,15 +474,13 @@ namespace ESMCI {
       //  1 <platform> in separate <CIMRecord>,
       //    also 1 within <deployment> within <simulationRun> <CIMRecord>
       //
-      localrc = AttPackAddAttribute("MachineCompiler", "CIM 1.0",
+      localrc = AttPackAddAttribute("CompilerName", "CIM 1.0",
                             "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineCompilerVersion", "CIM 1.0",
+      localrc = AttPackAddAttribute("CompilerVersion", "CIM 1.0",
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineCoresPerProcessor", "CIM 1.0",
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineDescription", "CIM 1.0",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineHardwareType", "CIM 1.0",
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineInterconnectType", "CIM 1.0",
                             "Platform Description", object);
@@ -492,7 +490,9 @@ namespace ESMCI {
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineOperatingSystem", "CIM 1.0",
                             "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineProcessor", "CIM 1.0",
+      localrc = AttPackAddAttribute("MachineProcessorType", "CIM 1.0",
+                            "Platform Description", object);
+      localrc = AttPackAddAttribute("MachineSystem", "CIM 1.0",
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineVendor", "CIM 1.0",
                             "Platform Description", object);
@@ -502,44 +502,44 @@ namespace ESMCI {
       // Citation attributes
       //  n <citation>s in <modelComponent>
       //
-      localrc = AttPackAddAttribute("CitationDate", "ISO 19115",
+      localrc = AttPackAddAttribute("Date", "ISO 19115",
                             "Citation Description", object);
-      localrc = AttPackSet("CitationDate",
+      localrc = AttPackSet("Date",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("CitationDOI", "ISO 19115",
+      localrc = AttPackAddAttribute("DOI", "ISO 19115",
                             "Citation Description", object);
-      localrc = AttPackSet("CitationDOI",
+      localrc = AttPackSet("DOI",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("CitationLongTitle", "ISO 19115",
+      localrc = AttPackAddAttribute("LongTitle", "ISO 19115",
                             "Citation Description", object);
-      localrc = AttPackSet("CitationLongTitle",
+      localrc = AttPackSet("LongTitle",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("CitationPresentationForm", "ISO 19115",
+      localrc = AttPackAddAttribute("PresentationForm", "ISO 19115",
                             "Citation Description", object);
-      localrc = AttPackSet("CitationPresentationForm",
+      localrc = AttPackSet("PresentationForm",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("CitationShortTitle", "ISO 19115",
+      localrc = AttPackAddAttribute("ShortTitle", "ISO 19115",
                             "Citation Description", object);
-      localrc = AttPackSet("CitationShortTitle",
+      localrc = AttPackSet("ShortTitle",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("CitationURL", "ISO 19115",
+      localrc = AttPackAddAttribute("URL", "ISO 19115",
                             "Citation Description", object);
-      localrc = AttPackSet("CitationURL",
+      localrc = AttPackSet("URL",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, NULL, NULL);
@@ -558,43 +558,21 @@ namespace ESMCI {
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("Author", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackSet("Author", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
-         object, NULL, NULL);
-
       localrc = AttPackAddAttribute("EmailAddress", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("EmailAddress", ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
 
-      localrc = AttPackAddAttribute("FundingSource", "ISO 19115",
+      localrc = AttPackAddAttribute("Name", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("FundingSource", ESMC_TYPEKIND_CHARACTER, 1,
+      localrc = AttPackSet("Name", ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
-
-      localrc = AttPackAddAttribute("IndividualName", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackSet("IndividualName", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
-         object, NULL, NULL);
-
-      localrc = AttPackAddAttribute("OrganizationName", "ISO 19115",
-                                      "Responsible Party Description", object);
-      // don't set OrganizationName to empty => default output is IndividualName
 
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("PhysicalAddress", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
-         object, NULL, NULL);
-
-      localrc = AttPackAddAttribute("PrincipalInvestigator", "ISO 19115",
-                                      "Responsible Party Description", object);
-      localrc = AttPackSet("PrincipalInvestigator", ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Responsible Party Description",
          object, NULL, NULL);
 
@@ -1088,6 +1066,7 @@ namespace ESMCI {
   int localrc;
   Attribute *attr;
   Attribute *attpack;
+  char msgbuf[4*ESMF_MAXSTR];
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -1103,8 +1082,10 @@ namespace ESMCI {
   // Find the attribute
   attr = attpack->AttPackGetAttribute(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
-      "This Attribute package does have the specified Attribute", &localrc);
+    sprintf(msgbuf, 
+      "This Attribute package does not have an Attribute named %s\n",
+       name.c_str(), &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, msgbuf, &localrc);
     return localrc;
   }
 
@@ -4863,6 +4844,9 @@ namespace ESMCI {
   localrc = io_xml->writeElement("numericalProperties", "", indent, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
 
+  localrc = io_xml->writeElement("scientificProperties", "", indent, 0);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+
   // <responsibleParty> nodes
   localrc = attpack->AttributeWriteCIMRP(io_xml, indent);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5292,6 +5276,8 @@ namespace ESMCI {
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
       localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
+      transform(value.begin(), value.end(), value.begin(), ::tolower);
+      if (value == "center") value = "centre";
       localrc = io_xml->writeStartElement("gmd:role", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_RoleCode", "", ++indent, 2,
