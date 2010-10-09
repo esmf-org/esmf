@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.199 2010/09/23 05:51:49 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.200 2010/10/09 00:04:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -171,9 +171,6 @@ module ESMF_CompMod
 
     type(ESMF_ContextFlag) :: contextflag   ! contextflag
     
-    type(ESMF_Method)   :: currentMethod    ! current method component is in
-    integer             :: currentPhase     ! current phase of method
-    
     ESMF_INIT_DECLARE
   end type
 
@@ -255,7 +252,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.199 2010/09/23 05:51:49 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.200 2010/10/09 00:04:20 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -739,10 +736,6 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
-    ! current method/phase
-    compp%currentMethod = ESMF_SETNONE
-    compp%currentPhase  = 0
-
     ! Set init code
     ESMF_INIT_SET_CREATED(compp)
 
@@ -991,10 +984,6 @@ contains
         ESMF_CONTEXT, rc)) return
     endif
     
-    ! set the current method/phase to keep track inside Component for query
-    compp%currentMethod = method
-    compp%currentPhase  = phaseArg
-          
     ! callback into user code
     call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
       compp%vm_info, compp%vm_cargo, compp%this, method, phaseArg, localrc)
@@ -1030,9 +1019,6 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif
-      ! reset current method/phase
-      compp%currentMethod = ESMF_SETNONE
-      compp%currentPhase  = 0
     endif
 
     ! pass back userRc
@@ -1088,6 +1074,8 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_Status)       :: status
+    type(ESMF_Method)       :: currentMethodArg
+    integer                 :: currentPhaseArg
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1171,12 +1159,20 @@ contains
       config = compp%config
     endif
 
+    if (present(currentMethod) .or. present(currentPhase)) then
+      call c_ESMC_CompGet(compp%vm_cargo, currentMethodArg, currentPhaseArg, &
+        localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+    endif
+
     if (present(currentMethod)) then
-      currentMethod = compp%currentMethod
+      currentMethod = currentMethodArg
     endif
 
     if (present(currentPhase)) then
-      currentPhase = compp%currentPhase
+      currentPhase = currentPhaseArg
     endif
     
     if (present(localPet)) then
@@ -1848,10 +1844,6 @@ contains
           ESMF_CONTEXT, rc)) return
       endif
     endif
-
-    ! reset current method/phase
-    compp%currentMethod = ESMF_SETNONE
-    compp%currentPhase  = 0
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc

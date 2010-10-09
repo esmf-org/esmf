@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.43 2010/10/05 03:56:50 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.44 2010/10/09 00:04:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.43 2010/10/05 03:56:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.44 2010/10/09 00:04:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -612,7 +612,14 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::VM *vm_parent = *ptr_vm_parent;      // pointer to parent VM
   ESMCI::VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
   ESMCI::FTable *ftable = *ptr;               // pointer to function table
-         
+  
+  int i = ftable->getEntry(name, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    return; // bail out
+  enum ESMCI::method currentMethod = ESMCI::SETNONE;  // default invalid
+  if (i > -1)
+    currentMethod = ftable->methodFromIndex(i);
+  
   ESMCI::cargotype *cargo = new ESMCI::cargotype;
   strcpy(cargo->name, name);    // copy trimmed type string
   delete[] name;  // delete memory that "newtrim" allocated above
@@ -624,6 +631,11 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   cargo->userrc[0] = 0;             // initialize user return code
   cargo->previousCargo = *vm_cargo; // support recursion
   cargo->previousParentFlag = vmplan->parentVMflag;    // support threaded rec.
+  cargo->currentMethod = currentMethod;
+  if (phase)
+    cargo->currentPhase = *phase;
+  else
+    cargo->currentPhase = 1;    // default
   *vm_cargo=(void*)cargo;           // store pointer to the cargo structure
   
   if (cargo->previousCargo != NULL){
@@ -634,7 +646,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
-    return;
+    return; // bail out
         
   // ... if the child VM uses threads (multi-threading or single-threading) 
   // then this parent PET continues running concurrently to the child PET in the
@@ -698,6 +710,34 @@ void FTN(c_esmc_compwait)(
   if (rc) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+  
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_compget"
+void FTN(c_esmc_compget)(
+  void **vm_cargo,            // p2 to member which holds cargo
+  enum ESMCI::method *method, // method type
+  int *phase,                 // phase selector
+  int *rc){                   // esmf internal return error code
+
+  // initialize the return codes
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;
+  
+  if (cargo){
+    *method = cargo->currentMethod;
+    *phase = cargo->currentPhase;
+  }else{
+    *method = ESMCI::SETNONE;
+    *phase = 0;
+  }
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
   
 } // extern "C"
 //==============================================================================
@@ -1416,8 +1456,8 @@ int FTable::callVFuncPtr(
         char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
         bool complianceCheckFlag = false;  // default internal compl. check off
         if (envVar != NULL){
-          complianceCheckFlag |= strcmp(envVar, "on");  // turn on
-          complianceCheckFlag |= strcmp(envVar, "ON");  // turn on
+          complianceCheckFlag |= !strcmp(envVar, "on");  // turn on
+          complianceCheckFlag |= !strcmp(envVar, "ON");  // turn on
         }
         if (complianceCheckFlag){
           
@@ -1824,7 +1864,40 @@ char const *FTable::methodString(enum ESMCI::method method){
 }
 //==============================================================================
 
-  
+//==============================================================================
+enum method FTable::methodFromString(char const *methodString){
+  if (!strncmp(methodString, "InitializeIC", strlen("InitializeIC")))
+    return ESMCI::SETINITIC;
+  else if (!strncmp(methodString, "RunIC", strlen("RunIC")))
+    return ESMCI::SETRUNIC;
+  else if (!strncmp(methodString, "FinalizeIC", strlen("FinalizeIC")))
+    return ESMCI::SETFINALIC;
+  else if (!strncmp(methodString, "WriteRestartIC", strlen("WriteRestartIC")))
+    return ESMCI::SETWRITERESTARTIC;
+  else if (!strncmp(methodString, "ReadRestartIC", strlen("ReadRestartIC")))
+    return ESMCI::SETREADRESTARTIC;
+  else if (!strncmp(methodString, "Initialize", strlen("Initialize")))
+    return ESMCI::SETINIT;
+  else if (!strncmp(methodString, "Run", strlen("Run")))
+    return ESMCI::SETRUN;
+  else if (!strncmp(methodString, "Finalize", strlen("Finalize")))
+    return ESMCI::SETFINAL;
+  else if (!strncmp(methodString, "WriteRestart", strlen("WriteRestart")))
+    return ESMCI::SETWRITERESTART;
+  else if (!strncmp(methodString, "ReadRestart", strlen("ReadRestart")))
+    return ESMCI::SETREADRESTART;
+  else if (!strncmp(methodString, "Register", strlen("Register")))
+    return ESMCI::SETREGISTER;
+  return ESMCI::SETNONE;
+}
+//==============================================================================
+
+//==============================================================================
+enum method FTable::methodFromIndex(int i){
+  return methodFromString(funcs[i].funcname);
+}
+//==============================================================================
+
 } // namespace ESMCI
 
 

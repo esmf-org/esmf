@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.19 2010/10/01 16:12:13 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.20 2010/10/09 00:04:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -143,6 +143,8 @@ class FTable {
     static void newtrim(char const *oldc, int clen, int *phase, int *nstate,
       char **newc);
     static char const *methodString(enum ESMCI::method method);
+    static enum method methodFromString(char const *methodString);
+    enum method methodFromIndex(int i);
   private: 
     int query(int *nfuncp, int *ndatap);
 };
@@ -155,6 +157,8 @@ typedef struct{
   int *userrc;          // return codes of registered user method (all threads)
   void *previousCargo;  // support for recursive entering of methods
   int previousParentFlag; // support for recursive entering of methods
+  enum method currentMethod;
+  int currentPhase;
 }cargotype;
 
 

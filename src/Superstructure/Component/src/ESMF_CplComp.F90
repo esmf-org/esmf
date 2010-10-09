@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.121 2010/10/07 23:30:04 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.122 2010/10/09 00:04:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.121 2010/10/07 23:30:04 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.122 2010/10/09 00:04:20 theurich Exp $'
 
 !==============================================================================
 !
@@ -1323,16 +1323,10 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! set the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETSERVICES
-
     call c_ESMC_SetServices(cplcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! reset the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -1413,9 +1407,6 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! set the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETSERVICES
-
     if (present(sharedObj)) then
       call c_ESMC_SetServicesShObj(cplcomp, userRoutine, sharedObj, &
         localUserRc, localrc)
@@ -1426,9 +1417,6 @@ contains
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! reset the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -1495,16 +1483,10 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! set the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETVM
-
     call c_ESMC_SetVM(cplcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! reset the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -1583,9 +1565,6 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
-    ! set the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETVM
-
     if (present(sharedObj)) then
       call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, localUserRc, &
         localrc)
@@ -1596,9 +1575,6 @@ contains
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! reset the current method to keep track inside Component for query
-    cplcomp%compp%currentMethod = ESMF_SETNONE
 
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
