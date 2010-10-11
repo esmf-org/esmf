@@ -1,4 +1,4 @@
-% $Id: CoupledFlow_usrdoc.ctex,v 1.2 2010/10/06 20:15:43 feiliu Exp $
+% $Id: CoupledFlow_usrdoc.ctex,v 1.3 2010/10/11 15:13:21 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -48,7 +48,7 @@
 \input{../demos/coupled_flow/doc/flow_pieces}
 #endif
 
-\section{Framework Usage Details}
+\section{ESMF COUPLED\_FLOW Demonstration: Code Details}
 
 #ifdef STANDALONE
 \input{CoupledFlowApp_fapi}

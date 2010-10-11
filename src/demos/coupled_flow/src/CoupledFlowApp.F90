@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.18 2010/10/08 20:27:57 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.19 2010/10/11 15:13:21 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -274,7 +274,7 @@
       enddo
 
       ! Get pointer reference to internal coordinate for U
-      ! Compute edge1 east stagger (U) coordinate values
+      ! Compute east stagger (U) coordinate values
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_EDGE1, &
         coordDim=1, fptr=CoordX, rc=rc)
@@ -296,7 +296,7 @@
       enddo
 
       ! Get pointer reference to internal coordinate for V
-      ! Compute edge2 north stagger (V) coordinate values
+      ! Compute north stagger (V) coordinate values
       call ESMF_GridGetCoord(grid, localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_EDGE2, &
         coordDim=1, fptr=CoordX, rc=rc)
@@ -325,6 +325,10 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOE
+!
+! !DESCRIPTION:
+! \subsubsection{Example of state creation:}
+!
 !  Create and initialize a dummy State to use for both import and export.
 !EOE
 !------------------------------------------------------------------------------
@@ -338,6 +342,10 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOE
+!
+! !DESCRIPTION:
+! \subsubsection{Example of initialize, run, and finalize use:}
+!
 ! Init, Run, and Finalize sections of the Coupled Flow Component:
 !EOE
 !------------------------------------------------------------------------------
@@ -364,7 +372,10 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOE
-!     Destroy section
+!
+! !DESCRIPTION:
+! \subsubsection{Example of object destruction:}
+!
 !     Clean up the objects previously created:
 !EOE
 !------------------------------------------------------------------------------
@@ -412,6 +423,10 @@
       ! reaching their destination files.
 
 !BOC
+!
+! !DESCRIPTION:
+! \subsubsection{Example of ESMF finalize:}
+!
       !Call ESMF_Finalize at the end of an ESMF application:
       call ESMF_Finalize(rc=rc)
 !EOC

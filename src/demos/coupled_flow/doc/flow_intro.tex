@@ -2,16 +2,17 @@
 \section{ESMF COUPLED\_FLOW Demonstration Program}
 \label{sec:demo}
 
-\subsection{Introduction}
-
-This section describes the organization of a
-demonstation program which uses the ESMF Framework,
-including use of both the 
-Superstructure and Infrastructure.
-
 \subsection{ESMF COUPLED\_FLOW Description}
+
+The {\tt ESMF COUPLED\_FLOW} application uses the ESMF framework, including 
+gridded and coupler components, Superstructure and Infrastructure. 
+The application injects a tracer from one gridded
+component into another, which then advects the flow.  Communication is handled through a
+coupler component.  Review of this demonstration should enable the user to
+understand the general structure of an ESMF application.
+
  
-The {\tt ESMF COUPLED\_FLOW} application is comprised of two ESMF 
+The application is comprised of two ESMF 
 {\tt Gridded Components} and a {\tt Coupler Component}.  
 The first {\tt Gridded Component}, {\tt FlowSolver}, solves the compressible 
 time-dependent fluid flow equations.  The algorithm 
@@ -28,5 +29,4 @@ the boundary conditions for the first component.  The {\tt FlowSolver} and
 {\tt Injector Components} sit on different Cartesian igrids.  The
 {\tt Coupler Component} redistributes boundary condition data from 
 the {\tt Injector} to the {\tt FlowSolver}.
-
 

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.18 2010/10/08 20:27:57 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.19 2010/10/11 15:13:21 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -509,6 +509,10 @@
 
 
 !BOE
+!
+! !DESCRIPTION:
+! \subsubsection{Example of Time Stepping Loop:}
+!
 ! Advancing in time with ESMF clock, the coupled flow component calls
 ! the run methods of the gridded components and coupler component sequentially:
 !BOC
@@ -560,6 +564,10 @@
 !EOE
  
 !BOE
+!
+! !DESCRIPTION:
+! \subsubsection{Example of clock destruction:}
+!
 ! At the end of run method, destroy the clock used to iterate through time:
 !BOC
      call ESMF_ClockDestroy(localclock, rc)

@@ -1,5 +1,4 @@
-
-\section{Program Organization}
+\subsection{Program Organization}
 
 The demonstration program consists of a top level Application
 Driver, a top level Gridded Component, and nested within this Gridded
@@ -9,7 +8,7 @@ The following diagram shows this organization.  Note that there
 is no direct communication between the subcomponents; all
 interactions are mediated by the top level Gridded Component.
 
-Each component communicates via Initialize, run, and finalize
+Each component communicates via initialize, run, and finalize
 subroutine calls.  These go through the ESMF library where
 they are checked for validity, default values are supplied,
 and only those components involved in the computation are
