@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.11 2010/10/09 03:01:06 eschwab Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.12 2010/10/11 19:18:35 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -79,7 +79,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    call ESMF_LogWrite(trim(prefix)//"Start registerIC.", ESMF_LOG_INFO, rc=rc)
+    call ESMF_LogWrite(trim(prefix)//"Start register compliance check.", &
+      ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -177,7 +178,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_LogWrite(trim(prefix)//"Stop registerIC.", ESMF_LOG_INFO, rc=rc)
+    call ESMF_LogWrite(trim(prefix)//"Stop register compliance check.", &
+      ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
