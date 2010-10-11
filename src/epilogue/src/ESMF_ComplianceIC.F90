@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.12 2010/10/11 19:18:35 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.13 2010/10/11 19:36:50 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -842,6 +842,14 @@ module ESMF_ComplianceICMod
     convention = "CIM 1.0"
     purpose = "Model Component Simulation Description"
     
+    call ESMF_LogWrite(trim(prefix)//" Component level attribute check: "// &
+      "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+      ESMF_LOG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     attributeName = "ShortName"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -1048,6 +1056,14 @@ module ESMF_ComplianceICMod
     convention = "CIM 1.0"
     purpose = "Inputs Description"
     
+    call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
+      "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+      ESMF_LOG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     attributeName = "ShortName"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
