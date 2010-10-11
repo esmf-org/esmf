@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.32 2010/10/08 22:28:55 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.33 2010/10/11 21:54:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.32 2010/10/08 22:28:55 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.33 2010/10/11 21:54:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -615,7 +615,8 @@ contains
 !
 !   \begin{description}
 !   \item [arraybundle]
-!     {\tt ESMF\_ArrayBundle} containing data to be haloed.
+!     {\tt ESMF\_ArrayBundle} containing data to be haloed. The data in the halo
+!     regions may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[halostartregionflag]}]
@@ -1055,7 +1056,8 @@ contains
 !   \item [srcArrayBundle]
 !     {\tt ESMF\_ArrayBundle} with source data.
 !   \item [dstArrayBundle]
-!     {\tt ESMF\_ArrayBundle} with destination data.
+!     {\tt ESMF\_ArrayBundle} with destination data. The data in these Arrays
+!     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[factor]}]
@@ -1377,7 +1379,8 @@ contains
 !   \item [srcArrayBundle]
 !     {\tt ESMF\_ArrayBundle} with source data.
 !   \item [dstArrayBundle]
-!     {\tt ESMF\_ArrayBundle} with destination data.
+!     {\tt ESMF\_ArrayBundle} with destination data. The data in these Arrays
+!     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[srcToDstTransposeMap]}]
@@ -1645,7 +1648,8 @@ contains
 !   \item [srcArrayBundle]
 !     {\tt ESMF\_ArrayBundle} with source data.
 !   \item [dstArrayBundle]
-!     {\tt ESMF\_ArrayBundle} with destination data.
+!     {\tt ESMF\_ArrayBundle} with destination data. The data in these Arrays
+!     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [factorList]
@@ -2008,7 +2012,8 @@ contains
 !   \item [srcArrayBundle]
 !     {\tt ESMF\_ArrayBundle} with source data.
 !   \item [dstArrayBundle]
-!     {\tt ESMF\_ArrayBundle} with destination data.
+!     {\tt ESMF\_ArrayBundle} with destination data. The data in these Arrays
+!     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
