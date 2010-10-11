@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.19 2010/10/11 15:13:21 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.20 2010/10/11 16:16:45 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -178,7 +178,8 @@
 !   The following code creates 2 Gridded Components on the same set of PETs 
 !   (persistent execution threads) as the top level Component, but each 
 !   of the Grids useds by these Components will have a different connectivity.
-!   It also creates a Coupler Component on the same PET set.
+!   It also creates a Coupler Component on the same PET set. Each gridded
+!   component has a Grid attached internally.
 !
 !BOC
     cnameIN = "Injector model"

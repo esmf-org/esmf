@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.19 2010/10/11 15:13:21 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.20 2010/10/11 16:16:45 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -225,7 +225,7 @@
 !  the Demo.  The extents of the Grid were previously read in from an input
 !  file, but the rest of the Grid parameters are set here by default.  The
 !  Grid spans the Application's PET list, while the type of the Grid is 
-!  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
+!  assumed to be horizontal and Cartesian x-y with an Arakawa C staggering.  
 !  The Grid name is set to "source grid":
 !EOE
 
@@ -344,7 +344,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of initialize, run, and finalize use:}
+! \subsubsection{Example of initialize, run, and finalize:}
 !
 ! Init, Run, and Finalize sections of the Coupled Flow Component:
 !EOE
@@ -376,7 +376,8 @@
 ! !DESCRIPTION:
 ! \subsubsection{Example of object destruction:}
 !
-!     Clean up the objects previously created:
+!     Near the end of the application, call object destroy methods to 
+!     clean up the objects previously created:
 !EOE
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -422,11 +423,13 @@
       ! it is being used and on some platforms that prevents messages from
       ! reaching their destination files.
 
-!BOC
+!BOE
 !
 ! !DESCRIPTION:
 ! \subsubsection{Example of ESMF finalize:}
 !
+!EOE
+!BOC
       !Call ESMF_Finalize at the end of an ESMF application:
       call ESMF_Finalize(rc=rc)
 !EOC

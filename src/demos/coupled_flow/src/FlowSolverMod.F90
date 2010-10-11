@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.20 2010/10/08 20:27:57 feiliu Exp $
+! $Id: FlowSolverMod.F90,v 1.21 2010/10/11 16:16:45 feiliu Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -11,7 +11,7 @@
 !  semi-compressible fluid flow.  It uses an explicit solution
 !  method on a staggered mesh with velocities and momentum located at cell
 !  faces and other physical quantities at cell centers.  The component
-!  assumes a logically rectangular two-dimensional cartesian mesh with
+!  assumes a logically rectangular two-dimensional Cartesian mesh with
 !  constant cell spacing.  It also employs a donor-cell advection scheme.
 !  Although the algorithm is general, the boundary conditions are coded to
 !  assume constant inflow on the left, outflow on the right, and free-slip
