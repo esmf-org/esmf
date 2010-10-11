@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.207 2010/10/08 17:39:14 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.208 2010/10/11 19:20:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.207 2010/10/08 17:39:14 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.208 2010/10/11 19:20:43 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -6092,9 +6092,9 @@ module ESMF_StateMod
 #else
           dcount1 = sp%datacount
           do, i1=1, dcount1
-            nextitem1 => stypep%datalist(i1)
+            nextitem1 => sp%datalist(i1)
             if (nextitem1%namep == dataname) then
-              itemindex = i1
+              lindex = i1
               exit
             end if
           end do
@@ -6168,11 +6168,11 @@ module ESMF_StateMod
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
 #else
-            dcount1 = stypep%datacount
+            dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
               if (nextitem1%namep == itempath_local(:slashpos-1)) then
-        	itemindex = i1
+        	lindex = i1
         	exit
               end if
             end do
@@ -6200,9 +6200,9 @@ module ESMF_StateMod
 #else
             dcount1 = sp%datacount
             do, i1=1, dcount1
-              nextitem1 => stypep%datalist(i1)
+              nextitem1 => sp%datalist(i1)
               if (nextitem1%namep == itempath_local) then
-        	itemindex = i1
+        	lindex = i1
         	exit
               end if
             end do
