@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.20 2010/10/11 16:16:45 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.21 2010/10/11 19:46:35 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -327,7 +327,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of state creation:}
+! \subsubsection{Example of State Creation:}
 !
 !  Create and initialize a dummy State to use for both import and export.
 !EOE
@@ -344,7 +344,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of initialize, run, and finalize:}
+! \subsubsection{Example of Initialize, Run, and Finalize:}
 !
 ! Init, Run, and Finalize sections of the Coupled Flow Component:
 !EOE
@@ -374,7 +374,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of object destruction:}
+! \subsubsection{Example of Object Destruction:}
 !
 !     Near the end of the application, call object destroy methods to 
 !     clean up the objects previously created:
@@ -426,7 +426,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of ESMF finalize:}
+! \subsubsection{Example of ESMF Finalize:}
 !
 !EOE
 !BOC

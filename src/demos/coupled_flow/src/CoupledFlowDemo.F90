@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.20 2010/10/11 16:16:45 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.21 2010/10/11 19:46:35 feiliu Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -567,7 +567,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsubsection{Example of clock destruction:}
+! \subsubsection{Example of Clock Destruction:}
 !
 ! At the end of run method, destroy the clock used to iterate through time:
 !BOC
