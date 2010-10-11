@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.49 2010/09/14 15:56:14 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.50 2010/10/11 21:21:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.49 2010/09/14 15:56:14 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.50 2010/10/11 21:21:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2607,7 +2607,7 @@ int DistGrid::print()const{
   printf("petCount = %d\n", vm->getPetCount());
   printf("--- ESMCI::DistGrid::print end ---\n");
   
-#if 1
+#if 0
   printf("--- ESMCI::DistGrid::print - Topology test start ---\n");
   int lrc;
   int indexTuple[2];
