@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.9 2010/10/09 03:01:06 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.10 2010/10/11 06:01:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.9 2010/10/09 03:01:06 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.10 2010/10/11 06:01:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -508,7 +508,8 @@ program ESMF_AttributeXMLUTest
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write out custom RP XML file test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
+                    name, failMsg, result, ESMF_SRCLINE)
 
   !-------------------------------------------------------------------------
   !   Multiple Attribute Packages of the same (conv,purp) tests. Uses built-in,
@@ -729,7 +730,8 @@ program ESMF_AttributeXMLUTest
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write out CIM RP XML file test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
+                    name, failMsg, result, ESMF_SRCLINE)
 
   !-------------------------------------------------------------------------
   !   <CIMRecord> attribute representation and output test for
@@ -1387,7 +1389,8 @@ program ESMF_AttributeXMLUTest
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write out CIM XML file test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
+                    name, failMsg, result, ESMF_SRCLINE)
 
 
     !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.24 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.25 2010/10/11 06:01:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.24 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.25 2010/10/11 06:01:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1163,7 +1163,8 @@ program ESMF_AttributeArrayBundleUTest
         attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package to .xml from an ArrayBundle Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.82 2010/10/09 03:46:09 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.83 2010/10/11 06:01:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.82 2010/10/09 03:46:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.83 2010/10/11 06:01:08 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4104,6 +4104,13 @@ namespace ESMCI {
   comment += ESMF_VERSION_STRING;
   comment += ", http://www.earthsystemmodeling.org";
   localrc = io_xml->writeComment(comment);
+  if (localrc == ESMF_RC_LIB_NOT_PRESENT) {
+    sprintf(msgbuf, "Xerces C++ library (>= v3.1.0) not present");
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, msgbuf, &localrc);
+    localrc = ESMCI_IO_XMLDestroy(&io_xml);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    return ESMF_RC_LIB_NOT_PRESENT;
+  }
 
   //
   // determine modelcompname, fullname, version for header

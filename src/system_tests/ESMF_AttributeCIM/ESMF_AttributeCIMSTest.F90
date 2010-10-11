@@ -308,8 +308,11 @@ program ESMF_AttributeCIMSTest
     call ESMF_AttributeWrite(cplcomp, conv, purp, &
                              attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
     if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
+        ESMF_CONTEXT, rcToReturn=rc)) then
+      if (rc .ne. ESMF_RC_LIB_NOT_PRESENT) then
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
+      endif
+    endif
   endif
 #endif
 !-------------------------------------------------------------------------

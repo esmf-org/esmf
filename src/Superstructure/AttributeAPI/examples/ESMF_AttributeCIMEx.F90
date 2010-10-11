@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.9 2010/10/09 03:01:06 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.10 2010/10/11 06:01:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,6 +29,10 @@ program ESMF_AttributeCIMEx
 ! with values.  Finally, all the Attributes are written to a CIM-formatted
 ! XML file.
 !EOE
+
+#include "ESMF.h"
+
+!-----------------------------------------------------------------------------
 !
 !  !PROGRAM: ESMF\_AttributeCIMEx - Example of Attribute Package usage.
 !
@@ -562,7 +566,7 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeWrite(cplcomp, convCIM, purpComp, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 !EOC
-        if (rc/=ESMF_SUCCESS) goto 10
+        if (rc/=ESMF_SUCCESS .and. rc/=ESMF_RC_LIB_NOT_PRESENT) goto 10
       endif
 
       ! Clean-up
