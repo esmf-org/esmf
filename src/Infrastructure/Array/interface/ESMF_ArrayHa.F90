@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.11 2010/10/08 22:27:22 rokuingh Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.12 2010/10/11 21:50:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.11 2010/10/08 22:27:22 rokuingh Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.12 2010/10/11 21:50:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -334,7 +334,8 @@ contains
 !
 !   \begin{description}
 !   \item [array]
-!     {\tt ESMF\_Array} containing data to be haloed.
+!     {\tt ESMF\_Array} containing data to be haloed. The data in the halo
+!     region may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[halostartregionflag]}]
@@ -962,7 +963,8 @@ contains
 !   \item [srcArray]
 !     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} with destination data.
+!     {\tt ESMF\_Array} with destination data. The data in this Array may be
+!     destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [factor]
@@ -1302,7 +1304,8 @@ contains
 !   \item [srcArray]
 !     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} with destination data.
+!     {\tt ESMF\_Array} with destination data. The data in this Array may be
+!     destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[srcToDstTransposeMap]}]

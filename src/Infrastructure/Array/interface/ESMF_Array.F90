@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.127 2010/10/08 22:27:22 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.128 2010/10/11 21:50:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.127 2010/10/08 22:27:22 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.128 2010/10/11 21:50:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -782,7 +782,8 @@ contains
 !   \item [srcArray]
 !     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} with destination data.
+!     {\tt ESMF\_Array} with destination data. The data in this Array may be
+!     destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [factorList]
@@ -1153,7 +1154,8 @@ contains
 !   \item [srcArray]
 !     {\tt ESMF\_Array} with source data.
 !   \item [dstArray]
-!     {\tt ESMF\_Array} with destination data.
+!     {\tt ESMF\_Array} with destination data. The data in this Array may be
+!     destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
