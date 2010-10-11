@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.13 2010/10/11 19:36:50 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.14 2010/10/11 20:39:55 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -952,6 +952,15 @@ module ESMF_ComplianceICMod
       return  ! bail out
 #endif
 
+    attributeName = "ResponsiblePartyRole"
+    call checkComponentAttribute(prefix, comp=comp, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
     attributeName = "Name"
     call checkComponentAttribute(prefix, comp=comp, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -1053,8 +1062,8 @@ module ESMF_ComplianceICMod
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! set CIM convention and purpose specifiers
-    convention = "CIM 1.0"
-    purpose = "Inputs Description"
+    convention = "ESG"
+    purpose = "General"
     
     call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
       "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2010/10/09 03:01:06 eschwab Exp $
+! $Id: user_model1.F90,v 1.5 2010/10/11 20:39:55 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -145,12 +145,12 @@ module user_model1
     call ESMF_StateAdd(importState, field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    call ESMF_AttributeAdd(field, convention="CIM 1.0", &
-      purpose="Inputs Description", rc=rc)
+    call ESMF_AttributeAdd(field, convention="ESG", &
+      purpose="General", rc=rc)
     
     call ESMF_AttributeSet(field, name="LongName", &
       value="ExchangeCorrelationEnergy", &
-      convention="CIM 1.0", purpose="Inputs Description", &
+      convention="ESG", purpose="General", &
       rc=rc)
    
     print *, localPet, "User Comp1 Init returning"
