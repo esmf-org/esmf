@@ -1,4 +1,4 @@
-% $Id: Mesh_cdesc.tex,v 1.1 2010/10/08 15:38:51 oehmke Exp $
+% $Id: Mesh_cdesc.tex,v 1.2 2010/10/12 20:11:12 oehmke Exp $
 
 Unstructured grids are commonly used in the computational solution of Partial Differential equations.  These are especially useful for problems that involve complex geometry, where using the less flexible structured grids can
 result in grid representation of regions where no computation is needed.  Finite
@@ -14,7 +14,7 @@ can be performed there. The rest of this section describes the Mesh class and ho
 \subsubsection{Mesh Representation in ESMF}
 
 A Mesh in ESMF is described in terms of {\bf nodes} and {\bf elements}. A node is a point in space which represents where the coordinate 
-information in a Mesh is located. An element is a higher dimensional shape constructed of nodes. Elements give a Mesh its shape and define the relationship of the nodes to one another. Field data may be located on a Mesh's nodes or it's elements. 
+information in a Mesh is located. An element is a higher dimensional shape constructed of nodes. Elements give a Mesh its shape and define the relationship of the nodes to one another. Field data may be located on a Mesh's nodes. 
 
 \subsubsection{Supported Meshes}
 
