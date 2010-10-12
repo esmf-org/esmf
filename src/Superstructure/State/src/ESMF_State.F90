@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.208 2010/10/11 19:20:43 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.209 2010/10/12 14:32:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.208 2010/10/11 19:20:43 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.209 2010/10/12 14:32:22 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2351,16 +2351,16 @@ module ESMF_StateMod
           type(ESMF_StateItem) , pointer :: dp
 
           if (.not. present (itemSearch)) then
-	    icount = sp%datacount
-	  else
+            icount = sp%datacount
+          else
             icount = 0
-	    do, i1 = 1, sp%datacount
-	      dp => sp%datalist(i1)
-	      if (dp%namep == itemSearch) then
-		icount = icount + 1
-	      end if
-	    end do
-	  end if
+            do, i1 = 1, sp%datacount
+              dp => sp%datalist(i1)
+              if (dp%namep == itemSearch) then
+        	icount = icount + 1
+              end if
+            end do
+          end if
 
           if (localnestedflag) then
             do, i1 = 1, sp%datacount
@@ -2389,7 +2389,7 @@ module ESMF_StateMod
             end if
 
             dp => sp%datalist(i1)
-	    if (.not. present (itemSearch)) then
+            if (.not. present (itemSearch)) then
               itemNameList(ilpos) = prefix // dp%namep
               ilpos = ilpos + 1
             else
@@ -2422,15 +2422,15 @@ module ESMF_StateMod
             end if
 
             dp => sp%datalist(i1)
-	    if (.not. present (itemSearch)) then
-	      stateitemtypeList(ilpos) = dp%otype
-	      ilpos = ilpos + 1
-	    else
-	      if (dp%namep == itemSearch) then
-	      stateitemtypeList(ilpos) = dp%otype
-	      ilpos = ilpos + 1
-	      end if
-	    end if
+            if (.not. present (itemSearch)) then
+              stateitemtypeList(ilpos) = dp%otype
+              ilpos = ilpos + 1
+            else
+              if (dp%namep == itemSearch) then
+              stateitemtypeList(ilpos) = dp%otype
+              ilpos = ilpos + 1
+              end if
+            end if
 
             if (dp%otype%ot == ESMF_STATEITEM_STATE%ot  &
                 .and. localnestedflag) then
@@ -2982,13 +2982,13 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!  \item[{[nestedFlag]}]						    
+!  \item[{[nestedFlag]}]        					    
 !    Optional.  Allows searching for the <item> being requested in either   
-!    the current level, or any nested States.				    
+!    the current level, or any nested States.        			    
 !      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!      level only (default)						    
+!      level only (default)        					    
 !      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!      the current level and in nested States				    
+!      the current level and in nested States        			    
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -3269,20 +3269,20 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!  \item[{[nestedFlag]}]						    
+!  \item[{[nestedFlag]}]        					    
 !    Optional.  Allows searching for the <item> being requested in either   
-!    the current level, or any nested States.				    
+!    the current level, or any nested States.        			    
 !      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!      level only (default)						    
+!      level only (default)        					    
 !      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!      the current level and in nested States				    
-!  \item[{[nestedFlag]}]						    
+!      the current level and in nested States        			    
+!  \item[{[nestedFlag]}]        					    
 !    Optional.  Allows searching for the <item> being requested in either   
-!    the current level, or any nested States.				    
+!    the current level, or any nested States.        			    
 !      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!      level only (default)						    
+!      level only (default)        					    
 !      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!      the current level and in nested States				    
+!      the current level and in nested States        			    
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -3399,13 +3399,13 @@ module ESMF_StateMod
 !       Name of nested {\tt ESMF\_State} to return.
 !     \item[nestedState]
 !       Returned {\tt ESMF\_State}.
-!     \item[{[nestedFlag]}]						    
+!     \item[{[nestedFlag]}]        					    
 !      Optional.  Allows searching for the <item> being requested in either   
-!      the current level, or any nested States. 			      
+!      the current level, or any nested States.         		      
 !        {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!        level only (default)						      
+!        level only (default)        					      
 !        {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!        the current level and in nested States 			      
+!        the current level and in nested States         		      
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -6019,10 +6019,10 @@ module ESMF_StateMod
              lfound=itemfound, lindex=itemindex, litem=dataitem)
       else
 #if defined (ESMF_ENABLENAMEMAP)
-	call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
+        call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
             value=itemindex, foundFlag=itemfound,  &
             rc=localrc)
-	if (ESMF_LogMsgFoundError (localrc,  &
+        if (ESMF_LogMsgFoundError (localrc,  &
                                    ESMF_ERR_PASSTHRU,  &
                                    ESMF_CONTEXT, rc)) return
 #else
@@ -6037,12 +6037,12 @@ module ESMF_StateMod
         itemfound = i0 <= dcount0
 #endif
 
-	if (itemfound) then
+        if (itemfound) then
           if (present(dataitem)) dataitem => stypep%datalist(itemindex)
-	else
+        else
            call find_nested_item_worker (stypep,  &
                lfound=itemfound, lindex=itemindex, litem=dataitem)
-	end if
+        end if
       end if
 
       if (itemfound) then
@@ -6072,8 +6072,8 @@ module ESMF_StateMod
           integer       :: i1
           integer       :: lrc
 #if !defined (ESMF_ENABLENAMEMAP)
-	  type(ESMF_StateItem), pointer :: nextitem1
-	  integer :: dcount1
+          type(ESMF_StateItem), pointer :: nextitem1
+          integer :: dcount1
 #endif
 
 !          print *, 'find_nested_item_worker: entered'
@@ -6086,7 +6086,7 @@ module ESMF_StateMod
           call ESMF_UtilMapNameLookup (sp%nameMap, name=dataname,  &
               value=lindex, foundFlag=lfound,  &
               rc=lrc)
-	  if (ESMF_LogMsgFoundError (lrc,  &
+          if (ESMF_LogMsgFoundError (lrc,  &
                                      ESMF_ERR_PASSTHRU,  &
                                      ESMF_CONTEXT, rc)) return
 #else
@@ -6098,21 +6098,21 @@ module ESMF_StateMod
               exit
             end if
           end do
-          itemfound = i1 <= dcount1
+          lfound = i1 <= dcount1
 #endif
           if (.not. lfound) then
             do, i1=1, sp%datacount
               if (sp%datalist(i1)%otype == ESMF_STATEITEM_STATE) then
-        	sp_local => sp%datalist(i1)%datap%spp
+                sp_local => sp%datalist(i1)%datap%spp
                 call find_nested_item_worker (sp_local, lfound, lindex, litem)
                 if (lfound) exit
               end if
             end do
             if (present (litem)) then
               if (lfound) then
-        	litem => sp_local%datalist(lindex)
+                litem => sp_local%datalist(lindex)
               else
-        	litem => null ()
+                litem => null ()
               end if
             end if
           end if
@@ -6135,8 +6135,8 @@ module ESMF_StateMod
           integer :: i1
           integer :: lrc
 #if !defined (ESMF_ENABLENAMEMAP)
-	  type(ESMF_StateItem), pointer :: nextitem1
-	  integer :: dcount1
+          type(ESMF_StateItem), pointer :: nextitem1
+          integer :: dcount1
 #endif
 
           ! print *, 'find_pathed_item_worker: entered.  lpath = ', lpath
@@ -6162,9 +6162,9 @@ module ESMF_StateMod
             ! Midway through the path, so only a State name is valid
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local(:slashpos-1),  &
-        	                       value=lindex, foundFlag=lfound,  &
-        	                       rc=lrc)
-	    if (ESMF_LogMsgFoundError (lrc,  &
+                                       value=lindex, foundFlag=lfound,  &
+                                       rc=lrc)
+            if (ESMF_LogMsgFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
 #else
@@ -6172,11 +6172,11 @@ module ESMF_StateMod
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
               if (nextitem1%namep == itempath_local(:slashpos-1)) then
-        	lindex = i1
-        	exit
+                lindex = i1
+                exit
               end if
             end do
-            itemfound = i1 <= dcount1
+            lfound = i1 <= dcount1
 #endif
             if (lfound .and. sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE) then
               sp_local => sp%datalist(lindex)%datap%spp
@@ -6192,9 +6192,9 @@ module ESMF_StateMod
             ! End of path, so any item is OK
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local,  &
-        	                       value=lindex, foundFlag=lfound,  &
-        	                       rc=lrc)
-	    if (ESMF_LogMsgFoundError (lrc,  &
+                                       value=lindex, foundFlag=lfound,  &
+                                       rc=lrc)
+            if (ESMF_LogMsgFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) return
 #else
@@ -6202,17 +6202,17 @@ module ESMF_StateMod
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
               if (nextitem1%namep == itempath_local) then
-        	lindex = i1
-        	exit
+                lindex = i1
+                exit
               end if
             end do
-            itemfound = i1 <= dcount1
+            lfound = i1 <= dcount1
 #endif
             if (present (litem)) then
               if (lfound) then
-        	litem => sp%datalist(lindex)
+                litem => sp%datalist(lindex)
               else
-        	litem => null ()
+                litem => null ()
               end if
             end if
           end if
