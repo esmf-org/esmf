@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.6 2010/03/04 18:57:45 svasquez Exp $
+$Id: ESMF_Macros.inc,v 1.7 2010/10/12 22:15:17 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ the following macro is here for the frameworks own internal use.
 unmatched quotes confuse some preprocessors with delusions of grammar.)
 #endif
 
-#define ESMF_SRCLINE __FILE__, __LINE__
+#define ESMF_SRCLINE ESMF_FILENAME, __LINE__
 
 #endif 
 
