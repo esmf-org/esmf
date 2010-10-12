@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.5 2010/10/07 23:30:38 rokuingh Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.6 2010/10/12 15:35:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.5 2010/10/07 23:30:38 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.6 2010/10/12 15:35:45 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -88,7 +88,8 @@ contains
 !
 !   \begin{description}
 !   \item [fieldBundle]
-!     {\tt ESMF\_FieldBundle} with source data.
+!     {\tt ESMF\_FieldBundle} with source data. The data in this 
+!       FieldBundle may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[checkflag]}]
@@ -245,7 +246,8 @@ contains
 !
 !   \begin{description}
 !   \item [fieldbundle]
-!     {\tt ESMF\_FieldBundle} containing data to be haloed.
+!     {\tt ESMF\_FieldBundle} containing data to be haloed. The data in this 
+!       FieldBundle may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]

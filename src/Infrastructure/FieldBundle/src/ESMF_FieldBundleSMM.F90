@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.16 2010/10/08 22:32:01 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.17 2010/10/12 15:35:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.16 2010/10/08 22:32:01 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.17 2010/10/12 15:35:45 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -369,7 +369,8 @@ contains
 ! \item [srcFieldBundle]  
 !       {\tt ESMF\_FieldBundle} with source data. 
 ! \item [dstFieldBundle] 
-!       {\tt ESMF\_FieldBundle} with destination data. 
+!       {\tt ESMF\_FieldBundle} with destination data. The data in this 
+!       FieldBundle may be destroyed by this call.
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
 ! \item [factorList]
@@ -849,7 +850,8 @@ contains
 ! \item [srcFieldBundle]  
 !       {\tt ESMF\_FieldBundle} with source data. 
 ! \item [dstFieldBundle] 
-!       {\tt ESMF\_FieldBundle} with destination data. 
+!       {\tt ESMF\_FieldBundle} with destination data. The data in this 
+!       FieldBundle may be destroyed by this call. 
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
 ! \item [{[rc]}]  
