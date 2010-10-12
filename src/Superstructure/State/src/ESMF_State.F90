@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.209 2010/10/12 14:32:22 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.210 2010/10/12 14:52:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.209 2010/10/12 14:32:22 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.210 2010/10/12 14:52:03 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -6015,8 +6015,10 @@ module ESMF_StateMod
       ! the validity of the state - it has been checked before we get here.
 
       if (.not. usenested_lookup) then
+print *, 'find_pathed_item_worker: being called'
          call find_pathed_item_worker (stypep, lpath=dataname,  &
              lfound=itemfound, lindex=itemindex, litem=dataitem)
+print *, 'find_pathed_item_worker: returned'
       else
 #if defined (ESMF_ENABLENAMEMAP)
         call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
@@ -6159,6 +6161,7 @@ module ESMF_StateMod
           lfound = .false.
 
           if (slashpos > 0) then
+print *, 'find_pathed_item_worker: midpath search'
             ! Midway through the path, so only a State name is valid
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local(:slashpos-1),  &
@@ -6178,10 +6181,16 @@ module ESMF_StateMod
             end do
             lfound = i1 <= dcount1
 #endif
-            if (lfound .and. sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE) then
-              sp_local => sp%datalist(lindex)%datap%spp
-              call find_pathed_item_worker (sp_local, itempath_local(slashpos+1:),  &
-                                       lfound, lindex, litem)
+            if (lfound) then
+              if (sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE) then
+                sp_local => sp%datalist(lindex)%datap%spp
+                call find_pathed_item_worker (sp_local, itempath_local(slashpos+1:),  &
+                                              lfound, lindex, litem)
+              else
+                if (present (litem)) then
+                  litem => null ()
+                end if 
+              end if
             else
               if (present (litem)) then
                 litem => null ()
@@ -6190,6 +6199,7 @@ module ESMF_StateMod
 
           else
             ! End of path, so any item is OK
+print *, 'find_pathed_item_worker: end of path search'
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameLookup (sp%nameMap, name=itempath_local,  &
                                        value=lindex, foundFlag=lfound,  &
