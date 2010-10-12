@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.16 2010/10/08 22:31:15 rokuingh Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.17 2010/10/12 15:35:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.16 2010/10/08 22:31:15 rokuingh Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.17 2010/10/12 15:35:31 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -315,7 +315,8 @@ contains
 ! \item [srcField]  
 !       {\tt ESMF\_Field} with source data. 
 ! \item [dstField] 
-!       {\tt ESMF\_Field} with destination data. 
+!       {\tt ESMF\_Field} with destination data. The data in this Field may be
+!     destroyed by this call.
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
 ! \item [factorList]
@@ -657,7 +658,8 @@ contains
 ! \item [srcField]  
 !       {\tt ESMF\_Field} with source data. 
 ! \item [dstField] 
-!       {\tt ESMF\_Field} with destination data. 
+!       {\tt ESMF\_Field} with destination data. The data in this Field may be
+!     destroyed by this call.
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
 ! \item [{[rc]}]  

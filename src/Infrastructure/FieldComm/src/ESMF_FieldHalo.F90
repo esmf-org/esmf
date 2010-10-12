@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.4 2010/10/08 17:30:59 rokuingh Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.5 2010/10/12 15:35:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.4 2010/10/08 17:30:59 rokuingh Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.5 2010/10/12 15:35:31 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -291,7 +291,8 @@ contains
 !
 !   \begin{description}
 !   \item [field]
-!     {\tt ESMF\_Field} containing data to be haloed.
+!     {\tt ESMF\_Field} containing data to be haloed. The data in this Field may be
+!     destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[halostartregionflag]}]
