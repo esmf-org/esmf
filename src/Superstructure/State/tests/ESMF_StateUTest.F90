@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.75 2010/10/04 00:37:25 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.76 2010/10/12 00:58:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.75 2010/10/04 00:37:25 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.76 2010/10/12 00:58:27 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -298,16 +298,16 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Test adding a second FieldBundle to a State
+      ! Test replacing a the FieldBundle with a second FieldBundle in the State
       bundlename = "Temperature"
       bundle1 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Creating a FieldBundle Test"
+      write(name, *) "Creating a replacement FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !EX_UTest
       call ESMF_StateAdd(state1, bundle1, rc)
-      write(name, *) "Adding a second FieldBundle to a State Test"
+      write(name, *) "Replacing a FieldBundle with a second FieldBundle in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
