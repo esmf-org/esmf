@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.14 2010/10/11 20:39:55 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.15 2010/10/12 18:22:36 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -97,7 +97,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (phaseCount == 0) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Initialize method registered!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -119,7 +119,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (phaseCount == 0) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Run method registered!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -141,7 +141,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     if (phaseCount == 0) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Finalize method registered!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -660,7 +660,7 @@ module ESMF_ComplianceICMod
     if (ESMF_StateGetInit(state) /= ESMF_INIT_CREATED) then
       call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
         " is invalid!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -720,7 +720,7 @@ module ESMF_ComplianceICMod
             write (tempString, *) item, " [FIELDBUNDLE] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAY) then
             call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
-              " contains an ESMF_Array object!", ESMF_LOG_ERROR, rc=rc)
+              " contains an ESMF_Array object!", ESMF_LOG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=__FILE__)) &
@@ -728,7 +728,7 @@ module ESMF_ComplianceICMod
             write (tempString, *) item, " [ARRAY] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
             call ESMF_LogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
-              " contains an ESMF_ArrayBundle object!", ESMF_LOG_ERROR, rc=rc)
+              " contains an ESMF_ArrayBundle object!", ESMF_LOG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
               file=__FILE__)) &
@@ -1023,7 +1023,7 @@ module ESMF_ComplianceICMod
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
       call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", ESMF_LOG_ERROR, rc=rc)
+        trim(attributeName)//"> is NOT present!", ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1031,7 +1031,7 @@ module ESMF_ComplianceICMod
     else if (len_trim(value) == 0) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> is NOT set!", ESMF_LOG_ERROR, rc=rc)
+        trim(attributeName)//"> is NOT set!", ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1144,7 +1144,7 @@ module ESMF_ComplianceICMod
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
       call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", ESMF_LOG_ERROR, rc=rc)
+        trim(attributeName)//"> is NOT present!", ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1152,7 +1152,7 @@ module ESMF_ComplianceICMod
     else if (len_trim(value) == 0) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> is NOT set!", ESMF_LOG_ERROR, rc=rc)
+        trim(attributeName)//"> is NOT set!", ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1185,7 +1185,7 @@ module ESMF_ComplianceICMod
     ! Ensure that the Clock is a valid object
     if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) then
       call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1265,7 +1265,7 @@ module ESMF_ComplianceICMod
     
       if (clockModified) then
         call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
-          ESMF_LOG_ERROR, rc=rc)
+          ESMF_LOG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=__FILE__)) &
@@ -1330,7 +1330,7 @@ module ESMF_ComplianceICMod
 
     if (.not.clockInternalValid) then
       call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1345,7 +1345,7 @@ module ESMF_ComplianceICMod
     
     if (.not.clockValid) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1375,7 +1375,7 @@ module ESMF_ComplianceICMod
       
     if (startTimeInt /= startTime) then
       call ESMF_LogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1385,7 +1385,7 @@ module ESMF_ComplianceICMod
       
     if (stopTimeInt /= stopTime) then
       call ESMF_LogWrite(trim(prefix)//" ==> stopTime of internal Clock does not match Clock!", &
-        ESMF_LOG_ERROR, rc=rc)
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1405,7 +1405,7 @@ module ESMF_ComplianceICMod
     if (mustReachStop) then
       if (currTimeInt /= stopTimeInt) then
         call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
-          ESMF_LOG_ERROR, rc=rc)
+          ESMF_LOG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=__FILE__)) &
