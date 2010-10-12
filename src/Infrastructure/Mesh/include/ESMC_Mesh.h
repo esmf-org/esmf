@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.34 2010/10/08 15:38:51 oehmke Exp $
+// $Id: ESMC_Mesh.h,v 1.35 2010/10/12 20:10:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -190,10 +190,10 @@ int ESMC_MeshAddNodes(
 ESMC_Mesh ESMC_MeshCreate(
   int parametricDim,         // in
   int spatialDim,            // in
-  int *rc                     // out
+  int *rc                    // out
 );
 // !RETURN VALUE:
-//  type(ESMC\_Mesh)         :: ESMC\_MeshCreate3Part
+//  type(ESMC_Mesh)         :: ESMC_MeshCreate
 //
 // !DESCRIPTION:
 //
