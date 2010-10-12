@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.9 2010/10/06 17:09:45 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.10 2010/10/12 22:14:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -224,7 +224,8 @@ end subroutine ESMF_ScripInq
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD, &
-      ESMF_SRCLINE, rc)) return
+      ESMF_SRCLINE,&
+      rc)) return
 
     ! Read in grid_center_lon and grid_center_lat
     if (present(grid_center_lon)) then
@@ -367,8 +368,8 @@ end subroutine ESMF_ScripInq
 
     ncStatus = nf90_close(ncid)
     if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
       rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
