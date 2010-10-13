@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.19 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.20 2010/10/13 22:25:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.19 2010/03/04 18:57:44 svasquez Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.20 2010/10/13 22:25:09 rokuingh Exp $'
 
 
 !==============================================================================
@@ -609,7 +609,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocPrint"
 !BOP
-! !IROUTINE: ESMF_StaggerLocPrint - Print information of a ESMF_StaggerLoc object
+! !IROUTINE: ESMF_StaggerLocPrint - Print information of a StaggerLoc object
 
 ! !INTERFACE:
       subroutine ESMF_StaggerLocPrint(staggerloc, rc)

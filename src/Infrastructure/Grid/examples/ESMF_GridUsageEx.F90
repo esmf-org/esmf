@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.77 2010/09/30 21:04:17 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.78 2010/10/13 22:25:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -72,7 +72,7 @@ program ESMF_GridCreateEx
 
 !BOE
 !
-!\subsubsection{Shortcut Creation Method for Single-Tile Grids}
+!\subsubsection{Create single-tile Grid shortcut method}
 
 ! The method {\tt ESMF\_GridCreateShapeTile()} is a shortcut
 ! for building single tile logically rectangular Grids up to 
@@ -304,7 +304,7 @@ endif
 #ifdef LOCAL_NOT_IMPL
 !BOEI
 !
-!\subsubsection{Specifying Tile Edge Connections}
+!\subsubsection{Specifying tile edge connections}
 ! \label{example:TileEdgeConn}
 !
 ! The {\tt ESMF\_GridCreateShapeTile} command has three arguments 
@@ -385,8 +385,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 
 !BOE
-!\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid
-!                  With Uniformly Spaced Coordinates}
+!\subsubsection{Create a 2D regularly distributed rectilinear Grid
+!                  with uniformly spaced coordinates}
 ! \label{example:2DRegUniGrid}
 !
 ! The following is an example of creating a simple rectilinear grid 
@@ -483,8 +483,8 @@ endif
 ! using a regular distribution, replace the {\tt countsPerDEDim} arguments
 ! in the Grid create with the appropriate {\tt maxIndex} and {\tt regDecomp} arguments. 
 !
-!\subsubsection{Creating a 2D Irregularly Distributed Rectilinear Grid
-!                  With Uniformly Spaced Coordinates}
+!\subsubsection{Create a 2D irregularly distributed rectilinear Grid
+!                  with uniformly spaced coordinates}
 ! \label{example:2DIrregUniGrid}
 !
 ! This example serves as an illustration of the difference between using
@@ -575,8 +575,8 @@ endif
 
 !BOE
 !
-!\subsubsection{Creating a 2D Irregularly Distributed Grid
-!                  With Curvilinear Coordinates}
+!\subsubsection{Create a 2D irregularly distributed Grid
+!                  with curvilinear coordinates}
 ! \label{example:2DIrregCurviGrid}
 !
 ! The following is an example of creating a simple curvilinear Grid and
@@ -668,8 +668,8 @@ if (petCount .le. 6) then
 endif
 
 !BOE
-!\subsubsection{Creating an Irregularly Distributed Rectilinear Grid with
-!                a Non-Distributed Vertical Dimension}
+!\subsubsection{Create an irregularly distributed rectilinear Grid with
+!                a non-distributed vertical dimension}
 ! \label{example:CurviGridWithUndistDim}
 !
 ! This example demonstrates how a user can build a rectilinear 
@@ -848,8 +848,8 @@ endif
    call ESMF_GridDestroy(grid3D, rc=rc)
 
 !BOE
-!\subsubsection{Creating an Arbitrarily Distributed Rectilinear Grid with
-!                a Non-Distributed Vertical Dimension}
+!\subsubsection{Create an arbitrarily distributed rectilinear Grid with
+!                a non-distributed vertical dimension}
 ! \label{example:ArbGridWithUndistDim}
 !
 ! There are more restrictions in defining an arbitrarily distributed grid.  
@@ -977,8 +977,8 @@ endif
 
 
 !BOE
-!\subsubsection{Creating a Curvilinear Grid Using the Coordinates Defined 
-! In A SCRIP file}\label{sec:example:2DLogRecFromScrip}
+!\subsubsection{Create a curvilinear Grid using the coordinates defined 
+! in a SCRIP file}\label{sec:example:2DLogRecFromScrip}
 !
 ! ESMF supports the creation of a 2D curvilinear Grid using the coordinates 
 ! defined in a SCRIP format Grid file~\cite{ref:SCRIP}. The grid contained in the 
@@ -1013,8 +1013,8 @@ endif
 
 
 !BOE
-!\subsubsection{Creating an Empty Grid in a Parent Component 
-! for Completion in a Child Component}\label{sec:usage:setcommit}
+!\subsubsection{Create an empty Grid in a parent Component 
+! for completion in a child Component}\label{sec:usage:setcommit}
 !
 ! ESMF Grids can be created incrementally. To do this,
 ! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
@@ -1073,7 +1073,7 @@ endif
 
 
 !BOE
-!\subsubsection{Grid Stagger Locations}
+!\subsubsection{Grid stagger locations}
 !\label{sec:usage:staggerloc}
 !
 ! A useful finite difference technique is to place different physical 
@@ -1113,7 +1113,7 @@ endif
 
 
 !BOE
-!\subsubsection{Associating Coordinates with Stagger Locations}
+!\subsubsection{Associate coordinates with stagger locations}
 !
 ! The primary type of data the Grid is resposible for storing is coordinates. 
 ! The coordinate values in a Grid can be employed by the user in calculations or
@@ -1181,8 +1181,8 @@ endif
 
 !BOE
 !
-!\subsubsection{Specifying the Relationship of Coordinate Arrays
-!               to Index Space Dimensions}
+!\subsubsection{Specify the relationship of coordinate Arrays
+!               to index space dimensions}
 !
 ! To specify how the coordinate arrays are mapped to the 
 ! index dimensions the arguments {\tt coordDep1}, 
@@ -1307,7 +1307,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-!\subsubsection{Accessing Coordinates}
+!\subsubsection{Access coordinates}
 !\label{sec:usage:coords:accessing}
 !
 ! Once a Grid has been created, the user has several options to access
@@ -1432,7 +1432,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 
 !BOE
-!\subsubsection{Associating Items with Stagger Locations}
+!\subsubsection{Associate items with stagger locations}
 !\label{sec:usage:items}
 !
 ! The ESMF Grids contain the ability to store other kinds of 
@@ -1480,7 +1480,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 
 !BOE
-!\subsubsection{Accessing Items}
+!\subsubsection{Access items}
 !\label{sec:usage:items:accessing}
 ! Once an item has been added to a Grid, the user has several options to access
 ! the data. The first of these, {\tt ESMF\_GridSetItem()}, 
@@ -1605,7 +1605,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 
 !BOE
-!\subsubsection{Grid Regions and Bounds}
+!\subsubsection{Grid regions and bounds}
 !\label{sec:grid:usage:bounds}
 !
 ! Like an Array or a Field, the index space of each 
@@ -1740,7 +1740,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOE
 
 !BOE
-!\subsubsection{Getting Grid Coordinate Bounds}
+!\subsubsection{Get Grid coordinate bounds}
 !
 ! When operating on coordinates the user may often wish to 
 ! retrieve the bounds of the piece of coordinate data on
@@ -1802,7 +1802,7 @@ endif
 
 
 !BOE
-!\subsubsection{Getting Grid Stagger Location Bounds}
+!\subsubsection{Get Grid stagger location bounds}
 !
 ! When operating on data stored at a particular stagger
 ! in a Grid the user may find it useful to be able
@@ -1859,7 +1859,7 @@ endif
 
 
 !BOE
-!\subsubsection{Getting Grid Stagger Location Information}
+!\subsubsection{Get Grid stagger location information}
 !
 ! In addition to the per DE information that can be accessed about
 ! a stagger location there is some global information that can
@@ -1909,7 +1909,7 @@ endif
 
 
 !BOE
-!\subsubsection{Creating an Array at a Stagger Location}
+!\subsubsection{Create an Array at a stagger location}
 !
 ! In order to create an Array to correspond to a Grid stagger location
 ! several pieces of information need to be obtained from both the 
@@ -2065,7 +2065,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
-!\subsubsection{Generating Grid Coordinates}
+!\subsubsection{Generate Grid coordinates}
 !
 ! The current ESMF grid interface provides some automatic production
 ! of coordinate values. In the future there are plans to add more, but 
@@ -2087,7 +2087,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
-!\subsubsection{Calculating Grid Coordinates}
+!\subsubsection{Calculate Grid coordinates}
 !
 ! In addition to the grid generate option specified above to set coordinates, 
 ! ESMF also provides a method to calculate coordinates based on those
@@ -2106,7 +2106,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
-!\subsubsection{Grid Halo}
+!\subsubsection{Grid halo}
 !
 ! The Grid halo operation allows users to update the
 ! halos (if present) of the Grid coordinate arrays to contain the coordinate values on the 
@@ -2128,7 +2128,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
-! \subsubsection{Creating a Regularly Distributed 3D Grid with Generated Coordinates}
+! \subsubsection{Create a regularly distributed 3D Grid with generated coordinates}
 !
 ! This example illustrates the creation of a 100x100x100  3D Grid distributed across
 ! 5 PETs in each dimension. The coordinates in the Grid are uniformly distributed
@@ -2166,7 +2166,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !removeBOE
-! \subsubsection{Creating a Grid from Existing Fortran Arrays}~\label{sec:example5}
+! \subsubsection{Create a Grid from existing Fortran arrays}~\label{sec:example5}
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in 4 byte real fortan arrays.  The new Grid contains just the center stagger location.
@@ -2247,7 +2247,7 @@ endif
 
 
 !removeBOE
-! \subsubsection{Example: Grid Creation from Existing Fortran Arrays Using CreateEmpty/Set}
+! \subsubsection{Create a Grid from existing Fortran arrays using the CreateEmpty/Set paradigm}
 !
 !  This example illustrates the use of the CreateEmpty/Set paradigm.
 !  It repeats the above example using this grid creation technique.
@@ -2303,7 +2303,7 @@ endif
 
 
 !BOE
-!\subsubsection{Creating More Complex Grids Using DistGrid}
+!\subsubsection{Create more complex Grids using DistGrid}
 !\label{sec:usage:adv:create}
 !
 ! Besides the shortcut methods for creating a Grid object such as
@@ -2373,7 +2373,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
-!\subsubsection{Creation: Advanced: Coordinate Specification and Index Space Dependency}~\label{sec:usage:coordstore}
+!\subsubsection{Create with advanced coordinate specification and index space dependency}~\label{sec:usage:coordstore}
 !
 ! Depending on the user's coordinate data there are many possible
 ! arrangements for the coordinates to be stored in memory. 
@@ -2444,7 +2444,7 @@ endif
 
 #ifdef LOCAL_NOT_IMPL
 !removeBOE
-!\subsubsection{Creation: Advanced: Miscellaneous}
+!\subsubsection{Create with miscellaneous advanced options}
 !
 ! There are also a couple of other grid arguments which don't
 ! fit into the above categories. One of these
@@ -2466,7 +2466,7 @@ endif
 
 
 !BOE
-!\subsubsection{Specifying Custom Stagger Locations}
+!\subsubsection{Specify custom stagger locations}
 !\label{sec:usage:staggerloc:adv}
 !
 ! Although ESMF provides a set of predefined stagger locations (See Section~\ref{sec:opt:staggerloc}),
@@ -2556,7 +2556,7 @@ endif
 
 
 !BOE
-!\subsubsection{Specifying Custom Stagger Padding}
+!\subsubsection{Specify custom stagger padding}
 !\label{sec:usage:staggerpadding:adv}
 !
 !There is an added complication with the data (e.g. coordinates) stored at stagger locations in 
@@ -2770,7 +2770,7 @@ endif
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
-!\subsubsection{Creating a 2D Regularly Distributed Rectilinear Grid from File} 
+!\subsubsection{Create a 2D regularly distributed rectilinear Grid from file} 
 ! \label{example:GridCrFromFile}
 !
 ! This example shows how to read an ESMF GridSpec Attribute Package from an

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.164 2010/10/01 23:06:04 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.165 2010/10/13 22:25:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.164 2010/10/01 23:06:04 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.165 2010/10/13 22:25:09 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -834,7 +834,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddCoord"
 !BOPI
-! !IROUTINE: ESMF_GridAddCoord - Set coordinates using array of ESMF Arrays
+! !IROUTINE: ESMF_GridAddCoord - Set coordinates using an array of Arrays
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddCoord()
@@ -2991,7 +2991,7 @@ end subroutine ESMF_GridConvertIndex
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScripDistGrd"
 !BOP
-! !IROUTINE: ESMF_GridCreate Create a ESMF_Grid from a SCRIP grid file and a DistGrid
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP grid file and a DistGrid
 
 ! !INTERFACE:
   function ESMF_GridCreateFrmScripDistGrd(distgrid, filename, rc)
@@ -3310,7 +3310,7 @@ end subroutine convert_corner_arrays_to_1D
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScripReg"
 !BOP
-! !IROUTINE: ESMF_GridCreate Create a ESMF_Grid from a SCRIP grid file with a regular distribution
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP grid file with a regular distribution
 
 ! !INTERFACE:
   function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, addCornerStagger, rc)
@@ -9142,7 +9142,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an ESMF Array
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
@@ -12314,7 +12314,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetItem - Get item and put into an ESMF Array
+! !IROUTINE: ESMF_GridGetItem - Get item and put into an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
@@ -12931,7 +12931,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordFromArray"
 !BOP
-! !IROUTINE: ESMF_GridSetCoord - Set coordinates using ESMF Arrays
+! !IROUTINE: ESMF_GridSetCoord - Set coordinates using Arrays
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromArray(grid, staggerloc, coordDim, &
@@ -15523,7 +15523,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetItemFromArray"
 !BOP
-! !IROUTINE: ESMF_GridSetItem - Set item using ESMF Array
+! !IROUTINE: ESMF_GridSetItem - Set an item using an Array
 
 ! !INTERFACE:
       subroutine ESMF_GridSetItemFromArray(grid, staggerloc, item, &

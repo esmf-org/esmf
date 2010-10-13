@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.5 2010/06/29 20:47:58 svasquez Exp $
+! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.6 2010/10/13 22:25:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@ program ESMF_GridCreateEx
 ! This program shows examples of Grid creation
 
 !BOE
-! \subsubsection{Example: 2D+1 Spherical Grid Creation}
+! \subsubsection{Create a 2D thick sphere grid}
 !
 ! This example  illustrates the creation of a 2D spherical Grid 
 ! with a 3rd undistributed dimension.  The Grid contains both the center stagger location and a corner

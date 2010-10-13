@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.13 2010/06/29 20:47:58 svasquez Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.14 2010/10/13 22:25:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_GridCreateEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: Create 2D Grid with Regular Distribution from a DistGrid}~\label{sec:usage:ex:adv:reg}
+! \subsubsection{Create a 2D Grid with regular distribution from a DistGrid}~\label{sec:usage:ex:adv:reg}
 !
 ! This example illustrates the creation of a single tile 2D Grid
 ! with a regular distribution from a DistGrid.  The size of the Grid is
