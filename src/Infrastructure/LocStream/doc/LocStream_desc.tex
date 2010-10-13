@@ -16,15 +16,15 @@ be thought of as a set of observations.  Their locations are generally
 described using Cartesian (x, y, z), or (lat, lon, height) coordinates.
 There is no assumption of any regularity in the positions of the points.
 To make the concept more general, the locations for each data point are
-represented using a construct called Keys, which can include other
+represented using a construct called {\it keys}, which can include other
 descriptors besides location.
 
-Although Keys are similar in concept to ESMF Attributes they have important
-differences. First, Keys always occur as vectors, never as scalars.
-Second, Keys are local to the DE: each DE can have a different Key
-list with a different number of of elements. Third, the local Key 
+Although keys are similar in concept to ESMF Attributes they have important
+differences. First, keys always occur as vectors, never as scalars.
+Second, keys are local to the DE: each DE can have a different key
+list with a different number of of elements. Third, the local key 
 list always has the same number of elements as there are local observations
-on that DE.  Finally, Keys may be used for the distribution of LocStreams.
+on that DE.  Finally, keys may be used for the distribution of LocStreams.
 As such, they must be defined before the LocStream is distributed.
 
 LocStreams can be very large. Data assimilation systems might use
@@ -34,32 +34,27 @@ Common operations involving LocStreams are similar to those involving Grids.
 In data assimilation, for example, there is an immediate need to:
 
 \begin{enumerate}
-\item Create a Field or FieldBundle on a LocStream.
-\item Redistribute data between Fields defined on LocStreams.
-\item Gather a bundle of data defined on a LocStream to a root
-DE (for output). Similarly, scatter from a root DE.
-\item Halo region exchange for a Field defined by a haloed LocStream.
-\item Extract Fortran array from Field which was defined by a LocStream.
+\item Create a Field or FieldBundle on a LocStream
+\item Redistribute data between Fields defined on LocStreams
+\item Gather or scatter a FieldBundle defined on a LocStream from/to a root DE
+\item Halo region exchange for a Field defined by a haloed LocStream
+\item Extract Fortran array from Field which was defined by a LocStream
 \end{enumerate}
 
-The operations on the Fortran arrays underlyinng LocStreams are usually simple numerical ones. However,
+The operations on the Fortran arrays underlying LocStreams are usually simple numerical ones. However,
 it is necessary to sort them in place, and access only portions of the them. It would
 not be efficient to continually create new LocStreams to reflect this sorting. Instead,
 the sorting is managed by the application through permutation arrays while keeping
 the data in place. Locations can become inactive, e.g., if the quality control asserts that
 observation is invalid. This can be managed again by the application through masks.
 
-\subsubsection{How is a LocStream different than a Grid?}
 A LocStream differs from a Grid in that no topological structure is
 maintained between the points
 (e.g. the class contains no information about which point is the neighbor
 of which other point).
 
-\subsubsection{How is a LocStream different than a Mesh?}
-A Mesh consists of irregularly positioned points, but it has connectivity
+A LocStream is similar to a Mesh consists in that both are collections of irregularly positioned 
+points.  However, the two structures differ in that a Mesh has connectivity
 also: each data point has a set of neighboring data points. There is no requirement that the
-points in a LocStream have connectivity, indeed any particular spatial relationship to
-one another.
-Due to their heritage from data assimilation, many of the operations on LocStreams
-do not resemble typical operations on Meshes, for example in a finite-volume
-or finite-element code. 
+points in a LocStream have connectivity, in fact there is no requirement that a point has 
+any particular spatial relationship to another.

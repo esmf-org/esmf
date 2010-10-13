@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.30 2010/05/10 07:20:54 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.31 2010/10/13 22:24:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.30 2010/05/10 07:20:54 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.31 2010/10/13 22:24:47 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -332,7 +332,7 @@ contains
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyArray"
 !BOP
-! !IROUTINE: ESMF_LocStreamAddKey - Add a key ESMF Array 
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array 
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
@@ -484,9 +484,65 @@ contains
   end subroutine ESMF_LocStreamAddKeyArray
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user memory 
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LocStreamAddKey()
+!  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, copyflag, &
+!               keyUnits, keyLongName, rc)
+!
+! !ARGUMENTS:
+!    type(ESMF_Locstream), intent(in) :: locstream
+!    character (len=*), intent(in) :: keyName
+!    <farray>
+!    type(ESMF_CopyFlag), intent(in), optional :: copyflag
+!    character (len=*), intent(in), optional :: keyUnits
+!    character (len=*), intent(in), optional :: keyLongName
+!    integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    Add a key to a locstream. Once a key has been added its internal data
+!    can be retrieved and used to set key values. 
+!
+!    Supported values for <farray> are:
+!    \begin{description}
+!    \item integer(ESMF_KIND_I4), dimension(:), intent(in) :: farray
+!    \item real(ESMF_KIND_R4), dimension(:), intent(in) :: farray
+!    \item real(ESMF_KIND_R8), dimension(:), intent(in) :: farray
+!    \end{description}
+!
+!    The arguments are:
+!    \begin{description}
+!    \item [locstream]
+!    The {\tt ESMF\_LocStream} object to add key to.
+!    \item [keyName]
+!    The name of the key to add. 
+!    \item[farray] 
+!    Valid native Fortran array, i.e. memory must be associated with the 
+!    actual argument. The type/kind/rank information of {\tt farray} will be 
+!    used to set the key Array's properties accordingly. 
+!    \item[{[copyflag]}] 
+!    Specifies whether the Array object will reference the memory allocation 
+!    provided by {\tt farray} directly or will copy the data from 
+!    {\tt farray} into a new memory allocation. Valid options are 
+!    {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
+!    Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+!    may be unsafe when specifying an array slice for {\tt farray}. 
+!    \item [{[keyUnits]}]
+!    The units of the key data. 
+!    If not specified, then the item remains blank.  
+!    \item [{[keyLongName]}]
+!    The long name of the key data. 
+!    If not specified, then the item remains blank.  
+!    \item [{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    \end{description}
+!EOP
+!------------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyI4"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user memory 
 
 ! !INTERFACE:
@@ -533,7 +589,7 @@ contains
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     type(ESMF_LocStreamType), pointer :: lstypep
     type(ESMF_Array) :: array
@@ -576,7 +632,7 @@ contains
 !------------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyR4"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user memory
 
 ! !INTERFACE:
@@ -623,7 +679,7 @@ contains
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     type(ESMF_LocStreamType), pointer :: lstypep
     type(ESMF_Array) :: array
@@ -666,7 +722,7 @@ contains
 !------------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamAddKeyR8"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamAddKey - Add a key Array created around user memory
 
 ! !INTERFACE:
@@ -713,7 +769,7 @@ contains
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     type(ESMF_LocStreamType), pointer :: lstypep
     type(ESMF_Array) :: array
@@ -1045,7 +1101,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream from a distgrid
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a distgrid
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
@@ -1180,7 +1236,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream from an irregular dist.
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from an irregular distribution
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
@@ -1306,7 +1362,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream from a local count
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream from a local count
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
@@ -1438,7 +1494,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamCreate"
 !BOP
-! !IROUTINE: ESMF_LocStreamCreate - Create a new location stream using a regular distribution.
+! !IROUTINE: ESMF_LocStreamCreate - Create a new LocStream using a regular distribution
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
@@ -1836,7 +1892,7 @@ contains
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyArray"
 !BOP
-! !IROUTINE: ESMF_LocStreamGetKey - Get ESMF Array associated with key
+! !IROUTINE: ESMF_LocStreamGetKey - Get an Array associated with a key
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -2031,7 +2087,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyInfo"
 !BOP
-! !IROUTINE: ESMF_LocStreamGetKey - Get Info associated with key
+! !IROUTINE: ESMF_LocStreamGetKey - Get info associated with a key
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -2118,11 +2174,93 @@ end subroutine ESMF_LocStreamGetKeyBounds
   end subroutine ESMF_LocStreamGetKeyInfo
 !------------------------------------------------------------------------------
 
+!BOP
+! !IROUTINE: ESMF_LocStreamGetKey - Get a pointer to key values
+
+! !INTERFACE:
+  ! Private name; call using ESMF_LocStreamGetKey()
+!      subroutine ESMF_LocStreamGetKeyI4(locstream, localDE, keyName, &
+!          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
+!          computationalLBound, computationalUBound, computationalCount,     &
+!          totalLBound, totalUBound, totalCount,     &
+!          farray, doCopy, rc)
+!
+! !ARGUMENTS:
+!      type(ESMF_LocStream), intent(in) :: locstream
+!      integer, intent(in) :: localDE
+!      character (len=*),    intent(in)              :: keyName
+!      integer,                intent(out), optional :: exclusiveLBound
+!      integer,                intent(out), optional :: exclusiveUBound
+!      integer,                intent(out), optional :: exclusiveCount
+!      integer,                intent(out), optional :: computationalLBound
+!      integer,                intent(out), optional :: computationalUBound
+!      integer,                intent(out), optional :: computationalCount
+!      integer,                intent(out), optional :: totalLBound
+!      integer,                intent(out), optional :: totalUBound
+!      integer,                intent(out), optional :: totalCount
+!      <farray>
+!      type(ESMF_CopyFlag), intent(in), optional :: docopy
+!      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method gets a Fortran pointer to the piece of memory which holds the 
+!    key data for a particular key on the given local DE. 
+!    This is useful, for example, for setting the key values in a LocStream, or
+!    for reading the values. 
+!
+!    Supported values for <farray> are:
+!    \begin{description}
+!    \item integer(ESMF_KIND_I4), pointer :: farray(:)
+!    \item real(ESMF_KIND_R4), pointer :: farray(:)
+!    \item real(ESMF_KIND_R8), pointer :: farray(:)
+!    \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{locstream}]
+!          LocStream to get the information from.
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{keyName}]
+!          The key to get the information from.
+!     \item[{[exclusiveLBound]}]
+!          Upon return this holds the lower bounds of the exclusive region.
+!     \item[{[exclusiveUBound]}]
+!          Upon return this holds the upper bounds of the exclusive region.
+!     \item[{[exclusiveCount]}]
+!          Upon return this holds the number of items in the exclusive region
+!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
+!     \item[{[computationalLBound]}]
+!          Upon return this holds the lower bounds of the computational region.
+!     \item[{[computationalUBound]}]
+!          Upon return this holds the upper bounds of the computational region.
+!     \item[{[computationalCount]}]
+!          Upon return this holds the number of items in the computational region
+!          (i.e. {\tt computationalUBound-computationalLBound+1}). 
+!     \item[{[totalLBound]}]
+!          Upon return this holds the lower bounds of the total region.
+!     \item[{[totalUBound]}]
+!          Upon return this holds the upper bounds of the total region.
+!     \item[{[totalCount]}]
+!          Upon return this holds the number of items in the total region
+!          (i.e. {\tt totalUBound-totalLBound+1}). 
+!     \item[{farray}]
+!          The pointer to the coordinate data.
+!     \item[{[doCopy]}]
+!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!          farray is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{opt:copyflag} for further description and a
+!          list of valid values. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyI4"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
@@ -2196,7 +2334,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
 
  ! Local variables 
@@ -2288,7 +2426,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyR4"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
@@ -2362,7 +2500,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
 
  ! Local variables 
@@ -2455,7 +2593,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetKeyR8"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocStreamGetKey - Get pointer to key values
 
 ! !INTERFACE:
@@ -2529,7 +2667,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
 
  ! Local variables 
@@ -2622,7 +2760,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetBounds"
 !BOP
-! !IROUTINE: ESMF_LocStreamGet - Get the local bounds of a location stream
+! !IROUTINE: ESMF_LocStreamGet - Get the local bounds of a LocStream
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()

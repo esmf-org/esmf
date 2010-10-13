@@ -55,7 +55,7 @@ program ESMF_LocStreamEx
 
 #if 1
 !BOE
-!\subsubsection{Creating a LocStream Employing User Allocated Memory}
+!\subsubsection{Create a LocStream with user allocated memory}
 !
 ! The following is an example of creating a LocStream object.
 ! After creation, key data is added, and a Field is created to hold data
@@ -139,7 +139,7 @@ program ESMF_LocStreamEx
    deallocate(temperature)
 
 !BOE
-!\subsubsection{Creating a LocStream Employing Internally Allocated Memory}
+!\subsubsection{Create a LocStream with internally allocated memory}
 !
 ! The following is an example of creating a LocStream object.
 ! After creation, key data is internally allocated,
@@ -236,7 +236,7 @@ program ESMF_LocStreamEx
 
 
 !BOE
-!\subsubsection{Creating a LocStream from a Background Grid}
+!\subsubsection{Create a LocStream from a background Grid}
 !
 ! The following is an example of creating a LocStream object from another LocStream object 
 ! using a background Grid. The new LocStream contains the data present in the old LocStream, 
