@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the University of Illinois-NCSA License.
 #
-# $Id: do_chprotex,v 1.10 2010/03/04 18:57:41 svasquez Exp $
+# $Id: do_chprotex,v 1.11 2010/10/13 05:29:32 eschwab Exp $
 #
 #===============================================================================
 # chprotex
@@ -49,5 +49,7 @@ else
   set class=$1
   set file=$2
 #  perl $DOC_DIR/templates/protex ${option} -bC +f $file > ${class}_${fnsuffix}
-  perl $PROTEX ${option} -bC +f $file > ${class}_${fnsuffix}
+#  perl $PROTEX ${option} -bC +f $file > ${class}_${fnsuffix}
+# TODO:  replace -i with ${option} if needed
+  perl $PROTEX -bCi +f $file > ${class}_${fnsuffix}
 endif
