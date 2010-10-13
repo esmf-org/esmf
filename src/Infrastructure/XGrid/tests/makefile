@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2010/08/18 19:50:22 feiliu Exp $ 
+# $Id: makefile,v 1.3 2010/10/13 21:08:28 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -10,7 +10,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_XGridUTest
 
 TESTS_RUN     = 
 
-TESTS_RUN_UNI = 
+TESTS_RUN_UNI = RUN_ESMF_XGridUTestUNI
 
 include ${ESMF_DIR}/makefile
 
