@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.16 2010/10/08 20:27:57 feiliu Exp $
+! $Id: InjectorMod.F90,v 1.17 2010/10/13 20:48:24 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -167,7 +167,7 @@
 !BOE
 !
 ! !DESCRIPTION:
-! \subsection{Namelist Input Parameters for Injector:}
+! \subsubsection{Namelist Input Parameters for Injector:}
 !     The following variables must be input to the Injector Component to run.
 !     They are located in a file called "coupled\_inject\_input."
 !
