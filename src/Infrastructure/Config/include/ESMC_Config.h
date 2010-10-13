@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.28 2010/10/06 19:42:26 w6ws Exp $
+// $Id: ESMC_Config.h,v 1.29 2010/10/13 17:48:34 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -72,8 +72,7 @@ typedef struct {
 // !INTERFACE:
 ESMC_Config ESMC_ConfigCreate(
   int* rc                    // out
-  );
-
+);
 // !RETURN VALUE:
 //  ESMC_Config*  to newly allocated ESMC_Config
 //
@@ -97,7 +96,6 @@ ESMC_Config ESMC_ConfigCreate(
 int ESMC_ConfigDestroy(
   ESMC_Config* config        // in
 );
-
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
@@ -226,7 +224,6 @@ int ESMC_ConfigLoadFile(
   const char* file,          // in
   ...                        // optional argument list
 );
-
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
 //
