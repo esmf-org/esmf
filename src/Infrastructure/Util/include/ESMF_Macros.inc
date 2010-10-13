@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.7 2010/10/12 22:15:17 theurich Exp $
+$Id: ESMF_Macros.inc,v 1.8 2010/10/13 19:06:28 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,6 +35,10 @@ unmatched quotes confuse some preprocessors with delusions of grammar.)
 #endif
 
 #define ESMF_SRCLINE ESMF_FILENAME, __LINE__
+
+#ifndef ESMF_FILENAME
+#define ESMF_FILENAME __FILE__
+#endif
 
 #endif 
 
