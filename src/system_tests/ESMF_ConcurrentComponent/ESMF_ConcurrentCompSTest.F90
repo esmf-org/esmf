@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.10 2010/10/13 17:01:47 theurich Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.11 2010/10/13 22:33:57 theurich Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -432,16 +432,13 @@
     write(0, *) ""
 
 
-    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-    ! file that the scripts grep for.
-    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
-  
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
     ! into the Log file that the scripts grep for.
     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
     __FILE__, &
     __LINE__)
+
+    call ESMF_Finalize()
 
     end program ConcurrentComponent
     
