@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2010/08/26 16:08:56 theurich Exp $
+# $Id: build_rules.mk,v 1.19 2010/10/13 19:53:42 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -171,6 +171,11 @@ ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
+
+############################################################
+# Set unlimited line length limit for free format files
+#
+ESMF_F90COMPILEOPTS += -ffree-line-length-none
 
 ############################################################
 # Set rpath syntax
