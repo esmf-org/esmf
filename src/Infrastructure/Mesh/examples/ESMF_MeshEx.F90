@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.30 2010/10/01 18:55:40 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.31 2010/10/13 22:36:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@ program ESMF_MeshEx
 ! Mesh class interfaces, for further detail which applies to using a Field specifically on created on a Mesh, please see 
 ! Section~\ref{sec:field:usage:create_mesh_arrayspec}.
 !
-!\subsubsection{Mesh Creation}
+!\subsubsection{Mesh creation}
 !\label{sec:mesh:usage:meshCreation}
 !
 ! To create a Mesh we need to set some properties of the Mesh as a whole,  some properties of each node in the mesh and 
@@ -131,7 +131,7 @@ program ESMF_MeshEx
 !EOE
 
 !BOE
-!\subsubsection{Example: Creating a Small Single PET Mesh in one Step}\label{sec:mesh:1pet1step}
+!\subsubsection{Create a small single PET Mesh in one step}\label{sec:mesh:1pet1step}
 !
 !\begin{verbatim}
 !
@@ -281,7 +281,7 @@ program ESMF_MeshEx
 
 
 !BOE
-!\subsubsection{Example: Creating a Small Single PET Mesh in Three Steps}\label{sec:mesh:1pet3step}
+!\subsubsection{Create a small single PET Mesh in three steps}\label{sec:mesh:1pet3step}
 !
 ! This example is intended to illustrate the creation of a small Mesh in three steps on one PET. The Mesh being created is exactly
 ! the same one as in the last example (Section~\ref{sec:mesh:1pet1step}), but the three step process allows the creation to occur in 
@@ -415,7 +415,7 @@ program ESMF_MeshEx
   endif 
 
 !BOE
-!\subsubsection{Example: Creating a Small Mesh on 4 PETs in One Step}
+!\subsubsection{Create a small Mesh on 4 PETs in one step}
 !
 !
 !\begin{verbatim}
@@ -677,7 +677,7 @@ program ESMF_MeshEx
   endif 
 
 !BOE
-!\subsubsection{Creating a Mesh from a SCRIP Grid file or a ESMF Unstructured Grid file}
+!\subsubsection{Create a Mesh from a SCRIP Grid file or an ESMF unstructured Grid file}
 !\label{sec:example:UnstructFromFile}
 !
 ! ESMF supports the creation of a Mesh from a 2D unstructured grid defined in a SCRIP format
@@ -801,7 +801,7 @@ program ESMF_MeshEx
 #endif
 
 !BOE
-!\subsubsection{Removing Mesh Memory}
+!\subsubsection{Remove Mesh memory}
 !
 ! There are two different levels that the memory in a Mesh can be removed. The first of these is the standard destroy call, 
 ! {\tt ESMF\_MeshDestroy()}. As with other classes, this call removes all memory associated with the object, and afterwards  
