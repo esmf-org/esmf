@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2010/10/13 21:08:28 feiliu Exp $ 
+# $Id: makefile,v 1.4 2010/10/13 22:19:18 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -8,7 +8,7 @@ LOCDIR	  = src/Infrastructure/XGrid/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_XGridUTest
 
-TESTS_RUN     = 
+TESTS_RUN     = RUN_ESMF_XGridUTest
 
 TESTS_RUN_UNI = RUN_ESMF_XGridUTestUNI
 
@@ -26,7 +26,7 @@ DIRS        =
 #
 
 RUN_ESMF_XGridUTest:
-	$(MAKE) TNAME=XGrid NP=4 ftest
+	$(MAKE) TNAME=XGrid NP=1 ftest
 
 RUN_ESMF_XGridUTestUNI:
 	$(MAKE) TNAME=XGrid NP=1 ftest

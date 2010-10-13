@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.12 2010/10/13 21:08:28 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.13 2010/10/13 22:19:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
     !------------------------------------------------------------------------
-    !EX_UTest
+    !NEX_UTest
     ! Create an empty XGrid
     print *, 'Starting test1'
     call test1(rc)
@@ -63,7 +63,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !NEX_UTest
     ! Create an empty XGrid with area/centroid
     print *, 'Starting test2'
     call test2(rc)
@@ -72,7 +72,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !NEX_UTest
     ! Create an empty XGrid with area/centroid, sparseMatA2X
     print *, 'Starting test3'
     call test3(rc)
@@ -81,7 +81,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !NEX_UTest
     ! Create an empty XGrid with area/centroid, sparseMatA2X
     print *, 'Starting test4'
     call test4(rc)
@@ -90,7 +90,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !NEX_UTest
     ! Create an empty XGrid with area/centroid, sparseMatA2X
     print *, 'Starting test5'
     call test5(rc)
