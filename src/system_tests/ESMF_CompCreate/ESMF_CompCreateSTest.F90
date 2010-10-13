@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.29 2009/10/16 20:37:05 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.30 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -16,8 +16,6 @@
 !\begin{verbatim}
 
     program CompCreate
-
-#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -182,10 +180,11 @@
 
       endif
 
-      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-      ! file that the scripts grep for.
-      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+      ! into the Log file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+        __FILE__, &
+        __LINE__)
 
       call ESMF_Finalize(rc=rc)
 

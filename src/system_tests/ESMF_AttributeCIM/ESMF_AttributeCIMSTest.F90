@@ -13,7 +13,6 @@ program ESMF_AttributeCIMSTest
 #define ESMF_METHOD "program ESMF_AttributeCIMSTest"
 
 #include "ESMF.h"
-#include "ESMF_Macros.inc"
 
   ! ESMF Framework module
   use ESMF_Mod
@@ -477,9 +476,12 @@ program ESMF_AttributeCIMSTest
 !  print *, "------------------------------------------------------------"
 !  print *, "------------------------------------------------------------"
 
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in
-  ! the log file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+  ! into the Log file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+  __FILE__, &
+  __LINE__)
 
   call ESMF_Finalize() 
 

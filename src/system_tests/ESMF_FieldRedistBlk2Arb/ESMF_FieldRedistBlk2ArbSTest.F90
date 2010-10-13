@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.18 2009/10/28 03:05:28 theurich Exp $
+! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.19 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test FieldRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -27,8 +27,6 @@
 
      program Blk2ArbFldRedist
 
-#include "ESMF_Macros.inc"
-
      ! ESMF Framework module
      use ESMF_Mod
      use ESMF_TestMod
@@ -36,7 +34,7 @@
      implicit none
 
      ! Local variables
-     integer :: status
+     integer :: rc
      integer :: i, j, j1, add, localCount
      integer :: counts(2), localCounts(2), miscount
      integer :: npets, localPet
@@ -74,12 +72,12 @@
 !
      ! Initialize the framework and get back the default global VM
      call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRedistBlk2ArbSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! Get the PET count and our PET number
-     call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+     call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
 
      miscount = 0
 
@@ -109,10 +107,10 @@
      ! block style and the second is distributed in arbitrary style
      grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
                             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &  
-                             name="source grid", rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
-     call ESMF_GridAddCoord(grid1, rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+                             name="source grid", rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
+     call ESMF_GridAddCoord(grid1, rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! allocate myIndices to maximum number of points on any DE in the first
      ! dimension and 2 in the second dimension.
@@ -135,50 +133,50 @@
 
      grid2 = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices,localArbIndexCount=localCount,rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+       localArbIndex=myIndices,localArbIndexCount=localCount,rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
      call ESMF_ArraySpecSet(arrayspec1, rank=2, &
                             typekind=ESMF_TYPEKIND_R8)
-     if (status .ne. ESMF_SUCCESS) goto 20
+     if (rc .ne. ESMF_SUCCESS) goto 20
      call ESMF_ArraySpecSet(arrayspec2, rank=1, &
                             typekind=ESMF_TYPEKIND_R8)
-     if (status .ne. ESMF_SUCCESS) goto 20
+     if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! Create the field and have it create the array internally for each grid
      humidity1 = ESMF_FieldCreate(grid1, arrayspec1, &
-                                  name="humidity1", rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+                                  name="humidity1", rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
      humidity2 = ESMF_FieldCreate(grid2, arrayspec2, &
-                                  name="humidity2", rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+                                  name="humidity2", rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
      humidity3 = ESMF_FieldCreate(grid1, arrayspec1, &
-                                  name="humidity3", rc=status)
-     if (status .ne. ESMF_SUCCESS) goto 20
+                                  name="humidity3", rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! precompute communication patterns, the first from the regularly
      ! distributed Field to the arbitrarily distributed Field and the second
      ! from the arbitrarily distributed Field back to a different regularly
      ! distributed Field
      call ESMF_FieldRedistStore(humidity1, humidity2, &
-                                routehandle=rh12, rc=status)
+                                routehandle=rh12, rc=rc)
      call ESMF_FieldRedistStore(humidity2, humidity3, &
-                                routehandle=rh23, rc=status)
+                                routehandle=rh23, rc=rc)
 
     ! get coordinate arrays available for setting the source data array
     call ESMF_GridGetCoord(grid1, localDE=0, coordDim=1, &
-      fptr=coordX, totalCount=localCounts, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+      fptr=coordX, totalCount=localCounts, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_GridGetCoord(grid1, localDE=0, coordDim=2, &
-      fptr=coordY, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+      fptr=coordY, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Get pointers to the data and set it up
-    call ESMF_FieldGet(humidity1, farrayPtr=srcdata, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldGet(humidity3, farrayPtr=resdata, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGet(humidity1, farrayPtr=srcdata, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldGet(humidity3, farrayPtr=resdata, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! initialize data arrays
     srcdata = 0.0
@@ -210,15 +208,15 @@
 !
 
     ! Call redistribution method here, output ends up in humidity2
-    call ESMF_FieldRedist(humidity1, humidity2, rh12, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedist(humidity1, humidity2, rh12, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
 
     ! Redistribute back so we can compare contents
     ! output ends up in humidity3
-    call ESMF_FieldRedist(humidity2, humidity3, rh23, rc=status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedist(humidity2, humidity3, rh23, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Redistribution, should match original:"
 
@@ -275,20 +273,20 @@
 
     deallocate(myIndices)
 
-    call ESMF_FieldRedistRelease(rh12, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldRedistRelease(rh23, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity1, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity2, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity3, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid1, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid2, status)
-    if (status .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistRelease(rh12, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldRedistRelease(rh23, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_FieldDestroy(humidity3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -298,14 +296,14 @@
     write(failMsg, *)  "Redistribution back not same as original"
     write(testname, *) "System Test FieldRedistBlk2Arb: Field Redistribute"
 
-    if (status .ne. ESMF_SUCCESS) then
+    if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
-      if ((miscount.eq.0) .and. (status .eq. ESMF_SUCCESS)) then
+      if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Data redistributed twice same as original."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Data redistribution does not match expected values, or error code", &
-        " set ",status 
+        " set ",rc 
       endif
       write(0, *) ""
       write(0, *) trim(testname)
@@ -314,11 +312,13 @@
 
     endif
 
-    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-    ! file that the scripts grep for.
-    call ESMF_STest((status.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-    
-    call ESMF_Finalize(rc=status)
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+      ! into the Log file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+        __FILE__, &
+        __LINE__)
+
+    call ESMF_Finalize(rc=rc)
 
     end program Blk2ArbFldRedist
     

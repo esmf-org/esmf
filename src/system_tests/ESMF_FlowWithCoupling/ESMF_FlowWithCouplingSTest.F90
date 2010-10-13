@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.30 2009/10/28 02:05:36 theurich Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.31 2010/10/13 17:01:47 theurich Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -19,8 +19,6 @@
 !\begin{verbatim}
 
     program ESMF_CoupledFlowDemo
-
-#include "ESMF_Macros.inc"
 
     ! ESMF Framework module, defines all ESMF data types and procedures
     use ESMF_Mod
@@ -300,9 +298,11 @@
 
       endif
     
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+      ! into the Log file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+      __FILE__, &
+      __LINE__)
 
       call ESMF_Finalize(rc=rc)
 

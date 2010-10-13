@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.8 2009/10/16 20:24:54 svasquez Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.9 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -42,7 +42,6 @@
 
     program FieldConcurrentComponent
 
-#include "ESMF_Macros.inc"
 #include "ESMF_Conf.inc"
 #include "ESMF.h"
 #define ESMF_METHOD "FieldConcurrentComponent"
@@ -435,10 +434,12 @@
       write(0, *) ""
 
 
-   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-   ! file that the scripts grep for.
-   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-  
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+    ! into the Log file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+    __FILE__, &
+    __LINE__)
+
     call ESMF_Finalize(rc=localrc) 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &

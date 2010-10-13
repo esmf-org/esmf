@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.38 2008/11/14 04:39:17 theurich Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.39 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -17,8 +17,6 @@
 !\begin{verbatim}
 
     program DELayoutRowReduce
-
-#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -282,9 +280,6 @@
       if (npets .eq. 1) rightvalue = 7585
       if (npets .eq. 2) rightvalue = 12205
       
-      call ESMF_Test((result .eq. rightvalue) .and. (rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
-
       ! Separate message to console for quick confirmation of success/failure
       if ((result .eq. rightvalue) .and. (rc .eq. ESMF_SUCCESS)) then
         write(finalMsg, *) "SUCCESS: Row reduction value (", rightvalue, &
@@ -301,6 +296,12 @@
 
     endif
     
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+    ! into the Log file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+    __FILE__, &
+    __LINE__)
+
     call ESMF_Finalize(rc=rc)
 
     end program DELayoutRowReduce

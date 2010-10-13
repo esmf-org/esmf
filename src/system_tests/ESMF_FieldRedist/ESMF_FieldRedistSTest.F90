@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.48 2009/10/19 17:16:34 svasquez Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.49 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -25,7 +25,6 @@
 
     program FieldRedist
 
-#include "ESMF_Macros.inc"
 #include "ESMF_Conf.inc"
 #include "ESMF.h"
 #define ESMF_METHOD "FieldRedistSTest"
@@ -362,10 +361,12 @@
 
     endif
 
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-    
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+    ! into the Log file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+    __FILE__, &
+    __LINE__)
+
     call ESMF_Finalize(rc=rc)
 
     end program FieldRedist

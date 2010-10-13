@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.15 2009/10/28 02:05:35 theurich Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.16 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test code FieldRegridConserv
 
@@ -25,8 +25,6 @@
 !\begin{verbatim}
 
     program FieldRegridConserv
-
-#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -278,10 +276,12 @@
 
     endif
   
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-  
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+    ! into the Log file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+    __FILE__, &
+    __LINE__)
+
     call ESMF_Finalize(rc=rc) 
 
     end program FieldRegridConserv

@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.19 2008/11/14 04:39:17 theurich Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.20 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -16,8 +16,6 @@
 !\begin{verbatim}
 
     program MergeCoupling
-
-#include "ESMF_Macros.inc"
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -300,9 +298,6 @@
         write(failMsg, *)  "Component Coupling"
         write(testname, *) "System Test MergeCoupling: Merge Component Coupling"
   
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                          testname, failMsg, testresult, ESMF_SRCLINE)
-
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS: Merge Component Coupling complete."
@@ -316,6 +311,12 @@
   
       endif
     
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+      ! into the Log file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
+      __FILE__, &
+      __LINE__)
+
       call ESMF_Finalize(rc=rc) 
 
       end program MergeCoupling

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.18 2009/10/28 03:05:28 theurich Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.19 2010/10/13 17:01:47 theurich Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -26,8 +26,6 @@
 !\begin{verbatim}
 
      program Arb2ArbFldReDist
-
-#include "ESMF_Macros.inc"
 
      ! ESMF Framework module
      use ESMF_Mod
@@ -324,11 +322,12 @@
 
     endif
 
-    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-    ! file that the scripts grep for.
-    call ESMF_STest((status.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
+    ! into the Log file that the scripts grep for.
+    call ESMF_STest((status.eq.ESMF_SUCCESS), testname, failMsg, result, &
+    __FILE__, &
+    __LINE__)
 
-    
     call ESMF_Finalize(rc=status)
 
     end program Arb2ArbFldReDist
