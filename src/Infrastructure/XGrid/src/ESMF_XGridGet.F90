@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.11 2010/10/13 21:08:28 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.12 2010/10/14 17:14:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.11 2010/10/13 21:08:28 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.12 2010/10/14 17:14:46 feiliu Exp $'
 
 !==============================================================================
 !
@@ -104,7 +104,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDefault()"
-!BOPI
+!BOP
 ! !IROUTINE:  ESMF_XGridGet - Get default information from XGrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -184,7 +184,7 @@ integer, intent(out), optional               :: rc
 !           is created.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
     integer :: n_wgts_a, n_wgts_b, ndim, ncells, i
@@ -488,7 +488,7 @@ end subroutine ESMF_XGridGetSMMSpec
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDG()"
-!BOPI
+!BOP
 ! !IROUTINE:  ESMF_XGridGet - Get an individual distgrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -526,7 +526,7 @@ integer, intent(out), optional               :: rc
 !       is created.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_XGridSide)          :: l_xgridSide
@@ -591,7 +591,7 @@ end subroutine ESMF_XGridGetDG
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetEle()"
-!BOPI
+!BOP
 ! !IROUTINE:  ESMF_XGridGet - Get information about XGrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -632,7 +632,7 @@ integer, intent(out), optional               :: rc
 !           is created.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     type(ESMF_XGridType), pointer   :: xgtypep
     type(ESMF_DELayout)             :: delayout

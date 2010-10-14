@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.7 2010/08/27 17:47:46 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.8 2010/10/14 17:14:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.7 2010/08/27 17:47:46 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.8 2010/10/14 17:14:46 feiliu Exp $'
 
 !==============================================================================
 !
@@ -206,7 +206,7 @@ end function ESMF_XGridCreateOnline
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridCreateRaw()"
-!BOPI
+!BOP
 ! !IROUTINE:  ESMF_XGridCreateRaw - Create an XGrid from raw input parameters
 
 ! !INTERFACE:
@@ -258,7 +258,7 @@ integer, intent(out), optional  :: rc
 !           is created.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
     integer :: n_wgts_a, n_wgts_b, ndim, ncells, i
@@ -765,7 +765,7 @@ end subroutine ESMF_XGridConstructBaseObj
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridDestroy"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_XGridDestroy - Free all resources associated with a XGrid
 ! !INTERFACE:
   subroutine ESMF_XGridDestroy(xgrid, rc)
@@ -785,7 +785,7 @@ end subroutine ESMF_XGridConstructBaseObj
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     ! Local variables
     integer :: localrc, i
