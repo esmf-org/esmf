@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.5 2010/10/14 19:46:21 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.6 2010/10/14 21:32:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -73,7 +73,8 @@
 !
 ! XGrid can be created from user input data, such as Grids on either side,
 ! area and centroid information of XGrid cells, sparse matrix matmul information
-! such as factorList and factorIndexList. 
+! such as factorList and factorIndexList. The functionalities provided by the
+! XGrid object is constrained by the user supplied input during its creation time.
 ! 
 ! In this example, we will set up a simple XGrid from overlapping Grids on
 ! either side of the XGrid. Then we perform a flux exchange from one side
@@ -87,10 +88,11 @@
 !\end{center}
 !
 ! We start by creating the Grids on both sides and associate coordinates with
-! the Grids.
+! the Grids. For details of Grid creation and coordinate use, please refer to
+! Grid class documentation.
 !EOE
 !BOC
-    sideA(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+    sideA(1) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,2/), &
         coordDep1=(/1/), &
         coordDep2=(/2/), &
         name='source Grid 1 on side A', rc=localrc)
@@ -98,7 +100,7 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
 !BOC
-    sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/1,2/), &
+    sideA(2) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/1,2/), &
         coordDep1=(/1/), &
         coordDep2=(/2/), &
         name='source Grid 2 on side A', rc=localrc)
@@ -148,7 +150,7 @@
 ! coordinate with the Grid:
 !EOE
 !BOC
-    sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+    sideB(1) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,2/), &
         coordDep1=(/1/), coordDep2=(/2/), &
         name='destination Grid on side B', rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -181,38 +183,48 @@
     allocate(sparseMatX2B(1)%factorIndexList(2,12), sparseMatX2B(1)%factorList(12))
 
 !BOE
-! Set up the mapping indices and weights from A side to the XGrid:
+!
+! Set up the mapping indices and weights from A side to the XGrid. For details of 
+! sequence indices, factorIndexList, and factorList, please see section 
+! \ref{Array:SparseMatMul} in the reference manual. Please refer to the figure above
+! for interpretation of the sequence indices used here.
+!
+! In order to compute the destination flux on sideB through the XGrid as an mediator, 
+! we need to set up the factorList (weights) and factorIndexList (indices) 
+! for sparse matrix matmul in this formulation:
+! dst_flux = W'*W*src_flux, where W' is the weight matrix from the XGrid to 
+! destination; and W is the weight matrix from source to the XGrid.
+!
 !EOE
 !BOC
     ! Set up mapping from A1 -> X
-    sparseMatA2X(1)%factorIndexList(1,1)=1
-    sparseMatA2X(1)%factorIndexList(1,2)=2
-    sparseMatA2X(1)%factorIndexList(1,3)=2
-    sparseMatA2X(1)%factorIndexList(1,4)=3
-!EOC
-    sparseMatA2X(1)%factorIndexList(1,5)=4
-    sparseMatA2X(1)%factorIndexList(1,6)=4
-    sparseMatA2X(1)%factorIndexList(1,7)=3
-    sparseMatA2X(1)%factorIndexList(1,8)=4
-    sparseMatA2X(1)%factorIndexList(1,9)=4
-    sparseMatA2X(1)%factorIndexList(2,1)=1
-    sparseMatA2X(1)%factorIndexList(2,2)=2
-    sparseMatA2X(1)%factorIndexList(2,3)=3
-    sparseMatA2X(1)%factorIndexList(2,4)=4
-    sparseMatA2X(1)%factorIndexList(2,5)=5
-    sparseMatA2X(1)%factorIndexList(2,6)=6
-    sparseMatA2X(1)%factorIndexList(2,7)=7
-    sparseMatA2X(1)%factorIndexList(2,8)=8
-    sparseMatA2X(1)%factorIndexList(2,9)=9
-!BOC
+    sparseMatA2X(1)%factorIndexList(1,1)=1    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,2)=2    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,3)=2    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,4)=3    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,5)=4    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,6)=4    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,7)=3    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,8)=4    ! src seq index
+    sparseMatA2X(1)%factorIndexList(1,9)=4    ! src seq index
+    sparseMatA2X(1)%factorIndexList(2,1)=1    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,2)=2    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,3)=3    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,4)=4    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,5)=5    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,6)=6    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,7)=7    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,8)=8    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(2,9)=9    ! dst seq index
+
     ! Set up mapping from A2 -> X
-    sparseMatA2X(2)%factorIndexList(1,1)=1
-    sparseMatA2X(2)%factorIndexList(1,2)=2
-    sparseMatA2X(2)%factorIndexList(1,3)=2
-    sparseMatA2X(2)%factorIndexList(2,1)=10
+    sparseMatA2X(2)%factorIndexList(1,1)=1    ! src seq index
+    sparseMatA2X(2)%factorIndexList(1,2)=2    ! src seq index
+    sparseMatA2X(2)%factorIndexList(1,3)=2    ! src seq index
+    sparseMatA2X(2)%factorIndexList(2,1)=10   ! dst seq index
+    sparseMatA2X(2)%factorIndexList(2,2)=11   ! dst seq index
+    sparseMatA2X(2)%factorIndexList(2,3)=12   ! dst seq index
 !EOC
-    sparseMatA2X(2)%factorIndexList(2,2)=11
-    sparseMatA2X(2)%factorIndexList(2,3)=12
 
 !BOE
 ! Set up the mapping weights from side A to the XGrid:
@@ -220,21 +232,10 @@
 !BOC
     ! Note that the weights are dest area weighted
     ! Set up mapping weights from A1 -> X
-    sparseMatA2X(1)%factorList(1)=1
-    sparseMatA2X(1)%factorList(2)=1
-    sparseMatA2X(1)%factorList(3)=1
-    sparseMatA2X(1)%factorList(4)=1
-!EOC
-    sparseMatA2X(1)%factorList(5)=1
-    sparseMatA2X(1)%factorList(6)=1
-    sparseMatA2X(1)%factorList(7)=1
-    sparseMatA2X(1)%factorList(8)=1
-    sparseMatA2X(1)%factorList(9)=1
-!BOC
+    sparseMatA2X(1)%factorList(:)=1.
+
     ! Set up mapping weights from A2 -> X
-    sparseMatA2X(2)%factorList(1)=1
-    sparseMatA2X(2)%factorList(2)=1
-    sparseMatA2X(2)%factorList(3)=1
+    sparseMatA2X(2)%factorList(:)=1.
 !EOC
 
 !BOE
@@ -242,47 +243,45 @@
 !EOE
 !BOC
     ! Set up mapping from X -> B
-    sparseMatX2B(1)%factorIndexList(1,1)=1
-    sparseMatX2B(1)%factorIndexList(1,2)=2
-    sparseMatX2B(1)%factorIndexList(1,3)=3
-    sparseMatX2B(1)%factorIndexList(1,4)=4
-!EOC
-    sparseMatX2B(1)%factorIndexList(1,5)=5
-    sparseMatX2B(1)%factorIndexList(1,6)=6
-    sparseMatX2B(1)%factorIndexList(1,7)=7
-    sparseMatX2B(1)%factorIndexList(1,8)=8
-    sparseMatX2B(1)%factorIndexList(1,9)=9
-    sparseMatX2B(1)%factorIndexList(1,10)=10
-    sparseMatX2B(1)%factorIndexList(1,11)=11
-    sparseMatX2B(1)%factorIndexList(1,12)=12
-    sparseMatX2B(1)%factorIndexList(2,1)=1
-    sparseMatX2B(1)%factorIndexList(2,2)=1
-    sparseMatX2B(1)%factorIndexList(2,3)=2
-    sparseMatX2B(1)%factorIndexList(2,4)=1
-    sparseMatX2B(1)%factorIndexList(2,5)=1
-    sparseMatX2B(1)%factorIndexList(2,6)=2
-    sparseMatX2B(1)%factorIndexList(2,7)=3
-    sparseMatX2B(1)%factorIndexList(2,8)=3
-    sparseMatX2B(1)%factorIndexList(2,9)=4
-    sparseMatX2B(1)%factorIndexList(2,10)=3
-    sparseMatX2B(1)%factorIndexList(2,11)=3
-    sparseMatX2B(1)%factorIndexList(2,12)=4
+    sparseMatX2B(1)%factorIndexList(1,1)=1    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,2)=2    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,3)=3    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,4)=4    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,5)=5    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,6)=6    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,7)=7    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,8)=8    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,9)=9    ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,10)=10  ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,11)=11  ! src seq index
+    sparseMatX2B(1)%factorIndexList(1,12)=12  ! src seq index
+    sparseMatX2B(1)%factorIndexList(2,1)=1    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,2)=1    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,3)=2    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,4)=1    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,5)=1    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,6)=2    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,7)=3    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,8)=3    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,9)=4    ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,10)=3   ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,11)=3   ! dst seq index
+    sparseMatX2B(1)%factorIndexList(2,12)=4   ! dst seq index
 
-!BOC
     ! Set up mapping weights from X -> B
-    sparseMatX2B(1)%factorList(1)=4./9
-    sparseMatX2B(1)%factorList(2)=2./9
-    sparseMatX2B(1)%factorList(3)=2./3
-    sparseMatX2B(1)%factorList(4)=2./9
+    sparseMatX2B(1)%factorList(1)=4./9.
+    sparseMatX2B(1)%factorList(2)=2./9.
+    sparseMatX2B(1)%factorList(3)=2./3.
+    sparseMatX2B(1)%factorList(4)=2./9.
+    sparseMatX2B(1)%factorList(5)=1./9.
+    sparseMatX2B(1)%factorList(6)=1./3.
+    sparseMatX2B(1)%factorList(7)=2./9.
+    sparseMatX2B(1)%factorList(8)=1./9.
+    sparseMatX2B(1)%factorList(9)=1./3.
+    sparseMatX2B(1)%factorList(10)=4./9.
+    sparseMatX2B(1)%factorList(11)=2./9.
+    sparseMatX2B(1)%factorList(12)=2./3.
 !EOC
-    sparseMatX2B(1)%factorList(5)=1./9
-    sparseMatX2B(1)%factorList(6)=1./3
-    sparseMatX2B(1)%factorList(7)=2./9
-    sparseMatX2B(1)%factorList(8)=1./9
-    sparseMatX2B(1)%factorList(9)=1./3
-    sparseMatX2B(1)%factorList(10)=4./9
-    sparseMatX2B(1)%factorList(11)=2./9
-    sparseMatX2B(1)%factorList(12)=2./3
 
 !BOE
 ! Optionally the area can be setup to compute surface area weighted flux integrals:
@@ -293,7 +292,6 @@
     xgrid_area(2) = 0.5
     xgrid_area(3) = 0.5
     xgrid_area(4) = 0.5
-!EOC
     xgrid_area(5) = 0.25
     xgrid_area(6) = 0.25
     xgrid_area(7) = 0.5
@@ -302,6 +300,7 @@
     xgrid_area(10) = 1.
     xgrid_area(11) = 0.5
     xgrid_area(12) = 0.5
+!EOC
 
     B_area(1,1) = 9./4
     B_area(2,1) = 3./4
@@ -388,14 +387,14 @@
 !EOC
 
 !BOE
-! Compute the destination flux on sideB through the XGrid as an mediator.
-! dst = W'*W*src, where W' is the weight matrix from the XGrid to destination; and W
-! is the weight matrix from source to the XGrid. The Grids used to generate the XGrid
+!
+! The Grids used to generate the XGrid
 ! must not match, i.e. they are different either topologically or geometrically or both.
 ! In this example, the first source Grid is topologically identical to the destination
 ! Grid but their geometric coordinates are different.
 !
 ! First we regrid from source Fields to the XGrid:
+! 
 !EOE
 !BOC
     ! From A -> X
