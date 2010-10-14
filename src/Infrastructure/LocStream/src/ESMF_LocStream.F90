@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.31 2010/10/13 22:24:47 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.32 2010/10/14 19:57:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.31 2010/10/13 22:24:47 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.32 2010/10/14 19:57:11 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -507,9 +507,9 @@ contains
 !
 !    Supported values for <farray> are:
 !    \begin{description}
-!    \item integer(ESMF_KIND_I4), dimension(:), intent(in) :: farray
-!    \item real(ESMF_KIND_R4), dimension(:), intent(in) :: farray
-!    \item real(ESMF_KIND_R8), dimension(:), intent(in) :: farray
+!    \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: farray
+!    \item real(ESMF\_KIND\_R4), dimension(:), intent(in) :: farray
+!    \item real(ESMF\_KIND\_R8), dimension(:), intent(in) :: farray
 !    \end{description}
 !
 !    The arguments are:
@@ -2210,9 +2210,9 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !
 !    Supported values for <farray> are:
 !    \begin{description}
-!    \item integer(ESMF_KIND_I4), pointer :: farray(:)
-!    \item real(ESMF_KIND_R4), pointer :: farray(:)
-!    \item real(ESMF_KIND_R8), pointer :: farray(:)
+!    \item integer(ESMF\_KIND\_I4), pointer :: farray(:)
+!    \item real(ESMF\_KIND\_R4), pointer :: farray(:)
+!    \item real(ESMF\_KIND\_R8), pointer :: farray(:)
 !    \end{description}
 !
 !     The arguments are:
