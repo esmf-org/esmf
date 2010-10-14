@@ -1,0 +1,16 @@
+% $Id: ESMC_cinfradataimplnotes.tex,v 1.1 2010/10/14 23:07:57 theurich Exp $
+
+%TODO: This file started as an exact copy of the Fortran version of this file.
+%TODO: Changes were made to correctly reflect the current status of the C API.
+%TODO: Eventually this file should be removed again and replaced by a single
+%TODO: generic version that can be included for both Fortran and C refdocs.
+
+\subsection{Design and Implementation Notes}
+
+\begin{enumerate}
+
+\item In communication methods such as Regrid, Redist, Scatter, etc. 
+the Field code cascades down through the Array code, so 
+that the actual implementation exist in only one place in the source.
+
+\end{enumerate}

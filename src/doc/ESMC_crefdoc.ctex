@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.9 2010/10/14 17:12:23 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.10 2010/10/14 23:07:57 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -142,10 +142,10 @@
 \newpage
 
 %\section{Overview of Infrastructure Data Classes}
-\input{ESMF_infradataoverview.tex}
+\input{ESMC_cinfradataoverview.tex}
 
 %\section{Design and Implementation Notes}
-\input{ESMF_infradataimplnotes.tex}
+\input{ESMC_cinfradataimplnotes.tex}
 
 \newpage
 
