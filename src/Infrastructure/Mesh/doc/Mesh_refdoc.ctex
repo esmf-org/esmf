@@ -1,4 +1,4 @@
-% $Id: Mesh_refdoc.ctex,v 1.5 2010/08/26 05:49:22 eschwab Exp $
+% $Id: Mesh_refdoc.ctex,v 1.6 2010/10/14 20:53:58 rokuingh Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -79,7 +79,7 @@
 
 #ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
+\bibliography{Mesh} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
 #endif

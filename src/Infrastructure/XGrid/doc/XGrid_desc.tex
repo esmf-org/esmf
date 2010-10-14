@@ -1,4 +1,4 @@
-% $Id: XGrid_desc.tex,v 1.2 2010/10/13 22:42:38 rokuingh Exp $
+% $Id: XGrid_desc.tex,v 1.3 2010/10/14 20:53:58 rokuingh Exp $
 
 An exchange grid represents the 2D boundary layer usually between the
 atmosphere on one side and ocean and land on the other in an Earth
@@ -10,14 +10,7 @@ it is critical that the fluxes transferred by the boundary layer are
 conservative.
 
 The exchange grid is implemented as a collection of the intersected cells
-between atmosphere and ocean/land. These cells can have irregular shapes
+between atmosphere and ocean/land\cite{BalajiXGrid}. These cells can have irregular shapes
 and can be broken down into triangles facilitating a finite element
 approach. In practice, there is a threshold of minimum cell area below
 which intersections are discarded.
-
-(see V. Balaji, Jeff Anderson, Isaac Held, Michael Winton, Jeff Durachta,
-Sergey Malyshev and Ronald J. Stouffer, 2006:  The Exchange Grid: a
-mechanism for data exchange between Earth System components on independent
-grids, Parallel Computational Fluid Dynamics: Theory and Applications,
-Proceedings of the 2005 International Conference on Parallel Computational
-Fluid Dynamics, Elsevier (2006).) 

@@ -99,7 +99,7 @@
 
 #ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
+\bibliography{Regrid} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
 #endif
