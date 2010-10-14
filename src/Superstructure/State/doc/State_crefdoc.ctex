@@ -1,4 +1,4 @@
-% $Id: State_crefdoc.ctex,v 1.5 2010/10/14 18:22:30 theurich Exp $
+% $Id: State_crefdoc.ctex,v 1.6 2010/10/14 18:58:15 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@
 %\input{../Superstructure/State/doc/State_usage}
 #endif
 
-%\subsection{Restrictions and Future Work}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{State_rest}
 #elif defined(CONSTITUENT)
