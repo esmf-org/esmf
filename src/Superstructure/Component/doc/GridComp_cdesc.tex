@@ -1,0 +1,74 @@
+% $Id: GridComp_cdesc.tex,v 1.1 2010/10/14 17:34:33 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%TODO: This started as an exact copy of the Fortran version of this file.
+%TODO: It was changed to the C version by ESMF->ESMC subsitution.
+%TODO: We should check into using latex command defintion to generate this
+%TODO: sort of language specific document from a single generic document.
+
+%\subsection{Description}
+\label{sec:GridComp}
+
+In Earth system modeling, the most natural way to think about an ESMF 
+Gridded Component, or {\tt ESMC\_GridComp}, is as a piece of code 
+representing a particular physical domain, such as an atmospheric 
+model or an ocean model.  Gridded Components may also represent individual
+processes, such as radiation or chemistry.  It's up to the application
+writer to decide how deeply to ``componentize.''
+
+Earth system software components tend to share a number of basic 
+features.  Most ingest and produce a variety of physical fields, refer to 
+a (possibly noncontiguous) spatial region and a grid that is 
+partitioned across a set of computational resources, and require 
+a clock for things like stepping a governing set of PDEs forward in time.  
+Most can also be divided into distinct initialize, run, and finalize 
+computational phases.  These common characteristics are used 
+within ESMF to define a Gridded Component data structure that 
+is tailored for Earth system modeling and yet is still flexible
+enough to represent a variety of domains.
+
+A well designed Gridded Component does not store information 
+internally about how it couples to other Gridded Components.  That
+allows it to be used in different contexts without changes to source
+code.  The idea here is to avoid situations in which slightly
+different versions of the same model source are maintained for use in 
+different contexts - standalone vs. coupled versions, for example.
+Data is passed in and out of Gridded Components using an ESMF State,
+this is described in Section \ref{sec:State}.
+
+An ESMF Gridded Component has two parts, one which is user-written
+and another which is part of the framework.  The user-written
+part is software that represents a physical domain or performs some
+other computational function.  It forms the body of the Gridded 
+Component.  It may be a piece of legacy code, or it may be developed 
+expressly for use with ESMF.  It must contain routines with
+standard ESMF interfaces that can be called to initialize, run, and
+finalize the Gridded Component.  These routines can have separate 
+callable phases, such as distinct first and second initialization steps.
+
+ESMF provides the Gridded Component derived type, 
+{\tt ESMC\_GridComp}.  An {\tt ESMC\_GridComp} must be created 
+for every portion of the application that will be represented 
+as a separate component.  For example, in a climate model, there may 
+be Gridded Components representing the land, ocean, sea ice, and 
+atmosphere.  If the application contains an ensemble of identical 
+Gridded Components, every one has its own associated {\tt ESMC\_GridComp}.
+Each Gridded Component has its own name and is allocated
+a set of computational resources, in the form of an ESMF Virtual
+Machine, or {\tt VM}.
+
+The user-written part of a Gridded Component is associated with an
+{\tt ESMC\_GridComp} derived type through a routine called 
+{\tt ESMC\_SetServices()}.
+This is a routine that the user must write, and declare public.
+Inside the SetServices routine the user must call  
+{\tt ESMC\_SetEntryPoint()} methods that associate a standard ESMF 
+operation with the name of the corresponding Fortran subroutine 
+in their user code.
