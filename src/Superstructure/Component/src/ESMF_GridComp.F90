@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.140 2010/10/09 00:04:20 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.141 2010/10/14 15:25:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.140 2010/10/09 00:04:20 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.141 2010/10/14 15:25:37 theurich Exp $'
 
 !==============================================================================
 !
@@ -331,15 +331,15 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, userRc, rc)
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -366,6 +366,11 @@ contains
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
+! \item[{[blockingflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]  
 !   Component providers must document whether their each of their
 !   routines are {\em single-phase} or {\em multi-phase}.
@@ -379,11 +384,6 @@ contains
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default
 !   is 1.
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -403,7 +403,7 @@ contains
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -422,15 +422,15 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompFinalizeAct(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, userRc, rc)
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -451,7 +451,7 @@ contains
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -680,15 +680,15 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, userRc, rc)
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -714,6 +714,11 @@ contains
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
+! \item[{[blockingflag]}]
+!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]
 !   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.
@@ -727,11 +732,6 @@ contains
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
-! \item[{[blockingflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -750,7 +750,7 @@ contains
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -769,15 +769,15 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompInitializeAct(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, userRc, rc)
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -797,7 +797,7 @@ contains
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -930,15 +930,15 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompReadRestart(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, userRc, rc)
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -964,6 +964,11 @@ contains
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
+! \item[{[blockingflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
 !   Component providers must document whether their each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
@@ -977,11 +982,6 @@ contains
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1001,7 +1001,7 @@ contains
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1020,15 +1020,15 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompRun(gridcomp, importState, exportState,&
-    clock, phase, blockingflag, userRc, rc)
+    clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -1054,6 +1054,11 @@ contains
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
+! \item[{[blockingflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
 !   Component providers must document whether their each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
@@ -1067,11 +1072,6 @@ contains
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1090,7 +1090,7 @@ contains
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1109,15 +1109,15 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompRunAct(gridcomp, importState, exportState,&
-    clock, phase, blockingflag, userRc, rc)
+    clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -1137,7 +1137,7 @@ contains
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2000,15 +2000,15 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompWriteRestart(gridcomp, importState, &
-    exportState, clock, phase, blockingflag, userRc, rc)
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -2034,6 +2034,11 @@ contains
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
+! \item[{[blockingflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
 !   Component providers must document whether their each of their
 !   routines are {\em single-phase} or {\em multi-phase}.    
@@ -2047,11 +2052,6 @@ contains
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
-!   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
-!   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2071,7 +2071,7 @@ contains
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      phase=phase, blockingflag=blockingflag, userRc=userRc, rc=localrc)
+      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

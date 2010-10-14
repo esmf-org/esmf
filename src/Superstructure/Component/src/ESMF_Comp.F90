@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.200 2010/10/09 00:04:20 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.201 2010/10/14 15:25:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -252,7 +252,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.200 2010/10/09 00:04:20 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.201 2010/10/14 15:25:37 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -845,7 +845,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompExecute(compp, method, &
-    importState, exportState, clock, phase, blockingflag, userRc, rc)
+    importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -854,8 +854,8 @@ contains
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(in),    optional :: clock
-    integer,                 intent(in),    optional :: phase
     type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -883,13 +883,13 @@ contains
 !   Export data for component method.
 ! \item[{[clock]}]  
 !   External clock for passing in time information.
-! \item[{[phase]}]
-!   If multiple-phase methods, which phase number this is. Default is 1.
 ! \item[{[blockingflag]}]
 !   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS.
+! \item[{[phase]}]
+!   If multiple-phase methods, which phase number this is. Default is 1.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
