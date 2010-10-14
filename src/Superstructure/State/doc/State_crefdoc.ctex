@@ -1,4 +1,4 @@
-% $Id: State_crefdoc.ctex,v 1.4 2010/10/14 17:44:43 theurich Exp $
+% $Id: State_crefdoc.ctex,v 1.5 2010/10/14 18:22:30 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -49,9 +49,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{State_desc}
+\input{State_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/State/doc/State_desc}
+\input{../Superstructure/State/doc/State_cdesc}
 #endif
 
 %\subsection{State Options}

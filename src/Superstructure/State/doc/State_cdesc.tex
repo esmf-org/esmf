@@ -1,0 +1,51 @@
+% $Id: State_cdesc.tex,v 1.1 2010/10/14 18:22:30 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%TODO: This file started as an exact copy of the Fortran version of this file.
+%TODO: Changes were made to correctly reflect the current status of the C API.
+%TODO: Eventually this file should be removed again and replaced by a single
+%TODO: generic version that can be included for both Fortran and C refdocs.
+
+%\subsection{Description}
+
+A State contains the data and metadata to be transferred between 
+ESMF Components.  It is an important class, because it defines a 
+standard for how data is represented in data transfers between Earth
+science components.  The 
+State construct is a rational compromise between a fully prescribed 
+interface - one that would dictate what specific fields should be 
+transferred between components - and an interface in which data structures
+are completely ad hoc.
+
+There are two types of States, import and export.
+An import State contains data that is necessary for a Gridded Component
+or Coupler Component to execute, and an export State contains the data
+that a Gridded Component or Coupler Component can make available.
+
+States can contain Arrays, ArrayBundles, Fields, FieldBundles, 
+and other States. However, the current C API only provides State access to
+Arrays, Fields and nested States.
+States cannot directly contain native language arrays
+(i.e. Fortran or C style arrays).  Objects in a State must span
+the VM on which they are running.  For sequentially executing components
+which run on the same set of PETs this happens by calling the object
+create methods on each PET, creating the object in unison.   For
+concurrently executing components which are running on subsets of PETs,
+an additional method, called {\tt ESMF\_StateReconcile()}, is provided by
+ESMF to broadcast information
+about objects which were created in sub-components.
+Currently this method is only available through the ESMF Fortran API. Hence
+the Coupler Component reponsible for reconciling States from Component that 
+execute on subsets of PETs must be written in Fortran.
+
+State methods include creation and deletion, adding and retrieving 
+data items, and performing queries.  
+
+
