@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.8 2010/10/06 17:10:44 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.9 2010/10/14 21:32:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -129,6 +129,8 @@ program ESMF_RegridWeightGen
 	     poleptrs = 0
            else if (trim(flag) .eq. 'all') then
              pole = ESMF_REGRIDPOLE_ALLAVG
+           else if (trim(flag) .eq. 'teeth') then
+             pole = ESMF_REGRIDPOLE_TEETH
            else 
              read(flag,'(i4)') poleptrs
              pole = ESMF_REGRIDPOLE_NPNTAVG
