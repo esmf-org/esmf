@@ -1,4 +1,4 @@
-% $Id: Field_crefdoc.ctex,v 1.8 2010/10/14 23:20:07 theurich Exp $
+% $Id: Field_crefdoc.ctex,v 1.9 2010/10/14 23:49:31 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -44,7 +44,7 @@
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
-#\input{Field_usage}
+\input{Field_cusage}
 %\input{ESMF_FieldEx_fapi}
 %\input{ESMF_FieldCreateEx_fapi}
 %\input{ESMF_FieldRepDimEx_fapi}
@@ -57,7 +57,7 @@
 %\input{../../FieldComm/doc/ESMF_FieldRedistEx_fapi}
 %\input{../../FieldComm/doc/ESMF_FieldSMMEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_usage}
+\input{../Infrastructure/Field/doc/Field_cusage}
 %\input{../Infrastructure/Field/doc/ESMF_FieldEx_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldCreateEx_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldRepDimEx_fapi}
@@ -87,7 +87,7 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-%\input{ESMC_Field_chapi.tex}
+\input{ESMC_Field_chapi.tex}
 %\input{ESMF_FieldCreate_fapi}
 %\input{ESMF_FieldGet_fapi}
 %\input{ESMF_FieldPr_fapi}

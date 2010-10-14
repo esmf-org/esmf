@@ -1,0 +1,48 @@
+% $Id: Field_cusage.tex,v 1.1 2010/10/14 23:49:31 theurich Exp $
+
+%TODO: This file started as an exact copy of the Fortran version of this file.
+%TODO: Changes were made to correctly reflect the current status of the C API.
+%TODO: Eventually this file should be removed again and replaced by a single
+%TODO: generic version that can be included for both Fortran and C refdocs.
+
+%\subsection{Use and Examples}
+
+A Field serves as an annotator of data, since it carries 
+a description of the grid it is associated with and metadata 
+such as name and units.  Fields can be used in this capacity
+alone, as convenient, descriptive containers into which arrays 
+can be placed and retrieved.  However, for most codes the primary 
+use of Fields is in the context of import and export States,
+which are the objects that carry coupling information between 
+Components.  Fields enable data to be self-describing, and a
+State holding ESMF Fields contains data in a standard format
+that can be queried and manipulated.  
+
+The sections below go into more detail about Field usage.
+
+\subsubsection{Field create and destroy}
+
+Fields can be created and destroyed at any time during 
+application execution.  However, these Field methods require 
+some time to complete.  We do not recommend that the user
+create or destroy Fields inside performance-critical 
+computational loops.
+
+All versions of the {\tt ESMC\_FieldCreate()} 
+routines require a Mesh object as input.
+The Mesh contains the information needed to know which 
+Decomposition Elements (DEs) are participating in 
+the processing of this Field, and which subsets of the data
+are local to a particular DE.
+
+The details of how the create process happens depends 
+on which of the variants of the {\tt ESMC\_FieldCreate()} 
+call is used.
+
+When finished with an {\tt ESMC\_Field}, the {\tt ESMC\_FieldDestroy} method
+removes it.  However, the objects inside the {\tt ESMC\_Field}
+created externally should be destroyed separately, 
+since objects can be added to
+more than one {\tt ESMC\_Field}.  For example, the same {\tt ESMF\_Mesh}
+can be referenced by multiple {\tt ESMC\_Field}s.  In this case the
+internal Mesh is not deleted by the {\tt ESMC\_FieldDestroy} call.
