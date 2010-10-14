@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2010/05/17 23:37:32 peggyli Exp $
+# $Id: makefile,v 1.22 2010/10/14 23:32:24 svasquez Exp $
 
 ALL: build_examples
 run: run_examples
@@ -47,5 +47,5 @@ run_ESMC_RefineEx_uni:
 run_ESMF_MeshEx:
 	cp -r data $(ESMF_EXDIR)
 	chmod u+rw $(ESMF_EXDIR)/data/*
-	$(MAKE) EXNAME=Mesh NP=6 exfrun
+	$(MAKE) EXNAME=Mesh NP=4 exfrun
 
