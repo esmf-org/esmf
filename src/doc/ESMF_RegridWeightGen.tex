@@ -1,28 +1,32 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.12 2010/10/12 21:32:22 rokuingh Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.13 2010/10/14 18:58:01 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
 
 \subsection{Description}
 
-The ESMF\_RegridWeightGen application is used to generate regridding weights in an offline mode.
-It takes a source grid file and a destination grid file
-in either the SCRIP format or the ESMF Unstructured grid format, and generate a regridding weight 
-file in the SCRIP format.  It supports bilinear, patch and conservative regridding methods.  
-The source and the destination grids can be either a regularly rectangular grid or an unstructured grid
-including cubed sphere grid.  This application is a parallel application that can be run 
-on any number of PETs.  This application is used in the 
-\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/developers/test/ed/ESMF_RegridWeightGenCheck_ed.shtml}.
+ In addition to the online regridding functionality, the ESMF distribution also 
+contains an exectuable for generating regridding weights. This tool reads in
+two grid files and outputs weights for interpolation
+between the two grids. The input and output files are all in netcdf format. The grid files are either in 
+the same format as is used as an input to SCRIP~\cite{ref:SCRIP}, or in the ESMF unstructured grid format~\ref{sec:example:UnstructFromFile}. The weight file is the same format as is output by SCRIP. The interpolation weights can be generated with
+the bilinear, patch, or first order conservative methods decribed below. This application assumes that the
+source and destination grids are spherical and that the coordinates given in the files are latitude and longitude
+values. This file based regrid weight generation application is fully parallel. This application is used in the 
+\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/developers/test/ed/ESMF_RegridWeightGenCheck_ed.shtml}, so that can serve as an example of its use.
 
-In this application, we use {\tt ESMF\_GridCreate}~\ref{sec:example:2DLogRecFromScrip} to create a 
-ESMF\_Grid object if the source or destination grid is a logically rectangular grid.  We put the cell center 
-coordinates of the input grid at the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) and we map the 2D coordinates
+Internally this application uses the ESMF public API to generate the interpolation weights.
+{\tt ESMF\_GridCreate}~\ref{sec:example:2DLogRecFromScrip} is used to create a 
+ESMF\_Grid object, if the source or destination grid is a logically rectangular grid. The cell center 
+coordinates of the input grid are put into the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER})
+and for conservative regridding the corner coordinates are put into the corner stagger location 
+({\tt ESMF\_STAGGERLOC\_CORNER}). The 2D coordinates are mapped
 into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} while calling 
-{\tt ESMF\_FieldRegridStore()}.   We use 
-{\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} to create a ESMF\_Mesh object if the 
-source or destination grid is a cubed sphere grid or an unstructured grid. We set {\tt cartisian3D} flag to {\tt TRUE} to
-convert the 2D coordinates into 3D Cartesian coordinates while calling {\tt ESMF\_MeshCreate()}. We then use
-{\tt ESMF\_FieldRegridStore()} to generate the regridding weight table and indicies table.   
+{\tt ESMF\_FieldRegridStore()}.   The method
+{\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
+source or destination grid is a cubed sphere grid or an unstructured grid. When making this call, 
+the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates.
+{\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indicies table representing the interpolation matrix. 
 
 The regridding occurs in 3D to avoid
 problems with periodicity and with the pole singularity. 
@@ -35,7 +39,8 @@ The default is for the value at the pole to be the average of the values
 of all of the grid points surrounding the pole. For another option, the user may also choose
 a number N from 1 to the number of source grid points around the pole. For
 each destination point, the value at the pole is then the average of the N source points
-surrounding that destination point.
+surrounding that destination point. Only pole option ``none'' is currently supported with the conservative
+interpolation method (i.e. ``-m conserve''). 
 
  This regridding application can be used to generate either bilinear or patch interpolation weights. The default interpolation method
 is bilinear. The algorithm used by this application to generate the bilinear weights is the standard one found in
@@ -66,17 +71,14 @@ To calculate the value at the destination point we do a weighted average of the 
 of each of the corner polynomials evaluated at that point. The weight for a corner's 
 polynomial is the bilinear weight of the destination point with regard to that corner.  
 
-Global first-order conservative interpolation weights are also available with the 
-file based regrid application. When this option is selected a conservative modification
-is applied to the interpolation weights using the L2 method.  The L2 method in ESMF is based
-on a finite element method to constrain the interpolation for global conservation of 
-mass.  The conservative option can be used with either the patch or bilinear interpolation
-and any of the pole options.  If this option is selected, integration weights will be
-written to the output file containing the interpolation weights. 
-Note that conservation is still in beta and should only be used with extreme caution.
-It can have interpolation problems with certain combinations of source and destination grid. 
-Particularly those where a high resolution area in the destination aligns with a lower resolution 
-region in the source. 
+First order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have  
+a larger interpolation error than the previous two methods, but will do a much better job of preserving the value of the 
+integral of data between the source and destination grid. In this method the value across each source cell
+is treated as a constant. The weights for a particular destination cell, are the area of intersection of each 
+source cell with the destination cell divided by the area of the destination cell.
+Areas in this case are the great circle 
+areas of the polygons which make up the cells (the cells around each center are defined by the corner coordinates 
+in the grid file). 
 
 The command line arguments are all keyword based.  Both the long keyward prefixed with \verb+ '--' + or the 
 one character short keyword prefixed with {\tt '-'} are supported.  The format to run the application is 
@@ -106,7 +108,7 @@ where
 
                    bilinear     - for bilinear interpolation, also the default method if not specified.
                    patch        - for patch recovery interpolation
-                   conservative - for first order conservative interpolation
+                   conserve     - for first order conservative interpolation
 
    --pole or -p - an optional argument indicating what to do with the pole.  The value can be one of
                   the following:
