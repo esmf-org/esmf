@@ -1,4 +1,4 @@
-% $Id: State_desc.tex,v 1.17 2010/10/05 23:52:04 rokuingh Exp $
+% $Id: State_desc.tex,v 1.18 2010/10/14 17:44:43 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,8 +25,8 @@ or Coupler Component to execute, and an export State contains the data
 that a Gridded Component or Coupler Component can make available.
 
 States can contain Arrays, ArrayBundles, Fields, FieldBundles, 
-and other States.  They cannot directly contain Fortran arrays.   
-Objects in a State must span
+and other States.  They cannot directly contain native language arrays
+(i.e. Fortran or C style arrays).  Objects in a State must span
 the VM on which they are running.  For sequentially executing components
 which run on the same set of PETs this happens by calling the object
 create methods on each PET, creating the object in unison.   For

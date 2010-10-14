@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.9 2009/04/24 05:20:17 theurich Exp $ 
+# $Id: makefile,v 1.10 2010/10/14 17:44:43 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Superstructure/State/doc
 
-DVIFILES  =     State_refdoc.dvi AttachMethods_refdoc.dvi
-PDFFILES  =     $(ESMC_DOCDIR)/State_refdoc.pdf $(ESMC_DOCDIR)/AttachMethods_refdoc.pdf
-HTMLFILES =     $(ESMC_DOCDIR)/State_refdoc $(ESMC_DOCDIR)/AttachMethods_refdoc
+DVIFILES  = State_refdoc.dvi State_crefdoc.dvi  AttachMethods_refdoc.dvi
+PDFFILES  = $(ESMC_DOCDIR)/State_refdoc.pdf $(ESMC_DOCDIR)/State_crefdoc.pdf $(ESMC_DOCDIR)/AttachMethods_refdoc.pdf
+HTMLFILES = $(ESMC_DOCDIR)/State_refdoc $(ESMC_DOCDIR)/State_crefdoc $(ESMC_DOCDIR)/AttachMethods_refdoc
 
 #
 # Tex Files to make
@@ -35,12 +35,13 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
-CLEANDIRS   = State_refdoc AttachMethods_refdoc $(HTMLFILES)
+DIRS	    = 
+
+CLEANDIRS   = State_refdoc State_crefdoc AttachMethods_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              State_refdoc.tex AttachMethods_refdoc.tex $(PDFFILES) 
+              State_refdoc.tex State_crefdoc.tex AttachMethods_refdoc.tex $(PDFFILES) 
 CLOBBERDIRS =
 
-DIRS	  = 
 
 
 
