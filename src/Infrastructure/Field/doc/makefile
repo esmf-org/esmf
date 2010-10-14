@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.16 2008/02/06 17:48:25 theurich Exp $ 
+# $Id: makefile,v 1.17 2010/10/14 23:20:07 theurich Exp $ 
 
 All: onedoc
 
-LOCDIR = src/Infrastructure/Field/doc
+LOCDIR    = src/Infrastructure/Field/doc
 
-DVIFILES  = Field_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/Field_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/Field_refdoc
+DVIFILES  = Field_refdoc.dvi Field_crefdoc.dvi
+PDFFILES  = $(ESMC_DOCDIR)/Field_refdoc.pdf $(ESMC_DOCDIR)/Field_crefdoc.pdf
+HTMLFILES = $(ESMC_DOCDIR)/Field_refdoc $(ESMC_DOCDIR)/Field_crefdoc
 
 #
 # Tex Files to make
@@ -36,9 +36,10 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Field_desc.tex Field_usage.tex Field_rest
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
-CLEANDIRS   = Field_refdoc $(HTMLFILES)
+DIRS        = 
+
+CLEANDIRS   = Field_refdoc Field_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              Field_refdoc.tex $(PDFFILES)
+              Field_refdoc.tex Field_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

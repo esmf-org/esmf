@@ -1,4 +1,4 @@
-% $Id: Field_crefdoc.ctex,v 1.7 2010/09/22 14:36:33 eschwab Exp $
+% $Id: Field_crefdoc.ctex,v 1.8 2010/10/14 23:20:07 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -37,9 +37,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Field_desc}
+\input{Field_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_desc}
+\input{../Infrastructure/Field/doc/Field_cdesc}
 #endif
 
 %\subsection{Use and Examples}

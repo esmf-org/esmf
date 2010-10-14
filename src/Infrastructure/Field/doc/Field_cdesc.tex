@@ -1,0 +1,31 @@
+% $Id: Field_cdesc.tex,v 1.1 2010/10/14 23:20:07 theurich Exp $
+
+%TODO: This file started as an exact copy of the Fortran version of this file.
+%TODO: Changes were made to correctly reflect the current status of the C API.
+%TODO: Eventually this file should be removed again and replaced by a single
+%TODO: generic version that can be included for both Fortran and C refdocs.
+
+An ESMF Field represents a physical field, such as temperature.
+The motivation for including Fields in ESMF is that bundles of 
+Fields are the entities that are normally exchanged when coupling
+Components.  
+
+The ESMF Field class contains distributed and discretized field data, a reference 
+to its associated grid, and metadata.  The Field class stores the grid {\it staggering}
+for that physical field.
+This is the relationship of how the data array of a field maps onto a grid 
+(e.g. one item per
+cell located at the cell center, one item per cell located at the NW
+corner,  one item per cell vertex, etc.).  This means that different Fields
+which are on the same underlying ESMF Grid but have different
+staggerings can share the same Grid object without needing to replicate
+it multiple times. 
+
+Fields can be added to States for use in inter-Component
+data communications.
+
+Field communication capabilities include: data redistribution, regridding, scatter,
+gather, sparse-matrix multiplication, and halo update.  These are discussed
+in more detail in the documentation for the specific method calls.  
+ESMF does not currently support vector fields, so the components of 
+a vector field must be stored as separate Field objects.  
