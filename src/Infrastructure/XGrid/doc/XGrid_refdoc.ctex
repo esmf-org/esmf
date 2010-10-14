@@ -1,4 +1,4 @@
-% $Id: XGrid_refdoc.ctex,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+% $Id: XGrid_refdoc.ctex,v 1.2 2010/10/14 17:10:17 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -45,12 +45,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{XGrid_usage}
-%\input{ESMF_XGridEx_fapi}
-%\input{ESMF_XGridCreateEx_fapi}
+\input{ESMF_XGridEx_fapi}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/XGrid/doc/XGrid_usage}
-%\input{../Infrastructure/XGrid/doc/ESMF_XGridEx_fapi}
-%\input{../Infrastructure/XGrid/doc/ESMF_XGridCreateEx_fapi}
+\input{../Infrastructure/XGrid/doc/ESMF_XGridEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -70,19 +68,12 @@
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_XGridCreate_fapi}
-%\input{ESMF_XGridGet_fapi}
+\input{ESMF_XGridGet_fapi}
 \input{ESMF_XGrid_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/XGrid/doc/ESMF_XGridCreate_fapi}
-%\input{../Infrastructure/XGrid/doc/ESMF_XGridGet_fapi}
+\input{../Infrastructure/XGrid/doc/ESMF_XGridGet_fapi}
 \input{../Infrastructure/XGrid/doc/ESMF_XGrid_fapi}
-#endif
-
-\subsection{Class API: XGrid Communications}
-#ifdef STANDALONE
-%\input{../../Field/doc/ESMF_FieldRegrid_fapi}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/ESMF_FieldRegrid_fapi}
 #endif
 
 #ifdef STANDALONE

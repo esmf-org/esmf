@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.3 2010/07/20 21:10:20 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.4 2010/10/14 17:09:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,9 +33,28 @@
     integer                             :: localrc, i
     type(ESMF_XGrid)                    :: xgrid
     type(ESMF_Grid)                     :: sideA(2), sideB(1)
-    type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1)
+    type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1), distgrid
     real*8                              :: centroid(12,2), area(12)
-    type(ESMF_XGridSpec)                :: sparseMatA2X(2)
+    type(ESMF_XGridSpec)                :: sparseMatA2X(2), sparseMatX2B(1)
+
+    type(ESMF_Grid)                     :: l_sideA(2), l_sideB(1)
+    type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
+    real(ESMF_KIND_R8)                  :: l_centroid(12,2), l_area(12)
+    type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
+    type(ESMF_Field)                    :: field, srcField(2), dstField(1)
+
+    integer                             :: eleCount, ngridA, ngridB
+    integer                             :: elb, eub, ec
+
+    real(ESMF_KIND_R8), pointer         :: fptr(:,:), xfptr(:)
+    real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
+    integer                             :: xlb(1), xub(1)
+    type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
+
+    real(ESMF_KIND_R8)                  :: centroidA1X(2), centroidA1Y(2)
+    real(ESMF_KIND_R8)                  :: centroidA2X(1), centroidA2Y(2)
+    real(ESMF_KIND_R8)                  :: centroidBX(2), centroidBY(2)
+    real(ESMF_KIND_R8), pointer         :: coordX(:), coordY(:)
 
     integer :: finalrc
 !   !Set finalrc to success
@@ -49,7 +68,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{XGrid from user input data}
+!\subsubsection{Create an XGrid from user input data then use it for regridding}
 !\label{sec:xgrid:usage:xgrid_createraw}
 !
 ! XGrid can be created from user input data, such as Grids on either side,
@@ -57,7 +76,8 @@
 ! such as factorList and factorIndexList. 
 ! 
 ! In this example, we will set up a simple XGrid from overlapping Grids on
-! either side of the XGrid. The Grids are laid out in the following figure.
+! either side of the XGrid. Then we perform a flux exchange from one side
+! to the other side of the XGrid. The Grids are laid out in the following figure:
 !\begin{center}
 !\begin{figure}
 !\scalebox{0.75}{\includegraphics{XGridEx1}}
@@ -66,43 +86,110 @@
 !\end{figure}
 !\end{center}
 !
+! We start by creating the Grids on both sides and associate coordinates with
+! the Grids.
 !EOE
 !BOC
-
-    ! set up Grids on either side of XGrid
-    ! - create side A distgrids
-    sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
+    sideA(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+        coordDep1=(/1/), &
+        coordDep2=(/2/), &
+        name='source Grid 1 on side A', rc=localrc)
+!EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), rc=localrc)
+!BOC
+    sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/1,2/), &
+        coordDep1=(/1/), &
+        coordDep2=(/2/), &
+        name='source Grid 2 on side A', rc=localrc)
+!EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    ! - create side B distgrids
-    sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-    ! - create side A Grids
+!BOC
     do i = 1, 2
-        sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
+        call ESMF_GridAddCoord(sideA(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
+            rc=localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     enddo
+!EOC
 
-    ! - create side B Grids
+!BOE
+! Coordinate for the Grids on sideA, refer to the Grid layout diagram for the 
+! interpretation of the coordinate values:
+!EOE
+!BOC
+    ! SideA first grid
+    centroidA1X=(/0.5, 1.5/)
+    centroidA1Y=(/0.5, 1.5/)
+    call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, fptr=coordX, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    coordX = centroidA1X
+    call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, fptr=coordY, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    coordY = centroidA1Y
+
+    ! SideA second grid
+    centroidA2X=(/2.5/)
+    centroidA2Y=(/0.5, 1.5/)
+    call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, fptr=coordX, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    coordX = centroidA2X
+    call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, fptr=coordY, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    coordY = centroidA2Y
+!EOC
+
+!BOE
+! Create the destination grid on side B, only one Grid exists on side B. Also associate
+! coordinate with the Grid:
+!EOE
+!BOC
+    sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+        coordDep1=(/1/), coordDep2=(/2/), &
+        name='destination Grid on side B', rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     do i = 1, 1
-        sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
+        call ESMF_GridAddCoord(sideB(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
+            rc=localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     enddo
 
-    ! Set up the sparsematrix matmul information
+    ! SideB grid
+    centroidBX=(/0.75, 2.25/)
+    centroidBY=(/0.75, 1.75/)
+    call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, fptr=coordX, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    coordX = centroidBX
+    call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, fptr=coordY, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    coordY = centroidBY
+!EOC
+
+!EOE
+! Now we need to set up the sparse matrix parameter for regridding. These are hardcoded
+! for the purpose of demonstration. They are generally read in from an external file and
+! distributed to processors.
+!EOE
     allocate(sparseMatA2X(1)%factorIndexList(2,9), sparseMatA2X(1)%factorList(9))
     allocate(sparseMatA2X(2)%factorIndexList(2,3), sparseMatA2X(2)%factorList(3))
+    allocate(sparseMatX2B(1)%factorIndexList(2,12), sparseMatX2B(1)%factorList(12))
 
-    ! Refer to the figure above to check the numbering
-    ! - set up mapping between A1 -> X
+!BOE
+! Set up the mapping indices and weights from A side to the XGrid:
+!EOE
+!BOC
+    ! Set up mapping from A1 -> X
     sparseMatA2X(1)%factorIndexList(1,1)=1
     sparseMatA2X(1)%factorIndexList(1,2)=2
     sparseMatA2X(1)%factorIndexList(1,3)=2
     sparseMatA2X(1)%factorIndexList(1,4)=3
+!EOC
     sparseMatA2X(1)%factorIndexList(1,5)=4
     sparseMatA2X(1)%factorIndexList(1,6)=4
     sparseMatA2X(1)%factorIndexList(1,7)=3
@@ -117,31 +204,281 @@
     sparseMatA2X(1)%factorIndexList(2,7)=7
     sparseMatA2X(1)%factorIndexList(2,8)=8
     sparseMatA2X(1)%factorIndexList(2,9)=9
-    ! - set up mapping between A2 -> X
+!BOC
+    ! Set up mapping from A2 -> X
     sparseMatA2X(2)%factorIndexList(1,1)=1
     sparseMatA2X(2)%factorIndexList(1,2)=2
     sparseMatA2X(2)%factorIndexList(1,3)=2
     sparseMatA2X(2)%factorIndexList(2,1)=10
+!EOC
     sparseMatA2X(2)%factorIndexList(2,2)=11
     sparseMatA2X(2)%factorIndexList(2,3)=12
-!EOC
+
 !BOE
-! Now we are ready to create the XGrid from user supplied input.
+! Set up the mapping weights from side A to the XGrid:
+!EOE
+!BOC
+    ! Note that the weights are dest area weighted
+    ! Set up mapping weights from A1 -> X
+    sparseMatA2X(1)%factorList(1)=1
+    sparseMatA2X(1)%factorList(2)=1
+    sparseMatA2X(1)%factorList(3)=1
+    sparseMatA2X(1)%factorList(4)=1
+!EOC
+    sparseMatA2X(1)%factorList(5)=1
+    sparseMatA2X(1)%factorList(6)=1
+    sparseMatA2X(1)%factorList(7)=1
+    sparseMatA2X(1)%factorList(8)=1
+    sparseMatA2X(1)%factorList(9)=1
+!BOC
+    ! Set up mapping weights from A2 -> X
+    sparseMatA2X(2)%factorList(1)=1
+    sparseMatA2X(2)%factorList(2)=1
+    sparseMatA2X(2)%factorList(3)=1
+!EOC
+
+!BOE
+! Set up the mapping indices and weights from the XGrid to B side:
+!EOE
+!BOC
+    ! Set up mapping from X -> B
+    sparseMatX2B(1)%factorIndexList(1,1)=1
+    sparseMatX2B(1)%factorIndexList(1,2)=2
+    sparseMatX2B(1)%factorIndexList(1,3)=3
+    sparseMatX2B(1)%factorIndexList(1,4)=4
+!EOC
+    sparseMatX2B(1)%factorIndexList(1,5)=5
+    sparseMatX2B(1)%factorIndexList(1,6)=6
+    sparseMatX2B(1)%factorIndexList(1,7)=7
+    sparseMatX2B(1)%factorIndexList(1,8)=8
+    sparseMatX2B(1)%factorIndexList(1,9)=9
+    sparseMatX2B(1)%factorIndexList(1,10)=10
+    sparseMatX2B(1)%factorIndexList(1,11)=11
+    sparseMatX2B(1)%factorIndexList(1,12)=12
+    sparseMatX2B(1)%factorIndexList(2,1)=1
+    sparseMatX2B(1)%factorIndexList(2,2)=1
+    sparseMatX2B(1)%factorIndexList(2,3)=2
+    sparseMatX2B(1)%factorIndexList(2,4)=1
+    sparseMatX2B(1)%factorIndexList(2,5)=1
+    sparseMatX2B(1)%factorIndexList(2,6)=2
+    sparseMatX2B(1)%factorIndexList(2,7)=3
+    sparseMatX2B(1)%factorIndexList(2,8)=3
+    sparseMatX2B(1)%factorIndexList(2,9)=4
+    sparseMatX2B(1)%factorIndexList(2,10)=3
+    sparseMatX2B(1)%factorIndexList(2,11)=3
+    sparseMatX2B(1)%factorIndexList(2,12)=4
+
+!BOC
+    ! Set up mapping weights from X -> B
+    sparseMatX2B(1)%factorList(1)=4./9
+    sparseMatX2B(1)%factorList(2)=2./9
+    sparseMatX2B(1)%factorList(3)=2./3
+    sparseMatX2B(1)%factorList(4)=2./9
+!EOC
+    sparseMatX2B(1)%factorList(5)=1./9
+    sparseMatX2B(1)%factorList(6)=1./3
+    sparseMatX2B(1)%factorList(7)=2./9
+    sparseMatX2B(1)%factorList(8)=1./9
+    sparseMatX2B(1)%factorList(9)=1./3
+    sparseMatX2B(1)%factorList(10)=4./9
+    sparseMatX2B(1)%factorList(11)=2./9
+    sparseMatX2B(1)%factorList(12)=2./3
+
+!BOE
+! Optionally the area can be setup to compute surface area weighted flux integrals:
+!EOE
+!BOC
+    ! Set up destination areas to adjust weighted flux
+    xgrid_area(1) = 1.
+    xgrid_area(2) = 0.5
+    xgrid_area(3) = 0.5
+    xgrid_area(4) = 0.5
+!EOC
+    xgrid_area(5) = 0.25
+    xgrid_area(6) = 0.25
+    xgrid_area(7) = 0.5
+    xgrid_area(8) = 0.25
+    xgrid_area(9) = 0.25
+    xgrid_area(10) = 1.
+    xgrid_area(11) = 0.5
+    xgrid_area(12) = 0.5
+
+    B_area(1,1) = 9./4
+    B_area(2,1) = 3./4
+    B_area(1,2) = 9./4
+    B_area(2,2) = 3./4
+
+!BOE
+! Create an XGrid based on the user supplied regridding parameters:
 !EOE
 !BOC
     xgrid = ESMF_XGridCreate(sideA, sideB, area=area, centroid=centroid, &
-        sparseMatA2X=sparseMatA2X, rc=localrc)
+        sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
+!EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    ! Destroy the XGrid
+!BOE
+! One can query the XGrid for its internal information:
+!EOE
+!BOC
+    call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
+        sideA=l_sideA, sideB=l_sideB, area=l_area, &
+        centroid=l_centroid, distgridA=l_sideAdg, &
+        distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
+        sparseMatX2B=l_sparseMatX2B, &
+        rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+!BOC
+    call ESMF_XGridGet(xgrid, localDe=0, elementCount=eleCount, &
+        exclusiveCount=ec, exclusiveLBound=elb, exclusiveUBound=eub, &
+        rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+!BOC
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
+        distgrid=distgrid, rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
+        distgrid=distgrid, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
+        distgrid=distgrid, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+!BOE
+! Create an {\tt ESMF\_Field} on the XGrid:
+!EOE
+!BOC
+    field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+!BOE
+! Query the Field for its Fortran data pointer and its exclusive bounds:
+!EOE
+!BOC
+    call ESMF_FieldGet(field, farrayPtr=xfptr, &
+        exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+    xfptr = 0.0
+
+!BOE
+! Setup and initialize src and dst Fields, source Fields have different source flux:
+!EOE
+!BOC
+    do i = 1, 2
+        srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        fptr = i
+    enddo
+    do i = 1, 1
+        dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        fptr = 0.0
+    enddo
+!EOC
+
+!BOE
+! Compute the destination flux on sideB through the XGrid as an mediator.
+! dst = W'*W*src, where W' is the weight matrix from the XGrid to destination; and W
+! is the weight matrix from source to the XGrid. The Grids used to generate the XGrid
+! must not match, i.e. they are different either topologically or geometrically or both.
+! In this example, the first source Grid is topologically identical to the destination
+! Grid but their geometric coordinates are different.
+!
+! First we regrid from source Fields to the XGrid:
+!EOE
+!BOC
+    ! From A -> X
+    do i = 1, 2
+        call ESMF_FieldRegridStore(xgrid, srcField(i), field, routehandle=rh_src2xgrid(i), &
+            rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
+            zeroflag=ESMF_REGION_SELECT, &
+            rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    enddo
+!EOC
+
+    ! xfptr should be all 1. at this point
+    ! To get the surface integral of flux on XGrid, adjust by dst area
+
+    !do i = xlb(1), xub(1)
+    !    xfptr(i) = xfptr(i) * xgrid_area(i) 
+    !enddo
+
+    print *, '- after SMM from A -> X'
+    print *, xfptr ! should be xgrid_area
+
+    print *, '- B before SMM from X -> B'
+    print *, fptr ! should be 0.
+
+!BOE
+! Next we regrid from the Field on XGrid to the destination Field on side B:
+!EOE
+!BOC
+    ! from X -> B
+    do i = 1, 1
+        call ESMF_FieldRegridStore(xgrid, field, dstField(i), routehandle=rh_xgrid2dst(i), &
+            rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_FieldRegrid(field, dstField(i), routehandle=rh_xgrid2dst(i), &
+            rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    enddo
+!EOC
+
+    print *, '- B after SMM from X -> B'
+    print *, fptr ! should be 1/B_area
+
+!BOE
+! After the regridding is successful. Clean up all the allocated resources:
+!EOE
+!BOC
+    call ESMF_FieldDestroy(field, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
     call ESMF_XGridDestroy(xgrid, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!EOC
+    do i = 1, 2
+        call ESMF_FieldDestroy(srcField(i), rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_GridDestroy(sideA(i), rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    enddo
+
+    do i = 1, 1
+        call ESMF_FieldDestroy(dstField(i), rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_GridDestroy(sideB(i), rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    enddo
+
     deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
     deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
+    deallocate(sparseMatX2B(1)%factorIndexList, sparseMatX2B(1)%factorList)
+!EOC
+
+!BOE
+! In the above example, we first set up all the required paramters to create an XGrid from user
+! supplied input. Then we create Fields on the XGrid and the Grids on either side. Finally
+! we use the {\tt ESMF\_FieldRegrid()} interface to perform a flux exchange from the source side
+! to the destination side.
+!EOE
+
     if(localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    print *, "XGrid create from user input example returned"
+    print *, "Regridding through XGrid example returned"
 
 !-------------------------------------------------------------------------
     call ESMF_Finalize(rc=localrc)
