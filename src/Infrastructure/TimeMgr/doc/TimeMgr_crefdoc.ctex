@@ -1,4 +1,4 @@
-% $Id: TimeMgr_crefdoc.ctex,v 1.10 2010/09/25 02:44:27 eschwab Exp $ 
+% $Id: TimeMgr_crefdoc.ctex,v 1.11 2010/10/14 23:45:35 theurich Exp $ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE
@@ -244,14 +244,14 @@
 % -----------
 % Alarm Class
 % -----------
-#\newpage
-#\section{Alarm Class}
+%\newpage
+%\section{Alarm Class}
 
-#\subsection{Description}
+%\subsection{Description}
 #ifdef STANDALONE
-#\input{Alarm_cdesc}
+%\input{Alarm_cdesc}
 #elif defined(CONSTITUENT)
-#\input{../Infrastructure/TimeMgr/doc/Alarm_cdesc}
+%\input{../Infrastructure/TimeMgr/doc/Alarm_cdesc}
 #endif
 
 %\subsection{Alarm Options}
@@ -284,7 +284,7 @@
 %\input{../Infrastructure/TimeMgr/doc/Alarm_implnotes}
 #endif
 
-#\subsection{Class API}
+%\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMF_Alarm_fapi}
 #elif defined(CONSTITUENT)
