@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.6 2010/10/14 21:32:57 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.7 2010/10/14 21:58:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -192,7 +192,7 @@
 ! In order to compute the destination flux on sideB through the XGrid as an mediator, 
 ! we need to set up the factorList (weights) and factorIndexList (indices) 
 ! for sparse matrix matmul in this formulation:
-! dst_flux = W'*W*src_flux, where W' is the weight matrix from the XGrid to 
+! dst\_flux = W'*W*src\_flux, where W' is the weight matrix from the XGrid to 
 ! destination; and W is the weight matrix from source to the XGrid.
 !
 !EOE
