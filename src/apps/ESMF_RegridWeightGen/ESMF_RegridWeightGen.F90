@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.9 2010/10/14 21:32:06 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.10 2010/10/14 22:36:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -131,6 +131,7 @@ program ESMF_RegridWeightGen
              pole = ESMF_REGRIDPOLE_ALLAVG
            else if (trim(flag) .eq. 'teeth') then
              pole = ESMF_REGRIDPOLE_TEETH
+             poleptrs = -2
            else 
              read(flag,'(i4)') poleptrs
              pole = ESMF_REGRIDPOLE_NPNTAVG
@@ -243,6 +244,8 @@ program ESMF_RegridWeightGen
 	       print *, "  Pole option: NONE"
 	elseif (pole .eq. ESMF_REGRIDPOLE_ALLAVG) then
 	       print *, "  Pole option: ALL"
+	elseif (pole .eq. ESMF_REGRIDPOLE_TEETH) then
+	       print *, "  Pole option: TEETH"
 	else
 	       print *, "  Pole option: ", poleptrs
         endif
@@ -305,7 +308,9 @@ program ESMF_RegridWeightGen
         poleptrs = commandbuf2(6)
         if (poleptrs == -1) then 
 	   pole=ESMF_REGRIDPOLE_ALLAVG
-        elseif (poleptrs ==  0) then
+        else if (poleptrs == -2) then 
+	   pole=ESMF_REGRIDPOLE_TEETH
+        else if (poleptrs ==  0) then
            pole=ESMF_REGRIDPOLE_NONE
 	else
            pole=ESMF_REGRIDPOLE_NPNTAVG 
