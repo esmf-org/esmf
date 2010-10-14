@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.324 2010/10/01 00:09:03 theurich Exp $
+#  $Id: common.mk,v 1.325 2010/10/14 13:44:22 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1036,16 +1036,16 @@ endif
 ifneq ($(origin ESMF_PIO), environment)
 ifdef ESMF_PIODEFAULT
 export ESMF_PIO = $(ESMF_PIODEFAULT)
-#TODO: This turns PIO off if it was set to internal from a default setting.
-#TODO: We need to do this while our internal PIO does not support mpiuni mode,
-#TODO: but want to allow external PIO or explicit ESMF_PIO setting for development.
-#TODO: Eventually this should become unnecessary.
+
 ifeq ($(ESMF_PIO),internal)
 ifeq ($(ESMF_COMM),mpiuni)
+#TODO: This turns PIO off if it was set to internal from a default setting.
+#TODO: We need to do this while our internal PIO does not support mpiuni mode,
+#TODO: but want to allow external PIO or explicit ESMF_PIO setting for developm. #TODO: Eventually this should become unnecessary.
 ESMF_PIO = OFF
 endif
 endif
-#---TODO
+
 endif
 endif
 
