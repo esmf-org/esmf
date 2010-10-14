@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.8 2010/09/24 05:36:38 eschwab Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.9 2010/10/14 17:12:23 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -81,7 +81,7 @@
 \input{ESMC_refintro}
 
 %\section{Support}
-%\input{ESMF_refsupport}
+\input{ESMF_refsupport}
 
 %\section{Document Conventions}
 %\input{ESMF_conventions}
