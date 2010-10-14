@@ -1,4 +1,4 @@
-% $Id: XGrid_refdoc.ctex,v 1.2 2010/10/14 17:10:17 feiliu Exp $
+% $Id: XGrid_refdoc.ctex,v 1.3 2010/10/14 18:22:29 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -53,9 +53,9 @@
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{XGrid_rest}
+\input{XGrid_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/XGrid/doc/XGrid_rest}
+\input{../Infrastructure/XGrid/doc/XGrid_rest}
 #endif
 
 \subsection{Design and Implementation Notes}
