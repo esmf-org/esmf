@@ -1,10 +1,25 @@
-% $Id: ESMC_infrautiloverview.tex,v 1.2 2010/09/25 02:45:56 eschwab Exp $
+% $Id: ESMC_infrautiloverview.tex,v 1.3 2010/10/15 17:15:28 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%TODO: This file started as an exact copy of the Fortran version of this file.
+%TODO: Changes were made to correctly reflect the current status of the C API.
+%TODO: Eventually this file should be removed again and replaced by a single
+%TODO: generic version that can be included for both Fortran and C refdocs.
 
 \section{Overview of Infrastructure Utility Classes}
 
-The ESMF utilities are a set of tools for quickly assembling modeling applications.  The Time Management Library provides utilities for time and time interval representation, as well as a higher-level utility, a clock, that controls model time stepping.
+The ESMF utilities are a set of tools for quickly assembling modeling applications.
 
-ESMF Configuration Management is based on NASA DAO's Inpak package, a collection of methods for accessing files containing input parameters stored in an ASCII format.
+The Time Management Library provides utilities for time and time interval representation, as well as a higher-level utility, a clock, that controls model time stepping.
+
+The ESMF Config class provides configuration management based on NASA DAO's Inpak package, a collection of methods for accessing files containing input parameters stored in an ASCII format.
 
 The ESMF LogErr class consists of a method for writing error, warning, and informational messages to a default Log file that is created during ESMF initialization.
 
