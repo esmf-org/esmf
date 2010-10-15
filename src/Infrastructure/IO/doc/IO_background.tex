@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.29 2010/10/01 05:59:57 eschwab Exp $
+% $Id: IO_background.tex,v 1.30 2010/10/15 21:52:30 eschwab Exp $
 
 %\subsection{Background}
 
@@ -7,7 +7,7 @@ high level ESMF objects such as Fields.  In the current release, the ESMF IO
 capability is integrated with third-party software such as 
 \htmladdnormallink{Parallel IO (PIO)}{http://code.google.com/p/parallelio/}
 to read and write Fortran array data in MPI\_IO binary or NetCDF format, and 
-\htmladdnormallink{Xerces}{http:xerces.apache.org/xerces-c/} 
+\htmladdnormallink{Xerces}{http://xerces.apache.org/xerces-c/} 
 Library to read and write Attribute data in XML format.  Other file IO
 functionalities, such as writing of error and log messages, input of
 configuration parameters from an ASCII file, and lower-level IO utilites are 
@@ -74,7 +74,7 @@ I/O Utilities, \ref{sec:IOUtil} respectively.
 %containing information about location, field values associated with this 
 %location, and a list of neighbors, if relevant. 
 
-\subsection{ESMF Attribute}
+\subsection{Attribute I/O}
 
 Metadata IO is handled via the ESMF Attribute class. The third
 party software Xerces C++ Library is used by ESMF to provide
@@ -89,7 +89,7 @@ set. Details can be found in the ESMF User Guide, "Building and Installing the E
 ESMF provides interfaces for high performance, parallel I/O using ESMF data
 objects such as Arrays and Fields.  Currently ESMF supports I/O of binary and
 NetCDF files.  The current ESMF implementation relies on the 
-\htmladdnormallink{Parallel I/O (PIO)}{http://web.ncar.teragrid.org/~dennis/pio\_doc/html} library developed as a collaboration between NCAR and DOE 
+\htmladdnormallink{Parallel I/O (PIO)}{http://code.google.com/p/parallelio/} library developed as a collaboration between NCAR and DOE 
 laboratories.  PIO is built as part of the ESMF build when the environment 
 variable ESMF\_PIO is set to "internal"; by default it is not set.
 When PIO is built with ESMF, the ESMF methods internally call the PIO 
@@ -102,25 +102,26 @@ found in ESMF User Guide, "Building and Installing the ESMF",
 In the current release, the following methods support parallel I/O using PIO:
 
 \begin{description}
-\item {\tt ESMF\_ArrayRead()}, section \ref{api:ArrayRead}.
-\item {\tt ESMF\_ArrayWrite()}, section \ref{api:ArrayWrite}.
-\item {\tt ESMF\_ArrayBundleRead()}, section \ref{api:ArrayBundleRead}.
-\item {\tt ESMF\_ArrayBundleWrite()}, section \ref{api:ArrayBundleWrite}.
-\item {\tt ESMF\_FieldRead()}, section \ref{api:FieldRead}.
-\item {\tt ESMF\_FieldWrite()}, section \ref{api:FieldWrite}.
 \item {\tt ESMF\_FieldBundleRead()}, section \ref{api:FieldBundleRead}.
 \item {\tt ESMF\_FieldBundleWrite()}, section \ref{api:FieldBundleWrite}.
+\item {\tt ESMF\_FieldRead()}, section \ref{api:FieldRead}.
+\item {\tt ESMF\_FieldWrite()}, section \ref{api:FieldWrite}.
+\item {\tt ESMF\_ArrayBundleRead()}, section \ref{api:ArrayBundleRead}.
+\item {\tt ESMF\_ArrayBundleWrite()}, section \ref{api:ArrayBundleWrite}.
+\item {\tt ESMF\_ArrayRead()}, section \ref{api:ArrayRead}.
+\item {\tt ESMF\_ArrayWrite()}, section \ref{api:ArrayWrite}.
 \end{description}
 
 
 \subsection{Data formats}
 
-Two formats are supported, namely, NetCDF and binary (MPI\_IO). 
+Two formats are supported, namely, NetCDF and binary (through MPI\_IO). 
 The environment variables that are enabled when ESMF is built determine the 
 format.  The environment variables ESMF\_NETCDF or/and ESMF\_PNETCDF should be 
-set to "standard" to enable NetCDF IO format.  Details about the environment 
-variables can be found in ESMF User Guide, "Building and Installing the ESMF", 
-"Third Party Libraries".
+set to "standard" to enable NetCDF IO format.  If neither ESMF\_NETCDF nor 
+ESMF\_PNETCDF are set, and MPI\_IO is enabled in MPI, the format will be 
+binary.  Details about the environment variables can be found in ESMF User 
+Guide, "Building and Installing the ESMF", "Third Party Libraries".
 
 \begin{description}
 \item[\bf NetCDF] Network Common Data Form (NetCDF) is an interface for 

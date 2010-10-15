@@ -1,6 +1,12 @@
-% $Id: IO_implnotes.tex,v 1.1 2009/02/18 06:45:59 eschwab Exp $
+% $Id: IO_implnotes.tex,v 1.2 2010/10/15 21:52:30 eschwab Exp $
 
 \subsection{Design and Implementation Notes}
 
-The IO class will use the Xerces C++ library to perform reading and writing
-of XML files.
+For data IO, the ESMF IO class relies on the 
+\htmladdnormallink{PIO}{http://code.google.com/p/parallelio}, 
+\htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf}, 
+\htmladdnormallink{PNetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf} 
+and MPI\_IO libraries.  For Attribute IO, the ESMF IO class uses the 
+\htmladdnormallink{Xerces}{http://xerces.apache.org/xerces-c} library to 
+perform reading and writing of XML files.  PIO is included with the ESMF 
+distribution; the other libraries must be installed on the machine of interest.
