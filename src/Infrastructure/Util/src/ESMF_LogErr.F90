@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.66 2010/09/15 01:18:47 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.67 2010/10/15 16:27:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -871,6 +871,9 @@ end subroutine ESMF_LogFlush
 	
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
+
+!   The Fortran Standard requires that a successful allocate return a stat value
+!   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_ALLOCATE
@@ -908,8 +911,8 @@ end function ESMF_LogFoundAllocError
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
-!      returned from a memory allocation indicates an allocation error.  
-!      An ESMF predefined memory allocation error 
+!      returned from a memory deallocation indicates an allocation error.  
+!      An ESMF predefined memory deallocation error 
 !      message will be added to the {\tt ESMF\_Log} along with {\tt line}, 
 !      {\tt file} and {\tt method}.  Additionally, the 
 !      {\tt statusToCheck} will be converted to a {\tt rcToReturn}.
@@ -918,7 +921,7 @@ end function ESMF_LogFoundAllocError
 !      \begin{description}
 ! 	
 !      \item [statusToCheck]
-!            Fortran allocation status to check.
+!            Fortran deallocation status to check.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
@@ -943,6 +946,9 @@ end function ESMF_LogFoundAllocError
 	
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundDeallocError=.FALSE.
+
+!   The Fortran Standard requires that a successful deallocate return a stat value
+!   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_DEALLOCATE
@@ -1264,6 +1270,9 @@ end subroutine ESMF_LogInitialize
     
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogMsgFoundAllocError=.FALSE.
+
+!   The Fortran Standard requires that a successful allocate return a stat value
+!   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
 	if (present(rcToReturn)) then
@@ -1284,7 +1293,7 @@ end function ESMF_LogMsgFoundAllocError
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogMsgFoundDeallocError - Check Fortran status for allocation 
+! !IROUTINE: ESMF_LogMsgFoundDeallocError - Check Fortran status for deallocation 
 !            error and write message
 
 ! !INTERFACE: 
@@ -1305,8 +1314,8 @@ end function ESMF_LogMsgFoundAllocError
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
-!      returned from a memory allocation indicates an allocation error.
-!      An ESMF predefined memory allocation error message 
+!      returned from a memory deallocation indicates an deallocation error.
+!      An ESMF predefined memory deallocation error message 
 !      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
 !      {\tt line}, {\tt file} and 
 !      {\tt method}.  Additionally, statusToCheck will be converted to 
@@ -1316,7 +1325,7 @@ end function ESMF_LogMsgFoundAllocError
 !      \begin{description}
 ! 	
 !      \item [statusToCheck]
-!            Fortran allocation status to check.
+!            Fortran deallocation status to check.
 !      \item [msg]
 !            User-provided message string.
 !      \item [{[line]}]
@@ -1343,6 +1352,9 @@ end function ESMF_LogMsgFoundAllocError
     
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogMsgFoundDeallocError=.FALSE.
+
+!   The Fortran Standard requires that a successful deallocate return a stat value
+!   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
 	if (present(rcToReturn)) then
