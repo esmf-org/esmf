@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.141 2010/10/14 15:25:37 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.142 2010/10/15 22:42:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.141 2010/10/14 15:25:37 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.142 2010/10/15 22:42:56 theurich Exp $'
 
 !==============================================================================
 !
@@ -812,7 +812,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompIsPetLocal"
 !BOP
-! !IROUTINE: ESMF_GridCompIsPETLocal - Inquire if this GridComp is to execute on the calling PET
+! !IROUTINE: ESMF_GridCompIsPetLocal - Inquire if this GridComp is to execute on the calling PET
 !
 ! !INTERFACE:
   recursive function ESMF_GridCompIsPetLocal(gridcomp, rc)
