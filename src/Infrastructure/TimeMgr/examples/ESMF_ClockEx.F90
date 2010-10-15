@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.46 2010/06/29 21:07:54 svasquez Exp $
+! $Id: ESMF_ClockEx.F90,v 1.47 2010/10/15 17:16:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Clock Creation}
+!\subsubsection{Clock creation}
 
 ! This example shows how to create and initialize an {\tt ESMF\_Clock}.
 !EOE
@@ -93,7 +93,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Clock Advance}
+!\subsubsection{Clock advance}
 
 ! This example shows how to time-step an {\tt ESMF\_Clock}.
 !EOE
@@ -122,7 +122,7 @@
 !EOC
 
 !BOE
-!\subsubsection{Clock Examination}
+!\subsubsection{Clock examination}
 
 ! This example shows how to examine an {\tt ESMF\_Clock}.
 !EOE
@@ -151,7 +151,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
 !BOE
-!\subsubsection{Clock Reversal}
+!\subsubsection{Clock reversal}
 
 ! This example shows how to time-step an {\tt ESMF\_Clock} in reverse mode.
 !EOE
@@ -187,7 +187,7 @@
 !EOC
 
 !BOE
-!\subsubsection{Clock Destruction}
+!\subsubsection{Clock destruction}
 
 ! This example shows how to destroy an {\tt ESMF\_Clock}.
 !EOE

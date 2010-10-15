@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.37 2010/06/29 21:07:54 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.38 2010/10/15 17:16:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Calendar Creation}
+!\subsubsection{Calendar creation}
 
 ! This example shows how to create two {\tt ESMF\_Calendars}.
 !EOE
@@ -74,7 +74,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Calendar Comparison}
+!\subsubsection{Calendar comparison}
 
 ! This example shows how to compare an {\tt ESMF\_Calendar} with a known
 ! calendar type.
@@ -83,14 +83,14 @@
 !BOC
       ! compare calendar type against a known type
       if (gregorianCalendar == ESMF_CAL_GREGORIAN) then
-          print *, "gregorianCalendar is of type ESMF_CAL_GREGORIAN."
+        print *, "gregorianCalendar is of type ESMF_CAL_GREGORIAN."
       else
-          print *, "gregorianCalendar is not of type ESMF_CAL_GREGORIAN."
+        print *, "gregorianCalendar is not of type ESMF_CAL_GREGORIAN."
       end if
 !EOC
 
 !BOE
-!\subsubsection{Time Conversion Between Calendars}
+!\subsubsection{Time conversion between Calendars}
 
 ! This example shows how to convert a time from one {\tt ESMF\_Calendar}
 ! to another.
@@ -119,7 +119,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Calendar Destruction}
+!\subsubsection{Calendar destruction}
 
 ! This example shows how to destroy two {\tt ESMF\_Calendars}.
 !EOE

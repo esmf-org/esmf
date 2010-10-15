@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.39 2010/06/29 21:07:54 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.40 2010/10/15 17:16:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -53,7 +53,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Time Initialization}
+!\subsubsection{Time initialization}
 
 ! This example shows how to initialize an {\tt ESMF\_Time}.
 !EOE
@@ -73,7 +73,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Time Increment}
+!\subsubsection{Time increment}
 
 ! This example shows how to increment an {\tt ESMF\_Time} by
 ! an {\tt ESMF\_TimeInterval}.
@@ -105,7 +105,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Time Comparison}
+!\subsubsection{Time comparison}
 
 ! This example shows how to compare two {\tt ESMF\_Times}.
 !EOE

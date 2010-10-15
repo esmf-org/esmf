@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.23 2010/06/29 21:07:54 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.24 2010/10/15 17:16:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Clock Initialization}
+!\subsubsection{Clock initialization}
 
 ! This example shows how to create and initialize an {\tt ESMF\_Clock}.
 !EOE
@@ -95,7 +95,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Alarm Initialization}
+!\subsubsection{Alarm initialization}
 
 ! This example shows how to create and initialize two {\tt ESMF\_Alarms} and
 ! associate them with the clock.
@@ -139,7 +139,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Clock Advance and Alarm Processing}
+!\subsubsection{Clock advance and Alarm processing}
 
 ! This example shows how to advance an {\tt ESMF\_Clock} and process any 
 ! resulting ringing alarms.
@@ -199,7 +199,7 @@
 !EOC
 
 !BOE
-!\subsubsection{Alarm and Clock Destruction}
+!\subsubsection{Alarm and Clock destruction}
 
 ! This example shows how to destroy {\tt ESMF\_Alarms} and {\tt ESMF\_Clocks}.
 !EOE
