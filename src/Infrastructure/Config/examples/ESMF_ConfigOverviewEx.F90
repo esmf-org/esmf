@@ -37,7 +37,7 @@
       type(ESMF_VM)       :: vm
 
 !BOE
-!\subsubsection{Variable Declarations}
+!\subsubsection{Variable declarations}
 
 ! The following are the variable declarations used as arguments in the following code 
 ! fragments. They represent the locals names for the variables listed in the Resource 
@@ -117,7 +117,7 @@
 ! First Method of Retrieval
 !----------------------------------------------------------------
 !BOE
-!\subsubsection{How to Retrieve a Label with a Single Value}
+!\subsubsection{How to retrieve a label with a single value}
 ! The first method for retrieving information from the 
 ! Resource File takes advantage of the <label,value> relationship
 ! within the file and access the data in a dictionary-like manner. This is the
@@ -217,7 +217,7 @@
 ! Second Method of Retrieval
 !----------------------------------------------------------------
 !BOE
-!\subsubsection{How to Retrieve a Label with Multiple Values}
+!\subsubsection{How to retrieve a label with multiple values}
 ! When there are multiple, mixed-typed values associated with a label, the 
 ! values can be retrieved in two steps:  1) Use ESMF\_ConfigFindLabel() 
 ! to find the label in the Config class; 2) use
@@ -312,7 +312,7 @@
 ! Retrieval of a Table
 !----------------------------------------------------------------
 !BOE
-!\subsubsection{How to Retrieve a Table}
+!\subsubsection{How to retrieve a table}
 
 ! To access tabular data, the user must use the multi-value method. 
 !EOE
