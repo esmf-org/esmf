@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.2 2010/09/29 23:28:18 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.3 2010/10/15 23:50:30 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "ESMC_Conf.h"
+#include "ESMCI_Util.h"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -301,14 +302,29 @@ void FTN(c_convertscrip)(
   size_t starts[2], counts[2];
   time_t tloc;
   int maxconnection;
+  char *c_infile;
+  char *c_outfile;
 
 #ifdef ESMF_NETCDF
   // ensure C conform string termination
-  infile[*infileLen] = '\0';
-  outfile[*outfileLen] = '\0';
+  c_infile=NULL;
+  c_infile=ESMC_F90toCstring(infile,*infileLen);
+  if (c_infile == NULL) {
+    fprintf(stderr, "SCRIP file name not valid \n");
+    *rc = -1;
+    return; // bail out
+  }
+
+  c_outfile=NULL;
+  c_outfile=ESMC_F90toCstring(outfile,*outfileLen);
+  if (c_outfile == NULL) {
+    fprintf(stderr, "output file name from converter not valid \n");
+    *rc = -1;
+    return; // bail out
+  }
   
   // Open intput SCRIP file
-  status = nc_open(infile, NC_NOWRITE, &ncid1);  
+  status = nc_open(c_infile, NC_NOWRITE, &ncid1);  
   if (status != NC_NOERR) handle_error(status);
 
   // inquire dimension ids
@@ -442,7 +458,7 @@ void FTN(c_convertscrip)(
 
   if (*dualflag == 0) {
     // create the output netcdf file
-    status = nc_create(outfile, NC_CLOBBER, &ncid2);
+    status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
     if (status != NC_NOERR) handle_error(status);
 
     // define the dimensions
@@ -508,7 +524,7 @@ void FTN(c_convertscrip)(
     strbuf = "0.9";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
     if (status != NC_NOERR) handle_error(status);
-    status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(infile), infile);
+    status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
     if (status != NC_NOERR) handle_error(status);
     time(&tloc);
     strbuf = ctime(&tloc);
@@ -650,7 +666,7 @@ void FTN(c_convertscrip)(
   // now write out the dual mesh in a netcdf file
   // create the output netcdf file
 
-  status = nc_create(outfile, NC_CLOBBER, &ncid2);
+  status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
   if (status != NC_NOERR) handle_error(status);
 
   // define the dimensions
@@ -694,10 +710,10 @@ void FTN(c_convertscrip)(
   strbuf = "0.9";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
-  status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(infile), infile);
+  status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
   if (status != NC_NOERR) handle_error(status);
   strbuf="Dual mesh generated using the cell center coordinates";
-  status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), infile);
+  status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), c_infile);
   if (status != NC_NOERR) handle_error(status);
   time(&tloc);
   strbuf = ctime(&tloc);
@@ -719,6 +735,9 @@ void FTN(c_convertscrip)(
   free(inbuf1);
   nc_close(ncid2);
   nc_close(ncid1);
+  free(c_infile);
+  free(c_outfile);
+
   *rc = 0;
   return;
 
