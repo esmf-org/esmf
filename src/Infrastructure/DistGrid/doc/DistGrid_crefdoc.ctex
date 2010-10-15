@@ -1,4 +1,4 @@
-% $Id: DistGrid_crefdoc.ctex,v 1.5 2010/09/16 04:33:44 theurich Exp $ 
+% $Id: DistGrid_crefdoc.ctex,v 1.6 2010/10/15 17:09:39 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,9 +50,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{DistGrid_desc}
+\input{DistGrid_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/DistGrid/doc/DistGrid_desc}
+\input{../Infrastructure/DistGrid/doc/DistGrid_cdesc}
 #endif
 
 %\subsection{DistGrid Options}
