@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.41 2010/09/13 05:50:47 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.42 2010/10/15 17:04:36 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -11,9 +11,9 @@
 
 The ESMF Attribute Class was created with the long-term goal of enabling models to be self-describing. Note that Attributes are individual name-value pairs, while Metadata is a term used to describe instances of Attributes that describe a particular object. While most of the discussion to follow is about specific Attributes, the overall goal is to create a Metadata system.   
 
-\subsubsection{ESMF's Approach to Attributes}
+\subsubsection{The ESMF approach to Attributes}
 
-ESMF's Approach to attributes can be summarized as follows:
+ESMF's Approach to Attributes can be summarized as follows:
 
 \begin{itemize}
   \item Implement community standards where they exist
@@ -37,7 +37,7 @@ ESMF's Approach to attributes can be summarized as follows:
   \item Ensure that all Attributes are consistent across the entire virtual machine of the object to which they are attached.
 \end{itemize}
 
-\subsubsection{Attribute Hierarchies}
+\subsubsection{Attribute hierarchies}
 \label{sec:AttHier}
 
 Of the ESMF objects with Attributes, only some can link their Attributes together in an Attribute hierarchy.  These objects are:
