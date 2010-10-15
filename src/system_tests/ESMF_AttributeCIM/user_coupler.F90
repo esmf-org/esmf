@@ -89,6 +89,7 @@ module user_coupler
     ! Local variables
     type(ESMF_VM)          :: vm
     character(ESMF_MAXSTR) :: convCIM, purpComp, purpPlatform
+    character(ESMF_MAXSTR) :: convISO, purpRP
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -212,18 +213,20 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Responsible party attributes (for Principal Investigator)
+    convISO = 'ISO 19115'
+    purpRP = 'Responsible Party Description'
     call ESMF_AttributeSet(comp, 'Name', &
       'Gerard Devine', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
       'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
       'g.m.devine@reading.ac.uk', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
       'Author', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine user_init

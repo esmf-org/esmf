@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2010/10/09 03:01:06 eschwab Exp $
+! $Id: user_model2.F90,v 1.8 2010/10/15 06:00:41 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -93,6 +93,7 @@ module user_model2
 
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
+    character(ESMF_MAXSTR)      :: convISO, purpRP
     type(ESMF_Field)            :: OH, Orog
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -125,18 +126,20 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Principal Investigator)
+    convISO = 'ISO 19115'
+    purpRP = 'Responsible Party Description'
     call ESMF_AttributeSet(comp, 'Name', &
       'Gerard Devine', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
      'Department of Meteorology University of Reading Earley Gate, Reading UK',&
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
       'g.m.devine@reading.ac.uk', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
       'PI', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create two Fields, and add CIM Attribute packages.
