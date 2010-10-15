@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.165 2010/10/13 22:25:09 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.166 2010/10/15 22:01:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.165 2010/10/13 22:25:09 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.166 2010/10/15 22:01:03 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2994,6 +2994,7 @@ end subroutine ESMF_GridConvertIndex
 ! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP grid file and a DistGrid
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate()
   function ESMF_GridCreateFrmScripDistGrd(distgrid, filename, rc)
 
 ! !RETURN VALUE:
@@ -3002,7 +3003,7 @@ end subroutine ESMF_GridConvertIndex
 ! !ARGUMENTS:
  
     type(ESMF_DistGrid), intent(in) :: distgrid
-    character(len=*), intent(in)  :: filename
+    character(len=*), intent(in)    :: filename
     integer, intent(out), optional  :: rc
 
 ! !DESCRIPTION:
@@ -3313,7 +3314,9 @@ end subroutine convert_corner_arrays_to_1D
 ! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP grid file with a regular distribution
 
 ! !INTERFACE:
-  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, addCornerStagger, rc)
+  ! Private name; call using ESMF_GridCreate()
+  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, &
+             addCornerStagger, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScripReg
