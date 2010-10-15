@@ -1,4 +1,4 @@
-% $Id: Array_crefdoc.ctex,v 1.3 2010/09/16 04:33:44 theurich Exp $ 
+% $Id: Array_crefdoc.ctex,v 1.4 2010/10/15 16:55:46 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,9 +50,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Array_desc}
+\input{Array_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/Array_desc}
+\input{../Infrastructure/Array/doc/Array_cdesc}
 #endif
 
 %\subsection{Array Options}
