@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.34 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.35 2010/10/15 18:13:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !EOC
 
 !BOE
-!\subsubsection{User Created Log}
+!\subsubsection{User created Log}
 ! This example shows how to use a user created Log.  This example uses
 ! cpp macros.
 !EOE
