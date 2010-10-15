@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.84 2010/10/15 05:58:44 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.85 2010/10/15 16:44:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.84 2010/10/15 05:58:44 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.85 2010/10/15 16:44:15 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1101,7 +1101,7 @@ namespace ESMCI {
   if (!attr) {
     sprintf(msgbuf, 
       "This Attribute package does not have an Attribute named %s\n",
-       name.c_str(), &localrc);
+       name.c_str());
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, msgbuf, &localrc);
     return localrc;
   }
