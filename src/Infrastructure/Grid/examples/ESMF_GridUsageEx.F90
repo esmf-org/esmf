@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.78 2010/10/13 22:25:09 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.79 2010/10/15 05:06:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -84,7 +84,7 @@ program ESMF_GridCreateEx
 ! to create many common grid shapes, including
 ! rectangle, bipole sphere, and tripole sphere. 
 !
-! In v4.0.0, the {\tt ESMF\_GridCreateShapeTile()} method supports 
+! In v5.1.0, the {\tt ESMF\_GridCreateShapeTile()} method supports 
 ! all three types of distributions described in 
 ! Section~\ref{sec:desc:dist}: regular, irregular and arbitrary.
 !

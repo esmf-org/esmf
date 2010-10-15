@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.50 2010/03/04 18:57:44 svasquez Exp $
+% $Id: Grid_desc.tex,v 1.51 2010/10/15 05:06:18 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -16,7 +16,7 @@ The most frequent use of the Grid class is to describe physical grids
 in user code so that sufficient information is available to perform ESMF
 methods such as regridding.  
 
-In the current release (v3.1.0)
+In the current release (v5.1.0)
 the functionality in this class is partially implemented.  
 Multi-tile grids are not supported, and edge connectivities 
 are not implemented and default to aperiodic.  
@@ -115,7 +115,7 @@ The table below shows the ESMF\_GridConn settings used to create
 standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
 are specified for each dimension, one for the low end and one for 
 the high end of the dimension's index values.  Note that connectivities
-have not been implemented as of v4.0.0 and default to aperiodic bounds.
+have not been implemented as of v5.1.0 and default to aperiodic bounds.
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
@@ -154,7 +154,7 @@ DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any grid cell can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Support for arbitrary distribution 
-is limited in v4.0.0, See section \ref{example:ArbGridWithUndistDim} for
+is limited in v5.1.0, See section \ref{example:ArbGridWithUndistDim} for
 more detail descriptions.
 
 
@@ -186,7 +186,7 @@ does not affect the computations performed on an ocean model grid.  Figure
 
 Any of these logically rectangular grid types can be combined through edge
 connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
-of mosaic grids.  Note that as of v4.0.0 multi-tile grids have not yet been
+of mosaic grids.  Note that as of v5.1.0 multi-tile grids have not yet been
 implemented.
  
 \begin{figure}
@@ -249,7 +249,7 @@ However, to achieve other types of staggering, the user may alter
 or eliminate this padding by using the appropriate options when adding
 coordinates to a Grid. 
  
-In v4.0.0, only the cell center stagger location is supported for an
+In v5.1.0, only the cell center stagger location is supported for an
 arbitrarily distributed grid. For examples and a full description of the stagger interface 
 see Section~\ref{sec:usage:staggerloc}. 
 
@@ -289,9 +289,7 @@ pass the DistGrid into a general {\tt ESMF\_GridCreate()} method.
 \item Specify the Grid coordinates and any other information
 required for regridding (this can vary depending on the particular
 regridding method).  At the completion of this stage, the Grid can
-be used in a regridding operation (once Grid is connected to regrid;
-as of v3.1.0, it is not).  Its {\tt ESMF\_GridStatus}
-has a value of {\tt ESMF\_GRIDSTATUS\_REGRID\_READY}.
+be used in a regridding operation.
 \end{enumerate}
 
 When creating the Grid shape and specifying the Grid coordinates,
