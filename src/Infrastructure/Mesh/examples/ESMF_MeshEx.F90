@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.31 2010/10/13 22:36:17 rokuingh Exp $
+! $Id: ESMF_MeshEx.F90,v 1.32 2010/10/15 23:49:32 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -634,7 +634,7 @@ program ESMF_MeshEx
 
   
   ! Create Mesh structure in 1 step
-  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+  mesh=ESMF_MeshCreate(parametricDim=2, spatialDim=2, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
@@ -817,7 +817,92 @@ program ESMF_MeshEx
 !
 !EOE
 
-if (petCount .eq. 4) then ! using Mesh created on 4 procs above
+! Just do this for 1 PET mesh
+if (petCount .eq. 1) then 
+  ! Set number of nodes
+  numNodes=9
+
+  ! Allocate and fill the node id array.
+  allocate(nodeIds(numNodes))
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  ! Allocate and fill node coordinate array.
+  ! Since this is a 2D Mesh the size is 2x the
+  ! number of nodes.
+  allocate(nodeCoords(2*numNodes))
+  nodeCoords=(/0.0,0.0, & ! node id 1
+               1.0,0.0, & ! node id 2
+               2.0,0.0, & ! node id 3
+               0.0,1.0, & ! node id 4
+               1.0,1.0, & ! node id 5
+               2.0,1.0, & ! node id 6
+               0.0,2.0, & ! node id 7
+               1.0,2.0, & ! node id 8
+               2.0,2.0 /) ! node id 9
+
+  ! Allocate and fill the node owner array.
+  ! Since this Mesh is all on PET 0, it's just set to all 0.
+  allocate(nodeOwners(numNodes))
+  nodeOwners=0 ! everything on PET 0
+
+
+  ! Set the number of each type of element, plus the total number.
+  numQuadElems=3
+  numTriElems=2
+  numTotElems=numQuadElems+numTriElems
+
+
+  ! Allocate and fill the element id array.
+  allocate(elemIds(numTotElems))
+  elemIds=(/1,2,3,4,5/) 
+
+
+  ! Allocate and fill the element topology type array.
+  allocate(elemTypes(numTotElems))
+  elemTypes=(/ESMF_MESHELEMTYPE_QUAD, & ! elem id 1
+              ESMF_MESHELEMTYPE_TRI,  & ! elem id 2
+              ESMF_MESHELEMTYPE_TRI,  & ! elem id 3
+              ESMF_MESHELEMTYPE_QUAD, & ! elem id 4
+              ESMF_MESHELEMTYPE_QUAD/)  ! elem id 5
+
+
+  ! Allocate and fill the element connection type array.
+  ! Note that entries in this array refer to the 
+  ! positions in the nodeIds, etc. arrays and that
+  ! the order and number of entries for each element
+  ! reflects that given in the Mesh options 
+  ! section for the corresponding entry
+  ! in the elemTypes array. The number of 
+  ! entries in this elemConn array is the
+  ! number of nodes in a quad. (4) times the 
+  ! number of quad. elements plus the number
+  ! of nodes in a triangle (3) times the number
+  ! of triangle elements. 
+  allocate(elemConn(4*numQuadElems+3*numTriElems))
+  elemConn=(/1,2,5,4, &  ! elem id 1
+             2,3,5,   &  ! elem id 2
+             3,6,5,   &  ! elem id 3
+             4,5,8,7, &  ! elem id 4
+             5,6,9,8/)   ! elem id 5
+
+
+  ! Create Mesh structure in 1 step
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+         nodeIds=nodeIds, nodeCoords=nodeCoords, &
+         nodeOwners=nodeOwners, elementIds=elemIds,&
+         elementTypes=elemTypes, elementConn=elemConn, &
+         rc=localrc)
+
+
+  ! After the creation we are through with the arrays, so they may be
+  ! deallocated.
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+
 !BOC
 
    ! Here a Field built on a mesh may be used
@@ -838,7 +923,7 @@ if (petCount .eq. 4) then ! using Mesh created on 4 procs above
    ! Here mesh can't be used for anything
 
 !EOC
-endif ! 4 procs
+endif ! 1 proc
 
 10   continue
   call ESMF_Finalize(rc=rc)
