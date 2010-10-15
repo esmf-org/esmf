@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.10 2010/10/11 06:01:09 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.11 2010/10/15 06:00:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_AttributeCIMEx
       type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: gridcomp1, gridcomp2, gridcomp3
       character(ESMF_MAXSTR)  :: convCIM, purpComp, purpField, purpPlatform
-      character(ESMF_MAXSTR)  :: convISO, purpCitation
+      character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
       
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -119,6 +119,7 @@ program ESMF_AttributeCIMEx
       purpField = 'Inputs Description'
       purpPlatform = 'Platform Description'
       convISO = 'ISO 19115'
+      purpRP = 'Responsible Party Description'
       purpCitation = 'Citation Description'
 
       ! Add CIM Attribute package to Components
@@ -249,19 +250,19 @@ program ESMF_AttributeCIMEx
       ! Responsible party attributes (for Principal Investigator)
       call ESMF_AttributeSet(cplcomp, 'Name', &
        'Gerard Devine', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'PhysicalAddress', &
        'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'EmailAddress', &
        'g.m.devine@reading.ac.uk', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ResponsiblePartyRole', &
        'PI', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'URL', &
        'www.epcc.ed.ac.uk', &
-        convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
 
       ! Citation attributes
       call ESMF_AttributeSet(cplcomp, 'ShortTitle', &
@@ -306,16 +307,16 @@ program ESMF_AttributeCIMEx
       ! Responsible party attributes (for Author)
       call ESMF_AttributeSet(gridcomp1, 'Name', &
        'John Doe', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'PhysicalAddress', &
        'Department of Meteorology University of ABC', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'EmailAddress', &
        'john.doe@uabc.edu', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'ResponsiblePartyRole', &
        'Author', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
 
       !
       !  Child component attributes, set on gridcomp3, child of gridcomp1
@@ -332,16 +333,16 @@ program ESMF_AttributeCIMEx
       ! Responsible party attributes (for Contact)
       call ESMF_AttributeSet(gridcomp3, 'Name', &
        'Jane Doe', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'PhysicalAddress', &
        'Department of Meteorology University of DEF', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'EmailAddress', &
        'jane.doe@udef.edu', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp3, 'ResponsiblePartyRole', &
        'Contact', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
 
       !
       !  Child component attributes, set on gridcomp2, child of cplcomp
@@ -357,16 +358,16 @@ program ESMF_AttributeCIMEx
       ! Responsible party attributes (for Center)
       call ESMF_AttributeSet(gridcomp2, 'Name', &
        'GHI', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
        'Department of Meteorology University of GHI', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'EmailAddress', &
        'info@ughi.edu', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp2, 'ResponsiblePartyRole', &
        'Center', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
 !EOC
 
 !BOE
