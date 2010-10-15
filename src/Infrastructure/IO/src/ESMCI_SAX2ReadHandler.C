@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.6 2010/06/28 05:59:47 eschwab Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.7 2010/10/15 05:58:44 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ using std::exception;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.6 2010/06/28 05:59:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.7 2010/10/15 05:58:44 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -128,10 +128,12 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       // Set the attribute on the object, if neither convention nor purpose
       if (cname != "convention" && cname != "purpose") {
         if (!this->convention.empty() && !this->purpose.empty()) {
+          string attPackInstanceName;
           status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
                                           &cvalue, this->convention,
                                                    this->purpose, 
-                                                   this->object, NULL, NULL);
+                                                   this->object,
+                                                   attPackInstanceName); 
           //cout << "setting xml attribute into AttPack" << endl;
         } else {
           // TODO:  handle one or the other (xor) of conv, purp (error) ?
@@ -201,10 +203,12 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
 
       // Set the attribute on the object
       if (!this->convention.empty() && !this->purpose.empty()) {
+        string attPackInstanceName;
         status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
                                         &cvalue, this->convention,
                                                  this->purpose, 
-                                                 this->object, NULL, NULL);
+                                                 this->object,
+                                                 attPackInstanceName); 
         //cout << "set xml element on AttPack" << endl;
       } else {
         // TODO:  handle one or the other (xor) of conv, purp (error) ?

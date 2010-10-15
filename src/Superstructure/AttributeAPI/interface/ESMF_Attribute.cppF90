@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.65 2010/09/30 18:16:54 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.66 2010/10/15 05:58:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.65 2010/09/30 18:16:54 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.66 2010/10/15 05:58:44 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -857,7 +857,8 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <value argument>, &
-!                    <defaultvalue argument>, convention, purpose, ordinal, rc)
+!                    <defaultvalue argument>, convention, purpose, &
+!                    attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -866,16 +867,16 @@ contains
 !     <defaultvalue argument>, see below for supported values   
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     integer, intent(in), optional :: ordinal
+!     character (len = *), intent(in), optional :: attPackInstanceName
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Return an Attribute value from the <object>, or from the Attribute package
-!     specified by {\tt convention} and {\tt purpose}.  A default value 
-!     argument may be given if a return code is not desired when the 
-!     Attribute is not found.  See Section~\ref{sec:AttPacks} for a
-!     description of Attribute packages and their conventions, purposes,
-!     and object types.
+!     Return an Attribute {\tt value} from the <object>, or from an Attribute 
+!     package on the <object>, specified by {\tt convention} and {\tt purpose},
+!     and optionally {\tt attPackInstanceName}.  A {\tt defaultvalue} argument
+!     may be given if a return code is not desired when the Attribute is not
+!     found.  See Section~\ref{sec:AttPacks} for a description of Attribute 
+!     packages and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -922,9 +923,10 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
-!     \item [{[ordinal]}]
-!           Integer specifying which one of multiple Attribute packages of
-!           the same convention and purpose
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  (Not implemented yet)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -938,7 +940,7 @@ contains
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <valueList argument>, &
 !                            <defaultvalueList argument>, convention, purpose, &
-!                            ordinal, itemCount, rc)
+!                            attPackInstanceName, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -947,17 +949,18 @@ contains
 !     <defaultvalueList argument>, see below for supported values   
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     integer, intent(in), optional :: ordinal
+!     character (len = *), intent(in), optional :: attPackInstanceName
 !     integer, intent(inout), optional :: itemCount
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Return an Attribute value from the <object>, or from the Attribute package
-!     specified by {\tt convention} and {\tt purpose}.  A default value 
-!     argument may be given if a return code is not desired when the 
-!     Attribute is not found.  See Section~\ref{sec:AttPacks} for a
-!     description of Attribute packages and their conventions, purposes,
-!     and object types.
+!     Return an Attribute {\tt valueList} from the <object>, or from an
+!     Attribute package on the <object>, specified by {\tt convention} and
+!     {\tt purpose}, and optionally {\tt attPackInstanceName}.
+!     A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1004,9 +1007,10 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
-!     \item [{[ordinal]}]
-!           Integer specifying which one of multiple Attribute packages of
-!           the same convention and purpose.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  (Not implemented yet)
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute.  If the itemCount is passed in, only itemCount
 !           items of the desired Attribute will be returned, as long as there is enough space and there are 
@@ -1076,14 +1080,14 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, itemCount, attrAttribute, rc)
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, &
+!                                           itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
 !     integer, intent(out), optional :: itemCount   
-!     logical, intent(out), optional :: attrAttribute   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1112,9 +1116,6 @@ contains
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute
-!     \item [{[attrAttribute]}]
-!           Whether this is an attribute describing a containing Attribute
-!           package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1128,7 +1129,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
 !     subroutine ESMF_AttributeGetInfoByNum(<object>, attributeIndex, name, &
-!       typekind, itemcount, attrAttribute, rc)
+!       typekind, itemcount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -1136,7 +1137,6 @@ contains
 !     character (len = *), intent(out) :: name
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
 !     integer, intent(out), optional :: itemCount   
-!     logical, intent(out), optional :: attrAttribute   
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1168,9 +1168,6 @@ contains
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute
-!     \item [{[attrAttribute]}]
-!           Whether this is an attribute describing a containing Attribute
-!           package.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1585,14 +1582,14 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, &
-!                                     ordinal, rc)
+!                                     attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in), optional :: name
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     integer, intent(in), optional :: ordinal
+!     character (len = *), intent(in), optional :: attPackInstanceName
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -1623,9 +1620,10 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
-!     \item [{[ordinal]}]
-!           Integer specifying which one of multiple Attribute packages of
-!           the same convention and purpose
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  (Not implemented yet)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1645,7 +1643,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <value argument>, &
-!                              convention, purpose, ordinal, attrAttribute, rc)
+!                              convention, purpose, attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -1653,14 +1651,14 @@ contains
 !     <value argument>, see below for supported values
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     integer, intent(in), optional :: ordinal
-!     logical, intent(in), optional :: attrAttribute
+!     character (len = *), intent(in), optional :: attPackInstanceName
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an 
-!     Attribute package.  The Attribute has a {\tt name} and either 
-!     a {\tt value}, and a {\tt convention} and {\tt purpose}.  
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, a {\tt convention} and {\tt purpose},
+!     and optionally an {\tt attPackInstanceName}.  
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
 !
@@ -1698,12 +1696,10 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
-!     \item [{[ordinal]}]
-!           Integer specifying which one of multiple Attribute packages of
-!           the same convention and purpose.
-!     \item [{[attrAttribute]}]
-!           Whether this is an attribute describing the Attribute package,
-!           default is .false.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  (Not implemented yet)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1716,8 +1712,8 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <valueList argument>, &
-!                                 convention, purpose, ordinal, &
-!                                 attrAttribute, itemCount, rc)
+!                                 convention, purpose, attPackInstanceName, &
+!                                 itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -1725,17 +1721,18 @@ contains
 !     <valueList argument>, see below for supported values
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     integer, intent(in), optional :: ordinal
-!     logical, intent(in), optional :: attrAttribute
+!     character (len = *), intent(in), optional :: attPackInstanceName
 !     integer, intent(in), optional :: itemCount
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an 
 !     Attribute package.  The Attribute has a {\tt name} and a 
-!     {\tt valueList}, with an {\tt itemCount}, and a {\tt convention}
-!     and {\tt purpose}.  See Section~\ref{sec:AttPacks} for a description
-!     of Attribute packages and their conventions, purposes, and object types.
+!     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute 
+!     package, a {\tt convention} and {\tt purpose}, and optionally an
+!     {\tt attPackInstanceName}.  See Section~\ref{sec:AttPacks} for a
+!     description of Attribute packages and their conventions, purposes,
+!     and object types.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1771,12 +1768,10 @@ contains
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
 !           The purpose of the Attribute package
-!     \item [{[attrAttribute]}]
-!           Whether this is an attribute describing the Attribute package,
-!           default is .false.
-!     \item [{[ordinal]}]
-!           Integer specifying which one of multiple Attribute packages of
-!           the same convention and purpose.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  (Not implemented yet)
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}] 
@@ -2368,8 +2363,8 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGet##mtypekind(mthis, name, value, defaultvalue, & @\
-        convention, purpose, ordinal, rc) @\
+      subroutine mclass##AttGet##mtypekind(mthis, name, value, & @\
+        defaultvalue, convention, purpose, attPackInstanceName, rc) @\
  @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
@@ -2377,7 +2372,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), intent(inout), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2398,9 +2393,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2434,13 +2430,13 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, ordinal, present_flag, localrc) @\
+          fobject, attPackInstanceName, present_flag, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-            convention, purpose, fobject, ordinal, localrc) @\
+            convention, purpose, fobject, attPackInstanceName, localrc) @\
         endif @\
       else @\
        @\
@@ -2481,7 +2477,8 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGet1D##mtypekind(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, ordinal, itemCount, rc) @\
+        defaultvalueList, convention, purpose, attPackInstanceName, & @\
+        itemCount, rc) @\
  @\
       type(mclass), intent(inout) :: mthis   @\
       character (len=*), intent(in) :: name @\
@@ -2489,7 +2486,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(inout), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len=*), intent(in), optional :: attPackInstanceName @\
       integer, intent(inout), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
@@ -2511,9 +2508,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2566,13 +2564,13 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, ordinal, present_flag, localrc) @\
+          fobject, attPackInstanceName, present_flag, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
         call c_ESMC_AttPackGetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, ordinal, localrc) @\
+          convention, purpose, fobject, attPackInstanceName, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
@@ -2625,7 +2623,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetLgcl(mthis, name, value, defaultvalue, & @\
-        convention, purpose, ordinal, rc) @\
+        convention, purpose, attPackInstanceName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -2634,7 +2632,7 @@ contains
       logical, intent(inout), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2655,9 +2653,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2691,13 +2690,13 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, ordinal, present_flag, localrc) @\
+          fobject, attPackInstanceName, present_flag, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-            convention, purpose, fobject, ordinal, localrc) @\
+            convention, purpose, fobject, attPackInstanceName, localrc) @\
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue   @\
@@ -2740,7 +2739,8 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetLgclList(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, ordinal, itemCount, rc) @\
+        defaultvalueList, convention, purpose, attPackInstanceName, & @\
+        itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -2749,7 +2749,7 @@ contains
       logical, dimension(:), intent(inout), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len=*), intent(in), optional :: attPackInstanceName @\
       integer, intent(inout), optional :: itemCount    @\
       integer, intent(out), optional :: rc @\
  @\
@@ -2771,9 +2771,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[rc]}]  @\
@@ -2828,13 +2829,13 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, ordinal, present_flag, localrc) @\
+          fobject, attPackInstanceName, present_flag, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
             ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-            convention, purpose, fobject, ordinal, localrc) @\
+            convention, purpose, fobject, attPackInstanceName, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
@@ -2886,7 +2887,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetChar(mthis, name, value, defaultvalue, & @\
-        convention, purpose, ordinal, rc) @\
+        convention, purpose, attPackInstanceName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -2895,7 +2896,7 @@ contains
       character (len = *), intent(inout), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -2916,9 +2917,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -2952,12 +2954,12 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, ordinal, present_flag, localrc) @\
+          fobject, attPackInstanceName, present_flag, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
-            convention, purpose, fobject, ordinal, localrc) @\
+            convention, purpose, fobject, attPackInstanceName, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
@@ -2994,7 +2996,8 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetCharList(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, ordinal, itemCount, rc) @\
+        defaultvalueList, convention, purpose, attPackInstanceName, & @\
+        itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3003,7 +3006,7 @@ contains
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len=*), intent(in), optional :: attPackInstanceName @\
       integer, intent(inout), optional :: itemCount @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3025,9 +3028,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[rc]}]  @\
@@ -3088,13 +3092,13 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, ordinal, present_flag, localrc) @\
+          fobject, attPackInstanceName, present_flag, localrc) @\
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-            litemCount, lens, valueString, convention, purpose, fobject, & @\
-            ordinal, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
+            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, & @\
+            convention, purpose, fobject, attPackInstanceName, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, present_flag, localrc) @\
@@ -3217,14 +3221,13 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetInfoByNam(mthis, name, typekind, itemCount, & @\
-        attrAttribute, rc) @\
+        rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character(len=*), intent(in) :: name @\
       type(ESMF_TypeKind), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
-      logical, intent(out), optional :: attrAttribute @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3243,9 +3246,6 @@ contains
 !     \item [{[itemCount]}] @\
 !           The number of items in this Attribute.  For character types, @\
 !           the length of the character string. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing a containing Attribute @\
-!           package. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3256,7 +3256,6 @@ contains
       integer :: localrc              @\
       type(ESMF_TypeKind) :: localTk @\
       integer :: litemCount @\
-      type(ESMF_Logical) :: lattrAttr @\
  @\
       ! Initialize  @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3266,13 +3265,12 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
-        localTk, litemCount, lattrAttr, localrc) @\
+        localTk, litemCount, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(typekind)) typekind = localTk @\
       if (present(itemCount)) itemCount = litemCount @\
-      if (present(attrAttribute)) attrAttribute = lattrAttr @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3288,7 +3286,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetInfoByNum(mthis, attributeIndex, name, & @\
-        typekind, itemCount, attrAttribute, rc) @\
+        typekind, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3296,7 +3294,6 @@ contains
       character(len=*), intent(out) :: name @\
       type(ESMF_TypeKind), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount @\
-      logical, intent(out), optional :: attrAttribute @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -3317,9 +3314,6 @@ contains
 !     \item [{[itemCount]}] @\
 !           Returns the number of items in this Attribute.  For character @\
 !           types, this is the length of the character string. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing a containing Attribute @\
-!           package. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3331,7 +3325,6 @@ contains
       character(len=len(name)) :: localName @\
       type(ESMF_TypeKind) :: localTk @\
       integer :: litemCount @\
-      type(ESMF_Logical) :: lattrAttr @\
  @\
       ! Initialize  @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3341,14 +3334,13 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       call c_ESMC_AttributeGetInfoNum(mthisfield, attributeIndex, & @\
-        localName, localTk, litemCount, lattrAttr, localrc) @\
+        localName, localTk, litemCount, localrc) @\
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       name = localName @\
       if (present(typekind)) typekind = localTk @\
       if (present(itemCount)) itemCount = litemCount @\
-      if (present(attrAttribute)) attrAttribute = lattrAttr @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3748,14 +3740,15 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRemove() @\
-      subroutine mclass##AttRemove(mthis, name, convention, purpose, ordinal, rc) @\
+      subroutine mclass##AttRemove(mthis, name, convention, purpose, & @\
+                                   attPackInstanceName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in), optional :: name @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
@@ -3771,9 +3764,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3806,10 +3800,10 @@ contains
  @\
       if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
         call c_ESMC_AttPackRemove(mthisfield, convention, & @\
-          purpose, fobject, ordinal, localrc) @\
+          purpose, fobject, attPackInstanceName, localrc) @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
         call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-          purpose, fobject, ordinal, localrc) @\
+          purpose, fobject, attPackInstanceName, localrc) @\
       else if (present(name)) then @\
         call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
       endif @\
@@ -3837,7 +3831,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet##mtypekind(mthis, name, value, convention, & @\
-        purpose, ordinal, attrAttribute, rc) @\
+        purpose, attPackInstanceName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3845,8 +3839,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), intent(in) :: value @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
-      logical, intent(in), optional :: attrAttribute @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3866,12 +3859,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing the Attribute package, @\
-!           default is .false. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3905,7 +3896,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, 1, value, & @\
-          convention, purpose, fobject, ordinal, attrAttribute, localrc) @\
+          convention, purpose, fobject, attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
@@ -3927,7 +3918,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet1D##mtypekind(mthis, name, valueList, & @\
-        convention, purpose, ordinal, attrAttribute, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -3935,8 +3926,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in) :: valueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
-      logical, intent(in), optional :: attrAttribute    @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3959,12 +3949,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing the Attribute package, @\
-!           default is .false. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
@@ -4019,7 +4007,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, ordinal, attrAttribute, localrc) @\
+          convention, purpose, fobject, attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
@@ -4043,7 +4031,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgcl(mthis, name, value, convention, & @\
-        purpose, ordinal, attrAttribute, rc) @\
+        purpose, attPackInstanceName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -4051,8 +4039,7 @@ contains
       logical, intent(in) :: value @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
-      logical, intent(in), optional :: attrAttribute @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -4072,12 +4059,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing the Attribute package, @\
-!           default is .false. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4113,7 +4098,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
-          convention, purpose, fobject, ordinal, attrAttribute, localrc) @\
+          convention, purpose, fobject, attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
@@ -4135,7 +4120,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgclList(mthis, name, valueList, & @\
-        convention, purpose, ordinal, attrAttribute, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -4143,8 +4128,7 @@ contains
       logical, dimension(:), intent(in) :: valueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
-      logical, intent(in), optional :: attrAttribute @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4167,12 +4151,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing the Attribute package, @\
-!           default is .false. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
@@ -4227,7 +4209,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-          convention, purpose, fobject, ordinal, attrAttribute, localrc) @\
+          convention, purpose, fobject, attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
@@ -4251,7 +4233,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetChar(mthis, name, value, convention, & @\
-        purpose, ordinal, attrAttribute, rc) @\
+        purpose, attPackInstanceName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
@@ -4259,8 +4241,7 @@ contains
       character (len = *), intent(in) :: value @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
-      logical, intent(in), optional :: attrAttribute @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -4280,12 +4261,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing the Attribute package, @\
-!           default is .false. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4319,7 +4298,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
           ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, & @\
-          ordinal, attrAttribute, localrc) @\
+          attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
       endif @\
@@ -4340,7 +4319,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
-        convention, purpose, ordinal, attrAttribute, itemCount, rc) @\
+        convention, purpose, attPackInstanceName, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -4348,8 +4327,7 @@ contains
       character (len = *), dimension(:), intent(in) :: valueList @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
-      integer, intent(in), optional :: ordinal @\
-      logical, intent(in), optional :: attrAttribute @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -4370,12 +4348,10 @@ contains
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
 !           The purpose of the Attribute package. @\
-!     \item [{[ordinal]}] @\
-!           Integer specifying which one of multiple Attribute packages of @\
-!           the same convention and purpose. @\
-!     \item [{[attrAttribute]}] @\
-!           Whether this is an attribute describing the Attribute package, @\
-!           default is .false. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4437,7 +4413,7 @@ contains
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, convention, purpose, fobject, & @\
-          ordinal, attrAttribute, localrc) @\
+          attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
