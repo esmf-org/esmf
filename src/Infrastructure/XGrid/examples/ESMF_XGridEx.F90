@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.7 2010/10/14 21:58:11 oehmke Exp $
+! $Id: ESMF_XGridEx.F90,v 1.8 2010/10/15 15:07:25 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -82,7 +82,12 @@
 !\begin{center}
 !\begin{figure}
 !\scalebox{0.75}{\includegraphics{XGridEx1}}
-!\caption{Grid layout for simple XGrid creation example.}
+!\caption{Grid layout for simple XGrid creation example. Overlapping of 3 Grids
+!(Green 2x2, Red 1x2, Blue 2x2). Green and red Grids on side A, blue Grid on side
+!B. Color coded sequence indices are marked at upper right corner of side A green and red 
+!Grids, lower right corner of side B blue Grid, and lower left corner of exchange
+!Grid (4x3). Physical coordinates are the tuples in parentsis, e.g. at the four 
+!corners of rectangular computational domain.}
 !\label{fig:xgridsimple}
 !\end{figure}
 !\end{center}
