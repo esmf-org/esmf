@@ -1,0 +1,60 @@
+% $Id: LogErr_cdesc.tex,v 1.1 2010/10/15 17:34:29 theurich Exp $
+
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%TODO: This file started as an exact copy of the Fortran version of this file.
+%TODO: Changes were made to correctly reflect the current status of the C API.
+%TODO: Eventually this file should be removed again and replaced by a single
+%TODO: generic version that can be included for both Fortran and C refdocs.
+
+%\subsection{Description}
+\label{sec:LogErr}
+
+The Log class consists of a variety of methods for writing error, warning, and
+informational messages to files.  A default Log is created at ESMF
+initialization.  Other Logs can be created later in the code by the user.  Most
+LogErr methods take a Log as an optional argument and apply to the default Log
+when another Log is not specified.  A set of standard return codes and
+associated messages are provided for error handling.  
+
+LogErr provides capabilities to store message entries in a buffer, which is 
+flushed to a file, either when the buffer is full, or when the user calls an 
+{\tt ESMF\_LogFlush()} method.  Currently, the default is for the Log to flush
+after every ten entries.  This can easily be changed by using the 
+{\tt ESMF\_LogSet()} method and setting the {\tt maxElements} property to 
+another value.  The {\tt ESMF\_LogFlush()} method is automatically called when 
+the program exits by any means (program completion, halt on error, or when the
+Log is closed).
+
+The user has the capability to halt the program on an error or on a warning by
+using the {\tt ESMF\_LogSet()} method with the {\tt halt} property.  When the 
+{\tt halt} property is set to {\tt ESMF\_LOG\_HALTWARNING}, the program will 
+stop on any and all warning or errors.  When the {\tt halt} property is set to 
+{\tt ESMF\_LOG\_HALTERROR}, the program will only halt only on errors.  Lastly,
+the user can choose to never halt by setting the {\tt halt} property to 
+{\tt ESMF\_LOG\_HALTNEVER}; this is the default.
+
+LogErr will automatically put the PET number into the Log.  Also, the user can 
+either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
+Log or {\tt ESMF\_LOG\_MULTI} which writes entries to multiple Logs according to 
+the PET number.  To distinguish Logs from each other when using 
+{\tt ESMF\_LOG\_MULTI}, the PET number (in the format {\tt PETx.}) will be 
+prepended to the file name where x is the PET number.
+
+Opening multiple log files and writing log messages from all the processors
+may affect the application performance while running on a large number of
+processors.  For that reason, {\tt ESMF\_LOG\_NONE} is provided to
+switch off the LogErr capability.  All the LogErr methods have no effect
+in the {\tt ESMF\_LOG\_NONE} mode. 
+   
+Other options that are planned for LogErr are to adjust the verbosity of output, and to optionally write to {\tt stdout} instead of file(s).
+
+
+
+

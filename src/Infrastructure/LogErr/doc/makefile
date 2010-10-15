@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.12 2008/09/26 04:17:25 cdeluca Exp $
+# $Id: makefile,v 1.13 2010/10/15 17:34:29 theurich Exp $
 
 ALL: onedoc
 
 LOCDIR	  = src/Infrastructure/LogErr/doc
 
-DVIFILES  =	LogErr_refdoc.dvi 
-PDFFILES  =	${ESMC_DOCDIR}/LogErr_refdoc.pdf 
-HTMLFILES =	${ESMC_DOCDIR}/LogErr_refdoc 
+DVIFILES  = LogErr_refdoc.dvi LogErr_crefdoc.dvi
+PDFFILES  = ${ESMC_DOCDIR}/LogErr_refdoc.pdf ${ESMC_DOCDIR}/LogErr_crefdoc.pdf
+HTMLFILES = ${ESMC_DOCDIR}/LogErr_refdoc ${ESMC_DOCDIR}/LogErr_crefdoc
 
 #
 # Tex Files to make
@@ -41,10 +41,11 @@ REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 include $(ESMF_DIR)/makefile
 
-DIRS = 
-CLEANDIRS   = LogErr_refdoc $(HTMLFILES)
+DIRS        =
+
+CLEANDIRS   = LogErr_refdoc LogErr_crefdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              LogErr_refdoc.tex $(PDFFILES)
+              LogErr_refdoc.tex LogErr_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

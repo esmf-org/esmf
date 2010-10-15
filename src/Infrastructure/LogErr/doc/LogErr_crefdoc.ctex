@@ -1,4 +1,4 @@
-% $Id: LogErr_crefdoc.ctex,v 1.2 2010/09/16 04:42:38 theurich Exp $
+% $Id: LogErr_crefdoc.ctex,v 1.3 2010/10/15 17:34:29 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf LogErr Reference}}
-\newcommand{\myauthors}{\large Shep Smithline,Erik Kluzek and Chuck Panaccione}
+\newcommand{\myauthors}{\large Walter Spector}
 #endif
 
 #ifdef STANDALONE
@@ -44,9 +44,9 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{LogErr_desc}
+\input{LogErr_cdesc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_desc}
+\input{../Infrastructure/LogErr/doc/LogErr_cdesc}
 #endif
 
 %\subsection{LogErr Options}
