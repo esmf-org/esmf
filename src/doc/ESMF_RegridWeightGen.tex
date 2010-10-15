@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.15 2010/10/14 23:28:14 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.16 2010/10/15 21:42:29 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -16,14 +16,12 @@ values. This file based regrid weight generation application is fully parallel. 
 \htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/developers/test/ed/ESMF_RegridWeightGenCheck_ed.shtml}, so that can serve as an example of its use.
 
 Internally this application uses the ESMF public API to generate the interpolation weights.
-{\tt ESMF\_GridCreate}~\ref{sec:example:2DLogRecFromScrip} is used to create a 
-ESMF\_Grid object, if the source or destination grid is a logically rectangular grid. The cell center 
-coordinates of the input grid are put into the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER})
-and for conservative regridding the corner coordinates are put into the corner stagger location 
+If a the source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
+coordinates of the input grid are put into the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}). In addition, for conservative regridding, the corner coordinates are also put into the corner stagger location 
 ({\tt ESMF\_STAGGERLOC\_CORNER}). The 2D coordinates are mapped
 into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} while calling 
 {\tt ESMF\_FieldRegridStore()}.   The method
-{\tt ESMF\_MeshCreate}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
+{\tt ESMF\_MeshCreate()}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
 source or destination grid is a cubed sphere grid or an unstructured grid. When making this call, 
 the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates.
 {\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indicies table representing the interpolation matrix. 
@@ -100,7 +98,7 @@ ESMF_RegridWeightGen  [--help]
                       [--destination|-d] dst_grid_filename 
                       [--weight|-w] out_weight_file 
                       [--method|-m] [bilinear|patch|conserve] 
-                      [--pole|-p] [all|none|1|2|..] 
+                      [--pole|-p] [none|all|teeth|1|2|..] 
                       --src_type [SCRIP|ESMF] 
                       --dst_type [SCRIP|ESMF]
                       -t [SCRIP|ESMF]
