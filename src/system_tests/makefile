@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.87 2010/10/06 17:14:29 w6ws Exp $ 
+# $Id: makefile,v 1.88 2010/10/15 23:18:24 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -42,9 +42,9 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldMeshSMM \
 	    ESMF_SequentialEnsemble \
 	    ESMF_ConcurrentEnsemble \
-	    ESMF_ArrayRedistOpenMP \
-	    ESMF_XGridSerial
-# Tests temporarily disabled, re-enable once capability is implemented
+	    ESMF_ArrayRedistOpenMP
+# Disabled STests
+#	    ESMF_XGridSerial
 #           ESMF_RowReduce \          cover by Array comms
 #           ESMF_MergeCoupling \
 #           ESMF_FieldRegridConserv \ cover by Regrid
