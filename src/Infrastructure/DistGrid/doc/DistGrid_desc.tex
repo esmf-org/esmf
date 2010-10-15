@@ -1,28 +1,38 @@
-% $Id: DistGrid_desc.tex,v 1.9 2010/10/13 22:49:06 rokuingh Exp $
-
+% $Id: DistGrid_desc.tex,v 1.10 2010/10/15 17:02:04 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2010, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
 
 \label{sec:DistGrid}
-The {\tt ESMF\_DistGrid} class sits on top of the DELayout class and holds domain 
-information in index space. A DistGrid object captures the index space topology and 
-describes its decomposition in terms of DEs. Combined with DELayout and VM the DistGrid 
-defines the data distribution of a domain decomposition across the computational 
-resources of an ESMF Component.
+The ESMF DistGrid class sits on top of the DELayout class and holds domain
+information in index space. A DistGrid object captures the index space topology
+and describes its decomposition in terms of DEs. Combined with DELayout and VM
+the DistGrid defines the data distribution of a domain decomposition across the
+computational resources of an ESMF Component.
 
-The global domain is defined as the union or ``patchwork'' of logically rectangular (LR) 
-sub-domains or {\em patches}. The DistGrid create methods allow the specification of such 
-a patchwork global domain and its decomposition into exclusive, DE-local LR regions 
-according to various degrees of user specified constraints. Complex index space topologies 
-can be constructed by specifying connection relationships between patches during creation.
+The global domain is defined as the union or ``patchwork'' of logically
+rectangular (LR) sub-domains or {\em patches}. The DistGrid create methods allow
+the specification of such a patchwork global domain and its decomposition into
+exclusive, DE-local LR regions according to various degrees of user specified
+constraints. Complex index space topologies can be constructed by specifying
+connection relationships between patches during creation.
 
-The DistGrid class holds domain information for all DEs. Each DE is associated with a local 
-LR region. No overlap of the regions is allowed. The DistGrid offers query methods that 
-allow DE-local topology information to be extracted, e.g. for the construction of halos by 
-higher classes.
+The DistGrid class holds domain information for all DEs. Each DE is associated
+with a local LR region. No overlap of the regions is allowed. The DistGrid
+offers query methods that allow DE-local topology information to be extracted,
+e.g. for the construction of halos by higher classes.
 
-A DistGrid object only contains decomposable dimensions. The minimum rank for a DistGrid 
-object is 1. A maximum rank does not exist for DistGrid objects, however, ranks greater than 
-7 may lead to difficulties with respect to the Fortran API of higher classes based on 
-DistGrid. The rank of a DELayout object contained within a DistGrid object must be equal to 
-the DistGrid rank. Higher class objects that use the DistGrid, such as an Array object, may 
-be of different rank than the associated DistGrid object. The higher class object will hold 
-the mapping information between its dimensions and the DistGrid dimensions.
+A DistGrid object only contains decomposable dimensions. The minimum rank for a
+DistGrid object is 1. A maximum rank does not exist for DistGrid objects, 
+however, ranks greater than 7 may lead to difficulties with respect to the
+Fortran API of higher classes based on DistGrid. The rank of a DELayout object
+contained within a DistGrid object must be equal to the DistGrid rank. Higher
+class objects that use the DistGrid, such as an Array object, may be of
+different rank than the associated DistGrid object. The higher class object
+will hold the mapping information between its dimensions and the DistGrid
+dimensions.
