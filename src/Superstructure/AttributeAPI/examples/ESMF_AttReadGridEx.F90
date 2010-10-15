@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.12 2010/09/15 04:58:36 eschwab Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.13 2010/10/15 16:58:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttReadGridEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: Reading an XML file-based GridSpec Attribute Package for a Grid}
+! \subsubsection{Read an XML file-based GridSpec Attribute package for a Grid}
 ! This example shows how to read a GridSpec Attribute Package from an
 ! XML file.  The XML file contains Attribute values filled-in by the user.
 ! The standard GridSpec Attribute Package is supplied with ESMF and is defined

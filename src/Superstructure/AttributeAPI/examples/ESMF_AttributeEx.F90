@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.15 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.16 2010/10/15 16:58:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttributeEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: Basic Attribute usage} \label{AttributeEx}
+! \subsubsection{Basic Attribute usage} \label{AttributeEx}
 !
 ! This example illustrates the most basic usage of the Attribute class.  
 ! This demonstration of Attribute manipulation is limited to the gridded 

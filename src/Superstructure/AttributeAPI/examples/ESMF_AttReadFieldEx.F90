@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.11 2010/10/09 03:01:06 eschwab Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.12 2010/10/15 16:58:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttReadFieldEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: Reading an XML file-based CF Attribute Package for a Field}
+! \subsubsection{Read an XML file-based CF Attribute package for a Field}
 ! This example shows how to read a CF Attribute Package for a Field from an
 ! XML file.  The XML file contains Attribute values filled-in by the user.
 ! The standard CF Attribute Package is supplied with ESMF and is defined in

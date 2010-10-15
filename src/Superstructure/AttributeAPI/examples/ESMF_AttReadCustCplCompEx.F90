@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.2 2010/06/29 21:55:28 svasquez Exp $
+! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.3 2010/10/15 16:58:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttReadCustCplCompEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: Read and validate an XML file-based set of user-defined Attributes for a Coupler Component}
+! \subsubsection{Read and validate an XML file-based set of user-defined Attributes for a Coupler Component}
 ! This example shows how to read and validate, from an XML and XSD file,
 ! respectively, a set of user-defined custom Attributes for a Coupler Component.
 ! See

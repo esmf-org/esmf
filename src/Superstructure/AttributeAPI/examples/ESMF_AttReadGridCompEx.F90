@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.10 2010/09/14 05:58:05 eschwab Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.11 2010/10/15 16:58:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttReadGridCompEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Example: Reading an XML file-based ESG Attribute Package for a Gridded Component}
+! \subsubsection{Read an XML file-based ESG Attribute package for a Gridded Component}
 ! This example shows how to read an ESG Attribute Package for a Gridded
 ! Component from an XML file.  The XML file contains Attribute values filled-in
 ! by the user.  The standard ESG Component Attribute Package is supplied with
