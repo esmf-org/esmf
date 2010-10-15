@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.211 2010/10/12 14:59:51 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.212 2010/10/15 05:42:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.211 2010/10/12 14:59:51 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.212 2010/10/15 05:42:17 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2126,7 +2126,6 @@ module ESMF_StateMod
         nullify(stypep)
 
         allocate(stypep, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
         if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
         
@@ -2151,7 +2150,6 @@ module ESMF_StateMod
                                   ESMF_CONTEXT, rc)) then 
             ! do not overwrite the rc from the real error
             deallocate(stypep, stat=localrc)
-            localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
             return
         endif
 
@@ -4406,8 +4404,7 @@ module ESMF_StateMod
           ! Now release the entire list
           if (associated(stypep%datalist)) then
             deallocate(stypep%datalist, stat=localrc)
-            localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-            if (ESMF_LogMsgFoundAllocError(localrc, "data list", &
+            if (ESMF_LogMsgFoundDeallocError(localrc, "data list", &
                                          ESMF_CONTEXT, rc)) return
             nullify(stypep%datalist)
           endif
@@ -4518,12 +4515,12 @@ module ESMF_StateMod
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
         deallocate(atodo, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
+        if (ESMF_LogMsgFoundDeallocError (localrc, 'atodo',  &
+                                         ESMF_CONTEXT, rc)) return
         return
       endif
 
       allocate(atodo(acount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "adding RouteHandles to a State", &
                                      ESMF_CONTEXT, rc)) return
@@ -4551,7 +4548,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
     
@@ -4562,7 +4558,6 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
    
@@ -4645,8 +4640,7 @@ module ESMF_StateMod
 
       ! Get rid of temp flag arrays
       deallocate(atodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating internal list, 1c", &
+      if (ESMF_LogMsgFoundDeallocError(localrc, "deallocating internal list, 1c", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4735,12 +4729,10 @@ module ESMF_StateMod
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
         deallocate(atodo, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
         return
       endif
 
       allocate(atodo(acount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "adding Arrays to a State", &
                                      ESMF_CONTEXT, rc)) return
@@ -4768,7 +4760,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
     
@@ -4779,7 +4770,6 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
    
@@ -4861,8 +4851,7 @@ module ESMF_StateMod
 
       ! Get rid of temp flag arrays
       deallocate(atodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating internal list, 1c", &
+      if (ESMF_LogMsgFoundDeallocError(localrc, "deallocating internal list, 1c", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4951,12 +4940,10 @@ module ESMF_StateMod
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
         deallocate(atodo, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
         return
       endif
 
       allocate(atodo(acount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "adding ArrayBundles to a State", &
                                      ESMF_CONTEXT, rc)) return
@@ -4984,7 +4971,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
     
@@ -4995,7 +4981,6 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(atodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
    
@@ -5077,8 +5062,7 @@ module ESMF_StateMod
 
       ! Get rid of temp flag arraybundles
       deallocate(atodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating internal list, 1c", &
+      if (ESMF_LogMsgFoundDeallocError(localrc, "deallocating internal list, 1c", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -5166,14 +5150,12 @@ module ESMF_StateMod
       if (allocated(ftodo)) then
         ! print *, "ftodo already allocated"
         deallocate(ftodo, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        if (ESMF_LogMsgFoundDeallocError(localrc, &
                                   "deallocating fields from a state", &
                                   ESMF_CONTEXT, rc)) return
       endif
 
       allocate(ftodo(fcount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                   "adding fields to a state", &
                                   ESMF_CONTEXT, rc)) return
@@ -5191,7 +5173,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(ftodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
         call ESMF_FieldGet(fields(i), name=fname, rc=localrc)
@@ -5199,7 +5180,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(ftodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
     
@@ -5210,7 +5190,6 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
           deallocate(ftodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
    
@@ -5294,8 +5273,7 @@ module ESMF_StateMod
 
       ! Get rid of temp flag array
       deallocate(ftodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      if (ESMF_LogMsgFoundDeallocError(localrc, &
                                   "adding fields to a state", &
                                   ESMF_CONTEXT, rc)) return
 
@@ -5337,7 +5315,7 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: localrc                   ! local error status
+      integer :: localrc, localrc1         ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
       character(len=ESMF_MAXSTR) :: bname, fname
@@ -5345,12 +5323,11 @@ module ESMF_StateMod
       integer :: bindex, findex 
       integer :: i, j
       integer :: fcount, fruncount, newcount
-      logical :: exists, fneedsdealloc
+      logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-      fneedsdealloc = .FALSE.
       fname = ""
 
       ! check variables
@@ -5396,7 +5373,6 @@ module ESMF_StateMod
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(btodo(bcount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, "btodo", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -5407,10 +5383,8 @@ module ESMF_StateMod
 
       if (fruncount .ge. 0) then
         allocate(ftodo(fruncount), stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
         if (ESMF_LogMsgFoundAllocError(localrc, "ftodo", &
                                        ESMF_CONTEXT, rc)) goto 10
-        fneedsdealloc = .TRUE.
         ftodo(1:fruncount) = 0
       endif
 
@@ -5637,6 +5611,7 @@ module ESMF_StateMod
               call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                                           "field/bundle lists", &
                                           ESMF_CONTEXT, rc)
+              localrc = ESMF_RC_INTNRL_INCONS
               goto 10
             endif
             dataitem%indirect_index = bindex
@@ -5659,24 +5634,22 @@ module ESMF_StateMod
       ! Get rid of temp flag arrays.  only report yet another error if up to
       ! here we think everything is ok.  otherwise report the original error
       ! and ignore any wimpering from dealloc.
-  
-      deallocate(btodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if ((localrc .ne. 0) .and. (rc .eq. ESMF_SUCCESS)) then         ! F90 rc
-        call ESMF_LogMsgSetError(ESMF_RC_INTNRL_BAD, &
-                                         "deallocating internal bundlelist", &
-                                         ESMF_CONTEXT, rc)
-      endif
-      if (fneedsdealloc) then
-        deallocate(ftodo, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-        if ((localrc .ne. 0) .and. (rc .eq. ESMF_SUCCESS)) then      ! F90 rc
-          call ESMF_LogMsgSetError(ESMF_RC_INTNRL_BAD, &
-                                         "deallocating internal fieldlist", &
-                                          ESMF_CONTEXT, rc)
-        endif
-      endif
 
+      if (allocated (btodo)) then
+        deallocate(btodo, stat=localrc1)
+        if (localrc == ESMF_SUCCESS) then
+          if (ESMF_LogMsgFoundDeallocError(localrc1, "bundle list", &
+                                         ESMF_CONTEXT, rc)) return
+        end if
+      end if
+
+      if (allocated (ftodo)) then
+        deallocate(ftodo, stat=localrc1)
+        if (localrc == ESMF_SUCCESS) then
+          if (ESMF_LogMsgFoundDeallocError(localrc1, "field list", &
+                                         ESMF_CONTEXT, rc)) return
+        end if
+      end if
 
       if (present(rc)) rc = localrc
       end subroutine ESMF_StateClAddFieldBundleList
@@ -5759,7 +5732,6 @@ module ESMF_StateMod
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(stodo(scount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, "adding States", &
                                        ESMF_CONTEXT, rc)) return
       stodo(1:scount) = 0
@@ -5777,7 +5749,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(stodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
 
@@ -5790,7 +5761,6 @@ module ESMF_StateMod
                                     "Cannot add a State to itself", &
                                     ESMF_CONTEXT, rc)
           deallocate(stodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
    
@@ -5799,7 +5769,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(stodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
     
@@ -5811,7 +5780,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(stodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
         endif
    
@@ -5849,7 +5817,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
           deallocate(stodo, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
           return
       endif
 
@@ -5873,7 +5840,6 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
               deallocate(stodo, stat=localrc)
-              localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
               return
             end if
 
@@ -5884,7 +5850,6 @@ module ESMF_StateMod
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) then
               deallocate(stodo, stat=localrc)
-              localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
               return
             end if
 #endif
@@ -5906,7 +5871,6 @@ module ESMF_StateMod
 
       ! Get rid of temp flag states
       deallocate(stodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                        "Adding States to a State", &
                                        ESMF_CONTEXT, rc)) return
@@ -6298,7 +6262,6 @@ module ESMF_StateMod
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(ntodo(ncount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, "adding names to a state", &
                                      ESMF_CONTEXT, rc)) return
       ntodo(1:ncount) = 0
@@ -6404,8 +6367,7 @@ module ESMF_StateMod
 
       ! Get rid of temp flag array
       deallocate(ntodo, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, "adding names to a state", &
+      if (ESMF_LogMsgFoundDeallocError(localrc, "adding names to a state", &
                                      ESMF_CONTEXT, rc)) return
 
 
@@ -6469,7 +6431,6 @@ module ESMF_StateMod
 
           allocsize = itemcount + chunksize - mod(itemcount,chunksize)
           allocate(stypep%datalist(allocsize), stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
           if (ESMF_LogMsgFoundAllocError(localrc, "datalist", &
                                          ESMF_CONTEXT, rc)) return
           stypep%alloccount = allocsize
@@ -6480,7 +6441,6 @@ module ESMF_StateMod
           newsize = stypep%datacount + itemcount
           allocsize = newsize + chunksize - mod(newsize,chunksize)
           allocate(temp_list(allocsize), stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
           if (ESMF_LogMsgFoundAllocError(localrc, "datalist realloc", &
                                          ESMF_CONTEXT, rc)) return
   
@@ -6491,8 +6451,7 @@ module ESMF_StateMod
   
           ! Delete old list
           deallocate(stypep%datalist, stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-          if (ESMF_LogMsgFoundAllocError(localrc, "datalist dealloc", &
+          if (ESMF_LogMsgFoundDeallocError(localrc, "datalist dealloc", &
                                          ESMF_CONTEXT, rc)) return
   
           ! Now make this the permanent list
@@ -6733,7 +6692,6 @@ module ESMF_StateMod
       nullify(substate%statep)
 
       allocate(sp, stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "space for new State object", &
                                      ESMF_CONTEXT, rc)) return
@@ -6764,7 +6722,6 @@ module ESMF_StateMod
 #endif
 
       allocate(sp%datalist(sp%alloccount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
       if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
                                        ESMF_CONTEXT, rc)) return
 
