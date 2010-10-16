@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.12 2010/10/15 16:58:36 rokuingh Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.13 2010/10/16 05:57:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttributeCIMEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Advanced Attribute usage: CIM Attribute packages}
+! \subsubsection{CIM Attribute packages}
 ! \label{sec:attribute:usage:cimAttPack}
 !
 ! This example illustrates the use of the Metafor CIM Attribute packages,

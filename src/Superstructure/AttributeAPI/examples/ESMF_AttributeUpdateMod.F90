@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.23 2010/10/09 03:01:06 eschwab Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.24 2010/10/16 05:57:07 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -216,7 +216,6 @@ module ESMF_AttributeUpdateMod
     if (rc/=ESMF_SUCCESS) return
 !EOC
 
-!BOE
 ! This first bit is a verification that the {\tt ESMF\_StateReconcile()} call will correctly
 ! reconcile Attributes and Attribute packages that are attached to the top level 
 ! State in an Attribute hierarchy.  During the initialize phase of the
@@ -225,17 +224,13 @@ module ESMF_AttributeUpdateMod
 ! completion of {\tt ESMF\_StateReconcile()}, as that is the responsibility of the
 ! {\tt ESMF\_AttributeUpdate()} call.  There will be more on this subject when we get
 ! to the coupler Component.
-!EOE
-!BOC
     call ESMF_AttributeSet(exportState, name="TESTESTEST", &
                            value="SUCCESUCCESUCCES", rc=status)
     if (status .ne. ESMF_SUCCESS) return
-!EOC
 
 !BOE
 ! At this point the Fields will need to have Attribute packages attached to them, and the
-! Attributes will be set with appropriate values.  This process is quite involved
-! at present, but will be more streamlined with the addition of the ESMF I/O class.
+! Attributes will be set with appropriate values.
 !EOE
   
 !BOC
@@ -738,9 +733,8 @@ module ESMF_AttributeUpdateMod
 ! parts of the VM can use them.  However, this is not our concern at this
 ! point because we will now explore the capabilities of {\tt ESMF\_AttributeWrite()}.
 !
-! First we will get the Component and VM.  Next we will use the writing
-! capabilities of the Attribute class, soon to be replaced by the ESMF I/O
-! class.  We will first write out the Attribute hierarchy to an .xml file, 
+! First we will get the Component and VM.  Then we will write out the 
+! Attribute hierarchy to an .xml file, 
 ! after which we will write out the Attribute hierarchy to a more reader
 ! friendly tab-delimited format.  Both of these write calls will output their
 ! respective data into files in the execution directory, in either a .xml

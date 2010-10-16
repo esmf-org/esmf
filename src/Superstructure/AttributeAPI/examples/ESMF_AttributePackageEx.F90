@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.17 2010/10/15 16:58:36 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.18 2010/10/16 05:57:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@ program ESMF_AttributePackageEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Intermediate Attribute usage: Attribute packages}
+! \subsubsection{Attribute packages}
 !
 ! This example is slightly more complex than the example presented in section 
 ! \ref{AttributeEx} and illustrates the use of the Attribute class to create 
