@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.166 2010/10/15 22:01:03 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.167 2010/10/16 00:07:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.166 2010/10/15 22:01:03 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.167 2010/10/16 00:07:13 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3014,6 +3014,8 @@ end subroutine ESMF_GridConvertIndex
 ! The grid defined in the file has to be a 2D logically rectangular grid (i.e. {\tt grid\_rank}
 ! in the file needs to be 2).
 !
+! This call is {\em collective} across the current VM.
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[distgrid]
@@ -3338,6 +3340,8 @@ end subroutine convert_corner_arrays_to_1D
 ! occur.  The default is to divide the range as evenly as possible.
 ! The grid defined in the file has to be a 2D logically rectangular
 ! grid (i.e. {\tt grid\_rank} in the file needs to be 2).
+!
+! This call is {\em collective} across the current VM.
 !
 ! The arguments are:
 ! \begin{description}

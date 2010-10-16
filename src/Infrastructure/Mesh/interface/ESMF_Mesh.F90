@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.46 2010/10/05 22:26:51 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.47 2010/10/16 00:07:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.46 2010/10/05 22:26:51 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.47 2010/10/16 00:07:13 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.46 2010/10/05 22:26:51 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.47 2010/10/16 00:07:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -310,6 +310,8 @@ module ESMF_MeshMod
 !   nodes used to create that element, so the connections for element $e$ in the 
 !   {\tt elementIds} array will start at $number\_of\_nodes\_in\_element(1) + number\_of\_nodes\_in\_element(2) +
 !   \cdots + number\_of\_nodes\_in\_element(e-1) + 1$ in {\tt elementConn}.
+!
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [elementIds]
@@ -541,6 +543,8 @@ module ESMF_MeshMod
 !   to add the nodes and then {\tt ESMF\_MeshAddElements()} (\ref{sec:mesh:api:meshaddelements}) to add 
 !   the elements and finalize the mesh.
 !
+!   This call is {\em collective} across the current VM.
+!
 !   \begin{description}
 !   \item [parametricDim]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
@@ -640,6 +644,8 @@ module ESMF_MeshMod
 !   nodes used to create that element, so the connections for element $e$ in the 
 !   {\tt elementIds} array will start at $number\_of\_nodes\_in\_element(1) + number\_of\_nodes\_in\_element(2) +
 !   \cdots + number\_of\_nodes\_in\_element(e-1) + 1$ in {\tt elementConn}.
+!
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [parametricDim]
@@ -798,6 +804,8 @@ module ESMF_MeshMod
 ! !DESCRIPTION:
 !   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
 !   format files, allows the dual of the mesh to be created. 
+!
+!   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [filename]
