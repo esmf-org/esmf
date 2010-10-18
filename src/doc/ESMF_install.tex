@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.93 2010/09/28 03:33:23 eschwab Exp $
+% $Id: ESMF_install.tex,v 1.94 2010/10/18 19:53:36 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -49,16 +49,16 @@ the desired LAPACK library:
 on systems where the library is located in a vendor-defined location.  On
 other systems, the default is OFF.
 
-\item[{\tt "OFF"}] (default on most system): Disables LAPACK-dependent code, regardless of system.
+\item[{\tt "OFF"}] (default on most system) Disables LAPACK-dependent code, regardless of system.
  
 \item[{\tt "mkl"}] Use the Intel MKL library.  Sets {\tt ESMF\_LAPACK\_LIBS} to
 {\tt "-lmkl\_lapack -lmkl"}, unless it is already defined in the user 
 environment.
 
-\item[{\tt "netlib"}] (default for PGI): Sets {\tt ESMF\_LAPACK\_LIBS} to 
+\item[{\tt "netlib"}] (default for PGI) Sets {\tt ESMF\_LAPACK\_LIBS} to 
 {\tt "-llapack -lblas"}, unless it is already defined in the user environment.
 
-\item[{\tt "scsl"}] (default for IRIX64): Sets {\tt ESMF\_LAPACK\_LIBS} to 
+\item[{\tt "scsl"}] (default for IRIX64) Sets {\tt ESMF\_LAPACK\_LIBS} to 
 {\tt "-lscs"}, unless it is already defined in the user environment.
 
 \item[{\it <userstring>}] Enables LAPACK-dependent code, but does not set a 
@@ -91,7 +91,7 @@ of the desired NETCDF library and associated header files:
 {\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\it not set}] (default): NETCDF-dependent features will be disabled.
+\item[{\it not set}] (default) NETCDF-dependent features will be disabled.
 The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
@@ -150,7 +150,7 @@ location of the desired PNETCDF library and associated header files:
 When defined, enables the use of PNETCDF.
 
 \begin{description}
-\item[{\it not set}] (default): PNETCDF-dependent features will be disabled.
+\item[{\it not set}] (default) PNETCDF-dependent features will be disabled.
 The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 {\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
 
@@ -182,21 +182,25 @@ application.
 \subsubsection{PIO}
 \label{sec:pio}
 ESMF provides the ability to read and write data in both binary and 
-NetCDF formats through a third-party IO software library, 
-\htmladdnormallink{ParallelIO (PIO)}{http://code.google.com/p/parallelio/}. 
-The following environment variable enables the functionality of the PIO 
-library. The binary format is supported when MPI\_IO 
-is enabled. To enable NetCDF IO format, the 
-{\tt ESMF\_PNETCDF} (see \ref{sec:pnetcdf}) and/or 
-{\tt ESMF\_NETCDF} (see \ref{sec:netcdf}) 
-environment variables must be enabled. 
+NetCDF formats through \htmladdnormallink{ParallelIO (PIO)}
+{http://code.google.com/p/parallelio/}, a third-party IO software
+library is integrated in the ESMF library. The following environment
+variable enables PIO functionalities inside of ESMF.
 
+The PIO code depends on MPI I/O support by the underlying MPI
+implementation to provide the binary format. Almost all current MPI
+implementations support MPI I/O to the required degree. For NetCDF format
+support the integrated PIO code depends on {\tt ESMF\_PNETCDF}
+(see \ref{sec:pnetcdf}) and/or {\tt ESMF\_NETCDF} (see \ref{sec:netcdf})
+being enabled.
 
 \begin{description}
 \item[ESMF\_PIO] Possible value: {\it not set} (default), {\tt "internal"}.
 
 \begin{description}
-\item[{\it not set}] (default): PIO-dependent features will be disabled.
+\item[{\it not set}] (default) PIO-dependent features will be disabled.
+
+\item[{\tt "OFF"}] Disables PIO-dependent code.
 
 \item[{\tt "internal"}] PIO-dependent features will be enabled and will use the 
 PIO library that is included and built with ESMF.  
@@ -219,7 +223,7 @@ and location of the desired XERCES C++ library and associated header files:
 {\it <userstring>}.
 
 \begin{description}
-\item[{\it not set}] (default): XERCES-dependent features will be disabled.
+\item[{\it not set}] (default) XERCES-dependent features will be disabled.
 The {\tt ESMF\_XERCES\_INCLUDE}, {\tt ESMF\_XERCES\_LIBPATH}, and
 {\tt ESMF\_XERCES\_LIBS} environment variables will be ignored.
 
