@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.67 2010/10/15 16:27:38 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.68 2010/10/18 21:17:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1811,7 +1811,7 @@ end subroutine ESMF_LogOpen
 !      \item [{[msgAllow]}]
 !            An array of message types that will be logged.  Log write requests
 !            not matching the list will be ignored.  By default all messages
-!            will be logged.   See section \ref{opt:logtype} for a list of
+!            will be logged.   See section \ref{opt:msgtype} for a list of
 !            valid message types.  In addition, the following named constant
 !            may be used:
 !            \begin{description}
