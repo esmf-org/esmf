@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.8 2010/10/15 15:07:25 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.9 2010/10/18 21:18:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -85,7 +85,7 @@
 !\caption{Grid layout for simple XGrid creation example. Overlapping of 3 Grids
 !(Green 2x2, Red 1x2, Blue 2x2). Green and red Grids on side A, blue Grid on side
 !B. Color coded sequence indices are marked at upper right corner of side A green and red 
-!Grids, lower right corner of side B blue Grid, and lower left corner of exchange
+!Grids, lower right corner of side B blue Grid, and in black lower left corner of exchange
 !Grid (4x3). Physical coordinates are the tuples in parentsis, e.g. at the four 
 !corners of rectangular computational domain.}
 !\label{fig:xgridsimple}
@@ -198,44 +198,48 @@
 ! we need to set up the factorList (weights) and factorIndexList (indices) 
 ! for sparse matrix matmul in this formulation:
 ! dst\_flux = W'*W*src\_flux, where W' is the weight matrix from the XGrid to 
-! destination; and W is the weight matrix from source to the XGrid.
+! destination; and W is the weight matrix from source to the XGrid. The weight matrix
+! is generated using destination area weighted algorithm.
 !
 !EOE
 !BOC
     ! Set up mapping from A1 -> X
-    sparseMatA2X(1)%factorIndexList(1,1)=1    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,2)=2    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,3)=2    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,4)=3    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,5)=4    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,6)=4    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,7)=3    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,8)=4    ! src seq index
-    sparseMatA2X(1)%factorIndexList(1,9)=4    ! src seq index
-    sparseMatA2X(1)%factorIndexList(2,1)=1    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,2)=2    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,3)=3    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,4)=4    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,5)=5    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,6)=6    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,7)=7    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,8)=8    ! dst seq index
-    sparseMatA2X(1)%factorIndexList(2,9)=9    ! dst seq index
+    sparseMatA2X(1)%factorIndexList(1,1)=1    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,2)=2    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,3)=2    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,4)=3    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,5)=4    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,6)=4    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,7)=3    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,8)=4    ! src seq index (green)
+    sparseMatA2X(1)%factorIndexList(1,9)=4    ! src seq index (green)
+
+    sparseMatA2X(1)%factorIndexList(2,1)=1    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,2)=2    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,3)=3    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,4)=4    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,5)=5    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,6)=6    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,7)=7    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,8)=8    ! dst seq index (black)
+    sparseMatA2X(1)%factorIndexList(2,9)=9    ! dst seq index (black)
 
     ! Set up mapping from A2 -> X
-    sparseMatA2X(2)%factorIndexList(1,1)=1    ! src seq index
-    sparseMatA2X(2)%factorIndexList(1,2)=2    ! src seq index
-    sparseMatA2X(2)%factorIndexList(1,3)=2    ! src seq index
-    sparseMatA2X(2)%factorIndexList(2,1)=10   ! dst seq index
-    sparseMatA2X(2)%factorIndexList(2,2)=11   ! dst seq index
-    sparseMatA2X(2)%factorIndexList(2,3)=12   ! dst seq index
+    sparseMatA2X(2)%factorIndexList(1,1)=1    ! src seq index (red)
+    sparseMatA2X(2)%factorIndexList(1,2)=2    ! src seq index (red)
+    sparseMatA2X(2)%factorIndexList(1,3)=2    ! src seq index (red)
+
+    sparseMatA2X(2)%factorIndexList(2,1)=10   ! dst seq index (black)
+    sparseMatA2X(2)%factorIndexList(2,2)=11   ! dst seq index (black)
+    sparseMatA2X(2)%factorIndexList(2,3)=12   ! dst seq index (black)
 !EOC
 
 !BOE
 ! Set up the mapping weights from side A to the XGrid:
 !EOE
 !BOC
-    ! Note that the weights are dest area weighted
+    ! Note that the weights are dest area weighted, they are ratio of areas with
+    ! destination area as the denominator.
     ! Set up mapping weights from A1 -> X
     sparseMatA2X(1)%factorList(:)=1.
 
@@ -248,30 +252,31 @@
 !EOE
 !BOC
     ! Set up mapping from X -> B
-    sparseMatX2B(1)%factorIndexList(1,1)=1    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,2)=2    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,3)=3    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,4)=4    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,5)=5    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,6)=6    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,7)=7    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,8)=8    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,9)=9    ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,10)=10  ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,11)=11  ! src seq index
-    sparseMatX2B(1)%factorIndexList(1,12)=12  ! src seq index
-    sparseMatX2B(1)%factorIndexList(2,1)=1    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,2)=1    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,3)=2    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,4)=1    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,5)=1    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,6)=2    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,7)=3    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,8)=3    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,9)=4    ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,10)=3   ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,11)=3   ! dst seq index
-    sparseMatX2B(1)%factorIndexList(2,12)=4   ! dst seq index
+    sparseMatX2B(1)%factorIndexList(1,1)=1    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,2)=2    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,3)=3    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,4)=4    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,5)=5    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,6)=6    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,7)=7    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,8)=8    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,9)=9    ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,10)=10  ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,11)=11  ! src seq index (black)
+    sparseMatX2B(1)%factorIndexList(1,12)=12  ! src seq index (black)
+
+    sparseMatX2B(1)%factorIndexList(2,1)=1    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,2)=1    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,3)=2    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,4)=1    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,5)=1    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,6)=2    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,7)=3    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,8)=3    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,9)=4    ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,10)=3   ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,11)=3   ! dst seq index (blue)
+    sparseMatX2B(1)%factorIndexList(2,12)=4   ! dst seq index (blue)
 
     ! Set up mapping weights from X -> B
     sparseMatX2B(1)%factorList(1)=4./9.
@@ -322,38 +327,6 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
 !BOE
-! One can query the XGrid for its internal information:
-!EOE
-!BOC
-    call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
-        sideA=l_sideA, sideB=l_sideB, area=l_area, &
-        centroid=l_centroid, distgridA=l_sideAdg, &
-        distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
-        sparseMatX2B=l_sparseMatX2B, &
-        rc=localrc)
-!EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-!BOC
-    call ESMF_XGridGet(xgrid, localDe=0, elementCount=eleCount, &
-        exclusiveCount=ec, exclusiveLBound=elb, exclusiveUBound=eub, &
-        rc=localrc)
-!EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-!BOC
-    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
-        distgrid=distgrid, rc=localrc)
-!EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
-        distgrid=distgrid, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
-        distgrid=distgrid, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-
-!BOE
 ! Create an {\tt ESMF\_Field} on the XGrid:
 !EOE
 !BOC
@@ -372,7 +345,8 @@
     xfptr = 0.0
 
 !BOE
-! Setup and initialize src and dst Fields, source Fields have different source flux:
+! Setup and initialize src and dst Fields on side A and side B Grids, 
+! source Fields have different source flux:
 !EOE
 !BOC
     do i = 1, 2
@@ -393,20 +367,51 @@
 
 !BOE
 !
-! The Grids used to generate the XGrid
+! The current implementation requires that Grids used to generate the XGrid
 ! must not match, i.e. they are different either topologically or geometrically or both.
 ! In this example, the first source Grid is topologically identical to the destination
-! Grid but their geometric coordinates are different.
+! Grid but their geometric coordinates are different. This requirement will be relaxed
+! in a future release.
 !
-! First we regrid from source Fields to the XGrid:
+! First we compute the regrid routehandles, these routehandles can be used repeatedly
+! afterwards. Then we initialize the values in the Fields. Finally we execute the Regrid.
 ! 
 !EOE
 !BOC
+    ! Compute regrid routehandles. The routehandles can be used repeatedly afterwards.
     ! From A -> X
     do i = 1, 2
         call ESMF_FieldRegridStore(xgrid, srcField(i), field, routehandle=rh_src2xgrid(i), &
             rc = localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    enddo
+    ! from X -> B
+    do i = 1, 1
+        call ESMF_FieldRegridStore(xgrid, field, dstField(i), routehandle=rh_xgrid2dst(i), &
+            rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    enddo
+
+    ! Initialize values in the source Fields on side A
+    do i = 1, 2
+        call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        fptr = i
+    enddo
+    ! Initialize values in the destination Field on XGrid
+    xfptr = 0.0
+    ! Initialize values in the destination Field on Side B
+    do i = 1, 1
+        call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        fptr = 0.0
+    enddo
+
+!BOE
+! First we regrid from the Fields on side A to the Field on the XGrid:
+!EOE
+    ! Execute regrid from A -> X
+    do i = 1, 2
         call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
             zeroflag=ESMF_REGION_SELECT, &
             rc = localrc)
@@ -426,16 +431,12 @@
 
     print *, '- B before SMM from X -> B'
     print *, fptr ! should be 0.
-
 !BOE
 ! Next we regrid from the Field on XGrid to the destination Field on side B:
 !EOE
 !BOC
-    ! from X -> B
+    ! Execute the regrid store
     do i = 1, 1
-        call ESMF_FieldRegridStore(xgrid, field, dstField(i), routehandle=rh_xgrid2dst(i), &
-            rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
         call ESMF_FieldRegrid(field, dstField(i), routehandle=rh_xgrid2dst(i), &
             rc = localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -444,6 +445,54 @@
 
     print *, '- B after SMM from X -> B'
     print *, fptr ! should be 1/B_area
+
+
+!BOE
+!\subsubsection{Query the XGrid for its internal information}
+!\label{sec:xgrid:usage:xgrid_get}
+! One can query the XGrid for its internal information:
+!EOE
+!BOC
+    call ESMF_XGridGet(xgrid, &
+        ngridA=ngridA, &    ! number of Grids on side A
+        ngridB=ngridB, &    ! number of Grids on side B
+        sideA=l_sideA, &    ! list of Grids on side A
+        sideB=l_sideB, &    ! list of Grids on side B
+        area=l_area, &      ! list of area of XGrid
+        centroid=l_centroid, &  ! list of centroid of XGrid
+        distgridA=l_sideAdg, &  ! list of Distgrids on side A
+        distgridM = distgrid, & ! balanced distgrid
+        sparseMatA2X=l_sparseMatA2X, &  ! sparse matrix matmul parameters from A to X
+        sparseMatX2B=l_sparseMatX2B, &  ! sparse matrix matmul parameters from X to B
+        rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+!BOC
+    call ESMF_XGridGet(xgrid, localDe=0, &
+        elementCount=eleCount, &    ! elementCount on the localDE
+        exclusiveCount=ec, &        ! exclusive count
+        exclusiveLBound=elb, &      ! exclusive lower bound
+        exclusiveUBound=eub, &      ! exclusive upper bound
+        rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
+!BOC
+    call ESMF_XGridGet(xgrid, &
+        xgridSide=ESMF_XGRID_SIDEA, & ! side of the XGrid to query
+        gridIndex=1, &              ! index of the distgrid
+        distgrid=distgrid, &        ! the distgrid returned
+        rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
+        distgrid=distgrid, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
+        distgrid=distgrid, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+
 
 !BOE
 ! After the regridding is successful. Clean up all the allocated resources:
