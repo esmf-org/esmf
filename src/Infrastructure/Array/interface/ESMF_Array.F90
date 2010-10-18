@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.128 2010/10/11 21:50:41 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.129 2010/10/18 19:36:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.128 2010/10/11 21:50:41 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.129 2010/10/18 19:36:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1287,10 +1287,13 @@ contains
 !    Logical: if .true., data is appended to an existing file;
 !    default is .false.
 !   \item[{[timeslice]}]
-!    NetCDF IO format supports an "unlimited" dimension to allow
-!    data to grow along that dimension, usually the time dimension. 
-!    This argument is the nth slice of that time dimension. 
-!    No "unlimited" dimension will be set when this argument is negative.
+!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    time slices. The {\tt timeslice} argument provides access to this
+!    capability. Usage of this feature requires that the first slice is
+!    written with a positive {\tt timeslice} value, and that subsequent slices
+!    are written with a {\tt timeslice} argument that increments by one each
+!    time. By default, i.e. by omitting the {\tt timeslice} argument, no
+!    provisions for time slicing are made in the output file.
 !   \item[{[iofmt]}]
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
