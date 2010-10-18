@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.25 2010/07/30 00:25:32 w6ws Exp $
+% $Id: LogErr_usage.tex,v 1.26 2010/10/18 21:20:00 w6ws Exp $
 
 %\subsection{Use and Examples}
 
@@ -18,12 +18,12 @@ to the filename and all entries will be written to their corresponding Log
 by their PET number.
  
 By default, the Log file is not truncated at the start of a new run; it just
-gets appended each time.  Future functionality would include an option to
+gets appended each time.  Future functionality may include an option to
 either truncate or append to the Log file. 
 
 In all cases where a Log is opened, a Fortran unit number is assigned to a specific
 Log.  A Log is assigned an unused unit number using the algorithm described in
-the ESMF\_IOUnitGet method.
+the {\tt ESMF\_IOUnitGet()} method.
 
 The user can then set or get options on how the Log should be used 
 with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.  These are 
@@ -35,6 +35,13 @@ full or by using the {\tt ESMF\_LogFlush()} method.  The default is to flush
 after every ten entries because {\tt maxElements} is initialized to ten 
 (which means the buffer reaches its full state after every ten writes and then
 flushes).
+
+A message filtering option may be set with {\tt ESMF\_LogSet()} so
+that only selected message types are actually written to the log.  One key
+use of this feature is to allow placing informational log write requests
+into the code for debugging or tracing.  Then, when the informational entries
+are not needed, the messages at that level may be turned off --- leaving only
+warning and error messages in the logs. 
 
 For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
 Log entry.  The time is given in microsecond precision.  The user can call 
