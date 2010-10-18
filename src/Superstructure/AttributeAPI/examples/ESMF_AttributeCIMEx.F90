@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.13 2010/10/16 05:57:06 rokuingh Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.14 2010/10/18 05:58:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -171,7 +171,7 @@ program ESMF_AttributeCIMEx
         'weather systems in much greater detail.', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ReleaseDate', &
-        '2009', &
+        '2009-01-01T00:00:00Z', &
           convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ModelType', &
         'AerosolEmissionAndConc', convention=convCIM, purpose=purpComp, rc=rc)
@@ -280,7 +280,7 @@ program ESMF_AttributeCIMEx
        '1861-1896.', &
         convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'Date', &
-       '2009', &
+       '2009-03-05', &
         convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'PresentationForm', &
        'Online Refereed', &
@@ -301,7 +301,7 @@ program ESMF_AttributeCIMEx
                              'Atmosphere component of the HiGEM model', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp1, 'ReleaseDate', &
-        '2009', &
+        '2009-12-31T23:59:59Z', &
           convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Responsible party attributes (for Author)
@@ -392,9 +392,7 @@ program ESMF_AttributeCIMEx
                                       'HiGEM_AtmosChem', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                      'conservativeSpatialRegridding', &
-           convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingType', 'TBD', &
+                                      'conservative-first-order', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -432,9 +430,7 @@ program ESMF_AttributeCIMEx
                                  'HiGEM_AtmosChem', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
-                                 'conservativeSpatialRegridding', &
-           convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(OH, 'SpatialRegriddingType', 'TBD', &
+                                 'conservative-first-order', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(OH, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -476,9 +472,7 @@ program ESMF_AttributeCIMEx
                                     'HiGEM_Atmos', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(Ozone, 'SpatialRegriddingMethod', &
-                                    'conservativeSpatialRegridding', &
-           convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(Ozone, 'SpatialRegriddingType', 'TBD', &
+                                    'conservative-first-order', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(Ozone, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -496,9 +490,7 @@ program ESMF_AttributeCIMEx
                                   'HiGEM_Atmos', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(SST, 'SpatialRegriddingMethod', &
-                                  'conservativeSpatialRegridding', &
-           convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(SST, 'SpatialRegriddingType', 'TBD', &
+                                  'conservative-first-order', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(SST, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)

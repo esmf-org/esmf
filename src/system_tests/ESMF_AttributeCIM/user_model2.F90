@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2010/10/15 06:00:41 eschwab Exp $
+! $Id: user_model2.F90,v 1.9 2010/10/18 05:58:03 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -170,9 +170,7 @@ module user_model2
     call ESMF_AttributeSet(OH, 'CouplingTarget', 'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
-                               'conservativeSpatialRegridding', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'SpatialRegriddingType', 'TBD', &
+                               'conservative-first-order', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'Frequency', '15 minutes', &
         convention=convCIM, purpose=purpField, rc=rc)

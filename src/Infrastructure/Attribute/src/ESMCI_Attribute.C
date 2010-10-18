@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.85 2010/10/15 16:44:15 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.86 2010/10/18 05:58:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.85 2010/10/15 16:44:15 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.86 2010/10/18 05:58:03 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -506,11 +506,12 @@ namespace ESMCI {
       localrc = AttPackAddAttribute("Date", "ISO 19115",
                             "Citation Description", object);
       string attPackInstanceName;
+#if 0
       localrc = AttPackSet("Date",
          ESMC_TYPEKIND_CHARACTER, 1,
          &empty, "ISO 19115", "Citation Description",
          object, attPackInstanceName);
-
+#endif
       localrc = AttPackAddAttribute("DOI", "ISO 19115",
                             "Citation Description", object);
       localrc = AttPackSet("DOI",
@@ -4929,7 +4930,8 @@ namespace ESMCI {
 
   if (attpack->AttributeIsSet("ModelType")) {
     localrc = attpack->AttributeGet("ModelType", &value);
-    localrc = io_xml->writeElement("type", "", indent, 1, "value", value.c_str());
+    localrc = io_xml->writeElement("type", "", indent, 2, "cv", "true", 
+                                   "value", value.c_str());
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
   }
 
@@ -5412,16 +5414,38 @@ namespace ESMCI {
     }
     if (attpack->AttributeIsSet("Date")) {
       localrc = attpack->AttributeGet("Date", &value);
-      localrc = io_xml->writeElement("gmd:date", value, indent, 0);
+      localrc = io_xml->writeStartElement("gmd:date", "", indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeStartElement("gmd:CI_Date", "", ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeStartElement("gmd:date", "", ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gco:Date", value, ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:date", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeStartElement("gmd:dateType", "", indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gmd:CI_DateTypeCode", "", 
+                                     ++indent, 2,
+                                     "codeList", "",
+                                     "codeListValue", "");
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:dateType", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:CI_Date", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:date", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("PresentationForm")) {
       localrc = attpack->AttributeGet("PresentationForm", &value);
       localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
-      localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", "", ++indent,
+      localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", value,
+                                     ++indent,
                                      2, "codeList", "",
-                                     "codeListValue", value.c_str());
+                                     "codeListValue", "");
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
@@ -5522,18 +5546,23 @@ namespace ESMCI {
         }
         if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
           localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value);
-          localrc = io_xml->writeStartElement("spatialRegridding", "", 6, 1,
-                                              value.c_str(), "true");
-        }
-        if (attpack->AttributeIsSet("SpatialRegriddingType")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingType", &value);
-          localrc = io_xml->writeElement("spatialRegriddingOrder", value, 7, 0);
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 6, 2,
+                                           "spatialRegriddingDimension", "2D", 
+                                             // enum: {'1D', '2D', '3D'}
+                                           "spatialRegriddingMethod", 
+                                            value.c_str());
+// enum: {'linear', 'near-neighbour', 'cubic', 'conservative-first-order', 'conservative-second-order'}
+          if (attpack->AttributeIsSet("SpatialRegriddingType")) {
+            localrc = attpack->AttributeGet("SpatialRegriddingType", &value);
+            localrc = io_xml->writeElement("spatialRegriddingProperty", value, 7, 0);
+          }
           localrc = io_xml->writeEndElement("spatialRegridding", 6);
         }
         if (attpack->AttributeIsSet("TimeTransformationType")) {
           localrc = attpack->AttributeGet("TimeTransformationType", &value);
           localrc = io_xml->writeStartElement("timeTransformation", "", 6, 0);
-          localrc = io_xml->writeElement("mappingType", "", 7, 1,
+          localrc = io_xml->writeElement("mappingType", "", 7, 2,
+                                         "cv", "true", 
                                          "value", value.c_str());
           localrc = io_xml->writeEndElement("timeTransformation", 6);
         }

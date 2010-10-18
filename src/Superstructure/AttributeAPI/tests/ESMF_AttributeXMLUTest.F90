@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.11 2010/10/15 05:59:29 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.12 2010/10/18 05:58:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.11 2010/10/15 05:59:29 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.12 2010/10/18 05:58:03 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -805,7 +805,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 4th <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'ReleaseDate', '2009', &
+    call ESMF_AttributeSet(gridcomp3, 'ReleaseDate', '2009-02-15T01:02:03Z', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -1156,7 +1156,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 3rd <citation> attribute value within the CIM citation
     !   package
     call ESMF_AttributeSet(gridcomp3, 'Date', &
-      '2009?(not in sample file)', &
+      '2009-04-20', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
                            rc=rc)
@@ -1288,7 +1288,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 8th <coupling> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'SpatialRegriddingMethod', &
-     'conservativeSpatialRegridding', &
+     'conservative-first-order', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
                            rc=rc)

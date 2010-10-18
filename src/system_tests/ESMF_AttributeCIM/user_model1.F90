@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2010/10/15 06:00:41 eschwab Exp $
+! $Id: user_model1.F90,v 1.7 2010/10/18 05:58:03 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -121,7 +121,7 @@ module user_model1
       'Atmosphere component of the HiGEM model', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
-      '2009', &
+      '2009-02-02T02:03:04Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -171,9 +171,7 @@ module user_model1
                                     'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                    'conservativeSpatialRegridding', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingType', 'TBD', &
+                                    'conservative-first-order', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 minutes', &
         convention=convCIM, purpose=purpField, rc=rc)

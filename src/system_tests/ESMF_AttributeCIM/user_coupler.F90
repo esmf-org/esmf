@@ -132,7 +132,7 @@ module user_coupler
       'weather systems in much greater detail.', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
-      '2009', &
+      '2009-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
       'AerosolEmissionAndConc', &
