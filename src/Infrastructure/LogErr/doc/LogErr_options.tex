@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.15 2010/03/04 18:57:44 svasquez Exp $
+% $Id: LogErr_options.tex,v 1.16 2010/10/18 21:19:19 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,7 +30,9 @@ Valid values are:
 \label{opt:msgtype}
 {\sf DESCRIPTION:\\}
 Specifies what message level --- e.g., informational, warning, 
-error --- will be written to log files.
+error --- will be written to log files.  This may be used both when
+writing the message with ESMF\_LogWrite, and when setting a filtering
+option with ESMF\_LogSet.
 
 Valid values are:
 \begin{description}
