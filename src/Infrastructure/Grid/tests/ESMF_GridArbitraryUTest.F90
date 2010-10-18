@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.11 2010/03/04 19:40:09 theurich Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.12 2010/10/18 18:43:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.11 2010/03/04 19:40:09 theurich Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.12 2010/10/18 18:43:12 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -77,6 +77,7 @@ program ESMF_GridArbitraryUTest
   integer ::  index(2), index3(3)
   integer :: index1(2), index2(2)
   integer :: memDimCount, arbDimCount
+  integer :: cu(2),cl(2),i1,i2
   type(ESMF_GridDecompType) :: decompType
   REAL(ESMF_KIND_R8), pointer :: dimarray(:), fptr1D(:)
   type(ESMF_Array) :: myarray
@@ -760,6 +761,20 @@ program ESMF_GridArbitraryUTest
     dimarray(i) = localIndices(i,2)*xdim + localIndices(i,1) 
   enddo
 
+
+  ! get 3rd coordinate array and set its values
+  call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, fptr=fptr2D, &
+	computationalLBound=cl,computationalUBound=cu, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+  ! fill the coordinate values
+  ! (All z coords are the same at the same z index)
+  do i1=cl(1),cu(1)
+     do i2=cl(2),cu(2)
+        fptr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
+     enddo
+  enddo
+
   ! Spot check the coordinate values
   index3(1)=localIndices(10,1)
   index3(2)=localIndices(10,2)
@@ -769,10 +784,9 @@ program ESMF_GridArbitraryUTest
 
   if (coord3(1) .ne. index3(1)*ydim+index3(2)) correct=.false.
   if (coord3(2) .ne. index3(2)*xdim+index3(1)) correct=.false.
-  if (coord3(3) .ne. 0) correct=.false.
+  if (abs(coord3(3)-2.0).gt.0.0000001) correct=.false. ! Since these are reals use tolerence to check
   if (.not. correct) write(failMsg, *) "ESMF_GridGetIndCoord return wrong values"
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-
 
   !-----------------------------------------------------------------------------
   ! Test getting the 3rd coordinate array
