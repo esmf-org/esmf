@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.21 2010/10/11 19:46:35 feiliu Exp $
+! $Id: CoupledFlowDemo.F90,v 1.22 2010/10/18 18:09:34 w6ws Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -421,7 +421,7 @@
     ! 
     ! Initialize the injector component, first phase 
     !
-    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, 1, rc=rc, userRc=urc)
+    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, phase=1, rc=rc, userRc=urc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Injection Model Initialize finished, rc =", rc
@@ -439,7 +439,7 @@
     !
     ! Initialize the flow solver component, first phase
     !
-    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, 1, rc=rc, userRc=urc)
+    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, phase=1, rc=rc, userRc=urc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Flow Model Initialize finished, rc =", rc
@@ -459,12 +459,12 @@
     !
     ! Second phase of init
     !
-    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, 2, rc=rc, userRc=urc)
+    call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, phase=2, rc=rc, userRc=urc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Injection Model Initialize finished, rc =", rc
  
-    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, 2, rc=rc, userRc=urc)
+    call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, phase=2, rc=rc, userRc=urc)
     if(rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=rc)
     if(urc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT, rc=urc)
     print *, "Flow Model Initialize finished, rc =", rc
