@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.30 2010/10/15 21:52:30 eschwab Exp $
+% $Id: IO_background.tex,v 1.31 2010/10/19 20:46:55 eschwab Exp $
 
 %\subsection{Background}
 
@@ -74,6 +74,7 @@ I/O Utilities, \ref{sec:IOUtil} respectively.
 %containing information about location, field values associated with this 
 %location, and a list of neighbors, if relevant. 
 
+\label{io:attributeio}
 \subsection{Attribute I/O}
 
 Metadata IO is handled via the ESMF Attribute class. The third
@@ -81,6 +82,13 @@ party software Xerces C++ Library is used by ESMF to provide
 the ability to read and write Attribute data in XML file format.
 To enable this capability, the environment variable ESMF\_XERCES must be
 set. Details can be found in the ESMF User Guide, "Building and Installing the ESMF", "Third Party Libraries".
+
+In the current release, the following methods support Attribute XML I/O using Xerces:
+
+\begin{description}
+\item {\tt ESMF\_AttributeRead()}, section \ref{api:AttributeRead}.
+\item {\tt ESMF\_AttributeWrite()}, section \ref{api:AttributeWrite}.
+\end{description}
 
 
 \label{io:dataio}
@@ -99,7 +107,7 @@ ESMF\_RC\_LIB\_NOT\_PRESENT.  Details about the environment variables can be
 found in ESMF User Guide, "Building and Installing the ESMF", 
 "Third Party Libraries".
 
-In the current release, the following methods support parallel I/O using PIO:
+In the current release, the following methods support parallel data I/O using PIO:
 
 \begin{description}
 \item {\tt ESMF\_FieldBundleRead()}, section \ref{api:FieldBundleRead}.
