@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.213 2010/10/19 05:44:27 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.214 2010/10/19 21:41:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.213 2010/10/19 05:44:27 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.214 2010/10/19 21:41:03 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2259,38 +2259,58 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !     Returns the requested information about this {\tt ESMF\_State}.
+!     The optional {\tt itemSearch} argument may specify the name of
+!     an individual item to search for.  When used in conjunction with
+!     the {\tt nestedFlag}, nested States will also be searched.
 !
 !     The arguments are:
 !     \begin{description}     
 !     \item[state]
 !       An {\tt ESMF\_State} object to be queried.
-!     \item[itemSearch]
-!       Query objects by name.  Use in conjunction with itemCount to obtain
-!       the number of objects with this name due to nested States.
+!     \item[{[itemSearch]}]
+!       Query objects by name in the State.  When the {\tt nestedFlag}
+!       option is set to .true., all nested States will also be searched
+!       for the specified name.
 !     \item[{[nestedFlag]}]
-!       {\tt .false.} - return information at the current State level only (default)
-!       {\tt .true.} - recursively return nested State information
+!       When set to {\tt .false.}, returns information at the current
+!       State level only (default)
+!       When set to {\tt .true.}, additionally returns information from
+!       nested States
 !     \item[{[name]}]
 !       Name of this {\tt ESMF\_State}.
 !     \item[{[statetype]}]
-!       Import or Export {\tt ESMF\_State}.  Possible values are
+!       Import or Export of this {\tt ESMF\_State}.  Possible values are
 !       listed in Section~\ref{opt:statetype}.
 !     \item[{[itemCount]}]
-!       Count of items in {\tt state}, including all objects
-!       as well as placeholder names.
+!       Count of items in this {\tt ESMF\_State}, including all objects
+!       as well as placeholder names.  When the {\tt nestedFlag} option is
+!       set to {\tt .true.}, the count will include items present in nested
+!       States.  When using {\tt itemSearch}, it will count the number of
+!       items matching the specified name.
 !     \item[{[itemNameList]}]
-!       Array of item names in {\tt state},
-!       including placeholder names.  {\tt itemNameList} must be at least
+!       Array of item names in this {\tt ESMF\_State}, including placeholder
+!       names.  When the {\tt nestedFlag} option is
+!       set to {\tt .true.}, the list will include items present in nested
+!       States.  When using {\tt itemSearch}, it will return the names of
+!       items matching the specified name.  {\tt itemNameList} must be at least
 !       {\tt itemCount} long.
 !     \item[{[stateitemtypeList]}]  
-!       Array of possible item object types in {\tt state}, including
-!       placeholder
-!       names. Must be at least {\tt itemCount} long.  Options are
-!       listed in Section~\ref{opt:stateitemtype}.
+!       Array of possible item object types in this {\tt ESMF\_State}, including
+!       placeholder names.  When the {\tt nestedFlag} option is
+!       set to {\tt .true.}, the list will include items present in nested
+!       States.  When using {\tt itemSearch}, it will return the types of
+!       items matching the specified name. Must be at least {\tt itemCount}
+!       long.  Return values are listed in Section~\ref{opt:stateitemtype}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+!     Typically, an {\tt ESMF\_StateGet} information request will be performed
+!     twice.  The first time, the {\tt itemCount} argument will be used to
+!     query the size of arrays that are needed.  Arrays can then be allocated
+!     to the correct size for {\tt itemNameList} and {\tt stateitemtypeList}
+!     as needed.  A second call to {\tt ESMF\_StateGet} will then fill in the
+!     values.
 !
 !EOP
       integer :: ilpos
@@ -2460,14 +2480,21 @@ module ESMF_StateMod
 !      Returns an <item> from an {\tt ESMF\_State} by name.  
 !      If the {\tt ESMF\_State} contains the <item> directly, only
 !      {\tt itemName} is required.
-!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
-!      and the <item> is one level down, this routine can return it
-!      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this option 
-!      only searches immediate descendents.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      An alternative technique for accessing a nested item which is only
+!      one level down, is to specify the nested State with the
+!      {\tt nestedStateName} argument.  While States can be nested to any
+!      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\\tt nestedStateName} and
+!      It is an error to specify both {\tt nestedStateName} and
 !      a fully qualified, nested State itemName.
 !
 !      Supported values for <item> are:
@@ -2485,15 +2512,18 @@ module ESMF_StateMod
 !     \item[state]
 !     State to query for an <item> named {\tt itemName}.
 !     \item[itemName]
-!     Name of <item> to be returned.
+!     Name of <item> to be returned.  This name may be fully
+!     qualified in order to access nested State items.
 !     \item[<item>]
 !     Returned reference to the <item>.
 !     \item[{[nestedStateName]}]
-!     Optional.  An error if specified when the {\tt state} argument contains
-!     no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!     Optional.  Used when the {\tt state} contains 
 !     multiple nested {\tt ESMF\_State}s and the <item> being requested is
 !     one level down in one of the nested {\tt ESMF\_State}.
-!     {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
+!     with a fully qualified {\tt itemName}.  This option is retained for
+!     compatibility with earlier versions of ESMF.
 !     \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2521,16 +2551,23 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Array} from an {\tt ESMF\_State} by name.  
-!      If the {\tt ESMF\_State} contains the object directly, only
+!      If the {\tt ESMF\_State} contains the {\tt ESMF\_Array} directly, only
 !      {\tt itemName} is required.
-!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
-!      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches in immediate descendents.  
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      An alternative technique for accessing a nested item which is only
+!      one level down, is to specify the nested State with the
+!      {\tt nestedStateName} argument.  While States can be nested to any
+!      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\\tt nestedStateName} and
+!      It is an error to specify both {\tt nestedStateName} and
 !      a fully qualified, nested State itemName.
 !      
 !     The arguments are:
@@ -2538,14 +2575,18 @@ module ESMF_StateMod
 !  \item[state]
 !   State to query for an {\tt ESMF\_Array} named {\tt itemName}.
 !  \item[itemName]
-!    Name of {\tt ESMF\_Array} to be returned.
+!    Name of {\tt ESMF\_Array} to be returned.  This name may be fully
+!     qualified in order to access nested State items.
 !  \item[array]
 !    Returned reference to the {\tt ESMF\_Array}.
-!     Optional.  An error if specified when the {\tt state} argument contains
-!     no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!  \item[{[nestedStateName]}]
+!     Optional.  Used when the {\tt state} contains 
 !     multiple nested {\tt ESMF\_State}s and the <item> being requested is
 !     one level down in one of the nested {\tt ESMF\_State}.
-!     {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
+!     with a fully qualified {\tt itemName}.  This option is retained for
+!     compatibility with earlier versions of ESMF.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2643,16 +2684,23 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_ArrayBundle} from an {\tt ESMF\_State} by name.  
-!      If the {\tt ESMF\_State} contains the object directly, only
-!      {\tt itemName} is required.
-!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
-!      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches in immediate descendents.  
+!      If the {\tt ESMF\_State} contains the {\tt ESMF\_ArrayBundle} directly,
+!      only {\tt itemName} is required.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      An alternative technique for accessing a nested item which is only
+!      one level down, is to specify the nested State with the
+!      {\tt nestedStateName} argument.  While States can be nested to any
+!      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\\tt nestedStateName} and
+!      It is an error to specify both {\tt nestedStateName} and
 !      a fully qualified, nested State itemName.
 !
 !     The arguments are:
@@ -2662,13 +2710,16 @@ module ESMF_StateMod
 !  \item[itemName]
 !    Name of {\tt ESMF\_ArrayBundle} to be returned.
 !  \item[arraybundl]
-!    Returned reference to the {\tt ESMF\_ArrayBundle}.
+!    Returned reference to the {\tt ESMF\_ArrayBundle}.  This name may be fully
+!     qualified in order to access nested State items.
 !  \item[{[nestedStateName]}]
-!    Optional.  An error if specified when the {\tt state} argument contains
-!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
-!    multiple nested {\tt ESMF\_State}s and the object being requested is
-!    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     Optional.  Used when the {\tt state} contains 
+!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
+!     one level down in one of the nested {\tt ESMF\_State}.
+!     An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
+!     with a fully qualified {\tt itemName}.  This option is retained for
+!     compatibility with earlier versions of ESMF.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2766,16 +2817,23 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Field} from an {\tt ESMF\_State} by name.  
-!      If the {\tt ESMF\_State} contains the object directly, only
-!      {\tt fieldname} is required.
-!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
-!      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches in immediate descendents.  
+!      If the {\tt ESMF\_State} contains the {\tt ESMF\_Field} directly,
+!      only {\tt itemName} is required.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      An alternative technique for accessing a nested item which is only
+!      one level down, is to specify the nested State with the
+!      {\tt nestedStateName} argument.  While States can be nested to any
+!      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\\tt nestedStateName} and
+!      It is an error to specify both {\tt nestedStateName} and
 !      a fully qualified, nested State itemName.
 !
 !     The arguments are:
@@ -2783,15 +2841,18 @@ module ESMF_StateMod
 !  \item[state]
 !   State to query for an {\tt ESMF\_Field} named {\tt itemName}.
 !  \item[itemName]
-!    Name of {\tt ESMF\_Field} to be returned.
+!    Name of {\tt ESMF\_Field} to be returned.  This name may be fully
+!     qualified in order to access nested State items.
 !  \item[field]
 !    Returned reference to the {\tt ESMF\_Field}.
 !  \item[{[nestedStateName]}]
-!    Optional.  An error if specified when the {\tt state} argument contains
-!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
-!    multiple nested {\tt ESMF\_State}s and the object being requested is
-!    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     Optional.  Used when the {\tt state} contains 
+!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
+!     one level down in one of the nested {\tt ESMF\_State}.
+!     An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
+!     with a fully qualified {\tt itemName}.  This option is retained for
+!     compatibility with earlier versions of ESMF.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2894,16 +2955,23 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_FieldBundle} from an {\tt ESMF\_State} by name.  
-!      If the {\tt ESMF\_State} contains the object directly, only
-!      {\tt itemName} is required.
-!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
-!      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches in immediate descendents.  
+!      If the {\tt ESMF\_State} contains the {\tt ESMF\_FieldBundle} directly,
+!      only {\tt itemName} is required.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      An alternative technique for accessing a nested item which is only
+!      one level down, is to specify the nested State with the
+!      {\tt nestedStateName} argument.  While States can be nested to any
+!      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\\tt nestedStateName} and
+!      It is an error to specify both {\tt nestedStateName} and
 !      a fully qualified, nested State itemName.
 !
 !     The arguments are:
@@ -2911,15 +2979,18 @@ module ESMF_StateMod
 !  \item[state]
 !   State to query for a {\tt ESMF\_FieldBundle} named {\tt itemName}.
 !  \item[itemName]
-!    Name of {\tt ESMF\_FieldBundle} to be returned.
+!    Name of {\tt ESMF\_FieldBundle} to be returned.  This name may be fully
+!     qualified in order to access nested State items.
 !  \item[fieldbundle]
 !    Returned reference to the {\tt ESMF\_FieldBundle}.
 !  \item[{[nestedStateName]}]
-!    Optional.  An error if specified when the {\tt state} argument contains
-!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
-!    multiple nested {\tt ESMF\_State}s and the object being requested is
-!    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
+!     Optional.  Used when the {\tt state} contains 
+!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
+!     one level down in one of the nested {\tt ESMF\_State}.
+!     An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
+!     with a fully qualified {\tt itemName}.  This option is retained for
+!     compatibility with earlier versions of ESMF.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -3165,16 +3236,23 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_RouteHandle} from an {\tt ESMF\_State} by name.  
-!      If the {\tt ESMF\_State} contains the object directly, only
+!      If the {\tt ESMF\_State} contains the {\tt ESMF\_RouteHandle} directly, only
 !      {\tt itemName} is required.
-!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
-!      and the object is one level down, this routine can return the object
-!      in a single call by specifing the proper {\tt nestedStateName}.
-!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
-!      only searches in immediate descendents.  
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      An alternative technique for accessing a nested item which is only
+!      one level down, is to specify the nested State with the
+!      {\tt nestedStateName} argument.  While States can be nested to any
+!      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\\tt nestedStateName} and
+!      It is an error to specify both {\tt nestedStateName} and
 !      a fully qualified, nested State itemName.
 !
 !     The arguments are:
@@ -3182,16 +3260,19 @@ module ESMF_StateMod
 !  \item[state]
 !   State to query for an {\tt ESMF\_RouteHandle} named {\tt itemName}.
 !  \item[itemName]
-!    Name of {\tt ESMF\_RouteHandle} to be returned.
+!    Name of {\tt ESMF\_RouteHandle} to be returned.  This name may be fully
+!     qualified in order to access nested State items.
 !  \item[routehandle]
 !    Returned reference to the {\tt ESMF\_RouteHandle}.
 !  \item[{[nestedStateName]}]
-!    Optional.  An error if specified when the {\tt state} argument contains
-!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
-!    multiple nested {\tt ESMF\_State}s and the object being requested is
-!    in one level down in one of the nested {\tt ESMF\_State}.
-!    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!!  \item[{[rc]}]
+!     Optional.  Used when the {\tt state} contains 
+!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
+!     one level down in one of the nested {\tt ESMF\_State}.
+!     An error if specified when the {\tt state} argument contains
+!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
+!     with a fully qualified {\tt itemName}.  This option is retained for
+!     compatibility with earlier versions of ESMF.
+!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -3286,7 +3367,16 @@ module ESMF_StateMod
 !
 ! !DESCRIPTION:
 !      Returns a nested {\tt ESMF\_State} from another {\tt ESMF\_State} 
-!      by name.  By default, only one level of nested State is searched.
+!      by name.
+!      If the {\tt ESMF\_State} contains the nested {\tt ESMF\_State} directly, only
+!      {\tt itemName} is required.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to access the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -3294,7 +3384,8 @@ module ESMF_StateMod
 !       The {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
 !       named {\tt stateName}.
 !     \item[itemName]
-!       Name of nested {\tt ESMF\_State} to return.
+!       Name of nested {\tt ESMF\_State} to return.  This name may be fully
+!       qualified in order to access nested State items.
 !     \item[nestedState]
 !       Returned {\tt ESMF\_State}.
 !     \item[{[rc]}]
