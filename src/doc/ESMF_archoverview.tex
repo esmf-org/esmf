@@ -1,23 +1,29 @@
-% $Id: ESMF_archoverview.tex,v 1.19 2008/04/02 20:43:02 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.20 2010/10/19 15:45:44 rokuingh Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
-The ESMF architecture is characterized by the layering strategy shown in Figure \ref{fig:TheESMFwich}. User code components that implement the {\it science} portions of an application, for example a sea ice or land model, are sandwiched 
-between two layers. The upper layer is denoted the {\bf superstructure} layer 
-and the lower layer the {\bf infrastructure} layer. The role of the superstructure layer is to provide a shell which encompasses user code and provides a context for interconnecting input and output
-data streams between components. The key elements of the superstructure are described in Section \ref{sec:superstructure}.
-These elements include classes that wrap user code, ensuring that all
-components present consistent interfaces. The infrastructure layer provides a foundation that developers of
-science components can use to speed construction and to ensure consistent, guaranteed behavior.
-The elements of the infrastructure include constructs to support parallel processing with data types tailored
-to Earth science applications, specialized libraries to support consistent time and calendar management and
-performance, error handling and scalable I/O tools. The infrastructure layer is described in 
+The ESMF architecture is characterized by the layering strategy shown in 
+Figure \ref{fig:TheESMFwich}. User code components that implement the 
+{\it science} portions of an application, for example a sea ice or land model, 
+are sandwiched between two layers. The upper layer is denoted the 
+{\bf superstructure} layer and the lower layer the {\bf infrastructure} layer. 
+The role of the superstructure layer is to provide a shell which encompasses 
+user code and provides a context for interconnecting input and output data 
+streams between components. The key elements of the superstructure are described 
+in Section \ref{sec:superstructure}.  These elements include classes that wrap 
+user code, ensuring that all components present consistent interfaces. The 
+infrastructure layer provides a foundation that developers of science components 
+can use to speed construction and to ensure consistent, guaranteed behavior.
+The elements of the infrastructure include constructs to support parallel 
+processing with data types tailored to Earth science applications, specialized 
+libraries to support consistent time and calendar management and performance, 
+error handling and scalable I/O tools. The infrastructure layer is described in 
 Section \ref{sec:infrastructure}.
-A hierarchical combination of superstructure, user code components, and infrastructure are joined 
-together to form an ESMF application.
+A hierarchical combination of superstructure, user code components, and 
+infrastructure are joined together to form an ESMF application.
 
 \subsection{Key Concepts}
-
+ 
 The ESMF architecture and programming paradigm are based upon 
 five key concepts:  modularity, flexibility, hierarchical 
 organization, communication within components, and a uniform 
@@ -25,24 +31,24 @@ communication API.
 
 \subsubsection{Modularity}
 
-The ESMF design is based upon modular components.  There
-are two types of components, one of which represents models 
+The ESMF design is based upon modular Components.  There
+are two types of Components, one of which represents models 
 (Gridded Components) and one which represents couplers (Coupler Components).  
-Data are always passed between components using a data structure 
+Data are always passed between Components using a data structure 
 called a State, which can store Fields, FieldBundles of Fields,
 Arrays, and other States.  A Gridded Component stores no information about 
 the internals of the Gridded Components that it interacts with; this information 
-is passed in through the argument lists of its initialize, run, 
+is passed in through the argument lists of the initialize, run, 
 and finalize methods.  The information that is 
 passed in through the argument list can be a State from 
 another Gridded Component, or it can be a function pointer that performs
 a computation or communication on a State.  These function 
-pointers (not yet implemented) are called Transforms, and they 
-are created by Coupler Components.  They are called inside the 
+pointers are called Transforms, and they are available as AttachableMethods
+created by Coupler Components.  They are called inside the 
 Gridded Component they are passed into.  Although Transforms add 
-some complexity to the framework (and their use is not required), they are what will
-enable ESMF to accommodate virtually any model of communication 
-between components. 
+some complexity to the framework (and their use is not required), they are what 
+will enable ESMF to accommodate virtually any model of communication 
+between Components. 
 
 {\bf Modularity means that an ESMF component stores nothing about 
 the internals of other components.  This allows components to be 
@@ -61,9 +67,9 @@ an application.  This accommodates scientific innovation - if you
 want your atmospheric model to communicate with your sea ice model
 mid-timestep, ESMF will not stop you.}
 
-\subsubsection{Hierarchical Organization}
+\subsubsection{Hierarchical organization}
 \label{sec:principles-hierarchy}
-The ESMF allows applications to be composed hierarchically.
+ESMF allows applications to be composed hierarchically.
 For example, physics and dynamics modules can be defined as 
 separate Gridded Components, coupled together with a Coupler Component, and all
 of these nested within a single atmospheric Gridded Component.
@@ -72,51 +78,51 @@ in a larger climate or data assimilation application.  See Figure
 \ref{fig:appunit} for an illustrative example.
 
 The data structure that enables scalability in ESMF is the
-derived type Gridded Component.  Fortran alone doesn't allow you to create
+derived type Gridded Component.  Fortran alone does not allow you to create
 generic components - you'd have to create derived types for
 PhysComp, and DynComp, and PhysDynCouplerComp, and AtmComp.  In 
 ESMF, these are always of type GridComp or CplComp, so they 
 can be called by the same drivers (whether that driver is a 
 standard ESMF driver or another model), and use the same methods
 without having to overload them with many specific derived 
-types.  It's the same idea when you want to support different 
+types.  It is the same idea when you want to support different 
 implementations of the same component, like multiple dynamics.
 
 {\bf The ESMF defines a hierarchical, scalable architecture 
 that is natural for organizing very complex applications, and
-for allowing exchangeable components.}
+for allowing exchangeable Components.}
 
 \begin{figure}
 \caption{A typical building block for an ESMF application consists 
 of a parent Gridded Component, two or more child Gridded Components, and 
 a Coupler Component.  The parent Gridded Component is called by an 
-Application Driver.  All ESMF components have initialize, run, and 
-finalize methods.  The diagram shows that when the Application Driver calls 
+application driver.  All ESMF Components have initialize, run, and 
+finalize methods.  The diagram shows that when the application driver calls 
 initialize on a parent Gridded Component, the call cascades down to
 all of its children, so that the result is that the entire ``tree''
-of components is initialized.  The run and finalize methods work the
+of Components is initialized.  The run and finalize methods work the
 same way.  In this example a hurricane simulation is built 
 from ocean and atmosphere Gridded Components.  The data exchange between 
 the ocean and atmosphere is handled by an ocean-atmosphere Coupler Component.  
 Since the whole hurricane simulation is a Gridded Component,
 it could be easily be treated as a child and coupled to another
-Gridded Component, rather than being driven directly by the Application 
-Driver.  A similar diagram could be drawn for an atmospheric model containing
+Gridded Component, rather than being driven directly by the application 
+driver.  A similar diagram could be drawn for an atmospheric model containing
 physics and dynamics components, as described in Section 
 \ref{sec:principles-hierarchy}.}
 \label{fig:appunit}
 \scalebox{1.0}{\includegraphics{ESMF_appunit}}
 \end{figure}
 
-\subsubsection{Communication Within Components}
-Communication in ESMF always occurs within a component.  It
+\subsubsection{Communication within Components}
+Communication in ESMF always occurs within a Component.  It
 can occur internal to a Gridded Component, and have nothing to do 
-with interactions with other components (setting aside 
+with interactions with other Components (setting aside 
 synchronization issues), or it can occur within a Coupler Component
-or a Transform generated by a Coupler Component.  A result of the rule 
-that all communication happens within a component is that 
+or a transform generated by a Coupler Component.  A result of the rule 
+that all communication happens within a Component is that 
 Coupler Components must always be defined on the union of all the
-components that they couple together.  Models can choose to 
+Components that they couple together.  Models can choose to 
 use whatever mechanism they want for intra-model communications.  
 
 {\bf The point is that although the ESMF defines some simple rules 
@@ -124,13 +130,13 @@ for communication, the communication mechanism that the
 framework uses is not hardwired into its architecture -
 the sends and receives or puts and gets are enclosed within 
 Gridded Components, Coupler Components and Transforms. The intent
-is to accommodate 
-multiple models of communication and technical innovations.}
+is to accommodate multiple models of communication and technical 
+innovations.}
 
-\subsubsection{Uniform Communication API}
-ESMF is developing a single API for shared and distributed
+\subsubsection{Uniform communication API}
+ESMF has a single API for shared and distributed
 memory that, unlike MPI, accounts for NUMA achitectures and 
-does not treat all processes as being identical.  It's possible for
+does not treat all processes as being identical.  It is possible for
 users to set ESMF communications to a strictly message passing 
 mode and put in their own OpenMP commands.
 
@@ -140,31 +146,36 @@ without being discouragingly complicated.}
 
 \subsection{Superstructure}
 \label{sec:superstructure}
-The ESMF superstructure layers in an application furnish a unifying context 
-within which user components are interconnected. Classes 
-called {\bf Gridded Components}, 
+The ESMF superstructure layer in a unifying context within which user 
+components are interconnected. Classes called {\bf Gridded Components}, 
 {\bf Coupler Components}, and {\bf States} are used within the superstructure 
 to achieve this flexibility.
-We describe these classes below:
 
-\subsubsection{Import and Export State Classes}
-User code components under ESMF use special interface objects for component to component data exchanges. These objects are 
-of type import State and export State. These special types support a variety of methods that allow user code components 
-to, for example, fill an export State object with data to be shared with other components or query an import State object to 
-determine its contents. In keeping with the overall requirements for high-performance it is permitted for import State and
-export State contents to use references or pointers to component data, so that costly data copies of potentially
-very large data structures can be avoided where possible. The content of an import State and an export State can be made 
-self-describing.
+\subsubsection{Import and export State classes}
+User code components under ESMF use special interface objects for Component to 
+Component data exchanges. These objects are of type import State and export 
+State. These special types support a variety of methods that allow user code 
+components to do things like fill an export State object with data to be shared 
+with other components or query an import State object to determine its contents. 
+In keeping with the overall requirements for high-performance it is permitted 
+for import State and export State contents to use references or pointers to 
+Component data, so that costly data copies of potentially large data structures 
+can be avoided where possible. The content of an import State and an export 
+State can be made self-describing.
 
-\subsubsection{Interface Standards}
-The import State and export State abstractions are designed to be flexible enough so
-that ESMF does not need to mandate a single format for fields. For example, ESMF does not prescribe the units
-of quantities exported or imported; instead it provides mechanisms to describe units, memory layout,and grid coordinates.  This allows the ESMF software to support a range of different policies for
-physical fields. The interoperability experiments that we are using to demonstrate ESMF make use of the emerging
-CF conventions \cite{ref:CF} for describing physical fields. This is a policy choice for that set of experiments. The ESMF 
-software itself can support arbitrary conventions for labeling and characterizing the contents of States.
+\subsubsection{Interface standards}
+The import State and export State abstractions are designed to be flexible 
+enough so that ESMF does not need to mandate a single format for fields. For 
+example, ESMF does not prescribe the units of quantities exported or imported. 
+However, ESMF does provide mechanisms to describe units, memory layout, and 
+grid coordinates.  This allows the ESMF software to support a range of different 
+policies for physical fields. The interoperability experiments that we are using 
+to demonstrate ESMF make use of the emerging CF conventions \cite{ref:CF} for 
+describing physical fields. This is a policy choice for that set of experiments. 
+The ESMF software itself can support arbitrary conventions for labeling and 
+characterizing the contents of States.
 
-\subsubsection{Gridded Component Class}
+\subsubsection{Gridded Component class}
 The Gridded Component class describes a user component that takes in one import State and produces one
 export State. Examples of Gridded Components are major Earth system 
 model components such as land surface models, ocean models, atmospheric models and sea ice models. Components 
@@ -172,78 +183,94 @@ used for linear algebra manipulations in a state estimation or data assimilation
 created as Gridded Components. In general the fields within an import State and export State of a Gridded Component will 
 use the same discrete grid.
 
-\subsubsection{Coupler Component Class}
-The other top-level component class supported in the ESMF architecture is a Coupler Component.
-This class is used for components that take one or more import States as input and map them through
-spatial and temporal interpolation or extrapolation onto one or more output export States. In a Coupler Component
-it is often the case that the export State(s) is on a different discrete grid to that of
-the import State(s). For example, in a coupled
-ocean-atmosphere simulation a Coupler Component might be used to map a set of sea-surface fields 
-in an ocean model to appropriate planetary boundary layer fields in an atmospheric model.
+\subsubsection{Coupler Component class}
+The other top-level Component class supported in the ESMF architecture is a 
+Coupler Component. This class is used for Components that take one or more 
+import States as input and map them through spatial and temporal interpolation 
+or extrapolation onto one or more output export States. In a Coupler Component
+it is often the case that the export State(s) is on a different discrete grid 
+to that of the import State(s). For example, in a coupled ocean-atmosphere 
+simulation a Coupler Component might be used to map a set of sea-surface fields 
+in an ocean model to appropriate planetary boundary layer fields in an 
+atmospheric model.
 
-\subsubsection{Flexible Data and Control Flow}
-Import States, export States, Gridded Components and Coupler Components can be arrayed flexibly
-within a superstructure layer. Using these constructs it is possible to 
-configure a set of components with multiple
+\subsubsection{Flexible data and control flow}
+Import States, export States, Gridded Components and Coupler Components can 
+be arrayed flexibly within a superstructure layer. Using these constructs, it 
+is possible to configure a set of Components with multiple
 pairwise Coupler Components, Figure \ref{fig:point2point}.  It is also
 possible to configure a set of concurrently
-executing Gridded Components joined through a single Coupler Component of the style shown in Figure \ref{fig:hubspoke}. 
+executing Gridded Components joined through a single Coupler Component of the 
+style shown in Figure \ref{fig:hubspoke}. 
 
 \begin{figure}
-\caption{ESMF supports configurations with a single central Coupler Component. In this case inputs from all Gridded 
+\caption{ESMF supports configurations with a single central Coupler Component. 
+In this case inputs from all Gridded 
 Components are transferred and regridded through the central coupler.}
 \label{fig:hubspoke}
 \scalebox{1.0}{\includegraphics{ESMF_hubandspokes}}
 \end{figure}
 
 \begin{figure}
-\caption{ESMF also supports configurations with multiple point to point Coupler Components. 
-These take inputs from one Gridded
-Component and transfer and regrid the data before passing it to another Gridded Component. This schematic shows a 
-flow of data between two Coupler Components that connect three Gridded Components:  an atmosphere model with a land model, and the same atmosphere model with a data assimilation system.}
+\caption{ESMF also supports configurations with multiple point to point Coupler 
+Components. These take inputs from one Gridded Component and transfer and regrid 
+the data before passing it to another Gridded Component. This schematic shows a 
+flow of data between two Coupler Components that connect three Gridded Components:  
+an atmosphere model with a land model, and the same atmosphere model with a data 
+assimilation system.}
 \label{fig:point2point}
 \scalebox{1.0}{\includegraphics{ESMF_pairwise}}
 \end{figure}
 
-The set of superstructure abstractions allows flexible data flow and control between components. However, 
-components will often use different discrete grids, and time-stepping components may march forward with different time
-intervals. In a parallel compute environment different components may be distributed in a different manner on the
-underlying compute resources. The ESMF infrastructure layer provides elements to manage this complexity.
+The set of superstructure abstractions allows flexible data flow and control 
+between components. However, components will often use different discrete grids, 
+and time-stepping components may march forward with different time intervals. 
+In a parallel compute environment different components may be distributed in a 
+different manner on the underlying compute resources. The ESMF infrastructure 
+layer provides elements to manage this complexity.
 
 \subsection{Infrastructure}
 \label{sec:infrastructure}
-Figure \ref{fig:threecomponents} illustrates three Gridded Components, each with a different grids, being coupled together. In 
+Figure \ref{fig:threecomponents} illustrates three Gridded Components, 
+each with a different Grids, being coupled together. In 
 order to achieve this coupling several steps beyond defining import State and 
-export State objects to act
-as data conduits are required. Coupler Components are needed that can interpolate between the different
-grids.  The necessary transformations may also involve mapping between different units and/or memory layout conventions for the fields that
-pass between components. In a parallel compute environment the Coupler Components may also be required to map between different 
-domain decompositions. In order to advance in time correctly the separate Gridded Components must have compatible notions
-of time. Approaches to parallelism within the Gridded Components must also be compatible. The {\bf Infrastructure} layer
-contains a set of classes that address these issues and assist in managing overall system complexity. We describe
-these classes below:
+export State objects to act as data conduits are required. Coupler Components 
+are needed that can interpolate between the different Grids.  The necessary 
+transformations may also involve mapping between different units and/or memory 
+layout conventions for the Fields that pass between Components. In a parallel 
+compute environment the Coupler Components may also be required to map between 
+different domain decompositions. In order to advance in time correctly the 
+separate Gridded Components must have compatible notions of time. Approaches to 
+parallelism within the Gridded Components must also be compatible. The 
+{\bf Infrastructure} layer contains a set of classes that address these issues 
+and assist in managing overall system complexity.
 
 \begin{figure}
-\caption{Schematic showing the coupling of components that use different discrete grids and different time-stepping. 
-In this example, component {\it NCAR Atmosphere} might use a spectral grid based on spherical harmonics, component
-{\it GFDL Ocean} might use a latitude-longitude grid but with a patched decomposition that does not include
-land masses and component {\it NSIPP Land} might use a mosaic-based grid for representing vegetation patchiness
-and a catchment area based grid for river routings. The ESMF infrastructure layer contains tools to help develop 
-software for coupling between components on different grids, mapping between components with different distributions in a 
-multi-processor compute environment and synchronizing events between components with different time-stepping intervals 
+\caption{Schematic showing the coupling of components that use different discrete 
+Grids and different time-stepping.  In this example, Component {\it NCAR Atmosphere} 
+might use a spectral Grid based on spherical harmonics, Component
+{\it GFDL Ocean} might use a latitude-longitude Grid but with a patched decomposition 
+that does not include land masses, and Component {\it NSIPP Land} might use a m
+osaic-based Grid for representing vegetation patchiness and a catchment area based 
+Grid for river routings. The ESMF infrastructure layer contains tools to help develop 
+software for coupling between Components on different Grids, mapping between Components 
+with different distributions in a multi-processor compute environment and synchronizing 
+events between Components with different time-stepping intervals 
 and algorithms.  }
 \label{fig:threecomponents}
 \scalebox{0.5}{\includegraphics{regrid}}
 \end{figure}
 
-\subsubsection{FieldBundle, Field and Array Classes}
+\subsubsection{FieldBundle, Field and Array classes}
 FieldBundle, Field and Array classes contain data together with descriptive
-physical and computational attribute information. The physical attributes include information that describes the units
-of the data. The computational attributes include information on the layout in memory of the field data. The Field class
-is primarily geared toward structured data. A comparable class called Location Stream, not yet implemented, will provide a self-describing
+physical and computational attribute information. The physical attributes 
+include information that describes the units of the data. The computational 
+attributes include information on the layout in memory of the field data. The 
+Field class is primarily geared toward structured data. A comparable class, 
+called Location Stream, provides a self-describing
 container for unstructured observational data streams.
 
-\subsubsection{Grid Class}
+\subsubsection{Grid class}
 The {\it Grid} class is an extensible class that holds discrete grid information. It has subtypes that allow
 it to serve as a container for the full range of different physical grids that might arise in a coupled system.
 In the example in figure \ref{fig:threecomponents} objects of type Grid would hold grid information for
@@ -254,32 +281,32 @@ parallel processing purposes. The class is designed to support a
 generalized ``ghosting'' for tiled 
 decompositions of finite difference, finite volume and finite element codes. 
 
-\subsubsection{Time and Calendar Management Class}
-To support synchronization between components Time, Time Interval,  Calendar,
-Clock, and Alarm classes are provided. These classes allow Gridded and 
-Coupler Component processing
-to be latched to a common controlling clock, and to schedule notification of
-regular events (such as a coupling intervals) and unique events.
+\subsubsection{Time and Calendar management}
+To support synchronization between Components, several time and calendar
+management classes are provided.  These capabilities are provided in the Time, 
+Time Interval, Calendar, Clock, and Alarm classes. These classes allow Gridded
+ and Coupler Component processing to be latched to a common controlling Clock, 
+and to schedule notification of
+regular events, such as a coupling intervals, and unique events.
 
-\subsubsection{Config Resource File Manager}
+\subsubsection{Config resource file manager}
 The Config class is a utility for accessing configuration files that are in
 ASCII format.  This utility enables configuration files to be prepared using
 more flexible formatting than Fortran namelists - for example, it permits the
 input of tables of data.
 
-\subsubsection{DELayout and Virtual Machine}
-To provide a mechanism for ensuring performance portability ESMF defines DELayout and Virtual Machine classes. These classes provide a set of
-high-level platform independent interfaces to performance critical parallel processing communication routines. These routines can be tuned
+\subsubsection{DELayout and virtual machine}
+To provide a mechanism for ensuring performance portability, ESMF defines 
+DELayout and virtual machine (VM) classes. These classes provide a set of
+high-level and platform independent interfaces to performance critical parallel 
+processing communication routines. These routines can be tuned
 to specific platforms to ensure optimal parallel performance on many platforms. 
-\subsubsection{Logging and Error Handling}
+
+\subsubsection{Logging and error handling}
 The LogErr class is designed to aid in managing the complexity of 
-multi-component applications. It provides ESMF with a unified mechanism 
+multi-Component applications. It provides ESMF with a unified mechanism 
 for managing logs and error reporting.
 
-\subsubsection{I/O Classes}
-The infrastructure layer will define a set of {\it I/O} classes for storing and retrieving Field and Grid information to and from persistent storage.  I/O classes are not yet implemented.
-
-
-
-
-
+\subsubsection{File input and output}
+The infrastructure layer will define a set of {\it IO} classes for storing and 
+retrieving Array, Field, and Grid information to and from persistent storage.

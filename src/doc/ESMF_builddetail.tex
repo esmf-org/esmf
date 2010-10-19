@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.13 2010/07/09 22:04:21 theurich Exp $
+%  $Id: ESMF_builddetail.tex,v 1.14 2010/10/19 15:45:44 rokuingh Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -12,7 +12,7 @@ sections should be sufficient.  Some users, however, may wish to have
 a more detailed knowledge of the make system either for configuring
 different build options or for porting to unsupported platforms.
 
-\subsubsection{General Structure}
+\subsubsection{General structure}
 
 The main components of the build system are:
 
@@ -89,7 +89,7 @@ the top level {\tt makefile}. These local makefiles include definitions that
 allow the local files and documents to be built.
 \end{itemize}
 
-\subsubsection{Build Configuration}
+\subsubsection{Build configuration}
 
 A single makefile or makefile fragment from the build system never
 constitutes a complete set of build rules and settings.  Starting from
@@ -130,7 +130,7 @@ will be set to {\tt default}.  Examples:
     build_config/Linux.lahey.default/build_rules.mk
 \end{verbatim}
 
-\subsubsection{Source Code Configuration}
+\subsubsection{Source code configuration}
 
 Some of the ESMF C++ and Fortran source files contain preprocessor directives
 to configure the source code for specific platforms.  The directives are 
