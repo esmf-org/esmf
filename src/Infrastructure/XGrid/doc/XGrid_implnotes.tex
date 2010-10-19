@@ -1,4 +1,4 @@
-% $Id: XGrid_implnotes.tex,v 1.1 2010/07/16 14:15:08 feiliu Exp $
+% $Id: XGrid_implnotes.tex,v 1.2 2010/10/19 21:39:20 feiliu Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -23,18 +23,5 @@ global information can be computed in unison by all PETs independently
 of the others.  In this way the overhead of communication is avoided,
 at the cost of more difficulty in diagnosing program bugs which result
 from not all PETs executing the same create calls.
-
-\item Related to the item above, the user request to not impose
-inter-PET communication at object creation time means that requirement
-FLD 1.5.1, that all XGrids will have unique names, and if not specified, 
-the framework will generate a unique name for it, is difficult or
-impossible to support.  A part of this requirement has been implememted;
-a unique object counter is maintained in the Base object class, and if
-a name is not given at create time a name such as "XGrid003" is generated
-which is guarenteed to not be repeated by the framework.   However, it
-is impossible to error check that the user has not replicated a name,
-and it is possible under certain conditions that if not all PETs have
-created the same number of objects, that the counters on different PETs
-may not stay synchronized.   This remains an open issue.
 
 \end{enumerate}

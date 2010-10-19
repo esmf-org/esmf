@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.12 2010/10/14 17:14:46 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.13 2010/10/19 21:39:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.12 2010/10/14 17:14:46 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.13 2010/10/19 21:39:20 feiliu Exp $'
 
 !==============================================================================
 !
@@ -108,6 +108,7 @@ contains
 ! !IROUTINE:  ESMF_XGridGet - Get default information from XGrid
 
 ! !INTERFACE: ESMF_XGridGet
+! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetDefault(xgrid, &
     sideA, sideB, ngridA, ngridB, area, centroid, &
@@ -492,6 +493,7 @@ end subroutine ESMF_XGridGetSMMSpec
 ! !IROUTINE:  ESMF_XGridGet - Get an individual distgrid
 
 ! !INTERFACE: ESMF_XGridGet
+! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridSide, gridIndex, &
     rc) 
@@ -505,7 +507,7 @@ integer, intent(in), optional                :: gridIndex
 integer, intent(out), optional               :: rc 
 !
 ! !DESCRIPTION:
-!      Get information about XGrid
+!      Get a distgrid from XGrid from a specific side. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -519,8 +521,9 @@ integer, intent(out), optional               :: rc
 !       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
 !       defaults to ESMF\_XGRID\_BALANCED.
 !     \item [{[xgridIndex]}] 
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
-!       that side to create the Field on. If not provided, defaults to 1. 
+!       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index 
+!       selects the Distgrid associated with the Grid on
+!       that side. If not provided, defaults to 1. 
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
 !       is created.
@@ -595,6 +598,7 @@ end subroutine ESMF_XGridGetDG
 ! !IROUTINE:  ESMF_XGridGet - Get information about XGrid
 
 ! !INTERFACE: ESMF_XGridGet
+! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetEle(xgrid, &
     localDE, elementCount, &
@@ -612,7 +616,7 @@ integer, intent(out), optional               :: exclusiveUBound
 integer, intent(out), optional               :: rc 
 !
 ! !DESCRIPTION:
-!      Get information about XGrid
+!      Get localDE specific information about XGrid
 !
 !     The arguments are:
 !     \begin{description}

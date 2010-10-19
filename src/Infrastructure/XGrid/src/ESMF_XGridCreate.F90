@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.9 2010/10/14 17:46:28 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.10 2010/10/19 21:39:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.9 2010/10/14 17:46:28 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.10 2010/10/19 21:39:20 feiliu Exp $'
 
 !==============================================================================
 !
@@ -79,7 +79,7 @@ module ESMF_XGridCreateMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_XGridCreateRaw
-!        module procedure ESMF_XGridCreateOnline
+!        module procedure ESMF_XGridCreateDefault
 
 
 ! !DESCRIPTION:
@@ -100,13 +100,13 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridCreateOnline()"
+#define ESMF_METHOD "ESMF_XGridCreateDefault()"
 !BOPI
-! !IROUTINE:  ESMF_XGridCreateOnline - Create an XGrid online from user input
+! !IROUTINE:  ESMF_XGridCreateDefault - Create an XGrid online from user input
 
 ! !INTERFACE:
 
-type(ESMF_XGrid) function ESMF_XGridCreateOnline(sideA, sideB, sideAPriority, &
+type(ESMF_XGrid) function ESMF_XGridCreateDefault(sideA, sideB, sideAPriority, &
 sideBPriority, storeOverlay, name, rc)
 type(ESMF_Grid), intent(in)     :: sideA(:), sideB(:)
 integer, intent(in), optional   :: sideAPriority(:), sideBPriority(:)
@@ -172,7 +172,7 @@ integer, intent(out), optional  :: rc
 
     ! initialize XGridType object and its base object
     nullify(xgtype)
-    nullify(ESMF_XGridCreateOnline%xgtypep)
+    nullify(ESMF_XGridCreateDefault%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogMsgFoundAllocError(localrc, &
                                 "Constructing xgtype base object ", &
@@ -190,17 +190,17 @@ integer, intent(out), optional  :: rc
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
-    ESMF_XGridCreateOnline%xgtypep => xgtype 
-    ESMF_INIT_SET_CREATED(ESMF_XGridCreateOnline)
+    ESMF_XGridCreateDefault%xgtypep => xgtype 
+    ESMF_INIT_SET_CREATED(ESMF_XGridCreateDefault)
 
-    call ESMF_XGridValidate(ESMF_XGridCreateOnline, rc=localrc)
+    call ESMF_XGridValidate(ESMF_XGridCreateDefault, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
-end function ESMF_XGridCreateOnline
+end function ESMF_XGridCreateDefault
 
 
 !------------------------------------------------------------------------------
@@ -210,8 +210,9 @@ end function ESMF_XGridCreateOnline
 ! !IROUTINE:  ESMF_XGridCreate - Create an XGrid from raw input parameters
 
 ! !INTERFACE:
+! ! Private name; call using ESMF_XGridCreate()
 
-type(ESMF_XGrid) function ESMF_XGridCreateRaw(sideA, sideB, area, centroid, &
+function ESMF_XGridCreateRaw(sideA, sideB, area, centroid, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
     name, &
     rc) 
@@ -225,6 +226,11 @@ type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:), sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:), sparseMatX2B(:)
 character (len=*), intent(in), optional :: name
 integer, intent(out), optional  :: rc 
+
+!
+! !RETURN VALUE:
+    type(ESMF_XGrid) :: ESMF_XGridCreateRaw
+
 !
 ! !DESCRIPTION:
 !      Create an XGrid directly from raw input parameters
@@ -768,10 +774,11 @@ end subroutine ESMF_XGridConstructBaseObj
 !BOP
 ! !IROUTINE: ESMF_XGridDestroy - Free all resources associated with a XGrid
 ! !INTERFACE:
+
   subroutine ESMF_XGridDestroy(xgrid, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_XGrid) :: xgrid       
+    type(ESMF_XGrid), intent(inout) :: xgrid       
     integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.11 2010/10/19 13:52:44 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.12 2010/10/19 21:39:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
     type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
 
     real(ESMF_KIND_R8)                  :: centroidA1X(2), centroidA1Y(2)
-    real(ESMF_KIND_R8)                  :: centroidA2X(1), centroidA2Y(2)
+    real(ESMF_KIND_R8)                  :: centroidA2X(2), centroidA2Y(1)
     real(ESMF_KIND_R8)                  :: centroidBX(2), centroidBY(2)
     real(ESMF_KIND_R8), pointer         :: coordX(:), coordY(:)
 
@@ -86,7 +86,7 @@
 !(Green 2x2, Red 1x2, Blue 2x2). Green and red Grids on side A, blue Grid on side
 !B. Color coded sequence indices are marked at upper right corner of side A green and red 
 !Grids, lower right corner of side B blue Grid, and in black lower left corner of exchange
-!Grid (4x3). Physical coordinates are the tuples in parentsis, e.g. at the four 
+!Grid (4x3). Physical coordinates are the tuples in parenthese, e.g. at the four 
 !corners of rectangular computational domain.}
 !\label{fig:xgridsimple}
 !\end{figure}
@@ -105,7 +105,7 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
 !BOC
-    sideA(2) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/1,2/), &
+    sideA(2) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,1/), &
         coordDep1=(/1/), &
         coordDep2=(/2/), &
         name='source Grid 2 on side A', rc=localrc)
@@ -138,8 +138,8 @@
     coordY = centroidA1Y
 
     ! SideA second grid
-    centroidA2X=(/2.5/)
-    centroidA2Y=(/0.5, 1.5/)
+    centroidA2X=(/0.5, 1.5/)
+    centroidA2Y=(/2.5/)
     call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=coordX, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -166,8 +166,8 @@
     enddo
 
     ! SideB grid
-    centroidBX=(/0.75, 2.25/)
-    centroidBY=(/0.75, 1.75/)
+    centroidBX=(/0.75, 1.75/)
+    centroidBY=(/0.75, 2.25/)
     call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=coordX, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -199,7 +199,8 @@
 ! for sparse matrix matmul in this formulation:
 ! dst\_flux = W'*W*src\_flux, where W' is the weight matrix from the XGrid to 
 ! destination; and W is the weight matrix from source to the XGrid. The weight matrix
-! is generated using destination area weighted algorithm.
+! is generated using destination area weighted algorithm. Please refer to figure 
+! \ref {fig:xgridsimple} for details.
 !
 !EOE
 !BOC
@@ -500,7 +501,12 @@
         distgrid=distgrid, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-
+!BOE
+!\subsubsection{Destroying the XGrid and other resources}
+!\label{sec:xgrid:usage:xgrid_destroy}
+! Clean up the resources by destroy the XGrid and other objects:
+!EOE
+!BOC
     ! After the regridding is successful. Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -525,6 +531,7 @@
     deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
     deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
     deallocate(sparseMatX2B(1)%factorIndexList, sparseMatX2B(1)%factorList)
+!EOC
 
     if(localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Regridding through XGrid example returned"
