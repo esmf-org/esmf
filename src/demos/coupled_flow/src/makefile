@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2010/10/19 18:12:35 theurich Exp $
+# $Id: makefile,v 1.4 2010/10/19 18:54:37 theurich Exp $
 
 ALL: tree_build_demos
 
@@ -37,7 +37,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = SIE.* U_velocity.* V_velocity.* FLAG.* DE.* \
+CLEANFILES  = SIE.* U_velocity.* V_velocity.* FLAG.* DE.* OMEGA.* \
               $(DEMOS_BUILD).stdout
 CLOBBERDIRS =
 
