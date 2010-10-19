@@ -31,7 +31,6 @@ fontsize=11
 + attrPack : ESMC_Logical
 + attrPackHead : ESMC_Logical
 + attrNested : ESMC_Logical
-+ attrAttr : ESMC_Logical
 + linkChange : ESMC_Logical
 + structChange: ESMF_Logical
 + valueChange : ESMC_Logical
