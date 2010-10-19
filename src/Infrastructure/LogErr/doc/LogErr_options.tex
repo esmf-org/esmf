@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.16 2010/10/18 21:19:19 w6ws Exp $
+% $Id: LogErr_options.tex,v 1.17 2010/10/19 11:37:21 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,17 +31,17 @@ Valid values are:
 {\sf DESCRIPTION:\\}
 Specifies what message level --- e.g., informational, warning, 
 error --- will be written to log files.  This may be used both when
-writing the message with ESMF\_LogWrite, and when setting a filtering
-option with ESMF\_LogSet.
+writing the message with {\tt ESMF\_LogWrite()}, and when setting the msgAllow
+option with {\tt ESMF\_LogSet()}.
 
 Valid values are:
 \begin{description}
    \item [ESMF\_LOG\_INFO] 
-         Issue informational, warning, and error messages.  (Default.)
+         Write or allow informational messages.
    \item [ESMF\_LOG\_WARNING]
-         Issue warning and error messages.
+         Write or allow warning messages.
    \item [ESMF\_LOG\_ERROR]
-         Only issue error messages.
+         Write or allow error messages.
 \end{description}
 
 \subsubsection{ESMF\_LogType}
