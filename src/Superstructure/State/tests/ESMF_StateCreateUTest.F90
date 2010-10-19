@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.27 2010/10/04 00:37:25 svasquez Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.28 2010/10/19 05:45:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.27 2010/10/04 00:37:25 svasquez Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.28 2010/10/19 05:45:39 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -429,7 +429,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Validate the nested State
-      call ESMF_StateValidate (state5, nestedFlag=ESMF_NESTED_OFF, rc=rc)
+      call ESMF_StateValidate (state5, nestedFlag=.false., rc=rc)
       write(failMsg, *) ""
       write(name, *) "Validating a nested State - single level"
       call ESMF_Test((rc == ESMF_SUCCESS), &
@@ -437,7 +437,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Validate the nested State with full depth
-      call ESMF_StateValidate (state5, nestedFlag=ESMF_NESTED_ON, rc=rc)
+      call ESMF_StateValidate (state5, nestedFlag=.true., rc=rc)
       write(failMsg, *) ""
       write(name, *) "Validating a nested State - nested"
       call ESMF_Test((rc == ESMF_SUCCESS), &
@@ -445,7 +445,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Print the nested State
-      call ESMF_StatePrint (state5, nestedFlag=ESMF_NESTED_OFF, options='long', rc=rc)
+      call ESMF_StatePrint (state5, nestedFlag=.false., options='long', rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a nested State - single level"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -497,7 +497,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest
       ! Print the nested State
-      call ESMF_StatePrint (state5, nestedFlag=ESMF_NESTED_ON, options='long', rc=rc)
+      call ESMF_StatePrint (state5, nestedFlag=.true., options='long', rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a nested State - nested"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -506,7 +506,7 @@ end module
       !EX_UTest      
       ! Test getting a nested State object Info item count - including nested
       ! objects
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON, &
+      call ESMF_StateGet(state=state5, nestedFlag=.true., &
          itemCount=itemcountnested, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting item count from a nested State - nested"
@@ -518,7 +518,7 @@ end module
       ! Test getting a nested State object Info item name list
       allocate (itemlist(itemcountnested))
       itemlist = " "
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
+      call ESMF_StateGet(state=state5, nestedFlag=.true.,  &
          itemNameList=itemlist, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting item name list from a nested State - nested"
@@ -528,7 +528,7 @@ end module
       !EX_UTest      
       ! Test getting a nested State object Info item type list
       allocate (itemtypelist(itemcountnested))
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
+      call ESMF_StateGet(state=state5, nestedFlag=.true.,  &
          stateitemtypeList=itemtypelist, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting item type list from a nested State - nested"
@@ -539,18 +539,18 @@ end module
       deallocate (itemtypelist, itemlist)
 
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_UxxTest      
       ! Test getting a nested State object using nestedFlag
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
-         itemName="Temperature", fieldBundle=bundle4, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Getting nested FieldBundle from a nested State using nestedFlag"
-      call ESMF_Test((rc == ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_StateGet(state=state5, nestedFlag=.true.,  &
+      !   itemName="Temperature", fieldBundle=bundle4, rc=rc)
+      !write(failMsg, *) ""
+      !write(name, *) "Getting nested FieldBundle from a nested State using nestedFlag"
+      !call ESMF_Test((rc == ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a non-existant nested State object
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
+      call ESMF_StateGet(state=state5,  &
          itemName="TemperatureXYZZY", fieldBundle=bundle5, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting nested non-existant FieldBundle from a nested State using nestedFlag"
@@ -559,7 +559,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a nested State object using path style
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_OFF,  &
+      call ESMF_StateGet(state=state5,  &
          itemName="Atmosphere Import/Temperature", fieldBundle=bundle6, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting nested FieldBundle from a nested State using path style"
@@ -568,7 +568,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a non-existant nested State object
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_OFF,  &
+      call ESMF_StateGet(state=state5,  &
          itemName="Atmosphere Import/TemperatureXYZZY", fieldBundle=bundle7, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting nested FieldBundle from a nested State using path style - bad end item"
@@ -577,21 +577,21 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Test getting a non-existant nested State object
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_OFF,  &
+      call ESMF_StateGet(state=state5,  &
          itemName="Atmosphere ImportXYZZY/Temperature", fieldBundle=bundle7, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting nested non-existant FieldBundle from a nested State using path style - bad nested name"
       call ESMF_Test((rc /= ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_UTest      
+      !EX_UxxTest      
       ! Test getting a nested State object with bad argument combination.
-      call ESMF_StateGet(state=state5, nestedFlag=ESMF_NESTED_ON,  &
-         itemName="Atmosphere Import/Temperature", fieldBundle=bundle7, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Get with both path-style name and ESMF_NESTED_ON set"
-      call ESMF_Test((rc /= ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_StateGet(state=state5, nestedFlag=.true.,  &
+      !   itemName="Atmosphere Import/Temperature", fieldBundle=bundle7, rc=rc)
+      !write(failMsg, *) ""
+      !write(name, *) "Get with both path-style name and .true. set"
+      !call ESMF_Test((rc /= ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
 
       !------------------------------------------------------------------------
