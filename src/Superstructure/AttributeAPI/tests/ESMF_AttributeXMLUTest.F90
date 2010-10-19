@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.12 2010/10/18 05:58:03 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.13 2010/10/19 05:59:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.12 2010/10/18 05:58:03 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.13 2010/10/19 05:59:13 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1300,8 +1300,8 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 9th <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'SpatialRegriddingType', &
-     'TBD', &
+    call ESMF_AttributeSet(field1, 'SpatialRegriddingDimension', &
+     '2D', &
                            convention='CIM 1.0', &
                            purpose='Inputs Description', &
                            rc=rc)

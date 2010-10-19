@@ -141,13 +141,13 @@ module user_coupler
 
     ! Simulation run attributes
     call ESMF_AttributeSet(comp, 'SimulationShortName', &
-      '1.1_HiGEM_Sim', &
+      'ESMF_ESM1', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationLongName', &
-      'HiGEM Simulation for Experiment 1.1', &
+      'Earth System Modeling Framework Earth System Model 1.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationRationale', &
-      'HiGEM simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)',&
+      'ESMF ESM1 simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)',&
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationStartDate', &
       '1960-1-1T00:00:00Z', &

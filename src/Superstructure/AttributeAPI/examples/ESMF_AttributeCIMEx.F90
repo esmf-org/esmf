@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.14 2010/10/18 05:58:03 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.15 2010/10/19 05:59:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -180,19 +180,19 @@ program ESMF_AttributeCIMEx
 
       ! Simulation run attributes
       call ESMF_AttributeSet(cplcomp, 'SimulationShortName', &
-        '1.1_HiGEM_Sim', &
+        'ESMF_ESM1', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationLongName', &
-        'HiGEM Simulation for Experiment 1.1', &
+        'Earth System Modeling Framework Earth System Model 1.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationRationale', &
-       'HiGEM simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
+       'ESMF ESM1 simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationStartDate', &
-       '1960-1-1T00:00:00Z', &
+       '1960-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationDuration', &
-       '10.0 Years', &
+       'P10Y', &
         convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Document genealogy
@@ -303,6 +303,8 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp1, 'ReleaseDate', &
         '2009-12-31T23:59:59Z', &
           convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp1, 'ModelType', &
+        'CloudSimulator', convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Responsible party attributes (for Author)
       call ESMF_AttributeSet(gridcomp1, 'Name', &
@@ -327,7 +329,10 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp3, 'LongName', &
                              'Dynamical core of HiGEM_Atmos', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'ModelType', &
+      call ESMF_AttributeSet(gridcomp3, 'ReleaseDate', &
+        '2009-10-31T23:59:59Z', &
+          convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp3, 'ModelType', &
         'AtmosDynamicalCore', convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Responsible party attributes (for Contact)
@@ -352,7 +357,10 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp2, 'LongName', &
                              'Atmospheric chemistry component of HiGEM', &
         convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'ModelType', &
+      call ESMF_AttributeSet(gridcomp2, 'ReleaseDate', &
+        '2009-05-31T23:59:59Z', &
+          convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp2, 'ModelType', &
         'AtmosphericChemistry', convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Responsible party attributes (for Center)
@@ -386,13 +394,20 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(DMS_emi, 'Units', 'unknown', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! DMS_emi CIM Attributes
-      call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', 'boundaryCondition', &
+      call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', &
+                                      'boundaryCondition', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(DMS_emi, 'CouplingSource', &
+                                      'DMS_emi', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(DMS_emi, 'CouplingTarget', &
                                       'HiGEM_AtmosChem', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                      'conservative-first-order', &
+                                      'Conservative-First-Order', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingDimension', &
+                                      '1D', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -404,10 +419,14 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(UM, 'ShortName', 'UM_Initial_1960', &
            convention=convCIM, purpose=purpField, rc=rc)
       ! UM CIM Attributes
-      call ESMF_AttributeSet(UM, 'CouplingPurpose', 'initialCondition', &
+      call ESMF_AttributeSet(UM, 'CouplingPurpose', &
+                                 'initialCondition', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(UM, 'CouplingSource', &
+                                 'Ocean Biogeo Chemistry', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(UM, 'CouplingTarget', &
-                                      'HiGEM_AtmosChem', &
+                                 'HiGEM_AtmosChem', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(UM, 'TimeTransformationType', 'Exact', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -426,11 +445,17 @@ program ESMF_AttributeCIMEx
       ! OH CIM Attributes
       call ESMF_AttributeSet(OH, 'CouplingPurpose', 'boundaryCondition', &
            convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(OH, 'CouplingSource', &
+                                 'Land_Emissions', &
+           convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(OH, 'CouplingTarget', &
                                  'HiGEM_AtmosChem', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
-                                 'conservative-first-order', &
+                                 'Conservative-First-Order', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(OH, 'SpatialRegriddingDimension', &
+                                 '2D', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(OH, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -450,6 +475,9 @@ program ESMF_AttributeCIMEx
       ! Orog CIM Attributes
       call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'initialCondition', &
            convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(Orog, 'CouplingSource', &
+                                   'Land_Emissions', &
+           convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(Orog, 'CouplingTarget', &
                                    'HiGEM_Atmos', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -468,11 +496,17 @@ program ESMF_AttributeCIMEx
       ! Ozone CIM Attributes
       call ESMF_AttributeSet(Ozone, 'CouplingPurpose', 'boundaryCondition', &
            convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(Ozone, 'CouplingSource', &
+                                    'Global_O3_mon', &
+           convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(Ozone, 'CouplingTarget', &
                                     'HiGEM_Atmos', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(Ozone, 'SpatialRegriddingMethod', &
-                                    'conservative-first-order', &
+                                    'Conservative-First-Order', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(Ozone, 'SpatialRegriddingDimension', &
+                                    '3D', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(Ozone, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
@@ -486,11 +520,17 @@ program ESMF_AttributeCIMEx
       ! SST CIM Attributes
       call ESMF_AttributeSet(SST, 'CouplingPurpose', 'initialCondition', &
            convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SST, 'CouplingSource', &
+                                  'seasonal_oxidant_conc', &
+           convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(SST, 'CouplingTarget', &
                                   'HiGEM_Atmos', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(SST, 'SpatialRegriddingMethod', &
-                                  'conservative-first-order', &
+                                  'Conservative-First-Order', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SST, 'SpatialRegriddingDimension', &
+                                  '2D', &
            convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(SST, 'Frequency', '15 minutes', &
            convention=convCIM, purpose=purpField, rc=rc)
