@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.77 2010/10/19 05:45:39 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.78 2010/10/19 11:05:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.77 2010/10/19 05:45:39 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.78 2010/10/19 11:05:06 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -281,7 +281,7 @@
       write (name, *) "Testing itemCount"
       call ESMF_Test((itemcount == 0), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
+
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from State 
@@ -297,7 +297,7 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Verifying FieldBundle item info from a State Test"
       call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_FIELDBUNDLE), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
+
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -315,7 +315,6 @@ call ESMF_VMBarrier (vm)
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       call  ESMF_StatePrint(state1, rc=rc)
-call ESMF_VMBarrier (vm)
 
       !EX_UTest
       ! Test adding a FieldBundle with Fields to a State
@@ -360,7 +359,7 @@ call ESMF_VMBarrier (vm)
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       call  ESMF_StatePrint(state1, rc=rc)
-call ESMF_VMBarrier (vm)
+
       !EX_UTest
       ! Test adding Field to a State
       fieldname = "Humidity"
@@ -383,7 +382,7 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Getting Field item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
+
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Verifying Item Info from a State 
@@ -391,7 +390,7 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Verifying Field item info from a State Test"
       call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_FIELD), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
+
       !------------------------------------------------------------------------
 
       !EX_UTest 
@@ -401,7 +400,7 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Getting unknown item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
+
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Verifying Unknown Item Info from a State 
@@ -409,7 +408,6 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Verifying unknown item info from a State Test"
       call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_NOTFOUND), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   ! Test adding an Array to a State
@@ -425,7 +423,6 @@ call ESMF_VMBarrier (vm)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_ArraySet(array, name="testArray", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-call ESMF_VMBarrier (vm)
   
   !------------------------------------------------------------------------
   !EX_UTest
@@ -434,7 +431,6 @@ call ESMF_VMBarrier (vm)
   write(name, *) "Verifying that the Array has correct name Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aname.eq."testArray"), name, failMsg,&
     result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest
@@ -442,7 +438,6 @@ call ESMF_VMBarrier (vm)
   write(name, *) "Adding an Array to a State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest 
@@ -452,7 +447,6 @@ call ESMF_VMBarrier (vm)
   write(name, *) "Getting Array item info from State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest 
@@ -461,7 +455,6 @@ call ESMF_VMBarrier (vm)
   write(name, *) "Verifying Array item info from a State Test"
   call ESMF_Test((stateItemType.eq.ESMF_STATEITEM_ARRAY), name, failMsg, &
     result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
 
   !------------------------------------------------------------------------
@@ -471,7 +464,6 @@ call ESMF_VMBarrier (vm)
   write(failMsg, *) ""
   write(name, *) "Printing of a State Test - default option"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest
@@ -480,26 +472,23 @@ call ESMF_VMBarrier (vm)
   write(failMsg, *) ""
   write(name, *) "Printing of a State Test - long option"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest
   ! Test printing of State - nested option
-  call  ESMF_StatePrint(state1, nestedFlag=ESMF_NESTED_ON, rc=rc)
+  call  ESMF_StatePrint(state1, nestedFlag=.true., rc=rc)
   write(failMsg, *) ""
   write(name, *) "Printing of a State Test - deep option"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest
   ! Test printing of State - nested and long options
   call  ESMF_StatePrint(state1,  &
-      nestedFlag=ESMF_NESTED_ON, options='long', rc=rc)
+      nestedFlag=.true., options='long', rc=rc)
   write(failMsg, *) ""
   write(name, *) "Printing of a State Test - nested and long options"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !EX_UTest
@@ -508,8 +497,6 @@ call ESMF_VMBarrier (vm)
   write(failMsg, *) ""
   write(name, *) "Printing of a State Test - illegal option"
   call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -528,7 +515,6 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Printing of a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
 #if defined (ESMF_ENABLESTATENEEDED)
       !------------------------------------------------------------------------
@@ -577,7 +563,6 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Verifying that the FieldBundle has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), name, &
         failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
@@ -631,7 +616,6 @@ call ESMF_VMBarrier (vm)
         !ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
 #endif
-call ESMF_VMBarrier (vm)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -650,7 +634,6 @@ call ESMF_VMBarrier (vm)
       write(name, *) "Verifying that the Field has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), name, &
         failMsg, result, ESMF_SRCLINE)
-call ESMF_VMBarrier (vm)
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -695,7 +678,6 @@ call ESMF_VMBarrier (vm)
         !ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
 #endif
-call ESMF_VMBarrier (vm)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -876,7 +858,7 @@ call ESMF_VMBarrier (vm)
       !EX_UTest
       ! Test State Validation
       call ESMF_StateGet (state2,  &
-          itemSearch="Humidity", nestedFlag=ESMF_NESTED_ON,  &
+          itemSearch="Humidity", nestedFlag=.true.,  &
           itemCount=itemcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Counting duplicate names in nested States test"
@@ -895,7 +877,7 @@ call ESMF_VMBarrier (vm)
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test nested State Validation
-      call ESMF_StateValidate(state2, nestedFlag=ESMF_NESTED_ON, rc=rc)
+      call ESMF_StateValidate(state2, nestedFlag=.true., rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Validating a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
