@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.212 2010/10/15 05:42:17 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.213 2010/10/19 05:44:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.212 2010/10/15 05:42:17 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.213 2010/10/19 05:44:27 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2092,7 +2092,8 @@ module ESMF_StateMod
 
         ! local vars
         type (ESMF_StateClass), pointer :: stypep
-        integer :: localrc                          ! local error status
+        integer :: localrc      ! local error status
+        integer :: memstat      ! Stat from allocate/deallocate
         integer :: i
 
         ! Initialize return code; assume failure until success is certain
@@ -2125,8 +2126,8 @@ module ESMF_StateMod
         nullify(ESMF_StateCreate%statep)
         nullify(stypep)
 
-        allocate(stypep, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
+        allocate(stypep, stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, "State type", &
                                        ESMF_CONTEXT, rc)) return
         
       !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
@@ -2148,8 +2149,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then 
-            ! do not overwrite the rc from the real error
-            deallocate(stypep, stat=localrc)
+            deallocate(stypep, stat=memstat)
             return
         endif
 
@@ -2248,7 +2248,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in) :: state
       character (len=*),     intent(in),  optional :: itemSearch
-      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      logical,               intent(in),  optional :: nestedFlag
       character (len=*),     intent(out), optional :: name
       type(ESMF_StateType),  intent(out), optional :: statetype
       integer,               intent(out), optional :: itemCount
@@ -2268,8 +2268,8 @@ module ESMF_StateMod
 !       Query objects by name.  Use in conjunction with itemCount to obtain
 !       the number of objects with this name due to nested States.
 !     \item[{[nestedFlag]}]
-!       {\tt ESMF\_NESTED\_OFF} - return information at the current State level only
-!       {\tt ESMF\_NESTED\_ON} - recursively return nested State information
+!       {\tt .false.} - return information at the current State level only (default)
+!       {\tt .true.} - recursively return nested State information
 !     \item[{[name]}]
 !       Name of this {\tt ESMF\_State}.
 !     \item[{[statetype]}]
@@ -2309,7 +2309,7 @@ module ESMF_StateMod
 
       localnestedflag = .false.
       if (present (nestedFlag)) then
-        localnestedflag = nestedFlag == ESMF_NESTED_ON
+        localnestedflag = nestedFlag
       end if
 
       stypep => state%statep
@@ -2446,14 +2446,13 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
 !      subroutine ESMF_StateGet(state, itemName, <item>,
-!      nestedStateName, nestedFlag, rc)
+!      nestedStateName, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF_State),      intent(in)            :: state
 !      character (len=*),     intent(in)            :: itemName
 !      <item>, see below for supported values
 !      character (len=*),     intent(in),  optional :: nestedStateName
-!      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
 !      integer,               intent(out), optional :: rc             
 !
 !
@@ -2468,10 +2467,8 @@ module ESMF_StateMod
 !      only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all levels.
 !      It is an error to specify both {\\tt nestedStateName} and
-!      {\tt nestedFlag}.
+!      a fully qualified, nested State itemName.
 !
 !      Supported values for <item> are:
 !      \begin{description}
@@ -2497,11 +2494,6 @@ module ESMF_StateMod
 !     multiple nested {\tt ESMF\_State}s and the <item> being requested is
 !     one level down in one of the nested {\tt ESMF\_State}.
 !     {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!     \item[{[nestedFlag]}]
-!       {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
-!       level only (default)
-!       {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
-!       the current level and in nested States
 !     \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2517,15 +2509,14 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetArray(state, itemName, array,  &
-          nestedStateName, nestedFlag, rc)
+          nestedStateName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),      intent(in)            :: state
-      character (len=*),     intent(in)            :: itemName
-      type(ESMF_Array),      intent(out)           :: array
-      character (len=*),     intent(in),  optional :: nestedStateName
-      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
-      integer,               intent(out), optional :: rc             
+      type(ESMF_State),  intent(in)	       :: state
+      character (len=*), intent(in)	       :: itemName
+      type(ESMF_Array),  intent(out)	       :: array
+      character (len=*), intent(in),  optional :: nestedStateName
+      integer,           intent(out), optional :: rc		 
 
 !
 ! !DESCRIPTION:
@@ -2539,10 +2530,8 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all levels.
 !      It is an error to specify both {\\tt nestedStateName} and
-!      {\tt nestedFlag}.
+!      a fully qualified, nested State itemName.
 !      
 !     The arguments are:
 !  \begin{description}     
@@ -2557,13 +2546,6 @@ module ESMF_StateMod
 !     multiple nested {\tt ESMF\_State}s and the <item> being requested is
 !     one level down in one of the nested {\tt ESMF\_State}.
 !     {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!     \item[{[nestedFlag]}]
-!     Optional.  Allows searching for the <item> being requested in either
-!     the current level, or any nested States.
-!       {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
-!       level only (default)
-!       {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
-!       the current level and in nested States
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2573,7 +2555,6 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
-      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
@@ -2591,15 +2572,10 @@ module ESMF_StateMod
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) array to mark failure?
 
-      if (present (nestedStateName) .and. present (nestedFlag)) then
-          errmsg = "both nestedStateName and nestedFlag were specified"
+      if (present (nestedStateName) .and. index (itemName, '/') > 0) then
+          errmsg = "both nestedStateName and fully qualified itemName were specified"
           if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
                                      ESMF_CONTEXT, rc)) return
-      end if
-
-      lnestedflag = ESMF_NESTED_OFF
-      if (present (nestedFlag)) then
-          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
@@ -2626,7 +2602,7 @@ module ESMF_StateMod
 
       exists = ESMF_StateClassFindData(top%statep,   &
                                        dataname=itemName, expected=.true., &
-                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       dataitem=dataitem,  &
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Array found named ", trim(itemName)
@@ -2655,14 +2631,13 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetArrayBundle(state, itemName, arraybundle, &
-        nestedStateName, nestedFlag, rc)
+        nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_ArrayBundle), intent(out)           :: arraybundle
       character (len=*),      intent(in),  optional :: nestedStateName
-      type(ESMF_NestedFlag),  intent(in),  optional :: nestedFlag
       integer,                intent(out), optional :: rc             
 
 !
@@ -2677,10 +2652,8 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all levels.
 !      It is an error to specify both {\\tt nestedStateName} and
-!      {\tt nestedFlag}.
+!      a fully qualified, nested State itemName.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -2696,13 +2669,6 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!     \item[{[nestedFlag]}]
-!     Optional.  Allows searching for the <item> being requested in either
-!     the current level, or any nested States.
-!       {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
-!       level only (default)
-!       {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
-!       the current level and in nested States
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2712,7 +2678,6 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
-      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
@@ -2730,16 +2695,10 @@ module ESMF_StateMod
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) arraybundle to mark failure?
 
-      if (present (nestedStateName) .and. present (nestedFlag)) then
-          errmsg = "both nestedStateName and nestedFlag were specified"
+      if (present (nestedStateName) .and. index (itemName, '/') > 0) then
+          errmsg = "both nestedStateName and fully qualified itemName were specified"
           if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
                                      ESMF_CONTEXT, rc)) return
-      end if
-
-
-      lnestedflag = ESMF_NESTED_OFF
-      if (present (nestedFlag)) then
-          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
@@ -2766,7 +2725,7 @@ module ESMF_StateMod
 
       exists = ESMF_StateClassFindData(top%statep,   &
                                        dataname=itemName, expected=.true., &
-                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       dataitem=dataitem,  &
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no ArrayBundle found named ", trim(itemName)
@@ -2795,14 +2754,13 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetField(state, itemName, field, &
-                                    nestedStateName, nestedFlag, rc)
+                                    nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in)            :: state
       character (len=*),     intent(in)            :: itemName
       type(ESMF_Field),      intent(out)           :: field
       character (len=*),     intent(in),  optional :: nestedStateName
-      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
       integer,               intent(out), optional :: rc             
 
 !
@@ -2817,10 +2775,8 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all levels.
 !      It is an error to specify both {\\tt nestedStateName} and
-!      {\tt nestedFlag}.
+!      a fully qualified, nested State itemName.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -2836,13 +2792,6 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!  \item[{[nestedFlag]}]
-!    Optional.  Allows searching for the <item> being requested in either
-!    the current level, or any nested States.
-!    {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State
-!    level only (default)
-!    {\tt ESMF\_NESTED\_ON} - recursively search for the object both in
-!    the current level and in nested States
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2853,7 +2802,6 @@ module ESMF_StateMod
       type(ESMF_State) :: top
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
 
       ! Assume failure until we know we will succeed
@@ -2868,15 +2816,10 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present (nestedStateName) .and. present (nestedFlag)) then
-          errmsg = "both nestedStateName and nestedFlag were specified"
+      if (present (nestedStateName) .and. index (itemName, '/') > 0) then
+          errmsg = "both nestedStateName and fully qualified itemName were specified"
           if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
                                      ESMF_CONTEXT, rc)) return
-      end if
-
-      lnestedflag = ESMF_NESTED_OFF
-      if (present (nestedFlag)) then
-          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
@@ -2903,7 +2846,7 @@ module ESMF_StateMod
 
       exists = ESMF_StateClassFindData(top%statep,   &
                                        dataname=itemName, expected=.true., &
-                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       dataitem=dataitem,  &
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Field found named ", trim(itemName)
@@ -2939,14 +2882,13 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetFieldBundle(state, itemName, fieldbundle, &
-                                     nestedStateName, nestedFlag, rc)
+                                     nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_FieldBundle), intent(out)           :: fieldbundle
       character (len=*),      intent(in),  optional :: nestedStateName
-      type(ESMF_NestedFlag),  intent(in),  optional :: nestedFlag
       integer,                intent(out), optional :: rc             
 
 !
@@ -2961,10 +2903,8 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all levels.
 !      It is an error to specify both {\\tt nestedStateName} and
-!      {\tt nestedFlag}.
+!      a fully qualified, nested State itemName.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -2980,13 +2920,6 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!  \item[{[nestedFlag]}]        					    
-!    Optional.  Allows searching for the <item> being requested in either   
-!    the current level, or any nested States.        			    
-!      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!      level only (default)        					    
-!      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!      the current level and in nested States        			    
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2998,7 +2931,6 @@ module ESMF_StateMod
       type(ESMF_State) :: top
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      type(ESMF_NestedFlag) :: lnestedflag
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3013,15 +2945,10 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present (nestedStateName) .and. present (nestedFlag)) then
-          errmsg = "both nestedStateName and nestedFlag were specified"
+      if (present (nestedStateName) .and. index (itemName, '/') > 0) then
+          errmsg = "both nestedStateName and fully qualified itemName were specified"
           if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
                                      ESMF_CONTEXT, rc)) return
-      end if
-
-      lnestedflag = ESMF_NESTED_OFF
-      if (present (nestedFlag)) then
-          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
@@ -3048,7 +2975,7 @@ module ESMF_StateMod
 
       exists = ESMF_StateClassFindData(top%statep,   &
                                        dataname=itemName, expected=.true., &
-                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       dataitem=dataitem,  &
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no FieldBundle found named ", trim(itemName)
@@ -3226,14 +3153,13 @@ module ESMF_StateMod
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetRouteHandle(state, itemName, routehandle, &
-                                     nestedStateName, nestedFlag, rc)
+                                     nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_RouteHandle), intent(out)           :: routehandle
       character (len=*),      intent(in),  optional :: nestedStateName
-      type(ESMF_NestedFlag),  intent(in),  optional :: nestedFlag
       integer,                intent(out), optional :: rc             
 
 !
@@ -3248,10 +3174,8 @@ module ESMF_StateMod
 !      only searches in immediate descendents.  
 !      It is an error to specify a {\tt nestedStateName} if the
 !      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      Alternatively, if the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all levels.
 !      It is an error to specify both {\\tt nestedStateName} and
-!      {\tt nestedFlag}.
+!      a fully qualified, nested State itemName.
 !
 !     The arguments are:
 !  \begin{description}     
@@ -3267,21 +3191,7 @@ module ESMF_StateMod
 !    multiple nested {\tt ESMF\_State}s and the object being requested is
 !    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt nestedStateName}.
-!  \item[{[nestedFlag]}]        					    
-!    Optional.  Allows searching for the <item> being requested in either   
-!    the current level, or any nested States.        			    
-!      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!      level only (default)        					    
-!      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!      the current level and in nested States        			    
-!  \item[{[nestedFlag]}]        					    
-!    Optional.  Allows searching for the <item> being requested in either   
-!    the current level, or any nested States.        			    
-!      {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!      level only (default)        					    
-!      {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!      the current level and in nested States        			    
-!  \item[{[rc]}]
+!!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -3290,7 +3200,6 @@ module ESMF_StateMod
       type(ESMF_StateItem), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
-      type(ESMF_NestedFlag) :: lnestedflag
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
 
@@ -3308,15 +3217,10 @@ module ESMF_StateMod
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
       ! TODO: do we need an empty (or invalid) routehandle to mark failure?
 
-      if (present (nestedStateName) .and. present (nestedFlag)) then
-          errmsg = "both nestedStateName and nestedFlag were specified"
+      if (present (nestedStateName) .and. index (itemName, '/') > 0) then
+          errmsg = "both nestedStateName and fully qualified itemName were specified"
           if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
                                      ESMF_CONTEXT, rc)) return
-      end if
-
-      lnestedflag = ESMF_NESTED_OFF
-      if (present (nestedFlag)) then
-          lnestedflag = nestedFlag
       end if
 
       if (present(nestedStateName)) then
@@ -3343,7 +3247,7 @@ module ESMF_StateMod
 
       exists = ESMF_StateClassFindData(top%statep,   &
                                        dataname=itemName, expected=.true., &
-                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       dataitem=dataitem,  &
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no RouteHandle found named ", trim(itemName)
@@ -3371,22 +3275,18 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetState(state, itemName, nestedState,  &
-          nestedFlag, rc)
+      subroutine ESMF_StateGetState(state, itemName, nestedState, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in)            :: state
       character (len=*),     intent(in)            :: itemName
       type(ESMF_State),      intent(out)           :: nestedState
-      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
       integer,               intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
 !      Returns a nested {\tt ESMF\_State} from another {\tt ESMF\_State} 
 !      by name.  By default, only one level of nested State is searched.
-!      If the {\tt nestedFlag} is set to {\tt ESMF\_NESTED\_ON},
-!      the {\tt itemName} is searched for in all nestedlevels.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -3397,13 +3297,6 @@ module ESMF_StateMod
 !       Name of nested {\tt ESMF\_State} to return.
 !     \item[nestedState]
 !       Returned {\tt ESMF\_State}.
-!     \item[{[nestedFlag]}]        					    
-!      Optional.  Allows searching for the <item> being requested in either   
-!      the current level, or any nested States.         		      
-!        {\tt ESMF\_NESTED\_OFF} - Search for the object at the current State 
-!        level only (default)        					      
-!        {\tt ESMF\_NESTED\_ON} - recursively search for the object both in   
-!        the current level and in nested States         		      
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3429,7 +3322,7 @@ module ESMF_StateMod
 
       exists = ESMF_StateClassFindData(state%statep,   &
                                        dataname=itemName, expected=.true., &
-                                       nestedFlag=nestedFlag, dataitem=dataitem,  &
+                                       dataitem=dataitem,  &
                                        rc=localrc)
       if (.not. exists) then
           write (errmsg,*) "no nested state found named ", trim(itemName)
@@ -3535,8 +3428,8 @@ module ESMF_StateMod
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      character (len = *),   intent(in), optional :: options
-      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
+      character (len = *),  intent(in), optional :: options
+      logical, intent(in),  optional :: nestedFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3584,7 +3477,7 @@ module ESMF_StateMod
 
        localnestedflag = .false.
        if (present (nestedFlag)) then
-         localnestedflag = nestedFlag == ESMF_NESTED_ON
+         localnestedflag = nestedFlag
        end if
        
        localopts = "brief"
@@ -4382,6 +4275,7 @@ module ESMF_StateMod
 
         ! Local vars
         integer :: localrc
+        integer :: memstat      ! Stat from allocate/deallocate
         type(ESMF_Status):: status
 
         ! Initialize return code; assume failure until success is certain
@@ -4403,8 +4297,8 @@ module ESMF_StateMod
 
           ! Now release the entire list
           if (associated(stypep%datalist)) then
-            deallocate(stypep%datalist, stat=localrc)
-            if (ESMF_LogMsgFoundDeallocError(localrc, "data list", &
+            deallocate(stypep%datalist, stat=memstat)
+            if (ESMF_LogMsgFoundDeallocError(memstat, "data list", &
                                          ESMF_CONTEXT, rc)) return
             nullify(stypep%datalist)
           endif
@@ -4468,6 +4362,7 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: rhname
       integer, allocatable, dimension(:) :: atodo
@@ -4514,14 +4409,14 @@ module ESMF_StateMod
         call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
-        deallocate(atodo, stat=localrc)
-        if (ESMF_LogMsgFoundDeallocError (localrc, 'atodo',  &
+        deallocate(atodo, stat=memstat)
+        if (ESMF_LogMsgFoundDeallocError (memstat, 'atodo',  &
                                          ESMF_CONTEXT, rc)) return
         return
       endif
 
-      allocate(atodo(acount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      allocate(atodo(acount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                                      "adding RouteHandles to a State", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -4547,7 +4442,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(atodo, stat=localrc)
+          deallocate(atodo, stat=memstat)
           return
         endif
     
@@ -4557,7 +4452,7 @@ module ESMF_StateMod
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(atodo, stat=localrc)
+          deallocate(atodo, stat=memstat)
           return
         endif
    
@@ -4639,8 +4534,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag arrays
-      deallocate(atodo, stat=localrc)
-      if (ESMF_LogMsgFoundDeallocError(localrc, "deallocating internal list, 1c", &
+      deallocate(atodo, stat=memstat)
+      if (ESMF_LogMsgFoundDeallocError(memstat, "deallocating internal list, 1c", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4682,6 +4577,7 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
       integer, allocatable, dimension(:) :: atodo
@@ -4728,12 +4624,12 @@ module ESMF_StateMod
         call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
-        deallocate(atodo, stat=localrc)
+        deallocate(atodo, stat=memstat)
         return
       endif
 
-      allocate(atodo(acount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      allocate(atodo(acount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                                      "adding Arrays to a State", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -4759,7 +4655,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(atodo, stat=localrc)
+          deallocate(atodo, stat=memstat)
           return
         endif
     
@@ -4769,7 +4665,7 @@ module ESMF_StateMod
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(atodo, stat=localrc)
+          deallocate(atodo, stat=memstat)
           return
         endif
    
@@ -4850,8 +4746,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag arrays
-      deallocate(atodo, stat=localrc)
-      if (ESMF_LogMsgFoundDeallocError(localrc, "deallocating internal list, 1c", &
+      deallocate(atodo, stat=memstat)
+      if (ESMF_LogMsgFoundDeallocError(memstat, "deallocating internal list, 1c", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4893,6 +4789,7 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
       integer, allocatable, dimension(:) :: atodo
@@ -4939,12 +4836,12 @@ module ESMF_StateMod
         call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
-        deallocate(atodo, stat=localrc)
+        deallocate(atodo, stat=memstat)
         return
       endif
 
-      allocate(atodo(acount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      allocate(atodo(acount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                                      "adding ArrayBundles to a State", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -4970,7 +4867,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(atodo, stat=localrc)
+          deallocate(atodo, stat=memstat)
           return
         endif
     
@@ -4980,7 +4877,7 @@ module ESMF_StateMod
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(atodo, stat=localrc)
+          deallocate(atodo, stat=memstat)
           return
         endif
    
@@ -5061,8 +4958,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag arraybundles
-      deallocate(atodo, stat=localrc)
-      if (ESMF_LogMsgFoundDeallocError(localrc, "deallocating internal list, 1c", &
+      deallocate(atodo, stat=memstat)
+      if (ESMF_LogMsgFoundDeallocError(memstat, "deallocating internal list, 1c", &
                                      ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -5104,6 +5001,7 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                   ! local error status
+      integer :: memstat                   ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: fname
       integer, allocatable, dimension(:) :: ftodo
@@ -5149,14 +5047,14 @@ module ESMF_StateMod
       ! How does this happen?  is ftodo some sort of static?
       if (allocated(ftodo)) then
         ! print *, "ftodo already allocated"
-        deallocate(ftodo, stat=localrc)
-        if (ESMF_LogMsgFoundDeallocError(localrc, &
+        deallocate(ftodo, stat=memstat)
+        if (ESMF_LogMsgFoundDeallocError(memstat, &
                                   "deallocating fields from a state", &
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      allocate(ftodo(fcount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      allocate(ftodo(fcount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                                   "adding fields to a state", &
                                   ESMF_CONTEXT, rc)) return
       ftodo(1:fcount) = 0
@@ -5172,14 +5070,14 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(ftodo, stat=localrc)
+          deallocate(ftodo, stat=memstat)
           return
         endif
         call ESMF_FieldGet(fields(i), name=fname, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(ftodo, stat=localrc)
+          deallocate(ftodo, stat=memstat)
           return
         endif
     
@@ -5189,7 +5087,7 @@ module ESMF_StateMod
                                         rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(ftodo, stat=localrc)
+          deallocate(ftodo, stat=memstat)
           return
         endif
    
@@ -5272,8 +5170,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag array
-      deallocate(ftodo, stat=localrc)
-      if (ESMF_LogMsgFoundDeallocError(localrc, &
+      deallocate(ftodo, stat=memstat)
+      if (ESMF_LogMsgFoundDeallocError(memstat, &
                                   "adding fields to a state", &
                                   ESMF_CONTEXT, rc)) return
 
@@ -5315,7 +5213,8 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: localrc, localrc1         ! local error status
+      integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
       character(len=ESMF_MAXSTR) :: bname, fname
@@ -5372,8 +5271,8 @@ module ESMF_StateMod
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
-      allocate(btodo(bcount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "btodo", &
+      allocate(btodo(bcount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "btodo", &
                                      ESMF_CONTEXT, rc)) return
 
       ! IMPORTANT: from here down, do not return on error, but goto 10
@@ -5382,8 +5281,8 @@ module ESMF_StateMod
       btodo(1:bcount) = 0
 
       if (fruncount .ge. 0) then
-        allocate(ftodo(fruncount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "ftodo", &
+        allocate(ftodo(fruncount), stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, "ftodo", &
                                        ESMF_CONTEXT, rc)) goto 10
         ftodo(1:fruncount) = 0
       endif
@@ -5636,17 +5535,17 @@ module ESMF_StateMod
       ! and ignore any wimpering from dealloc.
 
       if (allocated (btodo)) then
-        deallocate(btodo, stat=localrc1)
+        deallocate(btodo, stat=memstat)
         if (localrc == ESMF_SUCCESS) then
-          if (ESMF_LogMsgFoundDeallocError(localrc1, "bundle list", &
+          if (ESMF_LogMsgFoundDeallocError(memstat, "bundle list", &
                                          ESMF_CONTEXT, rc)) return
         end if
       end if
 
       if (allocated (ftodo)) then
-        deallocate(ftodo, stat=localrc1)
+        deallocate(ftodo, stat=memstat)
         if (localrc == ESMF_SUCCESS) then
-          if (ESMF_LogMsgFoundDeallocError(localrc1, "field list", &
+          if (ESMF_LogMsgFoundDeallocError(memstat, "field list", &
                                          ESMF_CONTEXT, rc)) return
         end if
       end if
@@ -5689,7 +5588,8 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: localrc                   ! local error status
+      integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
       integer, allocatable, dimension(:) :: stodo
@@ -5731,8 +5631,8 @@ module ESMF_StateMod
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
-      allocate(stodo(scount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "adding States", &
+      allocate(stodo(scount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "adding States", &
                                        ESMF_CONTEXT, rc)) return
       stodo(1:scount) = 0
 
@@ -5748,7 +5648,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=localrc)
+          deallocate(stodo, stat=memstat)
           return
         endif
 
@@ -5760,7 +5660,7 @@ module ESMF_StateMod
            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
                                     "Cannot add a State to itself", &
                                     ESMF_CONTEXT, rc)
-          deallocate(stodo, stat=localrc)
+          deallocate(stodo, stat=memstat)
           return
         endif
    
@@ -5768,7 +5668,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=localrc)
+          deallocate(stodo, stat=memstat)
           return
         endif
     
@@ -5779,7 +5679,7 @@ module ESMF_StateMod
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=localrc)
+          deallocate(stodo, stat=memstat)
           return
         endif
    
@@ -5816,7 +5716,7 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-          deallocate(stodo, stat=localrc)
+          deallocate(stodo, stat=memstat)
           return
       endif
 
@@ -5839,7 +5739,7 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
-              deallocate(stodo, stat=localrc)
+              deallocate(stodo, stat=memstat)
               return
             end if
 
@@ -5849,7 +5749,7 @@ module ESMF_StateMod
             if (ESMF_LogMsgFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
                                        ESMF_CONTEXT, rc)) then
-              deallocate(stodo, stat=localrc)
+              deallocate(stodo, stat=memstat)
               return
             end if
 #endif
@@ -5870,8 +5770,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag states
-      deallocate(stodo, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      deallocate(stodo, stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                                        "Adding States to a State", &
                                        ESMF_CONTEXT, rc)) return
 
@@ -5896,7 +5796,7 @@ module ESMF_StateMod
       type(ESMF_StateClass), pointer               :: stypep
       character (len=*),     intent(in)            :: dataname
       logical,               intent(in)            :: expected
-      type(ESMF_NestedFlag), intent(in),  optional :: nestedFlag
+      logical,               intent(in),  optional :: nestedFlag
       type(ESMF_StateItem),  pointer,     optional :: dataitem
       integer,               intent(out), optional :: dataindex
       integer,               intent(out), optional :: rc             
@@ -5920,7 +5820,7 @@ module ESMF_StateMod
 !       is set. The default is {\tt false} and the error code is not set if 
 !       the name is not found.
 !      \item[{[nestedFlag]}]
-!       If set to {\tt ESMF\_NESTED\_TRUE}, will search nested States for
+!       If set to {\tt .true.}, will search nested States for
 !       {\tt dataname}.
 !      \item[{[dataitem]}]
 !       Pointer to the corresponding {\tt ESMF\_StateItem} item if one is
@@ -5935,7 +5835,8 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: localrc                   ! local error status
+      integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       integer :: itemindex
       logical :: itemfound
       type(ESMF_StateClass), pointer  :: nested_sp
@@ -5954,19 +5855,11 @@ module ESMF_StateMod
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
 
-!      if (present (nestedFlag)) then
-!        if (nestedFlag == ESMF_NESTED_ON) then
-!          errmsg = "nestedFlag is not supported yet"
-!          if (ESMF_LogMsgFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-!                                     ESMF_CONTEXT, rc)) return
-!        end if
-!      end if
-
       if (present (dataitem)) nullify (dataitem)
 
       usenested_lookup = .false.
       if (present (nestedFlag)) then
-        usenested_lookup = nestedFlag == ESMF_NESTED_ON
+        usenested_lookup = nestedFlag
       end if
 
       if (usenested_lookup .and. index (dataname, '/') /= 0) then
@@ -6233,6 +6126,7 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                   ! local error status
+      integer :: memstat                   ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
       integer :: i
@@ -6261,8 +6155,8 @@ module ESMF_StateMod
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
-      allocate(ntodo(ncount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "adding names to a state", &
+      allocate(ntodo(ncount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "adding names to a state", &
                                      ESMF_CONTEXT, rc)) return
       ntodo(1:ncount) = 0
 
@@ -6366,8 +6260,8 @@ module ESMF_StateMod
 10    continue
 
       ! Get rid of temp flag array
-      deallocate(ntodo, stat=localrc)
-      if (ESMF_LogMsgFoundDeallocError(localrc, "adding names to a state", &
+      deallocate(ntodo, stat=memstat)
+      if (ESMF_LogMsgFoundDeallocError(memstat, "adding names to a state", &
                                      ESMF_CONTEXT, rc)) return
 
 
@@ -6411,6 +6305,7 @@ module ESMF_StateMod
       integer :: allocsize 
       integer :: newsize
       integer :: localrc                           ! local error status
+      integer :: memstat                           ! Stat from allocate/deallocate
       integer, parameter :: chunksize = 16         ! extend list by this
  
       ! Assume failure until success assured.  rc is not optional here.
@@ -6430,8 +6325,8 @@ module ESMF_StateMod
       if (stypep%alloccount .eq. 0) then
 
           allocsize = itemcount + chunksize - mod(itemcount,chunksize)
-          allocate(stypep%datalist(allocsize), stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "datalist", &
+          allocate(stypep%datalist(allocsize), stat=memstat)
+          if (ESMF_LogMsgFoundAllocError(memstat, "datalist", &
                                          ESMF_CONTEXT, rc)) return
           stypep%alloccount = allocsize
 
@@ -6440,8 +6335,8 @@ module ESMF_StateMod
 
           newsize = stypep%datacount + itemcount
           allocsize = newsize + chunksize - mod(newsize,chunksize)
-          allocate(temp_list(allocsize), stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "datalist realloc", &
+          allocate(temp_list(allocsize), stat=memstat)
+          if (ESMF_LogMsgFoundAllocError(memstat, "datalist realloc", &
                                          ESMF_CONTEXT, rc)) return
   
           ! Preserve old contents
@@ -6450,8 +6345,8 @@ module ESMF_StateMod
           enddo
   
           ! Delete old list
-          deallocate(stypep%datalist, stat=localrc)
-          if (ESMF_LogMsgFoundDeallocError(localrc, "datalist dealloc", &
+          deallocate(stypep%datalist, stat=memstat)
+          if (ESMF_LogMsgFoundDeallocError(memstat, "datalist dealloc", &
                                          ESMF_CONTEXT, rc)) return
   
           ! Now make this the permanent list
@@ -6667,7 +6562,8 @@ module ESMF_StateMod
 !
 !EOPI
 
-      integer :: localrc                             ! Error status
+      integer :: localrc                  ! Error status
+      integer :: memstat                  ! Stat from allocate/deallocate
       integer :: i
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
@@ -6691,8 +6587,8 @@ module ESMF_StateMod
       !nullify(ESMF_StateDeserialize%statep)
       nullify(substate%statep)
 
-      allocate(sp, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      allocate(sp, stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                                      "space for new State object", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -6721,8 +6617,8 @@ module ESMF_StateMod
                                  ESMF_CONTEXT, rc)) return
 #endif
 
-      allocate(sp%datalist(sp%alloccount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "State type", &
+      allocate(sp%datalist(sp%alloccount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "State type", &
                                        ESMF_CONTEXT, rc)) return
 
       do i = 1, sp%datacount
@@ -6758,7 +6654,7 @@ module ESMF_StateMod
 #if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
 #endif
-                  deallocate(sp%datalist)
+                  deallocate(sp%datalist, stat=memstat)
                   return
                 endif
               endif
@@ -6778,7 +6674,7 @@ module ESMF_StateMod
 #if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
 #endif
-                  deallocate(sp%datalist)
+                  deallocate(sp%datalist, stat=memstat)
                   return
                 endif
               endif
@@ -6809,7 +6705,7 @@ module ESMF_StateMod
 #if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
 #endif
-                  deallocate(sp%datalist)
+                  deallocate(sp%datalist, stat=memstat)
                   return
                 endif
               endif

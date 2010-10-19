@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.8 2010/05/07 22:50:12 w6ws Exp $
+! $Id: ESMF_StateVa.F90,v 1.9 2010/10/19 05:44:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.8 2010/05/07 22:50:12 w6ws Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.9 2010/10/19 05:44:27 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -90,13 +90,13 @@
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      character (len = *),   intent(in), optional :: options
-      type(ESMF_NestedFlag), intent(in), optional :: nestedFlag
+      character (len = *),  intent(in), optional :: options
+      logical, intent(in),  optional :: nestedFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !     Validates that the {\tt state} is internally consistent.
-!      Currently this method determines if the {\tt state} is uninitialized 
+!      Currently this method determines if the {\tt State} is uninitialized 
 !      or already destroyed.  The method returns an error code if problems 
 !      are found.  
 !
@@ -105,8 +105,8 @@
 !     \item[state]
 !       The {\tt ESMF\_State} to validate.
 !     \item[{[nestedFlag]}]
-!       {\tt ESMF\_NESTED\_OFF} - validates at the current State level only
-!       {\tt ESMF\_NESTED\_ON} - recursively validates any nested States
+!       {\tt .false.} - validates at the current State level only (default)
+!       {\tt .true.} - recursively validates any nested States
 !     \item[{[options]}]
 !       Validation options are not yet supported.
 !     \item[{[rc]}]
@@ -133,7 +133,7 @@
 
       localnestedflag = .false.
       if (present (nestedFlag)) then
-        localnestedflag = nestedFlag == ESMF_NESTED_ON
+        localnestedflag = nestedFlag
       end if
 
       localopts = "brief"
