@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.214 2010/10/19 21:41:03 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.215 2010/10/19 23:01:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.214 2010/10/19 21:41:03 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.215 2010/10/19 23:01:54 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2305,11 +2305,11 @@ module ESMF_StateMod
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!     Typically, an {\tt ESMF\_StateGet} information request will be performed
+!     Typically, an {\tt ESMF\_StateGet()} information request will be performed
 !     twice.  The first time, the {\tt itemCount} argument will be used to
 !     query the size of arrays that are needed.  Arrays can then be allocated
 !     to the correct size for {\tt itemNameList} and {\tt stateitemtypeList}
-!     as needed.  A second call to {\tt ESMF\_StateGet} will then fill in the
+!     as needed.  A second call to {\tt ESMF\_StateGet()} will then fill in the
 !     values.
 !
 !EOP
