@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.10 2010/10/19 13:44:35 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.11 2010/10/19 13:52:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -447,6 +447,12 @@
     print *, '- B after SMM from X -> B'
     print *, fptr ! should be 1/B_area
 
+!BOE
+! In the above example, we first set up all the required paramters to create an XGrid from user
+! supplied input. Then we create Fields on the XGrid and the Grids on either side. Finally
+! we use the {\tt ESMF\_FieldRegrid()} interface to perform a flux exchange from the source side
+! to the destination side.
+!EOE
 
 !BOE
 !\subsubsection{Query the XGrid for its internal information}
@@ -495,10 +501,7 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
 
-!BOE
-! After the regridding is successful. Clean up all the allocated resources:
-!EOE
-!BOC
+    ! After the regridding is successful. Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -522,14 +525,6 @@
     deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
     deallocate(sparseMatA2X(2)%factorIndexList, sparseMatA2X(2)%factorList)
     deallocate(sparseMatX2B(1)%factorIndexList, sparseMatX2B(1)%factorList)
-!EOC
-
-!BOE
-! In the above example, we first set up all the required paramters to create an XGrid from user
-! supplied input. Then we create Fields on the XGrid and the Grids on either side. Finally
-! we use the {\tt ESMF\_FieldRegrid()} interface to perform a flux exchange from the source side
-! to the destination side.
-!EOE
 
     if(localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Regridding through XGrid example returned"
