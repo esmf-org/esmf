@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.35 2010/10/12 20:10:09 oehmke Exp $
+// $Id: ESMC_Mesh.h,v 1.36 2010/10/19 20:46:39 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -313,7 +313,7 @@ int ESMC_MeshFreeMemory(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetLocalElementCount - Get the number of elements in a mesh owned by the current PET.
+// !IROUTINE: ESMC_MeshGetLocalElementCount - Get the number of elements in a Mesh owned by the current PET
 //
 // !INTERFACE:
 int ESMC_MeshGetLocalElementCount(
@@ -340,7 +340,7 @@ int ESMC_MeshGetLocalElementCount(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetLocalNodeCount - Get the number of nodes in a mesh owned by the current PET.
+// !IROUTINE: ESMC_MeshGetLocalNodeCount - Get the number of nodes in a Mesh owned by the current PET
 //
 // !INTERFACE:
 int ESMC_MeshGetLocalNodeCount(
