@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.325 2010/10/14 13:44:22 theurich Exp $
+#  $Id: common.mk,v 1.326 2010/10/19 18:20:03 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2713,12 +2713,12 @@ tree_demos_uni: tree_build_demos tree_run_demos_uni
 build_demos: reqfile_libesmf reqdir_lib chkdir_tests
 	@if [ -d src/demos ] ; then cd src/demos; fi; \
 	$(MAKE) ACTION=tree_build_demos tree
-# TODO:FIELDINTEGRATION Restore once demo is updated
-#	@echo "ESMF demos built successfully."
+	@echo "ESMF demos built successfully."
 
 tree_build_demos: $(DEMOS_BUILD) 
 
 $(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
+	$(MAKE) chkdir_tests
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
 	$(ESMF_RM) -f *.o *.mod
 
