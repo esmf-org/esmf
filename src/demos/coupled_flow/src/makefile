@@ -1,8 +1,9 @@
-# $Id: makefile,v 1.2 2008/09/26 21:11:39 cdeluca Exp $
+# $Id: makefile,v 1.3 2010/10/19 18:12:35 theurich Exp $
 
 ALL: tree_build_demos
 
 run:  tree_run_demos
+run_uni: tree_run_demos_uni
 
 LOCDIR	  = src/demos/coupled_flow/src
 
