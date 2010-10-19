@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.9 2010/10/18 21:18:17 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.10 2010/10/19 13:44:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -406,10 +406,11 @@
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
         fptr = 0.0
     enddo
-
+!EOC
 !BOE
 ! First we regrid from the Fields on side A to the Field on the XGrid:
 !EOE
+!BOC
     ! Execute regrid from A -> X
     do i = 1, 2
         call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
