@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.101 2010/10/14 20:53:58 rokuingh Exp $
+% $Id: ESMF_refdoc.ctex,v 1.102 2010/10/19 22:56:29 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -218,10 +218,10 @@
 
 
 \newpage
-\part{Bibliography}
+\part{References}
 \bibliography{ESMF} 
 \bibliographystyle{plain}
-\addcontentsline{toc}{section}{References}
+%\addcontentsline{toc}{section}{References}
 
 \newpage
 \begin{htmlonly}

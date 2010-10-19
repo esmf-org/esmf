@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.10 2010/10/14 23:07:57 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.11 2010/10/19 22:56:29 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -210,12 +210,11 @@
 
 %#include "../Infrastructure/Util/doc/IOUtil_crefdoc.ctex"
 
-
 \newpage
-\section{References}
-\bibliography{ESMC} 
+\part{References}
+\bibliography{ESMC}
 \bibliographystyle{plain}
-\addcontentsline{toc}{section}{References}
+%\addcontentsline{toc}{section}{References}
 
 \newpage
 \begin{htmlonly}
