@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.15 2010/10/19 05:59:13 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.16 2010/10/20 04:01:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -22,8 +22,8 @@ program ESMF_AttributeCIMEx
 !
 ! This example illustrates the use of the Metafor CIM Attribute packages,
 ! supplied by ESMF, to create an Attribute hierarchy on an ESMF object tree.
-! A coupler Component and three gridded Components are used together with
-! three States, two FieldBundles, and six realistic Fields to create an ESMF
+! A coupler Component and four gridded Components are used together with
+! four States, two FieldBundles, and eight realistic Fields to create an ESMF
 ! object tree.  CIM Attributes packages are created on the Components and
 ! Fields, and then the individual Attributes within the packages are populated
 ! with values.  Finally, all the Attributes are written to a CIM-formatted
@@ -48,11 +48,12 @@ program ESMF_AttributeCIMEx
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet
       type(ESMF_VM)           :: vm
-      type(ESMF_Field)        :: DMS_emi, UM, OH, Orog, Ozone, SST
+      type(ESMF_Field)        :: DMS_emi, UM, OH, Orog, Ozone, SST, SO2, NOx
       type(ESMF_FieldBundle)  :: fbundle1, fbundle2
       type(ESMF_State)        :: exportState1, exportState2, exportState3
+      type(ESMF_State)        :: exportState4
       type(ESMF_CplComp)      :: cplcomp
-      type(ESMF_GridComp)     :: gridcomp1, gridcomp2, gridcomp3
+      type(ESMF_GridComp)     :: gridcomp1, gridcomp2, gridcomp3, gridcomp4
       character(ESMF_MAXSTR)  :: convCIM, purpComp, purpField, purpPlatform
       character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
       
@@ -74,9 +75,9 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !    Create the ESMF objects that will hold the CIM Attributes.
-!    These objects include a coupler Component, three gridded Components,
-!    three States (one State per gridded Component) two FieldBundles,
-!    and six Fields.  In this example we are constructing empty Fields
+!    These objects include a coupler Component, four gridded Components,
+!    four States (one State per gridded Component) two FieldBundles,
+!    and eight Fields.  In this example we are constructing empty Fields
 !    without an underlying Grid.
 !EOE
 
@@ -90,11 +91,14 @@ program ESMF_AttributeCIMEx
           petList=(/0/), rc=rc)
       gridcomp3 = ESMF_GridCompCreate(name="gridded_component3", &
           petList=(/0/), rc=rc)
+      gridcomp4 = ESMF_GridCompCreate(name="gridded_component4", &
+          petList=(/0/), rc=rc)
 
       ! Create States
       exportState1 = ESMF_StateCreate("exportState1", ESMF_STATE_EXPORT, rc=rc)
       exportState2 = ESMF_StateCreate("exportState2", ESMF_STATE_EXPORT, rc=rc)
       exportState3 = ESMF_StateCreate("exportState3", ESMF_STATE_EXPORT, rc=rc)
+      exportState4 = ESMF_StateCreate("exportState4", ESMF_STATE_EXPORT, rc=rc)
         
       ! Create Field Bundles
       fbundle1 = ESMF_FieldBundleCreate(name="fbundle1", rc=rc)
@@ -107,6 +111,8 @@ program ESMF_AttributeCIMEx
       Orog = ESMF_FieldCreateEmpty(name='Orog', rc=rc)
       Ozone = ESMF_FieldCreateEmpty(name='Ozone', rc=rc)
       SST = ESMF_FieldCreateEmpty(name='SST', rc=rc)
+      SO2 = ESMF_FieldCreateEmpty(name='SO2', rc=rc)
+      NOx = ESMF_FieldCreateEmpty(name='NOx', rc=rc)
 !EOC
 
 !BOE
@@ -133,6 +139,8 @@ program ESMF_AttributeCIMEx
         purpose=purpComp, rc=rc)
       call ESMF_AttributeAdd(gridcomp3, convention=convCIM, &
         purpose=purpComp, rc=rc)
+      call ESMF_AttributeAdd(gridcomp4, convention=convCIM, &
+        purpose=purpComp, rc=rc)
 
       ! Add CIM Attribute package to Fields
       !   convention = 'CIM 1.0'
@@ -144,6 +152,8 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeAdd(Ozone, convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeAdd(SST, convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeAdd(SO2, convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeAdd(NOx, convention=convCIM, purpose=purpField, rc=rc)
 !EOC  
 
 !BOE
@@ -376,6 +386,36 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp2, 'ResponsiblePartyRole', &
        'Center', &
         convention=convISO, purpose=purpRP, rc=rc)
+
+      !
+      !  Child component attributes, set on gridcomp4, child of gridcomp2
+      !
+      call ESMF_AttributeSet(gridcomp4, 'ShortName', &
+                             'POP2', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp4, 'LongName', &
+                             'Parallel Ocean Program', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp4, 'ReleaseDate', &
+        '2010-06-10T00:00:00Z', &
+          convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp4, 'ModelType', &
+        'Ocean', convention=convCIM, purpose=purpComp, rc=rc)
+
+      ! Responsible party attributes (for Funder)
+      call ESMF_AttributeSet(gridcomp4, 'Name', &
+       'Sally Doe', &
+        convention=convISO, purpose=purpRP, rc=rc)
+      call ESMF_AttributeSet(gridcomp4, 'PhysicalAddress', &
+       'Department of Oceanography University of DEF', &
+        convention=convISO, purpose=purpRP, rc=rc)
+      call ESMF_AttributeSet(gridcomp4, 'EmailAddress', &
+       'sally.doe@udef.edu', &
+        convention=convISO, purpose=purpRP, rc=rc)
+      call ESMF_AttributeSet(gridcomp4, 'ResponsiblePartyRole', &
+       'Funder', &
+        convention=convISO, purpose=purpRP, rc=rc)
+
 !EOC
 
 !BOE
@@ -537,6 +577,54 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(SST, 'TimeTransformationType', &
                                   'TimeAverage', &
            convention=convCIM, purpose=purpField, rc=rc)
+
+      ! SO2 CF-Extended Attributes
+      call ESMF_AttributeSet(SO2, 'ShortName', 'SO2', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      ! SO2 CIM Attributes
+      call ESMF_AttributeSet(SO2, 'CouplingPurpose', 'boundaryCondition', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SO2, 'CouplingSource', &
+                                  'POP2 Ocean', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SO2, 'CouplingTarget', &
+                                  'HiGEM_Atmos', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SO2, 'SpatialRegriddingMethod', &
+                                  'Cubic', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SO2, 'SpatialRegriddingDimension', &
+                                  '3D', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SO2, 'Frequency', '10 minutes', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(SO2, 'TimeTransformationType', &
+                                  'Exact', &
+           convention=convCIM, purpose=purpField, rc=rc)
+
+      ! NOx CF-Extended Attributes
+      call ESMF_AttributeSet(NOx, 'ShortName', 'NOx', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      ! NOx CIM Attributes
+      call ESMF_AttributeSet(NOx, 'CouplingPurpose', 'initialCondition', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(NOx, 'CouplingSource', &
+                                  'POP2 Ocean', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(NOx, 'CouplingTarget', &
+                                  'HiGEM_Atmos', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(NOx, 'SpatialRegriddingMethod', &
+                                  'Linear', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(NOx, 'SpatialRegriddingDimension', &
+                                  '1D', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(NOx, 'Frequency', '5 minutes', &
+           convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(NOx, 'TimeTransformationType', &
+                                  'TimeAccumulation', &
+           convention=convCIM, purpose=purpField, rc=rc)
 !EOC  
 
 !BOE
@@ -558,10 +646,15 @@ program ESMF_AttributeCIMEx
       call ESMF_FieldBundleAdd(fbundle2, Orog, rc=rc)
       call ESMF_StateAdd(exportState2, fieldbundle=fbundle2, rc=rc)
 
-      ! Add the remaining two Fields directly to the third State,
+      ! Add two Fields directly to the third State,
       !  without a FieldBundle
       call ESMF_StateAdd(exportState3, field=Ozone, rc=rc)
       call ESMF_StateAdd(exportState3, field=SST, rc=rc)
+
+      ! Add the remaining two Fields directly to the fourth State,
+      !  without a FieldBundle
+      call ESMF_StateAdd(exportState4, field=SO2, rc=rc)
+      call ESMF_StateAdd(exportState4, field=NOx, rc=rc)
 !EOC
 
 !BOE
@@ -574,13 +667,16 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeLink(gridcomp1, exportState1, rc=rc)
       call ESMF_AttributeLink(gridcomp2, exportState2, rc=rc)
       call ESMF_AttributeLink(gridcomp3, exportState3, rc=rc)
+      call ESMF_AttributeLink(gridcomp4, exportState4, rc=rc)
 
       ! Gridded Component 1 and gridded Component 2 are children of the coupler
       call ESMF_AttributeLink(cplcomp, gridcomp1, rc=rc)
       call ESMF_AttributeLink(cplcomp, gridcomp2, rc=rc)
       ! Gridded Component 3 is a child of gridded Component 1 (grandchild of 
-      ! the coupler)
+      ! the coupler), and Gridded Component 4 is a child of gridded
+      ! Component 2 (grandchild of the coupler)
       call ESMF_AttributeLink(gridcomp1, gridcomp3, rc=rc)
+      call ESMF_AttributeLink(gridcomp2, gridcomp4, rc=rc)
 !EOC
 
 !BOE
@@ -603,6 +699,8 @@ program ESMF_AttributeCIMEx
       endif
 
       ! Clean-up
+      call ESMF_FieldDestroy(field=NOx, rc=rc)
+      call ESMF_FieldDestroy(field=SO2, rc=rc)
       call ESMF_FieldDestroy(field=SST, rc=rc)
       call ESMF_FieldDestroy(field=Ozone, rc=rc)
       call ESMF_FieldDestroy(field=Orog, rc=rc)
@@ -611,9 +709,11 @@ program ESMF_AttributeCIMEx
       call ESMF_FieldDestroy(field=DMS_emi, rc=rc)
       call ESMF_FieldBundleDestroy(fbundle2, rc=rc)
       call ESMF_FieldBundleDestroy(fbundle1, rc=rc)
+      call ESMF_StateDestroy(exportState4, rc=rc)
       call ESMF_StateDestroy(exportState3, rc=rc)
       call ESMF_StateDestroy(exportState2, rc=rc)
       call ESMF_StateDestroy(exportState1, rc=rc)
+      call ESMF_GridCompDestroy(gridcomp4, rc=rc)
       call ESMF_GridCompDestroy(gridcomp3, rc=rc)
       call ESMF_GridCompDestroy(gridcomp2, rc=rc)
       call ESMF_GridCompDestroy(gridcomp1, rc=rc)
