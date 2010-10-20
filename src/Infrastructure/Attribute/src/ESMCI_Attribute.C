@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.87 2010/10/19 05:59:13 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.88 2010/10/20 03:59:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.87 2010/10/19 05:59:13 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.88 2010/10/20 03:59:58 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -506,56 +506,20 @@ namespace ESMCI {
       localrc = AttPackAddAttribute("Date", "ISO 19115",
                             "Citation Description", object);
       string attPackInstanceName;
-#if 0
-      localrc = AttPackSet("Date",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Citation Description",
-         object, attPackInstanceName);
-#endif
       localrc = AttPackAddAttribute("DOI", "ISO 19115",
                             "Citation Description", object);
-#if 0
-      localrc = AttPackSet("DOI",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Citation Description",
-         object, attPackInstanceName);
-#endif
 
       localrc = AttPackAddAttribute("LongTitle", "ISO 19115",
                             "Citation Description", object);
-#if 0
-      localrc = AttPackSet("LongTitle",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Citation Description",
-         object, attPackInstanceName);
-#endif
 
       localrc = AttPackAddAttribute("PresentationForm", "ISO 19115",
                             "Citation Description", object);
-#if 0
-      localrc = AttPackSet("PresentationForm",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Citation Description",
-         object, attPackInstanceName);
-#endif
 
       localrc = AttPackAddAttribute("ShortTitle", "ISO 19115",
                             "Citation Description", object);
-#if 0
-      localrc = AttPackSet("ShortTitle",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Citation Description",
-         object, attPackInstanceName);
-#endif
 
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                             "Citation Description", object);
-#if 0
-      localrc = AttPackSet("URL",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Citation Description",
-         object, attPackInstanceName);
-#endif
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -4906,6 +4870,19 @@ namespace ESMCI {
   localrc = attpack->AttributeWriteCIMcitation(io_xml, indent);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
  
+  // <onlineResource>
+  if (attpack->AttributeIsSet("URL")) {
+    localrc = attpack->AttributeGet("URL", &value);
+    localrc = io_xml->writeStartElement("onlineResource", "", indent, 0); 
+    localrc = io_xml->writeStartElement("gmd:CI_OnlineResource", "", ++indent, 0); 
+    localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0); 
+    localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0); 
+    localrc = io_xml->writeEndElement("gmd:linkage", --indent); 
+    localrc = io_xml->writeEndElement("gmd:CI_OnlineResource", --indent); 
+    localrc = io_xml->writeEndElement("onlineResource", --indent); 
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  }
+
   // <composition><coupling> (all fields, written only in top-level component)
   if (callCount == 1) {
     localrc = io_xml->writeStartElement("composition", "", 4, 0);
