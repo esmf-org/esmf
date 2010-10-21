@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.94 2010/10/18 19:53:36 theurich Exp $
+% $Id: ESMF_install.tex,v 1.95 2010/10/21 19:24:33 rokuingh Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -29,7 +29,7 @@ that allow the user to control them.
 \subsubsection{LAPACK}
 \label{sec:lapack}
 The \htmladdnormallink{LAPACK}{http://www.netlib.org/lapack} library is 
-optionally used in the Mesh class to compute Patch Recovery regridding weights. 
+optionally used in the Mesh class to compute patch recovery regridding weights. 
 This regridding method requires solving local least squares problems, and 
 uses the LAPACK {\it DGELSY} solver.
 
@@ -78,12 +78,12 @@ Specifies the linker directive needed to link the LAPACK library to
 the application.  On some systems, the BLAS library must also be included.
 \end{description}
 
-\subsubsection{NETCDF}
+\subsubsection{NetCDF}
 \label{sec:netcdf}
-ESMF provides the ability to read grid and mesh data in 
-\htmladdnormallink{NETCDF}{http://www.unidata.ucar.edu/software/netcdf/} form. 
+ESMF provides the ability to read Grid and Mesh data in 
+\htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf/} format. 
 The following environment variables enable, and specify the name and location
-of the desired NETCDF library and associated header files:
+of the desired NetCDF library and associated header files:
 
 \begin{description}
 
@@ -91,7 +91,7 @@ of the desired NETCDF library and associated header files:
 {\tt "standard"}, {\it <userstring>}.
 
 \begin{description}
-\item[{\it not set}] (default) NETCDF-dependent features will be disabled.
+\item[{\it not set}] (default) NetCDF-dependent features will be disabled.
 The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt ESMF\_NETCDF\_LIBS} environment variables will be ignored.
 
@@ -117,16 +117,16 @@ variables will be used, if defined.
 \item[ESMF\_NETCDF\_INCLUDE] Typical value: {\tt /usr/local/include} 
 (no default).
 
-Specifies the path where the NETCDF header files are located.
+Specifies the path where the NetCDF header files are located.
 
 \item[ESMF\_NETCDF\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
 
-Specifies the path where the NETCDF library file is located.
+Specifies the path where the NetCDF library file is located.
 
 \item[ESMF\_NETCDF\_LIBS] Typical value: {\tt "-lnetcdf\_c++ -lnetcdf"} 
 (no default).
 
-Specifies the linker directives needed to link the NETCDF library to
+Specifies the linker directives needed to link the NetCDF library to
 the application.
 
 The default value depends on the setting of {\tt ESMF\_NETCDF}.  For the 
@@ -136,18 +136,18 @@ When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS}
 is set to {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.
 \end{description}
 
-\subsubsection{PNETCDF}
+\subsubsection{Parallel-NetCDF}
 \label{sec:pnetcdf}
-ESMF provides the ability to write mesh weights in 
-\htmladdnormallink{PNETCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf} 
-form.  The following environment variables enable, and specify the name and 
-location of the desired PNETCDF library and associated header files:
+ESMF provides the ability to write Mesh weights using 
+\htmladdnormallink{Parallel-NetCDF}{http://trac.mcs.anl.gov/projects/parallel-netcdf}. 
+The following environment variables enable and specify the name and 
+location of the desired Parallel-NetCDF library and associated header files:
 
 \begin{description}
 \item[ESMF\_PNETCDF] Possible value: {\it not set} (default), 
 {\tt "standard"}, {\it <userstring>}.  
 
-When defined, enables the use of PNETCDF.
+When defined, enables the use of Parallel-NetCDF.
 
 \begin{description}
 \item[{\it not set}] (default) PNETCDF-dependent features will be disabled.
@@ -167,15 +167,15 @@ variables will be used.
 \item[ESMF\_PNETCDF\_INCLUDE] Typical value: {\tt /usr/local/include} 
 (no default).
 
-Specifies the path where the PNETCDF header files are located.
+Specifies the path where the Parallel-NetCDF header files are located.
 
 \item[ESMF\_PNETCDF\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
 
-Specifies the path where the PNETCDF library file is located.
+Specifies the path where the Parallel-NetCDF library file is located.
 
 \item[ESMF\_PNETCDF\_LIBS] Typical value: {\tt "-lpnetcdf"} (no default).
 
-Specifies the linker directives needed to link the PNETCDF library to the
+Specifies the linker directives needed to link the Parallel-NetCDF library to the
 application.
 \end{description}
 
@@ -184,7 +184,7 @@ application.
 ESMF provides the ability to read and write data in both binary and 
 NetCDF formats through \htmladdnormallink{ParallelIO (PIO)}
 {http://code.google.com/p/parallelio/}, a third-party IO software
-library is integrated in the ESMF library. The following environment
+library that is integrated in the ESMF library. The following environment
 variable enables PIO functionalities inside of ESMF.
 
 The PIO code depends on MPI I/O support by the underlying MPI
