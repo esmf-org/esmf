@@ -1,13 +1,9 @@
 \section{Quick Start}
 \label{sec:QuickStart}
 
-This section gives a brief
-description of to how to get the ESMF software, build it, 
-and run the self-tests to verify the installation was successful.
-More detailed information on each of these steps, as well as
-information on running a {\tt quick\_start} application and linking
-the ESMF with your own code is found in Sections \ref{sec:TechOver} 
-and \ref{sec:TechOver2}.  
+This section gives a brief description of how to get the ESMF software, build it, and run the self-tests to verify the installation was successful. There is also a short guide for using the bundled ESMF applications. More detailed information on each of these steps is provided in later sections \ref{sec:TechOver} and \ref{sec:TechOver2} as well as \ref{sec:Apps}.
+
+With a growing user community requiring access to ESMF, central computing resources (such as ORNL for the {\it Jaguar} and {\it Kraken} supercomputers) have recently started providing system wide ESMF installations. The availablity of center-managed ESMF installations dramatically increases the ease of use of ESMF. Practically it means that if you are working on a system (such as {\it Jaguar}) that offers a standard ESMF installation, you do not have to download, build and validate your own ESMF installation from source! Instead you can proceed directly to using ESMF as a programming library or through access to the bundled applications as described in sections \ref{sec:Use} and \ref{sec:Apps}, respectively.
 
 \subsection{Downloading ESMF}
 \subsubsection{From the ESMF web site}
@@ -50,7 +46,6 @@ This will create a directory called {\tt esmf}.
 The current list of directories includes the following:
 \begin{itemize}
 \item README
-\item application
 \item build
 \item build\_config
 \item makefile
@@ -58,7 +53,7 @@ The current list of directories includes the following:
 \item src
 \end{itemize}
 
-The build\_config directory contains subdirectories for
+The {\tt build\_config} directory contains subdirectories for
 different operating system, compiler combinations. This is
 a useful area to examine if porting ESMF to a new platform.
 
@@ -203,121 +198,133 @@ ESMF support team. Below is an {\bf example output} from {\tt gmake info}:
 
 --------------------------------------------------------------
 Make version:
-GNU Make version 3.79, by Richard Stallman and Roland McGrath.
-Built for powerpc-apple-darwin7.0
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
-	Free Software Foundation, Inc.
+GNU Make 3.80
+Copyright (C) 2002  Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.
 
-Report bugs to <bug-make@gnu.org>.
-
-
 --------------------------------------------------------------
 Fortran Compiler version:
-ERROR: No input files.
-Pro Fortran 9.0
+Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 10.1    Build 20081024 Package ID: l_fc_p_10.1.021
+Copyright (C) 1985-2008 Intel Corporation.  All rights reserved.
+
+Version 10.1 
 
 --------------------------------------------------------------
 C++ Compiler version:
-g++ (GCC) 3.3 20030304 (Apple Computer, Inc. build 1666)
-Copyright (C) 2002 Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.1    Build 20081024 Package ID: l_cc_p_10.1.021
+Copyright (C) 1985-2008 Intel Corporation.  All rights reserved.
 
+Version 10.1 
 
 --------------------------------------------------------------
 Preprocessor version:
-gcc (GCC) 3.3 20030304 (Apple Computer, Inc. build 1666)
-Copyright (C) 2002 Free Software Foundation, Inc.
+gcc (GCC) 4.1.2 20070115 (SUSE Linux)
+Copyright (C) 2006 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 
 --------------------------------------------------------------
-ESMF_VERSION_STRING "3.1.0r beta snapshot"
+ESMF_VERSION_STRING:    5.1.0
 --------------------------------------------------------------
  
 --------------------------------------------------------------
  * User set ESMF environment variables *
-ESMF_OS=Darwin
-ESMF_DIR=/Users/svasquez/script_dirs/branch_builds/esmf
+ESMF_OS=Linux
+ESMF_TESTMPMD=ON
+ESMF_TESTHARNESS_ARRAY=RUN_ESMF_TestHarnessArrayUNI_2
+ESMF_DIR=/nobackupp10/scvasque/daily_builds/intel/esmf
+ESMF_TESTHARNESS_FIELD=RUN_ESMF_TestHarnessFieldUNI_1
 ESMF_TESTWITHTHREADS=OFF
-ESMF_INSTALL_PREFIX=/Users/svasquez/script_dirs/branch_builds/esmf/../install_dir
 ESMF_COMM=mpiuni
+ESMF_INSTALL_PREFIX=/nobackupp10/scvasque/daily_builds/intel/esmf/../install_dir
 ESMF_TESTEXHAUSTIVE=ON
+ESMF_BOPT=g
 ESMF_SITE=default
-ESMF_ABI=32
-ESMF_COMPILER=absoft
+ESMF_ABI=64
+ESMF_COMPILER=intel
  
 --------------------------------------------------------------
  * ESMF environment variables *
-ESMF_DIR: /Users/svasquez/script_dirs/branch_builds/esmf
-ESMF_OS:                Darwin
-ESMF_MACHINE:           Power Macintosh
-ESMF_ABI:               32
-ESMF_COMPILER:          absoft
+ESMF_DIR: /nobackupp10/scvasque/daily_builds/intel/esmf
+ESMF_OS:                Linux
+ESMF_MACHINE:           x86_64
+ESMF_ABI:               64
+ESMF_COMPILER:          intel
 ESMF_BOPT:              g
 ESMF_COMM:              mpiuni
 ESMF_SITE:              default
 ESMF_PTHREADS:          ON
+ESMF_OPENMP:            ON
 ESMF_ARRAY_LITE:        FALSE
 ESMF_NO_INTEGER_1_BYTE: FALSE
 ESMF_NO_INTEGER_2_BYTE: FALSE
 ESMF_FORTRANSYMBOLS:    default
+ESMF_DEFER_LIB_BUILD:   ON
 ESMF_TESTEXHAUSTIVE:    ON
 ESMF_TESTWITHTHREADS:   OFF
-ESMF_TESTMPMD:          OFF
+ESMF_TESTMPMD:          ON
+ESMF_TESTSHAREDOBJ:     OFF
+ESMF_TESTFORCEOPENMP:   OFF
+ESMF_TESTHARNESS_ARRAY: RUN_ESMF_TestHarnessArrayUNI_2
+ESMF_TESTHARNESS_FIELD: RUN_ESMF_TestHarnessFieldUNI_1
+ESMF_MPIRUN:            /nobackupp10/scvasque/daily_builds/intel/esmf/src/Infrastructure/stubs/mpiuni/mpirun
  
 --------------------------------------------------------------
  * ESMF environment variables pointing to 3rd party software *
  
 --------------------------------------------------------------
  * ESMF environment variables for final installation *
-ESMF_INSTALL_PREFIX:    /Users/svasquez/script_dirs/branch_builds/esmf/../install_dir
+ESMF_INSTALL_PREFIX:    /nobackupp10/scvasque/daily_builds/intel/esmf/../install_dir
 ESMF_INSTALL_HEADERDIR: include
-ESMF_INSTALL_MODDIR:    mod/modg/Darwin.absoft.32.mpiuni.default
-ESMF_INSTALL_LIBDIR:    lib/libg/Darwin.absoft.32.mpiuni.default
+ESMF_INSTALL_MODDIR:    mod/modg/Linux.intel.64.mpiuni.default
+ESMF_INSTALL_LIBDIR:    lib/libg/Linux.intel.64.mpiuni.default
+ESMF_INSTALL_BINDIR:    bin/bing/Linux.intel.64.mpiuni.default
 ESMF_INSTALL_DOCDIR:    doc
  
  
 --------------------------------------------------------------
  * Compilers, Linkers, Flags, and Libraries *
 Location of the preprocessor:      /usr/bin/gcc
-Location of the Fortran compiler:  /Applications/Absoft/bin/f90
-Location of the Fortran linker:    /Applications/Absoft/bin/f90
-Location of the C++ compiler:      /usr/bin/g++
-Location of the C++ linker:        /usr/bin/g++
+Location of the Fortran compiler:  /nasa/intel/fce/10.1.021/bin/ifort
+Location of the Fortran linker:    /nasa/intel/fce/10.1.021/bin/ifort
+Location of the C++ compiler:      /nasa/intel/cce/10.1.021/bin/icpc
+Location of the C++ linker:        /nasa/intel/cce/10.1.021/bin/icpc
 
 Fortran compiler flags:
-ESMF_F90COMPILEOPTS: -g -YEXT_NAMES=LCS -YEXT_SFX=_
-ESMF_F90COMPILEPATHS: -p/Users/svasquez/script_dirs/branch_builds/esmf/mod/modg/Darwin.absoft.32.mpiuni.default -I/Users/svasquez/script_dirs/branch_builds/esmf/src/include
-ESMF_F90COMPILECPPFLAGS:  -DESMF_TESTEXHAUSTIVE -DS32=1 -DESMF_OS_Darwin=1 -DESMF_MPIUNI
+ESMF_F90COMPILEOPTS: -g -fPIC -m64 -mcmodel=small -threads  -openmp
+ESMF_F90COMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/mod/modg/Linux.intel.64.mpiuni.default -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/include 
+ESMF_F90COMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE -DSx86_64_small=1 -DESMF_OS_Linux=1 -DESMF_MPIUNI
+ESMF_F90COMPILEFREECPP: 
+ESMF_F90COMPILEFREENOCPP: 
+ESMF_F90COMPILEFIXCPP: 
+ESMF_F90COMPILEFIXNOCPP: 
 
 Fortran linker flags:
-ESMF_F90LINKOPTS:  -YEXT_NAMES=LCS -YEXT_SFX=_
-ESMF_F90LINKPATHS: -L/Users/svasquez/script_dirs/branch_builds/esmf/lib/libg/Darwin.absoft.32.mpiuni.default
-ESMF_F90LINKRPATHS: 
-ESMF_F90LINKLIBS:  -lstdc++
-ESMF_F90ESMFLINKLIBS: -lesmf  -lstdc++
+ESMF_F90LINKOPTS:  -m64 -mcmodel=small -threads  -openmp
+ESMF_F90LINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default  -L/nasa/sgi/mpt/1.25/lib -L/nasa/intel/cce/10.1.021/lib/shared -L/nasa/intel/fce/10.1.021/lib/shared -L/nasa/intel/cce/10.1.021/lib -L/nasa/intel/fce/10.1.021/lib -L/nasa/intel/cce/10.1.021/lib -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/ -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64
+ESMF_F90LINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default
+ESMF_F90LINKLIBS:  -limf -lsvml -lm -lipgo -lguide -lstdc++ -lirc -lgcc_s -lgcc -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_F90ESMFLINKLIBS: -lesmf  -limf -lsvml -lm -lipgo -lguide -lstdc++ -lirc -lgcc_s -lgcc -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
 
 C++ compiler flags:
-ESMF_CXXCOMPILEOPTS: -g -DESMF_LOWERCASE_SINGLEUNDERSCORE
-ESMF_CXXCOMPILEPATHS: -I/Users/svasquez/script_dirs/branch_builds/esmf/src/include -I/Users/svasquez/script_dirs/branch_builds/esmf/src/Infrastructure/stubs/mpiuni
-ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DS32=1 -DESMF_OS_Darwin=1 -D__SDIR__='' -DESMF_MPIUNI
+ESMF_CXXCOMPILEOPTS: -g -fPIC -m64 -mcmodel=small -pthread  -openmp
+ESMF_CXXCOMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/include   -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/Infrastructure/stubs/mpiuni
+ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DSx86_64_small=1 -DESMF_OS_Linux=1 -D__SDIR__='' -DESMF_MPIUNI
 
 C++ linker flags:
-ESMF_CXXLINKOPTS: 
-ESMF_CXXLINKPATHS: -L/Users/svasquez/script_dirs/branch_builds/esmf/lib/libg/Darwin.absoft.32.mpiuni.default -L/Applications/Absoft/lib
-ESMF_CXXLINKRPATHS: 
-ESMF_CXXLINKLIBS:  -lf90math -lfio -lac -lf77math -lm
-ESMF_CXXESMFLINKLIBS: -lesmf  -lf90math -lfio -lac -lf77math -lm
+ESMF_CXXLINKOPTS:  -m64 -mcmodel=small -pthread  -openmp
+ESMF_CXXLINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default  -L/nasa/intel/fce/10.1.021/lib/
+ESMF_CXXLINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default -Wl,-rpath,/nasa/intel/fce/10.1.021/lib/
+ESMF_CXXLINKLIBS:  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_CXXESMFLINKLIBS: -lesmf  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
 
 
 --------------------------------------------------------------
-Compiling on Mon Apr 7 03:11:21 MDT 2008 on glass.image.ucar.edu
-Machine characteristics: Darwin glass.image.ucar.edu 7.9.0 Darwin Kernel Version 7.9.0: Wed Mar 30 20:11:17 PST 2005; root:xnu/xnu-517.12.7.obj~1/RELEASE_PPC Power Macintosh powerpc
+Compiling on Thu Oct 21 02:15:56 PDT 2010 on r75i0n8
+Machine characteristics: Linux r75i0n8 2.6.16.60-0.68.1.20100916-nasa #1 SMP Fri Sep 17 17:49:05 UTC 2010 x86_64 x86_64 x86_64 GNU/Linux
 ==============================================================
 
 \end{verbatim}
@@ -388,4 +395,28 @@ If this variable is set to {\tt ON} before compiling the unit tests,
 longer and more exhaustive unit tests will be run.  Note that this is a
 compile-time and not run-time option.
 \end{description}
+
+
+\subsubsection{Building and using bundled ESMF appliations}
+\label{quickapps}
+
+This section describes how the bundled ESMF applications can be built and used from inside the ESMF source tree. Notice that this is sort of a quick and dirty way of accessing the ESMF applications. It is supported as convenience to those users interested in quickly gaining access to the bundled ESMF applications, and do not mind the short comings of this approach. Users interested in maximum portability should instead follow the instructions provided in section \ref{sec:Apps}.
+
+To build the bundled ESMF applications type:
+\begin{verbatim}
+gmake build_apps
+\end{verbatim}
+This will build the applications and place the executables under the {\tt ./apps} directory structure inside the ESMF source tree under {\tt ESMF\_DIR}. The applications can be directly executed from within the {\tt ./apps} directory structure following the system specific rules for execution. The details will depend e.g. on whether ESMF was built with or without MPI dependency. In the latter case the system specific rules for launching parallel applications must be followed. System specific execution details on this level are outside of ESMF's scope.
+
+For most systems the MPI version of the ESMF bundled applications can be executed by a command equivalent to:
+
+\begin{verbatim}
+
+mpirun -np X $(ESMF_DIR)/apps/..../application
+
+\end{verbatim}
+ 
+where {\tt X} specifies the total number of PETs and {\tt application} is the name of the specific ESMF application to be executed. The {\tt ....} in the path indicates the precise subdirectory structure under {\tt ./apps} which follows the standard ESMF pattern also used for the {\tt ./tests} and {\tt ./examples} subdirectories.
+
+All bundled ESMF applications support the standard \verb+ '--help'+ command line option that prints out information on the proper use. More detailed instructions of the individual applications are available in the "Applications" section of the {\it ESMF Reference Manual}.
 
