@@ -1,4 +1,4 @@
-% $Id: Attribute_rest.tex,v 1.18 2010/10/15 17:04:36 rokuingh Exp $
+% $Id: Attribute_rest.tex,v 1.19 2010/10/23 00:34:20 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,6 +35,8 @@
 
 \subsubsection{Attribute import and export}
 \begin{itemize}
+\item The CIM XML output in this release validates against CIM development v1.5, svn revision 2210, which was current as of this ESMF release's freeze date, 9/19/2010.  CIM v1.5 development is continuing, with an official v1.5 release expected within weeks after this ESMF release.  ESMF, in a future release, will conform to the officially released CIM v1.5 or later.
+\item The CIM XML output format, as described above, is ingestable into ESG also as of this ESMF release's freeze date, 9/19/2010. However, ESG, like CIM, is in flux with active development.  When ESG officially releases, future releases of ESMF will be compatible with it.
 \item Only the CIM XML format is ingestable by ESG, not ESMF XML nor tab-delimited.
 \item CIM Attribute packages can only be output (to CIM XML); they may be inputtable (via XML) in a future release.
 \item The ESMF grid Attribute package XML output file only contains the nested GridSpec Attributes; Attributes RegDecompX and RegDecompY will be added in a future release. 
