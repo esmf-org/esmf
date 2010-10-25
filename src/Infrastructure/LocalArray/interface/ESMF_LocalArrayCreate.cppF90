@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.25 2010/10/08 23:05:48 rokuingh Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.26 2010/10/25 16:34:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -137,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.25 2010/10/08 23:05:48 rokuingh Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.26 2010/10/25 16:34:31 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -257,7 +257,7 @@ end function
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayCreateByTKR"
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray by explicitly specifying TKR arguments
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a LocalArray by explicitly specifying typekind and rank arguments
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()

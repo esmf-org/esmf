@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.20 2010/06/29 22:06:55 svasquez Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.21 2010/10/25 16:31:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 !-------------------------------------------------------------------------
 !BOP
-!\subsubsection{Setting and Getting the Internal State}  
+!\subsubsection{Set and Get the Internal State}  
 !
 !   ESMF provides the concept of an Internal State that is associated with
 !   a Component. Through the Internal State API a user can attach a private

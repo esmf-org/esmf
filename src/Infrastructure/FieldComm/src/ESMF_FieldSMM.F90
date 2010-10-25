@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.17 2010/10/12 15:35:31 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.18 2010/10/25 16:32:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.17 2010/10/12 15:35:31 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.18 2010/10/25 16:32:33 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -75,7 +75,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldSMM()"
 !BOP
-! !IROUTINE: ESMF_FieldSMM - Execute an Field sparse matrix multiplication
+! !IROUTINE: ESMF_FieldSMM - Execute a Field sparse matrix multiplication
 !
 ! !INTERFACE:
   subroutine ESMF_FieldSMM(srcField, dstField, routehandle, zeroflag, checkflag, rc)
@@ -209,7 +209,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Release resouces associated with an Field sparse matrix multiplication. After this call
+!   Release resouces associated with a Field sparse matrix multiplication. After this call
 !   {\tt routehandle} becomes invalid.
 !
 !   \begin{description}
@@ -259,7 +259,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 ! 
-! Store an Field sparse matrix multiplication operation from {\tt srcField}
+! Store a Field sparse matrix multiplication operation from {\tt srcField}
 ! to {\tt dstField}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and
@@ -602,7 +602,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 !
-! Store an Field sparse matrix multiplication operation from {\tt srcField}
+! Store a Field sparse matrix multiplication operation from {\tt srcField}
 ! to {\tt dstField}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and

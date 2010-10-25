@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.68 2010/10/18 21:17:53 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.69 2010/10/25 16:36:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -684,7 +684,7 @@ end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogFlush - Flushes the Log file(s)
+! !IROUTINE: ESMF_LogFlush - Flush the Log file(s)
 
 ! !INTERFACE: 
       subroutine ESMF_LogFlush(log,rc)

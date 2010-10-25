@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.13 2010/10/19 21:39:20 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.14 2010/10/25 16:35:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.13 2010/10/19 21:39:20 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.14 2010/10/25 16:35:15 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -105,7 +105,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDefault()"
 !BOP
-! !IROUTINE:  ESMF_XGridGet - Get default information from XGrid
+! !IROUTINE:  ESMF_XGridGet - Get default information from an XGrid
 
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
@@ -490,7 +490,7 @@ end subroutine ESMF_XGridGetSMMSpec
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDG()"
 !BOP
-! !IROUTINE:  ESMF_XGridGet - Get an individual distgrid
+! !IROUTINE:  ESMF_XGridGet - Get an individual DistGrid
 
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
@@ -595,7 +595,7 @@ end subroutine ESMF_XGridGetDG
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetEle()"
 !BOP
-! !IROUTINE:  ESMF_XGridGet - Get information about XGrid
+! !IROUTINE:  ESMF_XGridGet - Get information about an XGrid
 
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
