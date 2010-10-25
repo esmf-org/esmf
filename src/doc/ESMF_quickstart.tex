@@ -1,9 +1,22 @@
 \section{Quick Start}
 \label{sec:QuickStart}
 
-This section gives a brief description of how to get the ESMF software, build it, and run the self-tests to verify the installation was successful. There is also a short guide for using the bundled ESMF applications. More detailed information on each of these steps is provided in later sections \ref{sec:TechOver} and \ref{sec:TechOver2} as well as \ref{sec:Apps}.
+This section gives a brief description of how to get the ESMF software, build 
+it, and run the self-tests to verify the installation was successful. There is 
+also a short guide for using the bundled ESMF applications. More detailed 
+information on each of these steps is provided in sections \ref{sec:TechOver},
+ \ref{sec:TechOver2} and \ref{sec:Apps}, respectively.
 
-With a growing user community requiring access to ESMF, central computing resources (such as ORNL for the {\it Jaguar} and {\it Kraken} supercomputers) have recently started providing system wide ESMF installations. The availablity of center-managed ESMF installations dramatically increases the ease of use of ESMF. Practically it means that if you are working on a system (such as {\it Jaguar}) that offers a standard ESMF installation, you do not have to download, build and validate your own ESMF installation from source! Instead you can proceed directly to using ESMF as a programming library or through access to the bundled applications as described in sections \ref{sec:Use} and \ref{sec:Apps}, respectively.
+With a growing user community requiring access to ESMF, central computing 
+resources (such as ORNL for the {\it Jaguar} and {\it Kraken} supercomputers) 
+have recently started providing system wide ESMF installations. The availablity 
+of center-managed ESMF installations dramatically increases the ease of use of 
+ESMF. Practically it means that if you are working on a system (such as 
+{\it Jaguar}) that offers a standard ESMF installation, you do not have to 
+download, build and validate your own ESMF installation from source! Instead you 
+can proceed directly to using ESMF as a programming library or through access to 
+the bundled applications as described in sections \ref{sec:Use} and 
+\ref{sec:Apps}, respectively.
 
 \subsection{Downloading ESMF}
 \subsubsection{From the ESMF web site}
@@ -54,7 +67,7 @@ The current list of directories includes the following:
 \end{itemize}
 
 The {\tt build\_config} directory contains subdirectories for
-different operating system, compiler combinations. This is
+different operating system and compiler combinations. This is
 a useful area to examine if porting ESMF to a new platform.
 
 \subsection{Building ESMF}
@@ -110,7 +123,7 @@ flags using advanced ESMF environment variables.
 
 Alternatively, ESMF comes with a single-processor MPI-bypass library which is
 the default for Linux and Darwin systems. To force the use of this bypass
-library set {\tt ESMF\_COMM} equal to "mpiuni".
+library set {\tt ESMF\_COMM} equal to {\tt mpiuni}.
 
 \item[ESMF\_COMPILER]
 The ESMF library build requires a working Fortran90 and C++ compiler. On 
@@ -166,7 +179,13 @@ SourceForge site {\tt http://sourceforge.net/projects/esmfcontrib} for more
 information.
 
 \item[ESMF\_ETCDIR]
-If a user wants to add Attribute package specification files for their own customized Attribute packages, this is where they should go.  ESMF will look in this directory for files that specify which Attributes are in an Attribute package for certain ESMF objects, and what the appropriate initial values would be for those Attributes.  The format for these Attribute package specification files is to be defined in a future ESMF release.  This environment variable is largely for internal use at this point. 
+If a user wants to add Attribute package specification files for their own 
+customized Attribute packages, this is where they should go.  ESMF will look in 
+this directory for files that specify which Attributes are in an Attribute 
+package for certain ESMF objects, and what the appropriate initial values would 
+be for those Attributes.  The format for these Attribute package specification 
+files is to be defined in a future ESMF release.  This environment variable is 
+largely for internal use at this point. 
 
 \item[ESMF\_INSTALL\_PREFIX]
 This variable specifies the prefix of the installation path used during the
@@ -397,18 +416,32 @@ compile-time and not run-time option.
 \end{description}
 
 
-\subsubsection{Building and using bundled ESMF appliations}
+\subsubsection{Building and using bundled ESMF applications}
 \label{quickapps}
 
-This section describes how the bundled ESMF applications can be built and used from inside the ESMF source tree. Notice that this is sort of a quick and dirty way of accessing the ESMF applications. It is supported as convenience to those users interested in quickly gaining access to the bundled ESMF applications, and do not mind the short comings of this approach. Users interested in maximum portability should instead follow the instructions provided in section \ref{sec:Apps}.
+This section describes how the bundled ESMF applications can be built and used 
+from inside the ESMF source tree. Notice that this is sort of a quick and dirty 
+way of accessing the ESMF applications. It is supported as convenience to those 
+users interested in quickly gaining access to the bundled ESMF applications, and 
+do not mind the shortcomings of this approach. Users interested in maximum 
+portability should instead follow the instructions provided in section 
+\ref{sec:Apps}.
 
 To build the bundled ESMF applications type:
 \begin{verbatim}
 gmake build_apps
 \end{verbatim}
-This will build the applications and place the executables under the {\tt ./apps} directory structure inside the ESMF source tree under {\tt ESMF\_DIR}. The applications can be directly executed from within the {\tt ./apps} directory structure following the system specific rules for execution. The details will depend e.g. on whether ESMF was built with or without MPI dependency. In the latter case the system specific rules for launching parallel applications must be followed. System specific execution details on this level are outside of ESMF's scope.
+This will build the applications and place the executables under the 
+{\tt \$ESMF\_DIR/apps} directory inside the ESMF source tree. The 
+applications can be directly executed from within the {\tt \$ESMF\_DIR/apps} 
+directory following the system specific rules for execution. The details will 
+depend on whether ESMF was built with or without MPI dependency. In the latter 
+case the system specific rules for launching parallel applications must be 
+followed. System specific execution details on this level are outside of ESMF's 
+scope.
 
-For most systems the MPI version of the ESMF bundled applications can be executed by a command equivalent to:
+For most systems, the MPI version of the ESMF bundled applications can be 
+executed by a command equivalent to:
 
 \begin{verbatim}
 
@@ -416,7 +449,14 @@ mpirun -np X $(ESMF_DIR)/apps/..../application
 
 \end{verbatim}
  
-where {\tt X} specifies the total number of PETs and {\tt application} is the name of the specific ESMF application to be executed. The {\tt ....} in the path indicates the precise subdirectory structure under {\tt ./apps} which follows the standard ESMF pattern also used for the {\tt ./tests} and {\tt ./examples} subdirectories.
+where {\tt X} specifies the total number of PETs and {\tt application} is the 
+name of the specific ESMF application to be executed. The {\tt ....} in the path 
+indicates the precise subdirectory structure under {\tt ./apps} which follows 
+the standard ESMF pattern also used for the {\tt ./tests} and {\tt ./examples} 
+subdirectories.
 
-All bundled ESMF applications support the standard \verb+ '--help'+ command line option that prints out information on the proper use. More detailed instructions of the individual applications are available in the "Applications" section of the {\it ESMF Reference Manual}.
+All bundled ESMF applications support the standard \verb+ '--help'+ command line 
+option that prints out information on its proper use. More detailed instructions 
+of the individual applications are available in the "Applications" section of 
+the {\it ESMF Reference Manual}.
 
