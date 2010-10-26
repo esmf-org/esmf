@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.67 2010/10/19 20:46:55 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.68 2010/10/26 21:15:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.67 2010/10/19 20:46:55 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.68 2010/10/26 21:15:42 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -556,15 +556,12 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPackStd(<object>, convention, purpose, nestConvention, &
-!                                nestPurpose, rc)
+!     subroutine ESMF_AttAddPackStd(<object>, convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
 !     character (len = *), intent(in) :: convention
 !     character (len = *), intent(in) :: purpose
-!     character (len = *), intent(in), optional :: nestConvention
-!     character (len = *), intent(in), optional :: nestPurpose
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -590,12 +587,6 @@ contains
 !           The convention of the new Attribute package
 !     \item [purpose]
 !           The purpose of the new Attribute package
-!     \item [{[nestConvention]}]
-!           The convention of the Attribute package around which to nest the
-!           new Attribute package
-!     \item [{[nestPurpose]}]
-!           The purpose of the Attribute package around which to nest the
-!           new Attribute package
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -608,8 +599,8 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
-!     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
-!     attrList, count, nestConvention, nestPurpose, nestCount, rc)
+!     subroutine ESMF_AttAddPackCst(<object>, convention, purpose, &
+!     attrList, count, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -729,7 +720,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
 !     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
-!     attrList, count, nestConvention, nestPurpose, nestCount, rc)
+!     attrList, count, nestConvention, nestPurpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
