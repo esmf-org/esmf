@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.18 2010/10/28 20:57:21 theurich Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.19 2010/10/28 22:14:27 theurich Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -13,7 +13,7 @@ the same format as is used as an input to SCRIP~\cite{ref:SCRIP}, or in the ESMF
 the bilinear, patch, or first order conservative methods decribed below. This application assumes that the
 source and destination grids are spherical and that the coordinates given in the files are latitude and longitude
 values. This file based regrid weight generation application is fully parallel. This application is used in the 
-\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/test/ed/ESMF_RegridWeightGenCheck_ed.shtml}, so that can serve as an example of its use.
+\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}, so that can serve as an example of its use.
 
 Internally this application uses the ESMF public API to generate the interpolation weights.
 If a the source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
