@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.35 2010/10/14 21:32:06 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.36 2010/10/28 19:12:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.35 2010/10/14 21:32:06 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.36 2010/10/28 19:12:51 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -296,7 +296,12 @@ program ESMF_FieldRegridEx
 ! the data in a source cell. For 2D grids, these polynomials
 ! are currently 2nd degree 2D polynomials. One patch is constructed for each corner of the source cell, and the patch is constructed 
 ! by doing a least squared fit through the data in the cells surrounding the corner. The interpolated value at the destination point is 
-! then a weighted average of the values of the patches at that point.
+! then a weighted average of the values of the patches at that point. The patch method has a larger
+! stencil than the bilinear, for this reason the patch weight matrix can be correspondingly larger
+! than the bilinear matrix (e.g. for a quadrilateral grid the patch matrix is around 4x the size of
+! the bilinear matrix). This can be an issue when performing a regrid operation close to the memory
+! limit on a machine. 
+! 
 !
 ! First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will 
 ! typically have  a larger interpolation error than the previous two methods, but will do a much better job of preserving the 

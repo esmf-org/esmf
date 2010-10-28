@@ -1,4 +1,4 @@
-% $Id: Field_options.tex,v 1.2 2010/09/30 19:37:43 oehmke Exp $
+% $Id: Field_options.tex,v 1.3 2010/10/28 19:12:51 oehmke Exp $
 
 
 
@@ -12,7 +12,7 @@ Valid values are:
 \item [ESMF\_REGRID\_METHOD\_BILINEAR]
       Bilinear interpolation. Destination value is a linear combination of the source values in the cell which contains the destination point. The weights for the linear combination are based on the distance of destination point from each source value. 
 \item [ESMF\_REGRID\_METHOD\_PATCH]
-      Higher-order patch recovery interpolation. Destination value is a weighted average of 2D polynomial patches constructed from cells surrounding the source cell which contains the destination point. This method typically results in better approximations to values and derivatives than bilinear. 
+      Higher-order patch recovery interpolation. Destination value is a weighted average of 2D polynomial patches constructed from cells surrounding the source cell which contains the destination point. This method typically results in better approximations to values and derivatives than bilinear. However, because of its larger stencil, it also results in a much larger interpolation matrix (and thus routeHandle) than the bilinear. 
 \item [ESMF\_REGRID\_METHOD\_CONSERVE]
       First order conservative interpolation. Value of a destination cell is the weighted sum of the values of the source cells that it overlaps. The weights are the determined by the amount the source cell overlaps the destination cell. Will typically give less accurate approximations to values than the other interpolation methods, however, will do a much better job preserving the integral of the value between the source and destination.  Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger (or the Mesh element location). 
 \end{description}
