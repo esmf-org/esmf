@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.12 2010/10/11 21:50:41 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.13 2010/10/28 22:54:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.12 2010/10/11 21:50:41 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.13 2010/10/28 22:54:07 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -463,8 +463,8 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRead"
 !BOP
-! \label{api:ArrayRead}
 ! !IROUTINE: ESMF_ArrayRead - Read Array data from a file
+! \label{api:ArrayRead}
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayRead(array, file, variableName, iofmt, rc)

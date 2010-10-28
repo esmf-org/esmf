@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.59 2010/10/18 19:36:27 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.60 2010/10/28 22:54:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1798,8 +1798,8 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRead"
 !BOP
-! \label{api:FieldBundleRead}
 ! !IROUTINE: ESMF_FieldBundleRead - Read Fields to a FieldBundle from file(s) 
+! \label{api:FieldBundleRead}
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleRead(bundle, file, singleFile, iofmt, rc)
@@ -2383,8 +2383,8 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleWrite"
 !BOP
-! \label{api:FieldBundleWrite}
 ! !IROUTINE: ESMF_FieldBundleWrite - Write the Fields into a file
+! \label{api:FieldBundleWrite}
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleWrite(bundle, file, singleFile, timeslice, iofmt, rc)
