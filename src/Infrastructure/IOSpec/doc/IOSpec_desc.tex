@@ -1,12 +1,6 @@
-% $Id: IOSpec_desc.tex,v 1.4 2004/06/22 23:13:45 cdeluca Exp $
+% $Id: IOSpec_desc.tex,v 1.5 2010/10/28 22:57:28 eschwab Exp $
 
-The IOSpec in a simple class that specifies the options for 
-an IO activity.  An important choice is the IO format.  Currently
-only netCDF is supported.  Other options include 
-whether IO should be written to a single file or multiple files, 
-the Fortran unit number, and the filename.  The IO activity can
-be identified as being a restart write {\tt ESMF\_IO\_RESTART} or 
-a history write {\tt ESMF\_IO\_HISTORY}, if desired.
-
-
-
+The IOSpec class has been deprecated and will be removed in a future 
+release.  It is included here only as a reference for the {\tt ESMF\_IOSpec}
+type, which is still used to define iospec arguments (non-functional) 
+elsewhere in the ESMF API.
