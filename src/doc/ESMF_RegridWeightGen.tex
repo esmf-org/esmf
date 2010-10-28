@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.16 2010/10/15 21:42:29 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.17 2010/10/28 19:11:58 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -76,6 +76,12 @@ corner node of the source element generating a new polynomial for each set of el
 To calculate the value at the destination point we do a weighted average of the values 
 of each of the corner polynomials evaluated at that point. The weight for a corner's 
 polynomial is the bilinear weight of the destination point with regard to that corner.  
+The patch method has a larger stencil than the bilinear, for this reason the patch weight matrix can be correspondingly larger
+than the bilinear matrix (e.g. for a quadrilateral grid the patch matrix is around 4x the size of
+the bilinear matrix). This can be an issue when performing a regrid weight generation operation close to the memory
+limit on a machine. 
+
+
 
 First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have  
 a larger interpolation error than the previous two methods, but will do a much better job of preserving the value of the 
