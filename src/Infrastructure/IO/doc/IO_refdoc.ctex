@@ -56,10 +56,10 @@
 %#endif
 
 % --------
-% IO Class
+% IO Capability
 % --------
 \newpage
-\section{IO Class}
+\section{IO Capability}
 
 \subsection{Description}
 #ifdef STANDALONE
