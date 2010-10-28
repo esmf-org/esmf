@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.18 2010/09/15 01:39:29 w6ws Exp $
+! $Id: ESMF_IOSpec.F90,v 1.19 2010/10/28 23:12:14 eschwab Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -218,12 +218,15 @@ end function
 
 !
 ! !DESCRIPTION:
-!   (insert documentation here.)
+!   The IOSpec class has been deprecated and will be removed in a future 
+!   release.  It is included here only as a reference for the {\tt ESMF\_IOSpec}
+!   type, which is still used to define iospec arguments (non-functional) 
+!   elsewhere in the ESMF API.
 
+!EOP
 !
 ! !REQUIREMENTS: 
 
-!EOP
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -268,12 +271,15 @@ end function
 
 !
 ! !DESCRIPTION:
-!   (insert documentation here.)
+!   The IOSpec class has been deprecated and will be removed in a future 
+!   release.  It is included here only as a reference for the {\tt ESMF\_IOSpec}
+!   type, which is still used to define iospec arguments (non-functional) 
+!   elsewhere in the ESMF API.
 
+!EOP
 !
 ! !REQUIREMENTS: 
 
-!EOP
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
