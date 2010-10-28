@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.68 2010/10/26 21:15:42 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.69 2010/10/28 23:10:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.68 2010/10/26 21:15:42 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.69 2010/10/28 23:10:39 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1507,8 +1507,8 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! \label{api:AttributeRead}
 ! !IROUTINE: ESMF_AttributeRead  - Read Attributes from an XML file
+! \label{api:AttributeRead}
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRead(<object>, fileName, schemaFileName, &
@@ -1816,8 +1816,8 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! \label{api:AttributeWrite}
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
+! \label{api:AttributeWrite}
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeWrite(<object>, convention, purpose, attwriteflag, rc)
