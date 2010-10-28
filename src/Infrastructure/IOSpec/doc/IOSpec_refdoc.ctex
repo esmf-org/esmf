@@ -1,4 +1,4 @@
-% $Id: IOSpec_refdoc.ctex,v 1.5 2008/09/26 23:28:38 cdeluca Exp $
+% $Id: IOSpec_refdoc.ctex,v 1.6 2010/10/28 22:59:15 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -42,19 +42,19 @@
 \input{../Infrastructure/IOSpec/doc/IOSpec_desc}
 #endif
 
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{IOSpec_usage}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/IOSpec/doc/IOSpec_usage}
-#endif
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{IOSpec_usage}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IOSpec/doc/IOSpec_usage}
+%#endif
 
-\subsection{Restrictions and Future Work}
-#ifdef STANDALONE
-\input{IOSpec_rest}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/IOSpec/doc/IOSpec_rest}
-#endif
+%\subsection{Restrictions and Future Work}
+%#ifdef STANDALONE
+%\input{IOSpec_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IOSpec/doc/IOSpec_rest}
+%#endif
 
 %\subsubsection{Design and Implementation Notes}
 %#ifdef STANDALONE
@@ -71,7 +71,7 @@
 #endif
 
 %#ifdef STANDALONE
-%%\section{Glossary}
+%\section{Glossary}
 %\input{IOSpec_glos}
 %#endif
 
