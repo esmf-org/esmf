@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2010/10/19 18:54:37 theurich Exp $
+# $Id: makefile,v 1.5 2010/10/29 20:58:42 theurich Exp $
 
 ALL: tree_build_demos
 
@@ -18,7 +18,9 @@ DEMOS_OBJ      = FlowArraysMod.o InjectArraysMod.o \
                  FlowSolverMod.o InjectorMod.o CouplerMod.o \
                  CoupledFlowApp.o
 
-DEMOS_RUN      = RUN_CoupledFlowApp  
+#TODO: demo only supported for single-PET currently -> run UNI for now
+#DEMOS_RUN      = RUN_CoupledFlowApp
+DEMOS_RUN      = RUN_CoupledFlowAppUNI
 
 DEMOS_RUN_UNI  = RUN_CoupledFlowAppUNI
 
