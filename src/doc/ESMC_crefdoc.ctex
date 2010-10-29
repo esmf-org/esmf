@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.13 2010/10/29 03:45:21 w6ws Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.14 2010/10/29 17:19:04 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -87,7 +87,7 @@
 %\input{ESMF_conventions}
 
 \newpage
-\section{API Overview}
+%\section{API Overview}
 \input{ESMC_api}
 
 %\section{Global Options and Parameters}
