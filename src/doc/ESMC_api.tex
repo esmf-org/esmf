@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.2 2010/10/29 03:54:06 w6ws Exp $
+% $Id: ESMC_api.tex,v 1.3 2010/10/29 04:42:36 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -25,8 +25,8 @@ The C interface is implemented so that the variables associated
 with a class are stored in a C structure.  For example, an 
 {\tt ESMC\_Field} structure stores the data array, grid 
 information, and metadata associated with a physical field.
-The structure for each class is stored in a C header file. 
-The operations associated with each class are defined are also
+The structure for each class is defined in a C header file. 
+The operations associated with each class are also
 defined in the header files.
 
 The header files for ESMF are bundled together and can be accessed with a 
@@ -149,21 +149,13 @@ contain model data.  The operations that are performed
 on model data, such as regridding, redistribution, and halo 
 updates, are methods of these classes.  
 
-The main data classes in ESMF, in order of increasing complexity, are:
+The main data classes offered by the ESMF C API, in order of increasing complexity, are:
 \begin{itemize}
 \item {\bf Array} An ESMF Array is a distributed, multi-dimensional 
 array that can carry information such as its type, kind, rank, and 
 associated halo widths.  It contains a reference to a native Fortran array.
-\item {\bf ArrayBundle}  An ArrayBundle is a collection of Arrays, not
-necessarily distributed in the same manner.  It is useful for performing
-collective data operations and communications. 
 \item {\bf Field}  A Field represents a physical scalar or vector field.
 It contains a reference to an Array along with grid information and metadata.
-\item {\bf FieldBundle}  A FieldBundle is a collection of Fields discretized 
-on the same grid.  The staggering of data points may be different for 
-different Fields within a FieldBundle.  Like the ArrayBundle, it is
-useful for performing collective data operations and
-communications.
 \item {\bf State}  A State represents the collection of data that a 
 Component either requires to run (an Import State) or can make 
 available to other Components (an Export State).
@@ -183,10 +175,9 @@ complex ones.
 
 \end{itemize}
 
-Underlying these data classes are native language arrays.  ESMF allows 
-you to reference an existing C array to an ESMF Array or 
-Field so that ESMF data classes can be readily 
-introduced into existing code.  You can perform communication operations 
+Underlying these data classes are native language arrays.  ESMF Arrays 
+and Fields can be queried for the C pointer to the actual data.  You can
+perform communication operations either on the ESMF data objects or
 directly on C arrays through the VM class, which serves 
 as a unifying wrapper for distributed and shared memory communication 
 libraries.
@@ -215,7 +206,7 @@ are {\bf Persistent Execution Threads}, or {\bf PETs}, that are
 executing in {\bf Virtual Address Spaces}, or {\bf VASs}. A simple
 case is one in which every PET is associated with a single MPI process.
 In this case every PET is executing in its own private VAS. If Components
-are nested, the parent component allocates a subset of its PETs to its
+are nested, the parent Component allocates a subset of its PETs to its
 children. The children have some flexibility, subject to the constraints of
 the computing environment, to decide how they want to use the
 resources associated with the PETs they've received.
@@ -227,6 +218,8 @@ A DELayout associates a set of DEs with the PETs in a VM.  DEs are not
 necessarily one-to-one with PETs.  For cache blocking,
 or user-managed multi-threading, more DEs than PETs may be defined.
 Fewer DEs than PETs may also be defined if an application requires it.
+
+The current ESMF C API does not provide user access to the DELayout class.
 
 \item {\bf DistGrid}  A DistGrid represents the index space
 associated with a grid.  It is a useful abstraction because
@@ -245,6 +238,8 @@ defined on Arrays.
 It associates a coordinate system, a set of coordinates, and 
 a topology to a collection of grid cells.  Grids in ESMF are
 comprised of DistGrids plus additional coordinate information. 
+
+The current ESMF C API does not provide user access to the Grid class.
 
 \item {\bf Field}  A Field may contain more dimensions than the 
 Grid that it is discretized on.  For example, for convenience 
@@ -282,6 +277,7 @@ These are:
 \begin{itemize}
 \item {\bf Attributes}, for storing metadata about Fields,
 FieldBundles, States, and other classes.
+(Not currently available through the ESMF C API.)
 \item {\bf TimeMgr}, for calendar, time, clock and alarm functions.
 \item {\bf LogErr}, for logging and error handling.
 \item {\bf Config}, for creating resource files that can replace namelists
@@ -353,17 +349,17 @@ safety, users should try to avoid exploiting such implicit behavior.
 A preferable approach is to use a class creation or duplication 
 method.  Unfortunately, not all classes have duplication methods yet.
 
-\subsection{Attributes}
-
-Attributes are (name, value) pairs, where
-the name is a character string and the value can be either a single
-value or list of {\tt int}, {\tt double}, or {\tt char *} values.
-Attributes can be associated with Fields, FieldBundles, and States. 
-Mixed types are not allowed in a single attribute, and all attribute
-names must be unique within a single object.    Attributes are set
-by name, and can be retrieved either directly by name or by querying
-for a count of attributes and retrieving names and values
-by index number.
+%\subsection{Attributes}
+%
+%Attributes are (name, value) pairs, where
+%the name is a character string and the value can be either a single
+%value or list of {\tt int}, {\tt double}, or {\tt char *} values.
+%Attributes can be associated with Fields, FieldBundles, and States. 
+%Mixed types are not allowed in a single attribute, and all attribute
+%names must be unique within a single object.    Attributes are set
+%by name, and can be retrieved either directly by name or by querying
+%for a count of attributes and retrieving names and values
+%by index number.
 
 \section{Integrating ESMF into Applications}
 
