@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2009/05/29 19:52:05 theurich Exp $
+! $Id: user_model1.F90,v 1.3 2010/11/01 15:41:39 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -134,6 +134,9 @@ module user_model1
 !   !
  
   subroutine user_run(comp, importState, exportState, clock, rc)
+
+!$  use omp_lib
+
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
     type(ESMF_Clock) :: clock
@@ -145,8 +148,6 @@ module user_model1
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     type(ESMF_VM)         :: vm
     integer               :: i, j, tid, localPet, peCOunt
-    
-!$  integer :: omp_get_thread_num
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -171,11 +172,14 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGetPETLocalInfo(vm, pet=localPet, peCount=peCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
 !$  call omp_set_num_threads(peCount)
 
     ! Fill source Array with data
-    tid = 0
-!$omp parallel do
+!$omp parallel do  &
+!$omp& default(none) &
+!$omp& shared(farrayPtr, pi)  &
+!$omp& private(i, j, tid)
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
 !$    tid = omp_get_thread_num()
       print *, "user_model1.run(): tid = ", tid, " is working on column j = ", j
