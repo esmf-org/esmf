@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2009/10/22 14:40:48 feiliu Exp $
+! $Id: user_coupler.F90,v 1.7 2010/11/01 21:25:12 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,11 +95,11 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-    integer :: itemcount, localPet
+    integer :: itemcount, localPet, i
     type(ESMF_FieldBundle) :: srcFieldBundle, dstFieldBundle
     type(ESMF_VM) :: vm
-    real(ESMF_KIND_R8):: factorList(10000)
-    integer:: i, factorIndexList(2,10000)
+    real(ESMF_KIND_R8), allocatable:: factorList(:)
+    integer, allocatable:: factorIndexList(:,:)
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -133,6 +133,8 @@ module user_coupler
     ! Setup identity sparse matrix as a combination of PET 0 and PET 4
     ! there are 15000 elements on the diagonal, defined as two overlapping
     ! lists of each 10000 elements (overlapping 5000).
+    allocate(factorList(10000))
+    allocate(factorIndexList(2,10000))
     if (localPet==0) then
       factorIndexList(1,:) = (/(i,i=1,10000)/)
       factorIndexList(2,:) = factorIndexList(1,:)
@@ -167,7 +169,9 @@ module user_coupler
         routehandle=routehandle, rc=rc)
       if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     endif
-    
+    deallocate(factorIndexList)
+    deallocate(factorList)
+
     print *, "User Coupler Init returning"
    
   end subroutine user_init
