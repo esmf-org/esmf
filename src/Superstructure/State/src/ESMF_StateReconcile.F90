@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.81 2010/09/23 22:53:16 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.82 2010/11/01 17:25:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.81 2010/09/23 22:53:16 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.82 2010/11/01 17:25:53 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -306,6 +306,7 @@
     type(ESMF_InquireFlag) :: inqflag
     integer :: lbufsize, maxbufsize
     integer :: pass
+    integer :: memstat
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -333,14 +334,12 @@
     ! TODO: the current code only uses the first entry and hangs everything
     ! onto it.  eventually, have an info block for each distinct object in
     ! the state. 
-    allocate(stateInfoList(4), stat=localrc)
-    localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
+    allocate(stateInfoList(4), stat=memstat)
+    if (ESMF_LogMsgFoundAllocError(memstat, &
                                    "Allocating buffer for ID list", &
                                    ESMF_CONTEXT, rc)) return
-    allocate(stateInfoList(1)%childList(4), stat=localrc)
-    localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
+    allocate(stateInfoList(1)%childList(4), stat=memstat)
+    if (ESMF_LogMsgFoundAllocError(memstat, &
                                    "Allocating buffer for child ID list", &
                                    ESMF_CONTEXT, rc)) return
 
@@ -355,19 +354,16 @@
       si%mycount = state%statep%datacount
     endif
     if (si%mycount .gt. 0) then
-        allocate(si%idsend(si%mycount), stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        allocate(si%idsend(si%mycount), stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                    "Allocating buffer for local ID list", &
                                        ESMF_CONTEXT, rc)) return
-        allocate(si%vmidsend(si%mycount), stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        allocate(si%vmidsend(si%mycount), stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                    "Allocating buffer for local VM ID list", &
                                        ESMF_CONTEXT, rc)) return
-        allocate(si%objsend(si%mycount), stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        allocate(si%objsend(si%mycount), stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                    "Allocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
     endif
@@ -377,9 +373,8 @@
     inqflag = ESMF_NOINQUIRE
     maxbufsize = BUFSIZE
     if (si%mycount > 0) then
-      allocate(si%blindsend(lbufsize, si%mycount), stat=localrc)
-      localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      allocate(si%blindsend(lbufsize, si%mycount), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, &
                            "Allocating buffer for local buf list", &
                                ESMF_CONTEXT, rc)) return
     end if
@@ -392,22 +387,23 @@
         inqflag = ESMF_INQUIREONLY
         maxbufsize = 0
         lbufsize = 1
-        allocate (si%blindsend(1,si%mycount), stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                 "Allocating buffer for local buf inquiry", &
+        allocate (si%blindsend(1,si%mycount), stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
+                                 "Allocating inquiry pass dummy buffer", &
                                      ESMF_CONTEXT, rc)) return
       else
         ! Allocate the buffer, and do the serialization for real
-        deallocate (si%blindsend)
+        deallocate (si%blindsend, stat=memstat)
+        if (ESMF_LogMsgFoundDeAllocError(memstat, &
+                             "Deallocating dummy buffer", &
+                                 ESMF_CONTEXT, rc)) return
         inqflag = ESMF_NOINQUIRE
 !DEBUG        print *, 'ESMF_StateInfoBuild: leading buffer dimension =', maxbufsize
         lbufsize = maxbufsize
 
         if (si%mycount > 0) then
-          allocate(si%blindsend(lbufsize, si%mycount), stat=localrc)
-          localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-          if (ESMF_LogMsgFoundAllocError(localrc, &
+          allocate(si%blindsend(lbufsize, si%mycount), stat=memstat)
+          if (ESMF_LogMsgFoundAllocError(memstat, &
                                "Allocating buffer for local buf list", &
                                    ESMF_CONTEXT, rc)) return
         end if
@@ -669,6 +665,7 @@
 !EOPI
     integer :: localrc
     type(ESMF_StateItemInfo), pointer :: si
+    integer :: memstat
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -682,38 +679,32 @@
     ! need to be freed.  TODO: this needs to be better integrated with the
     ! object tree code below.
     if (si%mycount .gt. 0) then
-        deallocate(si%idsend, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        deallocate(si%idsend, stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                  "Deallocating buffer for local ID list", &
                                        ESMF_CONTEXT, rc)) return
-        deallocate(si%vmidsend, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        deallocate(si%vmidsend, stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                  "Deallocating buffer for local VM ID list", &
                                        ESMF_CONTEXT, rc)) return
-        deallocate(si%objsend, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        deallocate(si%objsend, stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                  "Deallocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
-        deallocate(si%blindsend, stat=localrc)
-        localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
+        deallocate(si%blindsend, stat=memstat)
+        if (ESMF_LogMsgFoundAllocError(memstat, &
                                  "Deallocating buffer for local buf list", &
                                        ESMF_CONTEXT, rc)) return
     endif
 
     ! The tree of objects - currently we are only using the first entry
     ! and creating blocks all attached to it.
-    deallocate(stateInfoList(1)%childList, stat=localrc)
-    localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
+    deallocate(stateInfoList(1)%childList, stat=memstat)
+    if (ESMF_LogMsgFoundAllocError(memstat, &
                                    "Deallocating buffer for child ID list", &
                                    ESMF_CONTEXT, rc)) return
-    deallocate(stateInfoList, stat=localrc)
-    localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
+    deallocate(stateInfoList, stat=memstat)
+    if (ESMF_LogMsgFoundAllocError(memstat, &
                                   "DeaAllocating buffer for state ID list", &
                                    ESMF_CONTEXT, rc)) return
     nullify(stateInfoList)
@@ -783,6 +774,7 @@
     type(ESMF_StateItemInfo), pointer :: si
     integer :: offset, myOrigCount
     logical :: i_send, i_recv
+    integer :: memstat
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -803,6 +795,7 @@
 
     myOrigCount = si%mycount  ! my original count on entering this routine
 
+petloop:  &
     do, j = 0, pets-1
 !!DEBUG "Outer loop, j = ", j
        ! each PET takes turns broadcasting to all
@@ -830,9 +823,8 @@
            if (i_send) then
                call ESMF_VMBroadcast (vm, si%idsend, count=myOrigCount, root=j, rc=localrc)
            else
-               allocate(si%idrecv(si%theircount), stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               allocate(si%idrecv(si%theircount), stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Allocating buffer for local ID list", &
                               ESMF_CONTEXT, rc)) return
                call ESMF_VMBroadcast (vm, si%idrecv, count=si%theircount, root=j, rc=localrc)
@@ -846,9 +838,8 @@
            if (i_send) then
                call ESMF_VMBroadcast (vm, si%objsend, count=myOrigCount, root=j, rc=localrc)
            else
-               allocate(si%objrecv(si%theircount), stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               allocate(si%objrecv(si%theircount), stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Allocating buffer for local obj list", &
                               ESMF_CONTEXT, rc)) return
                call ESMF_VMBroadcast (vm, si%objrecv, count=si%theircount, root=j, rc=localrc)
@@ -863,9 +854,8 @@
                call ESMF_VMBcastVMId(vm, si%vmidsend, count=myOrigCount, &
                    root=j, rc=localrc)
            else
-	       allocate(si%vmidrecv(si%theircount), stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+	       allocate(si%vmidrecv(si%theircount), stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Allocating buffer for local VM ID list", &
                               ESMF_CONTEXT, rc)) return
                do, k=1, si%theircount
@@ -882,9 +872,8 @@
            if (i_send) then
                call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*myOrigCount, root=j, rc=localrc)
 	   else
-               allocate(si%blindrecv(bsbufsize, si%theircount), stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_ALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               allocate(si%blindrecv(bsbufsize, si%theircount), stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Allocating buffer for local buf list", &
                               ESMF_CONTEXT, rc)) return
                call ESMF_VMBroadcast (vm, si%blindrecv, size (si%blindrecv), root=j, rc=localrc)
@@ -943,7 +932,7 @@
            !!!   the missing object is sent.
 
            ! k from 2 because the top level State was number 1
-           do k=attreconstart, si%theircount
+itemloop:  do k=attreconstart, si%theircount
 !!DEBUG " checking remote id for object ", k, "value is ", si%idrecv(k)
              ihave = .false.
              
@@ -1149,33 +1138,29 @@
                     print *, "WARNING: unexpected type"
                 end select
              endif
-           enddo
+           enddo itemloop
 
 !!DEBUG "end of proxy create section"
 
            if (si%theircount .gt. 0) then
 !!DEBUG "the remote pet had sent us objects; remove temp space now"
-               deallocate(si%idrecv, stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               deallocate(si%idrecv, stat=memstat)
+               if (ESMF_LogMsgFoundDeAllocError(memstat, &
                               "Deallocating buffer for local ID list", &
                                ESMF_CONTEXT, rc)) return
                do k = 1, si%theircount
                    call ESMF_VMIdDestroy(si%vmidrecv(k))
                enddo
-               deallocate(si%vmidrecv, stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               deallocate(si%vmidrecv, stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Deallocating buffer for local VM ID list", &
                                ESMF_CONTEXT, rc)) return
-               deallocate(si%objrecv, stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               deallocate(si%objrecv, stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Deallocating buffer for local obj list", &
                                ESMF_CONTEXT, rc)) return
-               deallocate(si%blindrecv, stat=localrc)
-               localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-               if (ESMF_LogMsgFoundAllocError(localrc, &
+               deallocate(si%blindrecv, stat=memstat)
+               if (ESMF_LogMsgFoundAllocError(memstat, &
                               "Deallocating buffer for local buf list", &
                                ESMF_CONTEXT, rc)) return
            endif
@@ -1203,7 +1188,7 @@
 
        endif   ! receiver
 !!DEBUG "bottom of loop"
-    enddo ! source PET number
+    enddo petloop ! source PET number
 
 !!DEBUG "end of state proxy create"
     if (present(rc)) rc = ESMF_SUCCESS
