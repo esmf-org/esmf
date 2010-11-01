@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.215 2010/10/19 23:01:54 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.216 2010/11/01 17:15:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.215 2010/10/19 23:01:54 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.216 2010/11/01 17:15:59 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1394,7 +1394,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       integer :: localrc, i
-      integer :: countOpt
+      integer :: localcount
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
 
@@ -1409,30 +1409,30 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
                                   
-      countOpt = size(arrayList)
+      localcount = size(arrayList)
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "- count must be positive", &
             ESMF_CONTEXT, rc)
           return
-        endif
-        if (count > countOpt) then
+        else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "- count must be smaller than size of arrayList", &
             ESMF_CONTEXT, rc)
           return
-        endif
-        countOpt = count
-      endif
+        else
+          localcount = count
+        end if
+      end if
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,countOpt
+      do i=1,localcount
          ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
       enddo
 
-      call ESMF_StateClsAddArrayList(state%statep, countOpt, arrayList, &
+      call ESMF_StateClsAddArrayList(state%statep, localcount, arrayList, &
         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1510,7 +1510,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
       integer :: localrc, i
-      integer :: countOpt
+      integer :: localcount
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
 
@@ -1525,37 +1525,37 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
                                   
-      countOpt = size(arraybundleList)
+      localcount = size(arraybundleList)
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "- count must be positive", &
             ESMF_CONTEXT, rc)
           return
-        endif
-        if (count > countOpt) then
+        else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
             "- count must be smaller than size of arraybundleList", &
             ESMF_CONTEXT, rc)
           return
-        endif
-        countOpt = count
-      endif
+        else
+          localcount = count
+        end if
+      end if
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,countOpt
+      do i=1,localcount
          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
       enddo
 
-      call ESMF_StateClsAddArrayBundleList(state%statep, countOpt,&
+      call ESMF_StateClsAddArrayBundleList(state%statep, localcount,&
         arraybundleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      do i=1,count
+      do i=1,localcount
          call c_ESMC_AttributeLink(state%statep%base, &
           arraybundleList(i), linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1597,7 +1597,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       type(ESMF_Field), dimension(:), intent(inout) :: fieldList
-      integer, intent(in) :: count
+      integer, intent(in),  optional :: count
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1624,32 +1624,50 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc,i
+      integer :: localcount
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,count
-         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
-      enddo
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check input variables
+                                  
+      localcount = size(fieldList)
+      if (present(count)) then
+        if (count < 0) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be positive", &
+            ESMF_CONTEXT, rc)
+          return
+        else if (count > localcount) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be smaller than size of fieldList", &
+            ESMF_CONTEXT, rc)
+          return
+        else
+          localcount = count
+        end if
+      end if
+
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,localcount
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
+      enddo
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClsAddFieldList(state%statep, count, fieldList, rc=localrc)
+      call ESMF_StateClsAddFieldList(state%statep, localcount, fieldList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      do i=1,count
+      do i=1,localcount
          call c_ESMC_AttributeLink(state%statep%base, &
           fieldList(i)%ftypep%base, linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1691,7 +1709,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       type(ESMF_FieldBundle), dimension(:), intent(inout) :: fieldbundleList
-      integer, intent(in) :: count
+      integer, intent(in),  optional :: count
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1718,19 +1736,37 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc,i
+      integer :: localcount
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,count
-         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundleList(i),rc)
-      enddo
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check input variables
+                                  
+      localcount = size(fieldbundleList)
+      if (present(count)) then
+        if (count < 0) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be positive", &
+            ESMF_CONTEXT, rc)
+          return
+        else if (count > localcount) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be smaller than size of fieldbundleList", &
+            ESMF_CONTEXT, rc)
+          return
+        else
+          localcount = count
+        end if
+      end if
+
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,localcount
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundleList(i),rc)
+      enddo
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1738,13 +1774,13 @@ module ESMF_StateMod
                                   ESMF_CONTEXT, rc)) return
 
       call ESMF_StateClAddFieldBundleList(state%statep, &
-                                          fieldbundleList, count, rc=localrc)
+                                          fieldbundleList, localcount, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      do i=1,count
+      do i=1,localcount
          call c_ESMC_AttributeLink(state%statep%base, &
           fieldbundleList(i)%btypep%base, linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1786,7 +1822,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
       character (len=*), intent(in) :: nameList(:)
-      integer, intent(in) :: count
+      integer, intent(in), optional :: count
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1817,6 +1853,7 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc
+      integer :: localcount
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1830,8 +1867,24 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      localcount = size(nameList)
+      if (present(count)) then
+        if (count < 0) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be positive", &
+            ESMF_CONTEXT, rc)
+          return
+        else if (count > localcount) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be smaller than size of State nameList", &
+            ESMF_CONTEXT, rc)
+          return
+        else
+          localcount = count
+        end if
+      end if
 
-      call ESMF_StateClsAddDataNameList(state%statep, count, &
+      call ESMF_StateClsAddDataNameList(state%statep, localcount, &
                   namelist, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1853,7 +1906,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
-      integer, intent(in) :: count
+      integer, intent(in),  optional :: count
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1881,6 +1934,7 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc,i
+      integer :: localcount
 
       ! check input variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1898,7 +1952,24 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClsAddRHandleList(state%statep, count, &
+      localcount = size(routehandleList)
+      if (present(count)) then
+        if (count < 0) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be positive", &
+            ESMF_CONTEXT, rc)
+          return
+        else if (count > localcount) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be smaller than size of routehandleList", &
+            ESMF_CONTEXT, rc)
+          return
+        else
+          localcount = count
+        end if
+      end if
+
+      call ESMF_StateClsAddRHandleList(state%statep, localcount, &
         routehandleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
@@ -1920,7 +1991,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       type(ESMF_State), dimension(:), intent(in) :: nestedStateList
-      integer, intent(in) :: count
+      integer, intent(in),  optional :: count
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1949,12 +2020,31 @@ module ESMF_StateMod
 !
 !EOPI
       integer :: localrc,i
+      integer :: localcount
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
 
       ! check input variables
+
+      localcount = size(nestedStateList)
+      if (present(count)) then
+        if (count < 0) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be positive", &
+            ESMF_CONTEXT, rc)
+          return
+        else if (count > localcount) then
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            "- count must be smaller than size of nestedStateList", &
+            ESMF_CONTEXT, rc)
+          return
+        else
+          localcount = count
+        end if
+      end if
+
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,count
+      do i=1,localcount
          ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
       enddo
 
@@ -1968,14 +2058,14 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_StateClsAddStateList(state%statep, count, &
+      call ESMF_StateClsAddStateList(state%statep, localcount, &
                                       nestedStateList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      do i=1,count
+      do i=1,localcount
          call c_ESMC_AttributeLink(state%statep%base, &
           nestedStateList(i)%statep%base, linkChange, localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
