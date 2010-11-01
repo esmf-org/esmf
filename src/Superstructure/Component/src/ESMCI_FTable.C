@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.44 2010/10/09 00:04:19 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.45 2010/11/01 21:23:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.44 2010/10/09 00:04:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.45 2010/11/01 21:23:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1506,7 +1506,7 @@ int FTable::callVFuncPtr(
       //printf("calling out of case FT_VOIDP4INTP\n");
       if (userrc) func->funcintarg = *userrc;
       VoidP4IntPFunc vf = (VoidP4IntPFunc)func->funcptr;
-      (*vf)(comp, func->funcarg[1], func->funcarg[2],
+      (*vf)((void *)comp, func->funcarg[1], func->funcarg[2],
         func->funcarg[3], &(func->funcintarg));
       if (userrc) *userrc = func->funcintarg;
       break;
