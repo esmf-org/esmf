@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.10 2010/10/12 22:14:47 theurich Exp $
+! $Id: ESMF_IOScrip.F90,v 1.11 2010/11/02 00:26:02 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -466,6 +466,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       do i=1,PetCnt
 	 total=allCounts(i)+total
       end do
+      !print *, PetNo, 'local count ', localCount(1), AllCounts(PetNo+1), total
 
      !Read the variables from the input grid files at PET0
       if (PetNo == 0) then
@@ -1249,50 +1250,54 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               ESMF_SRCLINE,&
               rc)) return
 	  else 
-            ! receive the factorList and factorIndexList 
-            call ESMF_VMRecv(vm, indexbuf, localCount(1)*2, i-1, rc=status)
-	    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
-            call ESMF_VMRecv(vm, weightbuf, localCount(1), i-1, rc=status)
-	    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+            if (localCount(1) > 0) then
+              ! receive the factorList and factorIndexList 
+              call ESMF_VMRecv(vm, indexbuf, localCount(1)*2, i-1, rc=status)
+	      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        	  ESMF_CONTEXT, rc)) return
+              call ESMF_VMRecv(vm, weightbuf, localCount(1), i-1, rc=status)
+	      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+        	  ESMF_CONTEXT, rc)) return
 
-            ncStatus=nf90_inq_varid(ncid,"col",VarId)
-     	    ncStatus=nf90_put_var(ncid,VarId, indexbuf,(/start/),localCount)          
-            if (CDFCheckError (ncStatus, &
-              ESMF_METHOD, &
-              ESMF_SRCLINE,&
-              rc)) return
-            next => indexbuf(localCount(1)+1:localCount(1)*2)
-            ncStatus=nf90_inq_varid(ncid,"row",VarId)
-     	    ncStatus=nf90_put_var(ncid,VarId, next ,(/start/),localCount)          
-            if (CDFCheckError (ncStatus, &
-              ESMF_METHOD, &
-              ESMF_SRCLINE,&
-              rc)) return
+              ncStatus=nf90_inq_varid(ncid,"col",VarId)
+       	      ncStatus=nf90_put_var(ncid,VarId, indexbuf,(/start/),localCount)          
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+                rc)) return
+              next => indexbuf(localCount(1)+1:localCount(1)*2)
+              ncStatus=nf90_inq_varid(ncid,"row",VarId)
+     	      ncStatus=nf90_put_var(ncid,VarId, next ,(/start/),localCount)          
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+                rc)) return
 
-            ncStatus=nf90_inq_varid(ncid,"S",VarId)
-            ncStatus=nf90_put_var(ncid,VarId, weightbuf, (/start/),localCount)
-            if (CDFCheckError (ncStatus, &
-              ESMF_METHOD, &
-              ESMF_SRCLINE,&
-              rc)) return
+              ncStatus=nf90_inq_varid(ncid,"S",VarId)
+              ncStatus=nf90_put_var(ncid,VarId, weightbuf, (/start/),localCount)
+              if (CDFCheckError (ncStatus, &
+                ESMF_METHOD, &
+                ESMF_SRCLINE,&
+                rc)) return
+            end if
           end if
           start = start + localCount(1)
        end do
     else
        allocate(indexbuf(localcount(1)*2))
-       do j=1,localCount(1)
-           indexbuf(j) = factorIndexList(j,1)
-           indexbuf(j+localCount(1)) = factorIndexList(j,2)
-       enddo
-       ! a non-root PET, send the results to PET 0
-        call ESMF_VMSend(vm, indexbuf, localCount(1)*2, 0, rc=status)
-        if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+       if (localcount(1) > 0) then
+         do j=1,localCount(1)
+             indexbuf(j) = factorIndexList(j,1)
+             indexbuf(j+localCount(1)) = factorIndexList(j,2)
+         enddo
+         ! a non-root PET, send the results to PET 0
+         call ESMF_VMSend(vm, indexbuf, localCount(1)*2, 0, rc=status)
+         if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         	ESMF_CONTEXT, rc)) return
-        call ESMF_VMSend(vm, factorList, localCount(1), 0, rc=status)
-	if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+         call ESMF_VMSend(vm, factorList, localCount(1), 0, rc=status)
+	 if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
         	ESMF_CONTEXT, rc)) return
+       end if
     end if
        
     call ESMF_VMBarrier(vm)
