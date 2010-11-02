@@ -1,3 +1,30 @@
+// $Id: ESMCI_WebServPassThruSvr.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+//==============================================================================
+//
+// ESMC WebServPassThruSvr method implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ PassThruSvr methods declared
+// in the companion file ESMCI_WebServPassThruSvr.h.  This code
+// provides the functionality needed to implement a Process Controller
+// Service, which essentially just passes requests from its client on to an
+// ESMF Component Service (implemented with the ESMCI_ComponentSvr class).
+//
+//-----------------------------------------------------------------------------
+
 #include "ESMCI_WebServPassThruSvr.h"
 
 #include <errno.h>
@@ -16,16 +43,45 @@
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_WebServCompSvrClient.h"
 
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+//-----------------------------------------------------------------------------
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-PassThruSvr::PassThruSvr(int     port,
-                         string  camDir)
+//-----------------------------------------------------------------------------
+#define VERBOSITY             (1)       // 0: off, 10: max
+//-----------------------------------------------------------------------------
+
+
+namespace ESMCI
 {
-	theStatus = (char*)NET_ESMF_STAT_IDLE;
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::ESMCI_WebServPassThruSvr()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::ESMCI_WebServPassThruSvr()
+//
+// !INTERFACE:
+ESMCI_WebServPassThruSvr::ESMCI_WebServPassThruSvr(
+//
+//
+// !ARGUMENTS:
+//
+  int     port,   // (in) the port number on which to setup the socket service
+                  // to listen for requests
+  string  camDir	// (in) the directory where the CAM output files can be 
+                  // found
+  )
+//
+// !DESCRIPTION:
+//    Initialize the ESMF Process Controller service with the default values 
+//    as well as the specified port number and output file directory.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
 	theNextClientId = 101;
 
 	theCAMDir = camDir;
@@ -35,42 +91,96 @@ PassThruSvr::PassThruSvr(int     port,
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-PassThruSvr::~PassThruSvr()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::~ESMCI_WebServPassThruSvr()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::~ESMCI_WebServPassThruSvr()
+//
+// !INTERFACE:
+ESMCI_WebServPassThruSvr::~ESMCI_WebServPassThruSvr(
+//
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Cleanup the process controller service.  For now, all this involves is 
+//    making sure the socket is disconnected.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theSocket.disconnect();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::setPort(int  port)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::setPort()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::setPort()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::setPort(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  int  port    // (in) number of the port on which the socket service listens
+               // for requests
+  )
+//
+// !DESCRIPTION:
+//    Sets the number of the port on which the socket service listens
+//    for requests.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	thePort = port;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::requestLoop()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::requestLoop()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::requestLoop()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::requestLoop(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Sets up a socket service for a process controller server to handle 
+//    client requests.  
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-printf("PassThruSvr::requestLoop()\n");
+	//printf("ESMCI_WebServPassThruSvr::requestLoop()\n");
 	
+   //***
+   // Setup the server socket
+   //***
 	if (theSocket.connect(thePort) < 0)
 	{
 		return;
 	}
 
+   //***
+   // Enter into a loop that waits for a client request and processes the
+   // requests as they come in.  This loop continues until the client sends
+   // an exit request (this isn't currently used).
+   //***
 	int	request;
 
 	do
@@ -81,16 +191,39 @@ printf("PassThruSvr::requestLoop()\n");
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  PassThruSvr::getNextRequest()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::getNextRequest()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::getNextRequest()
+//
+// !INTERFACE:
+int  ESMCI_WebServPassThruSvr::getNextRequest(
+//
+// !RETURN VALUE:
+//    int  id of the client request (defined in ESMCI_WebServNetEsmf.h)
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Listens on a server socket for client requests, and as the requests
+//    arrive, reads the request id from the socket and returns it.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("PassThruSvr::getNextRequest()\n");
+	//printf("ESMCI_WebServPassThruSvr::getNextRequest()\n");
+
+   //***
+   // Wait for client requests
+   //***
 	theSocket.accept();
 
+   //***
+   // Read the request id string from the socket
+   //***
 	int	n;
 	char	requestStr[50];
 
@@ -98,20 +231,38 @@ int  PassThruSvr::getNextRequest()
 
 	//printf("SERVER: request: %s\n", requestStr);
 
+   //***
+   // Convert the string to a valid request id
+   //***
 	return getRequestId(requestStr);
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  PassThruSvr::serviceRequest(int  request)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::serviceRequest()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::serviceRequest()
+//
+// !INTERFACE:
+int  ESMCI_WebServPassThruSvr::serviceRequest(
+//
+// !RETURN VALUE:
+//    int  id of the client request (the same value that's passed in)
+//
+// !ARGUMENTS:
+//
+  int  request    // id of the client request
+  )
+//
+// !DESCRIPTION:
+//    Calls the appropriate process method based on the client request id.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-printf("PassThruSvr::serviceRequest()\n");
-printf("Request ID: %d\n", request);
-	strcpy(theMsg, "OK");
+	//printf("ESMCI_WebServPassThruSvr::serviceRequest()\n");
+	//printf("Request ID: %d\n", request);
 
 	switch (request)
 	{
@@ -155,26 +306,37 @@ printf("Request ID: %d\n", request);
 		break;
 	}
 
-//printf("Sending msg: %s\n", theMsg);
-
-	if (request != NET_ESMF_NEW)
-	{
-		//theSocket.send(theMsg);
-	}
 	theSocket.close();
 
 	return request;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  PassThruSvr::getRequestId(const char  request[])
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::getRequestId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::getRequestId()
+//
+// !INTERFACE:
+int  ESMCI_WebServPassThruSvr::getRequestId(
+//
+// !RETURN VALUE:
+//    int  id of the request based on the specified string
+//
+// !ARGUMENTS:
+//
+  const char  request[] // request string for which the id is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request id based on a specified string value.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("PassThruSvr::getRequestId()\n");
+	//printf("ESMCI_WebServPassThruSvr::getRequestId()\n");
+
 	if (strcmp(request, "NEW")   == 0)	return NET_ESMF_NEW;
 	if (strcmp(request, "EXIT")  == 0)	return NET_ESMF_EXIT;
 	if (strcmp(request, "INIT")  == 0)	return NET_ESMF_INIT;
@@ -190,14 +352,31 @@ int  PassThruSvr::getRequestId(const char  request[])
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-char*  PassThruSvr::getRequestFromId(int  id)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::getRequestFromId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::getRequestFromId()
+//
+// !INTERFACE:
+char*  ESMCI_WebServPassThruSvr::getRequestFromId(
+//
+// !RETURN VALUE:
+//    char*  string value for the specified request id
+//
+// !ARGUMENTS:
+//
+  int  id      // request id for which the string value is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request string value based on a specified request id.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("PassThruSvr::getRequestFromId()\n");
+	//printf("ESMCI_WebServPassThruSvr::getRequestFromId()\n");
+
 	switch (id)
 	{
 	case NET_ESMF_EXIT:	return (char*)"EXIT";
@@ -217,14 +396,31 @@ char*  PassThruSvr::getRequestFromId(int  id)
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processNew()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processNew()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processNew()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processNew(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request for a new client session.  This method reads the
+//    client name from the socket, generates a new client id, creates a new
+//    client info object and adds it to the list of clients, and then writes
+//    the new client id to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing New\n");
+	//printf("\n\nSERVER: processing New\n");
 
 	//***
 	// Read the client name
@@ -232,14 +428,14 @@ void  PassThruSvr::processNew()
 	int	bytesRead = 0;
 	char	buf[1024];
 	theSocket.read(bytesRead, buf);
-printf("Buffer: %s\n", buf);
+	//printf("Buffer: %s\n", buf);
 
 	//***
 	// Generate a new client id and add the new client to the collection 
 	// of clients
 	//***
-	int			clientId = getNextClientId();
-	ClientInfo*	newClient = new ClientInfo(clientId);
+	int								clientId = getNextClientId();
+	ESMCI_WebServClientInfo*	newClient = new ESMCI_WebServClientInfo(clientId);
 	theClients[clientId] = newClient;
 
 	//***
@@ -255,19 +451,38 @@ printf("Buffer: %s\n", buf);
 	// Send back the new client id
 	//***
 	int	netClientId = htonl(clientId);
-//printf("Network client id: %d\n", netClientId);
+	//printf("Network client id: %d\n", netClientId);
 	theSocket.write(4, &netClientId);
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processInit()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processInit()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processInit()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processInit(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to initialize the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    It then reads the names of input files (if any) from the socket.  The
+//    request and its parameters are then passed on to the component server,
+//    and finally, the component status is written to the socket to complete 
+//    the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Init\n");
+	//printf("\n\nSERVER: processing Init\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -280,7 +495,7 @@ void  PassThruSvr::processInit()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Get the number of files (should be either 0 or 1)... if there's 1, then
@@ -288,7 +503,7 @@ printf("Client ID: %d\n", clientId);
 	//***
 	theSocket.read(bytesRead, buf);
    int	numFiles = ntohl(*((unsigned int*)buf));
-printf("Num Files: %d\n", numFiles);
+	//printf("Num Files: %d\n", numFiles);
 
 	char	filename[1024];
 
@@ -296,7 +511,7 @@ printf("Num Files: %d\n", numFiles);
 	{
 		theSocket.read(bytesRead, buf);
 		strcpy(filename, (char*)buf);
-printf("Filename: %s\n", filename);
+		//printf("Filename: %s\n", filename);
 	}
 
 	//***
@@ -304,8 +519,8 @@ printf("Filename: %s\n", filename);
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -316,38 +531,19 @@ printf("Filename: %s\n", filename);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 	status = clientInfo->status();
 
 	//***
-	// If a filename was specified, create the import state object
+	// Call the component initialize.  Must be in the READY state before the
+	// initialize can be called, so a call to request the current state is
+	// made first.
 	//***
-	if (numFiles > 0)
-	{
-		//clientInfo->setImportFilename(filename);
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
 
-		//***
-		//	Create state object from specified file
-		// TODO: Add a flag that the calling program can set to indicate whether
-		//       not there is a state to import
-		// TODO: Read from the file as part of the netCDF web service 
-		//       (instead of as a local file)
-		//***
-	}
-
-	//***
-	// Call the component initialize (must be in the READY state before the
-	// initialize can be called)
-	//***
-printf("Connecting to Component Server\n");
-	CompSvrClient	client(clientInfo->serverHost().c_str(), 
-                         clientInfo->serverPort(), 
-                         clientInfo->clientId());
-printf("Connected to Component Server\n");
-
-printf("Getting State\n");
 	status = client.state();
-printf("State: %d\n", status);
 	clientInfo->setStatus(status);
 
 	if (status == NET_ESMF_STAT_READY)
@@ -368,18 +564,36 @@ printf("State: %d\n", status);
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
 	theSocket.write(4, &netStatus);
-//clientInfo->print();
+	//clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processRun()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processRun()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processRun()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processRun(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to run the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    The request and its parameters are then passed on to the component 
+//    server, and finally, the component status is written to the socket 
+//    to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Run\n");
+	//printf("\n\nSERVER: processing Run\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -392,15 +606,15 @@ void  PassThruSvr::processRun()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -411,16 +625,16 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 	status = clientInfo->status();
 
 	//***
 	// Call the component run (must have completed the initialize phase before
 	// the run could be called)
 	//***
-	CompSvrClient	client(clientInfo->serverHost().c_str(), 
-                         clientInfo->serverPort(), 
-                         clientInfo->clientId());
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
 
 	status = client.state();
 	clientInfo->setStatus(status);
@@ -438,7 +652,7 @@ clientInfo->print();
 
 	//***
 	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
+	// the component run call to determine the state)
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
@@ -446,14 +660,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processFinal()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processFinal()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processFinal()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processFinal(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to finalize the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    The request and its parameters are then passed on to the component 
+//    server, and finally, the component status is written to the socket 
+//    to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Final\n");
+	//printf("\n\nSERVER: processing Final\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -466,15 +698,15 @@ void  PassThruSvr::processFinal()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -485,7 +717,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 	status = clientInfo->status();
 
 	//***
@@ -494,9 +726,9 @@ clientInfo->print();
    // (KDS: assuming you can call finalize after calling just initialize, but
    //       not sure if that is true.)
 	//***
-	CompSvrClient	client(clientInfo->serverHost().c_str(), 
-                         clientInfo->serverPort(), 
-                         clientInfo->clientId());
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
 
 	status = client.state();
 	clientInfo->setStatus(status);
@@ -515,7 +747,7 @@ clientInfo->print();
 
 	//***
 	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
+	// the component finalize call to determine the state)
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
@@ -523,14 +755,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processState()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processState()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processState()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processState(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to retrieve the component state.  This method
+//    reads the client id from the socket and uses it to lookup the client
+//    information.  The request and its parameters are then passed on to 
+//    the component server, and finally, the component status is written 
+//    to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing State\n");
+	//printf("\n\nSERVER: processing State\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -543,15 +793,15 @@ void  PassThruSvr::processState()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -561,20 +811,23 @@ printf("Client ID: %d\n", clientId);
 		return;
 	}
 
+	//***
+	// Pass on the state request to the component server and get the current
+	// status
+	//***
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 	status = clientInfo->status();
 
-	CompSvrClient	client(clientInfo->serverHost().c_str(), 
-                         clientInfo->serverPort(), 
-                         clientInfo->clientId());
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
 
 	status = client.state();
 	clientInfo->setStatus(status);
 
 	//***
-	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
+	// Send the current state back to the client 
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
@@ -582,14 +835,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processFiles()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processFiles()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processFiles()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processFiles(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to retrieve the export filenames.  
+//    (KDS: This method is here to support the existing NetEsmfClient call,
+//          but we want to use the Get Data call instead, so I'm not 
+//          supporting this call anymore.  Until we remove it completely,
+//          I just return zero filenames.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Files\n");
+	//printf("\n\nSERVER: processing Files\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 	int	numFiles = 0;
@@ -603,15 +874,15 @@ void  PassThruSvr::processFiles()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -627,42 +898,21 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
-//***
-// KDS: Get status from component server
-//***
-//***
-// KDS: Make call to component server to get filenames... set status to whatever
-//      status gets returned
-//***
+	//clientInfo->print();
+
 	status = clientInfo->status();
 
 	//***
 	// Write the file information back to the client
 	//***
-	numFiles = 2;
+	numFiles = 0;
 	char	fileInfoBuf[1024];
 
 	unsigned int  netNumFiles = htonl(numFiles);
 	theSocket.write(4, &netNumFiles);
 
-	strcpy(fileInfoBuf, "import");
-	theSocket.write(strlen(fileInfoBuf) + 1, fileInfoBuf);
-
-	strcpy(fileInfoBuf, "file1.nc");
-	//strcpy(fileInfoBuf, clientInfo->importFilename());
-	theSocket.write(strlen(fileInfoBuf) + 1, fileInfoBuf);
-
-	strcpy(fileInfoBuf, "export");
-	theSocket.write(strlen(fileInfoBuf) + 1, fileInfoBuf);
-
-	strcpy(fileInfoBuf, "file2.nc");
-	//strcpy(fileInfoBuf, clientInfo->exportFilename());
-	theSocket.write(strlen(fileInfoBuf) + 1, fileInfoBuf);
-
 	//***
-	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
+	// Send the current state back to the client 
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
@@ -670,14 +920,39 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processGetData()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processGetData()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processGetData()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processGetData(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to retrieve the export data.  This method
+//    reads the client id from the socket and uses it to lookup the client
+//    information.  It then reads the data parameters (variable name, time, 
+//    lat and lon) from the socket and uses that information to lookup the 
+//    data from a netcdf file.  The data and the component status are then 
+//    written back to the socket to complete the transaction.
+//
+//    (KDS: This design is very specific to CCSM/CAM and is hardcoded for
+//          that prototype.  This needs to be redesigned to be more generic.)
+//    (KDS: Also, getting one value for a specific time/lat/lon is really
+//          inefficient and not practical.  There needs to be a way to handle
+//          more data values at a time.)
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing GetData\n");
+	//printf("\n\nSERVER: processing GetData\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 	int	numFiles = 0;
@@ -691,12 +966,12 @@ void  PassThruSvr::processGetData()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	char	varName[256];
 	theSocket.read(bytesRead, buf);
 	strncpy(varName, (char*)buf, 255);
-//printf("Var Name: %s\n", varName);
+	//printf("Var Name: %s\n", varName);
 
 	//***
 	// These next values are read as strings and then converted to double values
@@ -706,19 +981,19 @@ printf("Client ID: %d\n", clientId);
 	// Read time
 	theSocket.read(bytesRead, buf);
 	strncpy(tempValue, (char*)buf, 255);
-//printf("Time: %s\n", tempValue);
+	//printf("Time: %s\n", tempValue);
 	double	timeValue = atof(tempValue);
 
 	// Read lat
 	theSocket.read(bytesRead, buf);
 	strncpy(tempValue, (char*)buf, 255);
-//printf("Lat: %s\n", tempValue);
+	//printf("Lat: %s\n", tempValue);
 	double	latValue = atof(tempValue);
 
 	// Read lon
 	theSocket.read(bytesRead, buf);
 	strncpy(tempValue, (char*)buf, 255);
-//printf("Lon: %s\n", tempValue);
+	//printf("Lon: %s\n", tempValue);
 	double	lonValue = atof(tempValue);
 
 	//***
@@ -726,8 +1001,8 @@ printf("Client ID: %d\n", clientId);
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -743,7 +1018,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
 	//***
 	// If the data files (to be added to ClientInfo) have not been retrieved
@@ -752,8 +1027,9 @@ clientInfo->print();
 	//***
 	if (theOutputFile == NULL)
 	{
-		theOutputFile = new CAMOutputFile(theCAMDir + 
-													 "/camrun.cam2.rh0.0000-01-02-00000.nc");
+		theOutputFile = new ESMCI_WebServCAMOutputFile(
+										theCAMDir + 
+										"/camrun.cam2.rh0.0000-01-02-00000.nc");
 
 		//***
 		// KDS: Make call to component server to get filenames... set status 
@@ -769,7 +1045,7 @@ clientInfo->print();
                                                     timeValue, 
                                                     latValue, 
                                                     lonValue);
-//printf("Data Value: %e\n", dataValue);
+	//printf("Data Value: %e\n", dataValue);
 
 	//***
 	// Write the data back to the client
@@ -787,14 +1063,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processEnd()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processEnd()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processEnd()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processEnd(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to end a client session.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    The client information is deleted from the list of clients, and finally,
+//    the component status is written to the socket to complete the
+//    transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing End\n");
+	//printf("\n\nSERVER: processing End\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -807,15 +1101,15 @@ void  PassThruSvr::processEnd()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -826,12 +1120,12 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 	status = clientInfo->status();
 
-	CompSvrClient	client(clientInfo->serverHost().c_str(), 
-                         clientInfo->serverPort(), 
-                         clientInfo->clientId());
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
 
 	status = client.end();
 	clientInfo->setStatus(status);
@@ -852,23 +1146,53 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  PassThruSvr::processPing()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processPing()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processPing()
+//
+// !INTERFACE:
+void  ESMCI_WebServPassThruSvr::processPing(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to ping the service.  Doesn't actually do anything.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	printf("\n\nSERVER: processing Ping\n");
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  PassThruSvr::getNextClientId()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::getNextClientId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::getNextClientId()
+//
+// !INTERFACE:
+int  ESMCI_WebServPassThruSvr::getNextClientId(
+//
+// !RETURN VALUE:
+//    int  the next available client identifier
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Increments the next client identifier value by one and returns the
+//    new value.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	int	nextClientId = theNextClientId;
 
@@ -876,3 +1200,5 @@ int  PassThruSvr::getNextClientId()
 
 	return nextClientId;
 }
+
+} // end namespace

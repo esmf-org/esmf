@@ -1,9 +1,22 @@
-/*
- *
- */
+// $Id: ESMCI_WebServPassThruSvr.h,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
-#ifndef _PassThruSvr_h_
-#define _PassThruSvr_h_
+#ifndef ESMCI_WebServPassThruSvr_H
+#define ESMCI_WebServPassThruSvr_H
 
 #include "ESMCI_WebServServerSocket.h"
 #include "ESMCI_WebServClientSocket.h"
@@ -14,54 +27,86 @@
 
 using namespace std;
 
+//-------------------------------------------------------------------------
+//BOPI
+// !CLASS: ESMCI::ESMCI_WebServPassThruSvr
+//
+// !DESCRIPTION:
+//
+// The code in this file defines the C++ PassThruSvr members and method
+// signatures (prototypes).  The companion file ESMCI\_WebServPassThruSvr.C
+// contains the full code (bodies) for the PassThruSvr methods.
+//
+// This class provides the basic functionality setting up Process Controller
+// Service, which essentially just passes requests from its client on to an
+// ESMF Component Service (implemented with the ESMCI_ComponentSvr class).
+//
+//EOPI
+//-------------------------------------------------------------------------
 
-class PassThruSvr 
+namespace ESMCI
 {
-public:
 
-	PassThruSvr(int     port, 
-               string  camDir);
-	~PassThruSvr();
+  class ESMCI_WebServPassThruSvr 
+  {
+  public:
 
-	int  getPort()		{ return thePort; }
-	void setPort(int  port);
+     // constructor and destructor
+	  ESMCI_WebServPassThruSvr(int     port, 
+                              string  camDir);
+	  ~ESMCI_WebServPassThruSvr();
 
-	void requestLoop();
+     // port number access methods
+	  int  getPort()		{ return thePort; }
+	  void setPort(int  port);
 
-
-private:
-
-	int  getNextRequest();
-	int  serviceRequest(int  request);
-
-	int   getRequestId(const char  request[]);
-	char* getRequestFromId(int  id);
-
-	void  processNew();
-	void  processInit();
-	void  processRun();
-	void  processFinal();
-	void  processState();
-	void  processFiles();
-	void  processGetData();
-	void  processEnd();
-	void  processPing();
-
-	int  getNextClientId();
-
-	int				thePort;
-	char				theMsg[8192];
-	ServerSocket	theSocket;
-
-	char*				theStatus;
-	ClientSocket	theSyncSocket;
-
-	map<int, ClientInfo*>	theClients;
-	int							theNextClientId;
-
-	string			theCAMDir;
-	CAMOutputFile*	theOutputFile;
-};
+     // method to setup socket service loop
+	  void requestLoop();
 
 
-#endif
+  private:
+
+     // methods to handle incoming requests
+	  int  getNextRequest();
+	  int  serviceRequest(int  request);
+
+	  int   getRequestId(const char  request[]);
+	  char* getRequestFromId(int  id);
+
+     // process request methods
+	  void  processNew();
+	  void  processInit();
+	  void  processRun();
+	  void  processFinal();
+	  void  processState();
+	  void  processFiles();
+	  void  processGetData();
+	  void  processEnd();
+	  void  processPing();
+
+     // internal data access methods
+	  int  getNextClientId();
+
+	  int				thePort;			// the port number of the socket service
+
+	  ESMCI_WebServServerSocket	theSocket;		// the server socket
+
+     // list of client sessions and counter to keep track of the next
+     // available client session id
+	  map<int, ESMCI_WebServClientInfo*>	theClients;
+	  int												theNextClientId;
+
+     //***
+     // These data members are specific to the CCSM/CAM Component Service...
+     // we should probably abstract this capability
+     //***
+	  string				theCAMDir;			// the directory where the CAM output
+                                       // files can be found
+	  ESMCI_WebServCAMOutputFile*	
+							theOutputFile;		// the CAM output file
+  };
+
+} // end namespace
+
+
+#endif 	// ESMCI_WebServPassThruSvr_H

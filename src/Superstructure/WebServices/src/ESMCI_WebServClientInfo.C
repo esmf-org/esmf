@@ -1,3 +1,29 @@
+// $Id: ESMCI_WebServClientInfo.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_WebServClientInfo.C"
+//==============================================================================
+//
+// ESMC WebServClientInfo method implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ ClientInfo methods declared
+// in the companion file ESMCI_WebServClientInfo.h.  This code
+// provides access methods for the client session information.
+//
+//-----------------------------------------------------------------------------
+
 #include "ESMCI_WebServClientInfo.h"
 #include "ESMCI_WebServNetEsmf.h"
 #include <string>
@@ -5,13 +31,47 @@
 
 using namespace std;
 
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_WebServClientInfo.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+//-----------------------------------------------------------------------------
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-ClientInfo::ClientInfo(int  clientId)
+//-----------------------------------------------------------------------------
+#define VERBOSITY             (1)       // 0: off, 10: max
+//-----------------------------------------------------------------------------
+
+
+namespace ESMCI
+{
+
+//-----------------------------------------------------------------------------
+//
+// constructor and destructor
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::ESMCI_WebServClientInfo()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::ESMCI_WebServClientInfo()
+//
+// !INTERFACE:
+ESMCI_WebServClientInfo::ESMCI_WebServClientInfo(
+//
+//
+// !ARGUMENTS:
+//
+  int  clientId	// the client session id
+  )
+//
+// !DESCRIPTION:
+//    Setup the initial default values for the client session information.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theClientId = clientId;
 	theCurrentStatus = NET_ESMF_STAT_IDLE;
@@ -20,71 +80,166 @@ ClientInfo::ClientInfo(int  clientId)
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-ClientInfo::~ClientInfo()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::~ESMCI_WebServClientInfo()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::~ESMCI_WebServClientInfo()
+//
+// !INTERFACE:
+ESMCI_WebServClientInfo::~ESMCI_WebServClientInfo(
+//
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Destroy any memory allocated for this class... essentially do nothing,
+//    for now.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  ClientInfo::setStatus(int  status)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::setStatus()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::setStatus()
+//
+// !INTERFACE:
+void  ESMCI_WebServClientInfo::setStatus(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  int  status		// the status value 
+  )
+//
+// !DESCRIPTION:
+//    Sets the status for the client session.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theCurrentStatus = status;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  ClientInfo::setServerHost(string  serverHost)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::setServerHost()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::setServerHost()
+//
+// !INTERFACE:
+void  ESMCI_WebServClientInfo::setServerHost(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  string  serverHost		// the name of the host machine to which the client 
+  								// is connected
+  )
+//
+// !DESCRIPTION:
+//    Sets the server host name for the client session.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theServerHost = serverHost;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  ClientInfo::setServerPort(int  serverPort)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::setServerPort()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::setServerPort()
+//
+// !INTERFACE:
+void  ESMCI_WebServClientInfo::setServerPort(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  int  serverPort		// the port number to which the client session is
+  							// connected
+  )
+//
+// !DESCRIPTION:
+//    Sets the server port number for the client session.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theServerPort = serverPort;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  ClientInfo::addOutputFile(string  outputFile)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::addOutputFile()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::addOutputFile()
+//
+// !INTERFACE:
+void  ESMCI_WebServClientInfo::addOutputFile(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  string  outputFile		// the name of the output file to add to the list
+  								// of output files
+  )
+//
+// !DESCRIPTION:
+//    Adds the output filename to the list of output files for the client 
+//    session.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theOutputFiles.push_back(outputFile);
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  ClientInfo::print()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServClientInfo::print()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServClientInfo::print()
+//
+// !INTERFACE:
+void  ESMCI_WebServClientInfo::print(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Prints the data values for this class.  For debug purposes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	cout << "***** BEGIN ClientInfo *****" << endl;
+	cout << "***** BEGIN ESMCI_WebServClientInfo *****" << endl;
 	cout << "Client ID       : " << theClientId << endl;
 	cout << "Status          : " << theCurrentStatus << endl;
 	cout << "Server Host     : " << theServerHost << endl;
 	cout << "Server Port     : " << theServerPort << endl;
-	cout << "*****  END ClientInfo  *****" << endl;
+	cout << "*****  END ESMCI_WebServClientInfo  *****" << endl;
 }
+
+
+} // end namespace

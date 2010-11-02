@@ -1,3 +1,30 @@
+// $Id: ESMCI_WebServNetEsmfServer.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_WebServNetEsmfServer.C"
+//==============================================================================
+//
+// ESMC WebServNetEsmfServer method implementation (body) file
+//
+//-----------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ NetEsmfServer methods declared
+// in the companion file ESMCI_WebServNetEsmfServer.h.  This code
+// provides the functionality needed to implement an ESMF component (grid
+// or coupler) as a network-accessible service.
+//
+//-----------------------------------------------------------------------------
+
 #include "ESMCI_WebServNetEsmfServer.h"
 
 #include <errno.h>
@@ -16,6 +43,10 @@
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_IO_NetCDF.h"
 
+//***
+// KDS: I think this section is going to have to move to a new file in the
+//      interface directory
+//***
 extern "C"
 {
 	void FTN(f_esmf_processinit)(ESMCI::GridComp*  comp,
@@ -40,14 +71,43 @@ extern "C"
                                  int*              rc);
 };
 
-using namespace ESMCI;
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-NetEsmfServer::NetEsmfServer(int  port)
+//-----------------------------------------------------------------------------
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_WebServNetEsmfServer.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#define VERBOSITY             (1)       // 0: off, 10: max
+//-----------------------------------------------------------------------------
+
+
+namespace ESMCI
+{
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::ESMCI_WebServNetEsmfServer()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::ESMCI_WebServNetEsmfServer()
+//
+// !INTERFACE:
+ESMCI_WebServNetEsmfServer::ESMCI_WebServNetEsmfServer(
+//
+//
+// !ARGUMENTS:
+//
+  int  port		// (in) the port number on which to setup the socket service 
+  					// to listen for requests
+  )
+//
+// !DESCRIPTION:
+//    Initialize the ESMF Component service with the default values as well
+//    as the specified port number.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theStatus = (char*)NET_ESMF_STAT_IDLE;
 	theNextClientId = 101;
@@ -56,41 +116,94 @@ NetEsmfServer::NetEsmfServer(int  port)
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-NetEsmfServer::~NetEsmfServer()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::~ESMCI_WebServNetEsmfServer()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::~ESMCI_WebServNetEsmfServer()
+//
+// !INTERFACE:
+ESMCI_WebServNetEsmfServer::~ESMCI_WebServNetEsmfServer(
+//
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Cleanup the component service.  For now, all this involves is making
+//    sure the socket is disconnected.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	theSocket.disconnect();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::setPort(int  port)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::setPort()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::setPort()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::setPort(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  int  port		// (in) number of the port on which component service listens 
+  					// for requests
+  )
+//
+// !DESCRIPTION:
+//    Sets the number of the port on which the component service listens
+//    for requests.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	thePort = port;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::requestLoop(ESMCI::GridComp*   comp,
-                                 ESMCI::State*      importState,
-                                 ESMCI::State*      exportState,
-                                 ESMCI::Clock*      clock,
-                                 int                phase,
-                                 ESMC_BlockingFlag  blockingFlag)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::requestLoop()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::requestLoop()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::requestLoop(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  ESMCI::GridComp*   comp,				// (in) the grid component
+  ESMCI::State*      importState,	// (in) import state 
+  ESMCI::State*      exportState,	// (in) export state
+  ESMCI::Clock*      clock,			// (in) clock
+  int                phase,			// (in) phase
+  ESMC_BlockingFlag  blockingFlag	// (in) blocking flag
+  )
+//
+// !DESCRIPTION:
+//    Sets up a socket service for a grid component server to handle client 
+//    requests.  The input parameters are all saved for later use when the 
+//    client makes requests of the server to initalize, run, and finalize.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-printf("NetEsmfServer::grid requestLoop()\n");
+	printf("NetEsmfServer::grid requestLoop()\n");
+
+	//***
+	// Save the input parameters... these are used later when the client 
+	// wants to execute the initialize, run and finalize procedures
+	//***
 	theCompType = ESMC_COMPTYPE_GRID;
 
 	theGridComp = comp;
@@ -100,12 +213,22 @@ printf("NetEsmfServer::grid requestLoop()\n");
 	thePhase = phase;
 	theBlockingFlag = blockingFlag;
 	
-comp->print("");
+	//comp->print("");
+
+	//***
+	// Setup the server socket
+	//***
 	if (theSocket.connect(thePort) < 0)
 	{
+		// KDS: need to do error handling here
 		return;
 	}
 
+	//***
+	// Enter into a loop that waits for a client request and processes the
+	// requests as they come in.  This loop continues until the client sends
+	// an exit request (this isn't currently used).
+	//***
 	int	request;
 
 	do
@@ -116,19 +239,41 @@ comp->print("");
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::requestLoop(ESMCI::CplComp*    comp,
-                                 ESMCI::State*      importState,
-                                 ESMCI::State*      exportState,
-                                 ESMCI::Clock*      clock,
-                                 int                phase,
-                                 ESMC_BlockingFlag  blockingFlag)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::requestLoop()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::requestLoop()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::requestLoop(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  ESMCI::CplComp*    comp,				// (in) the coupler component
+  ESMCI::State*      importState,	// (in) import state 
+  ESMCI::State*      exportState,	// (in) export state
+  ESMCI::Clock*      clock,			// (in) clock
+  int                phase,			// (in) phase
+  ESMC_BlockingFlag  blockingFlag	// (in) blocking flag
+  )
+//
+// !DESCRIPTION:
+//    Sets up a socket service for a coupler component server to handle client 
+//    requests.  The input parameters are all saved for later use when the 
+//    client makes requests of the server to initalize, run, and finalize.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-printf("NetEsmfServer::coupler requestLoop()\n");
+	printf("NetEsmfServer::coupler requestLoop()\n");
+
+	//***
+	// Save the input parameters... these are used later when the client 
+	// wants to execute the initialize, run and finalize procedures
+	//***
 	theCompType = ESMC_COMPTYPE_COUPLER;
 
 	theCouplerComp = comp;
@@ -138,12 +283,21 @@ printf("NetEsmfServer::coupler requestLoop()\n");
 	thePhase = phase;
 	theBlockingFlag = blockingFlag;
 	
-comp->print("");
+	//comp->print("");
+
+	//***
+	// Setup the server socket
+	//***
 	if (theSocket.connect(thePort) < 0)
 	{
 		return;
 	}
 
+	//***
+	// Enter into a loop that waits for a client request and processes the
+	// requests as they come in.  This loop continues until the client sends
+	// an exit request (this isn't currently used).
+	//***
 	int	request;
 
 	do
@@ -154,16 +308,39 @@ comp->print("");
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  NetEsmfServer::getNextRequest()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::getNextRequest()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::getNextRequest()
+//
+// !INTERFACE:
+int  ESMCI_WebServNetEsmfServer::getNextRequest(
+//
+// !RETURN VALUE:
+//    int  id of the client request (defined in ESMCI_WebServNetEsmf.h)
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Listens on a server socket for client requests, and as the requests
+//    arrive, reads the request id from the socket and returns it.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("NetEsmfServer::getNextRequest()\n");
+	//printf("NetEsmfServer::getNextRequest()\n");
+
+	//***
+	// Wait for client requests
+	//***
 	theSocket.accept();
 
+	//***
+	// Read the request id string from the socket
+	//***
 	int	n;
 	char	requestStr[50];
 
@@ -171,18 +348,37 @@ int  NetEsmfServer::getNextRequest()
 
 	//printf("SERVER: request: %s\n", requestStr);
 
+	//***
+	// Convert the string to a valid request id
+	//***
 	return getRequestId(requestStr);
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  NetEsmfServer::serviceRequest(int  request)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::serviceRequest()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::serviceRequest()
+//
+// !INTERFACE:
+int  ESMCI_WebServNetEsmfServer::serviceRequest(
+//
+// !RETURN VALUE:
+//    int  id of the client request (the same value that's passed in)
+//
+// !ARGUMENTS:
+//
+  int  request		// id of the client request
+  )
+//
+// !DESCRIPTION:
+//    Calls the appropriate process method based on the client request id.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("NetEsmfServer::serviceRequest()\n");
+	//printf("NetEsmfServer::serviceRequest()\n");
 	strcpy(theMsg, "OK");
 
 	switch (request)
@@ -223,26 +419,36 @@ int  NetEsmfServer::serviceRequest(int  request)
 		break;
 	}
 
-//printf("Sending msg: %s\n", theMsg);
-
-	if (request != NET_ESMF_NEW)
-	{
-		//theSocket.send(theMsg);
-	}
 	theSocket.close();
 
 	return request;
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  NetEsmfServer::getRequestId(const char  request[])
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::getRequestId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::getRequestId()
+//
+// !INTERFACE:
+int  ESMCI_WebServNetEsmfServer::getRequestId(
+//
+// !RETURN VALUE:
+//    int  id of the request based on the specified string
+//
+// !ARGUMENTS:
+//
+  const char  request[]	// request string for which the id is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request id based on a specified string value.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("NetEsmfServer::getRequestId()\n");
+	//printf("NetEsmfServer::getRequestId()\n");
 	if (strcmp(request, "NEW")   == 0)	return NET_ESMF_NEW;
 	if (strcmp(request, "EXIT")  == 0)	return NET_ESMF_EXIT;
 	if (strcmp(request, "INIT")  == 0)	return NET_ESMF_INIT;
@@ -257,14 +463,30 @@ int  NetEsmfServer::getRequestId(const char  request[])
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-char*  NetEsmfServer::getRequestFromId(int  id)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::getRequestFromId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::getRequestFromId()
+//
+// !INTERFACE:
+char*  ESMCI_WebServNetEsmfServer::getRequestFromId(
+//
+// !RETURN VALUE:
+//    char*  string value for the specified request id
+//
+// !ARGUMENTS:
+//
+  int  id		// request id for which the string value is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request string value based on a specified request id.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-//printf("NetEsmfServer::getRequestFromId()\n");
+	//printf("NetEsmfServer::getRequestFromId()\n");
 	switch (id)
 	{
 	case NET_ESMF_EXIT:	return (char*)"EXIT";
@@ -283,12 +505,29 @@ char*  NetEsmfServer::getRequestFromId(int  id)
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processNew()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processNew()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processNew()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processNew(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request for a new client session.  This method reads the
+//    client name from the socket, generates a new client id, creates a new 
+//    client info object and adds it to the list of clients, and then writes 
+//    the new client id to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	printf("\n\nSERVER: processing New\n");
 
@@ -298,16 +537,15 @@ void  NetEsmfServer::processNew()
 	int	bytesRead = 0;
 	char	buf[1024];
 	theSocket.read(bytesRead, buf);
-printf("Buffer: %s\n", buf);
 
 	//***
 	// Generate a new client id and add the new client to the collection 
 	// of clients
 	//***
-	int			clientId = getNextClientId();
-	ClientInfo*	newClient = new ClientInfo(clientId);
-	theClients[clientId] = newClient;
+	int								clientId = getNextClientId();
+	ESMCI_WebServClientInfo*	newClient = new ESMCI_WebServClientInfo(clientId);
 
+	theClients[clientId] = newClient;
 	newClient->setStatus(NET_ESMF_STAT_READY);
 
 	//***
@@ -319,14 +557,37 @@ printf("Network client id: %d\n", netClientId);
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processInit()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processInit()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processInit()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processInit(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to initialize the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    It then reads the names of input files (if any) from the socket and
+//    imports the input file contents into an ESMF import state object.  
+//    Next, the component initialization routine is called, and finally, the
+//    component status is written to the socket to complete the transaction.
+//
+//    (KDS: The whole import file stuff is still "iffy"... it works, but the
+//          file has to be locally accessible... and I currently only support
+//          one input file.)
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Init\n");
+	//printf("\n\nSERVER: processing Init\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -339,7 +600,7 @@ void  NetEsmfServer::processInit()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Get the number of files (should be either 0 or 1)... if there's 1, then
@@ -349,13 +610,13 @@ printf("Client ID: %d\n", clientId);
 
    int	numFiles = ntohl(*((unsigned int*)buf));
 	char	filename[1024];
-printf("Num Files: %d\n", numFiles);
+	//printf("Num Files: %d\n", numFiles);
 
 	if (numFiles > 0)
 	{
 		theSocket.read(bytesRead, buf);
 		strcpy(filename, (char*)buf);
-printf("Filename: %s\n", filename);
+		//printf("Filename: %s\n", filename);
 	}
 
 	//***
@@ -363,8 +624,8 @@ printf("Filename: %s\n", filename);
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -375,7 +636,7 @@ printf("Filename: %s\n", filename);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
 	//***
 	// If a filename was specified, create the import state object
@@ -405,7 +666,7 @@ clientInfo->print();
 												ESMC_NULL_POINTER,
 												&rc);
 
-printf("Reading file: %s\n", localFilename);
+			//printf("Reading file: %s\n", localFilename);
 			netCdfFile->read(strlen(localFilename), localFilename);
 
 			//***
@@ -438,32 +699,25 @@ printf("Reading file: %s\n", localFilename);
 	int	rc = 0;
 	if (theCompType == ESMC_COMPTYPE_GRID)
 	{
-printf("initializing a grid component\n");
-/*
-		theGridComp->initialize(theImportState, 
-                              theExportState, 
-                              theClock, 
-                              thePhase, 
-                              &rc);
-*/
+		//printf("initializing a grid component\n");
       FTN(f_esmf_processinit)(theGridComp,
                               theImportState, 
                               theExportState, 
                               theClock, 
                               thePhase, 
                               &rc);
-printf("Return code: %d\n", rc);
+		//printf("Return code: %d\n", rc);
 	}
 	else if (theCompType == ESMC_COMPTYPE_COUPLER)
 	{
-printf("initializing a coupler component\n");
+		//printf("initializing a coupler component\n");
 		theCouplerComp->initialize(theImportState, 
                                  theExportState, 
                                  theClock, 
                                  thePhase, 
                                  &rc);
 	}
-printf("Initialize Status: %d\n", rc);
+	//printf("Initialize Status: %d\n", rc);
 
 	clientInfo->setStatus(NET_ESMF_STAT_INIT_DONE);
 
@@ -475,18 +729,35 @@ printf("Initialize Status: %d\n", rc);
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
 	theSocket.write(4, &netStatus);
-clientInfo->print();
+	// clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processRun()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processRun()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processRun()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processRun(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to run the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    Next, the component run routine is called, and finally, the
+//    component status is written to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Run\n");
+	//printf("\n\nSERVER: processing Run\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -499,15 +770,15 @@ void  NetEsmfServer::processRun()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -518,7 +789,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
 	//***
 	// Call the component run
@@ -528,13 +799,6 @@ clientInfo->print();
 	int	rc = 0;
 	if (theCompType == ESMC_COMPTYPE_GRID)
 	{
-/*
-		theGridComp->run(theImportState, 
-                       theExportState, 
-                       theClock, 
-                       thePhase, 
-                       &rc);
-*/
       FTN(f_esmf_processrun)(theGridComp,
                              theImportState, 
                              theExportState, 
@@ -564,14 +828,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processFinal()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processFinal()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processFinal()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processFinal(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to finalize the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    Next, the component finalize routine is called, and then the export 
+//    state is written to a netcdf file.  Finally, the component status is 
+//    written to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Final\n");
+	//printf("\n\nSERVER: processing Final\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -584,15 +866,15 @@ void  NetEsmfServer::processFinal()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -603,7 +885,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
 	//***
 	// Set the status to indicate that the service is busy right now
@@ -640,7 +922,7 @@ clientInfo->print();
 		netCdfFile->setState(theExportState);
 		//theExportState->print();
 
-printf("Writing file: %s\n", localFilename);
+		//printf("Writing file: %s\n", localFilename);
 		netCdfFile->write(strlen(localFilename), localFilename);
 
 		ESMCI_IO_NetCDFDestroy(&netCdfFile);
@@ -655,13 +937,6 @@ printf("Writing file: %s\n", localFilename);
 	int	rc = 0;
 	if (theCompType == ESMC_COMPTYPE_GRID)
 	{
-/*
-		theGridComp->finalize(theImportState, 
-                            theExportState, 
-                            theClock, 
-                            thePhase, 
-                            &rc);
-*/
       FTN(f_esmf_processfinal)(theGridComp,
                                theImportState, 
                                theExportState, 
@@ -724,14 +999,31 @@ printf("Writing file: %s\n", localFilename);
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processState()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processState()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processState()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processState(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to retrieve the component state.  This method 
+//    reads the client id from the socket and uses it to lookup the client 
+//    information. The component state is retrieved from the client 
+//    information and is written to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing State\n");
+	//printf("\n\nSERVER: processing State\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -744,15 +1036,15 @@ void  NetEsmfServer::processState()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -763,7 +1055,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
 	//***
 	// Send the current state back to the client (use the return code from
@@ -776,14 +1068,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processFiles()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processFiles()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processFiles()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processFiles(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to retrieve the export filenames.  This method 
+//    reads the client id from the socket and uses it to lookup the client 
+//    information. Next, list of export files is retrieved from the client 
+//    information and is written out to the socket.  Finally, the component 
+//    status is written to the socket to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Files\n");
+	//printf("\n\nSERVER: processing Files\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 	int	numFiles = 0;
@@ -797,15 +1107,15 @@ void  NetEsmfServer::processFiles()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -821,7 +1131,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
 	//***
 	// Write the file information back to the client
@@ -856,14 +1166,32 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processEnd()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processEnd()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processEnd()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processEnd(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to end a client session.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    The client information is deleted from the list of clients, and finally,
+//    the component status is written to the socket to complete the 
+//    transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing End\n");
+	//printf("\n\nSERVER: processing End\n");
 
 	int	status = NET_ESMF_STAT_IDLE;
 
@@ -876,15 +1204,15 @@ void  NetEsmfServer::processEnd()
 	theSocket.read(bytesRead, buf);
 
    int	clientId = ntohl(*((unsigned int*)buf));
-printf("Client ID: %d\n", clientId);
+	//printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
 	//***
-	map<int, ClientInfo*>::iterator	iter;
-	ClientInfo*								clientInfo = NULL;
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
@@ -895,7 +1223,7 @@ printf("Client ID: %d\n", clientId);
 	}
 
 	clientInfo = iter->second;
-clientInfo->print();
+	//clientInfo->print();
 
    //***
    // Remove the client from the collection of clients
@@ -914,23 +1242,53 @@ clientInfo->print();
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::processPing()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::processPing()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::processPing()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::processPing(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to ping the service.  Doesn't actually do anything.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	printf("\n\nSERVER: processing Ping\n");
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-int  NetEsmfServer::getNextClientId()
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::getNextClientId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::getNextClientId()
+//
+// !INTERFACE:
+int  ESMCI_WebServNetEsmfServer::getNextClientId(
+//
+// !RETURN VALUE:
+//    int  the next available client identifier
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Increments the next client identifier value by one and returns the
+//    new value.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	int	nextClientId = theNextClientId;
 
@@ -940,13 +1298,28 @@ int  NetEsmfServer::getNextClientId()
 }
 
 
-/*
-*****************************************************************************
-**
-*****************************************************************************
-*/
-void  NetEsmfServer::copyFile(const char*  srcFilename,
-                              const char*  destFilename)
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfServer::copyFile()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfServer::copyFile()
+//
+// !INTERFACE:
+void  ESMCI_WebServNetEsmfServer::copyFile(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  const char*  srcFilename,	// the name of the file to copy
+  const char*  destFilename	// the name of the destination file
+  )
+//
+// !DESCRIPTION:
+//    Copies the source file to the destination file.
+//
+//EOPI
+//-----------------------------------------------------------------------------
 {
 	fstream	fin(srcFilename, ios::in | ios::binary);
 	fstream	fout(destFilename, ios::out | ios::binary);
@@ -964,3 +1337,5 @@ void  NetEsmfServer::copyFile(const char*  srcFilename,
 		fout.put(c);
 	}
 }
+
+} // end namespace

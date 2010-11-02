@@ -1,13 +1,31 @@
-/*
- *
- */
+// $Id: ESMCI_WebServNetEsmf.h,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
-#ifndef _NetEsmf_h_
-#define _NetEsmf_h_
+#ifndef ESMCI_WebServNetEsmf_H
+#define ESMCI_WebServNetEsmf_H
 
 
+namespace ESMCI
+{
+
+// Default port number for socket service... really shouldn't use this
 #define NET_ESMF_PORT	27001
 
+// Request identifiers
 #define NET_ESMF_EXIT			10
 #define NET_ESMF_NEW	   		15
 #define NET_ESMF_INIT			20
@@ -23,6 +41,7 @@
 #define NET_ESMF_END				40
 #define NET_ESMF_UNKN			50
 
+// State values
 #define NET_ESMF_STAT_IDLE				0
 #define NET_ESMF_STAT_READY			1
 #define NET_ESMF_STAT_BUSY				2
@@ -36,4 +55,6 @@
 #define NET_ESMF_STAT_ERROR			99
 
 
-#endif
+} // end namespace
+
+#endif 	// ESMCI_WebServNetEsmf_H

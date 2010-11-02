@@ -1,56 +1,96 @@
-/*
- *
- */
+// $Id: ESMCI_WebServRegistrarClient.h,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+//-------------------------------------------------------------------------
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
+// these lines prevent this file from being read more than once if it
+// ends up being included multiple times
 
-#ifndef _RegistrarClient_h_
-#define _RegistrarClient_h_
+#ifndef ESMCI_WebServRegistrarClient_H
+#define ESMCI_WebServRegistrarClient_H
 
 #include <stdlib.h>
 
 #include "ESMCI_WebServClientSocket.h"
 
+//-------------------------------------------------------------------------
+//BOPI
+// !CLASS: ESMCI::ESMCI_WebServRegistrarClient
+//
+// !DESCRIPTION:
+//
+// The code in this file defines the C++ RegistrarClient members and method
+// signatures (prototypes).  The companion file ESMCI\_WebServRegistrarClient.C
+// contains the full code (bodies) for the RegistrarClient methods.
+//
+// This class provides the capability to connect and communicate with a
+// Registrar service.
+//
+//EOPI
+//-------------------------------------------------------------------------
 
+// The default port number for the Registrar
 #define REGISTRAR_PORT	45002
 
-
-class RegistrarClient 
+namespace ESMCI
 {
-public:
 
-	RegistrarClient(const char*  host,
-                   int          port);
-	~RegistrarClient();
+  class ESMCI_WebServRegistrarClient 
+  {
+  public:
 
-	void setHost(const char*  host);
-	void setPort(int  port);
+     // constructor and destructor
+	  ESMCI_WebServRegistrarClient(const char*  host,
+                                  int          port);
+	  ~ESMCI_WebServRegistrarClient();
 
-	int  sendRequest(int    request,
-                    int    length = 0,
-                    void*  data = NULL);
-	int  getResponse(int    request,
-                    int&   length,
-                    void*  data);
+     // methods to setup the connection parameters
+	  void setHost(const char*  host);
+	  void setPort(int  port);
 
-	int  registerComp(char*  name,
-                     char*  desc,
-                     char*  hostName,
-                     char*  portNum,
-                     void*  retValue);
-	int  unregisterComp(char*  name,
+     // low-level methods to communicate across the socket
+	  int  sendRequest(int    request,
+                      int    length = 0,
+                      void*  data = NULL);
+
+	  int  getResponse(int    request,
+                      int&   length,
+                      void*  data);
+
+	  int  connect();
+	  void disconnect();
+
+     // methods to send client requests to the server
+	  int  registerComp(char*  name,
+                       char*  desc,
                        char*  hostName,
                        char*  portNum,
                        void*  retValue);
 
-	int  connect();
-	void disconnect();
+	  int  unregisterComp(char*  name,
+                         char*  hostName,
+                         char*  portNum,
+                         void*  retValue);
 
-private:
+  private:
 
-	char*				theHost;
-	int				thePort;
-	char				theMsg[8192];
-	ClientSocket	theSocket;
-};
+	  char*			theHost;			// the name of the machine that hosts the svc
+	  int				thePort;			// the port number for the service
+	  char			theMsg[8192];	// the message buffer
 
+	  ESMCI_WebServClientSocket		
+						theSocket;		// the socket connection to the service
+  };
 
-#endif
+} // end namespace
+
+#endif 	// ESMCI_WebServRegistrarClient_H

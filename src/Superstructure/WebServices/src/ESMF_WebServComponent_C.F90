@@ -1,0 +1,214 @@
+! $Id: ESMF_WebServComponent_C.F90,v 1.1 2010/11/02 18:36:04 ksaint Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+#define ESMC_FILENAME "ESMCI_WebServComponent_C.F90"
+!==============================================================================
+!
+! ESMF Component module
+
+!
+!==============================================================================
+! A blank line to keep protex happy because there are no public entry
+! points in this file, only internal ones.
+!BOP
+
+!EOP
+!
+! This file provides the fortran subroutine interfaces to be called by the
+! c++ software for the purpose of executing the component initialize, run and 
+! finalize routines.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_processinit()"
+!BOPI
+! !IROUTINE: f_esmf_processinit 
+!
+! !INTERFACE:
+  subroutine f_esmf_processinit(comp, impstate, expstate, clock, phase, rc)
+    use ESMF_Mod
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_WebServMod
+
+    implicit none
+
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: impstate
+    type(ESMF_State) :: expstate
+    type(ESMF_Clock) :: clock
+    integer :: phase
+    integer, intent(out) :: rc
+!
+!
+! !DESCRIPTION:
+!   Processes the request to call the grid component initialization routine.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
+!   the routine is run.
+! \item[{[impstate]}]
+!   {\tt ESMF\_State} containing import data for coupling. 
+! \item[{[expstate]}]
+!   {\tt ESMF\_State} containing export data for coupling. 
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
+! \item[{[phase]}]
+!   Indicates whether routines are {\em single-phase} or {\em multi-phase}.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    character :: proctype
+    integer :: localrc
+
+    proctype = 'I'
+    call ESMF_WebServProcessRequest(comp, impstate, expstate, clock, phase, &
+                                    proctype, rc)
+    call ESMF_GridCompInitialize(comp, exportState=expState, rc=localrc)
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_processrun()"
+!BOPI
+! !IROUTINE: f_esmf_processrun 
+!
+! !INTERFACE:
+  subroutine f_esmf_processrun(comp, impstate, expstate, clock, phase, rc)
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_ClockMod
+    use ESMF_WebServMod
+
+    implicit none
+
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: impstate
+    type(ESMF_State) :: expstate
+    type(ESMF_Clock) :: clock
+    integer :: phase
+    integer, intent(out) :: rc
+!
+!
+! !DESCRIPTION:
+!   Processes the request to call the grid component run routine.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
+!   the routine is run.
+! \item[{[impstate]}]
+!   {\tt ESMF\_State} containing import data for coupling. 
+! \item[{[expstate]}]
+!   {\tt ESMF\_State} containing export data for coupling. 
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
+! \item[{[phase]}]
+!   Indicates whether routines are {\em single-phase} or {\em multi-phase}.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    character :: proctype
+    integer :: localrc
+
+    proctype = 'R'
+    call ESMF_WebServProcessRequest(comp, impstate, expstate, clock, phase, &
+                                    proctype, rc)
+    call ESMF_GridCompRun(comp, exportState=expState, rc=localrc)
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_processfinal()"
+!BOPI
+! !IROUTINE: f_esmf_processfinal 
+!
+! !INTERFACE:
+  subroutine f_esmf_processfinal(comp, impstate, expstate, clock, phase, rc)
+    use ESMF_CompMod
+    use ESMF_GridCompMod
+    use ESMF_StateMod
+    use ESMF_ClockMod
+    use ESMF_WebServMod
+
+    implicit none
+
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp) :: comp
+    type(ESMF_State) :: impstate
+    type(ESMF_State) :: expstate
+    type(ESMF_Clock) :: clock
+    integer :: phase
+    integer, intent(out) :: rc
+!
+!
+! !DESCRIPTION:
+!   Processes the request to call the grid component finalization routine.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
+!   the routine is run.
+! \item[{[impstate]}]
+!   {\tt ESMF\_State} containing import data for coupling. 
+! \item[{[expstate]}]
+!   {\tt ESMF\_State} containing export data for coupling. 
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
+! \item[{[phase]}]
+!   Indicates whether routines are {\em single-phase} or {\em multi-phase}.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    character :: proctype
+    integer :: localrc
+
+    proctype = 'F'
+    call ESMF_WebServProcessRequest(comp, impstate, expstate, clock, phase, &
+                                    proctype, rc)
+    call ESMF_GridCompFinalize(comp, exportState=expState, rc=localrc)
+
+  end subroutine
+!------------------------------------------------------------------------------
+
