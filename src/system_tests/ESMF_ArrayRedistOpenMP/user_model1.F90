@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2010/11/01 15:41:39 w6ws Exp $
+! $Id: user_model1.F90,v 1.4 2010/11/02 05:25:32 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -176,10 +176,11 @@ module user_model1
 !$  call omp_set_num_threads(peCount)
 
     ! Fill source Array with data
+    tid = 0
 !$omp parallel do  &
-!$omp& default(none) &
-!$omp& shared(farrayPtr, pi)  &
-!$omp& private(i, j, tid)
+!$omp& default (none)  &
+!$omp& shared  (farrayPtr, pi)  &
+!$omp& private (i, j, tid)
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
 !$    tid = omp_get_thread_num()
       print *, "user_model1.run(): tid = ", tid, " is working on column j = ", j
