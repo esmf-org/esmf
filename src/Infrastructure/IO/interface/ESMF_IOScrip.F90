@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.11 2010/11/02 00:26:02 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.12 2010/11/03 19:54:59 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -188,6 +188,61 @@
 #endif
 
 end subroutine ESMF_ScripInq
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ScripInqUnits"
+!BOPI
+! !ROUTINE: ESMF_ScripInqUnits: Return the units attribute for
+! coordinate variables, assuming all the coordinate variables
+! have the same units
+!
+! !INTERFACE:
+subroutine ESMF_ScripInqUnits(filename, units, rc)
+
+! !ARGUMENTS:
+
+    character(len=*), intent(in)   :: filename
+    character(len=*), intent(out)   :: units
+    integer, intent(out), optional :: rc
+
+    integer:: localrc, ncStatus
+    integer :: ncid, VarId, len
+    character(len=80) :: buffer
+
+#ifdef ESMF_NETCDF
+    if (present(rc)) rc=ESMF_SUCCESS
+    ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE, rc)) return
+
+    ncStatus = nf90_inq_varid (ncid, "grid_center_lat", VarId)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        rc)) return
+ 
+    ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        rc)) return
+    ncStatus = nf90_get_att(ncid, VarId, "units", buffer)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        rc)) return
+    units = buffer(1:len)
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+#else
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
+#endif
+
+    return
+end subroutine ESMF_ScripInqUnits
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ScripGetVar"
@@ -426,8 +481,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer(ESMF_KIND_I4), pointer:: indexbuf(:), next(:)
       integer(ESMF_KIND_I4), pointer:: mask(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
-      integer :: maxcount
       character(len=256) :: titlelocal, norm, map_method, conventions
+      character(len=80) :: srcunits, dstunits
+      integer :: maxcount
       logical :: srcIsScriplocal, dstIsScriplocal
       integer :: srcNodeDim, dstNodeDim, srcCoordDim, dstCoordDim
       integer, parameter :: nf90_noerror = 0
@@ -561,9 +617,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           allocate(src_grid_dims(2))
           call ESMF_ScripInq(srcFile, grid_rank=src_grid_rank, grid_size=srcDim, &
 	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, rc=status)
+          call ESMF_ScripInqUnits(srcFile,units = srcunits, rc=status)
         else
           call ESMF_EsmfInq(srcFile, elementCount=srcDim, maxNodePElement=src_grid_corner, &
 	      coordDim = srcCoordDim, nodeCount=srcNodeDim, rc=status)
+          call ESMF_EsmfInqUnits(srcFile,units = srcunits, rc=status)
           allocate(src_grid_dims(1))
           src_grid_dims(1)=1
           src_grid_rank = 1    
@@ -572,9 +630,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           allocate(dst_grid_dims(2))
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
 	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, rc=status)
+          call ESMF_ScripInqUnits(dstFile,units = dstunits, rc=status)
         else
           call ESMF_EsmfInq(dstFile, elementCount=dstDim, maxNodePElement=dst_grid_corner, &
 	      coordDim = dstCoordDim, nodeCount=dstNodeDim, rc=status)    
+          call ESMF_EsmfInqUnits(dstFile,units = dstunits, rc=status)
           allocate(dst_grid_dims(1))
           dst_grid_dims(1)=1   
           dst_grid_rank = 1
@@ -632,7 +692,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            rc)) return
 
         ! define variables
-
          ! Grid Dims
          ncStatus = nf90_def_var(ncid,"src_grid_dims",NF90_INT, (/srankDimId/),  VarId)
          if (CDFCheckError (ncStatus, &
@@ -652,7 +711,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -664,7 +723,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -676,7 +735,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -688,7 +747,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -700,7 +759,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -712,7 +771,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -724,7 +783,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -736,7 +795,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -760,7 +819,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         ncStatus = nf90_put_att(ncid, VarId, "units", "degrees")
+         ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
@@ -1421,6 +1480,62 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
 
     return
 end subroutine ESMF_EsmfInq
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_EsmfInqUnits"
+!BOPI
+! !ROUTINE: ESMF_EsmfInqUnits: Return the units attribute for
+! coordinate variables, assuming all the coordinate variables
+! have the same units
+!
+! !INTERFACE:
+subroutine ESMF_EsmfInqUnits(filename, units, rc)
+
+! !ARGUMENTS:
+
+    character(len=*), intent(in)   :: filename
+    character(len=*), intent(out)   :: units
+    integer, intent(out), optional :: rc
+
+    integer:: localrc, ncStatus
+    integer :: ncid, VarId, len
+    character(len=80) :: buffer
+
+#ifdef ESMF_NETCDF
+    if (present(rc)) rc=ESMF_SUCCESS
+    ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE, rc)) return
+
+    ncStatus = nf90_inq_varid (ncid, "vert_coords", VarId)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        rc)) return
+
+    ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        rc)) return
+
+    ncStatus = nf90_get_att(ncid, VarId, "units", buffer)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        rc)) return
+    units = buffer(1:len)
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+#else
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 "- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rc) 
+#endif
+
+    return
+end subroutine ESMF_EsmfInqUnits
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GetMeshFromFile"
