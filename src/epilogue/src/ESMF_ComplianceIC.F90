@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.15 2010/10/12 18:22:36 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.16 2010/11/03 04:57:42 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -10,13 +10,13 @@
 !-------------------------------------------------------------------------
 
 
-!TODO: make this macros available through ESMF_Mod as parameter or find other way
+!TODO: make this macros available through ESMF as parameter or find other way
 #define ESMF_INIT_CREATED 82949521
 
 module ESMF_ComplianceICMod
 
   ! ESMF module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
   
@@ -1432,7 +1432,7 @@ end module ESMF_ComplianceICMod
 ! The register routine of internal ICs must be available as an external routine
 
 recursive subroutine ESMF_ComplianceICRegister(comp, rc)
-  use ESMF_Mod
+  use ESMF
   use ESMF_ComplianceICMod
   implicit none
   type(ESMF_GridComp)   :: comp
