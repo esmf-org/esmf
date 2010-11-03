@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.19 2010/11/03 04:58:57 theurich Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.20 2010/11/03 22:48:52 theurich Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -32,7 +32,7 @@
 #define ESMF_METHOD "FieldRedistBlk2BlkSTest"
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     use ESMF_TestMod
     
     implicit none

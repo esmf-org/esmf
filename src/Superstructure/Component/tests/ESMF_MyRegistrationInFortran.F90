@@ -1,4 +1,4 @@
-! $Id: ESMF_MyRegistrationInFortran.F90,v 1.10 2010/11/03 04:58:54 theurich Exp $
+! $Id: ESMF_MyRegistrationInFortran.F90,v 1.11 2010/11/03 22:48:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 
 module myFortranIRFMod
 
-  use ESMF
+  use ESMF_Mod
 
 contains
   subroutine myInitInFortran(gcomp, importState, exportState, clock, rc)
@@ -99,7 +99,7 @@ end module
 
 
 subroutine my_RegistrationInFortran(gcomp, rc)
-  use ESMF
+  use ESMF_Mod
   use myFortranIRFMod
   implicit none
   type(ESMF_GridComp) :: gcomp
@@ -121,7 +121,7 @@ end subroutine
 
 
 subroutine my_CplRegistrationInFortran(cplcomp, rc)
-  use ESMF
+  use ESMF_Mod
   use myFortranIRFMod
   implicit none
   type(ESMF_CplComp) :: cplcomp

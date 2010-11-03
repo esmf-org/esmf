@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.40 2010/11/03 04:58:51 theurich Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.41 2010/11/03 22:48:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,13 +32,13 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod      ! test methods
-      use ESMF
+      use ESMF_Mod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.40 2010/11/03 04:58:51 theurich Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.41 2010/11/03 22:48:43 theurich Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &

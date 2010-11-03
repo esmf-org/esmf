@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.6 2010/11/03 04:58:50 theurich Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.7 2010/11/03 22:48:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_CubedSphereRegridEx
 
 ! !USES:
 !      use ESMF_TestMod     ! test methods
-      use ESMF
+      use ESMF_Mod
       use ESMF_LogErrMod
 #ifdef ESMF_NETCDF
       use netcdf

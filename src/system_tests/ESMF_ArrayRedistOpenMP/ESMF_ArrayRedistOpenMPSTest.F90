@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.7 2010/11/03 04:58:56 theurich Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.8 2010/11/03 22:48:48 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -45,7 +45,7 @@ program ESMF_ArrayRedistOpenMPSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF
+  use ESMF_Mod
   use ESMF_TestMod
 
   use user_model1, only : userm1_setvm, userm1_register

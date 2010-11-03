@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.12 2010/11/03 04:58:56 theurich Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.13 2010/11/03 22:48:49 theurich Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -47,7 +47,7 @@
 #define ESMF_METHOD "ConcurrentComponent"
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     use ESMF_TestMod
 
     use user_model1, only : userm1_setvm, userm1_register

@@ -15,7 +15,7 @@ program ESMF_AttributeCIMSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF
+  use ESMF_Mod
   use ESMF_TestMod
 
   use user_model1, only : userm1_setvm, userm1_register

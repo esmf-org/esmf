@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.16 2010/11/03 04:58:54 theurich Exp $
+! $Id: CouplerMod.F90,v 1.17 2010/11/03 22:48:47 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -17,7 +17,7 @@
 !EOP
 
     module global_data
-      use ESMF
+      use ESMF_Mod
       type(ESMF_RouteHandle), save :: fromFlow_rh, fromInject_rh
       type(ESMF_RouteHandle), save :: fromFlowe1_rh, fromInjecte1_rh
       type(ESMF_RouteHandle), save :: fromFlowe2_rh, fromInjecte2_rh

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.50 2010/11/03 04:58:57 theurich Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.51 2010/11/03 22:48:52 theurich Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -30,7 +30,7 @@
 #define ESMF_METHOD "FieldRedistSTest"
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     use ESMF_TestMod
     
     implicit none

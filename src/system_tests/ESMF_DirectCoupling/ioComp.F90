@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.11 2010/11/03 04:58:57 theurich Exp $
+! $Id: ioComp.F90,v 1.12 2010/11/03 22:48:49 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -6,7 +6,7 @@
 module ioCompMod
 
   ! ESMF Framework module
-  use ESMF
+  use ESMF_Mod
 
   implicit none
     

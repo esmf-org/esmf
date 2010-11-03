@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.9 2010/11/03 04:58:59 theurich Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.10 2010/11/03 22:48:53 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_diable_SYSTEM_TEST        String used by test script to count system tests.
@@ -37,7 +37,7 @@ program ESMF_XGridSerialSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF
+  use ESMF_Mod
   use ESMF_TestMod
 
   use atmos_comp, only : atmos_setvm, atmos_register

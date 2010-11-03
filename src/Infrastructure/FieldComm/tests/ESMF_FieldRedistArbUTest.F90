@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.7 2010/11/03 04:58:48 theurich Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.8 2010/11/03 22:48:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF
+    use ESMF_Mod
     use ESMF_GridUtilMod
     use ESMF_LogErrMod
 

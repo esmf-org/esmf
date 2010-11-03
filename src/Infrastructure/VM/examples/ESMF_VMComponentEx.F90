@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.20 2010/11/03 04:58:52 theurich Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.21 2010/11/03 22:48:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ module ESMF_VMComponentEx_gcomp_mod
 !EOC
 
   ! modules
-  use ESMF
+  use ESMF_Mod
   
   implicit none
   
@@ -132,7 +132,7 @@ end module
 
 !BOC
 program ESMF_VMComponentEx
-  use ESMF
+  use ESMF_Mod
   use ESMF_VMComponentEx_gcomp_mod
   implicit none
   

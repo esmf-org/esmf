@@ -15,7 +15,7 @@
 module user_model2
 
   ! ESMF Framework module
-  use ESMF
+  use ESMF_Mod
 
   implicit none
   

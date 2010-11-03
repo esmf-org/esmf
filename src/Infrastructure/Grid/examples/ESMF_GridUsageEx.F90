@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.80 2010/11/03 04:58:48 theurich Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.81 2010/11/03 22:48:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@ program ESMF_GridCreateEx
 ! This program contains a set of Grid creation examples
 
       ! Use ESMF framework module
-      use ESMF
+      use ESMF_Mod
       implicit none
 
       ! Parameters
@@ -2138,7 +2138,7 @@ endif
 
 !BOCI
    ! Use ESMF framework module
-   use ESMF
+   use ESMF_Mod
    implicit none
 
    ! Local variables  
@@ -2204,7 +2204,7 @@ endif
 
 !removeBOC
    ! Use ESMF framework module
-   use ESMF
+   use ESMF_Mod
    implicit none
 
    ! Local variables  
@@ -2255,7 +2255,7 @@ endif
 
 !removeBOC
    ! Use ESMF framework module
-   use ESMF
+   use ESMF_Mod
    implicit none
 
    ! Local variables  

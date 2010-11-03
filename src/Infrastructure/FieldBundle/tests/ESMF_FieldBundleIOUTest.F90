@@ -27,7 +27,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF
+  use ESMF_Mod
 
   implicit none
 

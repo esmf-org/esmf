@@ -1,4 +1,4 @@
-! $Id: ocean_comp.F90,v 1.3 2010/11/03 04:58:59 theurich Exp $
+! $Id: ocean_comp.F90,v 1.4 2010/11/03 22:48:53 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -15,7 +15,7 @@
 module ocean_comp
 
   ! ESMF Framework module
-  use ESMF
+  use ESMF_Mod
 
   implicit none
     

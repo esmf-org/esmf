@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.18 2010/11/03 04:58:54 theurich Exp $
+! $Id: InjectorMod.F90,v 1.19 2010/11/03 22:48:47 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -24,7 +24,7 @@
     module InjectorMod
 
     ! ESMF module
-    use ESMF
+    use ESMF_Mod
     use InjectArraysMod
     
     implicit none

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.36 2010/11/03 04:58:50 theurich Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.37 2010/11/03 22:48:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 #include "ESMF_LogMacros.inc"
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     implicit none
     
     ! return variables

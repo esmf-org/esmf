@@ -29,7 +29,7 @@
 !EOE 
 
       ! ESMF Framework module
-      use ESMF
+      use ESMF_Mod
       implicit none
 
       ! Local variables

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.8 2010/11/03 04:58:57 theurich Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.9 2010/11/03 22:48:52 theurich Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -28,7 +28,7 @@
 #include "ESMF.h"
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

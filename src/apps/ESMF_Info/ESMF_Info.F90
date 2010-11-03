@@ -1,9 +1,9 @@
-! $Id: ESMF_Info.F90,v 1.4 2010/11/03 04:58:54 theurich Exp $
+! $Id: ESMF_Info.F90,v 1.5 2010/11/03 22:48:47 theurich Exp $
 
 program ESMF_Info
 
   ! modules
-  use ESMF
+  use ESMF_Mod
   
   implicit none
   

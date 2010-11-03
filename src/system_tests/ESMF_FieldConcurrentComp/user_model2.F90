@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.11 2010/11/03 04:58:57 theurich Exp $
+! $Id: user_model2.F90,v 1.12 2010/11/03 22:48:49 theurich Exp $
 !
 ! System test for Concurrent Components, user-written component 2.
 
@@ -18,7 +18,7 @@
 
     ! ESMF Framework module
     use ESMF_TestMod
-    use ESMF
+    use ESMF_Mod
 
     implicit none
     

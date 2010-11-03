@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.29 2010/11/03 04:58:54 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.30 2010/11/03 22:48:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 
 !--- Module used to test attachable methods in unit tests below ----------------
 module userMethodMod
-  use ESMF
+  use ESMF_Mod
   implicit none
   public myUserMethod
 contains
@@ -42,7 +42,7 @@ end module
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF 
+      use ESMF_Mod 
       use userMethodMod
       implicit none
 
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.29 2010/11/03 04:58:54 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.30 2010/11/03 22:48:47 theurich Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc

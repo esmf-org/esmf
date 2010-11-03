@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.3 2010/11/03 04:58:52 theurich Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.4 2010/11/03 22:48:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 module ESMF_AttributeUpdateUTestMod
 
-  use ESMF
+  use ESMF_Mod
 
   implicit none
 
@@ -516,7 +516,7 @@ program ESMF_AttributeUpdateUTest
 !
 !-----------------------------------------------------------------------------
 ! !USES:
-  use ESMF
+  use ESMF_Mod
   use ESMF_TestMod
   use ESMF_AttributeUpdateUTestMod, only : userm1_setvm, userm1_register, &
     userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.3 2010/11/03 04:58:52 theurich Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.4 2010/11/03 22:48:46 theurich Exp $'
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.23 2010/11/03 04:58:58 theurich Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.24 2010/11/03 22:48:52 theurich Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -29,7 +29,7 @@
     program FieldRegridOrder
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

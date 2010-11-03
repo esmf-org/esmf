@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.28 2010/11/03 04:58:52 theurich Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.29 2010/11/03 22:48:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 module ESMF_VMComponentUTest_gcomp_mod
 
   ! modules
-  use ESMF
+  use ESMF_Mod
   
   implicit none
   
@@ -158,7 +158,7 @@ program ESMF_VMComponentUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF
+  use ESMF_Mod
   use ESMF_VMComponentUTest_gcomp_mod
 
   implicit none
@@ -166,7 +166,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.28 2010/11/03 04:58:52 theurich Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.29 2010/11/03 22:48:45 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

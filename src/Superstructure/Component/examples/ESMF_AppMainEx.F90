@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.39 2010/11/03 04:58:54 theurich Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.40 2010/11/03 22:48:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 
     module PHYS_mod
 
-    use ESMF
+    use ESMF_Mod
     public PHYS_SetServices
     contains
 
@@ -93,7 +93,7 @@
 !   ! Start of a Second Gridded Component module
     module DYNM_mod
 
-    use ESMF
+    use ESMF_Mod
     public DYNM_SetServices
     contains
 
@@ -156,7 +156,7 @@
 !   ! Start of a Coupler Component module
     module CPLR_mod
 
-    use ESMF
+    use ESMF_Mod
 
     public CPLR_SetServices
     contains
@@ -221,7 +221,7 @@
     program ESMF_AppMainEx
     
 !   ! The ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     
 !   ! User supplied modules, using only the public registration routine.
     use PHYS_Mod, only: PHYS_SetServices

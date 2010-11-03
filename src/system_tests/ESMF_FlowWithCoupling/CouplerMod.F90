@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.22 2010/11/03 04:58:58 theurich Exp $
+! $Id: CouplerMod.F90,v 1.23 2010/11/03 22:48:53 theurich Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -15,7 +15,7 @@
     module CouplerMod
 
     ! ESMF Framework module - defines ESMF data types and procedures
-    use ESMF
+    use ESMF_Mod
 
     implicit none
     

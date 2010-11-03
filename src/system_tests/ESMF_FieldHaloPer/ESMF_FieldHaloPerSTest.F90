@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.54 2010/11/03 04:58:57 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.55 2010/11/03 22:48:52 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -18,7 +18,7 @@
 
     module global_data
 
-      use ESMF
+      use ESMF_Mod
 
       ! set to true to get more output
       logical :: verbose = .false.
@@ -42,7 +42,7 @@
 #include "ESMF_Macros.inc"
 
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     use ESMF_TestMod
     use global_data
     
@@ -185,7 +185,7 @@
 !-------------------------------------------------------------------------
 !
     subroutine setserv(comp, rc)
-      use ESMF
+      use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
@@ -210,7 +210,7 @@
 !-------------------------------------------------------------------------
 !
     subroutine myinit(comp, importState, exportState, clock, rc)
-      use ESMF
+      use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
@@ -465,7 +465,7 @@
 !
 
     subroutine myrun(comp, importState, exportState, clock, rc)
-      use ESMF
+      use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
@@ -546,7 +546,7 @@
 
 
     subroutine myfinal(comp, importState, exportState, clock, rc)
-      use ESMF
+      use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
@@ -621,7 +621,7 @@
 
 
     subroutine verifyhalo(thisfield, rc)
-      use ESMF
+      use ESMF_Mod
       use global_data
 
       type(ESMF_Field), intent(inout) :: thisfield

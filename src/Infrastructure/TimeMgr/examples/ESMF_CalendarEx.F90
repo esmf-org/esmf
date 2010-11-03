@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.39 2010/11/03 04:58:51 theurich Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.40 2010/11/03 22:48:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !-----------------------------------------------------------------------------
 
       ! ESMF Framework module
-      use ESMF
+      use ESMF_Mod
       implicit none
 
       ! instantiate calendars

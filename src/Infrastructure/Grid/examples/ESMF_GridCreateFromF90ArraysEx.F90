@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.8 2010/11/03 04:58:48 theurich Exp $
+! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.9 2010/11/03 22:48:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@ program ESMF_GridCreateEx
 
 !BOC
       ! Use ESMF framework module
-      use ESMF
+      use ESMF_Mod
       implicit none
 
       ! Local variables  

@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.47 2010/11/03 04:58:54 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.48 2010/11/03 22:48:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
     module ESMF_GriddedCompEx
     
     ! ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     implicit none
     public GComp_SetServices
     public GComp_SetVM
@@ -251,7 +251,7 @@
     program ESMF_AppMainEx
     
 !   ! The ESMF Framework module
-    use ESMF
+    use ESMF_Mod
     
     ! User supplied modules
     use ESMF_GriddedCompEx, only: GComp_SetServices, GComp_SetVM
