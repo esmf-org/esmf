@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.57 2010/10/13 17:01:47 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.58 2010/11/03 04:58:57 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -19,7 +19,7 @@
     program FieldHalo
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     
     implicit none
@@ -160,7 +160,7 @@
 ! module global data
 
     module shared
-      use ESMF_Mod
+      use ESMF
 
       ! width of halo region
       integer, parameter, public :: halo_width = 2
@@ -177,7 +177,7 @@
 !-------------------------------------------------------------------------
 !
     subroutine setserv(comp, rc)
-      use ESMF_Mod
+      use ESMF
 
       type(ESMF_GridComp) :: comp
       integer :: rc
@@ -201,7 +201,7 @@
 !-------------------------------------------------------------------------
 !
     subroutine myinit(comp, importState, exportState, clock, rc)
-      use ESMF_Mod
+      use ESMF
       use shared
 
       type(ESMF_GridComp) :: comp
@@ -331,7 +331,7 @@
 !
 
     subroutine myrun(comp, importState, exportState, clock, rc)
-      use ESMF_Mod
+      use ESMF
       use shared
 
       type(ESMF_GridComp) :: comp
@@ -380,7 +380,7 @@
 
 
     subroutine myfinal(comp, importState, exportState, clock, rc)
-      use ESMF_Mod
+      use ESMF
       use shared
 
       type(ESMF_GridComp) :: comp

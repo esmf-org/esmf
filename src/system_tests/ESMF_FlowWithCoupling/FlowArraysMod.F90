@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.15 2007/06/23 04:01:33 cdeluca Exp $
+! $Id: FlowArraysMod.F90,v 1.16 2010/11/03 04:58:58 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -15,7 +15,7 @@
 !
 ! ESMF modules
 !
-      use ESMF_Mod
+      use ESMF
     
       implicit none
       !save

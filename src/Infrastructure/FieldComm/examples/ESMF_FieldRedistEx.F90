@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.31 2010/06/29 20:12:08 svasquez Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.32 2010/11/03 04:58:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -27,14 +27,14 @@
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRedistEx"
      ! ESMF Framework module
-     use ESMF_Mod
+     use ESMF
      use ESMF_TestMod
      implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.31 2010/06/29 20:12:08 svasquez Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.32 2010/11/03 04:58:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables

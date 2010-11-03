@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.6 2010/04/22 15:48:29 rokuingh Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.7 2010/11/03 04:58:57 theurich Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -27,7 +27,7 @@
 #include "ESMF.h"
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

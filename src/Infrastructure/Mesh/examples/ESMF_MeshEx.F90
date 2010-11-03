@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.32 2010/10/15 23:49:32 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.33 2010/11/03 04:58:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ program ESMF_MeshEx
 #include "ESMF_Macros.inc"
 
 ! !USES:
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod     ! test methods
   use ESMF_MeshMod
   use ESMF_RegridMod

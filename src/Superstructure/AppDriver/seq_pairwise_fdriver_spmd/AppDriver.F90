@@ -35,7 +35,7 @@
 #include "ESMF.h"
 
     ! ESMF module, defines all ESMF data types and procedures
-    use ESMF_Mod
+    use ESMF
     
     ! Gridded Component registration routines.  Defined in "ChangeMe.F90"
     use USER_APP_Mod, only : SetServices => USER_APP_SetServices

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.29 2010/10/08 20:16:03 rokuingh Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.30 2010/11/03 04:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 
 module ESMF_StateReconcileEx_Mod
 
-use ESMF_Mod
+use ESMF
 
 contains
 
@@ -96,7 +96,7 @@ end module ESMF_StateReconcileEx_Mod
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_StateReconcileEx_Mod
     implicit none
 

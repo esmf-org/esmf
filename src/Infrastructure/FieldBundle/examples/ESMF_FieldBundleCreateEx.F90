@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.6 2010/06/29 20:01:32 svasquez Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.7 2010/11/03 04:58:48 theurich Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -18,7 +18,7 @@
     program ESMF_FieldBundleCreateEx
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
 
     implicit none
     

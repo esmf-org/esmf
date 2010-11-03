@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2009/05/29 19:24:41 theurich Exp $
+! $Id: user_coupler.F90,v 1.7 2010/11/03 04:58:56 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -15,7 +15,7 @@
 module user_coupler
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
     
   implicit none
    
@@ -199,7 +199,7 @@ end module user_coupler
 !\end{verbatim}
 
 subroutine usercpl_setvm(comp, rc)
-  use ESMF_Mod
+  use ESMF
   use user_coupler
   type(ESMF_CplComp) :: comp
   integer, intent(out) :: rc
@@ -207,7 +207,7 @@ subroutine usercpl_setvm(comp, rc)
 end subroutine
 
 subroutine usercpl_reg(comp, rc)
-  use ESMF_Mod
+  use ESMF
   use user_coupler
   type(ESMF_CplComp) :: comp
   integer, intent(out) :: rc

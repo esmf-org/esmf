@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.18 2010/06/29 21:27:04 svasquez Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.19 2010/11/03 04:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 
 program ESMF_VMGetMPICommunicatorEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   !include 'mpif.h'

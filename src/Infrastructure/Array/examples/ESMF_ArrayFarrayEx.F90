@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.17 2010/06/29 17:20:16 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.18 2010/11/03 04:58:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 !BOC
 program ESMF_ArrayFarrayEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

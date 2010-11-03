@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.4 2010/06/29 20:01:32 svasquez Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.5 2010/11/03 04:58:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -27,14 +27,14 @@
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleHaloEx"
      ! ESMF Framework module
-     use ESMF_Mod
+     use ESMF
      use ESMF_TestMod
      implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.4 2010/06/29 20:01:32 svasquez Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.5 2010/11/03 04:58:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables

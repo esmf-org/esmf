@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.7 2010/07/08 16:37:59 svasquez Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.8 2010/11/03 04:58:59 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -74,7 +74,7 @@ program ESMF_SequentialEnsembleSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use user_modelA, only : usermA_register

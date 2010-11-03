@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.34 2010/10/15 17:16:44 rokuingh Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.35 2010/11/03 04:58:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !-----------------------------------------------------------------------------
 
       ! ESMF Framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! instantiate some time intervals

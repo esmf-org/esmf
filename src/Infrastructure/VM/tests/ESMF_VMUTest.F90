@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.34 2010/10/13 19:05:34 theurich Exp $
+! $Id: ESMF_VMUTest.F90,v 1.35 2010/11/03 04:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 #include "ESMF.h"
 
       module ESMF_VMSubrs
-      use ESMF_Mod
+      use ESMF
       use ESMF_TestMod
 
       public
@@ -1009,7 +1009,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF_Mod
+      use ESMF
 
       use ESMF_VMSubrs     ! VM specific subroutines
 
@@ -1018,7 +1018,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.34 2010/10/13 19:05:34 theurich Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.35 2010/11/03 04:58:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------

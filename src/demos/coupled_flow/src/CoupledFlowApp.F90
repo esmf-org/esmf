@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.21 2010/10/11 19:46:35 feiliu Exp $
+! $Id: CoupledFlowApp.F90,v 1.22 2010/11/03 04:58:54 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -16,7 +16,7 @@
     program ESMF_ApplicationWrapper
 
     ! ESMF module, defines all ESMF data types and procedures
-    use ESMF_Mod
+    use ESMF
     
     ! Flow Component registration routines
     use CoupledFlowMod, only : CoupledFlow_register

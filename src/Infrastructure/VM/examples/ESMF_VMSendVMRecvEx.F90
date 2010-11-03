@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.15 2010/06/29 21:27:04 svasquez Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.16 2010/11/03 04:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 
 program ESMF_VMSendVMRecvEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

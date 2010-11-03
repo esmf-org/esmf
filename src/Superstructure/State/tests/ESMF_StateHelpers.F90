@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.18 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.19 2010/11/03 04:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 
 module ESMF_StateHelpers
 
-   use ESMF_Mod
+   use ESMF
 
    public Create2DIGrids, Create3DIGrids
    public CreateFields, CreateFieldBundle, AddFieldBundle

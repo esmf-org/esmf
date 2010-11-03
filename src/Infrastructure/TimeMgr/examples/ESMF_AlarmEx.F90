@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.24 2010/10/15 17:16:44 rokuingh Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.25 2010/11/03 04:58:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 !-----------------------------------------------------------------------------
 
       ! ESMF Framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! instantiate time_step, start, stop, and alarm times

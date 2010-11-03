@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.6 2010/10/13 22:25:09 rokuingh Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.7 2010/11/03 04:58:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCreateEx
 
 !BOC
       ! Use ESMF framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! Local variables  

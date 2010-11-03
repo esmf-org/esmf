@@ -1,4 +1,4 @@
-! $Id: GridComp2Template.F90,v 1.4 2009/03/23 20:40:48 theurich Exp $
+! $Id: GridComp2Template.F90,v 1.5 2010/11/03 04:58:52 theurich Exp $
 !
 ! Template code for a child Grid Component, which has no subcomponents
 !  below it.  This is where the bulk of the computation is expected to be
@@ -24,7 +24,7 @@
     module UserGridComp2Mod
     
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     
     implicit none
     private

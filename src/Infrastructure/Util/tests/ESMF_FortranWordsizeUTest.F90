@@ -1,4 +1,4 @@
-! $Id: ESMF_FortranWordsizeUTest.F90,v 1.12 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_FortranWordsizeUTest.F90,v 1.13 2010/11/03 04:58:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -27,14 +27,14 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod         ! test methods
-      use ESMF_Mod             ! the ESMF Framework
+      use ESMF             ! the ESMF Framework
 
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.12 2010/03/04 18:57:45 svasquez Exp $'
+      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.13 2010/11/03 04:58:51 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

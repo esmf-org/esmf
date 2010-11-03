@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.17 2010/06/28 21:55:29 theurich Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.18 2010/11/03 04:58:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -27,14 +27,14 @@ program ESMF_GridToMeshUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_Mod
+  use ESMF
 
   implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.17 2010/06/28 21:55:29 theurich Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.18 2010/11/03 04:58:50 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.2 2010/09/08 17:21:02 w6ws Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.3 2010/11/03 04:58:59 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -37,7 +37,7 @@ program ESMF_XGridConcurrentSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use atmos_comp, only : atmos_setvm, atmos_register

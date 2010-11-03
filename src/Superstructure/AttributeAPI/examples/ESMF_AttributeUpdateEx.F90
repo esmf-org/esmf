@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.21 2010/10/16 05:57:06 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.22 2010/11/03 04:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@ program ESMF_AttributeUpdateEx
 ! This program shows examples of Attribute usage
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use ESMF_AttributeUpdateMod, only : userm1_setvm, userm1_register, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.14 2009/10/19 17:09:39 svasquez Exp $
+! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.15 2010/11/03 04:58:58 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -40,7 +40,7 @@ program ESMF_FieldSparseMatMulSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use user_model1, only : userm1_setvm, userm1_register

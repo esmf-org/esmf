@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.9 2009/03/23 20:40:48 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.10 2010/11/03 04:58:52 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -21,7 +21,7 @@
     module UserParentGridCompMod
     
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     
     ! User Component registration routines
     use UserGridComp1Mod, only : UserGrid1_SetServices => UserGrid_SetServices

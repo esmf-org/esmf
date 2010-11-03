@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.11 2009/05/29 19:24:42 theurich Exp $
+! $Id: modelComp.F90,v 1.12 2010/11/03 04:58:57 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -6,7 +6,7 @@
 module modelCompMod
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   ! Model components
   use modelACompMod,     only : modelACompSetVM, modelACompReg

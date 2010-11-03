@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.1 2010/05/07 17:06:59 feiliu Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.2 2010/11/03 04:58:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@ program ESMF_FieldBundleRegridUTest
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     use ESMF_FieldBundleRegridMod
   
     implicit none
@@ -37,7 +37,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.1 2010/05/07 17:06:59 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.2 2010/11/03 04:58:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"

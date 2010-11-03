@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.5 2010/06/29 22:06:55 svasquez Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.6 2010/11/03 04:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 
 module user_mod
 
-  use ESMF_Mod
+  use ESMF
 
   implicit none
   
@@ -187,7 +187,7 @@ end module
 
 program ESMF_InternalStateModEx
 
-  use ESMF_Mod
+  use ESMF
   use user_mod
   implicit none
   

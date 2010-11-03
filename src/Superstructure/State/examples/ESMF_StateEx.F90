@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.35 2010/10/08 20:16:03 rokuingh Exp $
+! $Id: ESMF_StateEx.F90,v 1.36 2010/11/03 04:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     implicit none
 
 #define ESMF_ENABLESTATENEEDED

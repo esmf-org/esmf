@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.10 2010/06/29 19:43:19 svasquez Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.11 2010/11/03 04:58:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_FieldSetMod
     implicit none
     

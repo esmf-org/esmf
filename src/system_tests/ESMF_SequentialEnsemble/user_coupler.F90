@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2010/07/15 20:15:34 peggyli Exp $
+! $Id: user_coupler.F90,v 1.5 2010/11/03 04:58:59 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -15,7 +15,7 @@
 module user_coupler
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
     
   implicit none
    

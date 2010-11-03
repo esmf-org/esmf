@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.40 2010/04/15 17:29:58 rokuingh Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.41 2010/11/03 04:58:57 theurich Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -32,7 +32,7 @@
 #include "ESMF.h"
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

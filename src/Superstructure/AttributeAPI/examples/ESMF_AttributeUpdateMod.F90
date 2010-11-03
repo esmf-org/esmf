@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.24 2010/10/16 05:57:07 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.25 2010/11/03 04:58:52 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -9,7 +9,7 @@
 module ESMF_AttributeUpdateMod
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
   

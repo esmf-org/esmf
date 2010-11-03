@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.11 2010/06/29 21:27:04 svasquez Exp $
+! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.12 2010/11/03 04:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !BOC
 program ESMF_VMDefaultBasicsEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

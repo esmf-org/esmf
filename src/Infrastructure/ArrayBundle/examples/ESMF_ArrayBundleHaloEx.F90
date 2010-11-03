@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleHaloEx.F90,v 1.3 2010/10/08 21:41:59 rokuingh Exp $
+! $Id: ESMF_ArrayBundleHaloEx.F90,v 1.4 2010/11/03 04:58:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 program ESMF_ArrayBundleHaloEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

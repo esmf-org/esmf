@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.16 2010/06/29 18:35:51 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.17 2010/11/03 04:58:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 program ESMF_ArraySparseMatMulEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

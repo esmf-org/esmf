@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldUTest.F90,v 1.7 2010/10/09 03:01:06 eschwab Exp $
+! $Id: ESMF_AttReadFieldUTest.F90,v 1.8 2010/11/03 04:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,14 +29,14 @@ program ESMF_AttReadFieldUTest
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF_Mod         ! the ESMF Framework
+      use ESMF         ! the ESMF Framework
 
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadFieldUTest.F90,v 1.7 2010/10/09 03:01:06 eschwab Exp $'
+      '$Id: ESMF_AttReadFieldUTest.F90,v 1.8 2010/11/03 04:58:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

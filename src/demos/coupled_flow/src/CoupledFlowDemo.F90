@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.22 2010/10/18 18:09:34 w6ws Exp $
+! $Id: CoupledFlowDemo.F90,v 1.23 2010/11/03 04:58:54 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOE
@@ -19,7 +19,7 @@
     module CoupledFlowMod
 
     ! ESMF module, defines all ESMF data types and procedures
-    use ESMF_Mod
+    use ESMF
     
     ! User Component registration routines
     use   InjectorMod, only : Injector_register

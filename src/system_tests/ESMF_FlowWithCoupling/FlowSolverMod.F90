@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.34 2009/01/16 05:28:25 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.35 2010/11/03 04:58:58 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@
 !
 ! ESMF modules
 !
-      use ESMF_Mod
+      use ESMF
       use FlowArraysMod
     
       implicit none

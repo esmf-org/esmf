@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.15 2010/10/08 17:30:37 rokuingh Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.16 2010/11/03 04:58:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     implicit none
     
     ! Local variables
