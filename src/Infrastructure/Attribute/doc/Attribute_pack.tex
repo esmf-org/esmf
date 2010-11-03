@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.23 2010/10/20 04:05:07 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.24 2010/11/03 20:57:19 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -80,6 +80,13 @@ There are many attributes that are used to describe components. There are curren
 \begin{itemize}
     \item Convention: CIM 1.0
     \item Purpose: Model Component Simulation Description
+    \item Includes:
+    \begin{itemize}
+       \item CIM Responsible Party
+       \item CIM Citation
+       \item CIM Platform
+       \item CIM Inputs
+    \end{itemize}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML
@@ -110,7 +117,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt SimulationRationale} & The reason for performing an experiment. & N/A\\
      {\tt SimulationShortName} & The name of the simulation. & N/A \\
      {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & N/A\\ 
-     {\tt URL} & A URL associated with a model component & N/A \\
+     {\tt URL} & A URL associated with a model component. & N/A \\
 \end{tabular}
 
 \vspace{.20in}
@@ -191,9 +198,9 @@ There are many attributes that are used to describe components. There are curren
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Date} & The date of the citation. & N/A\\
-     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation & N/A\\
+     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A\\
      {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
-     {\tt PresentationForm} & A description of the type of citation & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
+     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
 \end{tabular}
 
@@ -217,7 +224,7 @@ There is currently only 1 predefined State-level Attribute package:
 \begin{itemize}
     \item Convention: ESMF
     \item Purpose: General
-    \item Output Options
+    \item Output Options:
     \begin{itemize}
         \item Tab-delimited
         \item Simple XML 
@@ -228,7 +235,7 @@ There is currently only 1 predefined State-level Attribute package:
 \begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
-    {\tt Intent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history outout. & Export,Import \\
+    {\tt Intent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history output. & Export,Import \\
 \end{tabular}
 
 
@@ -239,91 +246,26 @@ There is currently only 1 predefined State-level Attribute package:
 Several standards exist to describe fields. There are currently 4 predefined Field-level Attribute packages:
 
 \begin{enumerate}
-    \item Climate Forecast (CF) Convention General
-    \item Climate Forecast (CF) Convention Extended
     \item Common Information Model (CIM) Inputs
     \item Earth System Grid General
-
+    \item Climate Forecast (CF) Convention Extended
+    \item Climate Forecast (CF) Convention General
 \end{enumerate}
 
-\vspace{.20in}
-{\bf 1. Climate Forecast (CF) Convention General}
-
-\begin{itemize}
-    \item Convention: CF
-    \item Purpose: General
-    \item Output Options:
-    \begin{itemize}
-        \item Tab-delimited
-        \item Simple XML
-        \item CIM XML (when part of the CIM package)
-    \end{itemize} 
-    \item: Description: The climate and forecast (CF) convention contains metadata that is designed to promote the processing and sharing of files created with the NetCDF API. The CF conventions are increasingly gaining acceptance and have been adopted by a number of projects and groups as a primary standard. The conventions define metadata that provide a definitive description of what the data in each variable represents, and the spatial and temporal properties of the data. This enables users of data from different sources to decide which quantities are comparable, and facilitates building applications with powerful extraction, regridding, and display capabilities. The ESMF CF Attribute package contains the three mandatory Attributes required to describe fields.  
-\end{itemize}
-
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
-    {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
-    \hline\hline
-    {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
-    {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name & N/A \\
-    {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package & None\\
-\end{tabular}
-
-\vspace{.20in}
-{\bf 2. Climate Forecast (CF) Convention Extended}
-
-\begin{itemize}
-    \item Convention: CF
-    \item Purpose: Extended
-    \item Output Options: 
-    \begin{itemize}
-        \item Tab-delimited
-        \item Simple XML
-        \item CIM XML (when part of the CIM package)
-    \end{itemize} 
-    \item The CF standard for fields contains an optional standard\_name Attribute. Standard names are controlled vocabularies and not every variable in the earth system sciences contains a standard name. Because of this, ESMF implemented this optional Attribute in its own package.   This package nests the CF General package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
-\end{itemize}
-
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
-    {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
-    \hline\hline
-    {\tt StandardName} & The approved CF standard name for a variable if it exists &  N/A\\
-\end{tabular}
-
 
 
 \vspace{.20in}
-{\bf 3. Earth System Grid (ESG) Field}
-
-\begin{itemize}
-    \item Convention: ESG or ESMF
-    \item Purpose : General
-    \item Output Options: 
-    \begin{itemize}
-        \item Tab-delimited
-        \item Simple XML
-    \end{itemize}
-    \item Description: ESG has the ability to list variables as either import or export variables. This should not be confused with the ESMF State Attribute Package, which has similiar attributes. This attribute is assigned to individual variables.   This package nests the CF Extended package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
-
-\end{itemize}
-
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
-     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
-     \hline\hline
-     {\tt Intent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & Export,Import\\
-\end{tabular}
-
-
-
-
-\vspace{.20in}
-{\bf 4. Common Information Model (CIM) Inputs Package}
-\label{CIMFieldAttributePackages}
+{\bf 1.Common Information Model (CIM) Inputs}
 
 \begin{itemize}
     \item Convention: CIM 1.0
     \item Purpose: Inputs Description
-    \item Output Options
+    \item Includes: 
+    \begin{itemize}
+        \item CF General
+        \item CF Extended
+    \end{itemize}
+    \item Output Options:
     \begin{itemize}
         \item CIM XML 
     \end{itemize}
@@ -344,6 +286,85 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 \end{tabular}
 
 
+\vspace{.20in}
+{\bf 2. Earth System Grid (ESG) Field}
+
+\begin{itemize}
+    \item Convention: ESG or ESMF
+    \item Purpose : General
+\begin{itemize}
+        \item CF General
+        \item CF Extended
+    \end{itemize}
+    \item Output Options: 
+    \begin{itemize}
+        \item Tab-delimited
+        \item Simple XML
+    \end{itemize}
+    \item Description: ESG has the ability to list variables as either import or export variables. This should not be confused with the ESMF State Attribute Package, which has similiar attributes. This attribute is assigned to individual variables.   This package nests the CF Extended package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
+\end{itemize}
+
+\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     \hline\hline
+     {\tt Intent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & Export,Import\\
+\end{tabular}
+
+
+\vspace{.20in}
+{\bf 3. Climate Forecast (CF) Convention Extended}
+
+\begin{itemize}
+    \item Convention: CF
+    \item Purpose: Extended
+    \item Includes: 
+    \begin{itemize}
+        \item CF General
+    \end{itemize}
+    \item Output Options: 
+    \begin{itemize}
+        \item Tab-delimited
+        \item Simple XML
+        \item CIM XML (when part of the CIM package)
+    \end{itemize} 
+    \item Description: The CF standard for fields contains an optional standard\_name Attribute. Standard names are controlled vocabularies and not every variable in the earth system sciences contains a standard name. Because of this, ESMF implemented this optional Attribute in its own package. This package nests the CF General package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
+\end{itemize}
+
+\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+    {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+    \hline\hline
+    {\tt StandardName} & The approved CF standard name for a variable if it exists. &  N/A\\
+\end{tabular}
+
+\vspace{.20in}
+
+{\bf 4. Climate Forecast (CF) Convention General}
+
+\begin{itemize}
+    \item Convention: CF
+    \item Purpose: General
+    \item Output Options:
+    \begin{itemize}
+        \item Tab-delimited
+        \item Simple XML
+        \item CIM XML (when part of the CIM package)
+    \end{itemize} 
+    \item  Description: The climate and forecast (CF) convention contains metadata that is designed to promote the processing and sharing of files cre
+ated with the NetCDF API. The CF conventions are increasingly gaining acceptance and have been adopted by a number of projects and groups as a primary
+ standard. The conventions define metadata that provide a definitive description of what the data in each variable represents, and the spatial and tem
+poral properties of the data. This enables users of data from different sources to decide which quantities are comparable, and facilitates building ap
+plications with powerful extraction, regridding, and display capabilities. The ESMF CF Attribute package contains the three mandatory Attributes requi
+red to describe fields.  
+\end{itemize}
+
+\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+    {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+    \hline\hline
+    {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
+    {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is
+ distinct from the long\_name & N/A \\
+    {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package & None\\
+\end{tabular}
 
 
 \vspace{.20in}
@@ -374,7 +395,7 @@ There are two grid attribute packages in ESMF.
 \begin{itemize}
     \item Convention: GridSpec
     \item Purpose: General
-    \item Output Options
+    \item Output Options:
     \begin{itemize}
         \item Simple XML
         \item If combined with the ESMF Grid package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
@@ -411,7 +432,7 @@ There are two grid attribute packages in ESMF.
 \begin{itemize}
     \item Convention: ESMF
     \item Purpose: General
-    \item Output Options
+    \item Output Options:
     \begin{itemize}
         \item Simple XML
         \item If combined with the Gridspec Package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
@@ -450,7 +471,7 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt Date} & The date of the citation. & CIM Citation\\
      {\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & Gridspec\\ 
      {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid.& Gridspec \\
-     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation & CIM Citation\\
+     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & CIM Citation\\
      {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & CIM Responsible Party\\
      {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & CIM Inputs\\ 
      {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESG Basic Component\\
@@ -459,9 +480,9 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & Gridspec\\ 
      {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & Gridspec\\ 
      {\tt Institution} & An organization associated with a model component, simulation, or dataset.& ESG Basic Component\\
-     {\tt Intent} & An indication of whether a field or state is imported into or exported from a particular model component. This refers to coupling, and not history outout. & ESMF State, ESMF Field\\
+     {\tt Intent} & An indication of whether a field or state is imported into or exported from a particular model component. This refers to coupling, and not history output. & ESMF State, ESMF Field\\
      {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & Gridspec \\
-     {\tt LongName} & The name of an object with all acronyms spelled out. For fields, it is an ad-hoc long descriptive name which may, for example, be used for labeling plots & CF General\\
+     {\tt LongName} & The name of an object with all acronyms spelled out. For fields, it is an ad-hoc long descriptive name which may, for example, be used for labeling plots. & CF General\\
      {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & CIM Citation\\
      {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  CIM Platform\\
      {\tt MachineDescription} & A short note about the machine. & CIM Platform\\
@@ -488,7 +509,7 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& N/A\\
      {\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& N/A\\
      {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. &  CIM Responsible Party\\ 
-     {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name & CF General\\
+     {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CF General\\
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & CIM Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & CIM Main\\ 
@@ -497,11 +518,11 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt SimulationShortName} & The name of the simulation. & CIM Main\\
      {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & CIM Inputs\\ 
      {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & CIM Inputs\\
-     {\tt StandardName} & The approved CF standard name for a variable if it exists &  CF Extended\\
+     {\tt StandardName} & The approved CF standard name for a variable if it exists. &  CF Extended\\
      {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& CIM Inputs\\ 
      {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CIM Inputs\\ 
-     {\tt URL} & URL of the object being described. Exists in multple packages & CIM Responsible Party, CIM Main, CIM Citation\\
-     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package & CF General\\
+     {\tt URL} & URL of the object being described. Exists in multple packages. & CIM Responsible Party, CIM Main, CIM Citation\\
+     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package. & CF General\\
      {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & ESG Basic Component, CIM Main\\ 
 
 \end{tabular}
