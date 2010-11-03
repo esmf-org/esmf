@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2009/10/13 21:10:03 w6ws Exp $
+# $Id: build_rules.mk,v 1.13 2010/11/03 15:25:00 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -7,7 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ifort
-ESMF_F90COMPILEOPTS    += -unix -Qfpp
+ESMF_F90COMPILEOPTS    += -unix -Qfpp -heap-arrays:1000
 ESMF_CXXDEFAULT         = icl
 
 # Turn off some noise
