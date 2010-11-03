@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.62 2010/05/07 22:47:55 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.63 2010/11/03 05:22:43 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -464,59 +464,37 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      integer :: iret
-      integer :: localrc
+      integer :: memstat
       type(ESMF_ConfigClass), pointer :: config_local
       type(ESMF_ConfigAttrUsed), dimension(:), pointer :: attr_used_local
+
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      
-
  
 ! Initialization
-      allocate(config_local, stat=iret)
-
-      if (iret .eq. 0) then 
-        localrc=ESMF_SUCCESS
-      else
-        localrc=ESMF_RC_PTR_NOTALLOC
-      endif
-
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating config class", &
+      allocate(config_local, stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "Allocating config class", &
                                         ESMF_CONTEXT, rc)) return
 
-      allocate(config_local%buffer, config_local%this_line, stat = iret)
-
-      if (iret .eq. 0) then 
-        localrc=ESMF_SUCCESS
-      else
-        localrc=ESMF_RC_PTR_NOTALLOC
-      endif
-
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local buffer 1", &
+      allocate(config_local%buffer, config_local%this_line, stat = memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "Allocating local buffer 1", &
                                         ESMF_CONTEXT, rc)) return
 
       ! TODO: Absoft 8 compiler bug necessitates allocating pointer within
       ! derived type via local pointer first.  Absoft 9/Jazz bug necessitates
       ! this must be a separate allocate statement.
-      allocate(attr_used_local(NATT_MAX), stat = iret)
-      if (iret .eq. 0) then 
-        localrc=ESMF_SUCCESS
-      else
-        localrc=ESMF_RC_PTR_NOTALLOC
-      endif
-
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local buffer 2", &
+      allocate(attr_used_local(NATT_MAX), stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "Allocating local buffer 2", &
                                         ESMF_CONTEXT, rc)) return
       config_local%attr_used => attr_used_local
 
       ESMF_ConfigCreate%cptr => config_local
-      if (present( rc ))  rc = localrc
+      if (present( rc ))  rc = ESMF_SUCCESS
 
       ESMF_INIT_SET_CREATED(ESMF_ConfigCreate)
       return
-    end function ESMF_ConfigCreate
 
+    end function ESMF_ConfigCreate
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigDestroy"
@@ -545,7 +523,7 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      integer :: iret
+      integer :: memstat
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -553,18 +531,18 @@
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      iret = 0
+      memstat = 0
 
       ! TODO: Absoft 9/Jazz bug necessitates this separate deallocate statement
       ! before the other (must be in reverse order of allocation)
-      deallocate(config%cptr%attr_used, stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer 2", &
+      deallocate(config%cptr%attr_used, stat=memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "Deallocating local buffer 2", &
                                      ESMF_CONTEXT, rc)) return
-      deallocate(config%cptr%buffer, config%cptr%this_line, stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating local buffer 1", &
+      deallocate(config%cptr%buffer, config%cptr%this_line, stat = memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "Deallocating local buffer 1", &
                                      ESMF_CONTEXT, rc)) return
-      deallocate(config%cptr, stat = iret)
-      if (ESMF_LogMsgFoundAllocError(iret, "Deallocating config type", &
+      deallocate(config%cptr, stat = memstat)
+      if (ESMF_LogMsgFoundAllocError(memstat, "Deallocating config type", &
                                      ESMF_CONTEXT, rc)) return
       nullify(config%cptr)
 
@@ -615,12 +593,10 @@
 !
 !EOP -------------------------------------------------------------------
 
-      integer :: i, j, iret
+      integer :: i, j
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      iret = 0
 
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
@@ -636,7 +612,7 @@
                                  ESMF_CONTEXT, rc)) return
       elseif(i.le.0) then
          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "invalid operation with index", &
+                                "invalid operation with index_", &
                                  ESMF_CONTEXT, rc)) return
       end if
 
@@ -656,12 +632,8 @@
       
       config%cptr%value_begin = i
 
-      iret = ESMF_SUCCESS
-      if ( present (rc )) then
-        rc = iret
-      endif
+      if ( present (rc )) rc = ESMF_SUCCESS
       
-      return
     end subroutine ESMF_ConfigFindLabel
 
 
@@ -801,12 +773,12 @@
 
 !EOPI ------------------------------------------------------------------
       character(len=1) :: ch
-      integer :: ib, ie, iret
+      integer :: ib, ie, localrc
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -820,13 +792,13 @@
 
 ! Processing
       if(present( label )) then
-         call ESMF_ConfigFindLabel( config, label, iret )
-         if ( iret /= 0 ) then
+         call ESMF_ConfigFindLabel( config, label, localrc )
+         if ( localrc /= 0 ) then
             if (present(default)) then
-               iret = ESMF_SUCCESS
+               localrc = ESMF_SUCCESS
             end if
             if ( present (rc )) then
-              rc = iret
+              rc = localrc
             endif
             return
          endif
@@ -849,9 +821,9 @@
          if ( present ( default )) then
            value = default
          endif
-         iret = -1
+         localrc = -1
          if ( present (rc )) then
-           rc = iret
+           rc = localrc
          endif
          return
       else
@@ -860,14 +832,12 @@
          
          value = config%cptr%this_line(ib:ie) 
          config%cptr%this_line = config%cptr%this_line(ie+2:)
-         iret = 0
+         localrc = 0
       end if
 
-      if ( present (rc )) then
-        rc = iret
+      if ( present (rc)) then
+        rc = localrc
       endif
-      return
-
       
     end subroutine ESMF_ConfigGetString
     
@@ -913,14 +883,15 @@
 
 !EOPI -------------------------------------------------------------------
 !
-      integer :: iret
+      integer :: localrc
+      integer :: iostat
       character(len=LSZ) :: string
       real(ESMF_KIND_R4) :: x
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -933,35 +904,34 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = iret )
+         call ESMF_ConfigGetString( config, string, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, string, rc = iret )
+         call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
 
-      if ( iret .eq. 0 ) then
-           read(string,*,iostat=iret) x
-           if ( iret .ne. 0 ) iret = -2
-           if ( iret .eq. 0) then
-             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+      if ( localrc == ESMF_SUCCESS ) then
+           read(string,*,iostat=iostat) x
+           if (iostat == 0) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
            else
              ! undo what GetSring() did
-             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
+             localrc = ESMF_RC_VAL_OUTOFRANGE
            endif
       else
          if( present( default )) then
             x = default
-            iret = ESMF_SUCCESS
+            localrc = ESMF_SUCCESS
          endif
       end if
 
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          value = x
       endif
 
       if( present( rc )) then
-        rc = iret 
+        rc = localrc
       endif
-      return
 
     end subroutine ESMF_ConfigGetFloatR4
 
@@ -1007,14 +977,15 @@
 
 !EOPI -------------------------------------------------------------------
 !
-      integer :: iret
+      integer :: localrc
+      integer :: iostat
       character(len=LSZ) :: string
       real(ESMF_KIND_R8) :: x
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1027,35 +998,34 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = iret )
+         call ESMF_ConfigGetString( config, string, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, string, rc = iret )
+         call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
 
-      if ( iret .eq. 0 ) then
-           read(string,*,iostat=iret) x
-           if ( iret .ne. 0 ) iret = -2
-           if ( iret .eq. 0) then
-             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+      if ( localrc == ESMF_SUCCESS ) then
+           read(string,*,iostat=iostat) x
+           if (iostat == 0) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
            else
              ! undo what GetSring() did
-             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
+             localrc = ESMF_RC_VAL_OUTOFRANGE
            endif
       else
          if( present( default )) then
             x = default
-            iret = ESMF_SUCCESS
+            localrc = ESMF_SUCCESS
          endif
       end if
 
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          value = x
       endif
 
       if( present( rc )) then
-        rc = iret 
+        rc = localrc
       endif
-      return
 
     end subroutine ESMF_ConfigGetFloatR8
 
@@ -1076,12 +1046,12 @@
                                          default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)      :: config    
-      real(ESMF_KIND_R4), intent(inout)        :: valueList(:) 
-      integer, intent(in)                      :: count 
-      character(len=*), intent(in), optional   :: label 
-      real(ESMF_KIND_R4), intent(in), optional :: default
-      integer, intent(out), optional           :: rc    
+      type(ESMF_Config),  intent(inout)         :: config    
+      real(ESMF_KIND_R4), intent(inout)         :: valueList(:) 
+      integer,            intent(in),  optional :: count 
+      character(len=*),   intent(in),  optional :: label 
+      real(ESMF_KIND_R4), intent(in),  optional :: default
+      integer,            intent(out), optional :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets a 4-byte real {\tt valueList} of a given {\tt count} from
@@ -1104,44 +1074,58 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
-      integer :: iret, i 
+!
+      integer :: localrc
+      integer :: localcount
+      integer :: i 
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if (count.le.0) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "invalid SIZE", &
-                                 ESMF_CONTEXT, rc)) return
+      localcount = size (valueList)
+      if (present (count)) then
+	if (count <= 0) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else if (count > size (valueList)) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else
+           localcount = count
+        end if
       endif
+
 ! Default setting
       if( present( default ) ) then 
-         valueList(1:count) = default
+         valueList(1:localcount) = default
 
       else
-         valueList(1:count) = 0.0
+         valueList(1:localcount) = 0.0
       endif
 ! Processing
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = iret )
+         call ESMF_ConfigFindLabel( config, label, rc = localrc )
       end if
 
-      do i = 1, count
+      do i = 1, localcount
          
          if(present( default )) then
-            call ESMF_ConfigGetFloatR4( config, valueList(i), default=default, rc=iret )
+            call ESMF_ConfigGetFloatR4( config, valueList(i), default=default, rc=localrc )
          else
-            call ESMF_ConfigGetFloatR4( config, valueList(i), rc = iret)
+            call ESMF_ConfigGetFloatR4( config, valueList(i), rc = localrc)
          endif
       enddo
+
       if(present( rc )) then
-        rc = iret
+        rc = localrc
       endif
-      return
+
     end subroutine ESMF_ConfigGetFloatsR4
 
 #undef  ESMF_METHOD
@@ -1159,12 +1143,12 @@
                                          default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)      :: config    
-      real(ESMF_KIND_R8), intent(inout)        :: valueList(:) 
-      integer, intent(in)                      :: count 
-      character(len=*), intent(in), optional   :: label 
-      real(ESMF_KIND_R8), intent(in), optional :: default
-      integer, intent(out), optional           :: rc    
+      type(ESMF_Config),  intent(inout)         :: config    
+      real(ESMF_KIND_R8), intent(inout)         :: valueList(:) 
+      integer,            intent(in),  optional :: count 
+      character(len=*),   intent(in),  optional :: label 
+      real(ESMF_KIND_R8), intent(in),  optional :: default
+      integer,            intent(out), optional :: rc    
 !
 ! !DESCRIPTION: 
 !   Gets an 8-byte real {\tt valueList} of a given {\tt count} from the
@@ -1187,47 +1171,57 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
-      integer :: iret, i 
+      integer :: localrc
+      integer :: localcount
+      integer :: i 
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if (count.le.0) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "invalid SIZE", &
-                                 ESMF_CONTEXT, rc)) return
+      localcount = size (valueList)
+      if (present (count)) then
+	if (count <= 0) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else if (count > size (valueList)) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else
+           localcount = count
+        end if
       endif
        
 ! Default setting
       if( present( default ) ) then 
-         valueList(1:count) = default
+         valueList(1:localcount) = default
       else
-         valueList(1:count) = 0.0
+         valueList(1:localcount) = 0.0
       endif
 
 ! Processing
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = iret )
+         call ESMF_ConfigFindLabel( config, label, rc = localrc )
       end if
 
-      do i = 1, count
+      do i = 1, localcount
          
          if(present( default )) then
-            call ESMF_ConfigGetFloatR8( config, valueList(i), default=default, rc=iret )
+            call ESMF_ConfigGetFloatR8( config, valueList(i), default=default, rc=localrc )
          else
-            call ESMF_ConfigGetFloatR8( config, valueList(i), rc = iret)
+            call ESMF_ConfigGetFloatR8( config, valueList(i), rc = localrc)
          endif
       enddo
 
       if(present( rc )) then
-        rc = iret
+        rc = localrc
       endif
 
-      return
     end subroutine ESMF_ConfigGetFloatsR8
 
 #undef  ESMF_METHOD
@@ -1269,15 +1263,17 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
+
+      integer :: localrc
       character(len=LSZ) :: string
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I4) ::  n
-      integer :: iret
+      integer :: iostat
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1290,41 +1286,40 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = iret )
+         call ESMF_ConfigGetString( config, string, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, string, rc = iret )
+         call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
 
-      if ( iret .eq. 0 ) then
-           read(string,*,iostat=iret) x
-           if ( iret .ne. 0 ) iret = -2
-           if ( iret .eq. 0) then
-             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+      if ( localrc == ESMF_SUCCESS ) then
+           read(string,*,iostat=iostat) x
+           if ( iostat == 0 ) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
            else
              ! undo what GetSring() did
-             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
+             localrc = ESMF_RC_VAL_OUTOFRANGE
            endif
       end if
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          n = nint(x)
       else
          if( present( default )) then
             n = default
-            iret = ESMF_SUCCESS
+            localrc = ESMF_SUCCESS
          else
             n = 0
          endif
       endif
 
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          value = n
       endif
 
       if( present( rc )) then
-        rc = iret
+        rc = localrc
       endif
       
-      return
     end subroutine ESMF_ConfigGetIntI4
 
 #undef  ESMF_METHOD
@@ -1366,15 +1361,17 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
+!
+      integer :: localrc
+      integer :: iostat
       character(len=LSZ) :: string
       real(ESMF_KIND_R8) :: x
       integer(ESMF_KIND_I8) :: n
-      integer :: iret
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1387,41 +1384,40 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = iret )
+         call ESMF_ConfigGetString( config, string, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, string, rc = iret )
+         call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
 
-      if ( iret .eq. 0 ) then
-           read(string,*,iostat=iret) x
-           if ( iret .ne. 0 ) iret = -2
-           if ( iret .eq. 0) then
-             call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+      if ( localrc == ESMF_SUCCESS ) then
+           read(string,*,iostat=iostat) x
+           if ( iostat == 0 ) then
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
            else
              ! undo what GetSring() did
-             call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+             call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
+             localrc = ESMF_RC_VAL_OUTOFRANGE
            endif
       end if
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          n = nint(x)
       else
          if( present( default )) then
             n = default
-            iret = ESMF_SUCCESS
+            localrc = ESMF_SUCCESS
          else
             n = 0
          endif
       endif
 
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          value = n
       endif
 
       if( present( rc )) then
-        rc = iret
+        rc = localrc
       endif
       
-      return
     end subroutine ESMF_ConfigGetIntI8
 
 
@@ -1439,12 +1435,12 @@
                                        default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)          :: config      
+      type(ESMF_Config),     intent(inout)         :: config      
       integer(ESMF_KIND_I4), intent(inout)         :: valueList(:)  
-      integer, intent(in)                          :: count  
-      character(len=*), intent(in), optional       :: label 
-      integer(ESMF_KIND_I4), intent(in), optional  :: default
-      integer, intent(out), optional               :: rc    
+      integer,               intent(in),  optional :: count  
+      character(len=*),      intent(in),  optional :: label 
+      integer(ESMF_KIND_I4), intent(in),  optional :: default
+      integer,               intent(out), optional :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets a 4-byte integer {\tt valueList} of given {\tt count} from the 
@@ -1467,47 +1463,58 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
-      integer :: iret, i 
+!
+      integer :: localrc
+      integer :: localcount
+      integer :: i 
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if (count.le.0) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "invalid SIZE", &
-                                 ESMF_CONTEXT, rc)) return
+      localcount = size (valueList)
+      if (present (count)) then
+	if (count <= 0) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else if (count > size (valueList)) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else
+           localcount = count
+        end if
       endif
        
  ! Default setting
       if( present( default ) ) then 
-         valueList(1:count) = default
+         valueList(1:localcount) = default
       else
-         valueList(1:count) = 0
+         valueList(1:localcount) = 0
       endif
 
 ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = iret )
+         call ESMF_ConfigFindLabel( config, label, rc = localrc )
       end if
 
-      do i = 1, count
+      do i = 1, localcount
          
          if(present( default )) then
-            call ESMF_ConfigGetIntI4( config, valueList(i), default = default, rc = iret)
+            call ESMF_ConfigGetIntI4( config, valueList(i), default = default, rc = localrc)
          else
-            call ESMF_ConfigGetIntI4( config, valueList(i), rc = iret)
+            call ESMF_ConfigGetIntI4( config, valueList(i), rc = localrc)
          endif
       enddo
 
       if(present( rc )) then
-        rc = iret
+        rc = localrc
       endif
 
-      return
     end subroutine ESMF_ConfigGetIntsI4
 
 
@@ -1526,12 +1533,12 @@
                                        default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)          :: config      
+      type(ESMF_Config),     intent(inout)         :: config      
       integer(ESMF_KIND_I8), intent(inout)         :: valueList(:)  
-      integer, intent(in)                          :: count  
-      character(len=*), intent(in), optional       :: label 
-      integer(ESMF_KIND_I8), intent(in), optional  :: default
-      integer, intent(out), optional               :: rc    
+      integer,               intent(in),  optional :: count  
+      character(len=*),      intent(in),  optional :: label 
+      integer(ESMF_KIND_I8), intent(in),  optional :: default
+      integer,               intent(out), optional :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets an 8-byte integer {\tt valueList} of given {\tt count} from
@@ -1554,41 +1561,53 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
-      integer :: iret, i 
+!
+      integer :: localrc
+      integer :: localcount
+      integer :: i 
       
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if (count.le.0) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "invalid SIZE", &
-                                 ESMF_CONTEXT, rc)) return
+      localcount = size (valueList)
+      if (present (count)) then
+	if (count <= 0) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else if (count > size (valueList)) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else
+           localcount = count
+        end if
       endif
        
  ! Default setting
       if( present( default ) ) then 
-         valueList(1:count) = default
+         valueList(1:localcount) = default
       else
-         valueList(1:count) = 0
+         valueList(1:localcount) = 0
       endif
 
 ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = iret )
+         call ESMF_ConfigFindLabel( config, label, rc = localrc )
       end if
 
-      do i = 1, count
+      do i = 1, localcount
          
          if(present( default )) then
-            call ESMF_ConfigGetIntI8( config, valueList(i), default = default, rc = iret)
+            call ESMF_ConfigGetIntI8( config, valueList(i), default = default, rc = localrc)
          else
-            call ESMF_ConfigGetIntI8( config, valueList(i), rc = iret)
+            call ESMF_ConfigGetIntI8( config, valueList(i), rc = localrc)
          endif
       enddo
 
       if(present( rc )) then
-        rc = iret
+        rc = localrc
       endif
 
       return
@@ -1608,11 +1627,11 @@
       subroutine ESMF_ConfigGetLogical( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)             :: config     
-      logical, intent(out)                         :: value
-      character(len=*), intent(in), optional       :: label 
-      logical, intent(in), optional                :: default
-      integer, intent(out), optional               :: rc   
+      type(ESMF_Config), intent(inout)         :: config     
+      logical,           intent(out)           :: value
+      character(len=*),  intent(in),  optional :: label 
+      logical,           intent(in),  optional :: default
+      integer,           intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION: 
@@ -1641,12 +1660,12 @@
 !
 !EOPI -------------------------------------------------------------------
       character(len=LSZ) :: string
-      integer :: iret
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = 0
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1659,15 +1678,15 @@
 
       ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = iret )
+         call ESMF_ConfigGetString( config, string, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, string, rc = iret )
+         call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
 
-      if ( iret .eq. ESMF_SUCCESS ) then
+      if ( localrc == ESMF_SUCCESS ) then
 
         ! Convert string to lower case
-         call ESMF_StringLowerCase(string, iret)
+         call ESMF_StringLowerCase(string, localrc)
 
          ! Check if valid true/false keyword
          if (string == 't'      .or. string == 'true' .or. &
@@ -1675,17 +1694,17 @@
              string == 'y'      .or. string == 'yes'  .or. &
              string == 'on') then
            value = .true.
-           call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+           call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
          else
             if (string == 'f'       .or. string == 'false' .or. &
                 string == '.false.' .or. string == '.f.'   .or. &
                 string == 'n'       .or. string == 'no'    .or. &
                 string == 'off') then
               value = .false.
-              call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+              call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
             else
               ! undo what GetSring() did
-              call ESMF_ConfigSetCurrentAttrUsed(config, .false.)
+              call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
 
               if (ESMF_LogMsgFoundError(ESMF_RC_CANNOT_GET, &
                                 "bad boolean value '" // string // &
@@ -1695,18 +1714,15 @@
          endif
       else
          if( present( default )) then
-            iret = ESMF_SUCCESS
+            localrc = ESMF_SUCCESS
          endif
       end if
 
       if( present( rc )) then
-        rc = iret
+        rc = localrc
       endif
       
-      return
     end subroutine ESMF_ConfigGetLogical
-
-
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLogicals"
@@ -1722,12 +1738,12 @@
                                          default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)          :: config      
-      logical, intent(inout)                       :: valueList(:)  
-      integer, intent(in)                          :: count  
-      character(len=*), intent(in), optional       :: label 
-      logical, intent(in), optional                :: default
-      integer, intent(out), optional               :: rc    
+      type(ESMF_Config), intent(inout)         :: config      
+      logical,           intent(inout)         :: valueList(:)  
+      integer,           intent(in),  optional :: count  
+      character(len=*),  intent(in),  optional :: label 
+      logical,           intent(in),  optional :: default
+      integer,           intent(out), optional :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets a logical {\tt valueList} of given {\tt count} from the 
@@ -1750,51 +1766,60 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
-      integer :: iret, i 
+!
+      integer :: localrc
+      integer :: localcount
+      integer :: i 
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if (count.le.0) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "invalid SIZE", &
-                                 ESMF_CONTEXT, rc)) return
+      localcount = size (valueList)
+      if (present (count)) then
+	if (count <= 0) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else if (count > size (valueList)) then
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                  "invalid SIZE", &
+                                   ESMF_CONTEXT, rc)) return
+        else
+           localcount = count
+        end if
       endif
        
       ! Default setting
       if( present( default ) ) then 
-         valueList(1:count) = default
+         valueList(1:localcount) = default
       else
-         valueList(1:count) = .false.
+         valueList(1:localcount) = .false.
       endif
 
       ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = iret )
+         call ESMF_ConfigFindLabel( config, label, rc = localrc )
       end if
 
-      do i = 1, count
+      do i = 1, localcount
          
          if(present( default )) then
             call ESMF_ConfigGetLogical( config, valueList(i), &
-                                        default = default, rc = iret)
+                                        default = default, rc = localrc)
          else
-            call ESMF_ConfigGetLogical( config, valueList(i), rc = iret)
+            call ESMF_ConfigGetLogical( config, valueList(i), rc = localrc)
          endif
       enddo
 
       if(present( rc )) then
-        rc = iret
+        rc = localrc
       endif
 
-      return
     end subroutine ESMF_ConfigGetLogicals
-
-
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetChar"
@@ -1808,11 +1833,11 @@
       subroutine ESMF_ConfigGetChar( config, value, label, default, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)    :: config 
-      character, intent(out)                 :: value
-      character(len=*), intent(in), optional :: label   
-      character, intent(in), optional        :: default
-      integer, intent(out), optional         :: rc    
+      type(ESMF_Config), intent(inout)         :: config 
+      character,         intent(out)           :: value
+      character(len=*),  intent(in),  optional :: label   
+      character,         intent(in),  optional :: default
+      integer,           intent(out), optional :: rc    
 !
 ! !DESCRIPTION: 
 !  Gets a character {\tt value} from the {\tt config} object.
@@ -1834,12 +1859,12 @@
 !
 !EOP -------------------------------------------------------------------
       character(len=LSZ) :: string
-      integer :: iret
+      integer :: localrc
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1852,25 +1877,23 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = iret )
+         call ESMF_ConfigGetString( config, string, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, string, rc = iret )
+         call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
 
-      if ( iret .eq. 0 ) then
+      if ( localrc == ESMF_SUCCESS ) then
          value = string(1:1)
-         call ESMF_ConfigSetCurrentAttrUsed(config, .true.)
+         call ESMF_ConfigSetCurrentAttrUsed(config, used=.true.)
       else
          if( present( default )) then
-            iret = ESMF_SUCCESS
+            localrc = ESMF_SUCCESS
          endif
       end if
 
       if (present( rc )) then
-        rc = iret
+        rc = localrc
       endif
-
-      return
 
     end subroutine ESMF_ConfigGetChar
 
@@ -1917,7 +1940,9 @@
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
-      integer :: n, iret
+!
+      integer :: localrc
+      integer :: n
       logical :: tend
 
       ! Initialize return code; assume routine not implemented
@@ -1930,18 +1955,18 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if ( present(label) ) then
-        call ESMF_ConfigFindLabel(config, label = label, rc = iret )
-        if ( iret /= 0 ) then
+        call ESMF_ConfigFindLabel(config, label = label, rc = localrc )
+        if ( localrc /= 0 ) then
            if ( present( rc )) then
-             rc = iret
+             rc = localrc
            endif
            return
         endif
       endif
 
       do 
-         call ESMF_ConfigNextLine( config, tend, rc = iret)
-         if (iret /=0 ) then
+         call ESMF_ConfigNextLine( config, tend, rc = localrc)
+         if (localrc /=0 ) then
             lineCount = 0
             columnCount = 0
             exit
@@ -1950,12 +1975,12 @@
             exit
          else
             lineCount = lineCount + 1
-            n = ESMF_ConfigGetLen( config, rc = iret)
-            if ( iret /= 0 ) then
+            n = ESMF_ConfigGetLen( config, rc = localrc)
+            if ( localrc /= 0 ) then
                lineCount = 0
                columnCount = 0
                if ( present( rc )) then
-                 rc = iret
+                 rc = localrc
                endif
                return
             else
@@ -1964,9 +1989,8 @@
          endif 
       enddo
       if ( present( rc )) then
-        rc = iret
+        rc = localrc
       endif
-      return
 
     end subroutine ESMF_ConfigGetDim
     
@@ -1981,9 +2005,9 @@
     integer function ESMF_ConfigGetLen( config, label, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)    :: config 
-      character(len=*), intent(in), optional :: label
-      integer, intent(out), optional :: rc         
+      type(ESMF_Config), intent(inout)         :: config 
+      character(len=*),  intent(in),  optional :: label
+      integer,           intent(out), optional :: rc         
 !
 ! !DESCRIPTION: 
 ! Gets the length of the line in words by counting words
@@ -2001,13 +2025,13 @@
 !
 !EOP -------------------------------------------------------------------
       character(len=LSZ) :: string
-      integer :: iret
+      integer :: localrc
       integer :: count 
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_SUCCESS
       count = 0
       ESMF_ConfigGetLen = -1    ! assume error
       
@@ -2015,21 +2039,21 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if( present( label )) then
-         call ESMF_ConfigFindLabel(config, label = label, rc = iret )
-         if( iret /= 0) then
+         call ESMF_ConfigFindLabel(config, label = label, rc = localrc )
+         if( localrc /= 0) then
             if (present( rc )) then
-              rc = iret
+              rc = localrc
             endif
             return
          endif
       endif
 
       do
-         call ESMF_ConfigGetString( config, string, rc = iret )
-         if ( iret .eq. 0 ) then
+         call ESMF_ConfigGetString( config, string, rc = localrc )
+         if ( localrc == ESMF_SUCCESS ) then
             count = count + 1
          else
-            if (iret .eq. -1) iret  = 0  ! end of the line
+            if (localrc == -1) localrc = ESMF_SUCCESS  ! end of the line
             exit
          endif
       enddo
@@ -2038,10 +2062,9 @@
       ESMF_ConfigGetLen = count
 
       if( present ( rc )) then
-        rc = iret
+        rc = localrc
       endif
 
-      return
     end function ESMF_ConfigGetLen
 
 #undef  ESMF_METHOD
@@ -2056,11 +2079,11 @@
     subroutine ESMF_ConfigLoadFile( config, filename, delayout, unique, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)        :: config     
-      character(len=*), intent(in)               :: filename 
-      type(ESMF_DELayout), intent(in), optional  :: delayout 
-      logical, intent(in), optional              :: unique 
-      integer, intent(out), optional             :: rc         
+      type(ESMF_Config),   intent(inout)         :: config     
+      character(len=*),    intent(in)            :: filename 
+      type(ESMF_DELayout), intent(in),  optional :: delayout 
+      logical,             intent(in),  optional :: unique 
+      integer,             intent(out), optional :: rc         
 !
 ! !DESCRIPTION: 
 !  Resource file with {\tt filename} is loaded into memory.
@@ -2093,7 +2116,7 @@
 
       call ESMF_ConfigLoadFile_1proc_( config, filename, localrc )
            if (ESMF_LogMsgFoundError(localrc, &
-                                "unable to load file", &
+                                "unable to load file: " // trim (filename), &
                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_ConfigParseAttributes( config, unique, localrc )
@@ -2108,7 +2131,6 @@
       if (present( rc )) then
         rc = localrc 
       endif
-      return
 
     end subroutine ESMF_ConfigLoadFile
 
@@ -2126,20 +2148,9 @@
 
     subroutine ESMF_ConfigLoadFile_1proc_( config, filename, rc )
 
-
-      implicit none
-
       type(ESMF_Config), intent(inout) :: config     ! ESMF Configuration
-      character(len=*), intent(in)  :: filename     ! file name
-      integer, intent(out), optional :: rc       ! Error code
-                                                 !   0 no error
-                                                 ! -98 coult not get unit 
-                                                 !     number (strange!)
-                                                 ! -98 talk to a wizzard
-                                                 ! -99 out of memory: increase
-                                                 !     NBUF_MAX 
-                                                 !     other iostat from open 
-                                                 !     statement.
+      character(len=*),  intent(in)    :: filename   ! file name
+      integer,           intent(out), optional :: rc ! Error code
 !
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
@@ -2158,21 +2169,16 @@
 !     Open file
 !     ---------     
       call ESMF_IOUnitGet (lu, rc=localrc)
-      if ( localrc /= ESMF_SUCCESS ) then
-         localrc = -97
-         if ( present (rc )) then
-           rc = localrc
-         endif
-         return
-      end if
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       ! A open through an interface to avoid portability problems.
       ! (J.G.)
 
-      call opntext(lu,filename,'old',localrc)
+      call opntext(lu,filename,'old',rc=localrc)
 
-      if ( localrc .ne. ESMF_SUCCESS ) then
+      if ( localrc /= ESMF_SUCCESS ) then
          if (ESMF_LogMsgFoundError(localrc, &
-                              "opntext() error", &
+                              "error opening text file: " // trim (filename), &
                                ESMF_CONTEXT, rc)) return
       end if
 
@@ -2218,9 +2224,9 @@
 !     All done
 !     --------
 ! Close lu
-      call clstext(lu,ios)
-      if(ios /= ESMF_SUCCESS) then
-         localrc = ESMF_RC_MEM
+      call clstext(lu, rc=localrc)
+      if(localrc /= ESMF_SUCCESS) then
+         localrc = ESMF_RC_FILE_CLOSE
          if ( present (rc )) then
            rc = localrc
          endif
@@ -2236,8 +2242,8 @@
         rc = ESMF_SUCCESS
       endif
 
-      return
     end subroutine ESMF_ConfigLoadFile_1proc_
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigNextLine"
 !-----------------------------------------------------------------------
@@ -2250,9 +2256,9 @@
     subroutine ESMF_ConfigNextLine( config, tableEnd, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout) :: config 
-      logical, intent(out), optional :: tableEnd
-      integer, intent(out), optional:: rc 
+      type(ESMF_Config), intent(inout)         :: config 
+      logical,           intent(out), optional :: tableEnd
+      integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION: 
 !   Selects the next line (for tables).
@@ -2268,21 +2274,23 @@
 !   \end{description}
 
 !EOP -------------------------------------------------------------------
-      integer :: i, j, iret
+!
+      integer :: localrc
+      integer :: i, j
       logical :: local_tend
 
       ! Initialize return code; assume routine not implemented 
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      iret = 0
+      localrc = ESMF_RC_NOT_IMPL
       local_tend = .false.
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if ( config%cptr%next_line .ge. config%cptr%nbuf ) then
-         iret = -1
+      if ( config%cptr%next_line >= config%cptr%nbuf ) then
+         localrc = ESMF_RC_MEM
            if ( present (rc )) then
-             rc = iret
+             rc = localrc
            endif
          return
       end if
@@ -2292,29 +2300,29 @@
       config%cptr%this_line = config%cptr%buffer(i:j) // BLK // EOL
       
       if ( config%cptr%this_line(1:2) .eq. '::' ) then
-         iret = 0                    ! end of table. We set iret = 0
+         localrc = ESMF_SUCCESS      ! end of table. We set rc = ESMF_SUCCESS
          local_tend = .true.         ! and end = .true. Used to be iret = 1  
          config%cptr%next_line = config%cptr%nbuf + 1
          if ( present (tableEnd )) then
            tableEnd = local_tend
          endif
          if ( present (rc )) then
-           rc = iret
+           rc = localrc
          endif
          return
       end if
 
       config%cptr%next_line = j + 2
-      iret = 0
+      localrc = ESMF_SUCCESS
       if ( present (tableEnd )) then
         tableEnd = local_tend
       endif
       if ( present (rc )) then
-        rc = iret
+        rc = localrc
       endif
-      return
 
     end subroutine ESMF_ConfigNextLine
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigParseAttributes"
 !-----------------------------------------------------------------------
@@ -2481,10 +2489,10 @@
       subroutine ESMF_ConfigSetIntI4( config, value, label, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)             :: config     
+      type(ESMF_Config),     intent(inout)         :: config     
       integer(ESMF_KIND_I4), intent(in)            :: value
-      character(len=*), intent(in), optional       :: label 
-      integer, intent(out), optional               :: rc   
+      character(len=*),      intent(in),  optional :: label 
+      integer,               intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION: 
@@ -2503,12 +2511,14 @@
 !   \end{description}
 !
 !EOPI -------------------------------------------------------------------
+!
+      integer :: localrc
       character(len=ESMF_MAXSTR) :: logmsg
       character(len=LSZ) :: curVal, newVal
-      integer :: iret, i, j, k, m, nchar, ninsert, ndelete, lenThisLine
+      integer :: i, j, k, m, nchar, ninsert, ndelete, lenThisLine
 
       ! Initialize return code; assume routine not implemented
-      iret = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       !check variables
@@ -2516,18 +2526,18 @@
 
       ! Set config buffer at desired attribute
       if ( present (label) ) then
-         call ESMF_ConfigGetString( config, curVal, label, rc = iret )
+         call ESMF_ConfigGetString( config, curVal, label, rc = localrc )
       else
-         call ESMF_ConfigGetString( config, curVal, rc = iret )
+         call ESMF_ConfigGetString( config, curVal, rc = localrc )
       endif
 
-      if ( iret .ne. ESMF_SUCCESS ) then
-        if ( iret .eq. ESMF_RC_NOT_FOUND ) then
+      if ( localrc /= ESMF_SUCCESS ) then
+        if ( localrc == ESMF_RC_NOT_FOUND ) then
           ! set config buffer at end for appending
           i = config%cptr%nbuf
         else
           if ( present( rc ) ) then
-            rc = iret
+            rc = localrc
           endif
           return
         endif
@@ -2623,7 +2633,7 @@
       endif
 
       if( present( rc )) then
-        rc = iret
+        rc = localrc
       endif
       
       return
@@ -2644,9 +2654,9 @@
 
       implicit none
 
-      type(ESMF_Config), intent(inout) :: config ! ESMF Configuration
-      logical, intent(in)            :: used     ! used flag
-      integer, intent(out), optional :: rc       ! Error return code
+      type(ESMF_Config), intent(inout)         :: config ! ESMF Configuration
+      logical,           intent(in)            :: used     ! used flag
+      integer,           intent(out), optional :: rc       ! Error return code
 !
 ! !DESCRIPTION: Set the given config's current attribute's used flag
 !
@@ -2691,7 +2701,7 @@
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)         :: config 
       character (len=*), intent(in),  optional :: options
-      integer, intent(out), optional           :: rc 
+      integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION: 
 !   Checks whether a {\tt config} object is valid.
@@ -2781,9 +2791,7 @@
 !-----------------------------------------------------------------------
 
 
-      integer function index_ (string,tok)
-
-      implicit NONE
+    integer function index_ (string,tok)
 
 !-------------------------------------------------------------------------
 ! !ROUTINE: index_ Extension of the Fortran 77 intrinsic "index" for
@@ -2804,6 +2812,7 @@
 !-------------------------------------------------------------------------
       integer :: idx, i, n, nlen, lt, ibot, itop
       integer, parameter :: MAXLEN = 32767   ! max size of signed 2-byte integer
+
       n = len(string)         ! length of string
       lt = len(tok)           ! length of token tok
       i = 1                   ! initialize loop index
@@ -2819,13 +2828,10 @@
       end do
       index_ = idx                    ! case where idx = 0, or (i=1 & idx > 0)
       if(idx > 0) index_ = idx - 1 + ibot
-      return
-      end function index_
 
-      subroutine ESMF_Config_Trim ( string )
+    end function index_
 
-      implicit NONE
-
+    subroutine ESMF_Config_Trim ( string )
 
 !-------------------------------------------------------------------------
 !
@@ -2866,14 +2872,10 @@
 !     ----------------------------------
       string = string(ib:)
 
-      return
-      end subroutine ESMF_Config_trim
+    end subroutine ESMF_Config_trim
 
 
-      subroutine ESMF_Config_pad ( string )
-
-      implicit NONE
-
+    subroutine ESMF_Config_pad ( string )
 
 !-------------------------------------------------------------------------!
 ! !ROUTINE:  ESMF_CONFIG_Pad() --- Pad strings.
@@ -2923,12 +2925,7 @@
          if ( string(i:i) .eq. '#' ) exit
       end do
 
-      return
-      end subroutine ESMF_Config_pad
-
-    
-
-
+    end subroutine ESMF_Config_pad
 
 !-----------------------------------------------------------------------
 ! !IROUTINE: opntext - portably open a text file
@@ -2940,13 +2937,12 @@
 !
 ! !INTERFACE:
 
-    subroutine opntext(lu,filename,status,localrc)
-      implicit none
+    subroutine opntext(lu, filename, status, rc)
 
       integer,         intent(in) :: lu     ! logical unit number
       character(len=*),intent(in) :: filename  ! filename to be opened
       character(len=*),intent(in) :: status ! the value for STATUS=<>
-      integer,         intent(out):: localrc ! the status
+      integer,         intent(out):: rc     ! the status
 
 !-----------------------------------------------------------------------
 !
@@ -2954,12 +2950,15 @@
                 ! local parameter
 
         character(len=len(status)) :: Ustat
-        integer :: ier
+        integer :: iostat
 
 
 #ifdef _UNICOS
-        call asnunit(lu,'-R',localrc)         ! remove any set attributes
-        if(localrc .ne. ESMF_SUCCESS) return  ! let the parent handle it
+        call asnunit(lu,'-R',iostat)         ! remove any set attributes
+        if (iostat /= 0) then
+          rc = ESMF_FAILURE
+          return  ! let the parent handle it
+        end if
 #endif
 
         Ustat = status
@@ -2976,7 +2975,7 @@
             status      ='unknown',       &
             action      ='readwrite',     &
             position    ='append',        &
-            iostat      =ier                )
+            iostat      =iostat            )
 
         case default
 
@@ -2988,14 +2987,14 @@
             status      =status,          &
             action      ='read',          &
             position    ='asis',          &
-            iostat      =ier                )
+            iostat      =iostat            )
 
         end select
 
-        if (ier .eq. 0) then
-          localrc = ESMF_SUCCESS
+        if (iostat == 0) then
+          rc = ESMF_SUCCESS
         else
-          localrc = ESMF_RC_FILE_OPEN
+          rc = ESMF_RC_FILE_OPEN
         endif
 
         end subroutine opntext
@@ -3009,15 +3008,15 @@
 
 ! !INTERFACE:
 
-    subroutine clstext(lu,ier,status)
-      implicit none
+    subroutine clstext(lu, rc, status)
 
       integer,                    intent(in)  :: lu     ! a logical unit to close
-      integer,                    intent(out) :: ier    ! the status
+      integer,                    intent(out) :: rc     ! the status
       Character(len=*), optional, intent(In)  :: status ! keep/delete
 
 !-----------------------------------------------------------------------
           character(len=6) :: status_
+          integer :: iostat
 
           status_ = 'KEEP'
           If (Present(status)) Then
@@ -3027,17 +3026,19 @@
              Case  ('KEEP','keep')
                 status_ = 'KEEP'
              Case Default
-                ier = -997
+                rc = ESMF_RC_FILE_UNEXPECTED
                 return
              End Select
           End If
 
-        close(lu,iostat=ier,status=status_)
+        close(lu,iostat=iostat,status=status_)
 #ifdef _UNICOS
-        if(ier .eq. 0) call asnunit(lu,'-R',ier) ! remove any attributes
+        if(iostat == 0) call asnunit(lu,'-R',iostat) ! remove any attributes
 #endif
 
-        end subroutine clstext
+        rc = ESMF_SUCCESS
+
+    end subroutine clstext
 
 
 !-----------------------------------------------------------------------
