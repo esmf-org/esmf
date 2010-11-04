@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.167 2010/10/16 00:07:13 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.168 2010/11/04 19:06:24 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.167 2010/10/16 00:07:13 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.168 2010/11/04 19:06:24 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3169,6 +3169,7 @@ end subroutine ESMF_GridConvertIndex
     !print *, "Finish ArrayScatter 1st dim coord"
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
+    if (PetNo == 0)  deallocate(imask, mask2D)
     
     ESMF_GridCreateFrmScripDistGrd = grid
     if (present(rc)) rc=ESMF_SUCCESS
@@ -3374,6 +3375,7 @@ end subroutine convert_corner_arrays_to_1D
     integer :: DimId, VarId
     real(ESMF_KIND_R8) :: rad2deg
     real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
+    integer, allocatable:: imask(:), mask2D(:,:)
     real(ESMF_KIND_R8),  allocatable:: cornerX2D(:,:),cornerY2D(:,:)
     real(ESMF_KIND_R8),  allocatable:: cornerX(:),cornerY(:)
     type(ESMF_Grid)  :: grid
@@ -3472,11 +3474,13 @@ end subroutine convert_corner_arrays_to_1D
       ! Get the coordinate information from the SCRIP file, if in radians, convert to degrees
       if (localAddCornerStagger) then ! Get centers and corners
           allocate(coordX(totalpoints), coordY(totalpoints))
+	  allocate(imask(totalpoints))
           allocate(cornerX2D(grid_corners,totalpoints), cornerY2D(grid_corners,totalpoints))
 
           call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
                  grid_center_lat=coordY, grid_corner_lon=cornerX2D, &
-                 grid_corner_lat=cornerY2D, convertToDeg=.TRUE., rc=rc)
+                 grid_corner_lat=cornerY2D, grid_imask=imask,  &
+		convertToDeg=.TRUE., rc=rc)
 
           allocate(cornerX(dims(1)*(dims(2)+1)), cornerY(dims(1)*(dims(2)+1)))
 
@@ -3488,8 +3492,10 @@ end subroutine convert_corner_arrays_to_1D
           deallocate(cornerX2D, cornerY2D)          
      else ! get just centers
           allocate(coordX(totalpoints), coordY(totalpoints))
+          allocate(imask(totalpoints))
           call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
-                 grid_center_lat=coordY, convertToDeg=.TRUE., rc=rc)
+                 grid_center_lat=coordY, grid_imask=imask,  &
+		convertToDeg=.TRUE., rc=rc)
       endif
     endif
 
@@ -3532,8 +3538,28 @@ end subroutine convert_corner_arrays_to_1D
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
+    ! Mask
+    call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	item = ESMF_GRIDITEM_MASK, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+    call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
+	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
+    if (PetNo == 0) then
+       allocate(mask2D(dims(1),dims(2)))
+       mask2D = RESHAPE(imask,(/dims(1), dims(2)/))
+    endif
+    call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
+    !print *, "Finish ArrayScatter 1st dim coord"
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rc)) return
+
     if (PetNo == 0) then
       deallocate(coord2D, coordX, coordY)
+      deallocate(imask, mask2D)
     endif
 
     ! Put Corners into coordinates
