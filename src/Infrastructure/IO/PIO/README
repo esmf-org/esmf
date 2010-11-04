@@ -1,6 +1,17 @@
 PIO directory README
 ====================
 
+Current Notes:
+-------------
+The "./src/Infrastucture/IO/PIO" directory holds a copy of the PIO source files. These source files are based on PIO svn tag pio1_2_0. They were obtained via:
+
+svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_2_0
+
+This release provides functionality to use a disjoint set of mpi tasks for IO, currently this functionality is supported for netcdf backends but not binary.
+
+
+Older Notes:
+-----------
 The "./src/Infrastucture/IO/PIO" directory holds a copy of the PIO source files. These source files are based on PIO svn tag pio1_1_1. They were obtained via:
 
 svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_1_1

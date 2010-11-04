@@ -25,6 +25,7 @@ module pio_support
 
   logical, public :: Debug=.FALSE.
   logical, public :: DebugIO=.FALSE.
+  logical, public :: DebugAsync=.FALSE.
   integer,private,parameter :: versno = 1001
 
   character(len=*), parameter :: modName='pio_support'
@@ -42,7 +43,7 @@ contains
     ! Change History
     ! 20070608 R. Loy  added optional args
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90.in,v 1.1 2010/06/04 23:24:15 theurich Exp $
+    ! $Id: pio_support.F90.in,v 1.2 2010/11/04 23:27:50 samsoncheung Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -139,7 +140,7 @@ contains
     ! Change History
     ! 
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90.in,v 1.1 2010/06/04 23:24:15 theurich Exp $
+    ! $Id: pio_support.F90.in,v 1.2 2010/11/04 23:27:50 samsoncheung Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -244,7 +245,7 @@ contains
     ! Change History
     ! 
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90.in,v 1.1 2010/06/04 23:24:15 theurich Exp $
+    ! $Id: pio_support.F90.in,v 1.2 2010/11/04 23:27:50 samsoncheung Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none

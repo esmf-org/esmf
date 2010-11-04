@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2010/09/24 04:26:24 theurich Exp $
+# $Id: makefile,v 1.8 2010/11/04 23:27:50 samsoncheung Exp $
 
 ALL: build_here 
 
@@ -23,12 +23,13 @@ endif
 ifeq ($(ESMF_PIO),internal)
 SOURCEC	  = pnetcdfversion.c topology.c
 SOURCEF	  = pio_kinds.F90 pio_types.F90 pio_support.F90 alloc_mod.F90 \
-            pio_utils.F90 ionf_mod.F90 pionfread_mod.F90 nf_mod.F90 \
+            pio_utils.F90 ionf_mod.F90 pionfread_mod.F90 pio_msg_mod.F90 \
+            nf_mod.F90 \
             pionfwrite_mod.F90 pio_mpi_utils.F90 iompi_mod.F90 \
             pio_quicksort.F90 mct_rearrange.F90 pio_spmd_utils.F90 \
             box_rearrange.F90 rearrange.F90 piolib_mod.F90 piodarray.F90 \
             pionfatt_mod.F90 pionfput_mod.F90 pionfget_mod.F90 pio.F90 \
-            pio_nf_utils.F90
+            pio_nf_utils.F90 pio_msg_callbacks.F90 pio_msg_getput_callbacks.F90
 else
 SOURCEC	  = 
 SOURCEF	  = 
