@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.12 2010/11/03 19:54:59 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.13 2010/11/04 18:54:40 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -268,6 +268,7 @@ end subroutine ESMF_ScripInqUnits
 
     integer:: ncStatus
     integer:: ncid, VarId
+    integer:: len
     character(len=128) :: units
     real(ESMF_KIND_R8) :: rad2deg
     logical :: convertToDegLocal
@@ -295,6 +296,11 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
         rc)) return
       ! get the attribute 'units'
+      ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD, &
+          ESMF_SRCLINE,&
+          rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
@@ -302,7 +308,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (trim(units) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             print *, 'Convert radians to degree ', rad2deg
             grid_center_lon(:) = grid_center_lon(:)*rad2deg
@@ -321,6 +327,11 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
         rc)) return
       ! get the attribute 'units'
+      ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD, &
+          ESMF_SRCLINE,&
+          rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
@@ -328,7 +339,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (trim(units) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             grid_center_lat(:) = grid_center_lat(:)*rad2deg
          endif
@@ -361,6 +372,11 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
         rc)) return
       ! get the attribute 'units'
+      ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD, &
+          ESMF_SRCLINE,&
+          rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
@@ -368,7 +384,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (trim(units) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             print *, 'Convert radians to degree ', rad2deg
             grid_corner_lon(:,:) = grid_corner_lon(:,:)*rad2deg
@@ -387,6 +403,11 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
         rc)) return
       ! get the attribute 'units'
+      ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD, &
+          ESMF_SRCLINE,&
+          rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
@@ -394,7 +415,7 @@ end subroutine ESMF_ScripInqUnits
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (trim(units) .eq. "radians") then
+         if (units(1:len) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             grid_corner_lat(:,:) = grid_corner_lat(:,:)*rad2deg
          endif
@@ -522,7 +543,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       do i=1,PetCnt
 	 total=allCounts(i)+total
       end do
-      !print *, PetNo, 'local count ', localCount(1), AllCounts(PetNo+1), total
+      print *, PetNo, 'local count ', localCount(1), AllCounts(PetNo+1), total
 
      !Read the variables from the input grid files at PET0
       if (PetNo == 0) then
