@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServLowLevelSocket.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,11 +40,14 @@
 #include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -125,7 +128,7 @@ ESMCI_WebServLowLevelSocket::~ESMCI_WebServLowLevelSocket(
 int  ESMCI_WebServLowLevelSocket::nonblock(
 // 
 // !RETURN VALUE:
-//   int  return code - 0 for success, -1 for failure
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
 // 
@@ -142,6 +145,8 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 {
 	//printf("LowLevelSocket::nonblock()\n");
 
+	int		localrc = ESMC_RC_NOT_IMPL;
+
 	/*
 	** Turn on the non-blocking attribute for the socket
 	*/
@@ -149,7 +154,12 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 
 	if (theTSock <= 0)
 	{
-		return 0;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_OBJ_WRONG, 
+			"The Server listening socket not valid.", 
+			&localrc);
+
+		return localrc;
 	}
 
 	int	sock;
@@ -164,13 +174,15 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 
 	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
 	{
-		//notify("Unable to set nonblock attribute", ERROR, 
-      //       "LowLevelSocket:nonblock");
-		//perror("");
-		return -1;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_CANNOT_SET, 
+			"Unable to set nonblock attribute.", 
+			&localrc);
+
+		return localrc;
 	}
 
-	return 0;
+	return ESMF_SUCCESS;
 }
 
 
@@ -184,7 +196,7 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 int  ESMCI_WebServLowLevelSocket::serverConnect(
 // 
 // !RETURN VALUE:
-//   int  socket file descriptor if successful, -1 otherwise.
+//   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
 // 
 // !ARGUMENTS:
 // 
@@ -197,15 +209,20 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
+
 	//printf("LowLevelSocket::serverConnect()\n");
 	disconnect();
 
 	theTSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theTSock < 0)
 	{
-		//notify("socket failed", ERROR, "LowLevelSocket::serverConnect");
-		//perror("");
-		return -1;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"Unable to open socket connection.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	struct sockaddr_in	server;
@@ -229,9 +246,12 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 
 	if (status < 0)
 	{
-		//notify("bind failed", ERROR, "LowLevelSocket::serverConnect");
-		//perror("");
-		return -1;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"Socket bind failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	if (theNonBlock)
@@ -239,7 +259,15 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 		nonblock();
 	}
 
-	listen(theTSock, 5);
+	if (listen(theTSock, 5) < 0)
+	{
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"Socket listen failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
+	}
 
 	return theTSock;
 }
@@ -255,7 +283,7 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 int  ESMCI_WebServLowLevelSocket::accept(
 // 
 // !RETURN VALUE:
-//   int  return code - 0 for success, -1 for failure
+//   int  return code - ESMF_SUCCESS for success, ESMF_FAILURE for failure
 // 
 // !ARGUMENTS:
 // 
@@ -268,13 +296,19 @@ int  ESMCI_WebServLowLevelSocket::accept(
 //-----------------------------------------------------------------------------
 {
 	//printf("LowLevelSocket::accept()\n");
+	int	localrc = 0;
 
 	//***
 	// Make sure the server socket has been created
 	//***
 	if (theTSock <= 0)
 	{
-		return -1;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_OBJ_WRONG, 
+			"The Server listening socket not valid.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	//***
@@ -288,13 +322,14 @@ int  ESMCI_WebServLowLevelSocket::accept(
 	//***
 	if ((theSock = ::accept(theTSock, NULL, NULL)) < 0)
 	{
-		if (theSock != EAGAIN)
-		{
-			//notify("accept failed", ERROR, "LowLevelSocket::serverConnect");
-			//perror("");
-			disconnect();
-		}
-		return -1;
+		disconnect();
+
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"Socket accept failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	return theSock;
@@ -311,7 +346,7 @@ int  ESMCI_WebServLowLevelSocket::accept(
 int  ESMCI_WebServLowLevelSocket::clientConnect(
 // 
 // !RETURN VALUE:
-//   int  socket file descriptor if successful, -1 otherwise.
+//   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
 // 
 // !ARGUMENTS:
 // 
@@ -326,6 +361,7 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 //-----------------------------------------------------------------------------
 {
 	//printf("LowLevelSocket::clientConnect()\n");
+	int	localrc = 0;
 
 	//***
 	// First, make sure that we're not already connected... if so, disconnect
@@ -338,9 +374,12 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 	theSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theSock < 0)
 	{
-		//notify("socket failed", ERROR, "LowLevelSocket::clientConnect");
-		//perror("");
-		return -1;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"Unable to create client socket.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	struct sockaddr_in	server;
@@ -349,11 +388,12 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 	struct hostent*	hp = gethostbyname(host);
 	if (hp == NULL)
 	{
-		//char	serr[1024];
-		//sprintf(serr, "gethostbyname(%s) failed", host);
-		//notify(serr, ERROR, "LowLevelSocket::clientConnect");
-		//perror("");
-		return -1;
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_OBJ_BAD, 
+			"Call to gethostbyname failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	memcpy(&server.sin_addr, hp->h_addr, hp->h_length);
@@ -364,10 +404,14 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 	//***
 	if (connect(theSock, (struct sockaddr*)&server, sizeof(server)) < 0)
 	{
-		//notify("connect failed", ERROR, "LowLevelSocket::clientConnect");
-		//perror("");
 		disconnect();
-		return -1;
+
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"Client socket connect failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
 	}
 
 	return theSock;
@@ -448,7 +492,7 @@ void  ESMCI_WebServLowLevelSocket::disconnect(
 int  ESMCI_WebServLowLevelSocket::send(
 // 
 // !RETURN VALUE:
-//   int  number of characters (bytes) sent if successful, -1 otherwise.
+//   int  number of characters (bytes) sent 
 // 
 // !ARGUMENTS:
 // 
@@ -462,7 +506,7 @@ int  ESMCI_WebServLowLevelSocket::send(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::send1()\n");
+	//printf("LowLevelSocket::send()\n");
 
 	return ESMCI::ESMCI_WebServSend(theSock, size, data);
 }
@@ -479,11 +523,11 @@ int  ESMCI_WebServLowLevelSocket::recv(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) received if successful, 0 if the peer
-//        has performed an orderly shutdown, and -1 otherwise.
+//        has performed an orderly shutdown, and ESMF_FAILURE otherwise.
 // 
 // !ARGUMENTS:
 // 
-  int  	size,  // (in) the size of the data to send
+  int  	size,  // (in) the max size of the data to receive
   void*  data   // (inout) the buffer where the data is put; must have memory
                 // allocated at least the specified size
   )
@@ -511,7 +555,7 @@ int  ESMCI_WebServLowLevelSocket::read(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) read (not including the packet header) 
-//        if successful, -1 otherwise.
+//        if successful, ESMF_FAILURE otherwise.
 // 
 // !ARGUMENTS:
 // 
@@ -530,6 +574,8 @@ int  ESMCI_WebServLowLevelSocket::read(
 {
 	//printf("LowLevelSocket::read()\n");
 
+	int	localrc = 0;
+
 	size = 0;
 
 	//***
@@ -538,7 +584,11 @@ int  ESMCI_WebServLowLevelSocket::read(
 	//printf("Reading size: %d\n", thePhSize);
 	if (recv(thePhSize, &thePHead) != thePhSize)
 	{
-		//notify("recv failed", WARN, "LowLevelSocket::read");
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_READ, 
+			"Socket receive failed.", 
+			&localrc);
+
 		return 0;
 	}
 
@@ -558,8 +608,12 @@ int  ESMCI_WebServLowLevelSocket::read(
 	if (thePHead.magic != MAGIC)
 	{
 		thePHead.magic = MAGIC;
-		//notify("recv failed - invalid packet header", WARN, 
-      //       "LowLevelSocket::read");
+
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_READ, 
+			"Socket receive failed: invalid packet header.", 
+			&localrc);
+
 		return 0;
 	}
 
@@ -574,7 +628,10 @@ int  ESMCI_WebServLowLevelSocket::read(
 
 	if (bytesRead != size)
 	{
-		//notify("recv failed", WARN, "LowLevelSocket::read");
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_READ, 
+			"Socket receive failed: number of bytes read not expected size.", 
+			&localrc);
 	}
 	//printf("Data: %s\n", data);
 
@@ -593,7 +650,7 @@ int  ESMCI_WebServLowLevelSocket::write(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) written (not including the packet
-//        header) if successful, -1 otherwise.
+//        header) if successful, ESMF_FAILURE otherwise.
 // 
 // !ARGUMENTS:
 // 
@@ -611,6 +668,8 @@ int  ESMCI_WebServLowLevelSocket::write(
 {
 	//printf("LowLevelSocket::write()\n");
 
+	int	localrc = 0;
+
 	//***
 	// Make sure we handle endianness
 	//***
@@ -623,7 +682,11 @@ int  ESMCI_WebServLowLevelSocket::write(
 	int	bytesSent = 0;
 	if ((bytesSent = send(thePhSize, &thePHead)) != thePhSize)
 	{
-		//notify("send failed", WARN, "LowLevelSocket::write");
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_WRITE, 
+			"Socket send failed.", 
+			&localrc);
+
 		return 0;
 	}
 
@@ -633,7 +696,10 @@ int  ESMCI_WebServLowLevelSocket::write(
 	int	bytesWritten = send(size, data);
 	if (bytesWritten != size)
 	{
-		//notify("send failed", WARN, "LowLevelSocket::write");
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_WRITE, 
+			"Socket send failed: number of bytes sent not expected size.", 
+			&localrc);
 	}
 
 	return bytesWritten;
@@ -651,7 +717,7 @@ int  ESMCI_WebServLowLevelSocket::send(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) written (not including the packet
-//        header) if successful, -1 otherwise.
+//        header) if successful, ESMF_FAILURE otherwise.
 // 
 // !ARGUMENTS:
 // 

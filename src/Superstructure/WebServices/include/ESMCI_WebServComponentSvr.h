@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.h,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.h,v 1.3 2010/11/05 18:46:57 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -66,7 +66,7 @@ namespace ESMCI
 	  void setPort(int  port);
 
      // method to setup socket service loop... 
-	  void requestLoop(ESMCI::GridComp*	comp,
+	  int  requestLoop(ESMCI::GridComp*	  comp,
                       ESMCI::State*      importState,
                       ESMCI::State*      exportState,
                       ESMCI::Clock*      clock,
@@ -93,12 +93,12 @@ namespace ESMCI
 	  void  setStatus(int  status);
 
      // process request methods
-	  void  processInit();
-	  void  processRun();
-	  void  processFinal();
-	  void  processState();
-	  void  processFiles();
-	  void  processEnd();
+	  int  processInit();
+	  int  processRun();
+	  int  processFinal();
+	  int  processState();
+	  int  processFiles();
+	  int  processEnd();
 
 	  int			thePort;			// the port number of the socket service
 	  char		theMsg[8192];	// buffer to store client requests

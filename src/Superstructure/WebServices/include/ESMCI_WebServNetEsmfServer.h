@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmfServer.h,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServNetEsmfServer.h,v 1.3 2010/11/05 18:46:57 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -69,14 +69,14 @@ namespace ESMCI
 
      // methods to setup socket service loop... one for grid components and
      // one for coupler components
-	  void requestLoop(ESMCI::GridComp*	  comp,
+	  int  requestLoop(ESMCI::GridComp*	  comp,
                       ESMCI::State*      importState,
                       ESMCI::State*      exportState,
                       ESMCI::Clock*      clock,
                       int                phase,
                       ESMC_BlockingFlag  blockingFlag);
 
-	  void requestLoop(ESMCI::CplComp*	  comp,
+	  int  requestLoop(ESMCI::CplComp*	  comp,
                       ESMCI::State*      importState,
                       ESMCI::State*      exportState,
                       ESMCI::Clock*      clock,
@@ -93,14 +93,14 @@ namespace ESMCI
 	  char* getRequestFromId(int  id);
 
      // process request methods
-	  void  processNew();
-	  void  processInit();
-	  void  processRun();
-	  void  processFinal();
-	  void  processState();
-	  void  processFiles();
-	  void  processEnd();
-	  void  processPing();
+	  int   processNew();
+	  int   processInit();
+	  int   processRun();
+	  int   processFinal();
+	  int   processState();
+	  int   processFiles();
+	  int   processEnd();
+	  int   processPing();
 
      // internal data access methods
 	  int  getNextClientId();

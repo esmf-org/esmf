@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServServerSocket.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServServerSocket.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,11 +40,15 @@
 #include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServServerSocket.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServServerSocket.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -118,7 +122,7 @@ ESMCI_WebServServerSocket::~ESMCI_WebServServerSocket(
 int  ESMCI_WebServServerSocket::connect(
 //
 // !RETURN VALUE:
-//   int  socket file descriptor if successful, -1 otherwise.
+//   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
 //
 // !ARGUMENTS:
 //

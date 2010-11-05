@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.1 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServ_F.C,v 1.2 2010/11/05 18:46:57 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.1 2010/11/02 18:36:04 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.2 2010/11/05 18:46:57 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -77,8 +77,14 @@ void FTN(c_esmc_componentsvcloop)(
 {
 	//printf("Port Number: %d\n", *portNum);
 
+   //***
+   // This loop should not return until either an "exit" message has been
+   // received or an error has occurred.
+   //***
 	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
 	server.requestLoop(comp, importState, exportState, clock, 0, ESMF_BLOCKING);
+
+   *rc = ESMF_SUCCESS;
 }
 
 

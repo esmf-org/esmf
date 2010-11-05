@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServPassThruSvr.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServPassThruSvr.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -42,11 +42,15 @@
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_WebServCompSvrClient.h"
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -151,9 +155,10 @@ void  ESMCI_WebServPassThruSvr::setPort(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::requestLoop()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::requestLoop(
+int  ESMCI_WebServPassThruSvr::requestLoop(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -167,13 +172,19 @@ void  ESMCI_WebServPassThruSvr::requestLoop(
 //-----------------------------------------------------------------------------
 {
 	//printf("ESMCI_WebServPassThruSvr::requestLoop()\n");
+	int	localrc = 0;
 	
    //***
    // Setup the server socket
    //***
 	if (theSocket.connect(thePort) < 0)
 	{
-		return;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Connection error for the server socket.",
+         &localrc);
+
+      return localrc;
 	}
 
    //***
@@ -186,8 +197,22 @@ void  ESMCI_WebServPassThruSvr::requestLoop(
 	do
 	{
 		request = getNextRequest();
+
+      if (request == ESMF_FAILURE)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_ARG_VALUE,
+            "Request ID not valid.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
+
 		serviceRequest(request);
+
 	} while (request != NET_ESMF_EXIT);
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -201,7 +226,8 @@ void  ESMCI_WebServPassThruSvr::requestLoop(
 int  ESMCI_WebServPassThruSvr::getNextRequest(
 //
 // !RETURN VALUE:
-//    int  id of the client request (defined in ESMCI_WebServNetEsmf.h)
+//    int  id of the client request (defined in ESMCI_WebServNetEsmf.h);
+//         ESMF_FAILURE if error
 //
 // !ARGUMENTS:
 //
@@ -215,11 +241,20 @@ int  ESMCI_WebServPassThruSvr::getNextRequest(
 //-----------------------------------------------------------------------------
 {
 	//printf("ESMCI_WebServPassThruSvr::getNextRequest()\n");
+	int	localrc = 0;
 
    //***
    // Wait for client requests
    //***
-	theSocket.accept();
+	if (theSocket.accept() != ESMF_SUCCESS)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "The Server socket not accepting requests.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Read the request id string from the socket
@@ -227,7 +262,15 @@ int  ESMCI_WebServPassThruSvr::getNextRequest(
 	int	n;
 	char	requestStr[50];
 
-	theSocket.read(n, requestStr);
+	if (theSocket.read(n, requestStr) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read request id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
 	//printf("SERVER: request: %s\n", requestStr);
 
@@ -322,7 +365,8 @@ int  ESMCI_WebServPassThruSvr::serviceRequest(
 int  ESMCI_WebServPassThruSvr::getRequestId(
 //
 // !RETURN VALUE:
-//    int  id of the request based on the specified string
+//    int  id of the request based on the specified string; ESMF_FAILURE
+//         if the id cannot be found
 //
 // !ARGUMENTS:
 //
@@ -348,7 +392,7 @@ int  ESMCI_WebServPassThruSvr::getRequestId(
 	if (strcmp(request, "END")   == 0)	return NET_ESMF_END;
 	if (strcmp(request, "PING")  == 0)	return NET_ESMF_PING;
 
-	return NET_ESMF_UNKN;
+	return ESMF_FAILURE;
 }
 
 
@@ -362,7 +406,8 @@ int  ESMCI_WebServPassThruSvr::getRequestId(
 char*  ESMCI_WebServPassThruSvr::getRequestFromId(
 //
 // !RETURN VALUE:
-//    char*  string value for the specified request id
+//    char*  string value for the specified request id; the string, "UNKN",
+//           if the value cannot be found
 //
 // !ARGUMENTS:
 //
@@ -403,9 +448,10 @@ char*  ESMCI_WebServPassThruSvr::getRequestFromId(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processNew()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processNew(
+int  ESMCI_WebServPassThruSvr::processNew(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -421,13 +467,24 @@ void  ESMCI_WebServPassThruSvr::processNew(
 //-----------------------------------------------------------------------------
 {
 	//printf("\n\nSERVER: processing New\n");
+	int	localrc = 0;
 
 	//***
 	// Read the client name
 	//***
 	int	bytesRead = 0;
 	char	buf[1024];
-	theSocket.read(bytesRead, buf);
+
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client name from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
 	//printf("Buffer: %s\n", buf);
 
 	//***
@@ -452,7 +509,18 @@ void  ESMCI_WebServPassThruSvr::processNew(
 	//***
 	int	netClientId = htonl(clientId);
 	//printf("Network client id: %d\n", netClientId);
-	theSocket.write(4, &netClientId);
+
+	if (theSocket.write(4, &netClientId) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -463,9 +531,10 @@ void  ESMCI_WebServPassThruSvr::processNew(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processInit()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processInit(
+int  ESMCI_WebServPassThruSvr::processInit(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -484,6 +553,7 @@ void  ESMCI_WebServPassThruSvr::processInit(
 {
 	//printf("\n\nSERVER: processing Init\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 
 	//***
@@ -492,7 +562,15 @@ void  ESMCI_WebServPassThruSvr::processInit(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
@@ -501,7 +579,16 @@ void  ESMCI_WebServPassThruSvr::processInit(
 	// Get the number of files (should be either 0 or 1)... if there's 1, then
 	// get the filename
 	//***
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read number of files from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
    int	numFiles = ntohl(*((unsigned int*)buf));
 	//printf("Num Files: %d\n", numFiles);
 
@@ -509,7 +596,16 @@ void  ESMCI_WebServPassThruSvr::processInit(
 
 	if (numFiles > 0)
 	{
-		theSocket.read(bytesRead, buf);
+		if (theSocket.read(bytesRead, buf) <= 0)
+   	{
+      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+         	ESMC_RC_FILE_READ,
+         	"Unable to read filename from socket.",
+         	&localrc);
+
+      	return localrc;
+   	}
+
 		strcpy(filename, (char*)buf);
 		//printf("Filename: %s\n", filename);
 	}
@@ -526,8 +622,23 @@ void  ESMCI_WebServPassThruSvr::processInit(
 	{
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
-		return;
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	clientInfo = iter->second;
@@ -563,8 +674,19 @@ void  ESMCI_WebServPassThruSvr::processInit(
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
 	//clientInfo->print();
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -575,9 +697,10 @@ void  ESMCI_WebServPassThruSvr::processInit(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processRun()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processRun(
+int  ESMCI_WebServPassThruSvr::processRun(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -595,6 +718,7 @@ void  ESMCI_WebServPassThruSvr::processRun(
 {
 	//printf("\n\nSERVER: processing Run\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 
 	//***
@@ -603,7 +727,15 @@ void  ESMCI_WebServPassThruSvr::processRun(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
@@ -620,8 +752,23 @@ void  ESMCI_WebServPassThruSvr::processRun(
 	{
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
-		return;
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	clientInfo = iter->second;
@@ -656,7 +803,18 @@ void  ESMCI_WebServPassThruSvr::processRun(
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -667,9 +825,10 @@ void  ESMCI_WebServPassThruSvr::processRun(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processFinal()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processFinal(
+int  ESMCI_WebServPassThruSvr::processFinal(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -687,6 +846,7 @@ void  ESMCI_WebServPassThruSvr::processFinal(
 {
 	//printf("\n\nSERVER: processing Final\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 
 	//***
@@ -695,7 +855,15 @@ void  ESMCI_WebServPassThruSvr::processFinal(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
@@ -712,8 +880,23 @@ void  ESMCI_WebServPassThruSvr::processFinal(
 	{
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
-		return;
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	clientInfo = iter->second;
@@ -751,7 +934,18 @@ void  ESMCI_WebServPassThruSvr::processFinal(
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -762,9 +956,10 @@ void  ESMCI_WebServPassThruSvr::processFinal(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processState()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processState(
+int  ESMCI_WebServPassThruSvr::processState(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -782,6 +977,7 @@ void  ESMCI_WebServPassThruSvr::processState(
 {
 	//printf("\n\nSERVER: processing State\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 
 	//***
@@ -790,7 +986,15 @@ void  ESMCI_WebServPassThruSvr::processState(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
@@ -807,8 +1011,23 @@ void  ESMCI_WebServPassThruSvr::processState(
 	{
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
-		return;
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	//***
@@ -831,7 +1050,18 @@ void  ESMCI_WebServPassThruSvr::processState(
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -842,9 +1072,10 @@ void  ESMCI_WebServPassThruSvr::processState(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processFiles()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processFiles(
+int  ESMCI_WebServPassThruSvr::processFiles(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -862,6 +1093,7 @@ void  ESMCI_WebServPassThruSvr::processFiles(
 {
 	//printf("\n\nSERVER: processing Files\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 	int	numFiles = 0;
 
@@ -871,7 +1103,15 @@ void  ESMCI_WebServPassThruSvr::processFiles(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
@@ -888,13 +1128,35 @@ void  ESMCI_WebServPassThruSvr::processFiles(
 	{
 		numFiles = 0;
 		unsigned int  netNumFiles = htonl(numFiles);
-		theSocket.write(4, &netNumFiles);
+		if (theSocket.write(4, &netNumFiles) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write number of files to socket.",
+            &localrc);
+
+         return localrc;
+      }
 
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
 
-		return;
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	clientInfo = iter->second;
@@ -909,14 +1171,33 @@ void  ESMCI_WebServPassThruSvr::processFiles(
 	char	fileInfoBuf[1024];
 
 	unsigned int  netNumFiles = htonl(numFiles);
-	theSocket.write(4, &netNumFiles);
+	if (theSocket.write(4, &netNumFiles) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write number of files to socket.",
+         &localrc);
+
+      return localrc;
+   }
 
 	//***
 	// Send the current state back to the client 
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -927,9 +1208,10 @@ void  ESMCI_WebServPassThruSvr::processFiles(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processGetData()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processGetData(
+int  ESMCI_WebServPassThruSvr::processGetData(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -954,6 +1236,7 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 {
 	//printf("\n\nSERVER: processing GetData\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 	int	numFiles = 0;
 
@@ -963,13 +1246,30 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
 
 	char	varName[256];
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read variable name from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
 	strncpy(varName, (char*)buf, 255);
 	//printf("Var Name: %s\n", varName);
 
@@ -979,19 +1279,43 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 	char	tempValue[256];
 
 	// Read time
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read time value from socket.",
+         &localrc);
+
+      return localrc;
+   }
 	strncpy(tempValue, (char*)buf, 255);
 	//printf("Time: %s\n", tempValue);
 	double	timeValue = atof(tempValue);
 
 	// Read lat
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read lat value from socket.",
+         &localrc);
+
+      return localrc;
+   }
 	strncpy(tempValue, (char*)buf, 255);
 	//printf("Lat: %s\n", tempValue);
 	double	latValue = atof(tempValue);
 
 	// Read lon
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read lon value from socket.",
+         &localrc);
+
+      return localrc;
+   }
 	strncpy(tempValue, (char*)buf, 255);
 	//printf("Lon: %s\n", tempValue);
 	double	lonValue = atof(tempValue);
@@ -1008,13 +1332,34 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 	{
 		numFiles = 0;
 		unsigned int  netNumFiles = htonl(numFiles);
-		theSocket.write(4, &netNumFiles);
+		if (theSocket.write(4, &netNumFiles) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write number of files to socket.",
+            &localrc);
+
+         return localrc;
+      }
 
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
 
-		return;
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	clientInfo = iter->second;
@@ -1051,7 +1396,17 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 	// Write the data back to the client
 	//***
 	sprintf(tempValue, "%e", dataValue);
-	theSocket.write(strlen(tempValue) + 1, tempValue);
+	int	valueLen = strlen(tempValue) + 1;
+
+	if (theSocket.write(valueLen, tempValue) != valueLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write data value to socket.",
+         &localrc);
+
+      return localrc;
+   }
 
 	//***
 	// Send the current state back to the client (use the return code from
@@ -1059,7 +1414,18 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -1070,9 +1436,10 @@ void  ESMCI_WebServPassThruSvr::processGetData(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processEnd()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processEnd(
+int  ESMCI_WebServPassThruSvr::processEnd(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -1090,6 +1457,7 @@ void  ESMCI_WebServPassThruSvr::processEnd(
 {
 	//printf("\n\nSERVER: processing End\n");
 
+	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
 
 	//***
@@ -1098,7 +1466,15 @@ void  ESMCI_WebServPassThruSvr::processEnd(
 	int	bytesRead = 0;
 	char	buf[1024];
 
-	theSocket.read(bytesRead, buf);
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
 
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
@@ -1115,8 +1491,23 @@ void  ESMCI_WebServPassThruSvr::processEnd(
 	{
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-		theSocket.write(4, &netStatus);
-		return;
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
 	}
 
 	clientInfo = iter->second;
@@ -1142,7 +1533,18 @@ void  ESMCI_WebServPassThruSvr::processEnd(
 	//***
 	status = NET_ESMF_STAT_DONE;
 	unsigned int	netStatus = htonl(status);
-	theSocket.write(4, &netStatus);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
 }
 
 
@@ -1153,9 +1555,10 @@ void  ESMCI_WebServPassThruSvr::processEnd(
 // !ROUTINE:  ESMCI_WebServPassThruSvr::processPing()
 //
 // !INTERFACE:
-void  ESMCI_WebServPassThruSvr::processPing(
+int  ESMCI_WebServPassThruSvr::processPing(
 //
 // !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
 //
@@ -1168,6 +1571,8 @@ void  ESMCI_WebServPassThruSvr::processPing(
 //-----------------------------------------------------------------------------
 {
 	printf("\n\nSERVER: processing Ping\n");
+
+	return ESMF_SUCCESS;
 }
 
 
