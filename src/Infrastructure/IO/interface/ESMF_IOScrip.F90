@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.13 2010/11/04 18:54:40 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.14 2010/11/05 05:26:25 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -543,7 +543,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       do i=1,PetCnt
 	 total=allCounts(i)+total
       end do
-      print *, PetNo, 'local count ', localCount(1), AllCounts(PetNo+1), total
+      !print *, PetNo, 'local count ', localCount(1), AllCounts(PetNo+1), total
 
      !Read the variables from the input grid files at PET0
       if (PetNo == 0) then
