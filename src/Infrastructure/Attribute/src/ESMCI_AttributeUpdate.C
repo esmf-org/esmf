@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.30 2010/10/15 05:58:44 eschwab Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.31 2010/11/05 21:22:53 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.30 2010/10/15 05:58:44 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.31 2010/11/05 21:22:53 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -444,28 +444,6 @@ static const int keySize = 4*sizeof(int) + 1;
       return ESMF_FAILURE;
     }
   }
-
-#ifdef DEBUG
-if (packList.size() == 2) {
-// test the funky key, I guess
-char *testkey1, *testkey2;
-testkey1 = NULL, testkey2 = NULL;
-testkey1 = new char[keySize];
-testkey2 = new char[keySize];
-localrc = packList.at(0)->AttributeUpdateKeyCreate(testkey1);
-localrc = packList.at(1)->AttributeUpdateKeyCreate(testkey2);
-if(AttributeUpdateKeyCompare(testkey1,testkey2) == true) {
-  printf("FAIL!\n");
-  printf("PET %d - %s == %s ??\n", localPet, packList.at(0)->attrName.c_str(), packList.at(1)->attrName.c_str());
-}
-else
-  printf("problems..\n");
-delete [] testkey1, testkey2;
-}
-
-printf("PET %d - attrListSize = %d, packListSize = %d, linkListSize = %d\n", 
-       localPet, attrList.size(), packList.size(), linkList.size());
-#endif
 
   // recurse through the Attribute hierarchy
   for (i=0; i<attrList.size(); ++i) {
@@ -879,12 +857,13 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   // am I a root?
   vector<ESMC_I4>::const_iterator itSend, itNR, itR;
   itSend = find(roots.begin(), roots.end(), localPet);
-      
-  /*printf("PET%d - nonroots.size() = %d, roots.size()= %d\n",localPet,
-          nonroots.size(), roots.size());*/
-  
+
+#ifdef DEBUG      
+printf("PET%d - nonroots.size() = %d, roots.size()= %d\n",localPet,
+          nonroots.size(), roots.size());
+#endif  
+
   int ceilID=ceil(static_cast<double> (nonroots.size())/static_cast<double> (roots.size()));
-  int floorID=floor(static_cast<double> (nonroots.size())/static_cast<double> (roots.size()));
     
   // No, I am receiving
   if (itSend == roots.end()) {
@@ -897,12 +876,11 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
       return ESMF_FAILURE;
     }
 
+  int floorID=floor(static_cast<double> (distance(nonroots.begin(), itNR))/static_cast<double> (roots.size()));
+
     int indRecv = 0;
     // find the index of roots from which to receive
-    if (roots.size() < nonroots.size())
-      indRecv=fmod(static_cast<double> (*itNR),static_cast<double> (ceilID));
-    else
-      indRecv = distance(nonroots.begin(), find(nonroots.begin(), nonroots.end(), localPet));
+    indRecv = distance(nonroots.begin(), itNR) - floorID*roots.size();
     
     // receive with message=0 and status=NULL for now
     *commh = NULL;
@@ -914,8 +892,11 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
     vm->send(&handshake, sizeof(int), roots[indRecv]);
     // now we all wait for all comm calls to complete
     vm->commqueuewait();
-    /*printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
-            localPet, recvBuf, roots[indRecv]);*/
+
+#ifdef DEBUG      
+printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
+            localPet, recvBuf, roots[indRecv]);
+#endif
   }
     
   // Yes, I am sending
@@ -932,12 +913,14 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
     
     for (i=0; i<ceilID; ++i) {
       // find the index of nonroots to which to send
-      int indSend = distance(roots.begin(), itR) + i*floorID;
+      int indSend = distance(roots.begin(), itR) + i*roots.size();
       
       if (indSend < nonroots.size()) {
         // send with message=0 and status=NULL for now
-        /*printf("\n\nI am PET #%d, I am sending message \"%s\" to PET #%d\n\n",
-                localPet, sendBuf, nonroots[indSend]);*/
+#ifdef DEBUG      
+        printf("\n\nI am PET #%d, I am sending message \"%s\" to PET #%d\n\n",
+                localPet, sendBuf, nonroots[indSend]);
+#endif
         vm->recv(&handshake, sizeof(int), nonroots[indSend]);
         vm->send(&sendBufSize, sizeof(sendBufSize), nonroots[indSend]);
         vm->recv(&handshake, sizeof(int), nonroots[indSend]);
@@ -1173,8 +1156,6 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
       return ESMF_FAILURE;
     }
 
-/*printf("localPet = %d  linkChanges = %d, realChanges=%d\n", localPet, linkChanges, structChanges+valueChanges);*/
-    
     // create buffer
     int realChanges = structChanges+valueChanges;
     (*(reinterpret_cast<int*> (sendBuf+offset)))=linkChanges;
@@ -1234,8 +1215,6 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
     }  
   }
 
-//printf("PET%d - linkChanges = %d, realChanges=%d\n", localPet, linkChangesOut, realChangesOut);
-
   // if link changes, we bail and recommend StateReconcile
   if (linkChangesOut > 0) {
     ESMC_LogDefault.Write(
@@ -1263,9 +1242,6 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   
   // set return value of buffer size
   bufSize = (realChangesOut+10)*sizeof(Attribute) + numKeysOut*keySize;
-  
-  /*printf("linkChanges = %d, realChangesOut = %d, numKeysOut = %d bufSize = %d\n", 
-    linkChangesOut, realChangesOut, numKeysOut, bufSize);*/
   
   delete [] recvBuf;
   delete [] sendBuf;
