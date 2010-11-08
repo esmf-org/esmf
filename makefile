@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.119 2010/10/06 20:15:43 feiliu Exp $
+# $Id: makefile,v 1.120 2010/11/08 15:00:03 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -298,6 +298,10 @@ info_mk: chkdir_lib
 	-@echo "ESMF_OPENMP_F90LINKOPTS=$(ESMF_OPENMP_F90LINKOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENMP_CXXCOMPILEOPTS=$(ESMF_OPENMP_CXXCOMPILEOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENMP_CXXLINKOPTS=$(ESMF_OPENMP_CXXLINKOPTS)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "ESMF_INTERNAL_DIR=$(ESMF_DIR)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "#" >> $(MKINFO)
 	-@echo "# !!! The following options were used on this ESMF build !!!" >> $(MKINFO)
