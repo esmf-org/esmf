@@ -1,4 +1,4 @@
-% $Id: IOUtil_refdoc.ctex,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+% $Id: IOUtil_refdoc.ctex,v 1.5 2010/11/08 22:52:33 w6ws Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -43,10 +43,10 @@
 
 
 %============================================================================
-% Fortran I/O Utilities
+% Fortran I/O and System Utilities
 %============================================================================
 
-\section{Fortran I/O Utilities}
+\section{Fortran I/O and System Utilities}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -90,6 +90,7 @@
 \input{ESMF_IOUtil_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Util/doc/ESMF_IOUtil_fapi}
+\input{../Infrastructure/Util/doc/ESMF_Util_fapi}
 #endif
 
 %#ifdef STANDALONE
