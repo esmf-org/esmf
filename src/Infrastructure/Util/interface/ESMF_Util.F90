@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.36 2010/09/24 02:17:58 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.37 2010/11/08 22:45:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.36 2010/09/24 02:17:58 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.37 2010/11/08 22:45:10 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -455,7 +455,7 @@
 ! !ARGUMENTS:
 !  none
 !
-! !Description:
+! !DESCRIPTION:
 ! This method returns the number of command line arguments specified
 ! when the process was started.
 !
@@ -509,7 +509,7 @@
     integer, intent(out), optional :: length
     integer, intent(out), optional :: rc
 !
-! !Description:
+! !DESCRIPTION:
 ! This method returns a copy of a command line argument specified
 ! when the process was started.  This argument is the same as an
 ! equivalent C++ program would find in the argv array.
@@ -663,10 +663,10 @@
     integer, intent(out), optional :: argindex
     integer, intent(out), optional :: rc
 !
-! !Description:
+! !DESCRIPTION:
 ! This method searches for, and returns the index of a desired command
 ! line argument.  An example might be to find a specific keyword
-! (e.g., -esmf_path) so that its associated value argument could be
+! (e.g., -esmf\_path) so that its associated value argument could be
 ! obtained by adding 1 to the argindex and calling ESMF\_UtilGetArg.
 !
 ! The arguments are:
