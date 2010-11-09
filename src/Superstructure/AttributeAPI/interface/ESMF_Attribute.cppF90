@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.69 2010/10/28 23:10:39 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.70 2010/11/09 06:59:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -32,8 +32,12 @@ module ESMF_AttributeMod
 ! INCLUDES
 ^include "ESMF.h"
 #include "ESMF_TypeKindMacros.hcppF90"
+^ifndef ESMF_NO_INTEGER_1_BYTE
 ^define ESMF_NO_INTEGER_1_BYTE
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
 ^define ESMF_NO_INTEGER_2_BYTE
+^endif
 
 !==============================================================================
 !BOPI
@@ -114,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.69 2010/10/28 23:10:39 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.70 2010/11/09 06:59:38 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1547,7 +1551,7 @@ contains
 !     \item type(ESMF\_CplComp), intent(inout) :: cplComp
 !     \item type(ESMF\_GridComp), intent(inout) :: gridComp
 !     \item type(ESMF\_Field), intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldBundle ! not yet implemented
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle ! not yet implemented
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_DistGrid), intent(inout) :: distGrid       ! not yet implemented
 !     \end{description}
@@ -1839,9 +1843,10 @@ contains
 !
 !     For xml output, requires the third party Xerces C++ XML Parser library
 !     to be installed, v3.1.0 or better.  For more details, see the
-!     "ESMF Users Guide", "Building and Installing the ESMF, Third Party
-!     Libraries, Xerces" and the website "http://xerces.apache.org/xerces-c".
-!     Also please see the section on Attribute I/O,~\ref{io:attributeio}.
+!     {\it ESMF Users Guide}, under the section {\it Building and Installing 
+!     the ESMF, Third Party Libraries, Xerces} and the website
+!     "http://xerces.apache.org/xerces-c".  Also please see the section on 
+!     Attribute I/O,~\ref{io:attributeio}.
 !
 !     Note:  For an object type of {\tt ESMF\_GridComp}, convention='WaterML',
 !     purpose='TimeSeries', and attwriteflag=ESMF\_ATTWRITE\_XML, an XML file
