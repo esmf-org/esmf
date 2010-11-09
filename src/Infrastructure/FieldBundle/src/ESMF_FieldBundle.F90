@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.60 2010/10/28 22:54:08 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.61 2010/11/09 06:58:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -111,10 +111,10 @@
 !
       type ESMF_FieldBundleType
       sequence
-      ! this data type is not private so the bundlecomm code can
+      ! this data type is not private so the fieldbundlecomm code can
       ! reach directly in and get at the localdata without a loop
       ! of subroutine calls.  but this causes problems with the 'pattern'
-      ! declaration below - the bundlecongruentdata derived type is
+      ! declaration below - the fieldbundlecongruentdata derived type is
       ! private and so it wants this to be private as well.
       ! since pattern is not being used yet, comment it out below, but this
       ! needs to be rationalized at some point soon.  perhaps the comm code
@@ -126,7 +126,7 @@
         type(ESMF_Status) :: gridstatus
 
         type(ESMF_GeomBase) :: geombase           ! associated global grid, mesh, etc.
-        type(ESMF_LocalFieldBundle) :: localbundle    ! this differs per DE
+        type(ESMF_LocalFieldBundle) :: localfieldbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
@@ -198,15 +198,15 @@
    !public ESMF_FieldBundleRedist   ! Redistribute existing arrays, matching Grids
    !public ESMF_FieldBundleHalo     ! Halo updates
 
-   !public ESMF_FieldBundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
-   !public ESMF_FieldBundleAllGather! Combine 1 decomposed bundle into N copies on N DEs
+   !public ESMF_FieldBundleGather   ! Combine 1 decomposed fieldbundle into 1 on 1 DE
+   !public ESMF_FieldBundleAllGather! Combine 1 decomposed fieldbundle into N copies on N DEs
 
-   !public ESMF_FieldBundleScatter  ! Split 1 bundle into a decomposed one over N DEs
-   !public ESMF_FieldBundleBroadcast! Send 1 bundle to all DEs, none decomposed
-   !public ESMF_FieldBundleAlltoAll ! might make sense with bundles; each DE could
-                              ! call with a different non-decomposed bundle 
-                              ! and the result would be a packed bundle of
-                              ! data with decomposed bundles on each DE.
+   !public ESMF_FieldBundleScatter  ! Split 1 fieldbundle into a decomposed one over N DEs
+   !public ESMF_FieldBundleBroadcast! Send 1 fieldbundle to all DEs, none decomposed
+   !public ESMF_FieldBundleAlltoAll ! might make sense with fieldbundles; each DE could
+                              ! call with a different non-decomposed fieldbundle 
+                              ! and the result would be a packed fieldbundle of
+                              ! data with decomposed fieldbundles on each DE.
 
    !public ESMF_FieldBundleReduce     ! Global reduction operation, return on 1 DE    
    !public ESMF_FieldBundleAllReduce  ! Global reduction operation, return on each DE
@@ -221,13 +221,13 @@
 
     public operator(.eq.), operator(.ne.)
 
-!  !subroutine ESMF_FieldBundleWriteRestart(bundle, iospec, rc)
+!  !subroutine ESMF_FieldBundleWriteRestart(fieldbundle, iospec, rc)
 !  !function ESMF_FieldBundleReadRestart(name, iospec, rc)
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !  ! additional future signatures of ESMF_FieldBundleCreate() functions:
-!  !function ESMF_FieldBundleCreateCopy(bundle, subarray, name, packflag, rc)
-!  !function ESMF_FieldBundleCreateRemap(bundle, grid, name, packflag, rc)
+!  !function ESMF_FieldBundleCreateCopy(fieldbundle, subarray, name, packflag, rc)
+!  !function ESMF_FieldBundleCreateRemap(fieldbundle, grid, name, packflag, rc)
 
 !EOPI
 
@@ -365,22 +365,22 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAdd()
-      subroutine ESMF_FieldBundleAddOneField(bundle, field, rc)
+      subroutine ESMF_FieldBundleAddOneField(fieldbundle, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
       type(ESMF_Field), intent(inout) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Adds a single {\tt field} to an existing {\tt bundle}.  The
+!      Adds a single {\tt field} to an existing {\tt fieldbundle}.  The
 !      {\tt field} must be associated with the same geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream) 
-!      as the other {\tt ESMF\_Field}s in the {\tt bundle}.   
-!      The {\tt field} is referenced by the {\tt bundle}, not copied.
+!      as the other {\tt ESMF\_Field}s in the {\tt fieldbundle}.   
+!      The {\tt field} is referenced by the {\tt fieldbundle}, not copied.
 ! 
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           The {\tt ESMF\_FieldBundle} to add the {\tt ESMF\_Field} to.
 !     \item [field] 
 !           The {\tt ESMF\_Field} to add.
@@ -402,18 +402,18 @@ end function
       status = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       temp_list(1) = field
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
     
       call ESMF_FieldBundleTypeAddList(btype, 1, temp_list, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -427,7 +427,7 @@ end function
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
       ! this resets the congruent flag as a side effect
-      dummy = ESMF_FieldBundleIsCongruent(bundle, rc=status)
+      dummy = ESMF_FieldBundleIsCongruent(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -444,25 +444,25 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAdd()
-      subroutine ESMF_FieldBundleAddFieldList(bundle, fieldCount, fieldList, rc)
+      subroutine ESMF_FieldBundleAddFieldList(fieldbundle, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle        
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle        
       integer, intent(in) :: fieldCount
       type(ESMF_Field), dimension(:), intent(inout) :: fieldList
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
 !      Adds a {\tt fieldList} to an existing {\tt ESMF\_FieldBundle}.  
-!      The items added from the {\tt ESMF\_fieldList} must be associated 
+!      The items added from the {\tt fieldList} must be associated 
 !      with the same geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream) 
 !       as the other {\tt ESMF\_Field}s in the 
-!      {\tt bundle}.  The items in the {\tt fieldList} are referenced by
-!      the {\tt bundle}, not copied.  
+!      {\tt fieldbundle}.  The items in the {\tt fieldList} are referenced by
+!      the {\tt fieldbundle}, not copied.  
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to add {\tt ESMF\_Field}s to.
 !     \item [fieldCount]
 !           Number of {\tt ESMF\_Field}s to be added to the 
@@ -489,18 +489,18 @@ end function
       status = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
       do i=1,fieldCount
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
       enddo
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
     
       call ESMF_FieldBundleTypeAddList(btype, fieldCount, fieldList, rc=status)
       if (ESMF_LogMsgFoundError(status, &
@@ -517,7 +517,7 @@ end function
       enddo
 
       ! this resets the congruent flag as a side effect
-      dummy = ESMF_FieldBundleIsCongruent(bundle, rc=status)
+      dummy = ESMF_FieldBundleIsCongruent(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -588,7 +588,7 @@ end function
 !
 !EOP
 
-      type(ESMF_FieldBundleType), pointer :: btypep         ! Pointer to new bundle
+      type(ESMF_FieldBundleType), pointer :: btypep         ! Pointer to new fieldbundle
       logical :: dummy
       integer :: status                                ! Error status
       integer :: i      
@@ -611,7 +611,7 @@ end function
       if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
                                        ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to initialize bundle internals.
+      ! Call construction method to initialize fieldbundle internals.
       call ESMF_FieldBundleConstructNew(btypep, fieldCount, fieldList, &
                                    packflag, &
                                    name, iospec, status)
@@ -631,7 +631,7 @@ end function
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
 
-      ! set the return bundle
+      ! set the return fieldbundle
       ESMF_FieldBundleCreateNew%btypep => btypep
       
       ! Add reference to this object into ESMF garbage collection table
@@ -640,7 +640,7 @@ end function
         ESMF_ID_FIELDBUNDLE%objectID)
 
       ! do this before ESMF_FieldBundleIsConguent so it doesn't complain
-      ! about uninitialized bundles
+      ! about uninitialized fieldbundles
       ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNew)
 
 
@@ -692,7 +692,7 @@ end function
 !EOP
 
 
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
       integer :: status                          ! Error status
 
       ! Initialize pointers
@@ -707,7 +707,7 @@ end function
       if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
                                        ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize bundle internals.
+      ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -769,7 +769,7 @@ end function
 !EOP
 
 
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
       integer :: status                          ! Error status
       type(ESMF_Logical) :: linkChange
 
@@ -788,7 +788,7 @@ end function
       if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
                                        ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize bundle internals.
+      ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -873,7 +873,7 @@ end function
 !EOP
 
 
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
       integer :: status                          ! Error status
 
       ! Initialize pointers
@@ -891,7 +891,7 @@ end function
       if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
                                        ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize bundle internals.
+      ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -964,7 +964,7 @@ end function
 !EOP
 
 
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new bundle
+      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
       integer :: status                          ! Error status
 
       ! Initialize pointers
@@ -982,7 +982,7 @@ end function
       if (ESMF_LogMsgFoundAllocError(status, "FieldBundle allocate", &
                                        ESMF_CONTEXT, rc)) return
 
-      ! Call construction method to allocate and initialize bundle internals.
+      ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1018,21 +1018,21 @@ end function
 ! !IROUTINE: ESMF_FieldBundleDestroy - Free all resources associated with a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleDestroy(bundle, rc)
+      subroutine ESMF_FieldBundleDestroy(fieldbundle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle) :: bundle
+      type(ESMF_FieldBundle) :: fieldbundle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases resources associated with the {\tt bundle}.  This
+!     Releases resources associated with the {\tt fieldbundle}.  This
 !     method does not destroy the {\tt ESMF\_Field}s that the
-!     {\tt bundle} contains.  The
-!     {\tt bundle} should be destroyed before the {\tt ESMF\_Field}s
+!     {\tt fieldbundle} contains.  The
+!     {\tt fieldbundle} should be destroyed before the {\tt ESMF\_Field}s
 !     within it are.
 !
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1049,29 +1049,29 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check inputs 
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (.not.associated(bundle%btypep)) then 
+      if (.not.associated(fieldbundle%btypep)) then 
         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
           "Uninitialized or already destroyed FieldBundle: btypep unassociated", &
           ESMF_CONTEXT, rc)
         return
       endif 
     
-      ! Destruct all bundle internals and then free field memory.
-      call ESMF_FieldBundleDestruct(bundle%btypep, rc=localrc)
+      ! Destruct all fieldbundle internals and then free field memory.
+      call ESMF_FieldBundleDestruct(fieldbundle%btypep, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
       ! mark object invalid
-      call ESMF_BaseSetStatus(bundle%btypep%base, ESMF_STATUS_INVALID, &
+      call ESMF_BaseSetStatus(fieldbundle%btypep%base, ESMF_STATUS_INVALID, &
         rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
                                 
-      ESMF_INIT_SET_DELETED(bundle)
+      ESMF_INIT_SET_DELETED(fieldbundle)
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldBundleDestroy
@@ -1085,10 +1085,10 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetInfo(bundle, geomtype, grid, mesh, locstream, fieldCount, name, rc)
+      subroutine ESMF_FieldBundleGetInfo(fieldbundle, geomtype, grid, mesh, locstream, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       type(ESMF_GeomType), intent(out), optional :: geomtype
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Mesh), intent(out), optional :: mesh
@@ -1098,29 +1098,29 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns information about the {\tt bundle}.  
+!      Returns information about the {\tt fieldbundle}.  
 !      If the {\tt ESMF\_FieldBundle} was originally created
 !      without specifying a name, a unique name will have been generated
 !      by the framework.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           The {\tt ESMF\_FieldBundle} object to query.
 !     \item [{[geomtype]}]
 !           Specifies the type of geometry on which the FieldBundle is built. Please see Section~\ref{opt:geomtype} for 
 !           the range of values. Based on this value the user can use this method to retrieve one and only one 
 !           of {\tt grid}, {\tt mesh}, or {\tt locstream}. 
 !     \item [{[grid]}]
-!           The {\tt ESMF\_Grid} associated with the {\tt bundle}.
+!           The {\tt ESMF\_Grid} associated with the {\tt fieldbundle}.
 !     \item [{[mesh]}]
-!           The {\tt ESMF\_Mesh} associated with the {\tt bundle}.
+!           The {\tt ESMF\_Mesh} associated with the {\tt fieldbundle}.
 !     \item [{[locstream]}]
-!           The {\tt ESMF\_LocStream} associated with the {\tt bundle}.
+!           The {\tt ESMF\_LocStream} associated with the {\tt fieldbundle}.
 !     \item [{[fieldCount]}]
-!           Number of {\tt ESMF\_Field}s in the {\tt bundle}.
+!           Number of {\tt ESMF\_Field}s in the {\tt fieldbundle}.
 !     \item [{[name]}]
-!           A character string where the {\tt bundle} name is returned.
+!           A character string where the {\tt fieldbundle} name is returned.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1143,15 +1143,15 @@ end function
       endif
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
 
     ! Get the geometry type
     if (present(geomtype)) then
@@ -1210,7 +1210,7 @@ end function
 
       if (present(fieldCount)) then
           ! Return Field count
-          fieldCount = bundle%btypep%field_count
+          fieldCount = fieldbundle%btypep%field_count
       endif
 
       if (present(name)) then
@@ -1231,10 +1231,10 @@ end function
 ! !IROUTINE: ESMF_FieldBundleGetAllFields - Retrieve an array of Fields 
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleGetAllFields(bundle, fieldList, fieldCount, rc)
+      subroutine ESMF_FieldBundleGetAllFields(fieldbundle, fieldList, fieldCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       type(ESMF_Field), dimension (:), optional :: fieldList
       integer, intent(out), optional :: fieldCount
       integer, intent(out), optional :: rc
@@ -1244,12 +1244,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           The {\tt ESMF\_FieldBundle} to query for the {\tt ESMF\_Field}s.
 !     \item [{[fieldList]}]
 !           {\tt ESMF\_Field} array.
 !     \item [{[fieldCount]}]
-!           Return the number of {\tt ESMF\_Field}s in the {\tt bundle}.
+!           Return the number of {\tt ESMF\_Field}s in the {\tt fieldbundle}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1266,16 +1266,16 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
 
       ! Return Fields
       if (present(fieldList)) then
@@ -1304,30 +1304,30 @@ end function
 ! !IROUTINE: ESMF_FieldBundleIsCongruent - Is data in FieldBundle the same?
 !
 ! !INTERFACE:
-      function ESMF_FieldBundleIsCongruent(bundle, rc)
+      function ESMF_FieldBundleIsCongruent(fieldbundle, rc)
 
 ! !RETURN VALUE:
       logical :: ESMF_FieldBundleIsCongruent
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !      Returns {\tt .TRUE.} if the data in all {\tt ESMF\_Fields} in the
-!      {\tt bundle} are completely congruent, meaning they have the same
+!      {\tt fieldbundle} are completely congruent, meaning they have the same
 !      data rank, type, kind, index ordering, relative location in a cell, etc.
 !      This may allow more optimized communication by grouping data together
 !      and making fewer communcations calls.  Returns {\tt .FALSE.} if the
 !      data is not congruent.   A {\tt ESMF\_FieldBundle} with no data, or on error
 !      this routine returns {\tt .FALSE.}.
 !
-!      This routine also resets the internal bundle flag to a known bundle
+!      This routine also resets the internal fieldbundle flag to a known fieldbundle
 !      before returning.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           The {\tt ESMF\_FieldBundle} object to query.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1350,21 +1350,21 @@ end function
       status = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
 
 ! TODO:FIELDINTEGRATION Restore FieldBundleIsCongruent
       ESMF_FieldBundleIsCongruent = .FALSE.
 #if 0
-      bundle%btypep%isCongruent = .FALSE.
+      fieldbundle%btypep%isCongruent = .FALSE.
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
 
       newstart = 1
 
@@ -1460,22 +1460,22 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldByName(bundle, name, field, rc)
+      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, name, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       character (len = *), intent(in) :: name
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a {\tt field} from a {\tt bundle} using
+!      Returns a {\tt field} from a {\tt fieldbundle} using
 !      the {\tt field}'s {\tt name}.
 !
 !     The arguments are:
 !     \begin{description}
 !
-!     \item [bundle]
+!     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to query for {\tt ESMF\_Field}.
 !     \item [name]
 !           {\tt ESMF\_Field} name.
@@ -1501,17 +1501,17 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       found = .FALSE.
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
 
       ! Check for an empty FieldBundle first
       if(btype%field_count .eq. 0) then
@@ -1530,7 +1530,7 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
        if (name .eq. temp_name) then
-           field = bundle%btypep%flist(i) 
+           field = fieldbundle%btypep%flist(i) 
            found = .TRUE.
            ! found match, exit loop early
            exit
@@ -1556,20 +1556,20 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldByNum(bundle, fieldIndex, field, rc)
+      subroutine ESMF_FieldBundleGetFieldByNum(fieldbundle, fieldIndex, field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       integer, intent(in) :: fieldIndex
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns a {\tt field} from a {\tt bundle} by index number.
+!      Returns a {\tt field} from a {\tt fieldbundle} by index number.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to query for {\tt ESMF\_Field}.
 !     \item [fieldIndex]
 !           {\tt ESMF\_Field} index number; first {\tt fieldIndex} is 1.
@@ -1591,17 +1591,17 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       found = .FALSE.
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
 
       ! Check for an empty FieldBundle first
       if(btype%field_count .eq. 0) then
@@ -1621,7 +1621,7 @@ end function
       endif
 
       ! Fetch requested field
-      field = bundle%btypep%flist(fieldIndex) 
+      field = fieldbundle%btypep%flist(fieldIndex) 
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1636,10 +1636,10 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldNames(bundle, nameList, nameCount, rc)
+      subroutine ESMF_FieldBundleGetFieldNames(fieldbundle, nameList, nameCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle 
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle 
       character (len = *), intent(out) :: nameList(:)
       integer, intent(out), optional :: nameCount     
       integer, intent(out), optional :: rc     
@@ -1649,7 +1649,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [nameList]
 !           An array of character strings where each {\tt ESMF\_Field} name
@@ -1671,9 +1671,9 @@ end function
       status = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      bp => bundle%btypep
+      bp => fieldbundle%btypep
 
       if (present(nameCount)) nameCount = bp%field_count
 
@@ -1702,15 +1702,15 @@ end function
 ! !IROUTINE: ESMF_FieldBundlePrint - Print information about a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundlePrint(bundle, options, rc)
+      subroutine ESMF_FieldBundlePrint(fieldbundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Prints diagnostic information about the {\tt bundle}
+!     Prints diagnostic information about the {\tt fieldbundle}
 !     to {\tt stdout}. \\
 !
 !     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
@@ -1721,7 +1721,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [{[options]}]
 !           Print options are not yet supported.
@@ -1747,19 +1747,19 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       status = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
     !jw  call ESMF_LogWrite("FieldBundle Print:", ESMF_LOG_INFO)
       write (*, *)  "FieldBundle print:"
 
-      if (.not. associated(bundle%btypep)) then
+      if (.not. associated(fieldbundle%btypep)) then
       !jw  call ESMF_LogWrite("Empty or Uninitialized FieldBundle", ESMF_LOG_INFO)
         write(*,*) "Empty or Uninitialized FieldBundle"
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
       call c_ESMC_GetName(btype%base, bname, status)
     !jw  write (msgbuf, *)  "  FieldBundle name = ", trim(bname)
     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -1802,10 +1802,10 @@ end function
 ! \label{api:FieldBundleRead}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRead(bundle, file, singleFile, iofmt, rc)
+      subroutine ESMF_FieldBundleRead(fieldbundle, file, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout)           :: bundle
+      type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
       character(*),           intent(in)              :: file
       logical,                intent(in),   optional  :: singleFile
       type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
@@ -1825,12 +1825,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item[file]
 !      The name of the file from which FieldBundle data is read.
 !     \item[{[singleFile]}]
-!      A logical flag, the default is .true., i.e., all Fields in the bundle 
+!      A logical flag, the default is .true., i.e., all Fields in the fieldbundle 
 !      are stored in one single file. If .false., each Field is stored 
 !      in separate files; these files are numbered with the name based on the
 !      argument "file". That is, a set of files are named: [file\_name]001,
@@ -1858,9 +1858,9 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (.not. associated(bundle%btypep)) then
+      if (.not. associated(fieldbundle%btypep)) then
         write(*,*) "Empty or Uninitialized FieldBundle"
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -1872,7 +1872,7 @@ end function
       iofmtd = ESMF_IOFMT_NETCDF
       if(present(iofmt)) iofmtd = iofmt
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
       write (*, *)  "  Field count = ", btype%field_count
       fieldCount = btype%field_count
 
@@ -1881,7 +1881,7 @@ end function
       if (singlef) then
         ! Get and read the arrays in the Bundle
         do i=1,fieldCount
-         call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
+         call ESMF_FieldBundleGet(fieldbundle, fieldIndex=i, field=fieldList(i), rc=localrc)
          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
          call ESMF_FieldRead(fieldList(i), file=file, iofmt=iofmtd, rc=localrc)
@@ -1892,7 +1892,7 @@ end function
         do i=1,fieldCount
           write(cnum,"(i3.3)") i
           filename = file // cnum
-          call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=fieldList(i), rc=localrc)
+          call ESMF_FieldBundleGet(fieldbundle, fieldIndex=i, field=fieldList(i), rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
           call ESMF_FieldRead(fieldList(i), file=filename, &
@@ -1936,7 +1936,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [{[iospec]}]
 !           The I/O specification.
@@ -1969,21 +1969,21 @@ end function
 ! !IROUTINE: ESMF_FieldBundleRemoveField - Remove a Field from a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRemoveField(bundle, name, rc)
+      subroutine ESMF_FieldBundleRemoveField(fieldbundle, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
       character (len = *), intent(in) :: name
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
-!      Deletes an {\tt ESMF\_Field} reference from an existing {\tt bundle}
+!      Deletes an {\tt ESMF\_Field} reference from an existing {\tt fieldbundle}
 !      by {\tt name}.  
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           The {\tt ESMF\_FieldBundle} to remove the {\tt ESMF\_Field} from.
 !     \item [name]
 !           The name of the {\tt ESMF\_Field} to remove.
@@ -2015,10 +2015,10 @@ end function
 ! !IROUTINE: ESMF_FieldBundleSetDataValues - Set contents of packed array
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleSetDataValues(bundle, index, value, rc)
+      subroutine ESMF_FieldBundleSetDataValues(fieldbundle, index, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
       integer, dimension (:), intent(in) :: index
       real(ESMF_KIND_R8), dimension (:), intent(in) :: value
       integer, intent(out), optional :: rc
@@ -2032,7 +2032,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           The {\tt ESMF\_FieldBundle} to operate on.
 !     \item [index]
 !           Index values to change.
@@ -2069,22 +2069,22 @@ end function
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
-      subroutine ESMF_FieldBundleSetGrid(bundle, grid, rc)
+      subroutine ESMF_FieldBundleSetGrid(fieldbundle, grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Sets the {\tt grid} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!   Sets the {\tt grid} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
+!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
 !   associated with the same {\tt ESMF\_Grid}.  Returns an error if 
-!   there is already an {\tt ESMF\_Grid} associated with the {\tt bundle}.
+!   there is already an {\tt ESMF\_Grid} associated with the {\tt fieldbundle}.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [bundle]
+!   \item [fieldbundle]
 !        An {\tt ESMF\_FieldBundle} object.
 !   \item [grid]
 !        The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
@@ -2106,18 +2106,18 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
    
-      ! here we will only let someone associate a grid with a bundle
+      ! here we will only let someone associate a grid with a fieldbundle
       ! if there is not one already associated with it.  
       if (btype%gridstatus .eq. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2161,22 +2161,22 @@ end function
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
-      subroutine ESMF_FieldBundleSetMesh(bundle, mesh, rc)
+      subroutine ESMF_FieldBundleSetMesh(fieldbundle, mesh, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
       type(ESMF_Mesh), intent(in) :: mesh
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Sets the {\tt mesh} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!   Sets the {\tt mesh} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
+!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
 !   associated with the same {\tt ESMF\_Mesh}.  Returns an error if 
-!   there is already an {\tt ESMF\_Mesh} associated with the {\tt bundle}.
+!   there is already an {\tt ESMF\_Mesh} associated with the {\tt fieldbundle}.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [bundle]
+!   \item [fieldbundle]
 !        An {\tt ESMF\_FieldBundle} object.
 !   \item [mesh]
 !        The {\tt ESMF\_Mesh} which all {\tt ESMF\_Field}s added to this
@@ -2197,18 +2197,18 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
    
-      ! here we will only let someone associate a grid with a bundle
+      ! here we will only let someone associate a grid with a fieldbundle
       ! if there is not one already associated with it.  
       if (btype%gridstatus .eq. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2241,22 +2241,22 @@ end function
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
-      subroutine ESMF_FieldBundleSetLS(bundle, locstream, rc)
+      subroutine ESMF_FieldBundleSetLS(fieldbundle, locstream, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
       type(ESMF_LocStream), intent(in) :: locstream
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Sets the {\tt locstream} for a {\tt bundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!   Sets the {\tt locstream} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
+!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
 !   associated with the same {\tt ESMF\_LocStream}.  Returns an error if 
-!   there is already an {\tt ESMF\_LocStream} associated with the {\tt bundle}.
+!   there is already an {\tt ESMF\_LocStream} associated with the {\tt fieldbundle}.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [bundle]
+!   \item [fieldbundle]
 !        An {\tt ESMF\_FieldBundle} object.
 !   \item [locstream]
 !        The {\tt ESMF\_LocStream} which all {\tt ESMF\_Field}s added to this
@@ -2277,18 +2277,18 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
 
-      ! Validate bundle before going further
-      call ESMF_FieldBundleValidate(bundle, rc=status)
+      ! Validate fieldbundle before going further
+      call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
    
-      ! here we will only let someone associate a grid with a bundle
+      ! here we will only let someone associate a grid with a fieldbundle
       ! if there is not one already associated with it.  
       if (btype%gridstatus .eq. ESMF_STATUS_READY) then
         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -2317,27 +2317,27 @@ end function
 ! !IROUTINE: ESMF_FieldBundleValidate - Check validity of a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleValidate(bundle, options, rc)
+      subroutine ESMF_FieldBundleValidate(fieldbundle, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: bundle
+      type(ESMF_FieldBundle), intent(in) :: fieldbundle
       character (len=*), intent(in), optional :: options 
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt bundle} is internally consistent.
-!      Currently this method determines if the {\tt bundle} is uninitialized 
+!      Validates that the {\tt fieldbundle} is internally consistent.
+!      Currently this method determines if the {\tt fieldbundle} is uninitialized 
 !      or already destroyed.  The method returns an error code if problems 
 !      are found.  
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to validate.
 !     \item [{[options]}]
 !           Validation options are not yet supported.
 !     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundle}
+!           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt fieldbundle}
 !           is valid.
 !     \end{description}
 
@@ -2353,15 +2353,15 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (.not.associated(bundle%btypep)) then 
+      if (.not.associated(fieldbundle%btypep)) then 
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed FieldBundle", &
                                  ESMF_CONTEXT, rc)) return
       endif 
 
-      call ESMF_BaseGetStatus(bundle%btypep%base, fieldbundlestatus, rc=localrc)
+      call ESMF_BaseGetStatus(fieldbundle%btypep%base, fieldbundlestatus, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
@@ -2387,10 +2387,10 @@ end function
 ! \label{api:FieldBundleWrite}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(bundle, file, singleFile, timeslice, iofmt, rc)
+      subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout)          :: bundle
+      type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
       character(*),           intent(in)             :: file
       logical,                intent(in),  optional  :: singleFile
       integer,                intent(in),  optional  :: timeslice
@@ -2411,12 +2411,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !      An {\tt ESMF\_FieldBundle} object.
 !     \item[file]
-!      The name of the output file to which field bundle data is written.
+!      The name of the output file to which field fieldbundle data is written.
 !     \item[{[singleFile]}]
-!      A logical flag, the default is .true., i.e., all arrays in the bundle 
+!      A logical flag, the default is .true., i.e., all arrays in the fieldbundle 
 !      are written in one single file. If .false., each array will be written
 !      in separate files; these files are numbered with the name based on the
 !      argument "file". That is, a set of files are named: [file\_name]001,
@@ -2451,9 +2451,9 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
-      if (.not. associated(bundle%btypep)) then
+      if (.not. associated(fieldbundle%btypep)) then
         write(*,*) "Empty or Uninitialized FieldBundle"
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -2467,7 +2467,7 @@ end function
       time = -1   ! default, no time dimension
       if (present(timeslice)) time = timeslice
 
-      btype => bundle%btypep
+      btype => fieldbundle%btypep
       write (*, *)  "  Field count = ", btype%field_count
       fieldCount = btype%field_count
 
@@ -2475,7 +2475,7 @@ end function
 
       if (singlef) then
        ! Get and write the first array in the Bundle
-       call ESMF_FieldBundleGet(bundle, fieldIndex=1 , field=fieldList(1), rc=localrc)
+       call ESMF_FieldBundleGet(fieldbundle, fieldIndex=1 , field=fieldList(1), rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_FieldWrite(fieldList(1), file=file, timeslice=time, &
@@ -2485,7 +2485,7 @@ end function
 
        ! Get and write the rest of the arrays in the Bundle
        do i=2,fieldCount
-        call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
+        call ESMF_FieldBundleGet(fieldbundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldWrite(fieldList(i), file=file, append=.true., &
@@ -2498,7 +2498,7 @@ end function
         write(cnum,"(i3.3)") i
         filename = file // cnum
         ! Get and write the first array in the Bundle
-        call ESMF_FieldBundleGet(bundle, fieldIndex=i , field=fieldList(i), rc=localrc)
+        call ESMF_FieldBundleGet(fieldbundle, fieldIndex=i , field=fieldList(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldWrite(fieldList(i), file=trim(filename), &
@@ -2528,10 +2528,10 @@ end function
 ! !IROUTINE: ESMF_FieldBundleWriteRestart - Save FieldBundle in the quickest manner possible
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWriteRestart(bundle, iospec, rc)
+      subroutine ESMF_FieldBundleWriteRestart(fieldbundle, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle 
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc     
 !
@@ -2543,7 +2543,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
 !     \item [{[iospec]}]
 !           The I/O specification.
@@ -2650,12 +2650,12 @@ end function
       enddo
 
       ! consistency checking.  logic is: 
-      !    if bundle has grid, use it to compare against
-      !    if bundle has no grid, find first field w/ grid and use it instead
+      !    if fieldbundle has grid, use it to compare against
+      !    if fieldbundle has no grid, find first field w/ grid and use it instead
       !    if field has no grid, skip it 
-      !    if inconsistent grid found in list, exit w/ error leaving bundle
+      !    if inconsistent grid found in list, exit w/ error leaving fieldbundle
       !       unchanged
-      !    if all ok, then if bundle had no grid originally, set it here 
+      !    if all ok, then if fieldbundle had no grid originally, set it here 
 
       isGeomFound=.false.
       if (btype%gridstatus .ne. ESMF_STATUS_READY) then
@@ -2771,7 +2771,7 @@ end function
        endif
 
 
-       ! if bundle has no grid, and all new fields have no grid, then 
+       ! if fieldbundle has no grid, and all new fields have no grid, then 
        ! we cannot do any grid consistency checks here.  so only continue
        ! here if someone somewhere has a grid to compare against.
        if (isGeomFound) then
@@ -2805,7 +2805,7 @@ end function
                         "Invalid Field found when trying to access Field", &
                         ESMF_CONTEXT, rc)) return
                
-               ! make sure this fields grid matches the rest in the bundle
+               ! make sure this fields grid matches the rest in the fieldbundle
 
 
                ! NOTE: ALL GRIDS MATCH RIGHT NOW UNTIL WE HAVE A MORE IN DEPTH
@@ -2826,7 +2826,7 @@ end function
                         "Invalid Field found when trying to access Field", &
                         ESMF_CONTEXT, rc)) return
 
-               ! make sure this fields grid matches the rest in the bundle
+               ! make sure this fields grid matches the rest in the fieldbundle
                theyMatch=ESMF_LocStreamMatch(locstream,locstreamToCheck,status)
                if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2843,7 +2843,7 @@ end function
                         "Invalid Field found when trying to access Field", &
                         ESMF_CONTEXT, rc)) return
 
-               ! make sure this fields grid matches the rest in the bundle
+               ! make sure this fields grid matches the rest in the fieldbundle
                theyMatch=ESMF_MeshMatch(mesh,meshToCheck,status)
                if (ESMF_LogMsgFoundAllocError(status, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2862,7 +2862,7 @@ end function
        endif
 
       ! if we get this far, either no one has any grids, or the grids
-      ! have passed the consistency check.  add them to the bundle.
+      ! have passed the consistency check.  add them to the fieldbundle.
 
       ! Add the fields in the list, checking for consistency.
       if (btype%field_count .eq. 0) then
@@ -2920,16 +2920,16 @@ end function
 
       ! TODO: outstanding architectural issue:
       ! unless all the fields are required to contain data before they are
-      ! added to the bundle, we cannot set the congruent flag yet -- it is
-      ! possible with the current interfaces to add empty fields to a bundle
+      ! added to the fieldbundle, we cannot set the congruent flag yet -- it is
+      ! possible with the current interfaces to add empty fields to a fieldbundle
       ! and then add inconsistent grids to the fields -- which needs to be
       ! avoided; but also the data can be added afterwards and there is no
       ! obvious time to check for consistency/congruency.   the suggested
-      ! fix is that a field being added to a bundle must already contain both
+      ! fix is that a field being added to a fieldbundle must already contain both
       ! a grid and the data array, so we can do the checking here.
 
       ! all the handling below is to fool around with maintaining information
-      ! about whether the data fields inside this bundle are identical in
+      ! about whether the data fields inside this fieldbundle are identical in
       ! rank, data type, staggerloc, index order, etc.  if we know they already
       ! are not, we can jump around the code to the continue.  otherwise we
       ! have to test the new fields to make sure they match in datatype.
@@ -2940,7 +2940,7 @@ end function
       ! only compare the newly added fields and not search the old ones.
       if (btype%isCongruent) then
           ! compare the last fieldCount fields against the congruent data
-          ! type stored in the bundle.  if the bundle is empty, set the
+          ! type stored in the fieldbundle.  if the fieldbundle is empty, set the
           ! congruent info from the first one and then proceed from fields
           ! 2 thru fieldCount.
          
@@ -2951,9 +2951,9 @@ end function
               ! search the fields looking for one with data (it is possible
               ! none have data - in which case we cannot change the flag)
               ! the first one sets the congruent pattern which all others
-              ! must match to optimize the communication of this bundle
+              ! must match to optimize the communication of this fieldbundle
               ! in the most extreme version.  (other optimizations are possible
-              ! with non-congruent bundles.
+              ! with non-congruent fieldbundles.
               
               ! if all empty, get out
               ! if not, set the congruent datainfo here
@@ -2962,7 +2962,7 @@ end function
       endif
 
       ! TODO: this code does nothing with the congruent flag right now.
-      ! this needs to be fixed before the bundle communication code can 
+      ! this needs to be fixed before the fieldbundle communication code can 
       ! be considered robust.
 
 10 continue
@@ -3116,13 +3116,13 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
    
-      ! Initialize bundle contents.  An empty FieldBundle starts out with the
+      ! Initialize fieldbundle contents.  An empty FieldBundle starts out with the
       ! status flags uninitialized, and assumes all data is congruent.
       ! As fields are added, the first non-compliant one turns the flag
       ! to false, and after it is false, there is no way to set it back
       ! to true.
-      btype%localbundle%gridstatus = ESMF_STATUS_UNINIT
-      btype%localbundle%arraystatus = ESMF_STATUS_UNINIT
+      btype%localfieldbundle%gridstatus = ESMF_STATUS_UNINIT
+      btype%localfieldbundle%arraystatus = ESMF_STATUS_UNINIT
       btype%gridstatus = ESMF_STATUS_UNINIT
       btype%isCongruent = .TRUE.
    
@@ -3131,7 +3131,7 @@ end function
       nullify(btype%flist)
       
       btype%pack_flag = ESMF_NO_PACKED_DATA
-!     nullify(btype%localbundle%packed_data)
+!     nullify(btype%localfieldbundle%packed_data)
   
 
       ! Set as created 
@@ -3202,14 +3202,14 @@ end function
 #define ESMF_METHOD "ESMF_FieldBundleSerialize"
 
 !BOPI
-! !IROUTINE: ESMF_FieldBundleSerialize - Serialize bundle info into a byte stream
+! !IROUTINE: ESMF_FieldBundleSerialize - Serialize fieldbundle info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleSerialize(bundle, buffer, length, offset, &
+      subroutine ESMF_FieldBundleSerialize(fieldbundle, buffer, length, offset, &
                                           attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: bundle 
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundle 
       character, pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -3225,7 +3225,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [bundle]
+!     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} object to be serialized.
 !     \item [buffer]
 !           Data buffer which will hold the serialized information.
@@ -3250,7 +3250,7 @@ end function
 
       integer :: localrc                     ! Error status
       integer :: i
-      type(ESMF_FieldBundleType), pointer :: bp   ! bundle type
+      type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
 
@@ -3259,7 +3259,7 @@ end function
       localrc = ESMF_RC_NOT_IMPL
 
       ! check inputs
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundle,rc)      
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)      
 
       ! deal with optional attreconflag and inquireflag
       if (present(attreconflag)) then
@@ -3275,7 +3275,7 @@ end function
       end if
 
       ! shortcut to internals
-      bp => bundle%btypep
+      bp => fieldbundle%btypep
       
       call c_ESMC_BaseSerialize(bp%base, buffer, length, offset, &
                                  lattreconflag, linquireflag, localrc)
@@ -3361,7 +3361,7 @@ end function
 
       integer :: localrc, status             ! Error status, allocation status
       integer :: i
-      type(ESMF_FieldBundleType), pointer :: bp   ! bundle type
+      type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
       type(ESMF_GeomType) :: geomtype
@@ -3500,7 +3500,7 @@ end function
        ESMF_INIT_TYPE :: ESMF_FieldBundleCongDataGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt bundlecongruentdata}.
+!      Get the initialization status of the shallow class {\tt fieldbundlecongruentdata}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3531,7 +3531,7 @@ end function
        type(ESMF_FieldBundleCongrntData) :: s
 !
 ! !DESCRIPTION:
-!      Initialize the shallow class {\tt bundlecongruentdata}.
+!      Initialize the shallow class {\tt fieldbundlecongruentdata}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3596,7 +3596,7 @@ end function
        ESMF_INIT_TYPE :: ESMF_LocalFieldBundleGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt localbundle}.
+!      Get the initialization status of the shallow class {\tt localfieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3627,7 +3627,7 @@ end function
        type(ESMF_LocalFieldBundle) :: s
 !
 ! !DESCRIPTION:
-!      Initialize the shallow class {\tt localbundle}.
+!      Initialize the shallow class {\tt localfieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3692,7 +3692,7 @@ end function
        ESMF_INIT_TYPE :: ESMF_FieldBundleTypeGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt bundletype}.
+!      Get the initialization status of the shallow class {\tt fieldbundletype}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3723,7 +3723,7 @@ end function
        type(ESMF_FieldBundleType) :: s
 !
 ! !DESCRIPTION:
-!      Initialize the shallow class {\tt bundletype}.
+!      Initialize the shallow class {\tt fieldbundletype}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -3790,7 +3790,7 @@ end function
        ESMF_INIT_TYPE :: ESMF_FieldBundleGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the Deep class {\tt bundle}.
+!      Get the initialization status of the Deep class {\tt fieldbundle}.
 !
 !     The arguments are:
 !     \begin{description}

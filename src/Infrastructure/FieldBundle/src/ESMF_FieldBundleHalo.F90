@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.6 2010/10/12 15:35:45 feiliu Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.7 2010/11/09 06:58:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.6 2010/10/12 15:35:45 feiliu Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.7 2010/11/09 06:58:21 eschwab Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -74,20 +74,20 @@ contains
 ! !IROUTINE: ESMF_FieldBundleHalo - Execute a FieldBundle halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleHalo(fieldBundle, routehandle, checkflag, rc)
+  subroutine ESMF_FieldBundleHalo(fieldbundle, routehandle, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in)              :: fieldBundle
+        type(ESMF_FieldBundle), intent(in)              :: fieldbundle
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!   Execute a precomputed FieldBundle halo operation for the Fields in fieldBundle.
+!   Execute a precomputed FieldBundle halo operation for the Fields in fieldbundle.
 !   See {\tt ESMF\_FieldBundleStore()} on how to compute routehandle.
 !
 !   \begin{description}
-!   \item [fieldBundle]
+!   \item [fieldbundle]
 !     {\tt ESMF\_FieldBundle} with source data. The data in this 
 !       FieldBundle may be destroyed by this call.
 !   \item [routehandle]
@@ -127,14 +127,14 @@ contains
         l_checkflag = ESMF_FALSE
         if (present(checkflag)) l_checkflag = checkflag
 
-        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldBundle, rc)
+        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
 
-        fcount = fieldBundle%btypep%field_count
+        fcount = fieldbundle%btypep%field_count
 
         ! build arrayBundle on-the-fly
         allocate(arrays(fcount))
         do i = 1, fcount
-            call ESMF_FieldBundleGet(fieldBundle, i, l_field, rc=localrc)
+            call ESMF_FieldBundleGet(fieldbundle, i, l_field, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(l_field, array=arrays(i), rc=localrc)
@@ -214,15 +214,15 @@ contains
 ! !IROUTINE: ESMF_FieldBundleHaloStore - Precompute a FieldBundle halo operation
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleHaloStore(fieldBundle, routehandle, rc)
+    subroutine ESMF_FieldBundleHaloStore(fieldbundle, routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)                :: fieldBundle
+    type(ESMF_FieldBundle), intent(inout)                :: fieldbundle
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
     integer,                intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
-!   Store a FieldBundle halo operation over the data in {\tt fieldBundle}. By 
+!   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. By 
 !   definition, all elements in the total Field regions that lie
 !   outside the exclusive regions will be considered potential destination
 !   elements for halo. However, only those elements that have a corresponding
@@ -232,7 +232,7 @@ contains
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
 !   {\tt ESMF\_FieldBundleHalo()} on any FieldBundle that is weakly congruent
-!   and typekind conform to {\tt fieldBundle}. Congruency for FieldBundles is
+!   and typekind conform to {\tt fieldbundle}. Congruency for FieldBundles is
 !   given by the congruency of its constituents.
 !   Congruent Fields possess matching DistGrids, and the shape of the local
 !   array tiles matches between the Fields for every DE. For weakly congruent
@@ -267,13 +267,13 @@ contains
         if(present(rc)) rc = ESMF_RC_NOT_IMPL 
 
         ! check variables
-        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldBundle, rc) 
+        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc) 
 
         ! build arrayBundle on-the-fly
-        fcount = fieldBundle%btypep%field_count
+        fcount = fieldbundle%btypep%field_count
         allocate(arrays(fcount))
         do i = 1, fcount
-            call ESMF_FieldBundleGet(fieldBundle, i, l_field, rc=localrc)
+            call ESMF_FieldBundleGet(fieldbundle, i, l_field, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(l_field, array=arrays(i), rc=localrc)

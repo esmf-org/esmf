@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.216 2010/11/01 17:15:59 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.217 2010/11/09 06:58:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.216 2010/11/01 17:15:59 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.217 2010/11/09 06:58:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -2102,7 +2102,7 @@ module ESMF_StateMod
 
 ! !INTERFACE:
       function ESMF_StateCreate(stateName, statetype, &
-                   bundleList, fieldList, arrayList, nestedStateList, &
+                   fieldbundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
                    neededflag, readyflag, validflag, reqforrestartflag, rc)
 !
@@ -2112,7 +2112,7 @@ module ESMF_StateMod
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: bundleList
+      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: fieldbundleList
       type(ESMF_Field), dimension(:), intent(inout), optional :: fieldList
       type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
@@ -2138,7 +2138,7 @@ module ESMF_StateMod
 !    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
 !    or {\tt ESMF\_STATE\_UNSPECIFIED} The default 
 !    is {\tt ESMF\_STATE\_UNSPECIFIED}.
-!   \item[{[bundleList]}]
+!   \item[{[fieldbundleList]}]
 !    A list (Fortran array) of {\tt ESMF\_FieldBundle}s.
 !   \item[{[fieldList]}]
 !    A list (Fortran array) of {\tt ESMF\_Field}s.
@@ -2190,9 +2190,9 @@ module ESMF_StateMod
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
-        if (present(bundleList)) then
-           do i=1,size(bundleList)
-              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundleList(i),rc)
+        if (present(fieldbundleList)) then
+           do i=1,size(fieldbundleList)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundleList(i),rc)
            enddo
         endif
         if (present(fieldList)) then
@@ -2225,12 +2225,12 @@ module ESMF_StateMod
       !      on NAS' columbia.
         if (present(nameList)) then 
           call ESMF_StateConstruct(stypep, stateName, statetype, &
-                   bundleList, fieldList, arrayList, nestedStateList, &
+                   fieldbundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
                    neededflag, readyflag, validflag, reqforrestartflag, localrc)
         else
           call ESMF_StateConstruct(stypep, stateName, statetype, &
-                   bundleList, fieldList, arrayList, nestedStateList, &
+                   fieldbundleList, fieldList, arrayList, nestedStateList, &
                    itemcount=itemCount, &
                    neededflag=neededflag, readyflag=readyflag, &
                    validflag=validflag, reqforrestartflag=reqforrestartflag, &
@@ -3007,7 +3007,7 @@ module ESMF_StateMod
 
       if (dataitem%otype .ne. ESMF_STATEITEM_FIELD) then
           if (dataitem%otype .eq. ESMF_STATEITEM_INDIRECT) then
-              ! TODO: how do we return the info that this is inside a bundle?
+              ! TODO: how do we return the info that this is inside a fieldbundle?
               if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                        "extracting Fields directly from FieldBundles in a State", &
                        ESMF_CONTEXT, rc)) return
@@ -4126,14 +4126,14 @@ module ESMF_StateMod
 
 ! !INTERFACE:
       subroutine ESMF_StateConstruct(stypep, statename, statetype, & 
-                         bundles, fields, arrays, states, names, itemcount, &
+                         fieldbundles, fields, arrays, states, names, itemcount, &
                          neededflag, readyflag, validflag, reqforrestartflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
       character(len=*), intent(in), optional :: statename 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: bundles
+      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: fieldbundles
       type(ESMF_Field), dimension(:), intent(inout), optional :: fields
       type(ESMF_Array), dimension(:), intent(in), optional :: arrays
       type(ESMF_State), dimension(:), intent(in), optional :: states
@@ -4159,7 +4159,7 @@ module ESMF_StateMod
 !    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATE\_IMPORT},
 !    {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.   
 !    {\tt ESMF\_STATE\_LIST} is the default if not specified.
-!   \item[{[bundles]}]
+!   \item[{[fieldbundles]}]
 !    An array of {\tt FieldBundles}.
 !   \item[{[fields]}]
 !    An array of {\tt Fields}.
@@ -4211,9 +4211,9 @@ module ESMF_StateMod
         localrc = ESMF_RC_NOT_IMPL
 
         ! check input variables
-        if (present(bundles)) then
-           do i=1,size(bundles)
-              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundles(i),rc)
+        if (present(fieldbundles)) then
+           do i=1,size(fieldbundles)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
            enddo
         endif
         if (present(fields)) then
@@ -4235,7 +4235,7 @@ module ESMF_StateMod
 
         ! Quick sanity check on the values
         count = 0
-        if (present(bundles)) count = count + size(bundles)
+        if (present(fieldbundles)) count = count + size(fieldbundles)
         if (present(fields)) count = count + size(fields)
         if (present(arrays)) count = count + size(arrays)
         if (present(states)) count = count + size(states)
@@ -4288,10 +4288,10 @@ module ESMF_StateMod
       
         ! For each item type, set the data values.  All the allocation 
         !  has already been done.
-        if (present(bundles)) then
-          count = size(bundles)
+        if (present(fieldbundles)) then
+          count = size(fieldbundles)
           if (count .gt. 0) then
-            call ESMF_StateClAddFieldBundleList(stypep, bundles, count, &
+            call ESMF_StateClAddFieldBundleList(stypep, fieldbundles, count, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -5367,24 +5367,24 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateClAddFieldBundleList - Add a list of FieldBundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClAddFieldBundleList(stypep, bundles, bcount, &
+      subroutine ESMF_StateClAddFieldBundleList(stypep, fieldbundles, bcount, &
         proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
-      type(ESMF_FieldBundle), dimension(:), intent(inout) :: bundles
+      type(ESMF_FieldBundle), dimension(:), intent(inout) :: fieldbundles
       integer, intent(in) :: bcount
       logical, optional :: proxyflag
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple bundles to an {\tt ESMF\_State}.  Internal routine only.
+!      Add multiple fieldbundles to an {\tt ESMF\_State}.  Internal routine only.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
 !       Internal StateClass pointer.  Required.
-!     \item[bundles]
+!     \item[fieldbundles]
 !       The array of {\tt ESMF\_FieldBundles} to be added.
 !     \item[bcount]
 !       The number of {\tt ESMF\_FieldBundles} to be added.
@@ -5413,7 +5413,7 @@ module ESMF_StateMod
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
       do i=1,bcount
-         ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,bundles(i),rc)
+         ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
       enddo
   
       ! Return with error if list is empty.  
@@ -5423,26 +5423,26 @@ module ESMF_StateMod
                                      ESMF_CONTEXT, rc)) return
       endif
 
-      if (bcount > size (bundles)) then
+      if (bcount > size (fieldbundles)) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD,  &
-                                     "bcount must be <= size (bundles)", &
+                                     "bcount must be <= size (fieldbundles)", &
                                      ESMF_CONTEXT, rc)) return
       endif
       
-      ! Add the bundles to the state, checking for name clashes
+      ! Add the fieldbundles to the state, checking for name clashes
       !  and name placeholders
 
       ! TODO: check for existing name, if placeholder, replace it
       !       if existing object - what?  replace it silently?
 
-      ! get a count of all fields in all bundles
+      ! get a count of all fields in all fieldbundles
       fruncount = 0
       do i=1, bcount
-        call ESMF_FieldBundleValidate(bundles(i), rc=localrc)
+        call ESMF_FieldBundleValidate(fieldbundles(i), rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_FieldBundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -5473,11 +5473,11 @@ module ESMF_StateMod
       fruncount = 1
       newcount = 0
 
-      ! This is the start of the first pass through the bundle list.
-      ! For each bundle...
+      ! This is the start of the first pass through the fieldbundle list.
+      ! For each fieldbundle...
       do i=1, bcount
 
-        call ESMF_FieldBundleGet(bundles(i), name=bname, rc=localrc)
+        call ESMF_FieldBundleGet(fieldbundles(i), name=bname, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) goto 10
@@ -5503,7 +5503,7 @@ module ESMF_StateMod
             endif
 
             dataitem%otype = ESMF_STATEITEM_FIELDBUNDLE
-            dataitem%datap%fbp = bundles(i)
+            dataitem%datap%fbp = fieldbundles(i)
         
             ! Don't change flags of existing entry
             !dataitem%needed = ESMF_NEEDED
@@ -5511,15 +5511,15 @@ module ESMF_StateMod
             !dataitem%valid = ESMF_VALIDITYUNKNOWN
         endif
 
-        ! and now the same for each field in the bundle
-        call ESMF_FieldBundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        ! and now the same for each field in the fieldbundle
+        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) goto 10
 
         do j=1, fcount
             ! get next field and query name
-            call ESMF_FieldBundleGet(bundles(i), j, field, localrc)
+            call ESMF_FieldBundleGet(fieldbundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5540,7 +5540,7 @@ module ESMF_StateMod
                                       ESMF_CONTEXT, rc)) goto 10
 
             ! If the field is going to have to be added later,
-            !  keep track of whether it belongs to a bundle which has to
+            !  keep track of whether it belongs to a fieldbundle which has to
             !  be added new, or exists.  If it exists, note the index number
             !  so we don't have to search for it later.
             if (.not. exists) then
@@ -5549,7 +5549,7 @@ module ESMF_StateMod
             else
                 ! TODO: decide if we need to verify that this is only a
                 ! placeholder, or if it's ok to silently overwrite an array
-                ! or bundle which had the same name.
+                ! or fieldbundle which had the same name.
                 if (dataitem%otype .ne. ESMF_STATEITEM_NAME) then
                   ! print *, "Warning: overwriting old entry"
                 endif
@@ -5558,7 +5558,7 @@ module ESMF_StateMod
                 dataitem%otype = ESMF_STATEITEM_INDIRECT
                 if (bindex .eq. -1) then
                     ! We found the field already in the state list but
-                    ! not the bundle, so we can't set the right index yet.
+                    ! not the fieldbundle, so we can't set the right index yet.
                     ! Set a flag so later we can update this in pass 2.
                     ftodo(fruncount) = -2
                     dataitem%indirect_index = 0   
@@ -5572,7 +5572,7 @@ module ESMF_StateMod
                 dataitem%reqrestart = stypep%reqrestart_default
             endif
 
-            ! This is a total running count of all fields in all bundles.
+            ! This is a total running count of all fields in all fieldbundles.
             fruncount = fruncount+1
     
         enddo
@@ -5590,12 +5590,12 @@ module ESMF_StateMod
                                 ESMF_CONTEXT, rc)) goto 10
 
 
-      ! There is enough space now to add new bundles & fields to the list.
-      ! This is the start of the second pass through the bundle list.
+      ! There is enough space now to add new fieldbundles & fields to the list.
+      ! This is the start of the second pass through the fieldbundle list.
       fruncount = 1     
       do i=1, bcount
 
-        ! If bundle wasn't already found in the list, we need to add it here.
+        ! If fieldbundle wasn't already found in the list, we need to add it here.
         if (btodo(i) .eq. 1) then
             stypep%datacount = stypep%datacount + 1
 
@@ -5605,7 +5605,7 @@ module ESMF_StateMod
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
 
             ! Add name
-            call ESMF_FieldBundleGet(bundles(i), name=nextitem%namep, rc=localrc)
+            call ESMF_FieldBundleGet(fieldbundles(i), name=nextitem%namep, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5618,7 +5618,7 @@ module ESMF_StateMod
                                        ESMF_CONTEXT, rc)) return
 #endif
 
-           nextitem%datap%fbp = bundles(i)
+           nextitem%datap%fbp = fieldbundles(i)
 
            nextitem%needed = stypep%needed_default
            nextitem%ready = stypep%ready_default
@@ -5633,15 +5633,15 @@ module ESMF_StateMod
         ! Whether it was found in pass 1 or just added above, we still
         !  have to go through each field and see if any of them need to
         !  be added or updated.
-        call ESMF_FieldBundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcount, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) goto 10
 
-        ! Skip empty bundles
+        ! Skip empty fieldbundles
         if (fcount .le. 0) cycle
 
-        ! for each field in the bundle
+        ! for each field in the fieldbundle
         do j=1, fcount
 
           ! If new field entry needs to be added
@@ -5654,7 +5654,7 @@ module ESMF_StateMod
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
     
             ! get next field and query name
-            call ESMF_FieldBundleGet(bundles(i), j, field, localrc)
+            call ESMF_FieldBundleGet(fieldbundles(i), j, field, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -5664,7 +5664,7 @@ module ESMF_StateMod
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
     
-            ! If we found the corresponding bundle entry during pass 1,
+            ! If we found the corresponding fieldbundle entry during pass 1,
             ! it was stored in the todo list.  Otherwise, we just added it
             ! above and we saved the new index to use here.
             if (ftodo(fruncount) .ge. 0) then
@@ -5678,9 +5678,9 @@ module ESMF_StateMod
             nextitem%valid = stypep%stvalid_default
             nextitem%reqrestart = stypep%reqrestart_default
 
-          ! If the field entry already existed but needs bundle index updated,
+          ! If the field entry already existed but needs fieldbundle index updated,
           !  we do have to do a lookup on the field to see where it was
-          !  found.  We just added the bundle above, so bindex is the
+          !  found.  We just added the fieldbundle above, so bindex is the
           !  value to set.
           else if (ftodo(fruncount) .eq. -2) then
             exists = ESMF_StateClassFindData(stypep, fname, .true.,  &
@@ -5689,7 +5689,7 @@ module ESMF_StateMod
 
             if (.not. exists) then
               call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
-                                          "field/bundle lists", &
+                                          "field/fieldbundle lists", &
                                           ESMF_CONTEXT, rc)
               localrc = ESMF_RC_INTNRL_INCONS
               goto 10
@@ -5718,7 +5718,7 @@ module ESMF_StateMod
       if (allocated (btodo)) then
         deallocate(btodo, stat=memstat)
         if (localrc == ESMF_SUCCESS) then
-          if (ESMF_LogMsgFoundDeallocError(memstat, "bundle list", &
+          if (ESMF_LogMsgFoundDeallocError(memstat, "fieldbundle list", &
                                          ESMF_CONTEXT, rc)) return
         end if
       end if

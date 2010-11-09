@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.82 2010/11/01 17:25:53 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.83 2010/11/09 06:58:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.82 2010/11/01 17:25:53 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.83 2010/11/09 06:58:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -452,7 +452,7 @@
            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%fbp%btypep, si%idsend(i), localrc)
              if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Fieldbundle get ID", &
+                             "nested fieldbundle get ID", &
                              ESMF_CONTEXT, rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%fbp%btypep, si%vmidsend(i), localrc)
@@ -469,7 +469,7 @@
                              "nested fieldbundle serialize", &
                              ESMF_CONTEXT, rc)) return
 
-!!DEBUG "serialized bundle, obj=", si%objsend(i), " id=", si%idsend(i)
+!!DEBUG "serialized fieldbundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_FIELD%ot)
              call c_ESMC_GetID(stateitem%datap%fp%ftypep, si%idsend(i), localrc)
@@ -518,12 +518,12 @@
            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%abp, si%idsend(i), localrc)
              if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle get ID", &
+                             "nested arraybundle get ID", &
                              ESMF_CONTEXT, rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%abp, si%vmidsend(i), localrc)
              if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle get VM ID", &
+                             "nested arraybundle get VM ID", &
                              ESMF_CONTEXT, rc)) return
 
              si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
@@ -532,7 +532,7 @@
                                        lbufsize, offset, attreconflag, &
                                        inqflag, localrc)
              if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle serialize", &
+                             "nested arraybundle serialize", &
                              ESMF_CONTEXT, rc)) return
 
 !!DEBUG "serialized arraybundle, obj=", si%objsend(i), " id=", si%idsend(i)
@@ -586,7 +586,7 @@
                              "nested string serialize (indirect)", &
                              ESMF_CONTEXT, rc)) return
 
-!!DEBUG "serialized field-in-bundle, name=", trim(stateitem%namep)
+!!DEBUG "serialized field-in-fieldbundle, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
 
            case (ESMF_STATEITEM_UNKNOWN%ot)
@@ -764,7 +764,7 @@
     integer(ESMF_KIND_I4) :: comm_ints(2)
     type(ESMF_State) :: substate
     type(ESMF_Base) :: base
-    type(ESMF_FieldBundle) :: bundle
+    type(ESMF_FieldBundle) :: fieldbundle
     type(ESMF_Field) :: field
     type(ESMF_Array) :: array
     type(ESMF_ArrayBundle) :: arraybundle
@@ -978,26 +978,26 @@ itemloop:  do k=attreconstart, si%theircount
                 offset = 0  
                 select case (si%objrecv(k))
                    case (ESMF_ID_FIELDBUNDLE%objectID)
-!!DEBUG "need to create proxy bundle, remote id=", si%idrecv(k)
+!!DEBUG "need to create proxy fieldbundle, remote id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
-                    bundle = ESMF_FieldBundleDeserialize(bptr, offset, &
+                    fieldbundle = ESMF_FieldBundleDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Fieldbundle deserialize", &
+                             "nested fieldbundle deserialize", &
                              ESMF_CONTEXT, rc)) return
 
-!!DEBUG "created Fieldbundle, ready to set id and add to local state"
-                    call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
+!!DEBUG "created fieldbundle, ready to set id and add to local state"
+                    call c_ESMC_SetVMId(fieldbundle%btypep, si%vmidrecv(k), localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Fieldbundle SetVMId call", &
+                             "nested fieldbundle SetVMId call", &
                              ESMF_CONTEXT, rc)) return
 
-                    call ESMF_StateAdd(state, bundle, proxyflag=.true., &
+                    call ESMF_StateAdd(state, fieldbundle, proxyflag=.true., &
                       rc=localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Fieldbundle add to local state", &
+                             "nested fieldbundle add to local state", &
                              ESMF_CONTEXT, rc)) return
-!!DEBUG "Fieldbundle added to state"
+!!DEBUG "fieldbundle added to state"
 
                    case (ESMF_ID_FIELD%objectID)
 !!DEBUG "need to create proxy field, remote id=", si%idrecv(k)
@@ -1055,25 +1055,25 @@ itemloop:  do k=attreconstart, si%theircount
                     call c_ESMC_ArrayBundleDeserialize(arraybundle, bptr, &
                       offset, attreconflag, localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle deserialize", &
+                             "nested arraybundle deserialize", &
                              ESMF_CONTEXT, rc)) return
 
                     ! Set init code
                     call ESMF_ArrayBundleSetInitCreated(arraybundle, rc=localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "Arraybundle SetInit call", &
+                             "arraybundle SetInit call", &
                              ESMF_CONTEXT, rc)) return
 
 !!DEBUG "created arraybundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(arraybundle, si%vmidrecv(k), localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle SetVMId call", &
+                             "nested arraybundle SetVMId call", &
                              ESMF_CONTEXT, rc)) return
 
                     call ESMF_StateAdd(state, arraybundle, &
                       proxyflag=.true., rc=localrc)
                     if (ESMF_LogMsgFoundError(localrc, &
-                             "nested Arraybundle add to local state", &
+                             "nested arraybundle add to local state", &
                              ESMF_CONTEXT, rc)) return
 !!DEBUG "arraybundle added to state"
 
@@ -1115,7 +1115,7 @@ itemloop:  do k=attreconstart, si%theircount
 !!DEBUG "placeholder added to state"
          
                   case (ESMF_STATEITEM_INDIRECT%ot)
-                     !print *, "field inside a bundle"
+                     !print *, "field inside a fieldbundle"
                     call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                     if (ESMF_LogMsgFoundError(localrc, &

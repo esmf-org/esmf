@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cppF90,v 1.7 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_StateGet.cppF90,v 1.8 2010/11/09 06:58:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ module ESMF_StateGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateGet.cppF90,v 1.7 2010/03/04 18:57:46 svasquez Exp $'
+    '$Id: ESMF_StateGet.cppF90,v 1.8 2010/11/09 06:58:21 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -134,8 +134,8 @@ contains
 !  \item[{[nestedStateName]}] @\
 !   Optional.  If multiple states are present, a specific state name must be given. @\
 !  \item[{[fieldName]}] @\
-!   Optional.  If {\tt itemName} refers to a bundle then the name of the field @\
-!   in the bundle must also be given. @\
+!   Optional.  If {\tt itemName} refers to a fieldbundle then the name of the field @\
+!   in the fieldbundle must also be given. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -159,7 +159,7 @@ contains
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        !!type (ESMF_FieldBundle) :: bundle      ! bundle object @\
+        !!type (ESMF_FieldBundle) :: fieldbundle      ! fieldbundle object @\
         type (ESMF_Field) :: field          ! field object @\
         type(ESMF_Array) :: array           ! array object @\
         type(ESMF_State) :: top     @\
@@ -238,11 +238,11 @@ contains
            ! make sure we have a field name @\
            if (.not. present(fieldName)) then @\
               if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, & @\
-                  "When retrieving bundle data pointer need to provide fieldName", & @\
+                  "When retrieving fieldbundle data pointer need to provide fieldName", & @\
                   ESMF_CONTEXT, rc)) return    @\
            endif @\
 @\
-           ! get the bundle data @\
+           ! get the fieldbundle data @\
 ! TODO:FIELDINTEGRATION uncomment the next line, and erase the next after that @\
 !           call ESMF_FieldBundleGetDataPointer(dataitem%datap%bp, & @\
 !                 fieldName, dataPointer, copyflag, status) @\
