@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.80 2010/11/03 22:48:47 theurich Exp $
+! $Id: ESMF_StateUTest.F90,v 1.81 2010/11/09 22:42:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.80 2010/11/03 22:48:47 theurich Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.81 2010/11/09 22:42:06 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -797,7 +797,7 @@
       x = 1
       bundle2(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
-                                bundleList=bundle2, itemcount=x, rc=rc)
+                                fieldbundleList=bundle2, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
