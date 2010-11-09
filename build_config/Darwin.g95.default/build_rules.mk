@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2009/06/01 04:19:43 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2010/11/09 22:37:28 eschwab Exp $
 #
 # Dawin.g95.default
 #
@@ -172,6 +172,11 @@ ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
+
+############################################################
+# Set huge line length limit for free format files
+#
+ESMF_F90COMPILEOPTS += -ffree-line-length-huge
 
 ############################################################
 # Blank out variables to prevent rpath encoding
