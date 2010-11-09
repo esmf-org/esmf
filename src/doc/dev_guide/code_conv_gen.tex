@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.22 2010/03/04 18:57:46 svasquez Exp $
+% CVS $Id: code_conv_gen.tex,v 1.23 2010/11/09 06:21:43 eschwab Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -56,8 +56,8 @@ ESMF repository on the SourceForge site.
 \subsubsection{File format}
 
 Documents will be available in both web-browsable (e.g. html) and
-printer-friendly formats.  They will be written in \LaTeX and based on a
-set of templates. \LaTeX was chosen because:
+printer-friendly formats.  They will be written in \LaTeX\ and based on a
+set of templates. \LaTeX\ was chosen because:
 
 \begin{itemize}
 \item it is a format that many people are already familiar with; 
@@ -76,19 +76,19 @@ which we shall use.
 
 \subsubsection{Style Rules for \LaTeX}
 
-General style recommendations for \LaTeX documentation include the
+General style recommendations for \LaTeX\ documentation include the
 following:
 
 \begin{enumerate}
 \item Limiting the source file text width to 80 characters;
 \item The use of proper indentation in sections and environments;
 \item The liberal use of blank lines to delimit blocks;
-\item Leaving as much of the typesetting as possible to \LaTeX itself
+\item Leaving as much of the typesetting as possible to \LaTeX\ itself
   (user-specified lengths, pagebreaks, etc. are discouraged);
 \item The use of the \texttt{html} package for convenient production
   of HTML and print formats;
 \item The use of the \texttt{fontenc} packages
-  to permit use of \LaTeX special tokens in source;
+  to permit use of \LaTeX\ special tokens in source;
 \item The use of a Type-I font (e.g the \texttt{times} or
   \texttt{palatcm} packages) to provide scaling PDF documents.
 \end{enumerate}
@@ -359,17 +359,17 @@ logical values between Fortran and C++ code.
 
 \subsubsection{Version Identification} 
 The first line of every file in ESMF
-  must be its CVS version identification. For example, each \LaTeX
+  must be its CVS version identification. For example, each \LaTeX\ 
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.22 2010/03/04 18:57:46 svasquez Exp $ 
+% $Id: code_conv_gen.tex,v 1.23 2010/11/09 06:21:43 eschwab Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.22 2010/03/04 18:57:46 svasquez Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.23 2010/11/09 06:21:43 eschwab Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
