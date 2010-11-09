@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.38 2010/11/08 23:00:57 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.39 2010/11/09 17:28:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.38 2010/11/08 23:00:57 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.39 2010/11/09 17:28:10 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -465,7 +465,7 @@
 ! Some MPI implementations do not consistently provide command line
 ! arguments on PETs other than PET 0.  It is therefore recommended
 ! that PET 0 call this method and broadcast the results to the other
-! PETs using ESMF\_VMBroadcast.
+! PETs by using the {\tt ESMF\_VMBroadcast()} method.
 !EOP
     integer :: argc
 
@@ -519,12 +519,12 @@
 ! \item [{argindex}]
 ! A non-negative index into the command line argument {\tt argv} array.
 ! If argindex is negative or greater than the number of user-specified
-! arguments, ESMF\_RC\_ARG\_VALUE is returned in the {\tt rc} argument.
+! arguments, {\tt ESMF\_RC\_ARG\_VALUE} is returned in the {\tt rc} argument.
 ! \item [{[value]}]
 ! Returns a copy of the desired command line argument.  If the provided
 ! character string is longer than the command line argument, the string
 ! will be blank padded.  If the string is too short, truncation will
-! occur and ESMF\_RC\_ARG\_SIZE is returned in the {\tt rc} argument.
+! occur and {\tt ESMF\_RC\_ARG\_SIZE} is returned in the {\tt rc} argument.
 ! \item [{[length]}]
 ! Returns the length of the desired command line argument in characters.
 ! The length result does not depend on the length of the {\tt value}
@@ -536,7 +536,7 @@
 ! Some MPI implementations do not consistently provide command line
 ! arguments on PETs other than PET 0.  It is therefore recommended
 ! that PET 0 call this method and broadcast the results to the other
-! PETs using ESMF\_VMBroadcast.
+! PETs by using the {\tt ESMF\_VMBroadcast()} method.
 !EOP
 !------------------------------------------------------------------------- 
 #if defined (ESMF_NEEDSPXFGETARG) || defined (ESMF_NEEDSGETARG)
@@ -671,7 +671,7 @@
 ! This method searches for, and returns the index of a desired command
 ! line argument.  An example might be to find a specific keyword
 ! (e.g., -esmf\_path) so that its associated value argument could be
-! obtained by adding 1 to the argindex and calling ESMF\_UtilGetArg.
+! obtained by adding 1 to the argindex and calling {\tt ESMF\_UtilGetArg()}.
 !
 ! The arguments are:
 ! \begin{description}
@@ -689,7 +689,7 @@
 ! Some MPI implementations do not consistently provide command line
 ! arguments on PETs other than PET 0.  It is therefore recommended
 ! that PET 0 call this method and broadcast the results to the other
-! PETs using ESMF\_VMBroadcast.
+! PETs by using the {\tt ESMF\_VMBroadcast()} method.
 !EOP
 !------------------------------------------------------------------------- 
 
