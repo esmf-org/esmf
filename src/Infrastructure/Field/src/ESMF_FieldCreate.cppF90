@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.74 2010/10/08 17:30:37 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.75 2010/11/09 06:19:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.74 2010/10/08 17:30:37 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.75 2010/11/09 06:19:52 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -4048,7 +4048,7 @@ end function ESMF_FieldCreateMeshTKR
 !       for the {\tt farray}. @\
 ! \item [{[location]}] @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\ 
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
@@ -4213,7 +4213,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       for the {\tt farrayPtr}. @\
 ! \item [{[location]}] @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\ 
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 ! \item [{[copyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
@@ -4732,7 +4732,7 @@ end function ESMF_FieldCreateXGTKR
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [xgrid] @\
-!       {\tt ESMF\_XGrid} object. @\ 
+!       {\tt ESMF\_XGrid} object. @\
 ! \item [{[xgridSide]}] @\
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
 !       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
@@ -4902,7 +4902,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [xgrid] @\
-!       {\tt ESMF\_XGrid} object. @\ 
+!       {\tt ESMF\_XGrid} object. @\
 ! \item [{[xgridSide]}] @\
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
 !       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\

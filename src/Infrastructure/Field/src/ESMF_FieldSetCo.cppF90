@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.22 2010/10/25 16:33:35 rokuingh Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.23 2010/11/09 06:19:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.22 2010/10/25 16:33:35 rokuingh Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.23 2010/11/09 06:19:52 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -824,7 +824,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !       for the {\tt farray}. @\
 ! \item [{[location]}] @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\ 
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
