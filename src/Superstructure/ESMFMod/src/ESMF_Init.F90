@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.60 2010/05/07 22:51:14 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.61 2010/11/10 22:29:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -306,7 +306,7 @@
       ! prior to log files being created.
 
       if (present (IOUnitLower) .or. present (IOUnitUpper)) then
-          call ESMF_IOUnitInit (lower=IOUnitLower, upper=IOUnitUpper, rc=status)
+          call ESMF_UtilIOUnitInit (lower=IOUnitLower, upper=IOUnitUpper, rc=status)
           if (status /= ESMF_SUCCESS) then
               if (rcpresent) rc = status
               print *, "Error setting unit number bounds"

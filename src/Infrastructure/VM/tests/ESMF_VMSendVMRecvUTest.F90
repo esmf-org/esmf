@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.27 2010/11/03 22:48:45 theurich Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.28 2010/11/10 22:29:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.27 2010/11/03 22:48:45 theurich Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.28 2010/11/10 22:29:04 w6ws Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -270,7 +270,7 @@
       end do
       call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
 
-call ESMF_IOUnitFlush (6)
+call ESMF_UtilIOUnitFlush (6)
 call ESMF_VMBarrier (vm)
 
      !Test with scalar character string arguments
@@ -284,7 +284,7 @@ call ESMF_VMBarrier (vm)
       call ESMF_VMSend(vm, sendData=lchars, count=len(lchars), dst=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-call ESMF_IOUnitFlush (6)
+call ESMF_UtilIOUnitFlush (6)
 call ESMF_VMBarrier (vm)
 
       !------------------------------------------------------------------------
@@ -297,7 +297,7 @@ call ESMF_VMBarrier (vm)
       call ESMF_VMRecv(vm, recvData=lchars, count=len(lchars), src=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-call ESMF_IOUnitFlush (6)
+call ESMF_UtilIOUnitFlush (6)
 call ESMF_VMBarrier (vm)
 
       !------------------------------------------------------------------------
@@ -308,7 +308,7 @@ call ESMF_VMBarrier (vm)
       call ESMF_Test (lchars == char_soln(1),  &
           name, failMsg, result, ESMF_SRCLINE)
 
-call ESMF_IOUnitFlush (6)
+call ESMF_UtilIOUnitFlush (6)
 call ESMF_VMBarrier (vm)
 
      !Test with character string array arguments
@@ -326,7 +326,7 @@ call ESMF_VMBarrier (vm)
       print *, localPet, "before recv: Local_chars(2) is ", local_chars(2)
       !------------------------------------------------------------------------
 
-call ESMF_IOUnitFlush (6)
+call ESMF_UtilIOUnitFlush (6)
 call ESMF_VMBarrier (vm)
 
       !NEX_UTest_Multi_Proc_Only
@@ -336,7 +336,7 @@ call ESMF_VMBarrier (vm)
       call ESMF_VMRecv(vm, recvData=local_chars, count=count*len(local_chars), src=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-call ESMF_IOUnitFlush (6)
+call ESMF_UtilIOUnitFlush (6)
 call ESMF_VMBarrier (vm)
 
       !------------------------------------------------------------------------

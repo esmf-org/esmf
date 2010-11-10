@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.64 2010/11/10 18:02:50 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.65 2010/11/10 22:29:04 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2171,7 +2171,7 @@
 
 !     Open file
 !     ---------     
-      call ESMF_IOUnitGet (lu, rc=localrc)
+      call ESMF_UtilIOUnitGet (lu, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       ! A open through an interface to avoid portability problems.

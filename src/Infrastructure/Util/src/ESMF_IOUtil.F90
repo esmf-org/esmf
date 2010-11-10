@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.10 2010/04/23 17:49:51 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.11 2010/11/10 22:29:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -9,7 +9,6 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 #define ESMF_FILENAME "ESMF_IOUtil.F90"
-
 !
 ! ESMF IOUtil Module
 !
@@ -28,7 +27,7 @@
 module ESMF_IOUtilMod
 
 !BOPI
-! !MODULE: ESMF_IOUtilMod - Fortran I/O utility routines
+! !MODULE: ESMF_UtilIOUtilMod - Fortran I/O utility routines
 !
 ! !DESCRIPTION:
 !
@@ -57,9 +56,9 @@ module ESMF_IOUtilMod
 !
 ! !PUBLIC MEMBER SUBROUTINES:
 !
-  public ESMF_IOUnitFlush
-  public ESMF_IOUnitGet
-  public ESMF_IOUnitInit
+  public ESMF_UtilIOUnitFlush
+  public ESMF_UtilIOUnitGet
+  public ESMF_UtilIOUnitInit
 
 !==============================================================================
 !
@@ -96,19 +95,19 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.10 2010/04/23 17:49:51 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.11 2010/11/10 22:29:04 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IOUnitFlush"
+#define ESMF_METHOD "ESMF_UtilIOUnitFlush"
 !BOP
-! !IROUTINE: ESMF_IOUnitFlush - flush output on a unit number
+! !IROUTINE: ESMF_UtilIOUnitFlush - Flush output on a unit number
 !
 ! !INTERFACE:
-  subroutine ESMF_IOUnitFlush (unit, rc)
+  subroutine ESMF_UtilIOUnitFlush (unit, rc)
 !
 ! !PARAMETERS:
     integer, intent(in) :: unit
@@ -152,15 +151,15 @@ ESMF_IOFlushMacro(unit, localrc)
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
     end if
 
-  end subroutine ESMF_IOUnitFlush
+  end subroutine ESMF_UtilIOUnitFlush
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IOUnitGet"
+#define ESMF_METHOD "ESMF_UtilIOUnitGet"
 !BOP
-! !IROUTINE:  ESMF_IOUnitGet - Scan for a free I/O unit number
+! !IROUTINE:  ESMF_UtilIOUnitGet - Scan for a free I/O unit number
 !
 ! !INTERFACE:
-  subroutine ESMF_IOUnitGet (unit, rc)
+  subroutine ESMF_UtilIOUnitGet (unit, rc)
 !
 ! !ARGUMENTS:
     integer, intent(out) :: unit
@@ -169,16 +168,6 @@ ESMF_IOFlushMacro(unit, localrc)
 !
 ! !DESCRIPTION:
 !   Scan for, and return, a free Fortran I/O unit number.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[unit]}]
-!       A Fortran I/O unit number.
-!     \item[{[rc]}]
-!       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}.
-!     \end{description}
-!
-!
 !   By default, the range of unit numbers returned is between 50 and 99
 !   (parameters {\tt ESMF\_LOG\_FORTRAN\_UNIT\_NUMBER} and {\tt ESMF\_LOG\_UPPER}
 !   respectively.) When integrating ESMF into an application where these values
@@ -191,6 +180,14 @@ ESMF_IOFlushMacro(unit, localrc)
 !   (or other means of connecting to units), might not return a unique unit
 !   number.  It is recommended that an {\tt OPEN} statement immediately follow
 !   the call to {\tt ESMF\_IOUnitGet()} to activate the unit.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[unit]}]
+!       A Fortran I/O unit number.
+!     \item[{[rc]}]
+!       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}.
+!     \end{description}
 !EOP
 
     integer :: i, localrc
@@ -210,16 +207,16 @@ ESMF_IOFlushMacro(unit, localrc)
       unit = -1
     end if
 
-  end subroutine ESMF_IOUnitGet
+  end subroutine ESMF_UtilIOUnitGet
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IOUnitInit"
+#define ESMF_METHOD "ESMF_UtilIOUnitInit"
 !BOPI
-!  !IROUTINE:  ESMF_IOUnitInit - Initialize ESMF Fortran I/O unit number range
+!  !IROUTINE:  ESMF_UtilIOUnitInit - Initialize ESMF Fortran I/O unit number range
 !
 ! !INTERFACE:
-  subroutine ESMF_IOUnitInit (lower, upper, rc)
+  subroutine ESMF_UtilIOUnitInit (lower, upper, rc)
 !
 ! !ARGUMENTS:
     integer, intent(in), optional :: lower
@@ -279,7 +276,7 @@ ESMF_IOFlushMacro(unit, localrc)
 
     if (present (rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_IOUnitInit
+  end subroutine ESMF_UtilIOUnitInit
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.69 2010/10/25 16:36:19 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.70 2010/11/10 22:29:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -249,9 +249,11 @@ contains
 ! !INTERFACE:
     function ESMF_LogGetInit(s)
 !
+! !RETURN VALUE:
+       ESMF_INIT_TYPE :: ESMF_LogGetInit
+!
 ! !ARGUMENTS:
        type(ESMF_Log), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_LogGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt log}.
@@ -348,9 +350,11 @@ contains
 ! !INTERFACE:
     function ESMF_LogPrivateGetInit(s)
 !
+! !RETURN VALUE:
+       ESMF_INIT_TYPE :: ESMF_LogPrivateGetInit
+!
 ! !ARGUMENTS:
        type(ESMF_LogPrivate), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_LogPrivateGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt logprivate}.
@@ -453,9 +457,11 @@ contains
 ! !INTERFACE:
     function ESMF_LogEntryGetInit(s)
 !
+! !RETURN VALUE:
+       ESMF_INIT_TYPE :: ESMF_LogEntryGetInit
+!
 ! !ARGUMENTS:
        type(ESMF_LogEntry), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_LogEntryGetInit
 !
 ! !DESCRIPTION:
 !      Get the initialization status of the shallow class {\tt LogEntry}.
@@ -802,7 +808,7 @@ end subroutine ESMF_LogFinalize
       132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
       133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
 
-      call ESMF_IOUnitFlush (alog%unitNumber, localrc)
+      call ESMF_UtilIOUnitFlush (alog%unitNumber, localrc)
  
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
@@ -824,7 +830,8 @@ end subroutine ESMF_LogFlush
                                          method, rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                 ::ESMF_LogFoundAllocError    
+      logical                                 :: ESMF_LogFoundAllocError
+!
 ! !ARGUMENTS:
 !      
       integer, intent(in)                     :: statusToCheck             
@@ -899,7 +906,8 @@ end function ESMF_LogFoundAllocError
                                          method, rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                 ::ESMF_LogFoundDeallocError    
+      logical                                 :: ESMF_LogFoundDeallocError
+!
 ! !ARGUMENTS:
 !      
       integer, intent(in)                     :: statusToCheck  	     
@@ -974,7 +982,8 @@ end function ESMF_LogFoundDeallocError
                rcToReturn, log)
 !
 ! !RETURN VALUE:
-      logical                                         ::ESMF_LogFoundError
+      logical                                         :: ESMF_LogFoundError
+!
 ! !ARGUMENTS:
 !      
       integer, intent(in)                             :: rcToCheck
@@ -1219,7 +1228,8 @@ end subroutine ESMF_LogInitialize
                                           method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                  ::ESMF_LogMsgFoundAllocError   
+      logical                                  ::ESMF_LogMsgFoundAllocError 
+!  
 ! !ARGUMENTS:
 !      
       integer, intent(in)                      :: statusToCheck 	      
@@ -1301,7 +1311,8 @@ end function ESMF_LogMsgFoundAllocError
                                             method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                  ::ESMF_LogMsgFoundDeallocError	
+      logical                                  ::ESMF_LogMsgFoundDeallocError
+!	
 ! !ARGUMENTS:
 !      
       integer, intent(in)                      :: statusToCheck 	     	
@@ -1383,6 +1394,7 @@ end function ESMF_LogMsgFoundDeallocError
 !
 ! !RETURN VALUE:
       logical                                         :: ESMF_LogMsgFoundError
+!
 ! !ARGUMENTS:
 !	
       integer, intent(in)                             :: rcToCheck
@@ -1623,7 +1635,9 @@ end subroutine ESMF_LogMsgSetError
       end subroutine f_ESMF_VMGlobalGet
     end interface
 
-    integer 				                   :: status, i, rc2
+    integer :: localrc, rc2
+    integer :: iostat, memstat
+    integer 				                   :: i
     type(ESMF_LogEntry), dimension(:), pointer             :: localbuf
     character(len=ESMF_MAXPATHLEN)                         :: fname
     character(ESMF_MAXSTR)                                 :: petNumChar
@@ -1696,8 +1710,8 @@ end subroutine ESMF_LogMsgSetError
     endif
 
     ! find an available unit number
-    call ESMF_IOUnitGet (alog%unitNumber, rc=status)
-    if (status /= 0) then
+    call ESMF_UtilIOUnitGet (alog%unitNumber, rc=localrc)
+    if (localrc /= ESMF_SUCCESS) then
         if (present(rc)) then
             rc=ESMF_FAILURE
         endif
@@ -1708,18 +1722,18 @@ end subroutine ESMF_LogMsgSetError
     do i=1, ESMF_LOG_MAXTRYOPEN
 #if !defined (ESMF_OS_MinGW)
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,& 
-	     POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+	     POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
 #else
 #if defined (__INTEL_COMPILER)
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
              POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", &
-             SHARE="DENYNONE", IOSTAT=status)
+             SHARE="DENYNONE", IOSTAT=iostat)
 #else
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,&
-             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+             POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
 #endif
 #endif
-        if (status.eq.0) then
+        if (iostat == 0) then
             alog%FileIsOpen = ESMF_TRUE
             exit
         endif
@@ -1730,7 +1744,9 @@ end subroutine ESMF_LogMsgSetError
         if (present(rc)) then
             rc=ESMF_FAILURE
         endif
-        print *, "ESMF_LogOpen: open error.  iostat =", status
+        print *, ESMF_METHOD,  &
+            ': error opening file: ', trim (alog%nameLogErrFile),  &
+            ', iostat =', iostat
         return
     endif
 
@@ -1738,8 +1754,8 @@ end subroutine ESMF_LogMsgSetError
     ! you get an error.  if you allocate a local buffer and then point the
     ! derived type buffer at it, it works.  go figure.
     
-    allocate(localbuf(alog%maxElements), stat=status)
-    if (status .ne. 0) then
+    allocate(localbuf(alog%maxElements), stat=memstat)
+    if (memstat /= 0) then
       print *, "ESMF_LogOpen: Allocation of buffer failed."
       if (present(rc)) then
           rc = ESMF_FAILURE

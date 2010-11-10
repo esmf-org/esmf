@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.62 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.63 2010/11/10 22:29:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.62 2010/11/03 22:48:43 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.63 2010/11/10 22:29:04 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -635,7 +635,7 @@
       write (name, *) ' Creating a log file with message filtering'
       do, i=1,1
         ! Make sure we start with a clean log
-        call ESMF_IOUnitGet (unit=log8unit, rc=rc)
+        call ESMF_UtilIOUnitGet (unit=log8unit, rc=rc)
         if (rc /= ESMF_SUCCESS) exit
 
         open (log8unit, file=trim (my_pet_char) // '.logAllow',  &
@@ -763,7 +763,7 @@ contains
     rc    = ESMF_FAILURE
     found = .false.
 
-    call ESMF_IOUnitGet (unitno)
+    call ESMF_UtilIOUnitGet (unitno)
     open (unit=unitno, file=filename, status='old',  &
         action='read', position='rewind', iostat=ioerr)
     if (ioerr /= 0) then
