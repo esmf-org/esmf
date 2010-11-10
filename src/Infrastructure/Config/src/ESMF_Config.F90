@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.63 2010/11/03 05:22:43 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.64 2010/11/10 18:02:50 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -486,6 +486,10 @@
       allocate(attr_used_local(NATT_MAX), stat=memstat)
       if (ESMF_LogMsgFoundAllocError(memstat, "Allocating local buffer 2", &
                                         ESMF_CONTEXT, rc)) return
+
+      config_local%nbuf = 0
+      config_local%next_line = 0
+
       config_local%attr_used => attr_used_local
 
       ESMF_ConfigCreate%cptr => config_local
@@ -536,13 +540,13 @@
       ! TODO: Absoft 9/Jazz bug necessitates this separate deallocate statement
       ! before the other (must be in reverse order of allocation)
       deallocate(config%cptr%attr_used, stat=memstat)
-      if (ESMF_LogMsgFoundAllocError(memstat, "Deallocating local buffer 2", &
+      if (ESMF_LogMsgFoundDeallocError(memstat, "Deallocating local buffer 2", &
                                      ESMF_CONTEXT, rc)) return
       deallocate(config%cptr%buffer, config%cptr%this_line, stat = memstat)
-      if (ESMF_LogMsgFoundAllocError(memstat, "Deallocating local buffer 1", &
+      if (ESMF_LogMsgFoundDeallocError(memstat, "Deallocating local buffer 1", &
                                      ESMF_CONTEXT, rc)) return
       deallocate(config%cptr, stat = memstat)
-      if (ESMF_LogMsgFoundAllocError(memstat, "Deallocating config type", &
+      if (ESMF_LogMsgFoundDeallocError(memstat, "Deallocating config type", &
                                      ESMF_CONTEXT, rc)) return
       nullify(config%cptr)
 
@@ -550,7 +554,6 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       ESMF_INIT_SET_DELETED(config)
-      return
 
      end subroutine ESMF_ConfigDestroy
 
@@ -1956,7 +1959,7 @@
 
       if ( present(label) ) then
         call ESMF_ConfigFindLabel(config, label = label, rc = localrc )
-        if ( localrc /= 0 ) then
+        if ( localrc /= ESMF_SUCCESS ) then
            if ( present( rc )) then
              rc = localrc
            endif
@@ -1966,7 +1969,7 @@
 
       do 
          call ESMF_ConfigNextLine( config, tend, rc = localrc)
-         if (localrc /=0 ) then
+         if (localrc /= ESMF_SUCCESS ) then
             lineCount = 0
             columnCount = 0
             exit
@@ -1976,7 +1979,7 @@
          else
             lineCount = lineCount + 1
             n = ESMF_ConfigGetLen( config, rc = localrc)
-            if ( localrc /= 0 ) then
+            if ( localrc /= ESMF_SUCCESS ) then
                lineCount = 0
                columnCount = 0
                if ( present( rc )) then
