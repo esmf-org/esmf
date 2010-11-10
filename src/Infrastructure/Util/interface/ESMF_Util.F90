@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.39 2010/11/09 17:28:10 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.40 2010/11/10 20:27:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.39 2010/11/09 17:28:10 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.40 2010/11/10 20:27:50 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -450,10 +450,10 @@
 ! !IROUTINE:  ESMF_UtilGetArgC - Return number of command line arguments
 !
 ! !INTERFACE:
-  integer function ESMF_UtilGetArgC ()
+  function ESMF_UtilGetArgC ()
 !
-! !ARGUMENTS:
-!  none
+! !RETURN VALUE:
+    integer :: ESMF_UtilGetArgC
 !
 ! !DESCRIPTION:
 ! This method returns the number of command line arguments specified
