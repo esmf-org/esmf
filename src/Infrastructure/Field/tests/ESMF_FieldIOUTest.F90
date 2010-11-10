@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.10 2010/11/10 05:03:54 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.11 2010/11/10 20:05:59 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -53,7 +53,7 @@ program ESMF_FieldIOUTest
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
   integer      :: localDeCount, localPet, petCount
   integer :: i,j, t, endtime
-  real :: Maxvalue, diff
+  real*8 :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -225,10 +225,10 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   write(*,*)"Maximum Error (read-write) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 !------------------------------------------------------------------------
@@ -294,10 +294,10 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Comparison failed"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   write(*,*)"Maximum Error (read-write) = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
 
