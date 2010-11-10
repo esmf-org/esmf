@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServRegistrarClient.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServRegistrarClient.C,v 1.3 2010/11/10 20:16:35 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,11 +38,14 @@
 #include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServRegistrarClient.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServRegistrarClient.C,v 1.3 2010/11/10 20:16:35 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -187,7 +190,7 @@ int  ESMCI_WebServRegistrarClient::sendRequest(
 //
 // !RETURN VALUE:
 //    int  number of bytes written to the socket (in addition to the request
-//         msg).
+//         msg); ESMF_FAILURE if there is an error.
 //
 // !ARGUMENTS:
 //
@@ -205,11 +208,20 @@ int  ESMCI_WebServRegistrarClient::sendRequest(
 {
 	//printf("RegistrarClient::sendRequest()\n");
 
+	int	localrc = 0;
 	int	bytesWritten = 0;
 
 	if ((length > 0)  &&  (data != NULL))
 	{
-		bytesWritten = theSocket.write(length, data);
+		if ((bytesWritten = theSocket.write(length, data)) != length)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Error writing data to socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 	}
 
 	return bytesWritten;
@@ -226,7 +238,8 @@ int  ESMCI_WebServRegistrarClient::sendRequest(
 int  ESMCI_WebServRegistrarClient::getResponse(
 //
 // !RETURN VALUE:
-//    int  number of bytes read from the socket.
+//    int  number of bytes read from the socket; ESMF_FAILURE if there is
+//         an error.
 //
 // !ARGUMENTS:
 //
@@ -242,8 +255,19 @@ int  ESMCI_WebServRegistrarClient::getResponse(
 //-----------------------------------------------------------------------------
 {
 //printf("RegistrarClient::getResponse()\n");
+	int	localrc = 0;
+
 	length = 0;
-	theSocket.read(length, data);
+
+	if (theSocket.read(length, data) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error reading response from socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	return length;
 }
@@ -259,7 +283,8 @@ int  ESMCI_WebServRegistrarClient::getResponse(
 int  ESMCI_WebServRegistrarClient::registerComp(
 //
 // !RETURN VALUE:
-//    int  number of bytes read from the socket.
+//    int  number of bytes read from the socket;
+//         ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -278,15 +303,73 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 //-----------------------------------------------------------------------------
 {
 	//printf("RegistrarClient::registerComp()\n");
+	int	localrc = 0;
 
-	theSocket.write(strlen("register") + 1, (char*)"register");
-	theSocket.write(strlen(name) + 1, name);
-	theSocket.write(strlen(desc) + 1, desc);
-	theSocket.write(strlen(hostName) + 1, hostName);
-	theSocket.write(strlen(portNum) + 1, portNum);
+	int	dataLen = strlen("register") + 1;
+	if (theSocket.write(dataLen, (char*)"register") != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending register request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(name) + 1;
+	if (theSocket.write(dataLen, name) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service name to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(desc) + 1;
+	if (theSocket.write(dataLen, desc) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service description to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(hostName) + 1;
+	if (theSocket.write(dataLen, hostName) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service host name to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(portNum) + 1;
+	if (theSocket.write(dataLen, portNum) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service port number to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	int	length = 0;
-	theSocket.read(length, retValue);
+	if (theSocket.read(length, retValue) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Error reading register response from socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	return length;
 }
@@ -303,6 +386,7 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 //
 // !RETURN VALUE:
 //    int  number of bytes read from the socket.
+//         ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -320,14 +404,62 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 //-----------------------------------------------------------------------------
 {
 	//printf("RegistrarClient::unregisterComp()\n");
+	int	localrc = 0;
 
-	theSocket.write(strlen("unregister") + 1, (char*)"unregister");
-	theSocket.write(strlen(name) + 1, name);
-	theSocket.write(strlen(hostName) + 1, hostName);
-	theSocket.write(strlen(portNum) + 1, portNum);
+	int	dataLen = strlen("unregister") + 1;
+	if (theSocket.write(dataLen, (char*)"unregister") != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending unregister request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(name) + 1;
+	if (theSocket.write(dataLen, name) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service name to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(hostName) + 1;
+	if (theSocket.write(dataLen, hostName) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service host name to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	dataLen = strlen(portNum) + 1;
+	if (theSocket.write(dataLen, portNum) != dataLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending service port number to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	int	length = 0;
-	theSocket.read(length, retValue);
+	if (theSocket.read(length, retValue) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Error reading unregister response from socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	return length;
 }

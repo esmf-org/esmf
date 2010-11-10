@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.1 2010/11/02 18:36:04 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.2 2010/11/10 20:16:35 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -28,6 +28,7 @@ module ESMF_WebServMod
 !------------------------------------------------------------------------------
 ! INCLUDES
 
+#include "ESMF.h"
 
 contains
 
@@ -40,6 +41,7 @@ contains
 ! !INTERFACE:
   subroutine ESMF_WebServProcessRequest(comp, importState, exportState, &
                                         clock, phase, procType, rc)
+    use ESMF_Mod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_StateMod
@@ -119,7 +121,10 @@ contains
 
           ! Check return code to make sure send went out ok
           if (localrc /= ESMF_SUCCESS) then
-              ! do something
+              call ESMF_LogMsgSetError( &
+                      ESMF_RC_NOT_VALID, &
+                      "Error while sending message to non-root pet", &
+                      ESMF_CONTEXT, rcToReturn=localrc)
           endif
 
        enddo
@@ -198,6 +203,15 @@ contains
 
        call ESMF_VMRecv(vm, recvData=inmsg, count=count, src=0, &
                         blockingflag=ESMF_BLOCKING, rc=localrc)
+       if (localrc /= ESMF_SUCCESS) then
+           call ESMF_LogMsgSetError( &
+                   ESMF_RC_NOT_VALID, &
+                   "Error while receiving message from root pet", &
+                   ESMF_CONTEXT, rcToReturn=localrc)
+
+           rc = localrc
+           return
+       endif
 
        print *, "    Buffer value: ", inmsg(1), " - ", localPet
        print *, "Leaving MPI_Recv: ", localPet
@@ -208,6 +222,15 @@ contains
           print *, "Execute GridCompInitialize: ", localPet
           call ESMF_GridCompInitialize(comp, exportState=exportState, &
                                        rc=localrc)
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogMsgSetError( &
+                      ESMF_RC_NOT_VALID, &
+                      "Error while calling ESMF Initialize.", &
+                      ESMF_CONTEXT, rcToReturn=localrc)
+
+              rc = localrc
+              return
+          endif
           print *, "Done Execute GridCompInitialize: ", localPet
 
        ! 'R' = run
@@ -215,6 +238,15 @@ contains
 
           print *, "Execute GridCompRun: ", localPet
           call ESMF_GridCompRun(comp, exportState=exportState, rc=localrc)
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogMsgSetError( &
+                      ESMF_RC_NOT_VALID, &
+                      "Error while calling ESMF Run.", &
+                      ESMF_CONTEXT, rcToReturn=localrc)
+
+              rc = localrc
+              return
+          endif
           print *, "Done Execute GridCompRun: ", localPet
 
        ! 'F' = final
@@ -222,6 +254,15 @@ contains
 
           print *, "Execute GridCompFinalize: ", localPet
           call ESMF_GridCompFinalize(comp, exportState=exportState, rc=localrc)
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogMsgSetError( &
+                      ESMF_RC_NOT_VALID, &
+                      "Error while calling ESMF Finalize.", &
+                      ESMF_CONTEXT, rcToReturn=localrc)
+
+              rc = localrc
+              return
+          endif
           print *, "Done Execute GridCompFinalize: ", localPet
 
        endif

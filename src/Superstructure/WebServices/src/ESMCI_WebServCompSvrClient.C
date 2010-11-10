@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $
+// $Id: ESMCI_WebServCompSvrClient.C,v 1.3 2010/11/10 20:16:35 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -42,11 +42,15 @@
 #include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.2 2010/11/02 18:36:04 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.3 2010/11/10 20:16:35 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -224,7 +228,7 @@ int  ESMCI_WebServCompSvrClient::sendRequest(
 //
 // !RETURN VALUE:
 //    int  number of bytes written to the socket (in addition to the request
-//         msg).
+//         msg); ESMF_FAILURE if there is an error.
 //
 // !ARGUMENTS:
 //
@@ -241,13 +245,32 @@ int  ESMCI_WebServCompSvrClient::sendRequest(
 //-----------------------------------------------------------------------------
 {
 	//printf("ESMCI_WebServCompSvrClient::sendRequest()\n");
+	int	localrc = 0;
 
 	//***
 	// Get the id from the request string and send it
 	//***
 	char*		requestStr = getRequestFromId(request);
 
-	theSocket.send(requestStr);
+   if (strcmp(requestStr, "UNKN") == 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid request id.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	if (theSocket.send(requestStr) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error writing request id to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 	//printf("\nCLIENT: req: %s\n", requestStr);
 
 	//***
@@ -257,7 +280,15 @@ int  ESMCI_WebServCompSvrClient::sendRequest(
 
 	if ((length > 0)  &&  (data != NULL))
 	{
-		bytesWritten = theSocket.write(length, data);
+		if ((bytesWritten = theSocket.write(length, data)) != length)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Error writing request data to socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 	}
 
 	return bytesWritten;
@@ -274,7 +305,8 @@ int  ESMCI_WebServCompSvrClient::sendRequest(
 int  ESMCI_WebServCompSvrClient::getResponse(
 //
 // !RETURN VALUE:
-//    int  number of bytes read from the socket.
+//    int  number of bytes read from the socket; ESMF_FAILURE if there is
+//         an error.
 //
 // !ARGUMENTS:
 //
@@ -290,9 +322,19 @@ int  ESMCI_WebServCompSvrClient::getResponse(
 //-----------------------------------------------------------------------------
 {
 	//printf("ESMCI_WebServCompSvrClient::getResponse()\n");
+	int	localrc = 0;
 
 	length = 0;
-	theSocket.read(length, data);
+
+	if (theSocket.read(length, data) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error reading request response from socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	return length;
 }
@@ -308,7 +350,7 @@ int  ESMCI_WebServCompSvrClient::getResponse(
 int  ESMCI_WebServCompSvrClient::connect(
 //
 // !RETURN VALUE:
-//   int  socket file descriptor if successful, -1 otherwise.
+//   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
 //
 // !ARGUMENTS:
 //
@@ -364,7 +406,8 @@ void  ESMCI_WebServCompSvrClient::disconnect(
 int  ESMCI_WebServCompSvrClient::getRequestId(
 //
 // !RETURN VALUE:
-//    int  id of the request based on the specified string
+//    int  id of the request based on the specified string; ESMF_FAILURE
+//         if the id cannot be found
 //
 // !ARGUMENTS:
 //
@@ -389,7 +432,7 @@ int  ESMCI_WebServCompSvrClient::getRequestId(
 	if (strcmp(request, "END")   == 0)	return NET_ESMF_END;
 	if (strcmp(request, "PING")  == 0)	return NET_ESMF_PING;
 
-	return NET_ESMF_UNKN;
+	return ESMF_FAILURE;
 }
 
 
@@ -446,7 +489,8 @@ char*  ESMCI_WebServCompSvrClient::getRequestFromId(
 int  ESMCI_WebServCompSvrClient::init(
 //
 // !RETURN VALUE:
-//   int  the current state of the component service
+//   int  the current state of the component service; 
+//        ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -460,6 +504,7 @@ int  ESMCI_WebServCompSvrClient::init(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -468,26 +513,59 @@ int  ESMCI_WebServCompSvrClient::init(
    // Connect to the component service
    //***
 	if (connect() < 0)
-	{
-		return status;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Send the "Initialize" request... along with the client identifier
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending init request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	if (bytesSent == 4)
 	{
-		int	numFiles = 0;
+		int				numFiles = 0;
 		unsigned int	netNumFiles = htonl(numFiles);
-		int	bytesWritten = theSocket.write(4, &netNumFiles);
+		int				bytesWritten = 0;
+
+		if ((bytesWritten = theSocket.write(4, &netNumFiles)) != 4)
+   	{
+      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+         	ESMC_RC_FILE_WRITE,
+         	"Error sending number of files to socket.",
+         	&localrc);
+
+      	return ESMF_FAILURE;
+   	}
 
       //***
       // Retrieve the response... which should be the server status
       //***
-		getResponse(NET_ESMF_INIT, bufSize, buf);
+		if (getResponse(NET_ESMF_INIT, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading init response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 
 		if (bufSize == 4)
 		{
@@ -515,7 +593,8 @@ int  ESMCI_WebServCompSvrClient::init(
 int  ESMCI_WebServCompSvrClient::init(
 //
 // !RETURN VALUE:
-//   int  the current state of the component service
+//   int  the current state of the component service;
+//        ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -530,6 +609,7 @@ int  ESMCI_WebServCompSvrClient::init(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -538,29 +618,73 @@ int  ESMCI_WebServCompSvrClient::init(
    // Connect to the component service
    //***
 	if (connect() < 0)
-	{
-		return status;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Send the "Initialize" request... along with the client identifier and
    // the import state filename
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending init request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	if (bytesSent == 4)
 	{
 		int				numFiles = 1;
 		unsigned int	netNumFiles = htonl(numFiles);
+		int				bytesWritten = 0;
 
-		int	bytesWritten = theSocket.write(4, &netNumFiles);
-		bytesWritten = theSocket.write(strlen(filename) + 1, (void*)filename);
+		if ((bytesWritten = theSocket.write(4, &netNumFiles)) != 4)
+   	{
+      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+         	ESMC_RC_FILE_WRITE,
+         	"Error sending number of files to socket.",
+         	&localrc);
+
+      	return ESMF_FAILURE;
+   	}
+
+		int	filenameLen = strlen(filename) + 1;
+
+		if ((bytesWritten = 
+				theSocket.write(filenameLen, (void*)filename)) != filenameLen)
+   	{
+      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+         	ESMC_RC_FILE_WRITE,
+         	"Error sending filename to socket.",
+         	&localrc);
+
+      	return ESMF_FAILURE;
+   	}
 
       //***
       // Retrieve the response... which should be the server status
       //***
-		getResponse(NET_ESMF_INIT, bufSize, buf);
+		if (getResponse(NET_ESMF_INIT, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading init response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 
 		if (bufSize == 4)
 		{
@@ -588,7 +712,8 @@ int  ESMCI_WebServCompSvrClient::init(
 int  ESMCI_WebServCompSvrClient::run(
 //
 // !RETURN VALUE:
-//   int  the current state of the component service
+//   int  the current state of the component service;
+//        ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -602,6 +727,7 @@ int  ESMCI_WebServCompSvrClient::run(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -610,22 +736,45 @@ int  ESMCI_WebServCompSvrClient::run(
    // Connect to the component service
    //***
 	if (connect() < 0)
-	{
-		return status;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Send the "Run" request... along with the client identifier
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_RUN, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_RUN, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending run request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	if (bytesSent == 4)
 	{
       //***
       // Retrieve the response... which should be the server status
       //***
-		getResponse(NET_ESMF_RUN, bufSize, buf);
+		if (getResponse(NET_ESMF_RUN, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading run response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 
 		if (bufSize == 4)
 		{
@@ -653,7 +802,8 @@ int  ESMCI_WebServCompSvrClient::run(
 int  ESMCI_WebServCompSvrClient::final(
 //
 // !RETURN VALUE:
-//   int  the current state of the component service
+//   int  the current state of the component service;
+//        ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -667,6 +817,7 @@ int  ESMCI_WebServCompSvrClient::final(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -675,22 +826,45 @@ int  ESMCI_WebServCompSvrClient::final(
    // Connect to the component service
    //***
 	if (connect() < 0)
-	{
-		return status;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Send the "Finalize" request... along with the client identifier
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_FINAL, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_FINAL, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending finalize request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	if (bytesSent == 4)
 	{
       //***
       // Retrieve the response... which should be the server status
       //***
-		getResponse(NET_ESMF_FINAL, bufSize, buf);
+		if (getResponse(NET_ESMF_FINAL, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading finalize response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 
 		if (bufSize == 4)
 		{
@@ -718,7 +892,8 @@ int  ESMCI_WebServCompSvrClient::final(
 int  ESMCI_WebServCompSvrClient::state(
 //
 // !RETURN VALUE:
-//   int  the current state of the component service
+//   int  the current state of the component service;
+//        ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -732,6 +907,7 @@ int  ESMCI_WebServCompSvrClient::state(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -740,22 +916,45 @@ int  ESMCI_WebServCompSvrClient::state(
    // Connect to the component service
    //***
 	if (connect() < 0)
-	{
-		return status;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Send the "Get State" request... along with the client identifier
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_STATE, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_STATE, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending get state request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	if (bytesSent == 4)
 	{
       //***
       // Retrieve the response... which should be the server status
       //***
-		getResponse(NET_ESMF_STATE, bufSize, buf);
+		if (getResponse(NET_ESMF_STATE, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get status response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 
 		if (bufSize == 4)
 		{
@@ -797,6 +996,7 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -807,15 +1007,30 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
 	vector<string>		dataFiles;
 
 	if (connect() < 0)
-	{
-		return dataFiles;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return dataFiles;
+   }
 
    //***
    // Send the "Get Files" request... along with the client identifier
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_FILES, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_FILES, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending get files request to socket.",
+         &localrc);
+
+      return dataFiles;
+   }
 
 	if (bytesSent == 4)
 	{
@@ -823,7 +1038,15 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
       // Retrieve the response... which should include the number of export
       // files, the export filenames (if any), and the component server status
       //***
-		getResponse(NET_ESMF_FILES, bufSize, buf);
+		if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get files response - number of files from socket.",
+            &localrc);
+
+         return dataFiles;
+      }
 
 		if (bufSize == 4)
 		{
@@ -834,10 +1057,27 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
 
 			for (int i = 0; i < numFiles; ++i)
 			{
-				getResponse(NET_ESMF_FILES, bufSize, buf);
+				if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
+      		{
+         		ESMC_LogDefault.ESMC_LogMsgFoundError(
+            		ESMC_RC_FILE_READ,
+            		"Error reading get files response - file type from socket.",
+            		&localrc);
+
+         		return dataFiles;
+      		}
 				strcpy(fileType, buf);
 				//printf("File Type: %s\n", fileType);
-				getResponse(NET_ESMF_FILES, bufSize, buf);
+
+				if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
+      		{
+         		ESMC_LogDefault.ESMC_LogMsgFoundError(
+            		ESMC_RC_FILE_READ,
+            		"Error reading get files response - filename from socket.",
+            		&localrc);
+
+         		return dataFiles;
+      		}
 				strcpy(fileName, buf);
 				//printf("File Name: %s\n", fileName);
 
@@ -845,7 +1085,15 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
 			}
 		}
 
-		getResponse(NET_ESMF_FILES, bufSize, buf);
+		if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get data response - status from socket.",
+            &localrc);
+
+         return dataFiles;
+      }
 		status = ntohl(*((unsigned int*)buf));
 		printf("Status: %d\n", status);
 	}
@@ -869,7 +1117,8 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
 int  ESMCI_WebServCompSvrClient::end(
 //
 // !RETURN VALUE:
-//   int  the current state of the component service
+//   int  the current state of the component service;
+//        ESMF_FAILURE if an error occurs
 //
 // !ARGUMENTS:
 //
@@ -883,6 +1132,7 @@ int  ESMCI_WebServCompSvrClient::end(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	int	localrc = 0;
 	int	status = 0;
 	int	bufSize = 0;
    char  buf[1024];
@@ -891,22 +1141,45 @@ int  ESMCI_WebServCompSvrClient::end(
    // Connect to the component service
    //***
 	if (connect() < 0)
-	{
-		return status;
-	}
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
    //***
    // Send the "End Client" request... along with the client identifier
    //***
 	unsigned int	netClientId = htonl(theClientId);
-	int	bytesSent = sendRequest(NET_ESMF_END, 4, &netClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_END, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending end client request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
 
 	if (bytesSent == 4)
 	{
       //***
       // Retrieve the response... which should be the server status
       //***
-		getResponse(NET_ESMF_END, bufSize, buf);
+		if (getResponse(NET_ESMF_END, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading end client response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
 
 		if (bufSize == 4)
 		{
