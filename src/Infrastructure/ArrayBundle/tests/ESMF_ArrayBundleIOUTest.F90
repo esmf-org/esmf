@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.7 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.8 2010/11/10 20:21:02 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@ program ESMF_ArrayBundleIOUTest
   
   integer, allocatable :: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer :: i,j,rc
-  real :: Maxvalue, diff
+  real(ESMF_KIND_R8) :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -255,10 +255,10 @@ program ESMF_ArrayBundleIOUTest
   enddo
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   write(*,*)"Maximum Error  = ", Maxvalue
-  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
   write(failMsg, *) "Comparison did not failed as was expected"
-  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_Test((Maxvalue .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 !------------------------------------------------------------------------
 
