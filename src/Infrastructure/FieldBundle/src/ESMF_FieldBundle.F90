@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.62 2010/11/10 00:15:21 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.63 2010/11/10 00:16:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -3259,7 +3259,7 @@ end function
       localrc = ESMF_RC_NOT_IMPL
 
       ! check inputs
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)     
+      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       ! deal with optional attreconflag and inquireflag
       if (present(attreconflag)) then
