@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.23 2010/11/09 06:21:43 eschwab Exp $
+% CVS $Id: code_conv_gen.tex,v 1.24 2010/11/10 20:28:50 eschwab Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -132,7 +132,7 @@ Implementation Notes}.  Restrictions shall be listed in the
 \item If a method name is referred to in the text it shall be in this
 fashion {\tt ESMF\_<Class><MethodName>()}.  If a code fragment or flag is
 included in the text, we shall use the form {\tt ESMF\_<FLAG\_NAME>} 
-or surround the fragment with the \latex  verbatim command.  The 
+or surround the fragment with the \LaTeX\ {\tt verbatim} command.  The 
 goal is to get all code fragments in an identifiable font.
 
 \item Class names shall be capitalized in these sections, and
@@ -362,14 +362,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX\ 
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.23 2010/11/09 06:21:43 eschwab Exp $ 
+% $Id: code_conv_gen.tex,v 1.24 2010/11/10 20:28:50 eschwab Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.23 2010/11/09 06:21:43 eschwab Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.24 2010/11/10 20:28:50 eschwab Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
