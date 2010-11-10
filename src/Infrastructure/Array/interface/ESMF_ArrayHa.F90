@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.13 2010/10/28 22:54:07 eschwab Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.14 2010/11/10 05:02:21 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.13 2010/10/28 22:54:07 eschwab Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.14 2010/11/10 05:02:21 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -467,12 +467,13 @@ contains
 ! \label{api:ArrayRead}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRead(array, file, variableName, iofmt, rc)
+  subroutine ESMF_ArrayRead(array, file, variableName, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
     character(*),         intent(in)             :: file
     character(*),         intent(in),  optional  :: variableName
+    integer,              intent(in),  optional  :: timeslice
     type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
     integer,              intent(out), optional  :: rc
 !
@@ -499,6 +500,8 @@ contains
 !    Use this argument only in the IO format (such as NetCDF) that
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
+!   \item[{[timeslice]}]
+!    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
@@ -515,6 +518,7 @@ contains
     character(len=80) :: varname
     type(ESMF_IOFmtFlag) :: iofmt_internal
     character(len=10) :: piofmt
+    integer           :: time
 
     type(ESMF_TypeKind)             :: typekind
 
@@ -530,6 +534,8 @@ contains
     ! Handle IO format
     iofmt_internal = ESMF_IOFMT_NETCDF   ! default format
     if (present(iofmt)) iofmt_internal = iofmt
+    time = 0
+    if(present(timeslice)) time = timeslice
 
     if (iofmt_internal == ESMF_IOFMT_NETCDF) then
       ! NETCDF format selected
@@ -594,23 +600,23 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_ArrayReadIntl1DI4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl1DI4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DI4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl2DI4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DI4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl3DI4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DI4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl4DI4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DI4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl5DI4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -623,23 +629,23 @@ contains
         select case(rank)
         ! The PIO data type is PIO_real
           case (1)
-            call ESMF_ArrayReadIntl1DR4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl1DR4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DR4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl2DR4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DR4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl3DR4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DR4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl4DR4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DR4(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl5DR4(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -652,23 +658,23 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_ArrayReadIntl1DR8(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl1DR8(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayReadIntl2DR8(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl2DR8(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayReadIntl3DR8(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl3DR8(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayReadIntl4DR8(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl4DR8(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayReadIntl5DR8(array, file, varname, piofmt, rc=localrc)
+            call ESMF_ArrayReadIntl5DR8(array, file, varname, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default

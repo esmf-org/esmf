@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.9 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.10 2010/11/10 05:03:54 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,16 +40,19 @@ program ESMF_FieldIOUTest
   ! local variables
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
-  type(ESMF_Field) :: field_w, field_r
-  type(ESMF_Grid) :: grid
+  type(ESMF_Field) :: field_w, field_r, field_t, field_tr
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_w, Farray_r
-  type(ESMF_Array)                        :: array
+  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_tw, Farray_tr
+  ! Note: 
+  ! field_w---Farray_w; field_r---Farray_r; 
+  ! field_t---Farray_tw; field_tr---Farray_tr 
+  type(ESMF_Grid) :: grid
   type(ESMF_StaggerLoc)                       :: sloc
   integer                                 :: rc, de
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
   integer      :: localDeCount, localPet, petCount
-  integer :: i,j,k
+  integer :: i,j, t, endtime
   real :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -82,6 +85,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   ! Allocate array
   allocate(Farray_w(5,10))
+  allocate(Farray_tw(5,10))
+  allocate(Farray_tr(5,10))
 
   localDeCount = 1
   allocate(exclusiveLBound(2))         ! dimCount=2
@@ -116,15 +121,6 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  ! Obtain ESMF_Array
-  call ESMF_FieldGet(field_w, array=array, rc=rc)
-  write(failMsg, *) ""
-  write(name, *) "Obtain ESMF_Array from Field"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!------------------------------------------------------------------------
-
-!------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
   call ESMF_FieldWrite(field_w, file="field.nc", rc=rc)
   write(failMsg, *) ""
@@ -137,6 +133,34 @@ program ESMF_FieldIOUTest
 #endif
 !------------------------------------------------------------------------
 
+!
+! Test multiple time slices that making use of NETCDF's unlimited dimension
+!
+!------------------------------------------------------------------------
+  endtime = 5
+  do t = 1, endtime
+
+! Set values of fortran array
+  Farray_tw = 0.02  ! halo points will have value 0.02
+  do j=exclusiveLBound(2),exclusiveUBound(2)
+  do i=exclusiveLBound(1),exclusiveUBound(1)
+    Farray_tw(i,j) = dble(t)*(sin(dble(i)/5.0)*tan(dble(j)/5.0))
+  enddo
+  enddo
+
+!------------------------------------------------------------------------
+  ! Create Field
+  field_t=ESMF_FieldCreate(grid, farray=Farray_tw, &
+    indexflag=ESMF_INDEX_DELOCAL,name="temperature",  rc=rc)
+!------------------------------------------------------------------------
+
+  ! Write Fortran array in Field
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t, rc=rc)
+#else
+#endif
+
+  enddo  ! t
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
@@ -208,10 +232,79 @@ program ESMF_FieldIOUTest
 #endif
 
 !------------------------------------------------------------------------
+!------------------------------------------------------------------------
+
+! Read back the time slices of the field from file.
+
+!------------------------------------------------------------------------
+! Recall my Fortran array at time=t=... :
+  t = 3
+  Farray_tw = 0.02  ! halo points will have value 0.02
+  do j=exclusiveLBound(2),exclusiveUBound(2)
+  do i=exclusiveLBound(1),exclusiveUBound(1)
+    Farray_tw(i,j) = dble(t)*(sin(dble(i)/5.0)*tan(dble(j)/5.0))
+  enddo
+  enddo
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create an empty new Field
+  field_tr = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
+             name="temperature",  rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create new Field_r"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Read data at time=t to Object Field_r
+  write(failMsg, *) ""
+  write(name, *) "Read data time=t to object field_r per slice"
+  call ESMF_FieldRead(field_tr, file="field_time.nc", timeslice=t, rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, &
+                  failMsg, result, ESMF_SRCLINE)
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Obtain the Fortran pointer
+  call ESMF_FieldGet(field_tr, localDe=0, farrayPtr=Farray_tr, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Point data to Fortran pointer Farray_tr"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Compare readin and the existing file
+  Maxvalue = 0.0
+  do j=exclusiveLBound(2),exclusiveUBound(2)
+  do i=exclusiveLBound(1),exclusiveUBound(1)
+    diff = abs(Farray_tw(i,j) - Farray_tr(i,j))
+    if (Maxvalue.le.diff) Maxvalue=diff
+  enddo
+  enddo
+  write(name, *) "Compare readin data to the existing data"
+  write(failMsg, *) "Comparison failed"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  write(*,*)"Maximum Error (read-write) = ", Maxvalue
+  call ESMF_Test((Maxvalue .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Comparison did not failed as was expected"
+  call ESMF_Test((Maxvalue .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+#endif
+
 
 
   deallocate (computationalLBound, computationalUBound)
   deallocate (exclusiveLBound, exclusiveUBound)
+  deallocate (Farray_w)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -225,15 +318,9 @@ program ESMF_FieldIOUTest
   ! Verifying that a Field with no data can be destroyed
   call ESMF_FieldDestroy(field_w, rc=rc)
   call ESMF_FieldDestroy(field_r, rc=rc)
+  call ESMF_FieldDestroy(field_t, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying a Field with no data Test"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Destroy Array "
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayDestroy(array, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------

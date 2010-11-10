@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.31 2010/10/28 22:54:08 eschwab Exp $
+! $Id: ESMF_FieldPr.F90,v 1.32 2010/11/10 05:03:04 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -223,12 +223,13 @@ contains
 ! \label{api:FieldRead}
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRead(field, file, iofmt, rc)
+      subroutine ESMF_FieldRead(field, file, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field),     intent(inout)          :: field 
       character(*),         intent(in)             :: file 
+      integer,              intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt 
       integer,              intent(out), optional  :: rc
 !
@@ -250,6 +251,8 @@ contains
 !     The {\tt ESMF\_Field} object in which the read data is returned.
 !   \item[file]
 !     The name of the file from which Field data is read.
+!   \item[timeslice]
+!     Number of slices to be read from file, starting from the 1st slice
 !   \item[{[iofmt]}]
 !     The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
 !     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
@@ -265,6 +268,7 @@ contains
         integer                         :: gridrank, arrayrank
         type(ESMF_Status)               :: fieldstatus
         type(ESMF_IOFmtFlag)            :: iofmtd
+        integer                         :: time
 
 #ifdef ESMF_PIO
 !       Initialize
@@ -276,6 +280,8 @@ contains
 
         iofmtd = ESMF_IOFMT_NETCDF   ! default format
         if(present(iofmt)) iofmtd = iofmt
+        time = 0
+        if(present(timeslice)) time = timeslice
 
         fp => field%ftypep
 
@@ -289,7 +295,7 @@ contains
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayRead(array, file, variableName=trim(name), &
-          iofmt=iofmtd, rc=localrc)
+          timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 

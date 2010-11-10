@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.27 2010/09/30 18:05:16 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.28 2010/11/10 05:02:21 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.27 2010/09/30 18:05:16 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.28 2010/11/10 05:02:21 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -401,16 +401,13 @@ contains
         pioerr = PIO_inq_dimid(FileObj,'time', dimid_time) @\
         pioerr = PIO_inq_dimlen(FileObj, dimid_time, time_len) @\
         pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
-    !    pioerr = PIO_inq_vardimid(FileObj, vard, dimid_xyz) @\
       else @\
         ! For beginning and creating a file @\
-        pioerr = PIO_CreateFile(PIOSYS,FileObj,fmtiotype,trim(file)) @\
+        pioerr = PIO_CreateFile(PIOSYS,FileObj,fmtiotype,trim(file),PIO_CLOBBER) @\
         if(piofmt .ne. 'bin') then @\
          call WriteHeader(FileObj,varname,0,gDimsIndex,dimid_xyz,dimC) @\
         endif @\
 ^ifdef ESMF_NETCDF @\
-        if (time.gt.0) pioerr = PIO_def_dim(FileObj,'time',PIO_unlimited,dimid_time) @\
-^elif ESMF_NETCDF @\
         if (time.gt.0) pioerr = PIO_def_dim(FileObj,'time',PIO_unlimited,dimid_time) @\
 ^else @\
 ^endif @\
@@ -498,12 +495,13 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 ! !IROUTINE: ESMF_ArrayReadIntl - Read an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, file, varname, piofmt, rc) @\
+! subroutine ESMF_ArrayReadIntl<rank><type><kind>(array, file, varname, time, piofmt, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   character(*),               intent(in)              :: file @\
 !   character(*),               intent(in)              :: varname @\
+!   integer,                    intent(in)              :: time @\
 !   character(*),               intent(in)              :: piofmt @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
@@ -522,6 +520,8 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !    The name of the output file in which array data is read from. @\
 !   \item[varname] @\
 !     Variable name in netcdf file @\
+!   \item[time] @\
+!     The slice (time) of the variable to be read from file @\
 !   \item[piofmt] @\
 !    The IO format supported are "bin", "pnc", and "snc". @\
 !   \item[{[rc]}] @\
@@ -535,11 +535,12 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayReadIntl" @\
-  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, file, varname, piofmt, rc) @\
+  subroutine ESMF_ArrayReadIntl##mrank##D##mtypekind(array, file, varname, time, piofmt, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: file @\
     character(*),               intent(in)              :: varname @\
+    integer,                    intent(in)              :: time @\
     character(*),               intent(in)              :: piofmt @\
     integer,                    intent(out),  optional  :: rc @\
 @\
@@ -550,7 +551,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     integer, allocatable :: pioDofList(:) @\
     integer :: petCount,localPet,mpic @\
     mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farrayrd @\
-    integer :: dimC @\
+    integer :: dimC, time_len, dimid_time @\
     integer, allocatable :: gDimsIndex(:) @\
     integer, allocatable :: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:) @\
 @\
@@ -561,7 +562,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     type (IO_desc_t)    :: IOdesc @\
     integer :: mode, num_aggregator @\
     integer :: stride, base, num_iotasks, rearr_type @\
-    integer(kind=PIO_OFFSET) :: one @\
+    integer(kind=PIO_OFFSET) :: frame @\
     integer :: basepiotype, fmtiotype @\
     integer :: pioerr @\
 @\
@@ -609,6 +610,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     allocate (gDimsIndex(dimC)) @\
     allocate ( minIndexPDimPPatch(dimC,1) ) @\
     allocate ( maxIndexPDimPPatch(dimC,1) ) @\
+@\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayrd, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -687,14 +689,25 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
       __LINE__," openfile") @\
 @\
     if( piofmt .ne. 'bin') then @\
-    ! Set Frame to '1' in the PIO descriptor file @\
-    one = 1 @\
-    pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
-    call check_pioerr(pioerr,localPet,  & @\
-      __FILE__,  & @\
-      __LINE__," defvar") @\
-    call PIO_SetFrame(vard,one) @\
-    !TODO: need error checking here! @\
+      ! Set Frame to '1' in the PIO descriptor file @\
+      frame = 1 @\
+      if (time.gt.0) then @\
+        pioerr = PIO_inq_dimid(FileObj,'time', dimid_time) @\
+        pioerr = PIO_inq_dimlen(FileObj, dimid_time, time_len) @\
+        if(time .gt. time_len) then @\
+          call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, & @\
+               "Timeframe is greater than that in file", ESMF_CONTEXT, rc) @\
+          return @\
+        endif @\    
+        frame = time @\
+      endif @\
+      pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
+      call check_pioerr(pioerr,localPet,  & @\
+                        __FILE__,  & @\
+                        __LINE__," defvar") @\
+      ! Will read the time-slice number "frame" from the file @\
+      call PIO_SetFrame(vard,frame) @\
+      !TODO: need error checking here! @\
     endif @\
 @\
     !------------------------- @\
