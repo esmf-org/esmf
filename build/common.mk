@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.326 2010/10/19 18:20:03 theurich Exp $
+#  $Id: common.mk,v 1.327 2010/11/10 22:54:26 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1832,6 +1832,7 @@ dust_system_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.Log
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.stdout
 	$(ESMF_RM) $(ESMF_TESTDIR)/*.rc
+	$(ESMF_RM) $(ESMF_TESTDIR)/*.nc
 	$(ESMF_RM) $(ESMF_TESTDIR)/data
 
 #
@@ -2236,6 +2237,7 @@ dust_unit_tests: dust_test_harness
 	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest.Log
 	$(ESMF_RM) $(ESMF_TESTDIR)/*UTest.stdout
 	$(ESMF_RM) $(ESMF_TESTDIR)/*.rc
+	$(ESMF_RM) $(ESMF_TESTDIR)/*.nc
 	$(ESMF_RM) $(ESMF_TESTDIR)/data
 
 #
@@ -2585,6 +2587,7 @@ dust_examples:
 	$(ESMF_RM) $(ESMF_EXDIR)/*Ex.Log
 	$(ESMF_RM) $(ESMF_EXDIR)/*Ex.stdout
 	$(ESMF_RM) $(ESMF_EXDIR)/*.rc
+	$(ESMF_RM) $(ESMF_EXDIR)/*.nc
 	$(ESMF_RM) $(ESMF_EXDIR)/data
 
 #
