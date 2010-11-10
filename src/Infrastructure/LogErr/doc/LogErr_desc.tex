@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.28 2010/09/30 05:35:13 eschwab Exp $
+% $Id: LogErr_desc.tex,v 1.29 2010/11/10 23:31:26 theurich Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -10,16 +10,16 @@
 
 
 %\subsection{Description}
-\label{sec:LogErr}
+\label{sec:Log}
 
 The Log class consists of a variety of methods for writing error, warning, and
 informational messages to files.  A default Log is created at ESMF
 initialization.  Other Logs can be created later in the code by the user.  Most
-LogErr methods take a Log as an optional argument and apply to the default Log
+Log methods take a Log as an optional argument and apply to the default Log
 when another Log is not specified.  A set of standard return codes and
 associated messages are provided for error handling.  
 
-LogErr provides capabilities to store message entries in a buffer, which is 
+Log provides capabilities to store message entries in a buffer, which is 
 flushed to a file, either when the buffer is full, or when the user calls an 
 {\tt ESMF\_LogFlush()} method.  Currently, the default is for the Log to flush
 after every ten entries.  This can easily be changed by using the 
@@ -36,7 +36,7 @@ stop on any and all warning or errors.  When the {\tt halt} property is set to
 the user can choose to never halt by setting the {\tt halt} property to 
 {\tt ESMF\_LOG\_HALTNEVER}; this is the default.
 
-LogErr will automatically put the PET number into the Log.  Also, the user can 
+Log will automatically put the PET number into the Log.  Also, the user can 
 either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
 Log or {\tt ESMF\_LOG\_MULTI} which writes entries to multiple Logs according to 
 the PET number.  To distinguish Logs from each other when using 
@@ -46,10 +46,10 @@ prepended to the file name where x is the PET number.
 Opening multiple log files and writing log messages from all the processors
 may affect the application performance while running on a large number of
 processors.  For that reason, {\tt ESMF\_LOG\_NONE} is provided to
-switch off the LogErr capability.  All the LogErr methods have no effect
+switch off the Log capability.  All the Log methods have no effect
 in the {\tt ESMF\_LOG\_NONE} mode. 
    
-Other options that are planned for LogErr are to adjust the verbosity of output, and to optionally write to {\tt stdout} instead of file(s).
+Other options that are planned for Log are to adjust the verbosity of output, and to optionally write to {\tt stdout} instead of file(s).
 
 
 
