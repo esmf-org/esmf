@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.63 2010/11/10 00:16:51 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.64 2010/11/10 00:31:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -3299,7 +3299,6 @@ end function
           if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-
       endif
 
       ! TODO: decide if these need to be sent before or after
