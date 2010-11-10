@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.24 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.25 2010/11/10 21:35:13 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -57,6 +57,7 @@ program ESMF_ArrayIOUTest
   integer      :: localDeCount, localPet, petCount
   integer :: i,j,k
   real :: Maxvalue(1), diff
+  real(ESMF_KIND_R8) :: r8Max, r8diff
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -557,7 +558,7 @@ program ESMF_ArrayIOUTest
 ! !  skip this comparison.
   !NEX_UTest_Multi_Proc_Only
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  Maxvalue(1) = 0.0  ! initialize
+  r8Max = 0.0  ! initialize
   call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
   call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
   write(name, *) "Compare readin data from a different distgrid"
@@ -565,18 +566,18 @@ program ESMF_ArrayIOUTest
   if (localPet .eq.0) then
    do j=1,5
    do i=1,5
-     diff = abs(FarrayGr_1(i,j) - FarrayGr_2(i,j) )
-     if (diff .gt. Maxvalue(1)) Maxvalue(1) = diff
+     r8diff = abs(FarrayGr_1(i,j) - FarrayGr_2(i,j) )
+     if (r8diff .gt. r8Max) r8Max = r8diff
    enddo
    enddo
   endif
   call ESMF_VMBroadcast(vm, Maxvalue, count=1, root=0, rc=rc)
-  write(*,*)"Maximum Error (different distgrid) = ", Maxvalue(1)
-  call ESMF_Test((Maxvalue(1) .lt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+  write(*,*)"Maximum Error (different distgrid) = ", r8Max
+  call ESMF_Test((r8Max .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-   Maxvalue(1) = 1.0 ! initialize to ensure proper logic below
+   r8Max = 1.0 ! initialize to ensure proper logic below
    write(failMsg, *) "Comparison did not failed as was expected"
-   call ESMF_Test((Maxvalue(1) .gt. 1.e-6), name, failMsg, result,ESMF_SRCLINE)
+   call ESMF_Test((r8Max .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
   deallocate (computationalLWidth, computationalUWidth)
