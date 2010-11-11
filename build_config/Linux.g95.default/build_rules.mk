@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25 2010/11/11 00:48:35 theurich Exp $
+# $Id: build_rules.mk,v 1.26 2010/11/11 07:00:25 eschwab Exp $
 #
 # Linux.g95.default
 #
@@ -181,6 +181,11 @@ ESMF_OPENMP_CXXLINKOPTS    += -fopenmp
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
+
+############################################################
+# Set huge line length limit for free format files
+#
+ESMF_F90COMPILEOPTS += -ffree-line-length-huge
 
 ############################################################
 # Set rpath syntax
