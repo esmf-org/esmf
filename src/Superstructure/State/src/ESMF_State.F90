@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.217 2010/11/09 06:58:21 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.218 2010/11/11 18:01:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.217 2010/11/09 06:58:21 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.218 2010/11/11 18:01:42 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3628,11 +3628,13 @@ module ESMF_StateMod
 !       The {\tt ESMF\_State} to print.
 !     \item[{[options]}]
 !       Print options:
-!         " ", or "brief" - print names and types of the objects within the state (default)
+!         " ", or "brief" - print names and types of the objects within the state (default),
 !         "long" - print additional information, such as proxy flags
 !     \item[{[nestedFlag]}]
-!         {\tt ESMF\_NESTED\_OFF} - print objects at the current State level only
-!         {\tt ESMF\_NESTED\_ON} - recursively print nested State objects
+!       When set to {\tt .false.}, prints information about the current
+!       State level only (default),
+!       When set to {\tt .true.}, additionally prints information from
+!       nested States
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
