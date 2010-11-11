@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2010/04/26 18:10:48 w6ws Exp $
+# $Id: build_rules.mk,v 1.27 2010/11/11 00:48:34 theurich Exp $
 #
 # Darwin.nag.default
 #
@@ -28,6 +28,7 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC

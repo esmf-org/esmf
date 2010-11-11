@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.88 2010/10/07 16:13:33 theurich Exp $
+# $Id: build_rules.mk,v 1.89 2010/11/11 00:48:35 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -35,6 +35,7 @@ ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpiCC

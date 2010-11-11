@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2010/11/04 02:32:37 w6ws Exp $
+# $Id: build_rules.mk,v 1.16 2010/11/11 00:48:34 theurich Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -28,6 +28,7 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich -lmpich

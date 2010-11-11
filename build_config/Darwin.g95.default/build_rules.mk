@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2010/11/09 22:37:28 eschwab Exp $
+# $Id: build_rules.mk,v 1.18 2010/11/11 00:48:34 theurich Exp $
 #
 # Dawin.g95.default
 #
@@ -28,6 +28,7 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
+ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPICH
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich++ -lmpich
