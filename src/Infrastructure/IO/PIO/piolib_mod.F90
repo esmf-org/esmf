@@ -35,8 +35,8 @@ module piolib_mod
 
   include 'mpif.h'    ! _EXTERNAL
 
-#if defined CPRLAHEY
-	! this is a bug in file mpif.h on edinburgh
+#if (defined CPRLAHEY || ESMF_MPICH)
+	! this is a bug in file mpif.h on edinburgh - and MPICH
 	integer, parameter :: MPI_ROOT=-3
 #endif
 
