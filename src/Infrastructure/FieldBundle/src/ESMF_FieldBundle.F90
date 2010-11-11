@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.64 2010/11/10 00:31:44 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.65 2010/11/11 22:28:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1501,7 +1501,7 @@ end function
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundle,rc)
 
       found = .FALSE.
 
