@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.28 2010/11/10 05:02:21 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.29 2010/11/11 19:36:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.28 2010/11/10 05:02:21 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.29 2010/11/11 19:36:34 eschwab Exp $'
 
 !==============================================================================
 
@@ -698,7 +698,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
           call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, & @\
                "Timeframe is greater than that in file", ESMF_CONTEXT, rc) @\
           return @\
-        endif @\    
+        endif @\
         frame = time @\
       endif @\
       pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
