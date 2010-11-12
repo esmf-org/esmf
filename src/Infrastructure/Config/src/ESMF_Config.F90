@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.65 2010/11/10 22:29:04 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.66 2010/11/12 05:30:10 rokuingh Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -512,8 +512,8 @@
     subroutine ESMF_ConfigDestroy( config, rc )
 
 ! !ARGUMENTS:
-      type(ESMF_Config) :: config
-      integer,intent(out), optional    :: rc
+      type(ESMF_Config), intent(inout)          :: config
+      integer,           intent(out),  optional :: rc
 !
 ! !DESCRIPTION: 
 !    Destroys the {\tt config} object.
