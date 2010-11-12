@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.68 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.69 2010/11/12 21:38:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -999,8 +999,8 @@ end function
       subroutine ESMF_FieldBundleDestroy(fieldbundle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle) :: fieldbundle
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
+      integer,                intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !     Releases resources associated with the {\tt fieldbundle}.  This
