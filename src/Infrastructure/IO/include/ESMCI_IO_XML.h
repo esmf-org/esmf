@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.11 2010/09/22 05:53:36 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.12 2010/11/12 06:57:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -164,7 +164,6 @@ namespace ESMCI{
     // friend to restore state  TODO ?
     //IO *ESMCI_IO_XMLReadRestart(int nameLen,
                                    //const char*  name=0,
-                                   //ESMC_IOSpec* iospec=0,
                                    //int*         rc=0);
 
 }   // namespace ESMCI

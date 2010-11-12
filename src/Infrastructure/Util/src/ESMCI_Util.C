@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.5 2010/06/29 16:13:21 theurich Exp $
+// $Id: ESMCI_Util.C,v 1.6 2010/11/12 06:58:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,25 +40,24 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.5 2010/06/29 16:13:21 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.6 2010/11/12 06:58:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // define constants once to avoid duplicate instantiations
 ESMC_ObjectID ESMC_ID_BASE = {1, "ESMF_Base"};
-ESMC_ObjectID ESMC_ID_IOSPEC = {2, "ESMF_IOSpec"};
-ESMC_ObjectID ESMC_ID_LOGERR = {3, "ESMF_LogErr"};
-ESMC_ObjectID ESMC_ID_TIME = {4, "ESMF_Time"};
-ESMC_ObjectID ESMC_ID_CALENDAR = {5, "ESMF_Calendar"};
-ESMC_ObjectID ESMC_ID_TIMEINTERVAL = {6, "ESMF_TimeInterval"};
-ESMC_ObjectID ESMC_ID_ALARM = {7, "ESMF_Alarm"};
-ESMC_ObjectID ESMC_ID_CLOCK = {8, "ESMF_Clock"};
-ESMC_ObjectID ESMC_ID_ARRAYSPEC = {9, "ESMF_ArraySpec"};
-ESMC_ObjectID ESMC_ID_LOCALARRAY = {10, "ESMF_LocalArray"};
-ESMC_ObjectID ESMC_ID_ARRAYBUNDLE = {11, "ESMF_ArrayBundle"};
-ESMC_ObjectID ESMC_ID_VM = {12, "ESMF_VM"};
-ESMC_ObjectID ESMC_ID_DELAYOUT = {13, "ESMF_DELayout"};
-ESMC_ObjectID ESMC_ID_CONFIG = {14, "ESMF_Config"};
-ESMC_ObjectID ESMC_ID_ARRAY = {16, "ESMF_Array"};
+ESMC_ObjectID ESMC_ID_LOGERR = {2, "ESMF_LogErr"};
+ESMC_ObjectID ESMC_ID_TIME = {3, "ESMF_Time"};
+ESMC_ObjectID ESMC_ID_CALENDAR = {4, "ESMF_Calendar"};
+ESMC_ObjectID ESMC_ID_TIMEINTERVAL = {5, "ESMF_TimeInterval"};
+ESMC_ObjectID ESMC_ID_ALARM = {6, "ESMF_Alarm"};
+ESMC_ObjectID ESMC_ID_CLOCK = {7, "ESMF_Clock"};
+ESMC_ObjectID ESMC_ID_ARRAYSPEC = {8, "ESMF_ArraySpec"};
+ESMC_ObjectID ESMC_ID_LOCALARRAY = {9, "ESMF_LocalArray"};
+ESMC_ObjectID ESMC_ID_ARRAYBUNDLE = {10, "ESMF_ArrayBundle"};
+ESMC_ObjectID ESMC_ID_VM = {11, "ESMF_VM"};
+ESMC_ObjectID ESMC_ID_DELAYOUT = {12, "ESMF_DELayout"};
+ESMC_ObjectID ESMC_ID_CONFIG = {13, "ESMF_Config"};
+ESMC_ObjectID ESMC_ID_ARRAY = {14, "ESMF_Array"};
 ESMC_ObjectID ESMC_ID_PHYSGRID = {18, "ESMF_PhysGrid"};
 ESMC_ObjectID ESMC_ID_IGRID = {19, "ESMF_IGrid"};
 ESMC_ObjectID ESMC_ID_EXCHANGEPACKET = {20, "ESMF_ExchangePacket"};
@@ -77,6 +76,9 @@ ESMC_ObjectID ESMC_ID_STATE = {32, "ESMF_State"};
 ESMC_ObjectID ESMC_ID_GRIDCOMPONENT = {33, "ESMF_GridComponent"};
 ESMC_ObjectID ESMC_ID_CPLCOMPONENT = {34, "ESMF_CplComponent"};
 ESMC_ObjectID ESMC_ID_COMPONENT = {35, "ESMF_Component"};
+
+ESMC_ObjectID ESMC_ID_XGRID = {36, "ESMF_XGrid"};
+
 ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
 //

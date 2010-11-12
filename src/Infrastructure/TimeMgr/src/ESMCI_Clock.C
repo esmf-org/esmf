@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.14 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Clock.C,v 1.15 2010/11/12 06:58:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.14 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.15 2010/11/12 06:58:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1463,7 +1463,6 @@ int Clock::count=0;
 // !ARGUMENTS:
       int          nameLen,  // in
       const char  *name,     // in
-      ESMC_IOSpec *iospec,   // in
       int         *rc ) {    // out - return code
 
 //
@@ -1480,7 +1479,7 @@ int Clock::count=0;
     // Initialize return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
-    // TODO:  read clock state from iospec/name, then allocate/restore
+    // TODO:  read clock state from name, then allocate/restore
     //        (share code with ESMCI_ClockCreate()).
 
     return(ESMC_NULL_POINTER);
@@ -1492,13 +1491,13 @@ int Clock::count=0;
 // !IROUTINE:  Clock::writeRestart - save contents of a Clock
 //
 // !INTERFACE:
-      int Clock::writeRestart(
+      int Clock::writeRestart(void) const {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_IOSpec *iospec) const {
+//    none
 //
 // !DESCRIPTION:
 //      Save information about an {\tt ESMC\_Clock}.
@@ -1518,7 +1517,7 @@ int Clock::count=0;
       return(rc);
     }
 
-    // TODO:  save clock state using iospec/name.  Default to disk file.
+    // TODO:  save clock state using name.  Default to disk file.
 
     return(ESMF_SUCCESS);
 

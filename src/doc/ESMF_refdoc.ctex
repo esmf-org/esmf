@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.102 2010/10/19 22:56:29 rokuingh Exp $
+% $Id: ESMF_refdoc.ctex,v 1.103 2010/11/12 06:59:07 eschwab Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -172,8 +172,6 @@
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
 #include "../Infrastructure/IO/doc/IO_refdoc.ctex"
-
-#include "../Infrastructure/IOSpec/doc/IOSpec_refdoc.ctex"
 
 \newpage
 

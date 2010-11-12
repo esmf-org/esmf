@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.10 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_BaseTime.C,v 1.11 2010/11/12 06:58:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.10 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.11 2010/11/12 06:58:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -494,8 +494,7 @@
 //
 // !ARGUMENTS:
       int          nameLen,   // in
-      const char  *name,      // in
-      ESMC_IOSpec *iospec) {  // in
+      const char  *name) {    // in
 //
 // !DESCRIPTION:
 //      restore {\tt BaseTime} state for persistence/checkpointing.
@@ -505,7 +504,7 @@
 
     int rc = ESMF_SUCCESS;
 
-    // TODO:  read base time state from iospec/name, then restore
+    // TODO:  read base time state from name, then restore
     //        (share code with ESMCI::BaseTime::set()).
 
     return(rc);
@@ -517,13 +516,13 @@
 // !IROUTINE:  ESMCI::BaseTime::writeRestart - save BaseTime state
 //
 // !INTERFACE:
-      int BaseTime::writeRestart(
+      int BaseTime::writeRestart(void) const {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_IOSpec *iospec) const {
+//    none
 //
 // !DESCRIPTION:
 //      Save {\tt BaseTime} state for persistence/checkpointing

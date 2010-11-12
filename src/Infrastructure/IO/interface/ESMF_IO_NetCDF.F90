@@ -1,4 +1,4 @@
-! $Id: ESMF_IO_NetCDF.F90,v 1.2 2010/03/04 18:57:44 svasquez Exp $
+! $Id: ESMF_IO_NetCDF.F90,v 1.3 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,9 +41,6 @@
       use ESMF_UtilTypesMod
       use ESMF_BaseMod
       use ESMF_InitMacrosMod
-
-      ! for ReadRestart()/WriteRestart()
-      ! use ESMF_IOSpecMod
 
       ! associated derived types
       ! use ESMF_???Mod TODO

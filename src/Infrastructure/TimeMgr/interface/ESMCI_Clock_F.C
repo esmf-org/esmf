@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock_F.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Clock_F.C,v 1.5 2010/11/12 06:58:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -335,23 +335,19 @@ extern "C" {
 
        void FTN(c_esmc_clockreadrestart)(Clock **ptr, int *nameLen,
                                          const char *name,
-                                         ESMC_IOSpec *iospec,   
                                          int *status,
                                          ESMCI_FortranStrLenArg name_l) {    
           *ptr = ESMCI_ClockReadRestart(
                                            *nameLen,  // always present
                                                       //   internal argument.
                                             name,     // required.
-                    ESMC_NOT_PRESENT_FILTER(iospec),
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_clockwriterestart)(Clock **ptr,
-                                          ESMC_IOSpec *iospec,
                                           int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::writeRestart(
-                          ESMC_NOT_PRESENT_FILTER(iospec) );
+          int rc = (*ptr)->Clock::writeRestart();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

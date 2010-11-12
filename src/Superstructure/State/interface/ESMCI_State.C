@@ -48,7 +48,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.19 2010/04/08 19:14:46 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.20 2010/11/12 06:59:07 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1006,8 +1006,7 @@ namespace ESMCI {
 // !ARGUMENTS:
       ESMC_Base* base,                 //  in - location for read-in Attributes
       int fileNameLen,                 //  in - file name length
-      const char* fileName,            //  in - file name
-      ESMC_IOFileFormat* fileFormat) { //  in - file format
+      const char* fileName) {          //  in - file name
 //
 // !DESCRIPTION:
 //      Read data items for the State from a file.  Currently limited to
@@ -1018,43 +1017,33 @@ namespace ESMCI {
       // Initialize return code; assume routine not implemented
       int rc = ESMF_SUCCESS;
       int localrc = ESMC_RC_NOT_IMPL;
-      ESMC_IOFileFormat localFileFormat; 
 
-      // default file format is netCDF
-      localFileFormat = (fileFormat == ESMC_NULL_POINTER) ?
-                                    ESMF_IO_FILEFORMAT_NETCDF : *fileFormat;
-
-      // TODO:  move switch into an IO master class?  would be in one central
+      // TODO:  Assumes netcdf file; handle other file formats.
+      //        Put switch into an IO master class?  would be in one central
       //        location, rather than replicated in each ESMF data class.
-      switch (localFileFormat) {
-        // TODO:  other file formats
-        case ESMF_IO_FILEFORMAT_NETCDF:
-        default:
-          // instantiate IO object; initialize with pointer to this State's
-          // base, to place file-read attributes into.
-          IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                                               &localrc);
-          if (localrc != ESMF_SUCCESS) rc = localrc;
 
-          // set this State object as the target for read-in data
-          io_netcdf->setState(this);
+      // instantiate IO object; initialize with pointer to this State's
+      // base, to place file-read attributes into.
+      IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            &localrc);
+      if (localrc != ESMF_SUCCESS) rc = localrc;
 
-          // read the NetCDF file, placing contents into this State object, with
-          // Attributes placed on the State's base node
-          localrc = io_netcdf->read(fileNameLen, fileName);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                                               &localrc);
-          if (localrc != ESMF_SUCCESS) rc = localrc;
+      // set this State object as the target for read-in data
+      io_netcdf->setState(this);
 
-          // done with io_netcdf object
-          localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                                               &localrc);
-          if (localrc != ESMF_SUCCESS) rc = localrc;
+      // read the NetCDF file, placing contents into this State object, with
+      // Attributes placed on the State's base node
+      localrc = io_netcdf->read(fileNameLen, fileName);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            &localrc);
+      if (localrc != ESMF_SUCCESS) rc = localrc;
 
-          break;
-      }
+      // done with io_netcdf object
+      localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            &localrc);
+      if (localrc != ESMF_SUCCESS) rc = localrc;
 
       return rc;
 
@@ -1075,8 +1064,7 @@ namespace ESMCI {
 // !ARGUMENTS:
       ESMC_Base* base,               //  in - location to write Attributes from
       int fileNameLen,                 //  in - file name length
-      const char* fileName,            //  in - file name
-      ESMC_IOFileFormat* fileFormat) { //  in - file format
+      const char* fileName) {          //  in - file name
 //
 // !DESCRIPTION:
 //      Write data items for the State from a file.  Currently limited to
@@ -1087,43 +1075,33 @@ namespace ESMCI {
       // Initialize return code; assume routine not implemented
       int rc = ESMF_SUCCESS;
       int localrc = ESMC_RC_NOT_IMPL;
-      ESMC_IOFileFormat localFileFormat; 
 
-      // default file format is netCDF
-      localFileFormat = (fileFormat == ESMC_NULL_POINTER) ?
-                                    ESMF_IO_FILEFORMAT_NETCDF : *fileFormat;
-
-      // TODO:  move switch into an IO master class?  would be in one central
+      // TODO:  Assumes netcdf file; handle other file formats.
+      //        Put switch into an IO master class?  would be in one central
       //        location, rather than replicated in each ESMF data class.
-      switch (localFileFormat) {
-        // TODO:  other file formats
-        case ESMF_IO_FILEFORMAT_NETCDF:
-        default:
-          // instantiate IO object; initialize with pointer to this State's
-          // base, to write attributes from.
-          IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                                               &localrc);
-          if (localrc != ESMF_SUCCESS) rc = localrc;
 
-          // set this State object as the source of data to write out
-          io_netcdf->setState(this);
+      // instantiate IO object; initialize with pointer to this State's
+      // base, to write attributes from.
+      IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            &localrc);
+      if (localrc != ESMF_SUCCESS) rc = localrc;
 
-          // write the NetCDF file, taking contents from this State object, with
-          // Attributes taken from the State's base node
-          localrc = io_netcdf->write(fileNameLen, fileName);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                                               &localrc);
-          if (localrc != ESMF_SUCCESS) rc = localrc;
+      // set this State object as the source of data to write out
+      io_netcdf->setState(this);
 
-          // done with io_netcdf object
-          localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
-                                               &localrc);
-          if (localrc != ESMF_SUCCESS) rc = localrc;
+      // write the NetCDF file, taking contents from this State object, with
+      // Attributes taken from the State's base node
+      localrc = io_netcdf->write(fileNameLen, fileName);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            &localrc);
+      if (localrc != ESMF_SUCCESS) rc = localrc;
 
-          break;
-      }
+      // done with io_netcdf object
+      localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+                                            &localrc);
+      if (localrc != ESMF_SUCCESS) rc = localrc;
 
       return rc;
 

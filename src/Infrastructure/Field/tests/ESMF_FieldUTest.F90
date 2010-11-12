@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.152 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.153 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.152 2010/11/03 22:48:40 theurich Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.153 2010/11/12 06:57:18 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -62,7 +62,6 @@
 #ifdef ESMF_TESTEXHAUSTIVE
       integer :: cu(2), cl(2), cc(2), localrc
       integer :: ldecount
-      type(ESMF_IOSpec) :: ios
       type(ESMF_Grid) :: grid3
       type(ESMF_ArraySpec)            :: arrayspec, arrayspec1
       type(ESMF_LocStream)            :: locstream
@@ -558,7 +557,7 @@
       call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=rc)
       f3 = ESMF_FieldCreate(grid, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
-                        name="Field 0", iospec=ios, rc=rc)
+                        name="Field 0", rc=rc)
 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
@@ -588,7 +587,7 @@
       call ESMF_GridDestroy(grid2, rc=rc)
       f6 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
-                        name="Field 0", iospec=ios, rc=rc)
+                        name="Field 0", rc=rc)
 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array"
@@ -613,7 +612,7 @@
       call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R4, rc=rc)
       f3 = ESMF_FieldCreate(grid, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &
-                        name="Field 0", iospec=ios, rc=rc)
+                        name="Field 0", rc=rc)
       call ESMF_FieldGet(f3, grid=grid3, localDeCount=ldecount, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"

@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.18 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.19 2010/11/12 06:58:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
+#include "ESMCI_Util.h"
 #include "ESMCI_Macros.h"
 #include "ESMF_TimeMgr.inc"
 #include "ESMCI_Fraction.h"
@@ -204,8 +205,8 @@ class TimeInterval : public BaseTime {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int readRestart(int nameLen, const char *name=0, ESMC_IOSpec *iospec=0);
-    int writeRestart(ESMC_IOSpec *iospec=0) const;
+    int readRestart(int nameLen, const char *name=0);
+    int writeRestart(void) const;
 
     // internal validation (TMG 7.1.1)
     int validate(const char *options=0) const;

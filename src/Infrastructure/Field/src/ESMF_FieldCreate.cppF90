@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.76 2010/11/12 05:35:26 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.77 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -32,7 +32,6 @@ module ESMF_FieldCreateMod
   use ESMF_BaseMod
   use ESMF_InitMacrosMod
   use ESMF_LogErrMod
-  use ESMF_IOSpecMod
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayMod
   use ESMF_DELayoutMod
@@ -68,7 +67,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.76 2010/11/12 05:35:26 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.77 2010/11/12 06:57:18 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -137,14 +136,13 @@ contains
 ! !IROUTINE: ESMF_FieldCreateEmpty - Create an empty Field with no Grid
 
 ! !INTERFACE:
-  function ESMF_FieldCreateEmpty(name, iospec, rc)
+  function ESMF_FieldCreateEmpty(name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateEmpty 
 !
 ! !ARGUMENTS:
     character (len = *), intent(in), optional :: name  
-    type(ESMF_IOSpec), intent(in), optional :: iospec  
     integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -159,8 +157,6 @@ contains
 ! \begin{description}
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED 
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -184,7 +180,7 @@ contains
                                      ESMF_CONTEXT, rc)) return
 
     ! Call field construction method
-    call ESMF_FieldConstructEmpty(ftype, name, iospec, localrc)
+    call ESMF_FieldConstructEmpty(ftype, name, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -279,7 +275,7 @@ contains
 ! !INTERFACE:
   subroutine ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
+    maxHaloLWidth, maxHaloUWidth, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer :: ftype 
@@ -291,7 +287,6 @@ contains
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
     character (len=*), intent(in), optional :: name
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -366,8 +361,6 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED 
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       
@@ -513,7 +506,7 @@ contains
 ! !INTERFACE:
   subroutine ESMF_FieldConstructIANewArray(ftype, geombase, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
+    maxHaloLWidth, maxHaloUWidth, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer :: ftype 
@@ -526,7 +519,6 @@ contains
     integer, intent(in),optional :: maxHaloLWidth(:)
     integer, intent(in),optional :: maxHaloUWidth(:)
     character (len=*), intent(in), optional :: name
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -607,8 +599,6 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED 
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -716,12 +706,11 @@ contains
 ! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no GeomBase or Array
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldConstructEmpty(ftypep, name, iospec, rc)
+  subroutine ESMF_FieldConstructEmpty(ftypep, name, rc)
 !
 ! !ARGUMENTS:     
     type(ESMF_FieldType), pointer :: ftypep
     character (len = *), intent(in), optional :: name  
-    type(ESMF_IOSpec), intent(in), optional :: iospec  
     integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -733,8 +722,6 @@ contains
 !       Pointer to an {\tt ESMF\_Field} object.
 ! \item [{[name]}]
 !       Field name.
-! \item [{[iospec]}]
-!       {\tt ESMF\_Field} I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -841,7 +828,7 @@ contains
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGBArraySpec(geombase, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
+    maxHaloLWidth, maxHaloUWidth, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGBArraySpec
@@ -855,7 +842,6 @@ contains
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -927,8 +913,6 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1186,7 +1170,7 @@ contains
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
                                 localMaxHaloUWidth(1:gridDimCount_norep), name, &
-                                iospec, rc=localrc)
+                                rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1194,7 +1178,7 @@ contains
           call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, name=name, &
-                                iospec=iospec, rc=localrc)
+                                rc=localrc)
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1234,7 +1218,7 @@ contains
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGBArray(geombase, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, maxHaloLWidth, &
-    maxHaloUWidth, name, iospec, rc)
+    maxHaloUWidth, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGBArray    
@@ -1249,7 +1233,6 @@ contains
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
     character (len = *), intent(in), optional :: name   
-    type(ESMF_IOSpec), intent(in), optional :: iospec   
     integer, intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
@@ -1326,8 +1309,6 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1595,7 +1576,7 @@ contains
                                          ungriddedUBound=ungriddedUBound, &
                                          maxHaloLWidth=maxHaloLWidth, &
                                          maxHaloUWidth=maxHaloUWidth, &
-                                         name=name, iospec=iospec, rc=localrc)
+                                         name=name, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -1605,7 +1586,7 @@ contains
                                          localgridToFieldMap, &
                                          ungriddedLBound=ungriddedLBound, &
                                          ungriddedUBound=ungriddedUBound, &
-                                         name=name, iospec=iospec, rc=localrc)
+                                         name=name, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -1643,7 +1624,7 @@ contains
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateGBData<rank><type><kind>(geombase, & @\
 !   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateGBData<rank><type><kind> @\
@@ -1659,7 +1640,6 @@ contains
 !   integer, intent(in), optional :: maxHaloLWidth(:) @\
 !   integer, intent(in), optional :: maxHaloUWidth(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1742,8 +1722,6 @@ contains
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1757,7 +1735,7 @@ contains
 ^define ESMF_METHOD "ESMF_FieldCreateGBData" @\
   function ESMF_FieldCreateGBData##mrank##D##mtypekind(geombase, & @\
     farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateGBData##mrank##D##mtypekind @\
@@ -1773,7 +1751,6 @@ contains
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     ! local variables @\
@@ -1783,7 +1760,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL @\
 @\
     ESMF_FieldCreateGBData##mrank##D##mtypekind = & @\
-        ESMF_FieldCreateEmpty(name, iospec, rc=localrc) @\
+        ESMF_FieldCreateEmpty(name, rc=localrc) @\
 @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -1827,7 +1804,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateGBDataPtr<rank><type><kind>(geombase, & @\
 !   farrayPtr, copyflag, gridToFieldMap, & @\
-!   maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+!   maxHaloLWidth, maxHaloUWidth, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateGBDataPtr<rank><type><kind> @\
@@ -1840,7 +1817,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !   integer, intent(in), optional :: maxHaloLWidth(:) @\
 !   integer, intent(in), optional :: maxHaloUWidth(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1905,8 +1881,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1920,7 +1894,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 ^define ESMF_METHOD "ESMF_FieldCreateGBDataPtr" @\
   function ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
     farrayPtr, copyflag, gridToFieldMap, & @\
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+    maxHaloLWidth, maxHaloUWidth, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind @\
@@ -1933,7 +1907,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     ! local variables @\
@@ -1943,7 +1916,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
     localrc = ESMF_RC_NOT_IMPL @\
 @\
     ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind = & @\
-        ESMF_FieldCreateEmpty(name, iospec, rc=localrc) @\
+        ESMF_FieldCreateEmpty(name, rc=localrc) @\
 @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -1986,7 +1959,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridTKR(grid, typekind, rank, indexflag, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
+    maxHaloLWidth, maxHaloUWidth, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridTKR
@@ -2003,7 +1976,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -2095,8 +2067,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2118,7 +2088,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 
     ESMF_FieldCreateGridTKR = ESMF_FieldCreate(grid, arrayspec, indexflag, &
         staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
+        maxHaloLWidth, maxHaloUWidth, name, rc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2137,7 +2107,7 @@ end function ESMF_FieldCreateGridTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridArraySpec(grid, arrayspec, indexflag, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc)
+    maxHaloLWidth, maxHaloUWidth, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridArraySpec
@@ -2153,7 +2123,6 @@ end function ESMF_FieldCreateGridTKR
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -2243,8 +2212,6 @@ end function ESMF_FieldCreateGridTKR
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2321,7 +2288,7 @@ end function ESMF_FieldCreateGridTKR
     ESMF_FieldCreateGridArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, name, iospec, rc=localrc)
+        maxHaloLWidth, maxHaloUWidth, name, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
@@ -2348,7 +2315,7 @@ end function ESMF_FieldCreateGridTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridArray(grid, array, copyflag, staggerloc, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, maxHaloLWidth, &
-    maxHaloUWidth, name, iospec, rc)
+    maxHaloUWidth, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridArray    
@@ -2364,7 +2331,6 @@ end function ESMF_FieldCreateGridTKR
     integer, intent(in), optional :: maxHaloLWidth(:)
     integer, intent(in), optional :: maxHaloUWidth(:)
     character (len = *), intent(in), optional :: name   
-    type(ESMF_IOSpec), intent(in), optional :: iospec   
     integer, intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
@@ -2452,8 +2418,6 @@ end function ESMF_FieldCreateGridTKR
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2514,7 +2478,7 @@ end function ESMF_FieldCreateGridTKR
     ! Create Field from GeomBase
     ESMF_FieldCreateGridArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, maxHaloLWidth, &
-        maxHaloUWidth, name, iospec, rc=localrc)
+        maxHaloUWidth, name, rc=localrc)
 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -2541,7 +2505,7 @@ end function ESMF_FieldCreateGridTKR
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateGridData<rank><type><kind>(grid, & @\
 !   farray, indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateGridData<rank><type><kind> @\
@@ -2558,7 +2522,6 @@ end function ESMF_FieldCreateGridTKR
 !   integer, intent(in), optional :: maxHaloLWidth(:) @\
 !   integer, intent(in), optional :: maxHaloUWidth(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -2659,8 +2622,6 @@ end function ESMF_FieldCreateGridTKR
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -2674,7 +2635,7 @@ end function ESMF_FieldCreateGridTKR
 ^define ESMF_METHOD "ESMF_FieldCreateGridData" @\
   function ESMF_FieldCreateGridData##mrank##D##mtypekind(grid, & @\
     farray, indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateGridData##mrank##D##mtypekind @\
@@ -2691,7 +2652,6 @@ end function ESMF_FieldCreateGridTKR
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -2753,7 +2713,7 @@ end function ESMF_FieldCreateGridTKR
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
                                maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -2782,7 +2742,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateGridDataPtr<rank><type><kind>(grid, & @\
 !   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
-!   maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+!   maxHaloLWidth, maxHaloUWidth, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateGridDataPtr<rank><type><kind> @\
@@ -2796,7 +2756,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !   integer, intent(in), optional :: maxHaloLWidth(:) @\
 !   integer, intent(in), optional :: maxHaloUWidth(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -2878,8 +2837,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -2893,7 +2850,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ^define ESMF_METHOD "ESMF_FieldCreateGridDataPtr" @\
   function ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind(grid, & @\
     farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
-    maxHaloLWidth, maxHaloUWidth, name, iospec, rc) @\
+    maxHaloLWidth, maxHaloUWidth, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind @\
@@ -2907,7 +2864,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     integer, intent(in), optional :: maxHaloLWidth(:) @\
     integer, intent(in), optional :: maxHaloUWidth(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -2967,7 +2923,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
                                maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -2999,7 +2955,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateLSTKR(locstream, typekind, rank, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSTKR
@@ -3012,7 +2968,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -3069,8 +3024,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3092,7 +3045,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 
     ESMF_FieldCreateLSTKR = ESMF_FieldCreate(locstream, arrayspec, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-        name, iospec, rc)
+        name, rc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3110,7 +3063,7 @@ end function ESMF_FieldCreateLSTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateLSArraySpec(locstream, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSArraySpec
@@ -3122,7 +3075,6 @@ end function ESMF_FieldCreateLSTKR
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -3177,8 +3129,6 @@ end function ESMF_FieldCreateLSTKR
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3208,7 +3158,7 @@ end function ESMF_FieldCreateLSTKR
     ESMF_FieldCreateLSArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        name=name, iospec=iospec, rc=localrc)
+        name=name, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
@@ -3228,7 +3178,7 @@ end function ESMF_FieldCreateLSTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateLSArray(locstream, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSArray    
@@ -3241,7 +3191,6 @@ end function ESMF_FieldCreateLSTKR
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len = *), intent(in), optional :: name   
-    type(ESMF_IOSpec), intent(in), optional :: iospec   
     integer, intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
@@ -3301,8 +3250,6 @@ end function ESMF_FieldCreateLSTKR
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3331,7 +3278,7 @@ end function ESMF_FieldCreateLSTKR
     ! Create Field from GeomBase
     ESMF_FieldCreateLSArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name=name, iospec=iospec, rc=localrc)
+    name=name, rc=localrc)
 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -3351,7 +3298,7 @@ end function ESMF_FieldCreateLSTKR
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateLSData<rank><type><kind>(locstream, & @\
 !   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, name, iospec, rc) @\
+!   ungriddedUBound, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateLSData<rank><type><kind> @\
@@ -3365,7 +3312,6 @@ end function ESMF_FieldCreateLSTKR
 !   integer, intent(in), optional :: ungriddedLBound(:) @\
 !   integer, intent(in), optional :: ungriddedUBound(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -3431,8 +3377,6 @@ end function ESMF_FieldCreateLSTKR
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -3446,7 +3390,7 @@ end function ESMF_FieldCreateLSTKR
 ^define ESMF_METHOD "ESMF_FieldCreateLSData" @\
   function ESMF_FieldCreateLSData##mrank##D##mtypekind(locstream, & @\
     farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, name, iospec, rc) @\
+    ungriddedUBound, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateLSData##mrank##D##mtypekind @\
@@ -3460,7 +3404,6 @@ end function ESMF_FieldCreateLSTKR
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -3490,7 +3433,7 @@ end function ESMF_FieldCreateLSTKR
                                gridToFieldMap=gridToFieldMap, & @\
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -3512,7 +3455,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateLSDataPtr<rank><type><kind>(locstream, & @\
 !   farrayPtr, copyflag, gridToFieldMap, & @\
-!   name, iospec, rc) @\
+!   name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateLSDataPtr<rank><type><kind> @\
@@ -3523,7 +3466,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 !   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -3569,8 +3511,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 !       this direction. @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -3584,7 +3524,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ^define ESMF_METHOD "ESMF_FieldCreateLSDataPtr" @\
   function ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind(locstream, & @\
     farrayPtr, copyflag, gridToFieldMap, & @\
-    name, iospec, rc) @\
+    name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind @\
@@ -3595,7 +3535,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -3623,7 +3562,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -3648,7 +3587,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshTKR(mesh, typekind, rank, location, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshTKR
@@ -3662,7 +3601,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -3723,8 +3661,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3746,7 +3682,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 
     ESMF_FieldCreateMeshTKR = ESMF_FieldCreate(mesh, arrayspec, location, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-        name, iospec, rc)
+        name, rc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3764,7 +3700,7 @@ end function ESMF_FieldCreateMeshTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshArraySpec(mesh, arrayspec, location, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshArraySpec
@@ -3777,7 +3713,6 @@ end function ESMF_FieldCreateMeshTKR
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -3836,8 +3771,6 @@ end function ESMF_FieldCreateMeshTKR
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3867,7 +3800,7 @@ end function ESMF_FieldCreateMeshTKR
     ESMF_FieldCreateMeshArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        name=name, iospec=iospec, rc=localrc)
+        name=name, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
@@ -3887,7 +3820,7 @@ end function ESMF_FieldCreateMeshTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshArray(mesh, array, location, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshArray    
@@ -3901,7 +3834,6 @@ end function ESMF_FieldCreateMeshTKR
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len = *), intent(in), optional :: name   
-    type(ESMF_IOSpec), intent(in), optional :: iospec   
     integer, intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
@@ -3965,8 +3897,6 @@ end function ESMF_FieldCreateMeshTKR
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3995,7 +3925,7 @@ end function ESMF_FieldCreateMeshTKR
     ! Create Field from GeomBase
     ESMF_FieldCreateMeshArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name=name, iospec=iospec, rc=localrc)
+    name=name, rc=localrc)
 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -4015,7 +3945,7 @@ end function ESMF_FieldCreateMeshTKR
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateMeshData<rank><type><kind>(mesh, & @\
 !   farray, location, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, name, iospec, rc) @\
+!   ungriddedUBound, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshData<rank><type><kind> @\
@@ -4030,7 +3960,6 @@ end function ESMF_FieldCreateMeshTKR
 !   integer, intent(in), optional :: ungriddedLBound(:) @\
 !   integer, intent(in), optional :: ungriddedUBound(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -4100,8 +4029,6 @@ end function ESMF_FieldCreateMeshTKR
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -4115,7 +4042,7 @@ end function ESMF_FieldCreateMeshTKR
 ^define ESMF_METHOD "ESMF_FieldCreateMeshData" @\
   function ESMF_FieldCreateMeshData##mrank##D##mtypekind(mesh, & @\
     farray, location, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, name, iospec, rc) @\
+    ungriddedUBound, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateMeshData##mrank##D##mtypekind @\
@@ -4130,7 +4057,6 @@ end function ESMF_FieldCreateMeshTKR
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -4160,7 +4086,7 @@ end function ESMF_FieldCreateMeshTKR
                                gridToFieldMap=gridToFieldMap, & @\
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -4182,7 +4108,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateMeshDataPtr<rank><type><kind>(mesh, & @\
 !   farrayPtr, location, copyflag, gridToFieldMap, & @\
-!   name, iospec, rc) @\
+!   name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshDataPtr<rank><type><kind> @\
@@ -4194,7 +4120,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -4244,8 +4169,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       this direction. @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -4259,7 +4182,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ^define ESMF_METHOD "ESMF_FieldCreateMeshDataPtr" @\
   function ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind(mesh, & @\
     farrayPtr, location, copyflag, gridToFieldMap, & @\
-    name, iospec, rc) @\
+    name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind @\
@@ -4271,7 +4194,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -4299,7 +4221,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -4325,7 +4247,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateXGTKR(xgrid, xgridSide, gridIndex, typekind, rank, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateXGTKR
@@ -4340,7 +4262,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -4404,8 +4325,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4427,7 +4346,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 
     ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, xgridside, gridIndex, arrayspec, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-        name, iospec, rc)
+        name, rc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4445,7 +4364,7 @@ end function ESMF_FieldCreateXGTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateXGArraySpec(xgrid, xgridSide, gridIndex, arrayspec, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateXGArraySpec
@@ -4459,7 +4378,6 @@ end function ESMF_FieldCreateXGTKR
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len=*), intent(in), optional :: name 
-    type(ESMF_IOSpec), intent(in), optional :: iospec 
     integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -4521,8 +4439,6 @@ end function ESMF_FieldCreateXGTKR
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. ! NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4552,7 +4468,7 @@ end function ESMF_FieldCreateXGTKR
     ESMF_FieldCreateXGArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        name=name, iospec=iospec, rc=localrc)
+        name=name, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
@@ -4572,7 +4488,7 @@ end function ESMF_FieldCreateXGTKR
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateXGArray(xgrid, xgridSide, gridIndex, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name, iospec, rc)
+    name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateXGArray    
@@ -4587,7 +4503,6 @@ end function ESMF_FieldCreateXGTKR
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     character (len = *), intent(in), optional :: name   
-    type(ESMF_IOSpec), intent(in), optional :: iospec   
     integer, intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
@@ -4654,8 +4569,6 @@ end function ESMF_FieldCreateXGTKR
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[name]}] 
 !       Field name. 
-! \item [{[iospec]}] 
-!       I/O specification. NOT IMPLEMENTED
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4684,7 +4597,7 @@ end function ESMF_FieldCreateXGTKR
     ! Create Field from GeomBase
     ESMF_FieldCreateXGArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    name=name, iospec=iospec, rc=localrc)
+    name=name, rc=localrc)
 
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
@@ -4705,7 +4618,7 @@ end function ESMF_FieldCreateXGTKR
 ! function ESMF_FieldCreateXGData<rank><type><kind>(xgrid, & @\
 !   xgridSide, gridIndex, farray, indexflag, copyflag,     & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, name,& @\
-!   iospec, rc) @\
+!   rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateXGData<rank><type><kind> @\
@@ -4721,7 +4634,6 @@ end function ESMF_FieldCreateXGTKR
 !   integer, intent(in), optional :: ungriddedLBound(:) @\
 !   integer, intent(in), optional :: ungriddedUBound(:) @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -4794,8 +4706,6 @@ end function ESMF_FieldCreateXGTKR
 !       these ungridded dimensions is the same as their order in the {\tt farray}. @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -4809,7 +4719,7 @@ end function ESMF_FieldCreateXGTKR
 ^define ESMF_METHOD "ESMF_FieldCreateXGData" @\
   function ESMF_FieldCreateXGData##mrank##D##mtypekind(xgrid, & @\
     xgridSide, gridIndex, farray, indexflag, copyflag,        & @\
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, name, iospec, rc) @\
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateXGData##mrank##D##mtypekind @\
@@ -4825,7 +4735,6 @@ end function ESMF_FieldCreateXGTKR
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -4855,7 +4764,7 @@ end function ESMF_FieldCreateXGTKR
                                gridToFieldMap=gridToFieldMap, & @\
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -4877,7 +4786,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridSide, gridIndex, & @\
 !   farrayPtr, copyflag, gridToFieldMap, & @\
-!   name, iospec, rc) @\
+!   name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr<rank><type><kind> @\
@@ -4890,7 +4799,6 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 !   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   character (len=*), intent(in), optional :: name  @\
-!   type(ESMF_IOSpec), intent(in), optional :: iospec @\
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
@@ -4943,8 +4851,6 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 !       this direction. @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
-! \item [{[iospec]}]  @\
-!       I/O specification. NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -4958,7 +4864,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ^define ESMF_METHOD "ESMF_FieldCreateXGDataPtr" @\
   function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind(xgrid, & @\
     xgridSide, gridIndex, farrayPtr, copyflag, gridToFieldMap, & @\
-    name, iospec, rc) @\
+    name, rc) @\
 @\
     ! return value @\
     type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind @\
@@ -4971,7 +4877,6 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
-    type(ESMF_IOSpec), intent(in), optional :: iospec @\
     integer, intent(out), optional :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
@@ -4999,7 +4904,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
               ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind(geombase, & @\
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
-                               name=name, iospec=iospec, rc=localrc) @\
+                               name=name, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\

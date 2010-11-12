@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.33 2010/09/17 05:46:30 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.34 2010/11/12 06:58:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -182,7 +182,6 @@ enum ESMC_Operation { ESMF_SUM=1, ESMF_MIN, ESMF_MAX};
 
 
 extern ESMC_ObjectID ESMC_ID_BASE;
-extern ESMC_ObjectID ESMC_ID_IOSPEC;
 extern ESMC_ObjectID ESMC_ID_LOGERR;
 extern ESMC_ObjectID ESMC_ID_TIME;
 extern ESMC_ObjectID ESMC_ID_CALENDAR;
@@ -214,6 +213,7 @@ extern ESMC_ObjectID ESMC_ID_STATE;
 extern ESMC_ObjectID ESMC_ID_GRIDCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_CPLCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_COMPONENT;
+extern ESMC_ObjectID ESMC_ID_XGRID;
 extern ESMC_ObjectID ESMC_ID_NONE;
 
 #endif  // ESMCI_UTIL_H

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.33 2010/11/12 05:33:29 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.34 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,8 +33,7 @@ module ESMF_LocStreamMod
 ! The code in this file implements the {\tt ESMF\_LocStream} class, which 
 ! represents a single scalar or vector field.  {\tt ESMF\_LocStream}s associate
 ! a metadata description expressed as a set of {\tt ESMF\_Attributes} with
-! a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, and I/O specification, or
-! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED). 
+! a data {\tt ESMF\_Array} and an {\tt ESMF\_Grid}.
 ! 
 ! This type is implemented in Fortran 90.
 !
@@ -131,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.33 2010/11/12 05:33:29 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.34 2010/11/12 06:57:18 eschwab Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.53 2010/10/08 17:30:37 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.54 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,6 @@ module ESMF_FieldGetMod
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
   use ESMF_LogErrMod
-  use ESMF_IOSpecMod
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayMod
   use ESMF_ArrayMod
@@ -61,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.53 2010/10/08 17:30:37 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.54 2010/11/12 06:57:18 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -115,7 +114,7 @@ contains
   subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, xgrid, &
     array, typekind, dimCount, memDimCount, &
     staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, localDeCount, name, iospec, rc) 
+    maxHaloLWidth, maxHaloUWidth, localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout) :: field    
@@ -141,7 +140,6 @@ contains
     integer, intent(out), optional :: maxHaloUWidth(:)
     integer, intent(out), optional :: localDeCount
     character(len=*), intent(out), optional :: name
-    type(ESMF_IOSpec), intent(out), optional :: iospec ! NOT IMPLEMENTED
     integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -259,8 +257,6 @@ contains
 !       the DELayout associated with the Field object.
 ! \item [{[name]}]
 !       Name of queried item.
-! \item [{[iospec]}]
-!       {\tt ESMF\_IOSpec} object which contains settings for options. NOT IMPLEMENTED
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -499,8 +495,6 @@ contains
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
     endif
-
-    if (present(iospec)) iospec = ftype%iospec
 
     if (present(name)) then
         call c_ESMC_GetName(ftype%base, name, localrc)

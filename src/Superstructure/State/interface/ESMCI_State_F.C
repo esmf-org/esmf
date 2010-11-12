@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.9 2010/06/23 23:10:07 theurich Exp $
+// $Id: ESMCI_State_F.C,v 1.10 2010/11/12 06:59:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.9 2010/06/23 23:10:07 theurich Exp $";
+             "$Id: ESMCI_State_F.C,v 1.10 2010/11/12 06:59:07 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -241,7 +241,6 @@ void FTN(c_esmc_stateread)(State *ptr,
                            ESMC_Base **base,
                            int *fileNameLen,
                            const char *fileName,
-                           ESMC_IOFileFormat *fileFormat,
                            int *status,
                            ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
@@ -252,8 +251,7 @@ void FTN(c_esmc_stateread)(State *ptr,
          // Read the items and attributes into the state object.
          int rc = (ptr)->State::read(*base, // always present
                           *fileNameLen, // always present internal argument.
-                          fileName,     // always present
-                          ESMC_NOT_PRESENT_FILTER(fileFormat));
+                          fileName);      // always present
 
          if (ESMC_PRESENT(status)) *status = rc;
 }
@@ -264,7 +262,6 @@ void FTN(c_esmc_statewrite)(State *ptr,
                            ESMC_Base **base,
                            int *fileNameLen,
                            const char *fileName,
-                           ESMC_IOFileFormat *fileFormat,
                            int *status,
                            ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
@@ -275,8 +272,7 @@ void FTN(c_esmc_statewrite)(State *ptr,
          // Read the items and attributes into the state object.
          int rc = (ptr)->State::write(*base, // always present
                           *fileNameLen, // always present internal argument.
-                          fileName,     // always present
-                          ESMC_NOT_PRESENT_FILTER(fileFormat));
+                          fileName);    // always present
 
          if (ESMC_PRESENT(status)) *status = rc;
 }

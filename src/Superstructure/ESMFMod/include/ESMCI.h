@@ -1,4 +1,4 @@
-// $Id: ESMCI.h,v 1.35 2010/06/23 23:10:07 theurich Exp $
+// $Id: ESMCI.h,v 1.36 2010/11/12 06:59:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -23,7 +23,6 @@
 
 // base class, I/O, and error
 #include "ESMCI_Base.h"
-#include "ESMCI_IOSpec.h"
 #include "ESMCI_LogErr.h"
 
 // optional arguments in ESMC interfaces

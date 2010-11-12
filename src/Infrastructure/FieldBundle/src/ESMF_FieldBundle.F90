@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.67 2010/11/12 06:07:47 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.68 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -40,7 +40,6 @@
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_BaseMod
       use ESMF_LogErrMod
-      use ESMF_IOSpecMod
       use ESMF_StaggerLocMod
       use ESMF_GridMod
       use ESMF_FieldMod
@@ -128,7 +127,6 @@
         type(ESMF_GeomBase) :: geombase           ! associated global grid, mesh, etc.
         type(ESMF_LocalFieldBundle) :: localfieldbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
-        type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
         logical :: isCongruent                   ! are all fields identical?
         logical :: hasPattern                    ! first data field sets this
@@ -221,8 +219,8 @@
 
     public operator(.eq.), operator(.ne.)
 
-!  !subroutine ESMF_FieldBundleWriteRestart(fieldbundle, iospec, rc)
-!  !function ESMF_FieldBundleReadRestart(name, iospec, rc)
+!  !subroutine ESMF_FieldBundleWriteRestart(fieldbundle, rc)
+!  !function ESMF_FieldBundleReadRestart(name, rc)
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !  ! additional future signatures of ESMF_FieldBundleCreate() functions:
@@ -535,7 +533,7 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
       function ESMF_FieldBundleCreateNew(fieldCount, fieldList, &
-                                    packflag, name, iospec, rc)
+                                    packflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNew
@@ -545,7 +543,6 @@ end function
       type(ESMF_Field), dimension (:) :: fieldList
       type(ESMF_PackFlag), intent(in), optional :: packflag 
       character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
@@ -578,9 +575,6 @@ end function
 !   \item [{[name]}]
 !      {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !      one is not specified.
-!   \item [{[iospec]}]
-!      The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
-!      values passed in will be ignored.
 !   \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -614,7 +608,7 @@ end function
       ! Call construction method to initialize fieldbundle internals.
       call ESMF_FieldBundleConstructNew(btypep, fieldCount, fieldList, &
                                    packflag, &
-                                   name, iospec, status)
+                                   name, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -662,14 +656,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFNone(name, iospec, rc)
+      function ESMF_FieldBundleCreateNFNone(name, rc)
 !
 ! !RETURN VALUE:                
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFNone
 !
 ! !ARGUMENTS:
       character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
@@ -681,9 +674,6 @@ end function
 !   \item [{[name]}]
 !       {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !       one is not specified.
-!   \item [{[iospec]}]
-!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
-!       values passed in will be ignored.
 !   \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -708,7 +698,7 @@ end function
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -735,7 +725,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFGrid(grid, name, iospec, rc)
+      function ESMF_FieldBundleCreateNFGrid(grid, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFGrid
@@ -743,7 +733,6 @@ end function
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
@@ -758,9 +747,6 @@ end function
 !   \item [{[name]}]
 !       {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !       one is not specified.
-!   \item [{[iospec]}]
-!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
-!       values passed in will be ignored.
 !   \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -789,7 +775,7 @@ end function
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -839,7 +825,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFMesh(mesh, name, iospec, rc)
+      function ESMF_FieldBundleCreateNFMesh(mesh, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFMesh
@@ -847,7 +833,6 @@ end function
 ! !ARGUMENTS:
       type(ESMF_Mesh), intent(in) :: mesh
       character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
@@ -862,9 +847,6 @@ end function
 !   \item [{[name]}]
 !       {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !       one is not specified.
-!   \item [{[iospec]}]
-!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
-!       values passed in will be ignored.
 !   \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -892,7 +874,7 @@ end function
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -930,7 +912,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFLS(locstream, name, iospec, rc)
+      function ESMF_FieldBundleCreateNFLS(locstream, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFLS
@@ -938,7 +920,6 @@ end function
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
       character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
@@ -953,9 +934,6 @@ end function
 !   \item [{[name]}]
 !       {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !       one is not specified.
-!   \item [{[iospec]}]
-!       The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_FieldBundle}s.  Any 
-!       values passed in will be ignored.
 !   \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -983,7 +961,7 @@ end function
                                        ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, iospec, rc)
+      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1919,14 +1897,13 @@ end function
 ! !IROUTINE: ESMF_FieldBundleReadRestart - Read back a saved FieldBundle
 !
 ! !INTERFACE:
-!      function ESMF_FieldBundleReadRestart(name, iospec, rc)
+!      function ESMF_FieldBundleReadRestart(name, rc)
 !
 ! !RETURN VALUE:
 !      type(ESMF_FieldBundle) :: ESMF_FieldBundleReadRestart
 !
 ! !ARGUMENTS:
 !      character (len = *), intent(in) :: name     
-!      type(ESMF_IOSpec), intent(in), optional :: iospec
 !      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
@@ -1938,8 +1915,6 @@ end function
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
-!     \item [{[iospec]}]
-!           The I/O specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2528,11 +2503,10 @@ end function
 ! !IROUTINE: ESMF_FieldBundleWriteRestart - Save FieldBundle in the quickest manner possible
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWriteRestart(fieldbundle, iospec, rc)
+      subroutine ESMF_FieldBundleWriteRestart(fieldbundle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -2545,8 +2519,6 @@ end function
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
-!     \item [{[iospec]}]
-!           The I/O specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2979,7 +2951,7 @@ end function
 ! !INTERFACE:
       subroutine ESMF_FieldBundleConstructNew(btype, fieldCount, fields, &
                                          packflag, &
-                                         name, iospec, rc)
+                                         name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundleType), pointer :: btype 
@@ -2987,7 +2959,6 @@ end function
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
        character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3017,8 +2988,6 @@ end function
 !   \item [{[name]}]
 !      {\tt ESMF\_FieldBundle} name.  A default name will be generated if
 !      one is not specified.
-!   \item [{[iospec]}]
-!      I/O specification.
 !   \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3038,7 +3007,7 @@ end function
       enddo
 
       ! Initialize the derived type contents.
-      call ESMF_FieldBundleConstructEmpty(btype, name, iospec, status)
+      call ESMF_FieldBundleConstructEmpty(btype, name, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3074,12 +3043,11 @@ end function
 ! !IROUTINE: ESMF_FieldBundleConstructEmpty - Construct the internals of a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleConstructEmpty(btype, name, iospec, rc)
+      subroutine ESMF_FieldBundleConstructEmpty(btype, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundleType), pointer :: btype 
       character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3093,8 +3061,6 @@ end function
 !     \item [{[name]}]
 !           {\tt ESMF\_FieldBundle} name.  A default name will be generated if
 !           one is not specified.
-!     \item [{[iospec]}]
-!           I/O specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

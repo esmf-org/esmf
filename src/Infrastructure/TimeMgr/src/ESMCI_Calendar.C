@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.12 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Calendar.C,v 1.13 2010/11/12 06:58:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.12 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.13 2010/11/12 06:58:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -2339,7 +2339,6 @@ int Calendar::count=0;
 // !ARGUMENTS:
       int          nameLen,  // in
       const char  *name,     // in
-      ESMC_IOSpec *iospec,   // in
       int         *rc ) {    // out - return code
 
 //
@@ -2353,7 +2352,7 @@ int Calendar::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI_CalendarReadRestart()"
 
-    // TODO:  read calendar state from iospec/name, then allocate/restore
+    // TODO:  read calendar state from name, then allocate/restore
     //        (share code with ESMCI_CalendarCreate()).
 
     return(ESMC_NULL_POINTER);
@@ -2365,13 +2364,13 @@ int Calendar::count=0;
 // !IROUTINE:  Calendar::writeRestart - save Calendar state
 //
 // !INTERFACE:
-      int Calendar::writeRestart(
+      int Calendar::writeRestart(void) const {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_IOSpec *iospec) const {
+//    none
 //
 // !DESCRIPTION:
 //      Save {\tt Calendar} state for persistence/checkpointing

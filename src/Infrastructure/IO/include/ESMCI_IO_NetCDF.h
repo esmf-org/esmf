@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.h,v 1.7 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_IO_NetCDF.h,v 1.8 2010/11/12 06:57:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -137,7 +137,6 @@ namespace ESMCI
     // friend to restore state  TODO ?
     //Clock *ESMCI_IO_NetCDFReadRestart(int nameLen,
                                    //const char*  name=0,
-                                   //ESMC_IOSpec* iospec=0,
                                    //int*         rc=0);
 
 }   // namespace ESMCI

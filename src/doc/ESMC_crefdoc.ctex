@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.14 2010/10/29 17:19:04 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.15 2010/11/12 06:59:07 eschwab Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -166,8 +166,6 @@
 #include "../Infrastructure/DistGrid/doc/DistGrid_crefdoc.ctex"
 
 %#include "../Infrastructure/IO/doc/IO_crefdoc.ctex"
-
-%#include "../Infrastructure/IOSpec/doc/IOSpec_crefdoc.ctex"
 
 \newpage
 

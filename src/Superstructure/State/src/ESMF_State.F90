@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.220 2010/11/12 05:25:45 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.221 2010/11/12 06:59:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -40,7 +40,6 @@ module ESMF_StateMod
       use ESMF_UtilTypesMod
       use ESMF_LogErrMod
       use ESMF_BaseMod
-      use ESMF_IOSpecMod
       use ESMF_VMMod
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
@@ -100,7 +99,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.220 2010/11/12 05:25:45 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.221 2010/11/12 06:59:07 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -3819,12 +3818,11 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateRead -- Read data items from a file into a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateRead(state, fileName, fileFormat, rc)
+      subroutine ESMF_StateRead(state, fileName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
-      type (ESMF_IOFileFormat), intent(in),  optional :: fileFormat
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3851,14 +3849,10 @@ module ESMF_StateMod
 !       Arrays are supported.
 !     \item[fileName]
 !       File to be read.
-!     \item[{[fileFormat]}]
-!       The file format to be used.  Currently, only
-!       ESMF\_IO\_FILEFORMAT\_NETCDF is supported, which is the default.
-!       Future releases will support others.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if fileFormat is 
-!       ESMF\_IO\_FILEFORMAT\_NETCDF and the NetCDF library is not present.
+!       Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if the NetCDF library is
+!       not present.
 !     \end{description}
 !
 !EOP
@@ -3878,7 +3872,7 @@ module ESMF_StateMod
 
         ! invoke C to C++ entry point 
         call c_ESMC_StateRead(state, state%statep%base, &
-                              fileNameLen, fileName, fileFormat, localrc)
+                              fileNameLen, fileName, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3892,7 +3886,7 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
 ! !INTERFACE:
-      function ESMF_StateReadRestart(name, iospec, rc)
+      function ESMF_StateReadRestart(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateReadRestart
@@ -3900,7 +3894,6 @@ module ESMF_StateMod
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name              
-      type(ESMF_IOSpec), intent(in), optional :: iospec   
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -3911,8 +3904,6 @@ module ESMF_StateMod
 !     \begin{description}
 !     \item[name]
 !       Name of {\tt ESMF\_State} to reinitialize.
-!     \item[iospec]
-!       An {\tt ESMF\_IOSpec} which specifies I/O information.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3929,12 +3920,6 @@ module ESMF_StateMod
         a%statep => b
         nullify(a%statep)
 
-        if (present (iospec)) then
-          if (name /= " ") then
-!           quiet compiler warnings about unused dummy args
-          end if
-        end if
-
         ESMF_StateReadRestart = a 
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
  
@@ -3947,11 +3932,10 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateWrite -- Write single item from a State
 !
 ! !INTERFACE:
-!      subroutine ESMF_StateWrite(state, iospec, itemName, rc)
+!      subroutine ESMF_StateWrite(state, itemName, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF_State):: state 
-!      type(ESMF_IOSpec), intent(in), optional :: iospec
 !      character (len=*), intent(in), optional :: itemName
 !      integer, intent(out), optional :: rc            
 !
@@ -3962,8 +3946,6 @@ module ESMF_StateMod
 !     \begin{description}
 !     \item[state]
 !       The {\tt ESMF\_State} to write.
-!     \item[{[iospec]}]
-!       An {\tt ESMF\_IOSpec} object which specifies I/O information.
 !     \item[{[itemName]}]
 !       Item to be written.
 !     \item[{[rc]}]
@@ -3982,7 +3964,7 @@ module ESMF_StateMod
 !
 !        if (present(itemName)) then
 !            call ESMF_StateGetField(state, itemName=itemName, field=fred, rc=localrc)
-!            call ESMF_FieldWrite(fred, iospec=iospec, rc=localrc) 
+!            call ESMF_FieldWrite(fred, rc=localrc) 
 !        endif
 !
 !        if (ESMF_LogMsgFoundError(localrc, &
@@ -4000,12 +3982,11 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateWrite -- Write items from a State to file
 !
 ! !INTERFACE:
-      subroutine ESMF_StateWrite(state, fileName, fileFormat, rc)
+      subroutine ESMF_StateWrite(state, fileName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
-      type (ESMF_IOFileFormat), intent(in),  optional :: fileFormat
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4030,14 +4011,10 @@ module ESMF_StateMod
 !       Arrays.
 !     \item[fileName]
 !       File to be written.  
-!     \item[{[fileFormat]}]
-!       The file format to be used.  Currently, only
-!       ESMF\_IO\_FILEFORMAT\_NETCDF is supported, which is the default.
-!       Future releases will support others.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if fileFormat is 
-!       ESMF\_IO\_FILEFORMAT\_NETCDF and the NetCDF library is not present.
+!       Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if the NetCDF library is
+!       not present.
 !     \end{description}
 !
 !EOP
@@ -4057,7 +4034,7 @@ module ESMF_StateMod
 
         ! invoke C to C++ entry point 
         call c_ESMC_StateWrite(state, state%statep%base, &
-                              fileNameLen, fileName, fileFormat, localrc)
+                              fileNameLen, fileName, localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4071,11 +4048,10 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateWriteRestart(state, iospec, rc)
+      subroutine ESMF_StateWriteRestart(state, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State):: state 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -4088,8 +4064,6 @@ module ESMF_StateMod
 !     \begin{description}
 !     \item[state]
 !       {\tt ESMF\_State} to save contents of.
-!     \item[{[iospec]}]
-!       An {\tt ESMF\_IOSpec} object which contains I/O information and options.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4098,10 +4072,6 @@ module ESMF_StateMod
         integer :: localrc
 
         localrc = ESMF_RC_NOT_IMPL
-
-        if (present (iospec)) then
-!         quiet compiler warning about unused dummy arg
-        end if
 
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -6930,10 +6900,4 @@ module ESMF_StateMod
       end function ESMF_StateDeserialize
 !------------------------------------------------------------------------------
 
-
 end module ESMF_StateMod
-
-
-
-
-

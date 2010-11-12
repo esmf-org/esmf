@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.8 2010/10/28 22:54:08 eschwab Exp $
+! $Id: ESMF_FieldWr.F90,v 1.9 2010/11/12 06:57:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -31,7 +31,6 @@ module ESMF_FieldWrMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_LogErrMod
-  use ESMF_IOSpecMod
   use ESMF_ArraySpecMod
   use ESMF_ArrayMod
   use ESMF_FieldMod

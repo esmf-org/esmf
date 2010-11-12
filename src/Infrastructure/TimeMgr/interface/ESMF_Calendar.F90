@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.108 2010/11/12 05:31:07 rokuingh Exp $
+! $Id: ESMF_Calendar.F90,v 1.109 2010/11/12 06:58:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -44,9 +44,6 @@
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
       use ESMF_UtilTypesMod
-
-      ! for ReadRestart()/WriteRestart()
-      use ESMF_IOSpecMod
 
       implicit none
 !
@@ -145,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.108 2010/11/12 05:31:07 rokuingh Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.109 2010/11/12 06:58:00 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1250,14 +1247,13 @@
 ! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
-      function ESMF_CalendarReadRestart(name, iospec, rc)
+      function ESMF_CalendarReadRestart(name, rc)
 ! 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarReadRestart
 !
 ! !ARGUMENTS:
       character (len=*),   intent(in)            :: name
-      type(ESMF_IOSpec),   intent(in),  optional :: iospec
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1268,8 +1264,6 @@
 !     \begin{description}
 !     \item[name]
 !          The name of the object instance to restore.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1286,7 +1280,7 @@
 
 !     invoke C to C++ entry point to allocate and restore calendar
       call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
-                                      iospec, localrc)
+                                      localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1627,11 +1621,10 @@
 ! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarWriteRestart(calendar, iospec, rc)
+      subroutine ESMF_CalendarWriteRestart(calendar, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout)         :: calendar
-      type(ESMF_IOSpec),   intent(in),  optional :: iospec
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:  
@@ -1642,8 +1635,6 @@
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to save.  
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1659,7 +1650,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 !     invoke C to C++ entry point 
-      call c_ESMC_CalendarWriteRestart(calendar, iospec, localrc)
+      call c_ESMC_CalendarWriteRestart(calendar, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

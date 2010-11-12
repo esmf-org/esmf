@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.349 2010/09/23 19:08:38 samsoncheung Exp $
+! $Id: ESMF_Field.F90,v 1.350 2010/11/12 06:57:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,8 +33,7 @@ module ESMF_FieldMod
 ! The code in this file implements the {\tt ESMF\_Field} class, which 
 ! represents a single scalar or vector field.  {\tt ESMF\_Field}s associate
 ! a metadata description expressed as a set of {\tt ESMF\_Attributes} with
-! a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, and I/O specification, or
-! {\tt ESMF\_IOSpec} (NOT IMPLEMENTED). 
+! a data {\tt ESMF\_Array} and an {\tt ESMF\_Grid}.
 ! 
 ! A gridToFieldMap describes the relationship of the {\tt ESMF\_Array} to
 ! the {\tt ESMF\_Grid}.  
@@ -47,7 +46,6 @@ module ESMF_FieldMod
   use ESMF_UtilMod
   use ESMF_BaseMod
   use ESMF_LogErrMod
-  use ESMF_IOSpecMod
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayMod
   use ESMF_DELayoutMod
@@ -79,7 +77,6 @@ module ESMF_FieldMod
     type (ESMF_GeomBase)          :: geombase
     type (ESMF_Status)            :: gridstatus
     type (ESMF_Status)            :: datastatus
-    type (ESMF_IOSpec)            :: iospec           ! iospec values
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
@@ -132,7 +129,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.349 2010/09/23 19:08:38 samsoncheung Exp $'
+    '$Id: ESMF_Field.F90,v 1.350 2010/11/12 06:57:17 eschwab Exp $'
 
 !==============================================================================
 !

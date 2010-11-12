@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.13 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Alarm.C,v 1.14 2010/11/12 06:58:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.13 2010/03/04 18:57:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.14 2010/11/12 06:58:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1472,7 +1472,6 @@ int Alarm::count=0;
 // !ARGUMENTS:
       int          nameLen,  // in
       const char  *name,     // in
-      ESMC_IOSpec *iospec,   // in
       int         *rc ) {    // out - return code
 
 //
@@ -1486,7 +1485,7 @@ int Alarm::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI_alarmReadRestart()"
 
-    // TODO:  read alarm state from iospec/name, then allocate/restore
+    // TODO:  read alarm state from name, then allocate/restore
     //        (share code with ESMCI_alarmCreate()).
 
     // Initialize return code; assume routine not implemented
@@ -1501,13 +1500,13 @@ int Alarm::count=0;
 // !IROUTINE:  Alarm::writeRestart - save contents of an Alarm
 //
 // !INTERFACE:
-      int Alarm::writeRestart(
+      int Alarm::writeRestart(void) const {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_IOSpec *iospec) const {
+//    none
 //
 // !DESCRIPTION:
 //      Save information about an {\tt ESMC\_Alarm}.
@@ -1528,7 +1527,7 @@ int Alarm::count=0;
       return(rc);
     }
 
-    // TODO:  save alarm state using iospec/name.  Default to disk file.
+    // TODO:  save alarm state using name.  Default to disk file.
 
     rc = ESMF_SUCCESS;
     return(rc);

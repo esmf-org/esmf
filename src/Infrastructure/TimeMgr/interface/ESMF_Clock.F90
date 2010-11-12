@@ -1,5 +1,5 @@
 
-! $Id: ESMF_Clock.F90,v 1.92 2010/11/12 05:31:07 rokuingh Exp $
+! $Id: ESMF_Clock.F90,v 1.93 2010/11/12 06:58:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -43,9 +43,6 @@
       use ESMF_BaseMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
-
-      ! for ReadRestart()/WriteRestart()
-      use ESMF_IOSpecMod
 
       ! associated derived types
       use ESMF_CalendarMod
@@ -108,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.92 2010/11/12 05:31:07 rokuingh Exp $'
+      '$Id: ESMF_Clock.F90,v 1.93 2010/11/12 06:58:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1194,14 +1191,13 @@
 ! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock (not implemented)
 
 ! !INTERFACE:
-      function ESMF_ClockReadRestart(name, iospec, rc)
+      function ESMF_ClockReadRestart(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockReadRestart
 !
 ! !ARGUMENTS:
       character (len=*), intent(in)            :: name
-      type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1212,8 +1208,6 @@
 !     \begin{description}
 !     \item[name]
 !          The name of the object instance to restore.
-!     \item[{[iospec]}]      
-!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}  
@@ -1232,7 +1226,7 @@
 
 !     invoke C to C++ entry point to allocate and restore clock
       call c_ESMC_ClockReadRestart(ESMF_ClockReadRestart, nameLen, name, &
-                                   iospec, localrc)
+                                   localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1573,11 +1567,10 @@
 ! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_ClockWriteRestart(clock, iospec, rc)
+      subroutine ESMF_ClockWriteRestart(clock, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(inout)         :: clock
-      type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1588,8 +1581,6 @@
 !     \begin{description}
 !     \item[clock]
 !          The object instance to save.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1606,7 +1597,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockWriteRestart(clock, iospec, localrc)
+      call c_ESMC_ClockWriteRestart(clock, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

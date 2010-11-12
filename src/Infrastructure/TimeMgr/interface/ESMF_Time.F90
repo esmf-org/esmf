@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.107 2010/05/07 22:38:06 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.108 2010/11/12 06:58:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -43,9 +43,6 @@
       use ESMF_BaseMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
-
-      ! for ReadRestart()/WriteRestart()
-      use ESMF_IOSpecMod
 
       ! associated derived types
       use ESMF_TimeIntervalTypeMod
@@ -103,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.107 2010/05/07 22:38:06 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.108 2010/11/12 06:58:34 eschwab Exp $'
 
 !==============================================================================
 !
@@ -911,12 +908,11 @@
 ! !IROUTINE:  ESMF_TimeReadRestart - Restore the contents of a Time (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeReadRestart(time, name, iospec, rc)
+      subroutine ESMF_TimeReadRestart(time, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(inout)         :: time
       character (len=*), intent(in)            :: name
-      type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -929,8 +925,6 @@
 !          Restore into this {\tt ESMF\_Time}.
 !     \item[name]
 !          Restore from this object name.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -951,7 +945,7 @@
       nameLen = len_trim(name)
    
 !     invoke C to C++ entry point to restore time
-      call c_ESMC_TimeReadRestart(time, nameLen, name, iospec, localrc)
+      call c_ESMC_TimeReadRestart(time, nameLen, name, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1267,11 +1261,10 @@
 ! !IROUTINE:  ESMF_TimeWriteRestart - Save the contents of a Time (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeWriteRestart(time, iospec, rc)
+      subroutine ESMF_TimeWriteRestart(time, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(inout)         :: time
-      type(ESMF_IOSpec), intent(in),  optional :: iospec
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1282,8 +1275,6 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to save.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1300,7 +1291,7 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
 !     invoke C to C++ entry point
-      call c_ESMC_TimeWriteRestart(time, iospec, localrc)
+      call c_ESMC_TimeWriteRestart(time, localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

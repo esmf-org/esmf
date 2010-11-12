@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm_F.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Alarm_F.C,v 1.5 2010/11/12 06:58:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -225,23 +225,19 @@ extern "C" {
 
        void FTN(c_esmc_alarmreadrestart)(Alarm **ptr, int *nameLen,
                                          const char *name,
-                                         ESMC_IOSpec *iospec,
                                          int *status,
                                          ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_alarmReadRestart(
                                            *nameLen,  // always present
                                                       //   internal argument.
                                             name,     // required.
-                    ESMC_NOT_PRESENT_FILTER(iospec),
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_alarmwriterestart)(Alarm **ptr,
-                                          ESMC_IOSpec *iospec,
                                           int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Alarm::writeRestart(
-                          ESMC_NOT_PRESENT_FILTER(iospec) );
+          int rc = (*ptr)->Alarm::writeRestart();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

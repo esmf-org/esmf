@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time_F.C,v 1.5 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_Time_F.C,v 1.6 2010/11/12 06:58:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -201,22 +201,18 @@ extern "C" {
 
        void FTN(c_esmc_timereadrestart)(Time *ptr, int *nameLen,
                                         const char *name,
-                                        ESMC_IOSpec *iospec,   
                                         int *status,
                                         ESMCI_FortranStrLenArg name_l) {
           int rc = (ptr)->Time::readRestart(
                                                *nameLen,  // always present 
                                                           //  internal argument.
-                                                name,      // required.
-                        ESMC_NOT_PRESENT_FILTER(iospec) );
+                                                name);    // required.
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        void FTN(c_esmc_timewriterestart)(Time *ptr, 
-                                         ESMC_IOSpec *iospec,
                                          int *status) {
-          int rc = (ptr)->Time::writeRestart(
-                        ESMC_NOT_PRESENT_FILTER(iospec) );
+          int rc = (ptr)->Time::writeRestart();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

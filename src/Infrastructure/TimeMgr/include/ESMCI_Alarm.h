@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.15 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Alarm.h,v 1.16 2010/11/12 06:58:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
+#include "ESMCI_Util.h"
 #include "ESMCI_Macros.h"
 #include "ESMF_TimeMgr.inc"
 
@@ -74,7 +75,6 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-#include "ESMCI_IOSpec.h"    // IOSpec class for ReadRestart()/WriteRestart()
 #include "ESMCI_TimeInterval.h"
 #include "ESMCI_Time.h"
 
@@ -227,10 +227,9 @@ class Alarm {
     // for persistence/checkpointing
 
     // friend to restore state
-    friend Alarm *ESMCI_alarmReadRestart(int, const char*,
-                                             ESMC_IOSpec*, int*);
+    friend Alarm *ESMCI_alarmReadRestart(int, const char*, int*);
     // save state
-    int writeRestart(ESMC_IOSpec *iospec=0) const;
+    int writeRestart(void) const;
 
     // internal validation
     int validate(const char *options=0) const;
@@ -306,7 +305,6 @@ class Alarm {
     // friend to restore state
     Alarm *ESMCI_alarmReadRestart(int nameLen,
                                       const char*  name=0,
-                                      ESMC_IOSpec* iospec=0,
                                       int*         rc=0);
 
  }  // namespace ESMCI
