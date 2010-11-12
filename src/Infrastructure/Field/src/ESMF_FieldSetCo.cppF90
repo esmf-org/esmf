@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.23 2010/11/09 06:19:52 eschwab Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.24 2010/11/12 22:47:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.23 2010/11/09 06:19:52 eschwab Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.24 2010/11/12 22:47:06 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -130,7 +130,7 @@ contains
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
 !   integer,               intent(in), optional :: maxHaloLWidth(:) @\
 !   integer,               intent(in), optional :: maxHaloUWidth(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -343,7 +343,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: maxHaloLWidth(:) @\
 !   integer,               intent(in), optional :: maxHaloUWidth(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -534,7 +534,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -676,7 +676,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -799,7 +799,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -946,7 +946,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -1070,7 +1070,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -1225,7 +1225,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -1357,7 +1357,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
 !   integer,               intent(in), optional :: maxHaloLWidth(:) @\
 !   integer,               intent(in), optional :: maxHaloUWidth(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -1907,7 +1907,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: maxHaloLWidth(:) @\
 !   integer,               intent(in), optional :: maxHaloUWidth(:) @\
-!   integer,               intent(inout), optional :: rc @\
+!   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
