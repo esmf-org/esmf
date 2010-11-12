@@ -1,5 +1,4 @@
-
-! $Id: ESMF_Clock.F90,v 1.93 2010/11/12 06:58:00 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.94 2010/11/12 16:54:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -105,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.93 2010/11/12 06:58:00 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.94 2010/11/12 16:54:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -221,7 +220,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockAdvance(clock, timeStep, ringingAlarmList, &
-                                   ringingAlarmCount, rc)
+        ringingAlarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(inout)         :: clock
@@ -348,7 +347,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
       function ESMF_ClockCreateNew(name, timeStep, startTime, stopTime, &
-                                   runDuration, runTimeStepCount, refTime, rc)
+        runDuration, runTimeStepCount, refTime, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateNew
@@ -366,9 +365,6 @@
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Clock}.    
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_ClockCreate()}.
-!     
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]     
@@ -462,9 +458,6 @@
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Clock}.    
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_ClockCreate()}.
-!     
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
@@ -552,10 +545,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
-                               runDuration, runTimeStepCount, refTime, &
-                               currTime, prevTime, currSimTime, prevSimTime, &
-                               calendar, calendarType, timeZone, advanceCount, &
-                               alarmCount, direction, rc)
+        runDuration, runTimeStepCount, refTime, currTime, prevTime, &
+        currSimTime, prevSimTime, calendar, calendarType, timeZone, &
+        advanceCount, alarmCount, direction, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -756,7 +748,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
-                                        alarmList, alarmCount, timeStep, rc)
+        alarmList, alarmCount, timeStep, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(in)            :: clock
@@ -1244,8 +1236,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockSet(clock, name, timeStep, startTime, stopTime, &
-                               runDuration, runTimeStepCount, refTime, &
-                               currTime, advanceCount, direction, rc)
+        runDuration, runTimeStepCount, refTime, currTime, advanceCount, &
+        direction, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)           :: clock

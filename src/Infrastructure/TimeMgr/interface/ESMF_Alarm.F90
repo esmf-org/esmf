@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.88 2010/11/12 16:33:26 rokuingh Exp $
+! $Id: ESMF_Alarm.F90,v 1.89 2010/11/12 16:54:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.88 2010/11/12 16:33:26 rokuingh Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.89 2010/11/12 16:54:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -226,9 +226,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_AlarmCreate()
       function ESMF_AlarmCreateNew(name, clock, ringTime, ringInterval, &
-                                   stopTime, ringDuration, &
-                                   ringTimeStepCount, &
-                                   refTime, enabled, sticky, rc)
+        stopTime, ringDuration, ringTimeStepCount, refTime, enabled, sticky, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmCreateNew
@@ -252,9 +250,6 @@
 !     In {\tt ESMF\_MODE\_REVERSE} (see Section~\ref{sec:Clock}), alarms ring
 !     in reverse, i.e., they begin ringing when they originally ended, and end
 !     ringing when they originally began.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_AlarmCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -374,9 +369,6 @@
 
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Alarm}.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_AlarmCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -545,10 +537,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_AlarmGet(alarm, name, clock, ringTime, prevRingTime, &
-                               ringInterval, stopTime, ringDuration, &
-                               ringTimeStepCount, timeStepRingingCount, &
-                               ringBegin, ringEnd, refTime, ringing, &
-                               ringingOnPrevTimeStep, enabled, sticky, rc)
+        ringInterval, stopTime, ringDuration, ringTimeStepCount, &
+        timeStepRingingCount, ringBegin, ringEnd, refTime, ringing, &
+        ringingOnPrevTimeStep, enabled, sticky, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
@@ -833,8 +824,7 @@
 
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmNotSticky(alarm, ringDuration, &
-                                     ringTimeStepCount, rc)
+      subroutine ESMF_AlarmNotSticky(alarm, ringDuration, ringTimeStepCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
@@ -1115,8 +1105,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_AlarmSet(alarm, name, clock, ringTime, ringInterval, &
-                               stopTime, ringDuration, ringTimeStepCount, &
-                               refTime, ringing, enabled, sticky, rc)
+        stopTime, ringDuration, ringTimeStepCount, refTime, ringing, enabled, &
+        sticky, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.109 2010/11/12 06:58:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.110 2010/11/12 16:54:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.109 2010/11/12 06:58:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.110 2010/11/12 16:54:30 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -597,9 +597,6 @@
 !     Creates and sets a {\tt calendar} to the given built-in
 !     {\tt ESMF\_CalendarType}. 
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarCreate()}.
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[{[name]}]
@@ -666,9 +663,6 @@
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Calendar}.
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarCreate()}.
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
@@ -707,8 +701,8 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
       function ESMF_CalendarCreateCustom(name, daysPerMonth, secondsPerDay, &
-                                         daysPerYear, daysPerYearDn, &
-                                         daysPerYearDd, rc)
+        daysPerYear, daysPerYearDn, daysPerYearDd, rc)
+
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateCustom
 
@@ -723,9 +717,6 @@
 
 ! !DESCRIPTION:
 !     Creates a custom {\tt ESMF\_Calendar} and sets its properties.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -903,10 +894,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_CalendarGet(calendar, name, calendartype, &
-                                  daysPerMonth, monthsPerYear, &
-                                  secondsPerDay, secondsPerYear, &
-                                  daysPerYear, &
-                                  daysPerYearDn, daysPerYearDd, rc)
+        daysPerMonth, monthsPerYear, secondsPerDay, secondsPerYear, &
+        daysPerYear, daysPerYearDn, daysPerYearDd, rc)
+
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
       character (len=*),       intent(out), optional :: name
@@ -1087,9 +1077,6 @@
 !     Returns true if the given year is a leap year within the given calendar,
 !     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarIsLeapYear()}.
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
@@ -1141,9 +1128,6 @@
 ! !DESCRIPTION:
 !     Returns true if the given year is a leap year within the given calendar,
 !     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarIsLeapYear()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1309,9 +1293,6 @@
 ! !DESCRIPTION:
 !     Sets {\tt calendar} to the given built-in {\tt ESMF\_CalendarType}. 
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSet()}.
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
@@ -1367,9 +1348,8 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSet()
       subroutine ESMF_CalendarSetCustom(calendar, name, daysPerMonth, &
-                                        secondsPerDay, &
-                                        daysPerYear, daysPerYearDn, &
-                                        daysPerYearDd, rc)
+        secondsPerDay, daysPerYear, daysPerYearDn, daysPerYearDd, rc)
+
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
       character (len=*),     intent(in),  optional :: name
@@ -1382,9 +1362,6 @@
 
 ! !DESCRIPTION:
 !     Sets properties in a custom {\tt ESMF\_Calendar}.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSet()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1490,9 +1467,6 @@
 !     Manager operations requiring a calendar where one isn't specified will
 !     use the internal calendar of this type.
 !
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSetDefault()}.
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[calendartype]
@@ -1535,9 +1509,6 @@
 !     Sets the default {\tt calendar} to the one given.  Subsequent Time
 !     Manager operations requiring a calendar where one isn't specified will
 !     use this calendar.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSetDefault()}.
 !
 !     The arguments are:
 !     \begin{description}

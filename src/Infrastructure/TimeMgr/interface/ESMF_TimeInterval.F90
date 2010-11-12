@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.97 2010/11/12 06:58:34 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.98 2010/11/12 16:54:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.97 2010/11/12 06:58:34 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.98 2010/11/12 16:54:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -978,17 +978,17 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
       subroutine ESMF_TimeIntervalGetDur(timeinterval, &
-                                         yy, yy_i8, &
-                                         mm, mm_i8, &
-                                         d, d_i8, &
-                                         h, m, &
-                                         s, s_i8, &
-                                         ms, us, ns, &
-                                         d_r8, h_r8, m_r8, s_r8, &
-                                         ms_r8, us_r8, ns_r8, &
-                                         sN, sN_i8, sD, sD_i8, &
-                                         startTime, calendar, calendarType, &
-                                         timeString, timeStringISOFrac, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        startTime, calendar, calendarType, &
+        timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -1197,19 +1197,19 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
       subroutine ESMF_TimeIntervalGetDurStart(timeinterval, &
-                                              yy, yy_i8, &
-                                              mm, mm_i8, &
-                                              d, d_i8, &
-                                              h, m, &
-                                              s, s_i8, &
-                                              ms, us, ns, &
-                                              d_r8, h_r8, m_r8, s_r8, &
-                                              ms_r8, us_r8, ns_r8, &
-                                              sN, sN_i8, sD, sD_i8, &
-                                              startTime, &
-                                              calendar, calendarType, &
-                                              startTimeIn, &
-                                              timeString, timeStringISOFrac, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        startTime, &
+        calendar, calendarType, &
+        startTimeIn, &
+        timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -1425,19 +1425,19 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
       subroutine ESMF_TimeIntervalGetDurCal(timeinterval, &
-                                            yy, yy_i8, &
-                                            mm, mm_i8, &
-                                            d, d_i8, &
-                                            h, m, &
-                                            s, s_i8, &
-                                            ms, us, ns, &
-                                            d_r8, h_r8, m_r8, s_r8, &
-                                            ms_r8, us_r8, ns_r8, &
-                                            sN, sN_i8, sD, sD_i8, &
-                                            startTime, &
-                                            calendar, calendarType, &
-                                            calendarIn, &
-                                            timeString, timeStringISOFrac, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        startTime, &
+        calendar, calendarType, &
+        calendarIn, &
+        timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -1653,20 +1653,20 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
       subroutine ESMF_TimeIntervalGetDurCalTyp(timeinterval, &
-                                               yy, yy_i8, &
-                                               mm, mm_i8, &
-                                               d, d_i8, &
-                                               h, m, &
-                                               s, s_i8, &
-                                               ms, us, ns, &
-                                               d_r8, h_r8, m_r8, s_r8, &
-                                               ms_r8, us_r8, ns_r8, &
-                                               sN, sN_i8, sD, sD_i8, &
-                                               startTime, &
-                                               calendar, calendarType, &
-                                               calendarTypeIn, &
-                                               timeString, &
-                                               timeStringISOFrac, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        startTime, &
+        calendar, calendarType, &
+        calendarTypeIn, &
+        timeString, &
+        timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -2038,15 +2038,15 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
       subroutine ESMF_TimeIntervalSetDur(timeinterval, &
-                                         yy, yy_i8, &
-                                         mm, mm_i8, &
-                                         d, d_i8, &
-                                         h, m, &
-                                         s, s_i8, &
-                                         ms, us, ns, &
-                                         d_r8, h_r8, m_r8, s_r8, &
-                                         ms_r8, us_r8, ns_r8, &
-                                         sN, sN_i8, sD, sD_i8, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -2184,16 +2184,16 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
       subroutine ESMF_TimeIntervalSetDurStart(timeinterval, &
-                                              yy, yy_i8, &
-                                              mm, mm_i8, &
-                                              d, d_i8, &
-                                              h, m, &
-                                              s, s_i8, &
-                                              ms, us, ns, &
-                                              d_r8, h_r8, m_r8, s_r8, &
-                                              ms_r8, us_r8, ns_r8, &
-                                              sN, sN_i8, sD, sD_i8, &
-                                              startTime, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        startTime, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -2338,15 +2338,15 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
       subroutine ESMF_TimeIntervalSetDurCal(timeinterval, &
-                                            yy, yy_i8, &
-                                            mm, mm_i8, &
-                                            d, d_i8, &
-                                            h, m, &
-                                            s, s_i8, &
-                                            ms, us, ns, &
-                                            d_r8, h_r8, m_r8, s_r8, &
-                                            ms_r8, us_r8, ns_r8, &
-                                            sN, sN_i8, sD, sD_i8, calendar, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, calendar, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -2497,16 +2497,16 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
       subroutine ESMF_TimeIntervalSetDurCalTyp(timeinterval, &
-                                               yy, yy_i8, &
-                                               mm, mm_i8, &
-                                               d, d_i8, &
-                                               h, m, &
-                                               s, s_i8, &
-                                               ms, us, ns, &
-                                               d_r8, h_r8, m_r8, s_r8, &
-                                               ms_r8, us_r8, ns_r8, &
-                                               sN, sN_i8, sD, sD_i8, &
-                                               calendarType, rc)
+        yy, yy_i8, &
+        mm, mm_i8, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        calendarType, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval

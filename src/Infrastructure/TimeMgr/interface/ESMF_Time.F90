@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.108 2010/11/12 06:58:34 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.109 2010/11/12 16:54:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.108 2010/11/12 06:58:34 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.109 2010/11/12 16:54:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -458,20 +458,22 @@
 ! !IROUTINE: ESMF_TimeGet - Get a Time value 
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGet(time, yy, yy_i8, &
-                                    mm, dd, &
-                                    d, d_i8, &
-                                    h, m, &
-                                    s, s_i8, &
-                                    ms, us, ns, &
-                                    d_r8, h_r8, m_r8, s_r8, &
-                                    ms_r8, us_r8, ns_r8, &
-                                    sN, sN_i8, sD, sD_i8, &
-                                    calendar, calendarType, timeZone, &
-                                    timeString, timeStringISOFrac, &
-                                    dayOfWeek, midMonth, &
-                                    dayOfYear,  dayOfYear_r8, &
-                                    dayOfYear_intvl, rc)
+      subroutine ESMF_TimeGet(time, &
+        yy, yy_i8, &
+        mm, dd, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        calendar, calendarType, timeZone, &
+        timeString, timeStringISOFrac, &
+        dayOfWeek, midMonth, &
+        dayOfYear,  dayOfYear_r8, &
+        dayOfYear_intvl, rc)
+
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(inout)         :: time
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
@@ -960,17 +962,18 @@
 ! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSet(time, yy, yy_i8, &
-                                    mm, dd, &
-                                    d, d_i8, &
-                                    h, m, &
-                                    s, s_i8, &
-                                    ms, us, ns, &
-                                    d_r8, h_r8, m_r8, s_r8, &
-                                    ms_r8, us_r8, ns_r8, &
-                                    sN, sN_i8, sD, sD_i8, &
-                                    calendar, calendarType, &
-                                    timeZone, rc)
+      subroutine ESMF_TimeSet(time, &
+        yy, yy_i8, &
+        mm, dd, &
+        d, d_i8, &
+        h, m, &
+        s, s_i8, &
+        ms, us, ns, &
+        d_r8, h_r8, m_r8, s_r8, &
+        ms_r8, us_r8, ns_r8, &
+        sN, sN_i8, sD, sD_i8, &
+        calendar, calendarType, &
+        timeZone, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(inout)         :: time
