@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.130 2010/10/28 22:54:07 eschwab Exp $
+! $Id: ESMF_Array.F90,v 1.131 2010/11/12 02:40:39 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.130 2010/10/28 22:54:07 eschwab Exp $'
+    '$Id: ESMF_Array.F90,v 1.131 2010/11/12 02:40:39 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -1307,7 +1307,7 @@ contains
     integer :: localrc                   ! local return code
     integer :: localtk
     integer :: rank, time
-    logical :: file_exists
+    logical :: appd_internal
     character(len=80) :: varname
     type(ESMF_IOFmtFlag) :: iofmt_internal
     character(len=10) :: piofmt
@@ -1385,8 +1385,8 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     if(present(variableName)) varname = variableName
  
-    file_exists = .false.
-    if(present(append)) file_exists = append
+    appd_internal = .false.
+    if(present(append)) appd_internal = append
 
 
     ! Call a T/K/R specific interface in order to create the proper
@@ -1404,23 +1404,23 @@ contains
         ! The PIO data type is PIO_int
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DI4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl1DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DI4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl2DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DI4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl3DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DI4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl4DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DI4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl5DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -1433,23 +1433,23 @@ contains
         ! The PIO data type is PIO_real
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DR4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DR4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DR4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DR4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DR4(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
@@ -1462,23 +1462,23 @@ contains
         ! The PIO data type is PIO_double
         select case(rank)
           case (1)
-            call ESMF_ArrayWriteIntl1DR8(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl1DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
-            call ESMF_ArrayWriteIntl2DR8(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl2DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
-            call ESMF_ArrayWriteIntl3DR8(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl3DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
-            call ESMF_ArrayWriteIntl4DR8(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl4DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
-            call ESMF_ArrayWriteIntl5DR8(array, file, varname, file_exists, time, piofmt, rc=localrc)
+            call ESMF_ArrayWriteIntl5DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.29 2010/11/11 19:36:34 eschwab Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.30 2010/11/12 02:40:39 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.29 2010/11/11 19:36:34 eschwab Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.30 2010/11/12 02:40:39 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -190,13 +190,13 @@ contains
 ! !IROUTINE: ESMF_ArrayWriteIntl - Write an ESMF_Array via PIO @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, file, varname, file_exists, piofmt, rc) @\
+! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, file, varname, appd_internal, piofmt, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   character(*),               intent(in)              :: file @\
 !   character(*),               intent(in)              :: varname @\
-!   logical,                    intent(in)              :: file_exists @\
+!   logical,                    intent(in)              :: appd_internal @\
 !   character(*),               intent(in)              :: piofmt @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
@@ -215,7 +215,7 @@ contains
 !    The name of the output file in which Fortran array is written to. @\
 !   \item[variableName] @\
 !     Variable name written in output file @\
-!   \item[{[file_exists]}] @\
+!   \item[{[appd_internal]}] @\
 !     A tag indicates file already existed with value 1. @\
 !   \item[piofmt] @\
 !    The IO format supported are "bin", "pnc", and "snc". @\
@@ -230,12 +230,12 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayWriteIntl" @\
-  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, file_exists, time, piofmt, rc) @\
+  subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, appd_internal, time, piofmt, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     character(*),               intent(in)              :: file @\
     character(*),               intent(in)              :: varname @\
-    logical,                    intent(in)              :: file_exists @\
+    logical,                    intent(in)              :: appd_internal @\
     integer,                    intent(in)              :: time @\
     character(*),               intent(in)              :: piofmt @\
     integer,                    intent(out),  optional  :: rc @\
@@ -389,7 +389,7 @@ contains
     call ESMF_VMBarrier(vm_opt, rc=localrc) @\
     ! @\
     mode = pio_64bit_offset @\
-    if (file_exists .and. piofmt.ne.'bin') then @\
+    if (appd_internal .and. piofmt.ne.'bin') then @\
       ! For bundle append @\
       pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,trim(file),mode=PIO_write) @\
       pioerr = PIO_redef(FileObj) @\
@@ -421,21 +421,24 @@ contains
     ! Output are dimid_x,dimid_y,dimid_z @\
 @\
     if(piofmt .ne. 'bin') then @\
-    localrc = 1 @\
-    ! Comes in when append mode or file does not exist @\
-    if(file_exists .or. .not.isfilepresent) then  @\
-      if(time.gt.0) then @\
-       pioerr = PIO_def_var(FileObj,varname,basepiotype, (/dimid_xyz,dimid_time/),vard) @\
-      else @\
-       pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz ,vard) @\
-      endif @\
+     localrc = 1 @\
+     ! Comes in when append mode or file does not exist @\
+     ! However, do not come in when 2nd time of time slice @\
+     if(time.gt.0 .and. isfilepresent) then  @\
+       ! skip @\
+     else @\
+       if(time.gt.0) then @\
+        pioerr = PIO_def_var(FileObj,varname,basepiotype, (/dimid_xyz,dimid_time/),vard) @\
+       else @\
+        pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz ,vard) @\
+       endif @\
        call check_pioerr(pioerr, localPet,  & @\
-       __FILE__,  & @\
-       __LINE__, " defvar") @\
+        __FILE__,  & @\
+        __LINE__, " defvar") @\
        !TODO: need error checking here! @\
        pioerr = PIO_enddef(FileObj) @\
        !TODO: need error checking here! @\
-    endif @\
+     endif @\
     endif @\
 @\
     if(time.gt.0) then @\
@@ -696,9 +699,9 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
         pioerr = PIO_inq_dimlen(FileObj, dimid_time, time_len) @\
         if(time .gt. time_len) then @\
           call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, & @\
-               "Timeframe is greater than that in file", ESMF_CONTEXT, rc) @\
+             "Timeframe is greater than that in file", ESMF_CONTEXT, rc) @\
           return @\
-        endif @\
+        endif @\    
         frame = time @\
       endif @\
       pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
