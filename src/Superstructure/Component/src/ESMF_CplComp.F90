@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.124 2010/10/15 22:39:56 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.125 2010/11/12 05:20:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.124 2010/10/15 22:39:56 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.125 2010/11/12 05:20:22 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -250,8 +250,8 @@ contains
   subroutine ESMF_CplCompDestroy(cplcomp, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp)             :: cplcomp
-    integer, intent(out), optional :: rc
+    type(ESMF_CplComp), intent(inout)          :: cplcomp
+    integer,            intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 ! Releases all resources associated with this {\tt ESMF\_CplComp}.

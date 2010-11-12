@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.142 2010/10/15 22:42:56 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.143 2010/11/12 05:20:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.142 2010/10/15 22:42:56 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.143 2010/11/12 05:20:22 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -268,8 +268,8 @@ contains
   subroutine ESMF_GridCompDestroy(gridcomp, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)            :: gridcomp
-    integer, intent(out), optional :: rc
+    type(ESMF_GridComp), intent(inout)          :: gridcomp
+    integer,             intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 ! Releases all resources associated with this {\tt ESMF\_GridComp}.
