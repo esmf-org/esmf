@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.168 2010/11/04 19:06:24 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.169 2010/11/12 05:34:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.168 2010/11/04 19:06:24 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.169 2010/11/12 05:34:23 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -6184,8 +6184,8 @@ end function ESMF_GridCreateFrmScripReg
       subroutine ESMF_GridDestroy(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      integer, intent(out), optional :: rc
+      type(ESMF_Grid), intent(inout)         :: grid
+      integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Destroys an {\tt ESMF\_Grid} object and related internal structures. This call

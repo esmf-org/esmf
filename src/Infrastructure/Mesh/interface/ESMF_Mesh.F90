@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.48 2010/11/10 22:29:04 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.49 2010/11/12 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.48 2010/11/10 22:29:04 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.49 2010/11/12 05:33:06 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.48 2010/11/10 22:29:04 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.49 2010/11/12 05:33:06 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1373,8 +1373,8 @@ end function ESMF_MeshCreateFromScrip
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)           :: mesh
-    integer,        intent(out), optional :: rc
+    type(ESMF_Mesh), intent(inout)          :: mesh
+    integer,         intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !    Destroy the Mesh. This call removes all internal memory associated with {\tt mesh}. 

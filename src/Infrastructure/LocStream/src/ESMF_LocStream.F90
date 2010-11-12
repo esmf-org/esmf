@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.32 2010/10/14 19:57:11 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.33 2010/11/12 05:33:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.32 2010/10/14 19:57:11 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.33 2010/11/12 05:33:29 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1636,8 +1636,8 @@ contains
       subroutine ESMF_LocStreamDestroy(locstream,rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(inout)   :: locstream 
-      integer, intent(out), optional               :: rc
+      type(ESMF_LocStream), intent(inout)          :: locstream 
+      integer,              intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !     Deallocate an {\tt ESMF\_LocStream} object and all appropriate 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.75 2010/11/09 06:19:52 eschwab Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.76 2010/11/12 05:35:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.75 2010/11/09 06:19:52 eschwab Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.76 2010/11/12 05:35:26 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -217,8 +217,8 @@ contains
   subroutine ESMF_FieldDestroy(field, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field) :: field       
-    integer, intent(out), optional :: rc     
+    type(ESMF_Field), intent(inout)         :: field       
+    integer,          intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 ! Releases all resources associated with the {\tt ESMF\_Field}.

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.8 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.9 2010/11/12 05:34:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 program ESMF_GridCreateEx
 
 !==============================================================================
-!ESMF_EX_NOTWORKING_AMPLE        String used by test script to count examples.
+!EX_NOTWORKING_AMPLE        String used by test script to count examples.
 !==============================================================================
 
 !  !PROGRAM: ESMF_GridCreateEx - Examples of Grid creation.
@@ -54,8 +54,7 @@ program ESMF_GridCreateEx
 !EOC         
 
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, defaultlogfilename="GridCreateTripoleEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
 
       rootPet = zero
