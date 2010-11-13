@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.106 2010/11/12 06:58:35 eschwab Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.107 2010/11/13 00:25:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -235,46 +235,48 @@
 #endif
       end type
 
+      ! Note:  any changes made to this Fortran list must also be made to
+      !        the corresponding C++ list in ESMCI_Util.C
+
+      ! Caution:  The NAG compiler v5.2 error-exits if there are blank lines in
+      !           this list.
+
       ! these work well for internal ESMF use, arguments, etc
       type(ESMF_ObjectID), parameter :: &
-         ESMF_ID_BASE = ESMF_ObjectID(1, "ESMF_Base"), &
-         ESMF_ID_LOGERR = ESMF_ObjectID(2, "ESMF_LogErr"), &
-         ESMF_ID_TIME = ESMF_ObjectID(3, "ESMF_Time"), &
-         ESMF_ID_CALENDAR = ESMF_ObjectID(4, "ESMF_Calendar"), &
-         ESMF_ID_TIMEINTERVAL = ESMF_ObjectID(5, "ESMF_TimeInterval"), &
-         ESMF_ID_ALARM = ESMF_ObjectID(6, "ESMF_Alarm"), &
-         ESMF_ID_CLOCK = ESMF_ObjectID(7, "ESMF_Clock"), &
-         ESMF_ID_ARRAYSPEC = ESMF_ObjectID(8, "ESMF_ArraySpec"), &
-         ESMF_ID_LOCALARRAY = ESMF_ObjectID(9, "ESMF_LocalArray"), &
-         ESMF_ID_ARRAYBUNDLE = ESMF_ObjectID(10, "ESMF_ArrayBundle"), &
-         ESMF_ID_VM = ESMF_ObjectID(11, "ESMF_VM"), &
-         ESMF_ID_DELAYOUT = ESMF_ObjectID(12, "ESMF_DELayout"), &
-         ESMF_ID_CONFIG = ESMF_ObjectID(13, "ESMF_Config"), &
-         ESMF_ID_ARRAY = ESMF_ObjectID(14, "ESMF_Array"), &
-
-         ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &
-         ESMF_ID_IGRID = ESMF_ObjectID(19, "ESMF_IGrid"), &
-         ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(20, "ESMF_ExchangePacket"), &
-
-         ESMF_ID_COMMTABLE = ESMF_ObjectID(21, "ESMF_CommTable"), &
-         ESMF_ID_ROUTETABLE = ESMF_ObjectID(22, "ESMF_RouteTable"), &
-         ESMF_ID_ROUTE = ESMF_ObjectID(23, "ESMF_Route"), &
-         ESMF_ID_ROUTEHANDLE = ESMF_ObjectID(24, "ESMF_RouteHandle"), &
-         ESMF_ID_FIELDDATAMAP = ESMF_ObjectID(25, "ESMF_FieldDataMap"), &
-         ESMF_ID_FIELD = ESMF_ObjectID(26, "ESMF_Field"), &
-
-         ESMF_ID_BUNDLEDATAMAP = ESMF_ObjectID(27, "ESMF_FieldBundleDataMap"), &
-
-         ESMF_ID_FIELDBUNDLE = ESMF_ObjectID(28, "ESMF_FieldBundle"), &
-         ESMF_ID_GEOMBASE = ESMF_ObjectID(29, "ESMF_GeomBase"), &
-         ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
-         ESMF_ID_LOCSTREAM = ESMF_ObjectID(31, "ESMF_Locstream"), &
-         ESMF_ID_STATE = ESMF_ObjectID(32, "ESMF_State"), &
-         ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
-         ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
-         ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
-         ESMF_ID_XGRID = ESMF_ObjectID(36, "ESMF_XGrid"), &
-         ESMF_ID_NONE = ESMF_ObjectID(99, "ESMF_None")
+        ESMF_ID_BASE           = ESMF_ObjectID(1,  "ESMF_Base"), &
+        ESMF_ID_LOGERR         = ESMF_ObjectID(2,  "ESMF_LogErr"), &
+        ESMF_ID_TIME           = ESMF_ObjectID(3,  "ESMF_Time"), &
+        ESMF_ID_CALENDAR       = ESMF_ObjectID(4,  "ESMF_Calendar"), &
+        ESMF_ID_TIMEINTERVAL   = ESMF_ObjectID(5,  "ESMF_TimeInterval"), &
+        ESMF_ID_ALARM          = ESMF_ObjectID(6,  "ESMF_Alarm"), &
+        ESMF_ID_CLOCK          = ESMF_ObjectID(7,  "ESMF_Clock"), &
+        ESMF_ID_ARRAYSPEC      = ESMF_ObjectID(8,  "ESMF_ArraySpec"), &
+        ESMF_ID_LOCALARRAY     = ESMF_ObjectID(9,  "ESMF_LocalArray"), &
+        ESMF_ID_ARRAYBUNDLE    = ESMF_ObjectID(10, "ESMF_ArrayBundle"), &
+        ESMF_ID_VM             = ESMF_ObjectID(11, "ESMF_VM"), &
+        ESMF_ID_DELAYOUT       = ESMF_ObjectID(12, "ESMF_DELayout"), &
+        ESMF_ID_CONFIG         = ESMF_ObjectID(13, "ESMF_Config"), &
+        ESMF_ID_ARRAY          = ESMF_ObjectID(14, "ESMF_Array"), &
+        ESMF_ID_PHYSGRID       = ESMF_ObjectID(15, "ESMF_PhysGrid"), &
+        ESMF_ID_IGRID          = ESMF_ObjectID(16, "ESMF_IGrid"), &
+        ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(17, "ESMF_ExchangePacket"), &
+        ESMF_ID_COMMTABLE      = ESMF_ObjectID(18, "ESMF_CommTable"), &
+        ESMF_ID_ROUTETABLE     = ESMF_ObjectID(19, "ESMF_RouteTable"), &
+        ESMF_ID_ROUTE          = ESMF_ObjectID(20, "ESMF_Route"), &
+        ESMF_ID_ROUTEHANDLE    = ESMF_ObjectID(21, "ESMF_RouteHandle"), &
+        ESMF_ID_FIELDDATAMAP   = ESMF_ObjectID(22, "ESMF_FieldDataMap"), &
+        ESMF_ID_FIELD          = ESMF_ObjectID(23, "ESMF_Field"), &
+        ESMF_ID_BUNDLEDATAMAP  = ESMF_ObjectID(24, "ESMF_FieldBundleDataMap"), &
+        ESMF_ID_FIELDBUNDLE    = ESMF_ObjectID(25, "ESMF_FieldBundle"), &
+        ESMF_ID_GEOMBASE       = ESMF_ObjectID(26, "ESMF_GeomBase"), &
+        ESMF_ID_REGRID         = ESMF_ObjectID(27, "ESMF_Regrid"), &
+        ESMF_ID_LOCSTREAM      = ESMF_ObjectID(28, "ESMF_Locstream"), &
+        ESMF_ID_STATE          = ESMF_ObjectID(29, "ESMF_State"), &
+        ESMF_ID_GRIDCOMPONENT  = ESMF_ObjectID(30, "ESMF_GridComponent"), &
+        ESMF_ID_CPLCOMPONENT   = ESMF_ObjectID(31, "ESMF_CplComponent"), &
+        ESMF_ID_COMPONENT      = ESMF_ObjectID(32, "ESMF_Component"), &
+        ESMF_ID_XGRID          = ESMF_ObjectID(33, "ESMF_XGrid"), &
+        ESMF_ID_NONE           = ESMF_ObjectID(99, "ESMF_None")
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
