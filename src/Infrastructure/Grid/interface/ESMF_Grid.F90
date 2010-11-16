@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.169 2010/11/12 05:34:23 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.170 2010/11/16 00:04:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.169 2010/11/12 05:34:23 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.170 2010/11/16 00:04:40 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -279,6 +279,8 @@ interface ESMF_GridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+
+      module procedure ESMF_GridCreateCopyFromNewDG
       module procedure ESMF_GridCreateFrmDistGrid
       module procedure ESMF_GridCreateFrmDistGridArb
       module procedure ESMF_GridCreateFrmFile
@@ -2136,6 +2138,145 @@ end subroutine ESMF_GridConvertIndex
 
     end  subroutine ESMF_GridGetArrayInfo
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreate"
+!BOP
+! !IROUTINE: ESMF_GridCreate - Create a copy of a Grid with a new DistGrid
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate()
+      function ESMF_GridCreateCopyFromNewDG(grid, distgrid, &
+                 destroyDistGrid, destroyDELayout, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateCopyFromNewDG
+!
+! !ARGUMENTS:
+       type(ESMF_Grid),       intent(in)              :: grid
+       type(ESMF_DistGrid),   intent(in)              :: distgrid
+       logical,               intent(in),   optional  :: destroyDistGrid
+       logical,               intent(in),   optional  :: destroyDELayout
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+! This call allows the user to copy of an existing ESMF Grid, but with a new distribution. 
+! All internal data from the old Grid (coords, items) is redistributed to the new Grid. 
+! 
+! The arguments are:
+! \begin{description}
+! \item[grid]
+!     {\tt ESMF\_Grid} to copy.
+! \item[distgrid]
+!      {\tt ESMF\_DistGrid} object which describes how the Grid is decomposed and
+!      distributed over DEs. 
+! \item[{[destroyDistgrid]}]
+!      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
+!      Defaults to false. 
+! \item[{[destroyDELayout]}]
+!      If true, when the Grid is destroyed the DELayout will be destroyed also. 
+!      Defaults to false. 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+       type(ESMF_Grid) :: newGrid
+       integer :: localrc ! local error status
+       type(ESMF_TypeKind) :: coordTypeKind
+       character (len=ESMF_MAXSTR)    :: name
+       integer :: dimCount
+       integer :: distgridToGridMap(ESMF_MAXDIM)
+       integer :: coordDimCount(ESMF_MAXDIM)
+       integer :: coordDimMap(ESMF_MAXDIM,ESMF_MAXDIM)
+       integer :: gridEdgeLWidth(ESMF_MAXDIM)
+       integer :: gridEdgeUWidth(ESMF_MAXDIM)
+       integer :: gridAlign(ESMF_MAXDIM)
+       type(ESMF_IndexFlag) :: indexflag
+       
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! Check init status of arguments
+       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
+       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+       ! TODO: NEED TO MAKE SURE INCOMING DistGrid HAS SAME MinIndex, MaxIndex AS EXISTING
+       !       Grid's DistGrid
+
+
+       ! Get info from old grid to create new Grid.
+       call ESMF_GridGet(grid, &
+            dimCount=dimCount, & 
+            rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Get info from old grid to create new Grid.
+       call ESMF_GridGet(grid, name=name, &
+            dimCount=dimCount, & 
+            coordTypeKind=coordTypeKind, &
+            distgridToGridMap=distgridToGridMap(1:dimCount), &
+            coordDimCount=coordDimCount(1:dimCount), &
+            coordDimMap=coordDimMap(1:dimCount,1:dimCount), &
+            gridEdgeLWidth=gridEdgeLWidth(1:dimCount), &
+            gridEdgeUWidth=gridEdgeUWidth(1:dimCount), &
+            gridAlign=gridAlign(1:dimCount), &
+            indexFlag=indexFlag, &
+            rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Create New Grid
+       newGrid=ESMF_GridCreate(name=name, &
+            coordTypeKind=coordTypeKind, &
+            distgrid=distgrid, &
+            distgridToGridMap=distgridToGridMap(1:dimCount), &
+            coordDimCount=coordDimCount(1:dimCount), &
+            coordDimMap=coordDimMap(1:dimCount,1:dimCount), &
+            gridEdgeLWidth=gridEdgeLWidth(1:dimCount), &
+            gridEdgeUWidth=gridEdgeUWidth(1:dimCount), &
+            gridAlign=gridAlign(1:dimCount), &
+            ! gridMemLBound=gridMemLBound, &   ! TODO: NEED TO ADD THIS TO GET
+            indexFlag=indexFlag, &
+            destroyDistGrid=destroyDistGrid, &
+            destroyDELayout=destroyDELayout, &
+            rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Add Coords to new grid       
+       ! call ESMF_GridAddCoord(newGrid, staggerloc=<staggerlocs>, rc=localrc)
+
+       ! Create Arraybundle
+       ! Pull coord Arrays out of old grid and put them into Arraybundle
+       ! for each staggerloc added above
+       ! do i=1,dimCount
+       !    call ESMF_GridGetCoord(grid,coordDim=i, staggerloc=<staggerlocs>, &
+       !            array=array, rc=localrc)   
+       !    ....
+
+
+       ! Create 2nd Arraybundle
+       ! Pull coord Arrays out of new grid and put them into Arraybundle
+       ! for each staggerloc added above
+       ! do i=1,dimCount
+       !    call ESMF_GridGetCoord(newGrid,coordDim=i, staggerloc=<staggerlocs>, &
+       !            array=array, rc=localrc)   
+       !    ....
+
+ 
+       ! Redist between ArrayBundles
+
+       ! Destroy ArrayBundles and release Routehandle
+
+       ! Set return value
+       ESMF_GridCreateCopyFromNewDG = newGrid
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    end function ESMF_GridCreateCopyFromNewDG
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2405,6 +2546,7 @@ end subroutine ESMF_GridConvertIndex
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridCreateFrmDistGrid
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
