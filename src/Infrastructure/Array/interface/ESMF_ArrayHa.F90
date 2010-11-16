@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.14 2010/11/10 05:02:21 samsoncheung Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.15 2010/11/16 17:53:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.14 2010/11/10 05:02:21 samsoncheung Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.15 2010/11/16 17:53:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -695,7 +695,9 @@ contains
 
 #else
     ! Return indicating PIO not present
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      "ESMF must be compiled with PIO support to support I/O methods", &
+      ESMF_CONTEXT, rc)
 #endif
 
   end subroutine ESMF_ArrayRead
