@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2010/11/11 00:48:34 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2010/11/16 15:45:57 w6ws Exp $
 #
 # Cygwin.g95.default
 #
@@ -129,6 +129,11 @@ endif
 #
 ESMF_F90COMPILEFREENOCPP = -ffree-form
 ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
+
+############################################################
+# Set huge line length limit for free format files
+#
+ESMF_F90COMPILEOPTS += -ffree-line-length-huge
 
 ############################################################
 # Set rpath syntax
