@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.170 2010/11/16 00:04:40 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.171 2010/11/17 19:15:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,6 +37,8 @@
       use ESMF_BaseMod          ! ESMF base class
       use ESMF_LogErrMod
       use ESMF_ArrayMod
+      use ESMF_ArrayBundleMod
+      use ESMF_RHandleMod
       use ESMF_LocalArrayMod    ! ESMF local array class
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
@@ -223,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.170 2010/11/16 00:04:40 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.171 2010/11/17 19:15:05 feiliu Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2193,6 +2195,11 @@ end subroutine ESMF_GridConvertIndex
        integer :: gridEdgeUWidth(ESMF_MAXDIM)
        integer :: gridAlign(ESMF_MAXDIM)
        type(ESMF_IndexFlag) :: indexflag
+       integer :: i, j, nStaggers
+       type(ESMF_ArrayBundle) :: srcAB, dstAB
+       type(ESMF_RouteHandle) :: routehandle
+       type(ESMF_STAGGERLOC), allocatable :: srcStaggers(:)
+       type(ESMF_Array), allocatable :: srcA(:), dstA(:)
        
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -2246,30 +2253,74 @@ end subroutine ESMF_GridConvertIndex
        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! For Bob:
+        ! please fill out nStaggers and srcStaggers list, rest of the code is
+        ! is generic. nStaggers and srcStaggers are currently hardcoded for demo.
+        nStaggers = 3
+        allocate(srcStaggers(nStaggers))
+        srcStaggers(1) = ESMF_STAGGERLOC_CENTER
+        srcStaggers(2) = ESMF_STAGGERLOC_EDGE1
+        srcStaggers(3) = ESMF_STAGGERLOC_EDGE2
+
        ! Add Coords to new grid       
-       ! call ESMF_GridAddCoord(newGrid, staggerloc=<staggerlocs>, rc=localrc)
+       do i = 1, nStaggers
+           call ESMF_GridAddCoord(newGrid, staggerloc=srcStaggers(i), rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                ESMF_CONTEXT, rcToReturn=rc)) return
+       enddo
 
        ! Create Arraybundle
        ! Pull coord Arrays out of old grid and put them into Arraybundle
        ! for each staggerloc added above
-       ! do i=1,dimCount
-       !    call ESMF_GridGetCoord(grid,coordDim=i, staggerloc=<staggerlocs>, &
-       !            array=array, rc=localrc)   
-       !    ....
-
+       allocate(srcA(dimCount*nStaggers), dstA(dimCount*nStaggers))
+       do i=1,dimCount
+        do j = 1, nStaggers
+          call ESMF_GridGetCoord(grid, coordDim=i, staggerloc=srcStaggers(j), &
+                  array=srcA((i-1)*nStaggers+j), rc=localrc)   
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+       enddo 
+       srcAB = ESMF_ArrayBundleCreate(srcA, arrayCount=nStaggers, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       deallocate(srcA)
 
        ! Create 2nd Arraybundle
        ! Pull coord Arrays out of new grid and put them into Arraybundle
        ! for each staggerloc added above
-       ! do i=1,dimCount
-       !    call ESMF_GridGetCoord(newGrid,coordDim=i, staggerloc=<staggerlocs>, &
-       !            array=array, rc=localrc)   
-       !    ....
+       do i=1,dimCount
+        do j = 1, nStaggers
+          call ESMF_GridGetCoord(grid, coordDim=i, staggerloc=srcStaggers(j), &
+                  array=dstA((i-1)*nStaggers+j), rc=localrc)   
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+       enddo 
+       dstAB = ESMF_ArrayBundleCreate(dstA, arrayCount=nStaggers, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       deallocate(dstA)
+       deallocate(srcStaggers)
 
- 
        ! Redist between ArrayBundles
+       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Destroy ArrayBundles and release Routehandle
+       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_ArrayBundleDestroy(dstAB, rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Set return value
        ESMF_GridCreateCopyFromNewDG = newGrid
