@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.94 2010/11/12 16:54:30 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.95 2010/11/17 06:53:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.94 2010/11/12 16:54:30 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.95 2010/11/17 06:53:09 eschwab Exp $'
 
 !==============================================================================
 !
@@ -456,7 +456,10 @@
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Creates a copy of a given {\tt ESMF\_Clock}.    
+!     Creates a copy of a given {\tt ESMF\_Clock}, including its list of
+!     {\tt ESMF\_Alarm}s (pointers).  The returned {\tt ESMF\_Clock} copy
+!     shares (points to) the same set of {\tt ESMF\_Alarm} instances as the
+!     given {\tt ESMF\_Clock}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -492,7 +495,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ClockDestroy()"
 !BOP
-! !IROUTINE: ESMF_ClockDestroy - Free all resources associated with a Clock
+! !IROUTINE: ESMF_ClockDestroy - Release resources associated with a Clock
 !
 ! !INTERFACE:
       subroutine ESMF_ClockDestroy(clock, rc)
@@ -502,7 +505,11 @@
       integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt ESMF\_Clock}.
+!     Releases resources associated with this {\tt ESMF\_Clock}.  This releases
+!     the list of associated {\tt ESMF\_Alarm}s (pointers), but not the
+!     {\tt ESMF\_Alarm}s themselves; the user must explicitly call 
+!     {\tt ESMF\_AlarmDestroy()} on each i{\tt ESMF\_Alarm} to release its
+!     resources.
 !
 !     The arguments are:
 !     \begin{description}
