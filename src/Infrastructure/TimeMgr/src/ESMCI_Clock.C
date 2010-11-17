@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.15 2010/11/12 06:58:35 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.16 2010/11/17 06:54:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.15 2010/11/12 06:58:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.16 2010/11/17 06:54:40 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -2044,5 +2044,69 @@ int Clock::count=0;
     return(rc);
 
  } // end Clock::addAlarm
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  Clock::removeAlarm - remove alarm from clock's alarm list
+//
+// !INTERFACE:
+      int Clock::removeAlarm(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      Alarm *alarm) {   // in - alarm to remove
+//
+// !DESCRIPTION:
+//     Adds given alarm to a clock's alarm list. 
+//     Used by {\tt ESMC\_AlarmCreate().}
+//
+//EOP
+// !REQUIREMENTS:  TMG xx.x
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::Clock::removeAlarm()"
+
+    int rc = ESMF_SUCCESS;
+
+    // validate inputs
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    if (alarm == ESMC_NULL_POINTER) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      return(ESMF_FAILURE);
+    }
+
+    // TODO: replace alarmList with C++ STL container
+    // linear search for given alarm in list
+    for(int i=0; i<alarmCount; i++) {
+      if (alarmList[i] == alarm) {
+        // remove alarm by left shifting remainder of list ...
+        for(int j=i; j<alarmCount-1; j++) {
+          alarmList[j] = alarmList[j+1];
+        }
+        // ... and nullifying end of list
+        alarmList[alarmCount-1] = ESMC_NULL_POINTER; 
+        alarmCount--;
+        return(rc);
+      }
+    }
+
+    // given alarm not found in list
+    char logMsg[ESMF_MAXSTR];
+    sprintf(logMsg, "For clock %s, given alarm is not in clock's alarmList.",
+            this->name);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+    return(ESMF_FAILURE);
+
+ } // end Clock::removeAlarm
 
 }  // namespace ESMCI

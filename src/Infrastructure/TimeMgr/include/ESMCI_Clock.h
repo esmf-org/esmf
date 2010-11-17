@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.17 2010/11/12 06:58:00 eschwab Exp $
+// $Id: ESMCI_Clock.h,v 1.18 2010/11/17 06:54:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -245,6 +245,12 @@ namespace ESMCI{
                                  TimeInterval*, int*, Time*, bool*,
                                  bool*, int*);
 
+    // friend function to copy an alarm
+    friend Alarm *ESMCI_alarmCreate(Alarm*, int*);
+
+    // friend to de-allocate alarm
+    friend int ESMCI_alarmDestroy(Alarm **);
+
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
@@ -252,7 +258,8 @@ namespace ESMCI{
  // < declare private interface methods here >
 
     // called only by friend class Alarm
-    int addAlarm(Alarm *alarm);  // (TMG 4.1, 4.2)
+    int addAlarm(Alarm *alarm);    // alarmCreate(), alarmSet() (TMG 4.1, 4.2)
+    int removeAlarm(Alarm *alarm); // alarmDestroy(), alarmSet()
 
     friend class Alarm;
 
