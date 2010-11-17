@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.221 2010/11/12 06:59:07 eschwab Exp $
+! $Id: ESMF_State.F90,v 1.222 2010/11/17 06:57:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.221 2010/11/12 06:59:07 eschwab Exp $'
+      '$Id: ESMF_State.F90,v 1.222 2010/11/17 06:57:50 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -276,57 +276,9 @@ module ESMF_StateMod
 ! \end{description}
 !EOPI
 !------------------------------------------------------------------------------
-      type(ESMF_Array) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
-      type(ESMF_Logical) :: linkChange
-      integer :: localrc
 
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+    call ESMF_StateAddOneArrayX (state, array, proxyflag=.false., rc=rc)
 
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      temp_list(1) = array
-
-      call ESMF_StateClsAddArrayList(state%statep, 1, temp_list, rc=localrc)      
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(state%statep%base, array, linkChange, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lobject = 'array'
-      lvalue1 = 'Import' 
-      lvalue2 = 'Export'
-      lname  = 'VariableIntent'
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArray
 
 !------------------------------------------------------------------------------
@@ -460,58 +412,9 @@ module ESMF_StateMod
 ! \end{description}
 !EOPI
 !------------------------------------------------------------------------------
-      type(ESMF_ArrayBundle) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
-      type(ESMF_Logical) :: linkChange
-      integer :: localrc
 
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundle,rc)
+    call ESMF_StateAddOneArrayBundleX (state, arraybundle, proxyflag=.false., rc=rc)
 
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      temp_list(1) = arraybundle
-
-      call ESMF_StateClsAddArrayBundleList(state%statep, 1, temp_list, &
-        rc=localrc)      
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(state%statep%base, arraybundle, linkChange, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      ! set the import and export Attributes on any Array connected to this State
-      lobject = 'array'
-      lvalue1 = 'Import' 
-      lvalue2 = 'Export'
-      lname  = 'VariableIntent'
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_StateAddOneArrayBundle
 
 !------------------------------------------------------------------------------
@@ -647,57 +550,9 @@ module ESMF_StateMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-      type(ESMF_Field) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
-      type(ESMF_Logical) :: linkChange
-      integer :: localrc
 
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+        call ESMF_StateAddOneFieldX (state, field, proxyflag=.false., rc=rc)
 
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      temp_list(1) = field
-
-      call ESMF_StateClsAddFieldList(state%statep, 1, temp_list, rc=localrc)      
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(state%statep%base, field%ftypep%base, &
-        linkChange, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lobject = 'field'
-      lvalue1 = 'Import' 
-      lvalue2 = 'Export'
-      lname  = 'VariableIntent'
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneField
 
 !------------------------------------------------------------------------------
@@ -836,58 +691,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-      type(ESMF_FieldBundle) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
-      type(ESMF_Logical) :: linkChange
-      integer :: localrc
+        call ESMF_StateAddOneFieldBundleX (state, fieldBundle, proxyflag=.false., rc=rc)
 
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      temp_list(1) = fieldbundle
-
-      call ESMF_StateClAddFieldBundleList(state%statep, temp_list, 1, &
-        rc=localrc)      
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(state%statep%base, &
-        fieldbundle%btypep%base, linkChange, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lobject = 'field'
-      lvalue1 = 'Import' 
-      lvalue2 = 'Export'
-      lname  = 'VariableIntent'
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneFieldBundle
 
 !------------------------------------------------------------------------------
@@ -1153,58 +958,9 @@ module ESMF_StateMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-      type(ESMF_State) :: temp_list(1)
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
-      type(ESMF_Logical) :: linkChange
-      integer :: localrc
 
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedState,rc)
+        call ESMF_StateAddOneStateX (state, nestedState, proxyflag=.false., rc=rc)
 
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-
-      temp_list(1) = nestedState
-
-      call ESMF_StateClsAddStateList(state%statep, 1, temp_list, rc=localrc)      
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      !  link the Attribute hierarchies
-      linkChange = ESMF_TRUE
-      call c_ESMC_AttributeLink(state%statep%base, nestedstate%statep%base, &
-        linkChange, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      ! set the import and export Attributes on any Field connected to this State
-      lobject = 'field'
-      lvalue1 = 'Import' 
-      lvalue2 = 'Export'
-      lname  = 'VariableIntent'
-      if (state%statep%st == ESMF_STATE_IMPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue1, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      else if (state%statep%st == ESMF_STATE_EXPORT) then
-        call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
-          lname, lvalue2, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      endif
-      
-      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddOneState
 
 !------------------------------------------------------------------------------
