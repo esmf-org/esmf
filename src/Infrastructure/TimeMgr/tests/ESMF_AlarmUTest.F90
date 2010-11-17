@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.53 2010/11/10 22:29:04 w6ws Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.54 2010/11/17 06:58:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.53 2010/11/10 22:29:04 w6ws Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.54 2010/11/17 06:58:20 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -189,6 +189,34 @@
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount = 0"
+      write(name, *) "Get number of alarms after destroyed Alarm Test"
+      call ESMF_ClockGet(clock1, alarmCount=alarmCount, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.0), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !print *, "alarmCount = ", alarmCount
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_FAILURE"
+      write(name, *) "Get a destroyed Alarm Test"
+      call ESMF_ClockGetAlarm(clock1, "WAKEUP", alarm=alarm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Advance clock after destroyed alarm test"
+      call ESMF_ClockAdvance(clock1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -496,6 +524,9 @@
                                   alarmCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.3), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !call ESMF_AlarmPrint(alarmList(1), "name", rc=rc)
+      !call ESMF_AlarmPrint(alarmList(2), "name", rc=rc)
+      !call ESMF_AlarmPrint(alarmList(3), "name", rc=rc)
       !print *, "alarmCount = ", alarmCount
 
       ! ----------------------------------------------------------------------------
