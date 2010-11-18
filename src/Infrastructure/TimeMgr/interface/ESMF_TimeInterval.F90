@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.98 2010/11/12 16:54:30 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.99 2010/11/18 17:50:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.98 2010/11/12 16:54:30 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.99 2010/11/18 17:50:29 eschwab Exp $'
 
 !==============================================================================
 !
@@ -390,15 +390,15 @@
       end interface
 !
 !------------------------------------------------------------------------------
+      interface MOD
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return TimeInterval remainder
 !
 ! !INTERFACE:
-      interface MOD
-!     remainder = MOD(timeinterval1, timeinterval2)
+!     function MOD(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: remainder
+!     type(ESMF_TimeInterval) :: MOD
 !
 ! !ARGUMENTS: 
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
@@ -425,6 +425,43 @@
 !     Time Manager API review 6/2003, TMG7.2
 !
       end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return TimeInterval remainder
+!
+! !INTERFACE:
+!     interface MOD
+!     remainder = MOD(timeinterval1, timeinterval2)
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: remainder
+!
+! !ARGUMENTS: 
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
+!
+! !DESCRIPTION:
+!     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
+!     class to return the remainder of {\tt timeinterval1} divided by
+!     {\tt timeinterval2} as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          The dividend.
+!     \item[timeinterval2]
+!          The divisor.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!     module procedure ESMF_TimeIntervalRemainder   ! internal implementation
+!
+! !REQUIREMENTS:
+!     Time Manager API review 6/2003, TMG7.2
+!
+!     end interface
 !
 !------------------------------------------------------------------------------
 !BOP
