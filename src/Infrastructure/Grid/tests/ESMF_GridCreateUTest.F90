@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.104 2010/11/16 00:11:13 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.105 2010/11/18 18:05:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.104 2010/11/16 00:11:13 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.105 2010/11/18 18:05:54 feiliu Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@ program ESMF_GridCreateUTest
 
   type(ESMF_Grid) :: grid, grid2
   type(ESMF_VM) :: vm
-  type(ESMF_DistGrid) :: distgrid,distgrid2
+  type(ESMF_DistGrid) :: distgrid, distgrid2
   type(ESMF_Array) :: array
   integer :: coordDimMap(2,2), dimCount, undistLBound(3), undistUBound(3)
   type(ESMF_IndexFlag) :: indexflag
@@ -173,6 +173,15 @@ program ESMF_GridCreateUTest
 
   ! Create Grid 1
   grid=ESMF_GridCreate(distgrid=distgrid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Grid 2 from the original grid and distgrid
