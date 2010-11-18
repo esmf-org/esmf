@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.90 2010/11/17 06:53:10 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.91 2010/11/18 17:34:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.90 2010/11/17 06:53:10 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.91 2010/11/18 17:34:43 eschwab Exp $'
 
 !==============================================================================
 !
@@ -370,7 +370,7 @@
 ! !DESCRIPTION:
 !     Creates a complete (deep) copy of a given {\tt ESMF\_Alarm}.
 !     The returned {\tt ESMF\_Alarm} copy is associated with the same
-!     {\tt ESMF\_Clock} as the given {\tt ESMF\_Alarm}.  If desired, use
+!     {\tt ESMF\_Clock} as the original {\tt ESMF\_Alarm}.  If desired, use
 !     {\tt ESMF\_AlarmSet(...clock=...)} to re-associate the 
 !     {\tt ESMF\_Alarm} copy with a different {\tt ESMF\_Clock}.
 !

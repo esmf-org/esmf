@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.95 2010/11/17 06:53:09 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.96 2010/11/18 17:34:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.95 2010/11/17 06:53:09 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.96 2010/11/18 17:34:43 eschwab Exp $'
 
 !==============================================================================
 !
@@ -458,8 +458,8 @@
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Clock}, including its list of
 !     {\tt ESMF\_Alarm}s (pointers).  The returned {\tt ESMF\_Clock} copy
-!     shares (points to) the same set of {\tt ESMF\_Alarm} instances as the
-!     given {\tt ESMF\_Clock}.
+!     shares, via pointers, the same set of {\tt ESMF\_Alarm} instances as the
+!     original {\tt ESMF\_Clock}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -508,8 +508,9 @@
 !     Releases resources associated with this {\tt ESMF\_Clock}.  This releases
 !     the list of associated {\tt ESMF\_Alarm}s (pointers), but not the
 !     {\tt ESMF\_Alarm}s themselves; the user must explicitly call 
-!     {\tt ESMF\_AlarmDestroy()} on each i{\tt ESMF\_Alarm} to release its
-!     resources.
+!     {\tt ESMF\_AlarmDestroy()} on each {\tt ESMF\_Alarm} to release its
+!     resources.  {\tt ESMF\_ClockDestroy()} and corresponding 
+!     {\tt ESMF\_AlarmDestroy()}s can be called in either order.
 !
 !     The arguments are:
 !     \begin{description}
