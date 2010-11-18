@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.171 2010/11/17 19:15:05 feiliu Exp $
+! $Id: ESMF_Grid.F90,v 1.172 2010/11/18 18:14:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.171 2010/11/17 19:15:05 feiliu Exp $'
+      '$Id: ESMF_Grid.F90,v 1.172 2010/11/18 18:14:34 feiliu Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2291,7 +2291,7 @@ end subroutine ESMF_GridConvertIndex
        ! for each staggerloc added above
        do i=1,dimCount
         do j = 1, nStaggers
-          call ESMF_GridGetCoord(grid, coordDim=i, staggerloc=srcStaggers(j), &
+          call ESMF_GridGetCoord(newGrid, coordDim=i, staggerloc=srcStaggers(j), &
                   array=dstA((i-1)*nStaggers+j), rc=localrc)   
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
