@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.66 2010/11/12 05:30:10 rokuingh Exp $
+! $Id: ESMF_Config.F90,v 1.67 2010/11/18 00:03:26 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2194,8 +2194,8 @@
 !        Read next line
 !        --------------
          read(lu,'(a)', end=11) line  ! read next line
-         call ESMF_Config_trim ( line )      ! remove trailing blanks
-         call ESMF_Config_pad ( line )        ! Pad with # from end of line
+         call ESMF_Config_trim ( line )      ! remove trailing white space
+         call ESMF_Config_pad ( line )       ! Pad with # from end of line
 
 !        A non-empty line
 !        ----------------
@@ -2237,9 +2237,9 @@
       endif
       config%cptr%buffer(ptr:ptr) = EOB
       config%cptr%nbuf = ptr
-      config%cptr%this_line=' '
-      config%cptr%next_line=0
-      config%cptr%value_begin=0
+      config%cptr%this_line = ' '
+      config%cptr%next_line = 1
+      config%cptr%value_begin = 1
 
       if ( present (rc )) then
         rc = ESMF_SUCCESS
@@ -2838,7 +2838,7 @@
 
 !-------------------------------------------------------------------------
 !
-! !ROUTINE:  ESMF_Config_Trim() - Removes leading blanks from strings.
+! !ROUTINE:  ESMF_Config_Trim() - Removes leading white space from strings.
 !
 ! !DESCRIPTION: 
 !
