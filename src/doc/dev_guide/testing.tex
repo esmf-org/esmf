@@ -1,5 +1,5 @@
 %===============================================================================
-% CVS $Id: testing.tex,v 1.25 2010/04/20 18:07:37 garyblock Exp $
+% CVS $Id: testing.tex,v 1.26 2010/11/18 22:03:58 svasquez Exp $
 % CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/testing.tex,v $
 % CVS $Name:  $
 %===============================================================================
@@ -150,22 +150,6 @@ to identify the source of the bug immediately.
 \end{verbatim}
 
 
-\paragraph{Analyzing unit test results }
-When unit test are run, a Perl script prints out the test results as shown in
-Section "Running ESMF Unit Tests" in the ESMF User's Guide. To print out the test results,
-the Perl script must determine the number of unit tests in each test file and the number of
-processors executing the unit test. It determines the number of tests by counting the
-EX\_UTest, NEX\_UTest, EX\_UTest\_Multi\_Proc\_Only, or NEX\_UTest\_Multi\_Proc\_Only 
-tags in the test source file whichever is appropriate for the test being run. 
-To determine the number of processors, it counts the number of "NUMBER\_OF\_PROCESSORS" strings in the
-unit test output Log file. The script then counts the number of PASS and FAIL strings in the
-test Log file.
-The Perl script first divides the number of PASS strings by the number of processors. If the
-quotient is not a whole  number then the script concludes that the test crashed. If the quotient
-is a whole number, the script then divides the number of FAIL strings by the number of processors.
-The sum of the two quotients must equal the total number of tests, if not the test is marked
-as crashed.
-
 Sometimes a unit test is written expecting a subset of the processors to fail the test. To
 handle this case, the unit test must verify results from each processor as in the unit test below:
 \begin{verbatim}
@@ -185,6 +169,44 @@ handle this case, the unit test must verify results from each processor as in th
     !------------------------------------------------------------------------
 
 \end{verbatim}
+
+Some tests may require that a loop be written to verify multiple results. The following is
+an example of how a single tag, NEX\_UTest, is used instead of a tag for each loop iteration.
+
+\begin{verbatim}
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data in Array via Fortran array pointer access"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = -12, -6
+    j = i + 12 + lbound(fptr, 1)
+    print *, fptr(j), fdata(i)
+    if (fptr(j) /= fdata(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+\end{verbatim}
+
+\paragraph{Analyzing unit test results }
+When unit test are run, a Perl script prints out the test results as shown in
+Section "Running ESMF Unit Tests" in the ESMF User's Guide. To print out the test results,
+the Perl script must determine the number of unit tests in each test file and the number of
+processors executing the unit test. It determines the number of tests by counting the
+EX\_UTest, NEX\_UTest, EX\_UTest\_Multi\_Proc\_Only, or NEX\_UTest\_Multi\_Proc\_Only 
+tags in the test source file whichever is appropriate for the test being run. 
+To determine the number of processors, it counts the number of "NUMBER\_OF\_PROCESSORS" strings in the
+unit test output Log file. The script then counts the number of PASS and FAIL strings in the
+test Log file.
+The Perl script first divides the number of PASS strings by the number of processors. If the
+quotient is not a whole  number then the script concludes that the test crashed. If the quotient
+is a whole number, the script then divides the number of FAIL strings by the number of processors.
+The sum of the two quotients must equal the total number of tests, if not the test is marked
+as crashed.
+
+
 
 \paragraph{Disabling unit tests }
 Sometimes in the software development process it becomes necessary to disable one or more unit tests.
