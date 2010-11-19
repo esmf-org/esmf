@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.70 2010/11/10 22:29:04 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.71 2010/11/19 17:33:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -823,37 +823,42 @@ end subroutine ESMF_LogFlush
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_LogFoundAllocError - Check Fortran status for allocation error
+! !IROUTINE: ESMF_LogFoundAllocError - Check Fortran status for allocation 
+!            error and write message
 
 ! !INTERFACE: 
-      function ESMF_LogFoundAllocError(statusToCheck, line, file, & 
-                                         method, rcToReturn,log)
+      function ESMF_LogFoundAllocError(statusToCheck,msg,line,file, &
+                                          method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                 :: ESMF_LogFoundAllocError
-!
+      logical                                  ::ESMF_LogFoundAllocError 
+!  
 ! !ARGUMENTS:
 !      
-      integer, intent(in)                     :: statusToCheck             
-      integer, intent(in), optional           :: line		           
-      character(len=*), intent(in), optional  :: file		           
-      character(len=*), intent(in), optional  :: method 	           
-      integer, intent(out),optional           :: rcToReturn	           
-      type(ESMF_Log),intent(inout),optional   :: log		           
+      integer, intent(in)                      :: statusToCheck 	      
+      character(len=*), intent(in), optional   :: msg			      
+      integer, intent(in), optional            :: line  		      
+      character(len=*), intent(in), optional   :: file  		      
+      character(len=*), intent(in), optional   :: method		      
+      integer, intent(out),optional            :: rcToReturn		      
+      type(ESMF_Log), intent(inout), optional  :: log			      
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
-!      returned from a memory allocation indicates an allocation error.  
-!      An ESMF predefined memory allocation error 
-!      message will be added to the {\tt ESMF\_Log} along with {\tt line}, 
-!      {\tt file} and {\tt method}.  Additionally, the 
-!      {\tt statusToCheck} will be converted to a {\tt rcToReturn}.
+!      returned from a memory allocation indicates an allocation error.
+!      An ESMF predefined memory allocation error message 
+!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and 
+!      {\tt method}.  Additionally, statusToCheck will be converted to 
+!      {\tt rcToReturn}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
 !      \item [statusToCheck]
 !            Fortran allocation status to check.
+!      \item [{[msg]}]
+!            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
@@ -874,62 +879,73 @@ end subroutine ESMF_LogFlush
 !EOP
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-	integer::msglen=0
-	
+    integer::msglen=0
+    
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
 
 !   The Fortran Standard requires that a successful allocate return a stat value
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_ALLOCATE
         endif
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
-	call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
-	ESMF_LogFoundAllocError=.TRUE.
+        if (present(msg)) then
+          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,method,log)	
+        else
+          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+        endif
+        ESMF_LogFoundAllocError=.TRUE.
+#ifdef ESMF_SUCCESS_DEFAULT_ON
     else
         if (present(rcToReturn)) then
             rcToReturn=ESMF_SUCCESS
         endif
-    endif	
+#endif
+    endif
        
 end function ESMF_LogFoundAllocError
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_LogFoundDeallocError - Check Fortran status for deallocation error
+! !IROUTINE: ESMF_LogFoundDeallocError - Check Fortran status for deallocation 
+!            error and write message
 
 ! !INTERFACE: 
-      function ESMF_LogFoundDeallocError(statusToCheck, line, file, & 
-                                         method, rcToReturn,log)
+	function ESMF_LogFoundDeallocError(statusToCheck,msg,line,file, &
+                                            method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                 :: ESMF_LogFoundDeallocError
-!
+      logical                                  ::ESMF_LogFoundDeallocError
+!	
 ! !ARGUMENTS:
 !      
-      integer, intent(in)                     :: statusToCheck  	     
-      integer, intent(in), optional           :: line			     
-      character(len=*), intent(in), optional  :: file			     
-      character(len=*), intent(in), optional  :: method 		     
-      integer, intent(out),optional           :: rcToReturn		     
-      type(ESMF_Log),intent(inout),optional   :: log			     
+      integer, intent(in)                      :: statusToCheck 	     	
+      character(len=*), intent(in), optional   :: msg			     	
+      integer, intent(in), optional            :: line  		     	
+      character(len=*), intent(in), optional   :: file  		     	
+      character(len=*), intent(in), optional   :: method		     	
+      integer, intent(out),optional            :: rcToReturn		     	
+      type(ESMF_Log), intent(inout), optional  :: log			     	
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
-!      returned from a memory deallocation indicates an allocation error.  
-!      An ESMF predefined memory deallocation error 
-!      message will be added to the {\tt ESMF\_Log} along with {\tt line}, 
-!      {\tt file} and {\tt method}.  Additionally, the 
-!      {\tt statusToCheck} will be converted to a {\tt rcToReturn}.
+!      returned from a memory deallocation indicates an deallocation error.
+!      An ESMF predefined memory deallocation error message 
+!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and 
+!      {\tt method}.  Additionally, statusToCheck will be converted to 
+!      {\tt rcToReturn}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
 !      \item [statusToCheck]
 !            Fortran deallocation status to check.
+!      \item [{[msg]}]
+!            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
@@ -950,60 +966,71 @@ end function ESMF_LogFoundAllocError
 !EOP
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-	integer::msglen=0
-	
+    integer::msglen=0
+    
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundDeallocError=.FALSE.
 
 !   The Fortran Standard requires that a successful deallocate return a stat value
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_DEALLOCATE
         endif
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
-	call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
-	ESMF_LogFoundDeallocError=.TRUE.
+        if (present(msg)) then
+          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,method,log)
+        else
+          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+        endif
+        ESMF_LogFoundDeallocError=.TRUE.
+#ifdef ESMF_SUCCESS_DEFAULT_ON
     else
         if (present(rcToReturn)) then
             rcToReturn=ESMF_SUCCESS
         endif
-    endif	
+#endif
+    endif
        
 end function ESMF_LogFoundDeallocError
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error
+! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error and write message
 
 ! !INTERFACE: 
-      function ESMF_LogFoundError(rcToCheck, line, file, method,& 
-               rcToReturn, log)
+	function ESMF_LogFoundError(rcToCheck, msg, line, file, method, &
+                                       rcToReturn, log)
 !
 ! !RETURN VALUE:
       logical                                         :: ESMF_LogFoundError
 !
 ! !ARGUMENTS:
-!      
+!	
       integer, intent(in)                             :: rcToCheck
+      character(len=*), intent(in), optional          :: msg
       integer, intent(in), optional                   :: line
       character(len=*), intent(in), optional          :: file
       character(len=*), intent(in), optional          :: method
-      integer, intent(out), optional                  :: rcToReturn
-      type(ESMF_Log),intent(inout), target, optional  :: log
+      integer, intent(out),optional                   :: rcToReturn
+      type(ESMF_Log), intent(inout), target, optional :: log
 	
+
 ! !DESCRIPTION:
-!      This function returns a logical true for ESMF return codes that indicate 
+!      This function returns a logical true for ESMF return codes that indicate
 !      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
-!      along with {\tt line}, {\tt file} and {\tt method}.  Additionally, 
-!      {\tt rcToReturn} will be set to {\tt rcToCheck}.
+!      along with
+!      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
+!      Additionally, {\tt rcToReturn} is set to {\tt rcToCheck}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
 !      \item [rcToCheck]
 !            Return code to check.
+!      \item [{[msg]}]
+!            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
@@ -1018,7 +1045,7 @@ end function ESMF_LogFoundDeallocError
 !            at the same time it is testing the value.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default Log.
+!            of the default Log.
 !      
 !      \end{description}
 ! 
@@ -1027,6 +1054,9 @@ end function ESMF_LogFoundDeallocError
     integer:: i
     logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+    integer::msglen=0
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
@@ -1046,24 +1076,34 @@ end function ESMF_LogFoundDeallocError
 
       ! set default returns
       ESMF_LogFoundError = .FALSE.
+#ifdef ESMF_SUCCESS_DEFAULT_ON	
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+#endif
     
       ! check the error code
-      masked = .false.
       if (rcToCheck .NE. ESMF_SUCCESS) then
+        masked = .false.
         do i=1, alog%errorMaskCount
           if (alog%errorMask(i) .eq. rcToCheck) masked = .true.
         enddo
         if (.not.masked) then
-          call ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method,&
-	  log)
-          ESMF_LogFoundError = .TRUE.
+          call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
+          allocmsg=tempmsg(1:msglen)
+          if (present(msg)) then
+            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,&
+              method,log)
+          else
+            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,&
+              method,log)
+          endif
+          ESMF_LogFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
       endif
-    
+#ifdef ESMF_SUCCESS_DEFAULT_ON	
     else    
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+#endif
     endif
        
 end function ESMF_LogFoundError
@@ -1233,7 +1273,7 @@ end subroutine ESMF_LogInitialize
 ! !ARGUMENTS:
 !      
       integer, intent(in)                      :: statusToCheck 	      
-      character(len=*), intent(in)             :: msg			      
+      character(len=*), intent(in), optional   :: msg			      
       integer, intent(in), optional            :: line  		      
       character(len=*), intent(in), optional   :: file  		      
       character(len=*), intent(in), optional   :: method		      
@@ -1254,7 +1294,7 @@ end subroutine ESMF_LogInitialize
 ! 	
 !      \item [statusToCheck]
 !            Fortran allocation status to check.
-!      \item [msg]
+!      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
@@ -1285,19 +1325,23 @@ end subroutine ESMF_LogInitialize
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
-	if (present(rcToReturn)) then
+        if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_ALLOCATE
         endif
         allocmsg=tempmsg(1:msglen)
-	call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,method,log)	
-	ESMF_LogMsgFoundAllocError=.TRUE.
+        if (present(msg)) then
+          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,method,log)	
+        else
+          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+        endif
+        ESMF_LogMsgFoundAllocError=.TRUE.
 #ifdef ESMF_SUCCESS_DEFAULT_ON
     else
         if (present(rcToReturn)) then
             rcToReturn=ESMF_SUCCESS
         endif
 #endif
-    endif	
+    endif
        
 end function ESMF_LogMsgFoundAllocError
 
@@ -1316,7 +1360,7 @@ end function ESMF_LogMsgFoundAllocError
 ! !ARGUMENTS:
 !      
       integer, intent(in)                      :: statusToCheck 	     	
-      character(len=*), intent(in)             :: msg			     	
+      character(len=*), intent(in), optional   :: msg			     	
       integer, intent(in), optional            :: line  		     	
       character(len=*), intent(in), optional   :: file  		     	
       character(len=*), intent(in), optional   :: method		     	
@@ -1337,7 +1381,7 @@ end function ESMF_LogMsgFoundAllocError
 ! 	
 !      \item [statusToCheck]
 !            Fortran deallocation status to check.
-!      \item [msg]
+!      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
@@ -1368,19 +1412,23 @@ end function ESMF_LogMsgFoundAllocError
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
-	if (present(rcToReturn)) then
+        if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_DEALLOCATE
         endif
         allocmsg=tempmsg(1:msglen)
-	call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,method,log)	
-	ESMF_LogMsgFoundDeallocError=.TRUE.
+        if (present(msg)) then
+          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,method,log)
+        else
+          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+        endif
+        ESMF_LogMsgFoundDeallocError=.TRUE.
 #ifdef ESMF_SUCCESS_DEFAULT_ON
     else
         if (present(rcToReturn)) then
             rcToReturn=ESMF_SUCCESS
         endif
 #endif
-    endif	
+    endif
        
 end function ESMF_LogMsgFoundDeallocError
 
@@ -1398,7 +1446,7 @@ end function ESMF_LogMsgFoundDeallocError
 ! !ARGUMENTS:
 !	
       integer, intent(in)                             :: rcToCheck
-      character(len=*), intent(in)                    :: msg
+      character(len=*), intent(in), optional          :: msg
       integer, intent(in), optional                   :: line
       character(len=*), intent(in), optional          :: file
       character(len=*), intent(in), optional          :: method
@@ -1418,7 +1466,7 @@ end function ESMF_LogMsgFoundDeallocError
 ! 	
 !      \item [rcToCheck]
 !            Return code to check.
-!      \item [msg]
+!      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
@@ -1478,8 +1526,13 @@ end function ESMF_LogMsgFoundDeallocError
         if (.not.masked) then
           call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
-	  call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,&
-            method,log)	
+          if (present(msg)) then
+            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,&
+              method,log)
+          else
+            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,&
+              method,log)
+          endif
           ESMF_LogMsgFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
@@ -1503,7 +1556,7 @@ end function ESMF_LogMsgFoundError
 ! !ARGUMENTS:
 !	
       integer, intent(in)                             :: rcValue
-      character(len=*), intent(in)                    :: msg
+      character(len=*), intent(in), optional          :: msg
       integer, intent(in), optional                   :: line
       character(len=*), intent(in), optional          :: file
       character(len=*), intent(in), optional          :: method
@@ -1580,8 +1633,13 @@ end function ESMF_LogMsgFoundError
         if (.not.masked) then
           call c_esmc_loggeterrormsg(rcValue,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
-	  call ESMF_LogWrite(trim(allocmsg)//" "//msg,ESMF_LOG_ERROR,line,file,&
-            method,log)	
+          if (present(msg)) then
+            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,&
+              method,log)
+          else
+            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,&
+              method,log)
+          endif
           if (present(rcToReturn)) rcToReturn = rcValue
         endif
       endif	
@@ -1940,6 +1998,111 @@ end subroutine ESMF_LogOpen
     endif
 
 end subroutine ESMF_LogSet
+
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogSetError - Set ESMF return code for error and write msg
+
+! !INTERFACE: 
+	subroutine ESMF_LogSetError(rcValue, msg, line, file, method, &
+                                       rcToReturn, log)
+
+! !ARGUMENTS:
+!	
+      integer, intent(in)                             :: rcValue
+      character(len=*), intent(in), optional          :: msg
+      integer, intent(in), optional                   :: line
+      character(len=*), intent(in), optional          :: file
+      character(len=*), intent(in), optional          :: method
+      integer, intent(out),optional                   :: rcToReturn
+      type(ESMF_Log), intent(inout), target, optional :: log
+	
+
+! !DESCRIPTION:
+!      This subroutine sets the {\tt rcToReturn} value to {\tt rcValue} if
+!      {\tt rcToReturn} is present and writes this error code to the {\tt ESMF\_Log}
+!      if an error is generated.  A predefined error message will added to the 
+!      {\tt ESMF\_Log} along with a user added {\tt msg}, {\tt line}, {\tt file}
+!      and {\tt method}.  
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [rcValue]
+!            rc value for set
+!      \item [msg]
+!            User-provided message string.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name. 
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, copy the {\tt rcValue} value to {\tt rcToreturn}.
+!            This is not the return code for this function; it allows
+!            the calling code to do an assignment of the error code
+!            at the same time it is testing the value.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!	     of the default Log.
+!      
+!      \end{description}
+! 
+!EOP
+
+    integer:: i
+    logical:: masked
+    type(ESMF_LogPrivate), pointer          :: alog
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+    integer::msglen=0
+
+    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+
+    nullify(alog) ! ensure that the association status is well defined
+    
+    if (present(log)) then
+      if(log%logTableIndex.gt.0) then
+         alog => ESMF_LogTable(log%logTableIndex)
+      endif
+    else
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+    endif
+    
+    if (associated(alog)) then
+
+      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+
+      ! set default returns
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+	
+      ! check the error code
+      if (rcValue .NE. ESMF_SUCCESS) then
+        masked = .false.
+        do i=1, alog%errorMaskCount
+          if (alog%errorMask(i) .eq. rcValue) masked = .true.
+        enddo
+        if (.not.masked) then
+          call c_esmc_loggeterrormsg(rcValue,tempmsg,msglen)
+          allocmsg=tempmsg(1:msglen)
+          if (present(msg)) then
+            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,&
+              method,log)
+          else
+            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,&
+              method,log)
+          endif
+          if (present(rcToReturn)) rcToReturn = rcValue
+        endif
+      endif	
+    else    
+      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
+    endif
+       
+end subroutine ESMF_LogSetError
 
 
 !--------------------------------------------------------------------------
