@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.99 2010/11/18 17:50:29 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.100 2010/11/19 06:58:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.99 2010/11/18 17:50:29 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.100 2010/11/19 06:58:57 eschwab Exp $'
 
 !==============================================================================
 !
@@ -465,7 +465,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalOperator(x) - Multiply a TimeInterval by an integer
+! !IROUTINE:   ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by an integer
 !
 ! !INTERFACE:
       interface operator(*)
@@ -502,7 +502,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalOperator(x) - Multiply a TimeInterval by an integer
+! !IROUTINE:   ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by an integer
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -541,7 +541,7 @@
 !BOPI
 ! TODO: when implemented, change to BOP/EOP
 !
-! !IROUTINE:  ESMF_TimeIntervalOperator(x) - Multiply a TimeInterval by a fraction
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -580,7 +580,7 @@
 !BOPI
 ! TODO: when implemented, change to BOP/EOP
 !
-! !IROUTINE:  ESMF_TimeIntervalOperator(x) - Multiply a TimeInterval by a fraction
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -619,7 +619,7 @@
 !BOPI
 ! TODO: when implemented, change to BOP/EOP
 !
-! !IROUTINE:  ESMF_TimeIntervalOperator(x) - Multiply a TimeInterval by a double precision multiplier
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -658,7 +658,7 @@
 !BOPI
 ! TODO: when implemented, change to BOP/EOP
 !
-! !IROUTINE:  ESMF_TimeIntervalOperator(x) - Multiply a TimeInterval by a double precision multiplier
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
 !
 ! !INTERFACE:
 !     interface operator(*)
