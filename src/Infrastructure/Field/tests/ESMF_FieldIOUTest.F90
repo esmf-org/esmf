@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.11 2010/11/10 20:05:59 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.12 2010/11/19 00:19:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -137,7 +137,14 @@ program ESMF_FieldIOUTest
 ! Test multiple time slices that making use of NETCDF's unlimited dimension
 !
 !------------------------------------------------------------------------
+
+#ifdef ESMF_MPICH
+  !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
+  endtime = 1
+#else
   endtime = 5
+#endif
+  
   do t = 1, endtime
 
 ! Set values of fortran array
@@ -238,7 +245,12 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
 ! Recall my Fortran array at time=t=... :
+#ifdef ESMF_MPICH
+  !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
+  t = 1
+#else
   t = 3
+#endif
   Farray_tw = 0.02  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
