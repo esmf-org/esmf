@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.13 2010/06/23 22:13:48 theurich Exp $ 
+# $Id: makefile,v 1.14 2010/11/19 20:39:23 theurich Exp $ 
 
 ALL: build_here 
 
 SOURCEC	  = ESMCI_LogErr_F.C ESMC_LogErr.C
-SOURCEF	  = ESMF_LogErr_C.F90
+SOURCEF	  = ESMF_LogErr_C.F90 ESMF_LogPublic.F90
 SOURCEH	  = ESMC_LogErr.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

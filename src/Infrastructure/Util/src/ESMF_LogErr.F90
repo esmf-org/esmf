@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.71 2010/11/19 17:33:32 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.72 2010/11/19 20:39:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,8 +54,6 @@
 implicit none
 private
 
-character(*), parameter:: ESMF_LOG_ERRMSG = "ESMF interface returned ERROR"
-  
 !
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -181,7 +179,6 @@ end type ESMF_LogPrivate
     public ESMF_LOG_HALTWARNING
     public ESMF_LOG_HALTERROR
     
-    public ESMF_LOG_ERRMSG
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -203,6 +200,7 @@ end type ESMF_LogPrivate
    public ESMF_LogMsgSetError
    public ESMF_LogOpen
    public ESMF_LogSet
+   public ESMF_LogSetError
    public ESMF_LogWrite
    public ESMF_HaltType
    public ESMF_MsgType
