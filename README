@@ -47,7 +47,7 @@ correct compiler and linker flags yourself.
 
 You can do this in a variety of ways. If you already have build scripts or
 existing makefiles, you can explicitly add the correct compiler and linker
-flags. The ESMF build process puts the modules and libraries in separate
+flags. The ESMF build process puts the modules and library into separate
 directories depending on the options used when building the ESMF library.
 The directory containing the ESMF library file also contains a makefile 
 fragment named "esmf.mk" (e.g. ./lib/libg/Linux.intel.32.mpich.default/esmf.mk
@@ -64,12 +64,6 @@ as to prevent name space conflicts with users' makefiles. Notice that "esmf.mk"
 is a self-contained file and is not affected by environment variables. It is
 not necessary to set any ESMF_ environment variables to use an ESMF library
 that has been installed on your system!
-
-The $ESMF_DIR/application directory contains a sample ESMF code and Makefile
-that demonstrate how to use "esmf.mk" for your own application.
-
-For help at the programming level, cd to $ESMF_DIR/quick_start for an
-example application which uses ESMF.
 
 ================================================================================
 ================================================================================
@@ -99,12 +93,12 @@ Steps of the standard build and install procedure:
  2) Type 'gmake' (the GNU make program) to build the ESMF library.
 
  3) Optionally test the ESMF library build using any of the following targets:
-    a) 'gmake unit_tests' to build and run the unit tests
-    b) 'gmake system_tests' to build and run the system tests
+    a) 'gmake unit_tests' to build and run the unit tests.
+    b) 'gmake system_tests' to build and run the system tests.
     c) 'gmake check' to build and run the unit and system tests.
-    d) 'gmake examples' to build and run the examples
-    e) 'gmake demos' to build and run the demos
-    f) 'gmake all_tests' to build and run all available tests and demos
+    d) 'gmake examples' to build and run the examples.
+    f) 'gmake all_tests' to build and run all available tests and examples.
+    
     Please consult the "Platform Specific Notes Related to Executing Test 
     Targets" below before attempting to use any of these targets.
     
@@ -226,7 +220,7 @@ the intended target platform.
 ESMF_INSTALL_PREFIX
 
 This variable specifies the prefix of the installation path used with the
-install target. Libraries, F90 module files, header files and documentation
+install target. Library, F90 module files, header files and documentation
 all are installed relative to ESMF_INSTALL_PREFIX by default. See the ESMF
 User's Guide on how to customize the installation location of the installed
 files using additional "ESMF_INSTALL_..." environment variables.
@@ -238,18 +232,19 @@ Supported Makefile Targets
 --------------------------
 
  info       : print out extensive system configuration information about what
-              compilers, libraries, paths, flags, etc are being used
+              compilers, libraries, paths, flags, etc are being used.
 
  clean      : remove all files built for this OS/compiler/ABI.
- distclean  : remove all files built for all architectures
- clobber    : same as distclean
+ distclean  : remove all files built for all architectures.
+ clobber    : same as distclean.
 
- lib        : build the ESMF libraries only (default)
- check      : build and run the unit and system tests to validate the library
- all        : build the libraries, unit and system test, examples, and demos.
+ lib        : build the ESMF library only (default).
+ check      : build and run the unit and system tests to validate the library.
+ all        : build the library, the unit and system tests, and examples.
  doc        : build the documentation (requires specific latex macros packages
-              and additional utilities).  See the ESMF web site for details;  it
-              also contains pre-built pdf and html versions of all docs.
+              and additional utilities).  See the ESMF web site for details;
+              the web site also provides pre-built pdf and html versions of all
+              docs.
 
  unit_tests           : build and run the unit tests
  unit_tests_uni       : build unit tests and run them in uni-processor mode
@@ -272,17 +267,10 @@ Supported Makefile Targets
  run_examples_uni     : run examples in uni-processor mode (don't build)
  clean_examples       : remove example executables only
 
- demos                : build and run the demos
- demos_uni            : build demos and run them in uni-processor mode
- build_demos          : build demos (don't run)
- run_demos            : run demos (don't build)
- run_demos_uni        : run demos in uni-processor mode (don't build)
- clean_demos          : remove demo executables only
-
- all_tests            : build and run all available tests and demos
- build_all_tests      : build all available tests and demos (don't run)
- run_all_tests        : run all available tests and demos (don't build)
- clean_all_tests      : remove all available test and demo executables
+ all_tests            : build and run all available tests and examples.
+ build_all_tests      : build all available tests and examples (don't run)
+ run_all_tests        : run all available tests and examples (don't build)
+ clean_all_tests      : remove all available test and example executables
 
  install              : install the ESMF library in a custom location
  installcheck         : check the ESMF library installation
@@ -296,12 +284,11 @@ its functional integrity by building and executing a range of test applications.
 It is important to use the same environment settings for the ESMF gmake test 
 targets as were used during the library build.
 
-The ESMF library sources come with 4 flavors of test codes:
+The ESMF library source tree comes with 3 flavors of test codes:
 - unit_tests:   separately test the functionality of individual ESMF code units
 - system_tests: test the interplay of multiple ESMF code units
 - examples:     demonstrate features of individual ESMF code units. Example
                 sources are quoted in the ESMF Reference Manual.
-- demos:        more complex applications to demonstrate ESMF's capabilities
 
 Unless the ESMF library was built in MPI-bypass mode (mpiuni), all applications
 compiled and linked against ESMF automatically become MPI applications and must
@@ -313,8 +300,8 @@ ESMF provides mpirun scripts for a wide range of system configurations. These
 are used by ESMF by default or can be set by the user via the ESMF_MPIRUN
 environment variable. The best way to see how the existing scripts are used
 on the supported platforms is to go to the "Supported Platforms" web page at
-http://www.earthsystemmodeling.org/download/platforms/ and follow the link for the
-platform of interest. Each test report contains the output of "gmake info",
+http://www.earthsystemmodeling.org/download/platforms/ and follow the link for
+the platform of interest. Each test report contains the output of "gmake info",
 which lists the settings of the ESMF_MPIxxx environment variables.
 
 Users are encouraged to read the "Setting up ESMF to run Test Suite
@@ -439,14 +426,12 @@ Adding a New Platform
 4. Edit the ESMC_Conf.h file and look over the macro definitions.
 
 5. Once it is working, post it back on the esmfcontrib sourceforge site and
-   email esmf_support@list.woc.noaa.gov so we can include it in our next release.
+   email esmf_support@list.woc.noaa.gov so we can include it in our next
+   release.
 
 
 Directories
 -----------
-
-application:     Contains a simple ESMF application and Makefile to demonstrate
-                 the use of the esmf.mk makefile fragment.
 
 build_config:    Contains makefile fragments that can be customized by the 
                  user for specific platforms, compilers, and sites.
@@ -465,7 +450,7 @@ src:             Contains the source code.
 
 The following directories are created during the building and testing stages:
 
-lib:             Contains the ESMF libraries.
+lib:             Contains the ESMF library file.
 
 mod:             Contains the Fortran module files.
 
@@ -514,4 +499,4 @@ Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.112 2010/11/01 15:29:33 theurich Exp $
+ $Id: README,v 1.113 2010/11/19 00:12:48 theurich Exp $
