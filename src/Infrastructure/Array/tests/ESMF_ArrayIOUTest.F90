@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.25 2010/11/10 21:35:13 samsoncheung Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.26 2010/11/19 05:18:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ program ESMF_ArrayIOUTest
   integer      :: localDeCount, localPet, petCount
   integer :: i,j,k
   real :: Maxvalue(1), diff
-  real(ESMF_KIND_R8) :: r8Max, r8diff
+  real(ESMF_KIND_R8) :: r8Max(1), r8diff
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -181,8 +181,13 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the binary file.
   write(name, *) "Write ESMF_Array with Halo to binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+#ifdef ESMF_MPICH
+  !TODO: remove this once PIO in binary mode does not hang for MPICH
+  rc=ESMF_FAILURE
+#else
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
+#endif
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -312,8 +317,13 @@ program ESMF_ArrayIOUTest
 ! ! Read in a binary file to an ESMF array.
   write(name, *) "Read ESMF_Array with Halo binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+#ifdef ESMF_MPICH
+  !TODO: remove this once PIO in binary mode does not hang for MPICH
+  rc=ESMF_FAILURE
+#else
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
+#endif
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -558,7 +568,7 @@ program ESMF_ArrayIOUTest
 ! !  skip this comparison.
   !NEX_UTest_Multi_Proc_Only
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  r8Max = 0.0  ! initialize
+  r8Max(1) = 0.0  ! initialize
   call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
   call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
   write(name, *) "Compare readin data from a different distgrid"
@@ -567,17 +577,17 @@ program ESMF_ArrayIOUTest
    do j=1,5
    do i=1,5
      r8diff = abs(FarrayGr_1(i,j) - FarrayGr_2(i,j) )
-     if (r8diff .gt. r8Max) r8Max = r8diff
+     if (r8diff .gt. r8Max(1)) r8Max(1) = r8diff
    enddo
    enddo
   endif
-  call ESMF_VMBroadcast(vm, Maxvalue, count=1, root=0, rc=rc)
-  write(*,*)"Maximum Error (different distgrid) = ", r8Max
-  call ESMF_Test((r8Max .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
+  call ESMF_VMBroadcast(vm, r8Max, count=1, root=0, rc=rc)
+  write(*,*)"Maximum Error (different distgrid) = ", r8Max(1)
+  call ESMF_Test((r8Max(1) .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
-   r8Max = 1.0 ! initialize to ensure proper logic below
+   r8Max(1) = 1.0 ! initialize to ensure proper logic below
    write(failMsg, *) "Comparison did not failed as was expected"
-   call ESMF_Test((r8Max .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
+   call ESMF_Test((r8Max(1) .gt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #endif
 
   deallocate (computationalLWidth, computationalUWidth)
