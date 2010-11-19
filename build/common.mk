@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.327 2010/11/10 22:54:26 theurich Exp $
+#  $Id: common.mk,v 1.328 2010/11/19 03:11:48 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -464,7 +464,7 @@ ESMF_PATCHLEVEL = `fgrep ESMF_PATCHLEVEL $(ESMF_DIR)/src/Infrastructure/Util/inc
 # the same source tree, these files cannot go into a generic include dir.
 # - the 'storeh:' target copies include files into src/include under the
 # distribution tree.  
-# - the system tests and demos (not sure about the unit tests and examples) 
+# - the system tests (not sure about the unit tests and examples) 
 # are compiled with the current dir set to the src dir (this is
 # i think because if there are multiple .o files, it gets complicated to make
 # them, get their names to link them, and then remove just them if you are 
@@ -1555,7 +1555,7 @@ tree_mostlyclean:
 	done
 
 #-------------------------------------------------------------------------------
-# Generic target for building and running all tests, examples, and demos.
+# Generic target for building and running all tests and examples
 #-------------------------------------------------------------------------------
 
 # vars used below in the all_tests target, because these are in the pattern
@@ -1565,15 +1565,13 @@ TEST_TARGETS = build_unit_tests run_unit_tests \
                build_system_tests run_system_tests
 
 ALLTEST_TARGETS = $(TEST_TARGETS) \
-                  build_examples run_examples \
-                  build_demos run_demos
+                  build_examples run_examples
 
 TEST_TARGETS_UNI = build_unit_tests run_unit_tests_uni \
                    build_system_tests run_system_tests_uni
 
 ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
-                      build_examples run_examples_uni \
-                      build_demos run_demos_uni
+                      build_examples run_examples_uni
 
 
 # TODO: a bit more on what eventually these targets should be:
@@ -1583,8 +1581,8 @@ ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
 # pinned off.  this does a cursory check, not a full, exhaustive check.
 #
 # 'gmake all_tests' makes and runs the full set of tests, respecting the user
-# setting for TESTEXHAUSTIVE.  it runs the unit tests, system tests, examples,
-# and the demo.
+# setting for TESTEXHAUSTIVE.  it runs the unit tests, system tests, and
+# examples.
 #
 # 'gmake validate' should probably do some numerical validation to make
 # sure we have something like bit reproducibility, that we are not going to
@@ -1629,20 +1627,20 @@ all_tests: info
 dust_all_tests: dust_unit_tests dust_system_tests dust_examples
 
 build_all_tests: clean_if_exhaustive_flag_mismatch
-	$(MAKE) build_unit_tests build_system_tests build_examples build_demos 
+	$(MAKE) build_unit_tests build_system_tests build_examples
 
 
 run_all_tests:
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
 	  $(MAKE) run_unit_tests_uni run_system_tests_uni \
-                  run_examples_uni run_demos_uni results_summary ;\
+                  run_examples_uni results_summary ;\
 	else \
 	  $(MAKE) run_unit_tests run_system_tests \
-                  run_examples run_demos results_summary ;\
+                  run_examples results_summary ;\
         fi
 
 clean_all_tests:
-	$(MAKE) clean_unit_tests clean_system_tests clean_examples clean_demos
+	$(MAKE) clean_unit_tests clean_system_tests clean_examples
 
 
 # TODO: reserved for running any numerical validation tests, wordsize and
@@ -1785,7 +1783,7 @@ tree_build_system_tests: $(SYSTEM_TESTS_BUILD)
 # and linking, or to create a temp subdir based on the compiler/platform/
 # BOPT/SITE settings - so compiles are truly independent.
 #
-# this also applies to the tests, examples, and demo code.
+# this also applies to the tests, and examples.
 #
 
 #
@@ -2051,7 +2049,7 @@ tree_build_use_test_cases: chkdir_tests $(USE_TEST_CASES_BUILD)
 # and linking, or to create a temp subdir based on the compiler/platform/
 # BOPT/SITE settings - so compiles are truly independent.
 #
-# this also applies to the tests, examples, and demo code.
+# this also applies to the tests, and examples.
 #
 
 #
@@ -2689,74 +2687,6 @@ check_examples:
 
 
 #-------------------------------------------------------------------------------
-# Targets for building and running demos.
-#-------------------------------------------------------------------------------
-
-demos: autobuild_libs chkdir_tests
-	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor demo when ESMF_COMM is mpiuni;" ; \
-	  echo "run demos_uni instead." ; \
-	  echo "" ; \
-	  $(MAKE) err ; \
-	fi
-	@if [ -d src/demos ] ; then cd src/demos; fi; \
-	$(MAKE) ACTION=tree_demos tree
-
-tree_demos: tree_build_demos tree_run_demos
-
-demos_uni: autobuild_libs chkdir_tests
-	@if [ -d src/demos ] ; then cd src/demos; fi; \
-	$(MAKE) ACTION=tree_demos_uni tree
-
-tree_demos_uni: tree_build_demos tree_run_demos_uni
-
-#
-# build_demos
-#
-build_demos: reqfile_libesmf reqdir_lib chkdir_tests
-	@if [ -d src/demos ] ; then cd src/demos; fi; \
-	$(MAKE) ACTION=tree_build_demos tree
-	@echo "ESMF demos built successfully."
-
-tree_build_demos: $(DEMOS_BUILD) 
-
-$(ESMF_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
-	$(MAKE) chkdir_tests
-	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(DEMOS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
-
-
-#
-# run_demos
-#
-run_demos:  reqdir_tests
-	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-          echo "Cannot run multiprocessor demo when ESMF_COMM is mpiuni;" ; \
-	  echo "run run_demos_uni instead." ; \
-	  echo "" ; \
-	  $(MAKE) err ; \
-	fi
-	@if [ -d src/demos ] ; then cd src/demos; fi; \
-	$(MAKE) ACTION=tree_run_demos tree
-
-tree_run_demos: $(DEMOS_RUN) 
-
-run_demos_uni:  reqdir_tests
-	@if [ -d src/demos ] ; then cd src/demos; fi; \
-	$(MAKE) ACTION=tree_run_demos_uni tree
-
-tree_run_demos_uni: $(DEMOS_RUN_UNI) 
-
-#
-# this target deletes only the demos and output files created by the demos
-#
-clean_demos:
-	$(ESMF_RM) $(ESMF_TESTDIR)/*App 
-	@if [ -d src/demos ] ; then cd src/demos; fi; \
-	$(MAKE) clean
-
-
-#-------------------------------------------------------------------------------
 # Targets for checking the builds
 #-------------------------------------------------------------------------------
 
@@ -3248,7 +3178,7 @@ endif
 # \input and \includegraphics LaTeX commands.
 #
 
-TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demos/coupled_flow:"
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):"
 export TEXINPUTS_VALUE
 
 

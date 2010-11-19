@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.120 2010/11/08 15:00:03 theurich Exp $
+# $Id: makefile,v 1.121 2010/11/19 03:11:48 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -47,7 +47,7 @@ CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/obj \
 # after the include of common.mk, so it does not interfere with the
 # definition of the default build rule.
 
-all:  lib build_unit_tests build_examples build_system_tests build_demos
+all:  lib build_unit_tests build_examples build_system_tests
 
 
 #-------------------------------------------------------------------------------
@@ -401,17 +401,6 @@ ranlib:
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
 	-$(ESMF_RM) $(wildcard $(ESMF_LIBDIR)/lib*.*)
-
-# This demo is disabled until halo is implemented.
-# ESMF_COUPLED_FLOW/demo target.
-#ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
-#	cd src/demos/coupled_flow ;\
-#	$(MAKE) BOPT=$(BOPT) demos
-#
-## ESMF_COUPLED_FLOW_uni/demo target.
-ESMF_COUPLED_FLOW_uni: chkopts build_libs chkdir_tests
-	cd src/demos/coupled_flow ;\
-	$(MAKE) BOPT=$(BOPT) demos_uni
 
 
 # ------------------------------------------------------------------
