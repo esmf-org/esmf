@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.12 2010/11/19 00:19:26 theurich Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.13 2010/11/20 19:30:09 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -57,6 +57,7 @@ program ESMF_FieldIOUTest
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
+  integer :: countfail = 0
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -138,6 +139,8 @@ program ESMF_FieldIOUTest
 !
 !------------------------------------------------------------------------
 
+  !NEX_UTest_Multi_Proc_Only
+! ! Write data at time t on file, total number of time=endtime 
 #ifdef ESMF_MPICH
   !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
   endtime = 1
@@ -156,18 +159,34 @@ program ESMF_FieldIOUTest
   enddo
 
 !------------------------------------------------------------------------
-  ! Create Field
-  field_t=ESMF_FieldCreate(grid, farray=Farray_tw, &
-    indexflag=ESMF_INDEX_DELOCAL,name="temperature",  rc=rc)
+    ! Create Field
+    field_t=ESMF_FieldCreate(grid, farray=Farray_tw, &
+      indexflag=ESMF_INDEX_DELOCAL,name="temperature",  rc=rc)
+    if(rc.ne.ESMF_SUCCESS) then
+      countfail = countfail + 1
+      exit
+    endif
 !------------------------------------------------------------------------
 
-  ! Write Fortran array in Field
+    ! Write Fortran array in Field
+    call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t, rc=rc)
+    if(rc.ne.ESMF_SUCCESS) then
+      countfail = countfail + 1
+    endif
 #else
+    if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) then
+      countfail = countfail + 1
+      exit
+    endif
 #endif
-
   enddo  ! t
+
+! Loop of time is ended. Check for failure.
+  write(name, *) "Write Farray_tw at different time t in a loop"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((countfail==0), name, failMsg, result, ESMF_SRCLINE)
+
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
