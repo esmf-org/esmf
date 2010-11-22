@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.4 2010/11/22 15:11:50 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.3 2010/11/05 18:46:57 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.4 2010/11/22 15:11:50 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -414,6 +414,10 @@ int  ESMCI_WebServComponentSvr::serviceRequest(
 		processFiles();
 		break;
 
+	case NET_ESMF_DATA: 
+		processGetData();
+		break;
+
 	case NET_ESMF_END: 
 		processEnd();
 		break;
@@ -459,6 +463,7 @@ int  ESMCI_WebServComponentSvr::getRequestId(
 	if (strcmp(request, "FINAL") == 0)	return NET_ESMF_FINAL;
 	if (strcmp(request, "STATE") == 0)	return NET_ESMF_STATE;
 	if (strcmp(request, "FILES") == 0)	return NET_ESMF_FILES;
+	if (strcmp(request, "DATA")  == 0)	return NET_ESMF_DATA;
 	if (strcmp(request, "END")   == 0)	return NET_ESMF_END;
 
 	return ESMF_FAILURE;
@@ -498,6 +503,7 @@ char*  ESMCI_WebServComponentSvr::getRequestFromId(
 	case NET_ESMF_FINAL:	return (char*)"FINAL";
 	case NET_ESMF_STATE:	return (char*)"STATE";
 	case NET_ESMF_FILES:	return (char*)"FILES";
+	case NET_ESMF_DATA:	return (char*)"DATA";
 	case NET_ESMF_END:	return (char*)"END";
 	default:					return (char*)"UNKN";
 	}
@@ -1166,6 +1172,236 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 		return localrc;
 	}
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServComponentSvr::processGetData()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServComponentSvr::processGetData()
+//
+// !INTERFACE:
+int  ESMCI_WebServComponentSvr::processGetData(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to retrieve the export data.  This method
+//    reads the client id from the socket and uses it to lookup the client
+//    information.  It then reads the data parameters (variable name, time, 
+//    lat and lon) from the socket and uses that information to lookup the 
+//    data from a netcdf file.  The data and the component status are then 
+//    written back to the socket to complete the transaction.
+//
+//    (KDS: This design is very specific to CCSM/CAM and is hardcoded for
+//          that prototype.  This needs to be redesigned to be more generic.)
+//    (KDS: Also, getting one value for a specific time/lat/lon is really
+//          inefficient and not practical.  There needs to be a way to handle
+//          more data values at a time.)
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	//printf("\n\nSERVER: processing GetData\n");
+
+	int	localrc = 0;
+	int	status = NET_ESMF_STAT_IDLE;
+	int	numFiles = 0;
+
+/*
+	//***
+	// Get the client id 
+	//***
+	int	bytesRead = 0;
+	char	buf[1024];
+
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+   int	clientId = ntohl(*((unsigned int*)buf));
+	//printf("Client ID: %d\n", clientId);
+
+	char	varName[256];
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read variable name from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	strncpy(varName, (char*)buf, 255);
+	//printf("Var Name: %s\n", varName);
+
+	//***
+	// These next values are read as strings and then converted to double values
+	//***
+	char	tempValue[256];
+
+	// Read time
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read time value from socket.",
+         &localrc);
+
+      return localrc;
+   }
+	strncpy(tempValue, (char*)buf, 255);
+	//printf("Time: %s\n", tempValue);
+	double	timeValue = atof(tempValue);
+
+	// Read lat
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read lat value from socket.",
+         &localrc);
+
+      return localrc;
+   }
+	strncpy(tempValue, (char*)buf, 255);
+	//printf("Lat: %s\n", tempValue);
+	double	latValue = atof(tempValue);
+
+	// Read lon
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read lon value from socket.",
+         &localrc);
+
+      return localrc;
+   }
+	strncpy(tempValue, (char*)buf, 255);
+	//printf("Lon: %s\n", tempValue);
+	double	lonValue = atof(tempValue);
+
+	//***
+	// Now that everything's been read off the socket, lookup the client info
+	// based on the client id.  If the client can't be found, then send back
+	// an error
+	//***
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
+
+	if ((iter = theClients.find(clientId)) == theClients.end())
+	{
+		numFiles = 0;
+		unsigned int  netNumFiles = htonl(numFiles);
+		if (theSocket.write(4, &netNumFiles) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write number of files to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+		status = NET_ESMF_STAT_ERROR;
+		unsigned int	netStatus = htonl(status);
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
+	}
+
+	clientInfo = iter->second;
+	//clientInfo->print();
+
+	//***
+	// If the data files (to be added to ClientInfo) have not been retrieved
+	// from the component server, then get them.
+	// KDS: Right now, I'm hardcoding the output filename...
+	//***
+	if (theOutputFile == NULL)
+	{
+		theOutputFile = new ESMCI_WebServCAMOutputFile(
+										theCAMDir + 
+										"/camrun.cam2.rh0.0000-01-02-00000.nc");
+
+		//***
+		// KDS: Make call to component server to get filenames... set status 
+		//      to whatever status gets returned
+		//***
+		status = clientInfo->status();
+	}
+
+	//***
+	// Read the data from the specified file
+	//***
+	double	dataValue = theOutputFile->getDataValue(varName, 
+                                                    timeValue, 
+                                                    latValue, 
+                                                    lonValue);
+	//printf("Data Value: %e\n", dataValue);
+
+	//***
+	// Write the data back to the client
+	//***
+	sprintf(tempValue, "%e", dataValue);
+	int	valueLen = strlen(tempValue) + 1;
+
+	if (theSocket.write(valueLen, tempValue) != valueLen)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write data value to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	//***
+	// Send the current state back to the client (use the return code from
+	// the component initialize call to determine the state)
+	//***
+	status = clientInfo->status();
+	unsigned int	netStatus = htonl(status);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+*/
+
+	return ESMF_SUCCESS;
 }
 
 

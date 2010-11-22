@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.h,v 1.3 2010/11/05 18:46:57 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.h,v 1.4 2010/11/22 15:11:50 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,6 +98,7 @@ namespace ESMCI
 	  int  processFinal();
 	  int  processState();
 	  int  processFiles();
+	  int  processGetData();
 	  int  processEnd();
 
 	  int			thePort;			// the port number of the socket service
