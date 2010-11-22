@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.31 2010/11/12 21:43:11 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.32 2010/11/22 20:44:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.31 2010/11/12 21:43:11 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.32 2010/11/22 20:44:13 theurich Exp $'
 
 !==============================================================================
 
@@ -246,7 +246,7 @@ contains
     integer, allocatable :: pioDofList(:) @\
     integer :: petCount,localPet,mpic @\
     mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farraywr @\
-    integer :: timestart(mrank+1), timecount(mrank+1) @\
+    integer, allocatable :: timestart(:), timecount(:) @\
     integer :: dimC, time_len, dimid_time @\
     integer, allocatable :: gDimsIndex(:), dimid_xyz(:) @\
     integer, allocatable :: minIndexPDimPPatch(:,:), maxIndexPDimPPatch(:,:) @\
@@ -307,6 +307,8 @@ contains
     allocate (gDimsIndex(dimC)) @\
     allocate ( minIndexPDimPPatch(dimC,1) ) @\
     allocate ( maxIndexPDimPPatch(dimC,1) ) @\
+    allocate ( timecount(dimC+1) ) @\
+    allocate ( timestart(dimC+1) ) @\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farraywr, rc=localrc) @\
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
