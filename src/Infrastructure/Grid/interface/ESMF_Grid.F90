@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.172 2010/11/18 18:14:34 feiliu Exp $
+! $Id: ESMF_Grid.F90,v 1.173 2010/11/23 02:06:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.172 2010/11/18 18:14:34 feiliu Exp $'
+      '$Id: ESMF_Grid.F90,v 1.173 2010/11/23 02:06:43 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -282,6 +282,7 @@ interface ESMF_GridCreate
 ! !PRIVATE MEMBER FUNCTIONS:
 !
 
+      module procedure ESMF_GridCreateCopyFromReg
       module procedure ESMF_GridCreateCopyFromNewDG
       module procedure ESMF_GridCreateFrmDistGrid
       module procedure ESMF_GridCreateFrmDistGridArb
@@ -2148,7 +2149,7 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateCopyFromNewDG(grid, distgrid, &
+      function ESMF_GridCreateCopyFromNewDG(grid, name, distgrid, &
                  destroyDistGrid, destroyDELayout, rc)
 !
 ! !RETURN VALUE:
@@ -2156,6 +2157,7 @@ end subroutine ESMF_GridConvertIndex
 !
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)              :: grid
+       character (len=*),     intent(in),   optional  :: name
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        logical,               intent(in),   optional  :: destroyDistGrid
        logical,               intent(in),   optional  :: destroyDELayout
@@ -2169,6 +2171,8 @@ end subroutine ESMF_GridConvertIndex
 ! \begin{description}
 ! \item[grid]
 !     {\tt ESMF\_Grid} to copy.
+! \item[{[name]}]
+!      Name of the new Grid. If not specified, a new unique name will be created for the Grid.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object which describes how the Grid is decomposed and
 !      distributed over DEs. 
@@ -2186,7 +2190,6 @@ end subroutine ESMF_GridConvertIndex
        type(ESMF_Grid) :: newGrid
        integer :: localrc ! local error status
        type(ESMF_TypeKind) :: coordTypeKind
-       character (len=ESMF_MAXSTR)    :: name
        integer :: dimCount
        integer :: distgridToGridMap(ESMF_MAXDIM)
        integer :: coordDimCount(ESMF_MAXDIM)
@@ -2200,7 +2203,7 @@ end subroutine ESMF_GridConvertIndex
        type(ESMF_RouteHandle) :: routehandle
        type(ESMF_STAGGERLOC), allocatable :: srcStaggers(:)
        type(ESMF_Array), allocatable :: srcA(:), dstA(:)
-       
+ ! XMRKX       
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2221,7 +2224,7 @@ end subroutine ESMF_GridConvertIndex
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Get info from old grid to create new Grid.
-       call ESMF_GridGet(grid, name=name, &
+       call ESMF_GridGet(grid, &
             dimCount=dimCount, & 
             coordTypeKind=coordTypeKind, &
             distgridToGridMap=distgridToGridMap(1:dimCount), &
@@ -2328,6 +2331,296 @@ end subroutine ESMF_GridConvertIndex
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     end function ESMF_GridCreateCopyFromNewDG
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateCopyFromReg"
+!BOP
+! !IROUTINE: ESMF_GridCreate - Create a copy of a Grid with a different reg decomp.
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreate()
+      function ESMF_GridCreateCopyFromReg(grid, name, &
+                        regDecomp, decompFlag, rc)
+
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateCopyFromReg
+!
+! !ARGUMENTS:
+       type(ESMF_Grid),       intent(in)              :: grid
+       character (len=*),     intent(in),   optional  :: name
+       integer,               intent(in),   optional  :: regDecomp(:)
+       type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
+       integer,               intent(out),  optional  :: rc
+!
+! !DESCRIPTION:
+!
+! This method creates a copy of an existing Grid, the new Grid is 
+! regularly distributed (see Figure \ref{fig:GridDecomps}).
+! To specify the new distribution, the user passes in an array 
+! ({\tt regDecomp}) specifying the number of DEs to divide each 
+! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
+! occur.  The default is to divide the range as evenly as possible.
+!
+! The arguments are:
+! \begin{description}
+! \item[grid]
+!     {\tt ESMF\_Grid} to copy.
+! \item[{[name]}]
+!      Name of the new Grid. If not specified, a new unique name will be created for the Grid.
+! \item[{[regDecomp]}] 
+!      List that has the same number of elements as {\tt maxIndex}.
+!      Each entry is the number of decounts for that dimension.
+!      If not specified, the default decomposition will be petCountx1x1..x1. 
+! \item[{[decompflag]}]
+!      List of decomposition flags indicating how each dimension of the
+!      patch is to be divided between the DEs. The default setting
+!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      Section~\ref{opt:decompflag} for a full description of the 
+!      possible options. 
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+    type(ESMF_DistGrid)  :: distgrid
+    type(ESMF_DistGrid)  :: oldDistgrid
+    type(ESMF_DELayout)  :: delayout
+    type(ESMF_VM)        :: vm
+    integer, pointer     :: petList(:)
+    integer              :: localrc
+    integer              :: dimCount,i
+    integer, pointer     :: regDecompLocal(:)
+    type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
+    integer              :: deCount
+    integer              :: i1,i2,i3,k, patchCount
+    integer,pointer      :: minIndexPDimPPatch(:,:)
+    integer,pointer      :: maxIndexPDimPPatch(:,:)
+    integer,pointer      :: minIndexLocal(:)
+    integer,pointer      :: maxIndexLocal(:)
+    type(ESMF_IndexFlag) :: indexflag
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Get the Grid DimCount ---------------------------------------------------
+    call ESMF_GridGet(grid, dimCount=dimCount, indexflag=indexflag, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Argument Consistency Checking --------------------------------------------------------------
+    if (present(regDecomp)) then
+        if (size(regDecomp) .lt. dimCount) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                    "- regDecomp size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rc) 
+            return 
+        endif
+    endif
+
+    if (present(decompFlag)) then
+        if (size(decompFlag) .lt. dimCount) then
+            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+                    "- decompFlag size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rc) 
+            return 
+        endif
+    endif
+
+
+    ! Get min/max Index from old grid  ------------------------------------------------------------------
+    
+    ! Get old distgrid
+    call ESMF_GridGet(grid, distgrid=oldDistgrid, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+   
+    ! Get a couple of sizes
+    call ESMF_DistgridGet(oldDistgrid, patchCount=patchCount, rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+ ! XMRKX
+
+
+    ! Get Index info from DistGrid
+    allocate(minIndexPDimPPatch(dimCount,patchCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexPDimPatch", &
+                                     ESMF_CONTEXT, rc)) return
+
+    allocate(maxIndexPDimPPatch(dimCount,patchCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexPDimPatch", &
+                                     ESMF_CONTEXT, rc)) return
+
+
+    call ESMF_DistgridGet(oldDistgrid, &
+           minIndexPDimPPatch=minIndexPDimPPatch, &
+           maxIndexPDimPPatch=maxIndexPDimPPatch, &
+           rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! This doesn't work right now for Multitile Grids
+    if (patchCount > 1) then
+       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+            "- GridCopy with reg distribution not supported for multitile grids", &
+            ESMF_CONTEXT, rc)
+       return
+    endif
+
+    ! Set minIndex
+    allocate(minIndexLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    minIndexLocal(1:dimCount)=minIndexPDimPPatch(1:dimCount,1)
+
+    ! Set maxIndex
+    allocate(maxIndexLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    maxIndexLocal(1:dimCount)=maxIndexPDimPPatch(1:dimCount,1)
+
+
+
+    ! Free memory from distgrid get
+    deallocate(minIndexPDimPPatch)
+    deallocate(maxIndexPDimPPatch)
+
+
+    ! Set default for regDecomp 
+    allocate(regDecompLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating regDecompLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(regDecomp)) then
+       regDecompLocal(:)=regDecomp(:)
+    else
+       ! The default is 1D divided among all the Pets
+       call ESMF_VMGetGlobal(vm,rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
+       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       do i=2,dimCount
+          regDecompLocal(i)=1
+       enddo
+    endif
+
+
+   ! Set default for decomp flag based on gridEdgeWidths -----------------------------------
+   ! NOTE: This is a temporary fix until we have something better implemented in distGrid
+
+    ! Set default for decompFlag 
+    allocate(decompFlagLocal(dimCount), stat=localrc)
+    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+    endif
+
+
+   ! Process PetMap --------------------------------------------------------------
+   !! Calculate deCount
+   deCount=1
+   do i=1,dimCount
+      deCount=deCount*regDecompLocal(i)
+   enddo
+
+#if 0 
+   ! create DELayout based on presence of petMap
+   if (present(petMap)) then
+      !! Allocate petList
+      allocate(petList(deCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+              ESMF_CONTEXT, rc)) return
+
+
+      !! copy petMap to petList
+      if (dimCount .gt. 2) then
+	 k=1
+     	 do i3=1,regDecompLocal(3)
+         do i2=1,regDecompLocal(2)
+         do i1=1,regDecompLocal(1)
+            petList(k)=petMap(i1,i2,i3)
+            k=k+1
+         enddo
+         enddo
+         enddo
+      else 
+	 k=1
+     	 do i3=1,1
+         do i2=1,regDecompLocal(2)
+         do i1=1,regDecompLocal(1)
+            petList(k)=petMap(i1,i2,i3)
+            k=k+1
+         enddo
+         enddo
+         enddo
+      endif
+
+      !! create delayout from the petList
+      delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !! Get rid of list
+      deallocate(petList)
+   else      
+#endif
+
+
+      !! create a default delayout
+      delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
+   endif
+#endif
+
+
+   ! Create DistGrid --------------------------------------------------------------
+    distgrid=ESMF_DistGridCreate(minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
+              regDecomp=regDecompLocal, decompFlag=decompFlagLocal, delayout=delayout,&
+              indexflag=indexflag, &
+              rc=localrc)   
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  
+    ESMF_GridCreateCopyFromReg=ESMF_GridCreate(grid, name, distgrid, &
+                                    destroyDistGrid=.true., &
+                                    destroyDELayout=.true., &
+                                    rc=localrc)
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Clean up memory
+    deallocate(regDecompLocal)
+    deallocate(decompFlagLocal)
+    deallocate(minIndexLocal)
+    deallocate(maxIndexLocal)
+
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    end function ESMF_GridCreateCopyFromReg
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
