@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.41 2010/11/10 22:29:04 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.42 2010/11/23 19:21:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.41 2010/11/10 22:29:04 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.42 2010/11/23 19:21:06 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -602,7 +602,7 @@
       localrc = ESMF_RC_ARG_SIZE
     else if (localrc == EINVAL) then
       localrc = ESMF_RC_ARG_VALUE
-    case default
+    else
       localrc = ESMF_RC_VAL_OUTOFRANGE
     end if
  
