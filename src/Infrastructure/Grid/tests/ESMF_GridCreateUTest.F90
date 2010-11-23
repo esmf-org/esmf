@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.105 2010/11/18 18:05:54 feiliu Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.106 2010/11/23 02:07:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.105 2010/11/18 18:05:54 feiliu Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.106 2010/11/23 02:07:24 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -70,6 +70,9 @@ program ESMF_GridCreateUTest
   integer :: celw(3),ceuw(3)
   logical :: isLBound(2),isUBound(2)
   integer :: petMap2D(2,2,1)
+  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+!  integer :: lDE, localDECount
+
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -175,6 +178,11 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreate(distgrid=distgrid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! Get name, so we can set name in the grid create copy
+  ! to insure things are identical
+  call ESMF_GridGet(grid, name=grid_name, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -184,8 +192,9 @@ program ESMF_GridCreateUTest
   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+
   ! Create Grid 2 from the original grid and distgrid
-  grid2=ESMF_GridCreate(grid, distgrid=distgrid, rc=localrc)
+  grid2=ESMF_GridCreate(grid, name=trim(grid_name), distgrid=distgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! If the grid create copy works, then grid2 should now be 
@@ -203,6 +212,57 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Testing Grid copy from grid and regular distribution specification"
+  write(failMsg, *) "Incorrect result"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Grid 1
+  grid=ESMF_GridCreateShapeTile(maxIndex=(/20,20/), regDecomp=(/2,2/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get name, so we can set name in the grid create copy
+  ! to insure things are identical
+  call ESMF_GridGet(grid, name=grid_name, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create Grid 2 from the original grid and distgrid
+  grid2=ESMF_GridCreate(grid, name=trim(grid_name), regDecomp=(/2,2/), rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+  ! If the grid create copy works, then grid2 should now be 
+  ! a perfect copy of grid, so check that match returns true
+  if (.not. ESMF_GridMatch(grid,grid2,rc=localrc)) correct=.false.
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+#endif
+
+  ! get rid of first grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get rid of second grid
+  call ESMF_GridDestroy(grid2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
