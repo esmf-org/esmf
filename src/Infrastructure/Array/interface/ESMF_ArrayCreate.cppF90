@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.55 2010/07/23 18:57:23 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.56 2010/11/23 22:32:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.55 2010/07/23 18:57:23 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.56 2010/11/23 22:32:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -148,9 +148,78 @@ contains
 
 
 !===============================================================================
-! ArrayCreate() interfaces
+! ArrayOperator() interfaces
 !===============================================================================
 
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayOperator(=)Doc"
+!BOP
+! !IROUTINE: ESMF_ArrayOperator(=) - Array assignment operator
+!
+! !INTERFACE:
+!  interface operator(=)
+!  array1 = array2
+!
+! !ARGUMENTS:
+!    type(ESMF_Array), intent(inout) :: array1
+!    type(ESMF_Array), intent(inout) :: array2
+!
+!
+! !DESCRIPTION:
+!     Set {\tt array1} equal to {\tt array2}.  This is the default Fortran operator, which
+!     is effectively creates an alias to the original {\tt ESMF\_Array} in this
+!     case.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array1]
+!          The {\tt ESMF\_Array} to be set.
+!     \item[array2]
+!          The {\tt ESMF\_Array} to be copied.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayOperator(==)Doc"
+!BOP
+! !IROUTINE: ESMF_ArrayOperator(==) - Array equality operator
+!
+! !INTERFACE:
+!  interface operator(==)
+!  if (array1 == array2) then ... endif
+!             OR
+!  result = (array1 == array2)
+! !RETURN_VALUE
+!    logical :: result
+!
+! !ARGUMENTS:
+!    type(ESMF_Array), intent(inout) :: array1
+!    type(ESMF_Array), intent(inout) :: array2
+!
+!
+! !DESCRIPTION:
+!     Test if {\tt array1} is equal to {\tt array2}.  This is the default Fortran operator, which
+!     will return true if the {\tt ESMF\_Array}s are effectively the same, and false
+!     otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[array1]
+!          First {\tt ESMF\_Array} in comparison.
+!     \item[array2]
+!          Second {\tt ESMF\_Array} in comparison.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!===============================================================================
+! ArrayCreate() interfaces
+!===============================================================================
 
 #define ArrayCreateFromPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
