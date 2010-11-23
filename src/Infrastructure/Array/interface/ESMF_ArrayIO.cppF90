@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.32 2010/11/22 20:44:13 theurich Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.33 2010/11/23 21:06:33 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.32 2010/11/22 20:44:13 theurich Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.33 2010/11/23 21:06:33 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -216,7 +216,8 @@ contains
 !   \item[variableName] @\
 !     Variable name written in output file @\
 !   \item[{[appd_internal]}] @\
-!     A tag indicates file already existed with value 1. @\
+!     A logical tag indicates file already existed when it is .true. @\
+!     The new data (with attributes) will be written to the existed file.
 !   \item[piofmt] @\
 !    The IO format supported are "bin", "pnc", and "snc". @\
 !   \item[{[rc]}] @\

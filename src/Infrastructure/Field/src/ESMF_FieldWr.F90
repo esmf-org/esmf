@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.9 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_FieldWr.F90,v 1.10 2010/11/23 21:06:33 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,8 +101,8 @@ contains
 !   \item[file]
 !     The name of the output file to which Field data is written.
 !   \item[{[append]}]
-!     Logical: if .true., data is appended to an existing file;
-!     default is .false.
+!     Logical: if .true., data (with attributes) is appended to an
+!     existing file; default is .false.
 !   \item[{[timeslice]}]
 !     Some IO formats (e.g. NetCDF) support the output of data in form of
 !     time slices. The {\tt timeslice} argument provides access to this
@@ -124,7 +124,7 @@ contains
         type(ESMF_Array)                :: array 
         integer                         :: time, i, localrc
         integer                         :: gridrank, arrayrank
-        logical                         :: appended
+        logical                         :: appd_internal
         type(ESMF_Status)               :: fieldstatus
         type(ESMF_IOFmtFlag)            :: iofmtd
 
@@ -136,8 +136,8 @@ contains
         ! check variables
         ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-        appended = .false.
-        if(present(append)) appended = append
+        appd_internal = .false.
+        if(present(append)) appd_internal = append
 
         time = -1   ! default, no time dimension
         if (present(timeslice)) time = timeslice
@@ -157,7 +157,7 @@ contains
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayWrite(array, file, variableName=trim(name), &
-          append=appended, timeslice=time, iofmt=iofmtd, rc=localrc)
+          append=appd_internal, timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 

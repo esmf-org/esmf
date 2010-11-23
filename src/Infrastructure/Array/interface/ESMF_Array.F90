@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.132 2010/11/16 17:53:09 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.133 2010/11/23 21:06:33 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.132 2010/11/16 17:53:09 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.133 2010/11/23 21:06:33 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -1284,8 +1284,8 @@ contains
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[append]}]
-!    Logical: if .true., data is appended to an existing file;
-!    default is .false.
+!    Logical: if .true., data (with attributes) is appended to an
+!    existing file; default is .false.
 !   \item[{[timeslice]}]
 !    Some IO formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
