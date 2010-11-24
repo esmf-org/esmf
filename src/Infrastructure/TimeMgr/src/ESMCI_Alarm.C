@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.15 2010/11/17 06:54:40 eschwab Exp $
+// $Id: ESMCI_Alarm.C,v 1.16 2010/11/24 06:58:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.15 2010/11/17 06:54:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.16 2010/11/24 06:58:45 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -250,8 +250,7 @@ int Alarm::count=0;
     } else {
       // add this new valid alarm copy to the same clock as the original alarm
       if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-      Clock *clock = alarmCopy->clock;
-      returnCode = clock->Clock::addAlarm(alarmCopy);
+      returnCode = (alarmCopy->clock)->Clock::addAlarm(alarmCopy);
       ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     }
 
