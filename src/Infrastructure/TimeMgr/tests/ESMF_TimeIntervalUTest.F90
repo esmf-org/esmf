@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.60 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.61 2010/11/24 06:54:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.60 2010/11/03 22:48:43 theurich Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.61 2010/11/24 06:54:10 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2911,7 +2911,7 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing ESMF_TimeIntervalOperator(x)(timestep, integer)
+      ! Testing ESMF_TimeIntervalOperator(*)(timestep, integer)
       write(name, *) "No Calendar multiplication of a Time interval Test 1"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -2925,7 +2925,7 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing ESMF_TimeIntervalOperator(x)(integer, timestep)
+      ! Testing ESMF_TimeIntervalOperator(*)(integer, timestep)
       write(name, *) "No Calendar multiplication of a Time interval Test 2"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -3343,7 +3343,7 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Testing ESMF_TimeIntervalOperator(x)(timestep, integer)
+      ! Testing ESMF_TimeIntervalOperator(*)(timestep, integer)
       write(failMsg, *) "The time steps is not correct."
       write(name, *) "TimeInterval * operator Test"
       timeStep = timeStep2 * 86400  ! exercise TimeInterval x operator
@@ -3763,7 +3763,7 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing ESMF_TimeIntervalOperator(x)(timestep, integer)
+      ! Testing ESMF_TimeIntervalOperator(*)(timestep, integer)
       write(name, *) "Multiply rational fraction Time Interval by an integer Test 1"
       write(failMsg, *) " Did not return 30 2/5 seconds and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeInterval1, s=7, sN=3, sD=5, rc=rc)
@@ -3774,7 +3774,7 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing ESMF_TimeIntervalOperator(x)(timestep, integer)
+      ! Testing ESMF_TimeIntervalOperator(*)(timestep, integer)
       write(name, *) "Multiply rational fraction Time Interval by an integer Test 2"
       write(failMsg, *) " Did not return 3/4 seconds and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeInterval1, sN=1, sD=8, rc=rc)
