@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.100 2010/11/19 06:58:57 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.101 2010/11/24 06:56:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.100 2010/11/19 06:58:57 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.101 2010/11/24 06:56:15 eschwab Exp $'
 
 !==============================================================================
 !
@@ -390,11 +390,11 @@
       end interface
 !
 !------------------------------------------------------------------------------
-      interface MOD
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return TimeInterval remainder
 !
 ! !INTERFACE:
+      interface MOD
 !     function MOD(timeinterval1, timeinterval2)
 !
 ! !RETURN VALUE:
@@ -405,9 +405,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
-!     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
-!     class to return the remainder of {\tt timeinterval1} divided by
-!     {\tt timeinterval2} as an {\tt ESMF\_TimeInterval}.
+!     Overloads the Fortran intrinsic MOD() function for the
+!     {\tt ESMF\_TimeInterval} class to return the remainder of 
+!     {\tt timeinterval1} divided by {\tt timeinterval2} as an 
+!     {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -425,43 +426,6 @@
 !     Time Manager API review 6/2003, TMG7.2
 !
       end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return TimeInterval remainder
-!
-! !INTERFACE:
-!     interface MOD
-!     remainder = MOD(timeinterval1, timeinterval2)
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: remainder
-!
-! !ARGUMENTS: 
-!     type(ESMF_TimeInterval), intent(in) :: timeinterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeinterval2
-!
-! !DESCRIPTION:
-!     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
-!     class to return the remainder of {\tt timeinterval1} divided by
-!     {\tt timeinterval2} as an {\tt ESMF\_TimeInterval}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeinterval1]
-!          The dividend.
-!     \item[timeinterval2]
-!          The divisor.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-!     module procedure ESMF_TimeIntervalRemainder   ! internal implementation
-!
-! !REQUIREMENTS:
-!     Time Manager API review 6/2003, TMG7.2
-!
-!     end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -489,7 +453,7 @@
 !     \begin{description}
 !     \item[timeinterval]        
 !          The multiplicand.
-!     \item[mutliplier]
+!     \item[multiplier]
 !          The integer multiplier.
 !     \end{description}
 !
@@ -524,7 +488,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[mutliplier]
+!     \item[multiplier]
 !          The integer multiplier.
 !     \item[timeinterval]
 !          The multiplicand.
@@ -565,7 +529,7 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The multiplicand.
-!     \item[mutliplier]
+!     \item[multiplier]
 !          The fraction multiplier.
 !     \end{description}
 !
@@ -602,7 +566,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[mutliplier]
+!     \item[multiplier]
 !          The fraction multiplier.
 !     \item[timeinterval]
 !          The multiplicand.
@@ -643,7 +607,7 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The multiplicand.
-!     \item[mutliplier]
+!     \item[multiplier]
 !          The double precision multiplier.
 !     \end{description}
 !
@@ -680,7 +644,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[mutliplier]
+!     \item[multiplier]
 !          The double precision multiplier.
 !     \item[timeinterval]
 !          The multiplicand.
