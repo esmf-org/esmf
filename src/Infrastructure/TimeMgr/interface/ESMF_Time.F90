@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.109 2010/11/12 16:54:30 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.110 2010/11/24 06:57:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,13 +100,49 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.109 2010/11/12 16:54:30 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.110 2010/11/24 06:57:45 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !IROUTINE:  ESMF_TimeAssignment(=)Doc - Assign a Time to another Time
+!
+! !INTERFACE:
+!     interface assignment(=)
+!     time1 = time2
+!
+! !ARGUMENTS:
+!     type(ESMF_Time), intent(out) :: time1
+!     type(ESMF_Time), intent(in)  :: time2
+! 
+! !DESCRIPTION:
+!     Set {\tt time1} equal to {\tt time2}. This is the default Fortran
+!     assignment, which creates a complete, independent copy of {\tt time2} 
+!     as {\tt time1}.
+!
+!     The arguments are:
+!     \begin{description} 
+!     \item[time1] 
+!          The {\tt ESMF\_Time} to be set.
+!     \item[time2] 
+!          The {\tt ESMF\_Time} to be copied.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!     None, documentation only, to describe the behavior of the default 
+!     Fortran assignment(=).
+!
+! !REQUIREMENTS:
+!     API review 11/2010.
+! 
+!     end interface
+! 
+!------------------------------------------------------------------------------
+!
 !BOP
 ! !IROUTINE:  ESMF_TimeOperator(+) - Increment a Time by a TimeInterval
 !
@@ -237,7 +273,8 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} and {\tt time2} are equal, and false otherwise.
+!     if {\tt time1} and {\tt time2} are identical, independent copies of one
+!     another (equal), and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
