@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.3 2010/11/22 15:11:50 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.4 2010/11/25 00:23:33 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -322,14 +322,22 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
 
-    integer       :: localrc
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: compName
+    character(len=ESMF_MAXSTR)  :: compDesc
+    character(len=ESMF_MAXSTR)  :: hostName
 
     ! Initialize return code
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_RegisterComponent("Comp 1:First Component:localhost:27060", &
-                                  rc=localrc)
+    call ESMF_GridCompGet(comp, name=compName, rc=localrc)
+
+    compDesc = ""
+    hostName = "localhost"
+
+    call c_ESMC_RegisterComponent(compName, compDesc, hostName, portNum, &
+                                  localrc)
 
     rc = localrc
 
@@ -371,13 +379,19 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
 
-    integer       :: localrc
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: compName
+    character(len=ESMF_MAXSTR)  :: hostName
 
     ! Initialize return code
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_UnregisterComponent("Comp 1:localhost:27060", rc=localrc)
+    call ESMF_GridCompGet(comp, name=compName, rc=localrc)
+
+    hostName = "localhost"
+
+    call c_ESMC_UnregisterComponent(compName, hostName, portNum, localrc)
 
     rc = localrc
 
@@ -431,8 +445,8 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_ComponentSvcLoop(comp, importState, exportState, clock, 27060, &
-                                 rc=localrc)
+    call c_ESMC_ComponentSvcLoop(comp, importState, exportState, clock, &
+                                 blockingFlag, phase, 27060, rc=localrc)
 
     rc = localrc
 

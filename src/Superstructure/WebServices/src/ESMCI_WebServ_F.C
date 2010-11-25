@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.3 2010/11/10 20:16:35 ksaint Exp $
+// $Id: ESMCI_WebServ_F.C,v 1.4 2010/11/25 00:23:33 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.3 2010/11/10 20:16:35 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.4 2010/11/25 00:23:33 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -64,6 +64,8 @@ void FTN(c_esmc_componentsvcloop)(
   ESMCI::State*      importState,	// (in) the component import state
   ESMCI::State*      exportState,	// (in) the component export state
   ESMCI::Clock*      clock,			// (in) the component clock
+  ESMC_BlockingFlag* blockingFlag,  // (in) the blocking flag
+  int*               phase,         // (in) the phase
   int*               portNum,			// (in) the service port number
   int*               rc			      // (in) the return code
   )
@@ -88,8 +90,8 @@ void FTN(c_esmc_componentsvcloop)(
                           importState, 
                           exportState, 
                           clock, 
-                          0, 
-                          ESMF_BLOCKING) != ESMF_SUCCESS)
+                          *phase, 
+                          *blockingFlag) != ESMF_SUCCESS)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
@@ -223,9 +225,14 @@ void FTN(c_esmc_registercomponent)(
 //
 // !ARGUMENTS:
 //
-  char*         params, 	// (in) the input parameters tokenized in a string
-  int*          rc,        // (in) the return code
-  ESMCI_FortranStrLenArg  param_len	// (in) the length of the input parameters string
+  char*                   compName,		// (in) the grid component name
+  char*                   compDesc,		// (in) the grid component description
+  char*                   hostName, 	// (in) the service host name
+  int*                    portNum,     // (in) the service port number
+  int*                    rc,          // (in) the return code
+  ESMCI_FortranStrLenArg  compNameLen,	// (in) the length of the component name
+  ESMCI_FortranStrLenArg  compDescLen,	// (in) the length of the comp desc
+  ESMCI_FortranStrLenArg  hostNameLen	// (in) the length of the host name
   )
 //
 // !DESCRIPTION:
@@ -235,30 +242,22 @@ void FTN(c_esmc_registercomponent)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("registerComponent()\n");
-	//printf("Params: %s\n", params);
-	//printf("Length: %d\n", param_len);
-
 	int	localrc = 0;
 
-	char	paramStr[param_len + 1];
-	strncpy(paramStr, params, param_len);
-	paramStr[param_len] = '\0';
+	char	nameStr[ESMF_MAXSTR];
+	char	descStr[ESMF_MAXSTR];
+	char	hostStr[ESMF_MAXSTR];
+	char	portStr[ESMF_MAXSTR];
 
-	char	name[param_len];
-	char	desc[param_len];
-	char	hostName[param_len];
-	char	portNum[param_len];
+	strncpy(nameStr, compName, compNameLen);
+	strncpy(descStr, compDesc, compDescLen);
+	strncpy(hostStr, hostName, hostNameLen);
+	sprintf(portStr, "%d", portNum);
 
-	strcpy(name, strtok(paramStr, ":"));
-	strcpy(desc, strtok(NULL, ":"));
-	strcpy(hostName, strtok(NULL, ":"));
-	strcpy(portNum, strtok(NULL, ":"));
-
-	//printf("Name: %s\n", name);
-	//printf("Desc: %s\n", desc);
-	//printf("Host: %s\n", hostName);
-	//printf("Port: %s\n", portNum);
+	//printf("Name: %s\n", nameStr);
+	//printf("Desc: %s\n", descStr);
+	//printf("Host: %s\n", hostStr);
+	//printf("Port: %s\n", portStr);
 
 	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
 
@@ -274,10 +273,10 @@ void FTN(c_esmc_registercomponent)(
    }
 
 	char	response[1024];
-	if (client.registerComp(name, 
-                           desc, 
-                           hostName, 
-                           portNum, 
+	if (client.registerComp(nameStr, 
+                           descStr, 
+                           hostStr, 
+                           portStr, 
                            response) == ESMF_FAILURE)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -308,9 +307,12 @@ void FTN(c_esmc_unregistercomponent)(
 //
 // !ARGUMENTS:
 //
-  char*         params, 	// (in) the input parameters tokenized in a string
-  int*          rc,        // (in) the return code
-  ESMCI_FortranStrLenArg  param_len	// (in) the length of the input parameters string
+  char*                   compName,		// (in) the grid component name
+  char*                   hostName, 	// (in) the service host name
+  int*                    portNum,     // (in) the service port number
+  int*                    rc,          // (in) the return code
+  ESMCI_FortranStrLenArg  compNameLen,	// (in) the length of the component name
+  ESMCI_FortranStrLenArg  hostNameLen	// (in) the length of the host name
   )
 //
 // !DESCRIPTION:
@@ -321,26 +323,19 @@ void FTN(c_esmc_unregistercomponent)(
 //-----------------------------------------------------------------------------
 {
 	//printf("unregisterComponent()\n");
-	//printf("Params: %s\n", params);
-	//printf("Length: %d\n", param_len);
 
 	int	localrc = 0;
+	char	nameStr[ESMF_MAXSTR];
+	char	hostStr[ESMF_MAXSTR];
+	char	portStr[ESMF_MAXSTR];
 
-	char	paramStr[param_len + 1];
-	strncpy(paramStr, params, param_len);
-	paramStr[param_len] = '\0';
+	strncpy(nameStr, compName, compNameLen);
+	strncpy(hostStr, hostName, hostNameLen);
+	sprintf(portStr, "%d", portNum);
 
-	char	name[param_len];
-	char	hostName[param_len];
-	char	portNum[param_len];
-
-	strcpy(name, strtok(paramStr, ":"));
-	strcpy(hostName, strtok(NULL, ":"));
-	strcpy(portNum, strtok(NULL, ":"));
-
-	//printf("Name: %s\n", name);
-	//printf("Host: %s\n", hostName);
-	//printf("Port: %s\n", portNum);
+	//printf("Name: %s\n", nameStr);
+	//printf("Host: %s\n", hostStr);
+	//printf("Port: %s\n", portStr);
 
 	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
 
@@ -356,9 +351,9 @@ void FTN(c_esmc_unregistercomponent)(
    }
 
 	char	response[1024];
-	if (client.unregisterComp(name, 
-                             hostName, 
-                             portNum, 
+	if (client.unregisterComp(nameStr, 
+                             hostStr, 
+                             portStr, 
                              response) == ESMF_FAILURE)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
