@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.54 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.55 2010/11/25 05:23:33 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.54 2010/11/12 06:57:18 eschwab Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.55 2010/11/25 05:23:33 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -117,9 +117,9 @@ contains
     maxHaloLWidth, maxHaloUWidth, localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
-    type(ESMF_Field), intent(inout) :: field    
+    type(ESMF_Field), intent(in)   :: field    
     type(ESMF_ArraySpec), intent(out), optional :: arrayspec
-    logical, intent(out), optional  :: isCommitted
+    logical, intent(out), optional :: isCommitted
     type(ESMF_GeomType), intent(out), optional :: geomtype     
     type(ESMF_Grid), intent(out), optional :: grid     
     type(ESMF_Mesh), intent(out), optional :: mesh     
@@ -522,7 +522,7 @@ contains
   subroutine ESMF_FieldGetLocalArray(field, localarray, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field), intent(inout) :: field
+    type(ESMF_Field), intent(in) :: field
     type(ESMF_LocalArray), intent(out) :: localarray
     integer, intent(out), optional :: rc
 !
