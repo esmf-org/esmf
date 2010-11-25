@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.350 2010/11/12 06:57:17 eschwab Exp $
+! $Id: ESMF_Field.F90,v 1.351 2010/11/25 05:24:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.350 2010/11/12 06:57:17 eschwab Exp $'
+    '$Id: ESMF_Field.F90,v 1.351 2010/11/25 05:24:31 w6ws Exp $'
 
 !==============================================================================
 !
@@ -210,8 +210,8 @@ contains
       subroutine ESMF_FieldValidate(field, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-      integer, intent(out), optional :: rc   
+      type(ESMF_Field), intent(in) :: field 
+      integer,          intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt field} is internally consistent.
