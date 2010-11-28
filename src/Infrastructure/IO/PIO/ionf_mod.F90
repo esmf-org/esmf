@@ -18,7 +18,6 @@ module ionf_mod
   implicit none
   private
 
-  include 'mpif.h'      ! _EXTERNAL
 #ifdef _PNETCDF
 #include <pnetcdf.inc>   /* _EXTERNAL */
 #endif
@@ -37,6 +36,7 @@ contains
   !
 
   integer function create_nf(File,fname, amode) result(ierr)
+    include 'mpif.h'      ! _EXTERNAL
 
     type (File_desc_t), intent(inout) :: File
     character(len=*), intent(in)      :: fname
@@ -118,11 +118,12 @@ contains
        if(Debug) print *,__FILE__,__LINE__,file%fh,ierr
     end if
     tmpfh = file%fh
-    if(Debug.or.DebugAsync) print *,__FILE__,__LINE__,file%fh,ierr
     
     call mpi_bcast(tmpfh,1,mpi_integer, file%iosystem%iomaster, file%iosystem%my_comm, mpierr)
-
+    
     if(.not. file%iosystem%ioproc) file%fh=-tmpfh
+
+    if(Debug.or.DebugAsync) print *,__FILE__,__LINE__,file%fh,ierr
     
     call check_netcdf(File, ierr,_FILE_,__LINE__)
 
@@ -135,6 +136,7 @@ contains
   ! 
 
   integer function open_nf(File,fname, mode) result(ierr)
+    include 'mpif.h'      ! _EXTERNAL
 
     type (File_desc_t), intent(inout) :: File
     character(len=*), intent(in)      :: fname
@@ -191,7 +193,6 @@ contains
                 comm=File%iosystem%io_comm, info=File%iosystem%info)
            if(ierr==nf90_enotnc4 .or. ierr==nf90_einval) then
               ierr = nf90_open(fname, amode, File%fh,info=File%iosystem%info)
-              print *,__FILE__,__LINE__,ierr
            end if
 #endif
         end if
@@ -230,7 +231,6 @@ contains
 
 
   integer function close_nf(File) result(ierr)
-
     type (File_desc_t), intent(inout) :: File
 
     ierr=PIO_noerr
@@ -294,6 +294,9 @@ contains
   end function sync_nf
 
   subroutine check_file_type(File, filename) 
+    include 'mpif.h'      ! _EXTERNAL
+
+
     type (File_desc_t), intent(inout) :: File
     character(len=*), intent(in) :: filename
     character(len=4) :: magic
@@ -321,7 +324,6 @@ contains
                 exit
              endif
           end do
-!          print *,__FILE__,__LINE__, magic
           if(magic(1:3) .eq. 'CDF') then
              ! No need to do anything here
           else if(magic(2:4).eq.'HDF') then
@@ -333,8 +335,8 @@ contains
              end if
 #else
              call piodie(__FILE__,__LINE__, &
-                  'You must link with the netcdf4 ',0,&
-                  'library built with hdf5 support to read this file',0,filename)
+                'You must link with the netcdf4 ',0,&
+                'library built with hdf5 support to read this file',0,filename)
 #endif       
           else 
              ! The HDF identifier could be offset further into the file.
@@ -356,8 +358,8 @@ contains
              end do
              close(fh)
              if(eof<0) call piodie(  &
-               __FILE__,  &
-               __LINE__,'Unrecognized file format ',0,filename)
+                __FILE__,  &
+                __LINE__,'Unrecognized file format ',0,filename)             
           end if
 
        end if

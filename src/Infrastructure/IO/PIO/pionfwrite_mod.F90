@@ -32,7 +32,9 @@ contains
 # 22 "pionfwrite_mod.F90.in"
   integer function write_nfdarray_real (File,IOBUF,varDesc,iodesc,start,count) result(ierr)
     use nf_mod
-    use pio_types
+    use pio_types, only : io_desc_t, var_desc_t, file_desc_t, &
+      iosystem_desc_t, pio_noerr, pio_iotype_netcdf, &
+      pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c
     use pio_kinds
     use pio_utils, only : check_netcdf, bad_iotype
     use alloc_mod, only: alloc_check
@@ -76,7 +78,7 @@ contains
 
        select case (iotype) 
 #ifdef _PNETCDF
-       case(iotype_pnetcdf)
+       case(pio_iotype_pnetcdf)
 #ifdef DEBUG
           if(size(iobuf)<=0) then
              call piodie(subname,__LINE__,'empty iobuf')
@@ -98,7 +100,7 @@ contains
 #ifdef _NETCDF
        case(PIO_iotype_netcdf4p)	
           ierr=nf90_put_var(File%fh, vardesc%varid, iobuf,start=int(start),count=int(count))
-       case(iotype_netcdf,pio_iotype_netcdf4c)
+       case(pio_iotype_netcdf,pio_iotype_netcdf4c)
           ! allocate space on root for copy of iobuf etc.
           iobuf_size=size(IOBUF)
           if(File%iosystem%num_iotasks>1) then
@@ -247,7 +249,9 @@ contains
 # 22 "pionfwrite_mod.F90.in"
   integer function write_nfdarray_int (File,IOBUF,varDesc,iodesc,start,count) result(ierr)
     use nf_mod
-    use pio_types
+    use pio_types, only : io_desc_t, var_desc_t, file_desc_t, &
+      iosystem_desc_t, pio_noerr, pio_iotype_netcdf, &
+      pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c
     use pio_kinds
     use pio_utils, only : check_netcdf, bad_iotype
     use alloc_mod, only: alloc_check
@@ -291,7 +295,7 @@ contains
 
        select case (iotype) 
 #ifdef _PNETCDF
-       case(iotype_pnetcdf)
+       case(pio_iotype_pnetcdf)
 #ifdef DEBUG
           if(size(iobuf)<=0) then
              call piodie(subname,__LINE__,'empty iobuf')
@@ -313,7 +317,7 @@ contains
 #ifdef _NETCDF
        case(PIO_iotype_netcdf4p)	
           ierr=nf90_put_var(File%fh, vardesc%varid, iobuf,start=int(start),count=int(count))
-       case(iotype_netcdf,pio_iotype_netcdf4c)
+       case(pio_iotype_netcdf,pio_iotype_netcdf4c)
           ! allocate space on root for copy of iobuf etc.
           iobuf_size=size(IOBUF)
           if(File%iosystem%num_iotasks>1) then
@@ -462,7 +466,9 @@ contains
 # 22 "pionfwrite_mod.F90.in"
   integer function write_nfdarray_double (File,IOBUF,varDesc,iodesc,start,count) result(ierr)
     use nf_mod
-    use pio_types
+    use pio_types, only : io_desc_t, var_desc_t, file_desc_t, &
+      iosystem_desc_t, pio_noerr, pio_iotype_netcdf, &
+      pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c
     use pio_kinds
     use pio_utils, only : check_netcdf, bad_iotype
     use alloc_mod, only: alloc_check
@@ -506,7 +512,7 @@ contains
 
        select case (iotype) 
 #ifdef _PNETCDF
-       case(iotype_pnetcdf)
+       case(pio_iotype_pnetcdf)
 #ifdef DEBUG
           if(size(iobuf)<=0) then
              call piodie(subname,__LINE__,'empty iobuf')
@@ -528,7 +534,7 @@ contains
 #ifdef _NETCDF
        case(PIO_iotype_netcdf4p)	
           ierr=nf90_put_var(File%fh, vardesc%varid, iobuf,start=int(start),count=int(count))
-       case(iotype_netcdf,pio_iotype_netcdf4c)
+       case(pio_iotype_netcdf,pio_iotype_netcdf4c)
           ! allocate space on root for copy of iobuf etc.
           iobuf_size=size(IOBUF)
           if(File%iosystem%num_iotasks>1) then

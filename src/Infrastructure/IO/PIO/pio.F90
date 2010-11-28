@@ -8,7 +8,7 @@ module pio
        pio_openfile, pio_closefile, pio_createfile, pio_setdebuglevel, &
        pio_seterrorhandling, pio_setframe, pio_init, pio_get_local_array_size, &
        pio_freedecomp, pio_syncfile,pio_numtowrite,pio_numtoread,pio_setiotype, &
-       pio_dupiodesc, pio_finalize, pio_set_hint, pio_getnumiotasks
+       pio_dupiodesc, pio_finalize, pio_set_hint, pio_getnumiotasks, pio_file_is_open
 
   use pio_types, only : io_desc_t, file_desc_t, var_desc_t, iosystem_desc_t, &
 	pio_int, pio_real, pio_double, pio_noerr, iotype_netcdf, &
@@ -18,9 +18,8 @@ module pio
 	pio_global, pio_char, pio_write, pio_nowrite, pio_clobber, pio_noclobber, &
 	pio_max_name, pio_max_var_dims, pio_rearr_none, pio_rearr_mct, &
 #if defined(_NETCDF) || defined(_PNETCDF)
-	pio_nofill, pio_unlimited, &
+	pio_nofill, pio_unlimited, pio_64bit_offset, &
 #endif
-        pio_64bit_offset, &
         pio_rearr_box, pio_internal_error, pio_bcast_error, pio_return_error
 
 

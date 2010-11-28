@@ -3,6 +3,12 @@ PIO directory README
 
 Current Notes:
 -------------
+Just updated to PIO 1.2.5:
+svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_2_5
+
+
+Older Notes:
+-----------
 The "./src/Infrastucture/IO/PIO" directory holds a copy of the PIO source files. These source files are based on PIO svn tag pio1_2_0. They were obtained via:
 
 svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_2_0
