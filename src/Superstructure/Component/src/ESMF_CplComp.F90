@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.126 2010/11/12 06:58:35 eschwab Exp $
+! $Id: ESMF_CplComp.F90,v 1.127 2010/11/29 16:26:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.126 2010/11/12 06:58:35 eschwab Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.127 2010/11/29 16:26:53 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -243,7 +243,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompDestroy"
 !BOP
-! !IROUTINE: ESMF_CplCompDestroy - Release resources for a CplComp
+! !IROUTINE: ESMF_CplCompDestroy - Release all resources associated with this CplComp
 
 ! !INTERFACE:
   subroutine ESMF_CplCompDestroy(cplcomp, rc)
@@ -253,7 +253,9 @@ contains
     integer,            intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
-! Releases all resources associated with this {\tt ESMF\_CplComp}.
+! Releases all resources associated with this {\tt ESMF\_CplComp}.  This
+! includes any States, Clocks, or Attributes that are associated with
+! this CplComp that may not have been appropriately deallocated.
 !
 ! The arguments are:
 ! \begin{description}

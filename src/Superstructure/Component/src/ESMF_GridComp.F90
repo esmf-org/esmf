@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.144 2010/11/12 06:58:35 eschwab Exp $
+! $Id: ESMF_GridComp.F90,v 1.145 2010/11/29 16:26:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.144 2010/11/12 06:58:35 eschwab Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.145 2010/11/29 16:26:53 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -261,7 +261,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompDestroy"
 !BOP
-! !IROUTINE: ESMF_GridCompDestroy - Release resources for a GridComp
+! !IROUTINE: ESMF_GridCompDestroy - Release all resources associated with this GridComp
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompDestroy(gridcomp, rc)
@@ -271,7 +271,9 @@ contains
     integer,             intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
-! Releases all resources associated with this {\tt ESMF\_GridComp}.
+! Releases all resources associated with this {\tt ESMF\_GridComp}.  This
+! includes any States, Clocks, or Attributes that are associated with
+! this GridComp that may not have been appropriately deallocated.
 !
 ! The arguments are:
 ! \begin{description}
