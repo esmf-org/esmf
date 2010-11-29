@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.20 2010/05/08 06:24:27 w6ws Exp $
+! $Id: ESMF_TimeType.F90,v 1.21 2010/11/29 17:45:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 ! !MODULE: ESMF_TimeTypeMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager Fortran API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran types for corresponding C++ class {\tt ESMC\_Time}.
 !
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.20 2010/05/08 06:24:27 w6ws Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.21 2010/11/29 17:45:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -116,7 +116,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_Time} from which to retreive status.
+!           {\tt ESMF\_Time} from which to retrieve status.
 !     \end{description}
 !
 !EOPI

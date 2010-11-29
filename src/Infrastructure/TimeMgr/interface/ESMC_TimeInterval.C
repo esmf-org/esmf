@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.8 2010/06/23 22:46:38 theurich Exp $
+// $Id: ESMC_TimeInterval.C,v 1.9 2010/11/29 17:45:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_TimeInterval.C,v 1.8 2010/06/23 22:46:38 theurich Exp $";
+  "$Id: ESMC_TimeInterval.C,v 1.9 2010/11/29 17:45:28 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing
@@ -107,7 +107,7 @@ int ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
   int      rc = ESMC_RC_NOT_IMPL;         // final return code
 
   // Note: Don't need to check for passed-thru NULL input pointers currently;
-  //       ESMCI::TimeInterval::get() intreprets them as "not desired".
+  //       ESMCI::TimeInterval::get() interprets them as "not desired".
   //       (designed to support F90 not-present args)
 
   // call into ESMCI method

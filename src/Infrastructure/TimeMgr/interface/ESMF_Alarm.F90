@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.91 2010/11/18 17:34:43 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.92 2010/11/29 17:45:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 ! !MODULE: ESMF_AlarmMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager Fortran API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Alarm}.
@@ -68,7 +68,7 @@
 !
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-!     These types are defined in ESMF_AlarmTypeMod and progagated up from here.
+!     These types are defined in ESMF_AlarmTypeMod and propagated up from here.
 !
       public ESMF_AlarmListType
       public ESMF_ALARMLIST_ALL, ESMF_ALARMLIST_RINGING, &
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.91 2010/11/18 17:34:43 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.92 2010/11/29 17:45:28 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1507,7 +1507,7 @@
       logical :: lval1, lval2
 
       ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
-      ! init checks on both args, and in the case where both are unintialized,
+      ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
 
@@ -1557,7 +1557,7 @@
       logical :: lval1, lval2
 
       ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
-      ! init checks on both args, and in the case where both are unintialized,
+      ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
 

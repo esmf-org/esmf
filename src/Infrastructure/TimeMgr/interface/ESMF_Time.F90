@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.110 2010/11/24 06:57:45 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.111 2010/11/29 17:45:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 ! !MODULE: ESMF_TimeMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager Fortran API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Time} implementation.
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.110 2010/11/24 06:57:45 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.111 2010/11/29 17:45:28 eschwab Exp $'
 
 !==============================================================================
 !
@@ -604,11 +604,11 @@
 !     {\tt ESMF\_Time} instant falls on.
 !
 !     For dayOfYear, gets the day of the year that the given {\tt ESMF\_Time}
-!     instant falls on.  See range discusion in argument list below.
+!     instant falls on.  See range discussion in argument list below.
 !     Return as an integer value.
 !
 !     For dayOfYear\_r8, gets the day of the year the given {\tt ESMF\_Time}
-!     instant falls on.  See range discusion in argument list below.
+!     instant falls on.  See range discussion in argument list below.
 !     Return as floating point value; fractional part represents the time of
 !     day.
 !

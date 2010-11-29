@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.96 2010/11/18 17:34:43 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.97 2010/11/29 17:45:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-!     This type is defined in ESMF_ClockTypeMod and progagated up from here.
+!     This type is defined in ESMF_ClockTypeMod and propagated up from here.
       public ESMF_Clock
 !------------------------------------------------------------------------------
 !
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.96 2010/11/18 17:34:43 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.97 2010/11/29 17:45:28 eschwab Exp $'
 
 !==============================================================================
 !
@@ -320,10 +320,10 @@
         endif
       endif
 
-      ! postprocess ringing alarm list
+      ! post-process ringing alarm list
       if (present(ringingAlarmList)) then
 
-         ! postprocess ringing ringingAlarm list
+         ! post-process ringing ringingAlarm list
          do i=1,sizeofRingingAlarmList
             call ESMF_AlarmSetThis(ringingAlarmList(i),ringingAlarmPtrList(i))
             call ESMF_AlarmSetInitCreated(ringingAlarmList(i))
@@ -853,7 +853,7 @@
       endif
 
     
-      ! postprocess ringing alarm list
+      ! post-process ringing alarm list
       do i=1,sizeofAlarmList
          call ESMF_AlarmSetThis(alarmList(i),alarmPtrList(i))
          call ESMF_AlarmSetInitCreated(alarmList(i))
@@ -1631,7 +1631,7 @@
       logical :: lval1, lval2
 
       ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
-      ! init checks on both args, and in the case where both are unintialized,
+      ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
 
@@ -1681,7 +1681,7 @@
       logical :: lval1, lval2
 
       ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
-      ! init checks on both args, and in the case where both are unintialized,
+      ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
 

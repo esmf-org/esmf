@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.101 2010/11/24 06:56:15 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.102 2010/11/29 17:45:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -29,10 +29,10 @@
 ! !MODULE: ESMF_TimeIntervalMod
 !
 ! !DESCRIPTION:
-! Part of Time Manager Fortran API wrapper of C++ implemenation.
+! Part of Time Manager Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
-! C++ implementaion of class {\tt ESMC\_TimeInterval}.
+! C++ implementation of class {\tt ESMC\_TimeInterval}.
 !
 ! See {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.101 2010/11/24 06:56:15 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.102 2010/11/29 17:45:28 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1981,7 +1981,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeIntervalReadRestart()"
 !BOPI
-! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implmented)
+! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implemented)
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalReadRestart(timeinterval, name, rc)
