@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.26 2010/11/19 05:18:41 theurich Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.27 2010/11/29 14:52:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -181,13 +181,8 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the binary file.
   write(name, *) "Write ESMF_Array with Halo to binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-#ifdef ESMF_MPICH
-  !TODO: remove this once PIO in binary mode does not hang for MPICH
-  rc=ESMF_FAILURE
-#else
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#endif
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -265,8 +260,8 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Compare readin and the existing file
-  write(name, *) "Compare readin data to the existing data without halo"
+! ! Compare read in and the existing file
+  write(name, *) "Compare read in data to the existing data without halo"
   write(failMsg, *) "Comparison failed"
   Maxvalue(1) = 0.0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
@@ -317,13 +312,8 @@ program ESMF_ArrayIOUTest
 ! ! Read in a binary file to an ESMF array.
   write(name, *) "Read ESMF_Array with Halo binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-#ifdef ESMF_MPICH
-  !TODO: remove this once PIO in binary mode does not hang for MPICH
-  rc=ESMF_FAILURE
-#else
   call ESMF_ArrayRead(array_withhalo3, file='file3D_withhalo.bin', &
        iofmt=ESMF_IOFMT_BIN, rc=rc)
-#endif
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -333,8 +323,8 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Compare readin and the existing file
-  write(name, *) "Compare readin data to the existing data with halo"
+! ! Compare read in and the existing file
+  write(name, *) "Compare read in data to the existing data with halo"
   write(failMsg, *) "Comparison failed"
   Maxvalue(1) = 0.0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
@@ -355,8 +345,8 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Compare readin and the existing file
-  write(name, *) "Compare readin data to the existing binary data with halo"
+! ! Compare read in and the existing file
+  write(name, *) "Compare read in data to the existing binary data with halo"
   write(failMsg, *) "Comparison failed"
   Maxvalue(1) = 0.0
   do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
@@ -508,8 +498,8 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-! ! Compare readin and the existing file
-  write(name, *) "Compare readin data to the existing data without halo"
+! ! Compare read in and the existing file
+  write(name, *) "Compare read in data to the existing data without halo"
   write(failMsg, *) "Comparison failed"
   Maxvalue(1) = 0.0
   do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
@@ -571,7 +561,7 @@ program ESMF_ArrayIOUTest
   r8Max(1) = 0.0  ! initialize
   call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
   call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
-  write(name, *) "Compare readin data from a different distgrid"
+  write(name, *) "Compare read in data from a different distgrid"
   write(failMsg, *) "Comparison failed"
   if (localPet .eq.0) then
    do j=1,5
