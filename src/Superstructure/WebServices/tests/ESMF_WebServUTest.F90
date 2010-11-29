@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.1 2010/11/25 00:22:14 ksaint Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.2 2010/11/29 23:12:32 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -66,7 +66,7 @@ program ESMF_WebServComponentUTest
     expState = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
  
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
     call ESMF_WebServRegisterSvc(comp1, 27060, rc=rc)
@@ -76,7 +76,7 @@ program ESMF_WebServComponentUTest
           ESMF_SRCLINE)
  
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be unregistered
     rc = ESMF_SUCCESS
     call ESMF_WebServUnregisterSvc(comp1, 27060, rc=rc)
@@ -89,7 +89,7 @@ program ESMF_WebServComponentUTest
 #ifdef ESMF_TESTEXHAUSTIVE
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Verifing that a Gridded Component can be created in parent VM context
 !    cname = "Atmosphere - child in parent VM context"
 !    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
@@ -99,7 +99,7 @@ program ESMF_WebServComponentUTest
 !    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Query the run status of a Gridded Component 
 !    bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
 !    write(failMsg, *) "Did not return ESMF_SUCCESS"
