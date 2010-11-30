@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.120 2010/09/17 23:34:36 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.121 2010/11/30 19:24:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.120 2010/09/17 23:34:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.121 2010/11/30 19:24:24 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4636,7 +4636,7 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    commflag, finishedflag, cancelledflag, ESMF_REGION_TOTAL, checkflag);
+    commflag, finishedflag, cancelledflag, ESMF_REGION_SELECT, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
