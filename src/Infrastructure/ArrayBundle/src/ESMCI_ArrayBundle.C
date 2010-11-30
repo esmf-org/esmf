@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.31 2010/09/17 05:46:30 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.32 2010/11/30 22:04:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.31 2010/09/17 05:46:30 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.32 2010/11/30 22:04:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -784,7 +784,7 @@ int ArrayBundle::redist(
   
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
-    ESMF_REGION_TOTAL, checkflag);
+    ESMF_REGION_SELECT, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
