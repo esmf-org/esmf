@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.7 2010/10/07 23:30:38 rokuingh Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.8 2010/11/30 23:47:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.7 2010/10/07 23:30:38 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.8 2010/11/30 23:47:43 oehmke Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -208,13 +208,22 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, regridMethod, &
-        regridScheme, routehandle, rc)
+    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, srcMaskValues, &
+                                           dstFieldBundle, dstMaskValues, &
+                                           unmappedDstAction,              &
+                                           regridMethod, &
+                                           regridPoleType, regridPoleNPnts, &
+                                           regridScheme, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(inout)                :: srcFieldBundle
+    integer(ESMF_KIND_I4), intent(in), optional          :: srcMaskValues(:)
     type(ESMF_FieldBundle), intent(inout)                :: dstFieldBundle
+    integer(ESMF_KIND_I4), intent(in), optional          :: dstMaskValues(:)
+    type(ESMF_UnmappedAction), intent(in), optional      :: unmappedDstAction
     type(ESMF_RegridMethod), intent(in), optional        :: regridMethod
+      type(ESMF_RegridPole), intent(in), optional        :: regridPoleType
+      integer, intent(in),optional                       :: regridPoleNPnts
     integer, intent(in), optional                        :: regridScheme
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
     integer,                intent(out),        optional :: rc
@@ -241,11 +250,33 @@ contains
 !   \begin{description}
 !   \item [srcFieldbundle]
 !     Source {\tt ESMF\_FieldBundle} containing data to be regridded.
+!  \item [{[srcMaskValues]}]
+!     List of values that indicate a source point should be masked out. 
+!     If not specified, no masking will occur. 
 !   \item [dstFieldbundle]
 !     Destination {\tt ESMF\_FieldBundle}.
+!  \item [{[dstMaskValues]}]
+!     List of values that indicate a destination point should be masked out. 
+!     If not specified, no masking will occur.
+!  \item [{[unmappedDstAction]}]
+!    Specifies what should happen if there are destination points that
+!    can't be mapped to a source cell. Options are 
+!    {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!    to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[regridMethod]}]
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
 !     valid options. If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
+!   \item [{[regridPoleType]}]
+!    Which type of artificial pole
+!    to construct on the source Grid for regridding. Only valid when {\tt regridScheme} is set to 
+!    {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see Section~\ref{opt:regridpole} for a list of
+!    valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
+!   \item [{[regridPoleNPnts]}]
+!    If {\tt regridPoleType} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
+!    This parameter indicates how many points should be averaged
+!    over. Must be specified if {\tt regridPoleType} is 
+!    {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !   \item [{[regridScheme]}]
 !     Whether to convert to spherical coordinates (ESMF\_REGRID\_SCHEME\_FULL3D), 
 !     or to leave in native coordinates (ESMF\_REGRID\_SCHEME\_NATIVE). 
@@ -306,8 +337,12 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
           
           ! precompute regrid operation for this Field pair
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
-            routehandle=rh, regridMethod=regridMethod, regridScheme=regridScheme, &
+          call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=srcMaskValues, &
+            dstField=dstField, dstMaskValues=dstMaskValues, &
+            unmappedDstAction=unmappedDstAction, &
+            routehandle=rh, regridMethod=regridMethod, &
+            regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
+            regridScheme=regridScheme, &
             rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
