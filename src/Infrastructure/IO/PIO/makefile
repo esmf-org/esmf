@@ -1,6 +1,9 @@
-# $Id: makefile,v 1.8 2010/11/04 23:27:50 samsoncheung Exp $
+# $Id: makefile,v 1.9 2010/11/30 22:38:14 theurich Exp $
 
-ALL: build_here 
+# locally disable parallel build:
+.NOTPARALLEL:
+
+ALL: build_here
 
 CPPFLAGS += -D_USEBOX
 
