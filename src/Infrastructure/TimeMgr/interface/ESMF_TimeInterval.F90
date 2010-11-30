@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.102 2010/11/29 17:45:28 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.103 2010/11/30 17:17:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,13 +122,48 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.102 2010/11/29 17:45:28 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.103 2010/11/30 17:17:57 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalAssignment(=)Doc - Assign a TimeInterval to another TimeInterval
+!
+! !INTERFACE:
+!     interface assignment(=)
+!     timeinterval1 = timeinterval2
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(out) :: timeinterval1
+!     type(ESMF_TimeInterval), intent(in)  :: timeinterval2
+! 
+! !DESCRIPTION:
+!     Set {\tt timeinterval1} equal to {\tt timeinterval2}.  This is the default
+!     Fortran assignment, which creates a complete, independent copy of
+!     {\tt timeinterval2} as {\tt timeinterval1}.
+!
+!     The arguments are:
+!     \begin{description} 
+!     \item[timeinterval1] 
+!          The {\tt ESMF\_TimeInterval} to be set.
+!     \item[timeinterval2] 
+!          The {\tt ESMF\_TimeInterval} to be copied.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!     None, documentation only, to describe the behavior of the default 
+!     Fortran assignment(=).
+!
+! !REQUIREMENTS:
+!     API review 11/2010.
+! 
+!     end interface
+! 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalOperator(+) - Add two TimeIntervals
 !
