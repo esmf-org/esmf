@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.92 2010/11/29 17:45:28 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.93 2010/11/30 17:17:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -109,13 +109,47 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.92 2010/11/29 17:45:28 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.93 2010/11/30 17:17:15 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !IROUTINE:  ESMF_AlarmAssignment(=)Doc - Assign an Alarm to another Alarm
+!
+! !INTERFACE:
+!     interface assignment(=)
+!     alarm1 = alarm2
+!
+! !ARGUMENTS:
+!     type(ESMF_Alarm), intent(out) :: alarm1
+!     type(ESMF_Alarm), intent(in)  :: alarm2
+! 
+! !DESCRIPTION:
+!     Set {\tt alarm1} equal to {\tt alarm2}.  This is the default Fortran
+!     assignment, which creates an alias to the original {\tt ESMF\_Alarm}.
+!
+!     The arguments are:
+!     \begin{description} 
+!     \item[alarm1] 
+!          The {\tt ESMF\_Alarm} to be set.
+!     \item[alarm2] 
+!          The {\tt ESMF\_Alarm} to be copied.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!     None, documentation only, to describe the behavior of the default 
+!     Fortran assignment(=).
+!
+! !REQUIREMENTS:
+!     API review 11/2010.
+! 
+!     end interface
+! 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_AlarmOperator(==) - Test if Alarm 1 is equal to Alarm 2
 !
@@ -425,7 +459,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!       Destroy contents of this {\tt ESMF\_Alarm}.
+!       Release resources associated with this {\tt ESMF\_Alarm} and mark the
+!       object as invalid.  It is an error to pass this object into any other
+!       routines after being destroyed.
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

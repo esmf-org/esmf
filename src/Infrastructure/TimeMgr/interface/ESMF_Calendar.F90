@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.112 2010/11/29 17:45:28 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.113 2010/11/30 17:17:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -142,13 +142,47 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.112 2010/11/29 17:45:28 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.113 2010/11/30 17:17:15 eschwab Exp $'
 
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
 ! 
 !==============================================================================
+!BOP
+! !IROUTINE:  ESMF_CalendarAssignment(=)Doc - Assign a Calendar to another Calendar
+!
+! !INTERFACE:
+!     interface assignment(=)
+!     calendar1 = calendar2
+!
+! !ARGUMENTS:
+!     type(ESMF_Calendar), intent(out) :: calendar1
+!     type(ESMF_Calendar), intent(in)  :: calendar2
+! 
+! !DESCRIPTION:
+!     Set {\tt calendar1} equal to {\tt calendar2}.  This is the default Fortran
+!     assignment, which creates an alias to the original {\tt ESMF\_Calendar}.
+!
+!     The arguments are:
+!     \begin{description} 
+!     \item[calendar1] 
+!          The {\tt ESMF\_Calendar} to be set.
+!     \item[calendar2] 
+!          The {\tt ESMF\_Calendar} to be copied.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!     None, documentation only, to describe the behavior of the default 
+!     Fortran assignment(=).
+!
+! !REQUIREMENTS:
+!     API review 11/2010.
+! 
+!     end interface
+! 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar 1 is equal to Calendar 2
 !
@@ -824,7 +858,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
-!       Destroy contents of this {\tt ESMF\_Calendar}.
+!       Release resources associated with this {\tt ESMF\_Calendar} and mark the
+!       object as invalid.  It is an error to pass this object into any other
+!       routines after being destroyed.
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

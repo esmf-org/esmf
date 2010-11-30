@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.97 2010/11/29 17:45:28 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.98 2010/11/30 17:17:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,13 +104,47 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.97 2010/11/29 17:45:28 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.98 2010/11/30 17:17:15 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !IROUTINE:  ESMF_ClockAssignment(=)Doc - Assign a Clock to another Clock
+!
+! !INTERFACE:
+!     interface assignment(=)
+!     clock1 = clock2
+!
+! !ARGUMENTS:
+!     type(ESMF_Clock), intent(out) :: clock1
+!     type(ESMF_Clock), intent(in)  :: clock2
+! 
+! !DESCRIPTION:
+!     Set {\tt clock1} equal to {\tt clock2}.  This is the default Fortran
+!     assignment, which creates an alias to the original {\tt ESMF\_Clock}.
+!
+!     The arguments are:
+!     \begin{description} 
+!     \item[clock1] 
+!          The {\tt ESMF\_Clock} to be set.
+!     \item[clock2] 
+!          The {\tt ESMF\_Clock} to be copied.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!     None, documentation only, to describe the behavior of the default 
+!     Fortran assignment(=).
+!
+! !REQUIREMENTS:
+!     API review 11/2010.
+! 
+!     end interface
+! 
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_ClockOperator(==) - Test if Clock 1 is equal to Clock 2
 !
@@ -515,7 +549,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!       Destroy contents of this {\tt ESMF\_Clock}.
+!       Release resources associated with this {\tt ESMF\_Clock} and mark the
+!       object as invalid.  It is an error to pass this object into any other
+!       routines after being destroyed.
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
