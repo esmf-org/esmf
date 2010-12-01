@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.16 2010/09/17 05:46:30 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.17 2010/12/01 16:34:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -308,9 +308,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
   mypthid=0;
 #endif
 #ifdef ESMF_MPIUNI
-  mpionly = 0;          // this way the commtype will be checked in comm calls
+  mpionly=0;          // this way the commtype will be checked in comm calls
 #else
-  mpionly = 1;          // normally the default VM can only be MPI-only
+  if (npets==1)
+    mpionly=0;          // this way the commtype will be checked in comm calls
+  else
+    mpionly=1;          // normally the default VM can only be MPI-only
 #endif
   // no threading in default global VM
   nothreadsflag = 1;
@@ -345,10 +348,18 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sync_reset(&(sendChannel[0].shmp->shms));
   recvChannel[0] = sendChannel[0];
 #else
-  for (int i=0; i<npets; i++){
-    // normally by default all communication is via MPI-1
-    sendChannel[i].comm_type = VM_COMM_TYPE_MPI1;
-    recvChannel[i].comm_type = VM_COMM_TYPE_MPI1;
+  if (npets==1){
+    // for single PET VMs use the MPIUNI branch
+    sendChannel[0].comm_type = VM_COMM_TYPE_MPIUNI;
+    sendChannel[0].shmp = new shared_mp;
+    sync_reset(&(sendChannel[0].shmp->shms));
+    recvChannel[0] = sendChannel[0];
+  }else{
+    for (int i=0; i<npets; i++){
+      // normally by default all communication is via MPI-1
+      sendChannel[i].comm_type = VM_COMM_TYPE_MPI1;
+      recvChannel[i].comm_type = VM_COMM_TYPE_MPI1;
+    }
   }
 #endif
   // setup the IntraProcessSharedMemoryAllocation List
@@ -433,6 +444,8 @@ void VMK::finalize(int finalizeMpi){
 #ifdef ESMF_MPIUNI
   delete sendChannel[0].shmp;
 #endif
+  if (npets==1)
+    delete sendChannel[0].shmp;
   delete [] sendChannel;
   delete [] recvChannel;  
   while (*ipshmTop != NULL){
@@ -639,10 +652,14 @@ void VMK::construct(void *ssarg){
   // don't set mpionly flag so that comm call check for commtype
   mpionly=0;
 #else
-  // determine whether we are dealing with an MPI-only VMK
-  mpionly=1;  // assume this is MPI-only VMK until found otherwise
-  for (int i=0; i<npets; i++)
-    if (tid[i]>0) mpionly=0;    // found multi-threading PET
+  if (npets==1)
+    mpionly=0;
+  else{
+    // determine whether we are dealing with an MPI-only VMK
+    mpionly=1;  // assume this is MPI-only VMK until found otherwise
+    for (int i=0; i<npets; i++)
+      if (tid[i]>0) mpionly=0;    // found multi-threading PET
+  }
 #endif
   nothreadsflag = sarg->nothreadsflag;
   // need a barrier here before any of the PETs get into user code...
