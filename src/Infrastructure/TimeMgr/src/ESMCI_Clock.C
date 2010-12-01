@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.16 2010/11/17 06:54:40 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.17 2010/12/01 16:08:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.16 2010/11/17 06:54:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.17 2010/12/01 16:08:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -244,6 +244,13 @@ int Clock::count=0;
 //      via an {\tt ESMCI\_ClockCreate} routine.  Define for deep classes only.
 //
 //EOP
+
+   // set any associated alarm's clock pointers to null
+   if (*clock != ESMC_NULL_POINTER) {
+     for(int i=0; i < (*clock)->alarmCount; i++) {
+       ((*clock)->alarmList[i])->clock = ESMC_NULL_POINTER;
+     }
+   }
 
    // TODO: clock->destruct(); constructor calls it!
    delete *clock; // ok to delete null pointer
@@ -1353,10 +1360,14 @@ int Clock::count=0;
       }
   
       // copy alarm list (array of pointers)
-      for(int i=0; i<clock.alarmCount; i++) {
-        alarmList[i] = clock.alarmList[i];
-      }
-      alarmCount = clock.alarmCount;
+      //for(int i=0; i<clock.alarmCount; i++) {
+      //  alarmList[i] = clock.alarmList[i];
+      //}
+      //alarmCount = clock.alarmCount;
+
+      // don't copy alarm list values; an alarm can only be associated with
+      // one clock
+      alarmCount = 0;
 
       // copy all other members
       strcpy(name,           clock.name);
