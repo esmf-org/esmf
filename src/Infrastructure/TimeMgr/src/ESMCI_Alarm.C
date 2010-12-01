@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.16 2010/11/24 06:58:45 eschwab Exp $
+// $Id: ESMCI_Alarm.C,v 1.17 2010/12/01 16:09:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.16 2010/11/24 06:58:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.17 2010/12/01 16:09:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -250,8 +250,10 @@ int Alarm::count=0;
     } else {
       // add this new valid alarm copy to the same clock as the original alarm
       if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-      returnCode = (alarmCopy->clock)->Clock::addAlarm(alarmCopy);
-      ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+      if (alarmCopy->clock != ESMC_NULL_POINTER) {
+        returnCode = (alarmCopy->clock)->Clock::addAlarm(alarmCopy);
+        ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+      }
     }
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
@@ -290,8 +292,10 @@ int Alarm::count=0;
   // TODO: alarm->Alarm::destruct(); constructor calls it!
 
   // remove alarm from associated clock's alarmList
-  rc = ((*alarm)->clock)->Clock::removeAlarm(*alarm);
-  ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+  if ((*alarm)->clock != ESMC_NULL_POINTER) {
+    rc = ((*alarm)->clock)->Clock::removeAlarm(*alarm);
+    ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+  }
   delete *alarm;   // ok to delete null pointer
   *alarm = ESMC_NULL_POINTER;
   return(rc);
@@ -365,8 +369,10 @@ int Alarm::count=0;
 
     if (clock != ESMC_NULL_POINTER) {
       // remove this alarm from associated clock's alarmList
-      rc = (this->clock)->Clock::removeAlarm(this);
-      ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+      if (this->clock != ESMC_NULL_POINTER) {
+        rc = (this->clock)->Clock::removeAlarm(this);
+        ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+      }
 
       // and add it to the given clock's alarmList
       rc = (*clock)->Clock::addAlarm(this);
