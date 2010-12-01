@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.103 2010/11/30 17:17:57 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.104 2010/12/01 16:02:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.103 2010/11/30 17:17:57 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.104 2010/12/01 16:02:21 eschwab Exp $'
 
 !==============================================================================
 !
@@ -130,7 +130,7 @@
 !
 !==============================================================================
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalAssignment(=)Doc - Assign a TimeInterval to another TimeInterval
+! !IROUTINE:  ESMF_TimeIntervalAssignment(=) - Assign a TimeInterval to another TimeInterval
 !
 ! !INTERFACE:
 !     interface assignment(=)
