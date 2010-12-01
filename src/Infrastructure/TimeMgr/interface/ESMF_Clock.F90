@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.98 2010/11/30 17:17:15 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.99 2010/12/01 16:03:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.98 2010/11/30 17:17:15 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.99 2010/12/01 16:03:15 eschwab Exp $'
 
 !==============================================================================
 !
@@ -112,7 +112,7 @@
 !
 !==============================================================================
 !BOP
-! !IROUTINE:  ESMF_ClockAssignment(=)Doc - Assign a Clock to another Clock
+! !IROUTINE:  ESMF_ClockAssignment(=) - Assign a Clock to another Clock
 !
 ! !INTERFACE:
 !     interface assignment(=)
@@ -490,10 +490,15 @@
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Creates a copy of a given {\tt ESMF\_Clock}, including its list of
-!     {\tt ESMF\_Alarm}s (pointers).  The returned {\tt ESMF\_Clock} copy
-!     shares, via pointers, the same set of {\tt ESMF\_Alarm} instances as the
-!     original {\tt ESMF\_Clock}.
+!     Creates a deep copy of a given {\tt ESMF\_Clock}, but does not copy its
+!     list of {\tt ESMF\_Alarm}s (pointers), since an {\tt ESMF\_Alarm} can only
+!     be associated with one {\tt ESMF\_Clock}.  Hence, the returned
+!     {\tt ESMF\_Clock} copy has no associated {\tt ESMF\_Alarm}s, the same as
+!     with a newly created {\tt ESMF\_Clock}.  If desired, new
+!     {\tt ESMF\_Alarm}s must be created and associated with this copied
+!     {\tt ESMF\_Clock} via {\tt ESMF\_AlarmCreate()}, or existing 
+!     {\tt ESMF\_Alarm}s must be re-associated with this copied
+!     {\tt ESMF\_Clock} via {\tt ESMF\_AlarmSet(...clock=...)}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -545,6 +550,12 @@
 !     {\tt ESMF\_AlarmDestroy()} on each {\tt ESMF\_Alarm} to release its
 !     resources.  {\tt ESMF\_ClockDestroy()} and corresponding 
 !     {\tt ESMF\_AlarmDestroy()}s can be called in either order.
+!
+!     If {\tt ESMF\_ClockDestroy()} is called before {\tt ESMF\_AlarmDestroy()},
+!     any {\tt ESMF\_Alarm}s that were in the {\tt ESMF\_Clock}'s list will  
+!     no longer be associated with any {\tt ESMF\_Clock}.  If desired,
+!     these "orphaned" {\tt ESMF\_Alarm}s can be associated with a different
+!     {\tt ESMF\_Clock} via a call to {\tt ESMF\_AlarmSet(...clock=...)}.
 !
 !     The arguments are:
 !     \begin{description}
