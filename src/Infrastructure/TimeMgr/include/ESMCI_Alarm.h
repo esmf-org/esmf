@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.16 2010/11/12 06:58:00 eschwab Exp $
+// $Id: ESMCI_Alarm.h,v 1.17 2010/12/01 16:06:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -256,6 +256,9 @@ class Alarm {
     // friend to de-allocate alarm
     friend int ESMCI_alarmDestroy(Alarm **);
 
+    // friend function to de-allocate clock, allowing a clock's alarm's
+    // clock pointers to be nullified
+    friend int ESMCI_ClockDestroy(Clock **);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
