@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.222 2010/11/17 06:57:50 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.223 2010/12/01 06:17:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,6 +76,8 @@ module ESMF_StateMod
 
       public ESMF_StateAdd
       public ESMF_StateGet
+!      public ESMF_StateRemove
+      public ESMF_StateReplace
 
 #define ESMF_ENABLESTATENEEDED
 #if defined (ESMF_ENABLESTATENEEDED)
@@ -99,7 +101,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.222 2010/11/17 06:57:50 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.223 2010/12/01 06:17:26 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -176,6 +178,31 @@ module ESMF_StateMod
 !  
 !EOPI 
   end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateReplace -- Replace items in a State
+
+! !INTERFACE:
+  interface ESMF_StateReplace
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_StateRepOneArray
+    module procedure ESMF_StateRepOneArrayBundle
+    module procedure ESMF_StateRepOneField
+    module procedure ESMF_StateRepOneFieldBundle
+    module procedure ESMF_StateRepOneState
+
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+! types of {\tt ESMF\_StateReplace} functions.   
+!  
+!EOPI 
+  end interface
+
+
 
 !==============================================================================
 
@@ -277,7 +304,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-    call ESMF_StateAddOneArrayX (state, array, proxyflag=.false., rc=rc)
+    call ESMF_StateAdd (state, array, proxyflag=.false., rc=rc)
 
   end subroutine ESMF_StateAddOneArray
 
@@ -289,12 +316,14 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddOneArrayX(state, array, proxyflag, rc)
+  subroutine ESMF_StateAddOneArrayX(state, array,  &
+                                    proxyflag, replaceflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Array), intent(in)             :: array
     logical,          intent(in)             :: proxyflag
+    logical,          intent(in),   optional :: replaceflag
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -316,6 +345,10 @@ module ESMF_StateMod
 !     destruction of objects when they are no longer in use.
 ! \item[proxyflag]
 !     Indicate whether this is a proxy object. 
+! \item[replaceflag]
+!     If set, indicates a replacement operation where there must be an
+!     pre-existing item with the same name.  If there is no pre-existing
+!     item, an error is returned.
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -334,7 +367,6 @@ module ESMF_StateMod
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -343,7 +375,7 @@ module ESMF_StateMod
       temp_list(1) = array
 
       call ESMF_StateClsAddArrayList(state%statep, 1, temp_list, &
-        proxyflag=proxyflag, rc=localrc)      
+        replaceflag=replaceflag, proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -413,7 +445,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-    call ESMF_StateAddOneArrayBundleX (state, arraybundle, proxyflag=.false., rc=rc)
+    call ESMF_StateAdd (state, arraybundle,  &
+                        proxyflag=.false., rc=rc)
 
   end subroutine ESMF_StateAddOneArrayBundle
 
@@ -425,12 +458,14 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddOneArrayBundleX(state, arraybundle, proxyflag, rc)
+  subroutine ESMF_StateAddOneArrayBundleX(state, arraybundle,  &
+                                          proxyflag, replaceflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
     logical,                intent(in)             :: proxyflag
+    logical,                intent(in),   optional :: replaceflag
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -452,6 +487,9 @@ module ESMF_StateMod
 !     destruction of objects when they are no longer in use.
 ! \item[proxyflag]
 !     Indicate whether this is a proxy object. 
+! \item[replaceflag]
+!     If set, indicates a replacement operation where there must be an
+!     pre-existing item with the same name.
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -460,6 +498,7 @@ module ESMF_StateMod
       type(ESMF_ArrayBundle) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
+      logical :: localreplaceflag
       integer :: localrc
 
       ! check input variables
@@ -470,6 +509,10 @@ module ESMF_StateMod
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      localreplaceflag = .false.
+      if (present (replaceflag)) then
+        localreplaceflag = replaceflag
+      end if
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -479,7 +522,7 @@ module ESMF_StateMod
       temp_list(1) = arraybundle
 
       call ESMF_StateClsAddArrayBundleList(state%statep, 1, temp_list, &
-        proxyflag=proxyflag, rc=localrc)      
+        replaceflag=replaceflag, proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -551,7 +594,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-        call ESMF_StateAddOneFieldX (state, field, proxyflag=.false., rc=rc)
+        call ESMF_StateAdd (state, field,  &
+                            proxyflag=.false., rc=rc)
 
       end subroutine ESMF_StateAddOneField
 
@@ -563,12 +607,14 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneFieldX(state, field, proxyflag, rc)
+      subroutine ESMF_StateAddOneFieldX(state, field,  &
+                                        proxyflag, replaceflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)         :: state
       type(ESMF_Field), intent(in)            :: field
-      logical                                 :: proxyflag
+      logical,          intent(in)            :: proxyflag
+      logical,          intent(in),  optional :: replaceflag
       integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -618,7 +664,7 @@ module ESMF_StateMod
       temp_list(1) = field
 
       call ESMF_StateClsAddFieldList(state%statep, 1, temp_list, &
-        proxyflag=proxyflag, rc=localrc)      
+        replaceflag=replaceflag, proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -691,7 +737,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-        call ESMF_StateAddOneFieldBundleX (state, fieldBundle, proxyflag=.false., rc=rc)
+        call ESMF_StateAdd (state, fieldBundle,  &
+                            proxyflag=.false., rc=rc)
 
       end subroutine ESMF_StateAddOneFieldBundle
 
@@ -703,12 +750,14 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneFieldBundleX(state, fieldbundle, proxyflag, rc)
+      subroutine ESMF_StateAddOneFieldBundleX(state, fieldbundle,  &
+                                              proxyflag, replaceflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(inout)         :: state
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
       logical,                intent(in)            :: proxyflag
+      logical,                intent(in),  optional :: replaceflag
       integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -758,8 +807,8 @@ module ESMF_StateMod
 
       temp_list(1) = fieldbundle
 
-      call ESMF_StateClAddFieldBundleList(state%statep, temp_list, 1, &
-        proxyflag=proxyflag, rc=localrc)      
+      call ESMF_StateClAddFieldBundleList(state%statep, 1, temp_list, &
+        replaceflag=replaceflag, proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -803,9 +852,9 @@ module ESMF_StateMod
       subroutine ESMF_StateAddOneName(state, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      character (len=*), intent(in) :: name
-      integer, intent(out), optional :: rc
+      type(ESMF_State),  intent(inout)         :: state
+      character (len=*), intent(in)            :: name
+      integer,           intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
 !      Add the character string {\tt name} to an existing {\tt state}.
@@ -864,9 +913,9 @@ module ESMF_StateMod
       subroutine ESMF_StateAddOneRouteHandle(state, routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      integer, intent(out), optional :: rc
+      type(ESMF_State),       intent(inout)         :: state
+      type(ESMF_RouteHandle), intent(in)            :: routehandle
+      integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
 !      Add a single RouteHandle reference to an existing 
@@ -959,7 +1008,8 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-        call ESMF_StateAddOneStateX (state, nestedState, proxyflag=.false., rc=rc)
+        call ESMF_StateAdd (state, nestedState,  &
+                            proxyflag=.false., rc=rc)
 
       end subroutine ESMF_StateAddOneState
 
@@ -971,12 +1021,14 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneStateX(state, nestedState, proxyflag, rc)
+      subroutine ESMF_StateAddOneStateX(state, nestedState,  &
+                                        proxyflag, replaceflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)         :: state
       type(ESMF_State), intent(in)            :: nestedState
       logical,          intent(in)            :: proxyflag
+      logical,          intent(in),  optional :: replaceflag
       integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1028,7 +1080,7 @@ module ESMF_StateMod
       temp_list(1) = nestedState
 
       call ESMF_StateClsAddStateList(state%statep, 1, temp_list, &
-        proxyflag=proxyflag, rc=localrc)      
+        replaceflag=replaceflag, proxyflag=proxyflag, rc=localrc)      
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1173,7 +1225,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of arrayList", &
+            "- count must be smaller than or equal to the size of arrayList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -1289,7 +1341,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of arraybundleList", &
+            "- count must be smaller than or equal to the size of arraybundleList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -1398,7 +1450,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of fieldList", &
+            "- count must be smaller than or equal to the size of fieldList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -1510,7 +1562,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of fieldbundleList", &
+            "- count must be smaller than or equal to the size of fieldbundleList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -1529,7 +1581,7 @@ module ESMF_StateMod
                                   ESMF_CONTEXT, rc)) return
 
       call ESMF_StateClAddFieldBundleList(state%statep, &
-                                          fieldbundleList, localcount, rc=localrc)
+                                          localcount, fieldbundleList, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1631,7 +1683,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of State nameList", &
+            "- count must be smaller than or equal to the size of State nameList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -1716,7 +1768,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of routehandleList", &
+            "- count must be smaller than or equal to the size of routehandleList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -1790,7 +1842,7 @@ module ESMF_StateMod
           return
         else if (count > localcount) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than size of nestedStateList", &
+            "- count must be smaller than or equal to the size of nestedStateList", &
             ESMF_CONTEXT, rc)
           return
         else
@@ -3635,6 +3687,278 @@ module ESMF_StateMod
         if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_StateRead
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateReplace - Replace a single item to a State
+!
+! !INTERFACE:
+!  subroutine ESMF_StateReplace(state, <item>, rc)
+!
+! !ARGUMENTS:
+!    type(ESMF_State), intent(inout)          :: state
+!    <item>, see below for supported values
+!    integer,          intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+!      Supported values for <item> are:
+!      \begin{description}
+!      \item type(ESMF\_Array), intent(in)            :: array
+!      \item type(ESMF\_ArrayBundle), intent(in)      :: arraybundle
+!      \item type(ESMF\_Field), intent(in)            :: field
+!      \item type(ESMF\_FieldBundle), intent(in)      :: fieldbundle
+!      \item character (len=*), intent(in)            :: name
+!      \item type(ESMF\_RouteHandle), intent(in)      :: routehandle
+!      \item type(ESMF\_State), intent(in)            :: nestedState
+!      \end{description}
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!      The {\tt ESMF\_State} to which <item>s will be replaced.
+! \item[<item>]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRepOneArray"
+!BOPI
+! !IROUTINE: ESMF_StateReplace - Replace an Array in a State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateReplace()   
+  subroutine ESMF_StateRepOneArray(state, array, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)          :: state
+    type(ESMF_Array), intent(in)             :: array
+    integer,          intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[array]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+
+    call ESMF_StateAdd (state, array,       &
+                        proxyflag=.false.,  &
+                        replaceflag=.true., &
+                        rc=rc)
+
+  end subroutine ESMF_StateRepOneArray
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRepOneArrayBundle"
+!BOPI
+! !IROUTINE: ESMF_StateReplace - Replace an ArrayBundle in a State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateReplace()   
+  subroutine ESMF_StateRepOneArrayBundle(state, arraybundle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State),       intent(inout)          :: state
+    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    integer,                intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[arraybundle]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+
+    call ESMF_StateAdd (state, arraybundle,  &
+                        proxyflag=.false.,   &
+                        replaceflag=.true.,  &
+                        rc=rc)
+
+  end subroutine ESMF_StateRepOneArrayBundle
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRepOneField"
+!BOPI
+! !IROUTINE: ESMF_StateReplace - Replace a Field in a State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateReplace()   
+  subroutine ESMF_StateRepOneField(state, Field, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)          :: state
+    type(ESMF_Field), intent(in)             :: Field
+    integer,          intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[Field]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+
+    call ESMF_StateAdd (state, Field,       &
+                        proxyflag=.false.,  &
+                        replaceflag=.true., &
+                        rc=rc)
+
+  end subroutine ESMF_StateRepOneField
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRepOneFieldBundle"
+!BOPI
+! !IROUTINE: ESMF_StateReplace - Replace a FieldBundle in a State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateReplace()   
+  subroutine ESMF_StateRepOneFieldBundle(state, Fieldbundle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State),       intent(inout)          :: state
+    type(ESMF_FieldBundle), intent(in)             :: Fieldbundle
+    integer,                intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[Fieldbundle]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+
+    call ESMF_StateAdd (state, Fieldbundle,  &
+                        proxyflag=.false.,   &
+                        replaceflag=.true.,  &
+                        rc=rc)
+
+  end subroutine ESMF_StateRepOneFieldBundle
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRepOneState"
+!BOPI
+! !IROUTINE: ESMF_StateReplace - Replace an State in a State
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_StateReplace()   
+  subroutine ESMF_StateRepOneState(state, nestedState, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)          :: state
+    type(ESMF_State), intent(in)             :: nestedState
+    integer,          intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} object.
+! \item[nestedState]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+
+    call ESMF_StateAdd (state, nestedState=State, &
+                        proxyflag=.false.,  &
+                        replaceflag=.true., &
+                        rc=rc)
+
+  end subroutine ESMF_StateRepOneState
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReadRestart"
@@ -3855,7 +4179,10 @@ module ESMF_StateMod
 ! !INTERFACE:
       subroutine ESMF_StateConstruct(stypep, statename, statetype, & 
                          fieldbundles, fields, arrays, states, names, itemcount, &
-                         neededflag, readyflag, validflag, reqforrestartflag, rc)
+#if defined (ESMF_ENABLESTATENEEDED)
+                         neededflag, readyflag, validflag, reqforrestartflag, &
+#endif
+                         rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
@@ -3901,6 +4228,7 @@ module ESMF_StateMod
 !    The total number of FieldBundles, Fields, Arrays, States, and Names specified.
 !    This argument is optional, and if specified is used as an error check
 !    to verify that the actual total number of items found matches this count.
+#if defined (ESMF_ENABLESTATENEEDED)
 !   \item[{[neededflag]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEITEM\_NEEDED} or 
@@ -3923,6 +4251,7 @@ module ESMF_StateMod
 !    Valid values are {\tt ESMF\_REQUIRED\_FOR\_RESTART} or
 !    {\tt ESMF\_NOTREQUIRED\_FOR\_RESTART}. If not specified, the default 
 !    value is set to {\tt ESMF\_REQUIRED\_FOR\_RESTART}.
+#endif
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3983,6 +4312,7 @@ module ESMF_StateMod
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+#if defined (ESMF_ENABLESTATENEEDED)
         ! Set the defaults for objects added to this state
         if (present(neededflag)) then
             stypep%needed_default = neededflag
@@ -4007,6 +4337,7 @@ module ESMF_StateMod
         else
             stypep%reqrestart_default = ESMF_REQUIRED_FOR_RESTART
         endif
+#endif
 
         ! Set the initial size of the datalist
         call ESMF_StateClassExtendList(stypep, count, localrc)
@@ -4019,7 +4350,7 @@ module ESMF_StateMod
         if (present(fieldbundles)) then
           count = size(fieldbundles)
           if (count .gt. 0) then
-            call ESMF_StateClAddFieldBundleList(stypep, fieldbundles, count, &
+            call ESMF_StateClAddFieldBundleList(stypep, count, fieldbundles, &
               rc=localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4244,14 +4575,15 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       subroutine ESMF_StateClsAddRHandleList(stypep, acount, routehandles, &
-        proxyflag, rc)
+        replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass), pointer :: stypep
-      integer, intent(in) :: acount
-      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandles
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc     
+      type(ESMF_StateClass), pointer    :: stypep
+      integer,               intent(in) :: acount
+      type(ESMF_RouteHandle),intent(in) :: routehandles(:)
+      logical,               intent(in),  optional :: replaceflag
+      logical,               intent(in),  optional :: proxyflag
+      integer,               intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple routehandles to an {\tt ESMF\_State}.  Internal routine only.
@@ -4264,6 +4596,12 @@ module ESMF_StateMod
 !       The number of {\tt ESMF\_RouteHandle}s to be added.
 !     \item[routehandles]
 !       The array of {\tt ESMF\_RouteHandle}s to be added.
+!     \item[proxyflag]
+!       Indicate whether this is a proxy object. 
+!     \item[replaceflag]
+!       If set, indicates a replacement operation where there must be an
+!       pre-existing item with the same name.  If there is no pre-existing
+!       item, an error is returned.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4271,10 +4609,11 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      logical :: localrepflag             ! local replace-only flag
       integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: rhname
-      integer, allocatable, dimension(:) :: atodo
+      logical, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex
       logical :: exists
@@ -4288,6 +4627,11 @@ module ESMF_StateMod
          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandles(i),rc)
       enddo
 
+      if (present (replaceflag)) then
+        localrepflag = replaceflag
+      else
+        localrepflag = .false.
+      end if
 
       rhname = ""
   
@@ -4329,7 +4673,7 @@ module ESMF_StateMod
                                      "adding RouteHandles to a State", &
                                      ESMF_CONTEXT, rc)) return
 
-      atodo(1:acount) = 0
+      atodo = .false.
 
       ! Initialize counters to 0, indices to 1
       newcount = 0
@@ -4367,9 +4711,18 @@ module ESMF_StateMod
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
-            newcount = newcount + 1
-            aindex = -1
-            atodo(i) = 1
+            if (.not. localrepflag) then
+              newcount = newcount + 1
+              aindex = -1
+              atodo(i) = .true.
+            else
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
+                                      "existing item " // trim (rhname) // " was not found", &
+                                      ESMF_CONTEXT, rc)) then
+                deallocate (atodo, stat=memstat)
+                return
+              end if
+            end if
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
@@ -4405,7 +4758,7 @@ module ESMF_StateMod
       do i=1, acount
 
         ! If routehandle wasn't already found in the list, we need to add it here.
-        if (atodo(i) .eq. 1) then
+        if (atodo(i)) then
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
@@ -4459,14 +4812,16 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       subroutine ESMF_StateClsAddArrayList(stypep, acount, arrays, &
-        proxyflag, rc)
+        replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass), pointer :: stypep
-      integer, intent(in) :: acount
-      type(ESMF_Array), dimension(:), intent(in) :: arrays
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc     
+      type(ESMF_StateClass),  &
+                        pointer    :: stypep
+      integer,          intent(in) :: acount
+      type(ESMF_Array), intent(in) :: arrays(:)
+      logical,          intent(in),  optional :: replaceflag
+      logical,          intent(in),  optional :: proxyflag
+      integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Add multiple arrays to an {\tt ESMF\_State}.  Internal routine only.
@@ -4479,6 +4834,12 @@ module ESMF_StateMod
 !       The number of {\tt ESMF\_Arrays} to be added.
 !     \item[arrays]
 !       The array of {\tt ESMF\_Arrays} to be added.
+!     \item[proxyflag]
+!       Indicate whether this is a proxy object. 
+!     \item[replaceflag]
+!       If set, indicates a replacement operation where there must be an
+!       pre-existing item with the same name.  If there is no pre-existing
+!       item, an error is returned.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4486,10 +4847,11 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      logical :: localrepflag             ! local replace-only flag
       integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
-      integer, allocatable, dimension(:) :: atodo
+      logical, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex
       logical :: exists
@@ -4503,6 +4865,11 @@ module ESMF_StateMod
          ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrays(i),rc)
       enddo
 
+      if (present (replaceflag)) then
+        localrepflag = replaceflag
+      else
+        localrepflag = .false.
+      end if
 
       aname = ""
   
@@ -4542,7 +4909,7 @@ module ESMF_StateMod
                                      "adding Arrays to a State", &
                                      ESMF_CONTEXT, rc)) return
 
-      atodo(1:acount) = 0
+      atodo = .false.
 
       ! Initialize counters to 0, indices to 1
       newcount = 0
@@ -4578,11 +4945,21 @@ module ESMF_StateMod
           return
         endif
    
-        ! If not, in the second pass we will need to add it.
+        ! If not, and replaceflag is not set, in the second pass we will
+        ! need to add it.
         if (.not. exists) then
-            newcount = newcount + 1
-            aindex = -1
-            atodo(i) = 1
+            if (.not. localrepflag) then
+              newcount = newcount + 1
+              aindex = -1
+              atodo(i) = .true.
+            else
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
+                                      "existing item " // trim (aname) // " was not found", &
+                                      ESMF_CONTEXT, rc)) then
+                deallocate (atodo, stat=memstat)
+                return
+              end if
+            end if
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
@@ -4618,7 +4995,7 @@ module ESMF_StateMod
       do i=1, acount
 
         ! If array wasn't already found in the list, we need to add it here.
-        if (atodo(i) .eq. 1) then
+        if (atodo(i)) then
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
@@ -4670,15 +5047,16 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateClsAddArrayBundleList - Add a list of ArrayBundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClsAddArrayBundleList(stypep, acount, &
-        arraybundles, proxyflag, rc)
+      subroutine ESMF_StateClsAddArrayBundleList(stypep, acount, arraybundles, &
+        replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass), pointer :: stypep
-      integer, intent(in) :: acount
-      type(ESMF_ArrayBundle), dimension(:), intent(in) :: arraybundles
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc     
+      type(ESMF_StateClass),  pointer    :: stypep
+      integer,                intent(in) :: acount
+      type(ESMF_ArrayBundle), intent(in) :: arraybundles(:)
+      logical,                intent(in),  optional :: replaceflag
+      logical,                intent(in),  optional :: proxyflag
+      integer,                intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple arraybundles to an {\tt ESMF\_State}.  Internal routine only.
@@ -4691,6 +5069,12 @@ module ESMF_StateMod
 !       The number of {\tt ESMF\_ArrayBundles} to be added.
 !     \item[arraybundles]
 !       The array of {\tt ESMF\_ArrayBundles} to be added.
+!     \item[proxyflag]
+!       Indicate whether this is a proxy object. 
+!     \item[replaceflag]
+!       If set, indicates a replacement operation where there must be an
+!       pre-existing item with the same name.  If there is no pre-existing
+!       item, an error is returned.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4698,10 +5082,11 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      logical :: localrepflag             ! local replace-only flag
       integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
-      integer, allocatable, dimension(:) :: atodo
+      logical, allocatable :: atodo(:)
       integer :: i
       integer :: newcount, aindex
       logical :: exists
@@ -4715,6 +5100,11 @@ module ESMF_StateMod
          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
       enddo
 
+      if (present (replaceflag)) then
+        localrepflag = replaceflag
+      else
+        localrepflag = .false.
+      end if
 
       aname = ""
   
@@ -4754,7 +5144,7 @@ module ESMF_StateMod
                                      "adding ArrayBundles to a State", &
                                      ESMF_CONTEXT, rc)) return
 
-      atodo(1:acount) = 0
+      atodo = .false.
 
       ! Initialize counters to 0, indices to 1
       newcount = 0
@@ -4790,11 +5180,21 @@ module ESMF_StateMod
           return
         endif
    
-        ! If not, in the second pass we will need to add it.
+        ! If not, and replaceflag is not set, in the second pass we will
+        ! need to add it.
         if (.not. exists) then
-            newcount = newcount + 1
-            aindex = -1
-            atodo(i) = 1
+            if (.not. localrepflag) then
+              newcount = newcount + 1
+              aindex = -1
+              atodo(i) = .true.
+            else
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
+                                      "existing item " // trim (aname) // " was not found", &
+                                      ESMF_CONTEXT, rc)) then
+                deallocate (atodo, stat=memstat)
+                return
+              end if
+            end if
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
@@ -4830,7 +5230,7 @@ module ESMF_StateMod
       do i=1, acount
 
         ! If arraybundle wasn't already found in the list, we need to add it here.
-        if (atodo(i) .eq. 1) then
+        if (atodo(i)) then
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
@@ -4883,14 +5283,15 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       subroutine ESMF_StateClsAddFieldList(stypep, fcount, fields, &
-        proxyflag, rc)
+        replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass), pointer :: stypep
-      integer, intent(in) :: fcount
-      type(ESMF_Field), dimension(:), intent(inout) :: fields
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc     
+      type(ESMF_StateClass), pointer    :: stypep
+      integer,               intent(in) :: fcount
+      type(ESMF_Field),      intent(in) :: fields(:)
+      logical,               intent(in),  optional :: replaceflag
+      logical,               intent(in),  optional :: proxyflag
+      integer,               intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple fields to a {\tt State}.  Internal routine only.
@@ -4903,6 +5304,12 @@ module ESMF_StateMod
 !       The number of {\tt ESMF\_Fields} to be added.
 !     \item[fields]
 !       The array of {\tt ESMF\_Fields} to be added.
+!     \item[proxyflag]
+!       Indicate whether this is a proxy object. 
+!     \item[replaceflag]
+!       If set, indicates a replacement operation where there must be an
+!       pre-existing item with the same name.  If there is no pre-existing
+!       item, an error is returned.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4910,10 +5317,11 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                   ! local error status
+      logical :: localrepflag             ! local replace-only flag
       integer :: memstat                   ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: fname
-      integer, allocatable, dimension(:) :: ftodo
+      logical, allocatable :: ftodo(:)
       integer :: i
       integer :: newcount, findex
       logical :: exists
@@ -4927,6 +5335,11 @@ module ESMF_StateMod
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
       enddo
 
+      if (present (replaceflag)) then
+        localrepflag = replaceflag
+      else
+        localrepflag = .false.
+      end if
  
       fname = ""
 
@@ -4966,7 +5379,7 @@ module ESMF_StateMod
       if (ESMF_LogMsgFoundAllocError(memstat, &
                                   "adding fields to a state", &
                                   ESMF_CONTEXT, rc)) return
-      ftodo(1:fcount) = 0
+      ftodo = .false.
 
       ! Initialize counters to 0, indices to 1
       newcount = 0
@@ -5000,11 +5413,21 @@ module ESMF_StateMod
           return
         endif
    
-        ! If not, in the second pass we will need to add it.
+        ! If not, and replaceflag is not set, in the second pass we will
+        ! need to add it.
         if (.not. exists) then
-            newcount = newcount + 1
-            findex = -1
-            ftodo(i) = 1
+            if (.not. localrepflag) then
+              newcount = newcount + 1
+              findex = -1
+              ftodo(i) = .true.
+            else
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
+                                      "existing item " // trim (fname) // " was not found", &
+                                      ESMF_CONTEXT, rc)) then
+                deallocate (ftodo, stat=memstat)
+                return
+              end if
+            end if
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
@@ -5041,7 +5464,7 @@ module ESMF_StateMod
       do i=1, fcount
 
         ! If field wasn't already found in the list, we need to add it here.
-        if (ftodo(i) .eq. 1) then
+        if (ftodo(i)) then
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
@@ -5095,15 +5518,16 @@ module ESMF_StateMod
 ! !IROUTINE: ESMF_StateClAddFieldBundleList - Add a list of FieldBundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateClAddFieldBundleList(stypep, fieldbundles, bcount, &
-        proxyflag, rc)
+      subroutine ESMF_StateClAddFieldBundleList(stypep, bcount, fieldbundles, &
+        replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass), pointer :: stypep
-      type(ESMF_FieldBundle), dimension(:), intent(inout) :: fieldbundles
-      integer, intent(in) :: bcount
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc     
+      type(ESMF_StateClass),  pointer       :: stypep
+      integer,                intent(in)    :: bcount
+      type(ESMF_FieldBundle), intent(inout) :: fieldbundles(:)
+      logical,                intent(in),  optional :: replaceflag
+      logical,                intent(in),  optional :: proxyflag
+      integer,                intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple fieldbundles to an {\tt ESMF\_State}.  Internal routine only.
@@ -5116,6 +5540,12 @@ module ESMF_StateMod
 !       The array of {\tt ESMF\_FieldBundles} to be added.
 !     \item[bcount]
 !       The number of {\tt ESMF\_FieldBundles} to be added.
+!     \item[proxyflag]
+!       Indicate whether this is a proxy object. 
+!     \item[replaceflag]
+!       If set, indicates a replacement operation where there must be an
+!       pre-existing item with the same name.  If there is no pre-existing
+!       item, an error is returned.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5123,11 +5553,13 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      logical :: localrepflag             ! local replace-only flag
       integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
       character(len=ESMF_MAXSTR) :: bname, fname
-      integer, allocatable, dimension(:) :: btodo, ftodo
+      logical, allocatable :: btodo(:)
+      integer, allocatable :: ftodo(:)
       integer :: bindex, findex 
       integer :: i, j
       integer :: fcount, fruncount, newcount
@@ -5143,6 +5575,16 @@ module ESMF_StateMod
       do i=1,bcount
          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
       enddo
+
+      if (present (replaceflag)) then
+        localrepflag = replaceflag
+      else
+        localrepflag = .false.
+      end if
+      if (localrepflag) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "replace option not supported yet", &
+                                     ESMF_CONTEXT, rc)) return
+      endif
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
@@ -5187,13 +5629,13 @@ module ESMF_StateMod
       ! IMPORTANT: from here down, do not return on error, but goto 10
       !  to at least try to deallocate the temp storage.
 
-      btodo(1:bcount) = 0
+      btodo = .false.
 
       if (fruncount .ge. 0) then
         allocate(ftodo(fruncount), stat=memstat)
         if (ESMF_LogMsgFoundAllocError(memstat, "ftodo", &
                                        ESMF_CONTEXT, rc)) goto 10
-        ftodo(1:fruncount) = 0
+        ftodo = 0
       endif
 
   
@@ -5221,7 +5663,7 @@ module ESMF_StateMod
         if (.not. exists) then
             newcount = newcount + 1
             bindex = -1
-            btodo(i) = 1
+            btodo(i) = .true.
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
@@ -5324,7 +5766,7 @@ module ESMF_StateMod
       do i=1, bcount
 
         ! If fieldbundle wasn't already found in the list, we need to add it here.
-        if (btodo(i) .eq. 1) then
+        if (btodo(i)) then
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
@@ -5471,14 +5913,15 @@ module ESMF_StateMod
 !
 ! !INTERFACE:
       subroutine ESMF_StateClsAddStateList(stypep, scount, states, &
-        proxyflag, rc)
+        replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_StateClass), pointer :: stypep
-      integer, intent(in) :: scount
-      type(ESMF_State), dimension(:), intent(in) :: states
-      logical, optional :: proxyflag
-      integer, intent(out), optional :: rc     
+      integer,               intent(in) :: scount
+      type(ESMF_State),      intent(in) :: states(:)
+      logical,               intent(in),  optional :: replaceflag
+      logical,               intent(in),  optional :: proxyflag
+      integer,               intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple states to a {\tt State}.  Internal routine only.
@@ -5491,6 +5934,12 @@ module ESMF_StateMod
 !       The number of {\tt ESMF\_State}s to be added.
 !     \item[nestedstate]
 !       The array of {\tt ESMF\_State}s to be added.
+!     \item[proxyflag]
+!       Indicate whether this is a proxy object. 
+!     \item[replaceflag]
+!       If set, indicates a replacement operation where there must be an
+!       pre-existing item with the same name.  If there is no pre-existing
+!       item, an error is returned.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -5498,10 +5947,11 @@ module ESMF_StateMod
 !EOPI
 
       integer :: localrc                  ! local error status
+      logical :: localrepflag             ! local replace-only flag
       integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
-      integer, allocatable, dimension(:) :: stodo
+      logical, allocatable :: stodo(:)
       integer :: i
       integer :: newcount, sindex
       logical :: exists
@@ -5515,6 +5965,11 @@ module ESMF_StateMod
          ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
       enddo
 
+      if (present (replaceflag)) then
+        localrepflag = replaceflag
+      else
+        localrepflag = .false.
+      end if
 
       sname = ""
   
@@ -5543,7 +5998,7 @@ module ESMF_StateMod
       allocate(stodo(scount), stat=memstat)
       if (ESMF_LogMsgFoundAllocError(memstat, "adding States", &
                                        ESMF_CONTEXT, rc)) return
-      stodo(1:scount) = 0
+      stodo = .false.
 
       ! Initialize counters to 0, indices to 1
       newcount = 0
@@ -5592,11 +6047,21 @@ module ESMF_StateMod
           return
         endif
    
-        ! If not, in the second pass we will need to add it.
+        ! If not, and replaceflag is not set, in the second pass we will
+        ! need to add it.
         if (.not. exists) then
-            newcount = newcount + 1
-            sindex = -1
-            stodo(i) = 1
+            if (.not. localrepflag) then
+              newcount = newcount + 1
+              sindex = -1
+              stodo(i) = .true.
+            else
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
+                                      "existing item " // trim (sname) // " was not found", &
+                                      ESMF_CONTEXT, rc)) then
+                deallocate (stodo, stat=memstat)
+                return
+              end if
+            end if
         else
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
@@ -5635,7 +6100,7 @@ module ESMF_StateMod
       do i=1, scount
 
         ! If state wasn't already found in the list, we need to add it here.
-        if (stodo(i) .eq. 1) then
+        if (stodo(i)) then
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
