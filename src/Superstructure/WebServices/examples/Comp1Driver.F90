@@ -1,4 +1,4 @@
-! $Id: Comp1Driver.F90,v 1.1 2010/11/11 19:35:53 ksaint Exp $
+! $Id: Comp1Driver.F90,v 1.2 2010/12/02 15:46:09 ksaint Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -235,15 +235,18 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-   if (localPet == 0)  then
-     call c_ESMC_RegisterComponent("Comp 1:First Component:localhost:27060", &
-                                   rc=localrc)
-     call c_ESMC_ComponentSvcLoop(comp1, defaultstate, c1exp, clock, 27060, &
-                                  rc=localrc)
-     call c_ESMC_UnregisterComponent("Comp 1:localhost:27060", rc=localrc)
-   else
-     call ESMF_WebServWaitForRequest(comp1, exportState=c1exp, rc=localrc)
-   end if
+   call ESMF_WebServicesLoop(comp1, 27060, importState=defaultState, &
+         exportState=c1exp, clock=clock, rc=localrc)
+
+!   if (localPet == 0)  then
+!     call c_ESMC_RegisterComponent("Comp 1:First Component:localhost:27060", &
+!                                   rc=localrc)
+!     call c_ESMC_ComponentSvcLoop(comp1, defaultstate, c1exp, clock, 27060, &
+!                                  rc=localrc)
+!     call c_ESMC_UnregisterComponent("Comp 1:localhost:27060", rc=localrc)
+!   else
+!     call ESMF_WebServWaitForRequest(comp1, exportState=c1exp, rc=localrc)
+!   end if
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
