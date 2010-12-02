@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.24 2010/11/03 20:57:19 murphysj Exp $
+% $Id: Attribute_pack.tex,v 1.25 2010/12/02 22:45:16 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,8 +37,8 @@ There are many attributes that are used to describe components. There are curren
     \item Earth System Grid (ESG) Basic
     \item Common Information Model (CIM) Main
     \item Common Information Model (CIM) Platform
-    \item Common Information Model (CIM) Responsible Party
-    \item Common Information Model (CIM) Citation
+    \item International Association for Standardization (ISO) Responsible Party
+    \item International Association for Standardization (ISO) Citation
 \end{enumerate}
 
 \vspace{.20in}
@@ -82,8 +82,8 @@ There are many attributes that are used to describe components. There are curren
     \item Purpose: Model Component Simulation Description
     \item Includes:
     \begin{itemize}
-       \item CIM Responsible Party
-       \item CIM Citation
+       \item ISO Responsible Party
+       \item ISO Citation
        \item CIM Platform
        \item CIM Inputs
     \end{itemize}
@@ -154,7 +154,7 @@ There are many attributes that are used to describe components. There are curren
 
 
 \vspace{.20in}
-{\bf 4. CIM Responsible Party Attribute Package}
+{\bf 4. ISO Responsible Party Attribute Package}
 
 \begin{itemize}
     \item Convention: ISO 19115
@@ -181,7 +181,7 @@ There are many attributes that are used to describe components. There are curren
 
 
 \vspace{.20in}
-{\bf 4. CIM Citation Attribute Package}
+{\bf 4. ISO Citation Attribute Package}
 
 \begin{itemize}
     \item Convention: ISO 19115
@@ -425,7 +425,7 @@ There are two grid attribute packages in ESMF.
 
 
 \vspace{.20in}
-{\bf 2. EMSF Grid}
+{\bf 2. ESMF Grid}
 
 \label{ESMFGridAttributePackage}
 
@@ -435,7 +435,7 @@ There are two grid attribute packages in ESMF.
     \item Output Options:
     \begin{itemize}
         \item Simple XML
-        \item If combined with the Gridspec Package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
+        \item If combined with the Gridspec Package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed logically-rectangular grids. See Section \ref{example:GridCrFromFile} for details. 
     \end{itemize}
     \item Description: This package contains two Attributes required by ESMF to generate grids from a file. They describe the decomposition of a grid across ESMF DEs.  This package nests the GridSpec General package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
@@ -468,11 +468,11 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt CouplingSource} & The component the input condition is coming from. & CIM Inputs\\ 
      {\tt CouplingTarget} & The component the input condition is going to. & CIM Inputs\\ 
      {\tt Description} & A multi-line description of the component. & CIM Main \\
-     {\tt Date} & The date of the citation. & CIM Citation\\
+     {\tt Date} & The date of the citation. & ISO Citation\\
      {\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & Gridspec\\ 
      {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid.& Gridspec \\
-     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & CIM Citation\\
-     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & CIM Responsible Party\\
+     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & ISO Citation\\
+     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & ISO Responsible Party\\
      {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & CIM Inputs\\ 
      {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESG Basic Component\\
      {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere". & Gridspec \\
@@ -483,7 +483,7 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt Intent} & An indication of whether a field or state is imported into or exported from a particular model component. This refers to coupling, and not history output. & ESMF State, ESMF Field\\
      {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & Gridspec \\
      {\tt LongName} & The name of an object with all acronyms spelled out. For fields, it is an ad-hoc long descriptive name which may, for example, be used for labeling plots. & CF General\\
-     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & CIM Citation\\
+     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & ISO Citation\\
      {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  CIM Platform\\
      {\tt MachineDescription} & A short note about the machine. & CIM Platform\\
      {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & CIM Platform\\
@@ -500,17 +500,17 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt NumDims} & & N/A\\ 
      {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & Gridspec \\ 
      {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & Gridspec\\ 
-     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & CIM Responsible Party\\
+     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & ISO Responsible Party\\
      {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESG Basic Component\\
-     {\tt PresentationForm} & A description of the type of citation. & CIM Citation\\
+     {\tt PresentationForm} & A description of the type of citation. & ISO Citation\\
      {\tt PreviousVersion} & Name of the previous version of a model or model component. & CIM Main\\ 
      {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & CIM Main\\
      {\tt ReleaseDate} & The year a model component was issued. & CIM Main\\
      {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& N/A\\
      {\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& N/A\\
-     {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. &  CIM Responsible Party\\ 
+     {\tt ResponsiblePartyRole} & A flag to define the Responsible Party block. &  ISO Responsible Party\\ 
      {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CF General\\
-     {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & CIM Citation \\     
+     {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & ISO Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & CIM Main\\ 
      {\tt SimulationRationale} & The reason for performing an experiment. & CIM Main\\
@@ -521,7 +521,7 @@ The following is an alphabetical list of all the attributes impletmented in ESMF
      {\tt StandardName} & The approved CF standard name for a variable if it exists. &  CF Extended\\
      {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& CIM Inputs\\ 
      {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CIM Inputs\\ 
-     {\tt URL} & URL of the object being described. Exists in multple packages. & CIM Responsible Party, CIM Main, CIM Citation\\
+     {\tt URL} & URL of the object being described. Exists in multple packages. & ISO Responsible Party, CIM Main, ISO Citation\\
      {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA"s Udunits package. & CF General\\
      {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & ESG Basic Component, CIM Main\\ 
 
