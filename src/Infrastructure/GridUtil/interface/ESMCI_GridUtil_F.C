@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.31 2010/06/28 17:59:24 theurich Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.32 2010/12/02 18:17:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
                              ESMCI::Array **arraypp4,
                              ESMCI::Array **arraypp5,
                              ESMCI::Array **arraypp6,
-                             int *spherical,
+                             int *spherical, int *islatlondeg,
                              ESMCI_FortranStrLenArg nlen
 			  ) {
 #undef  ESMC_METHOD
@@ -157,6 +157,8 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
 
   if (*spherical != 0) grid.setSphere();
+
+  if (*islatlondeg != 0) grid.setLatLonDeg();
 
   for (UInt i = 0; i < *num_arrays; ++i)
     arrays.push_back(*ar[i]);
@@ -194,13 +196,15 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
 
 
-void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *regridConserve, int *rc) {
+  void FTN(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc, int *isSphere, int *islatlondeg, Mesh **meshpp, 					  ESMCI::InterfaceInt **maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridtomesh()" 
 
   ESMCI::Grid &grid = **gridpp;
 
   if (*isSphere) grid.setSphere();
+
+  if (*islatlondeg) grid.setLatLonDeg();
 
   Mesh *meshp = new Mesh();
 

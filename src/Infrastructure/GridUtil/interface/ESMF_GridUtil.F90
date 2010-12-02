@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.19 2010/08/23 17:27:45 rokuingh Exp $
+! $Id: ESMF_GridUtil.F90,v 1.20 2010/12/02 18:17:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.19 2010/08/23 17:27:45 rokuingh Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.20 2010/12/02 18:17:16 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ module ESMF_GridUtilMod
 ! !IROUTINE: ESMF_GridWriteVTK -- Write Grid and associated Arrays
 !
 ! !INTERFACE:
-    subroutine ESMF_GridWriteVTK(grid, staggerLoc, isSphere, filename, &
+    subroutine ESMF_GridWriteVTK(grid, staggerLoc, isSphere, isLatLonDeg, filename, &
                                  array1, array2, array3, array4, array5,&
                                  array6, rc)
 !
@@ -196,6 +196,7 @@ module ESMF_GridUtilMod
     type(ESMF_Grid), intent(inout)                :: grid
     type(ESMF_StaggerLoc), intent(in),optional    :: staggerLoc
     logical, intent(in), optional                 :: isSphere
+    logical, intent(in), optional                 :: isLatLonDeg
     character(len = *), intent(in)                :: filename 
     type(ESMF_Array), intent(inout), optional     :: array1
     type(ESMF_Array), intent(inout), optional     :: array2
@@ -217,6 +218,9 @@ module ESMF_GridUtilMod
 !   \item [{[isSphere]}]
 !         If .true. then grid will be transformed to a 3d spherical manifold, if
 !         not specified defaults to false (not spherical). 
+!   \item [{[isLatLonDeg]}]
+!         If .true. then grid coordinates will be assumed to be latxlon in deg. If not specified, then
+!         the default depends isSphere and has the same value. (e.g. true if isSphere=true)
 !   \item[filename]
 !         File (stub) to write results to
 !   \item [{[array1-6]}]
@@ -230,6 +234,7 @@ module ESMF_GridUtilMod
     integer                 :: localrc      ! local return code
     integer                 :: minidx
     integer                 :: lspherical
+    integer                 :: lisLatLonDeg
     integer                 :: tmp_staggerloc
     type(ESMF_Array)        :: arrayEmpty
 
@@ -244,6 +249,22 @@ module ESMF_GridUtilMod
          lspherical = 1
        else 
          lspherical = 0
+       endif
+    endif
+
+
+    ! set default isLatLonDeg
+    if (present(isLatLonDeg)) then
+       if (isLatLonDeg) then
+         lisLatLonDeg = 1
+       else 
+         lisLatLonDeg = 0
+       endif
+    else
+       if (lspherical .eq. 1) then
+         lisLatLonDeg = 1
+       else 
+         lisLatLonDeg = 0
        endif
     endif
 
@@ -269,31 +290,31 @@ module ESMF_GridUtilMod
       case (1)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 0, filename, localrc, &
              arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
-             arrayEmpty, lspherical)
+             arrayEmpty, lspherical, lisLatLonDeg)
       case (2)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 1, filename, localrc, &
              array1, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
-             arrayEmpty, lspherical)
+             arrayEmpty, lspherical, lisLatLonDeg)
       case (3) 
         call c_ESMC_GridIO(grid, tmp_staggerloc, 2, filename, localrc, &
              array1, array2, arrayEmpty, arrayEmpty, arrayEmpty, &
-             arrayEmpty, lspherical)
+             arrayEmpty, lspherical, lisLatLonDeg)
       case (4) 
         call c_ESMC_GridIO(grid, tmp_staggerloc, 3, filename, localrc, &
              array1, array2, array3, arrayEmpty, arrayEmpty, &
-             arrayEmpty, lspherical)
+             arrayEmpty, lspherical, lisLatLonDeg)
       case (5) 
         call c_ESMC_GridIO(grid, tmp_staggerloc, 4, filename, localrc, &
              array1, array2, array3, array4, arrayEmpty, &
-             arrayEmpty, lspherical)
+             arrayEmpty, lspherical, lisLatLonDeg)
       case (6) 
         call c_ESMC_GridIO(grid, tmp_staggerloc, 5, filename, localrc, &
              array1, array2, array3, array4, array5, &
-             arrayEmpty, lspherical)
+             arrayEmpty, lspherical, lisLatLonDeg)
       case (10) 
         call c_ESMC_GridIO(grid, tmp_staggerloc, 5, filename, localrc, &
              array1, array2, array3, array4, array5, &
-             array6, lspherical)
+             array6, lspherical, lisLatLonDeg)
       case default
         localrc = ESMF_RC_NOT_IMPL
     end select
@@ -312,7 +333,7 @@ module ESMF_GridUtilMod
 ! !IROUTINE: ESMF_GridToMesh -- return a mesh with same topo as mesh
 !
 ! !INTERFACE:
-   function ESMF_GridToMesh(grid, staggerLoc, isSphere, maskValues, regridConserve, rc)
+   function ESMF_GridToMesh(grid, staggerLoc, isSphere, isLatLonDeg, maskValues, regridConserve, rc)
 !
 !
 ! !RETURN VALUE:
@@ -322,6 +343,7 @@ module ESMF_GridUtilMod
     type(ESMF_Grid), intent(in)                :: grid
     type(ESMF_StaggerLoc),  intent(in)            :: staggerLoc
     integer,                intent(in)            :: isSphere
+    logical, intent(in),   optional               :: isLatLonDeg
     type(ESMF_RegridConserve), intent(in), optional :: regridConserve
     integer(ESMF_KIND_I4), optional               :: maskValues(:)
     integer, intent(out) , optional               :: rc
@@ -335,7 +357,10 @@ module ESMF_GridUtilMod
 !   \item [staggerLoc]
 !         Stagger location on grid to build.
 !   \item [isSphhere]
-!         1 = a spherical grid, build 3d mesh
+!         1 = a spherical grid make peridoic
+!   \item [isLatLonDeg]
+!         true coords of grids are lat lon in deg, default depends on isSphere
+!         if isSphere=1 then default is true, else is false.  
 !   \item [regridConserve]
 !         ESMF\_REGRID\_CONSERVE\_ON turns on the conservative regridding
 !   \item [{[rc]}]
@@ -349,6 +374,7 @@ module ESMF_GridUtilMod
     type(ESMF_InterfaceInt) :: maskValuesArg
     type(ESMF_IndexFlag) :: indexflag
     type(ESMF_RegridConserve) :: lregridConserve
+    integer :: localIsLatLonDeg     
 
     localrc = ESMF_SUCCESS
 
@@ -364,6 +390,23 @@ module ESMF_GridUtilMod
        lregridConserve=ESMF_REGRID_CONSERVE_OFF
     endif
 
+    ! Handle optional isLatLonDeg argument
+    if (present(isLatLonDeg)) then
+       if (isLatLonDeg) then
+          localIsLatLonDeg=1
+       else
+          localIsLatLonDeg=0
+       endif
+    else
+       if (isSphere .eq. 1) then
+           localIsLatLonDeg=1
+       else
+           localIsLatLonDeg=0
+       endif
+    endif
+
+
+
     ! Make sure indexflag is ESMF_INDEX_GLOBAL
     if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
@@ -376,7 +419,8 @@ module ESMF_GridUtilMod
     	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, theMesh, maskValuesArg, lregridConserve%regridconserve, localrc)
+    call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, localIsLatLonDeg, &
+                           theMesh, maskValuesArg, lregridConserve%regridconserve, localrc)
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 

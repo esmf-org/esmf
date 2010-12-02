@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.71 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.72 2010/12/02 18:17:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -88,6 +88,9 @@ class ProtoGrid;
 class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
 
+  // temporary for indicating regional grids on sphere
+  bool latLonDeg;
+ 
   // holder for set/commit data
   ProtoGrid *proto;
 
@@ -301,17 +304,24 @@ template <class TYPE>
   // bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
   // Temporary and will go away soon
+  bool isLatLonDeg() { return latLonDeg;}
+  void setLatLonDeg() { latLonDeg=true;}
+  void clearLatLonDeg() { latLonDeg=false;}
   bool isSphere() { return connL[0]==ESMC_GRIDCONN_PERIODIC && connU[0]==ESMC_GRIDCONN_PERIODIC &&
                            connL[1]==ESMC_GRIDCONN_POLE && connU[1]==ESMC_GRIDCONN_POLE; }
   bool isLBndNT(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
   bool isUBndNT(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
+  // Temporary create sphere until I have topology setting worked out 
+  void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
+
+  // End of Temporary
+  
+
   bool isLBnd(int localDE, int dim) {return ((connL[dim]!=ESMC_GRIDCONN_PERIODIC)&&(isDELBnd[localDE] & (0x1 << dim)))?true:false;}
   bool isUBnd(int localDE, int dim) {return ((connU[dim]!=ESMC_GRIDCONN_PERIODIC)&&(isDEUBnd[localDE] & (0x1 << dim)))?true:false;}
 
 
-  // Temporary create sphere until I have topology setting worked out 
-  void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
 
   // Get stagger distgrid
   int getStaggerDistgrid(int staggerloc, DistGrid **distgrid);

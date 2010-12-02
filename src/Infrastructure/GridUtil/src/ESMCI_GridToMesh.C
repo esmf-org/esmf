@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.3 2010/10/05 19:33:06 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.4 2010/12/02 18:17:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -99,6 +99,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
  bool is_sphere = grid.isSphere();
 
+ bool is_latlondeg = grid.isLatLonDeg();
+
  // *** Grid error checking here ***
  if (!grid.hasCoordStaggerLoc(staggerLoc))
    Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
@@ -117,12 +119,12 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  // At this point the topological and spatial dim of the Grid is the same this should change soon
  UInt sdim = grid.getDimCount();
  
- 
- if (is_sphere) {
+ if (is_latlondeg) {
    //std::cout << "g2m, is sphere=1" << std::endl;
    sdim = 3;
  }
 
+ if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
 
  mesh.set_spatial_dimension(sdim);
  
@@ -397,7 +399,7 @@ Par::Out() << std::endl;
      gni->getCoord(c);
 
      double DEG2RAD = M_PI/180.0;
-     if (is_sphere) {
+     if (is_latlondeg) {
 
          double lon = c[0];
           double lat = c[1];

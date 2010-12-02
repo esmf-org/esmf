@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.149 2010/09/29 03:37:28 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.150 2010/12/02 18:17:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -56,6 +56,7 @@
       private
 
       integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
+                            ESMF_REGRID_SCHEME_REGION3D = 2, &
                             ESMF_REGRID_SCHEME_NATIVE = 1
 
 
@@ -71,6 +72,7 @@
 !------------------------------------------------------------------------------
 
        public ESMF_REGRID_SCHEME_FULL3D, &
+              ESMF_REGRID_SCHEME_REGION3D, &
               ESMF_REGRID_SCHEME_NATIVE
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -96,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.149 2010/09/29 03:37:28 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.150 2010/12/02 18:17:16 oehmke Exp $'
 
 !==============================================================================
 !

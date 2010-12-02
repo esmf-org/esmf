@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.111 2010/09/17 03:13:32 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.112 2010/12/02 18:17:16 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.111 2010/09/17 03:13:32 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.112 2010/12/02 18:17:16 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -3581,6 +3581,9 @@ Grid::Grid(
 //EOPI
 //-----------------------------------------------------------------------------
 
+  // Init lat lon flag
+  latLonDeg=false;
+  
   // Set default values for grid members
   proto = ESMC_NULL_POINTER; 
   

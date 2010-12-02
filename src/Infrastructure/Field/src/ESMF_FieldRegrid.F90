@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.47 2010/10/14 17:52:06 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.48 2010/12/02 18:17:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.47 2010/10/14 17:52:06 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.48 2010/12/02 18:17:16 oehmke Exp $'
 
 !==============================================================================
 !
@@ -366,6 +366,7 @@ contains
         integer              :: gridDimCount
         type(ESMF_RegridPole):: localRegridPoleType
         integer              :: localRegridPoleNPnts
+        logical              :: isLatLonDeg
 
 
         ! Initialize return code; assume failure until success is certain
@@ -420,11 +421,11 @@ contains
 
 
         ! Handle optional pole argument
-        if (lregridScheme .eq. ESMF_REGRID_SCHEME_NATIVE) then
+        if (lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) then
            if (present(regridPoleType)) then
               if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
                  call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                 "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_SCHEME_NATIVE", & 
+                 "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_SCHEME_NATIVE or ESMF_REGRID_SCHEME_REGION3D", & 
                   ESMF_CONTEXT, rc) 
                  return
               endif
@@ -475,6 +476,17 @@ contains
            localRegridPoleNPnts=1
         endif
 
+        ! Set interpretation of grid based on regridScheme
+        if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
+           isSphere = 1
+           isLatLonDeg=.true.
+        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
+           isSphere = 0
+           isLatLonDeg=.true.
+        else  
+           isSphere = 0
+           isLatLonDeg=.false.
+        endif
 
         ! If grids, then convert to a mesh to do the regridding
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
@@ -513,17 +525,14 @@ contains
 	    srcStaggerloc=ESMF_STAGGERLOC_CORNER
           endif
 
-          isSphere = 0
-          if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
-
           ! check grid
           call checkGrid(srcGrid,srcStaggerloc,rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, &
-                      srcMaskValues, ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, isLatLonDeg, &
+                      maskValues=srcMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -586,17 +595,14 @@ contains
 	    dstStaggerloc=ESMF_STAGGERLOC_CORNER
           endif
 
-          isSphere = 0
-          if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
-
           ! check grid
           call checkGrid(dstGrid,dstStaggerloc,rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, &
-                      dstMaskValues, ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, isLatLonDeg, &
+                      maskValues=dstMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
@@ -970,7 +976,8 @@ contains
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
         integer :: gridDimCount, localDECount
 	type(ESMF_TypeKind) :: typekind
-  
+        logical :: isLatLonDeg  
+
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1001,15 +1008,24 @@ contains
           lregridScheme = ESMF_REGRID_SCHEME_NATIVE
         endif
 
+        ! Set interpretation of grid based on regridScheme
+        if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
+           isSphere = 1
+           isLatLonDeg=.true.
+        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
+           isSphere = 0
+           isLatLonDeg=.true.
+        else  
+           isSphere = 0
+           isLatLonDeg=.false.
+        endif
+
         ! If grids, then convert to a mesh to do the regridding
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(areaField, grid=Grid, &
                  staggerloc=staggerLoc, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
-          isSphere = 0
-          if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
 
           ! Only Center stagger is supported right now until we figure out what the
           ! control volume for the others should be
@@ -1038,8 +1054,8 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          Mesh = ESMF_GridToMesh(Grid, ESMF_STAGGERLOC_CORNER, isSphere, &
-                      MaskValues, ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+          Mesh = ESMF_GridToMesh(Grid, ESMF_STAGGERLOC_CORNER, isSphere, isLatLonDeg, &
+                      maskValues=MaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1173,9 +1189,6 @@ contains
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-          isSphere = 0
-          if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) isSphere = 1
-
           ! check grid
           call checkGrid(Grid,staggerloc,rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1183,7 +1196,7 @@ contains
 
           ! Convert Grid to Mesh
           Mesh = ESMF_GridToMesh(Grid, staggerLoc, isSphere, &
-                      MaskValues, ESMF_REGRID_CONSERVE_ON, rc=localrc)
+                      maskValues=MaskValues, regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 

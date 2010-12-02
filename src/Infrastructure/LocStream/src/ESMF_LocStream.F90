@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.34 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_LocStream.F90,v 1.35 2010/12/02 18:17:16 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.34 2010/11/12 06:57:18 eschwab Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.35 2010/12/02 18:17:16 oehmke Exp $'
 
 !==============================================================================
 !
@@ -918,7 +918,7 @@ contains
      endif
 
      ! Convert Grid to Mesh
-     mesh=ESMF_GridToMesh(background, staggerLoc, 0, maskValues, rc=localrc)
+     mesh=ESMF_GridToMesh(background, staggerLoc, 0, maskValues=maskValues, rc=localrc)
      if (ESMF_LogMsgFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rc)) return
