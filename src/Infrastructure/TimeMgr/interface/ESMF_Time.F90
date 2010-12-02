@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.113 2010/12/01 16:02:21 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.114 2010/12/02 04:16:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.113 2010/12/01 16:02:21 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.114 2010/12/02 04:16:17 eschwab Exp $'
 
 !==============================================================================
 !
@@ -273,8 +273,8 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} and {\tt time2} are identical, independent copies of one
-!     another (equal), and false otherwise.
+!     if {\tt time1} and {\tt time2} represent the same instant in time, and 
+!     false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -312,7 +312,8 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} and {\tt time2} are not equal, and false otherwise.
+!     if {\tt time1} and {\tt time2} do not represent the same instant in time,
+!     and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -350,7 +351,7 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is less than {\tt time2}, and false otherwise.
+!     if {\tt time1} is earlier in time than {\tt time2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -388,7 +389,8 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is less than or equal to {\tt time2}, and false otherwise.
+!     if {\tt time1} is earlier in time or the same time as {\tt time2}, and 
+!     false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -426,7 +428,7 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (>) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is greater than {\tt time2}, and false otherwise.
+!     if {\tt time1} is later in time than {\tt time2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -464,8 +466,8 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (>=) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is greater than or equal to {\tt time2}, and false
-!     otherwise.
+!     if {\tt time1} is later in time or the same time as {\tt time2}, and 
+!     false otherwise.
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.104 2010/12/01 16:02:21 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.105 2010/12/02 04:16:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.104 2010/12/01 16:02:21 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.105 2010/12/02 04:16:17 eschwab Exp $'
 
 !==============================================================================
 !
@@ -713,9 +713,9 @@
 !
 !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeinterval1} and {\tt timeinterval2} are equal,
-!     and false otherwise.
-!
+!     return true if {\tt timeinterval1} and {\tt timeinterval2} represent an
+!     equal duration of time, and false otherwise.
+
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval1]
@@ -752,8 +752,8 @@
 !
 !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeinterval1} and {\tt timeinterval2} are not equal,
-!     and false otherwise.
+!     return true if {\tt timeinterval1} and {\tt timeinterval2} do not 
+!     represent an equal duration of time, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -791,9 +791,9 @@
 !
 !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeinterval1} is less than {\tt timeinterval2},
-!     and false otherwise.
-!
+!     return true if {\tt timeinterval1} is a lesser duration of time than 
+!     {\tt timeinterval2}, and false otherwise.
+
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval1]
@@ -830,8 +830,8 @@
 !
 !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeinterval1} is less than or equal to
-!     {\tt timeinterval2}, and false otherwise.
+!     return true if {\tt timeinterval1} is a lesser or equal duration of 
+!     time than {\tt timeinterval2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -868,9 +868,9 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
-!     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeinterval1} is greater than {\tt timeinterval2},
-!     and false otherwise.
+!     Overloads the (>) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeinterval1} is a greater duration of time than 
+!     {\tt timeinterval2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -907,9 +907,9 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 !DESCRIPTION:
-!     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
-!     return true if {\tt timeinterval1} is greater than or equal to
-!     {\tt timeinterval2}, and false otherwise.
+!     Overloads the (>=) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeinterval1} is a greater or equal duration of 
+!     time than {\tt timeinterval2}, and false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
