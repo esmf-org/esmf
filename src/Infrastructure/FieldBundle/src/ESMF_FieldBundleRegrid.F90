@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.8 2010/11/30 23:47:43 oehmke Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.9 2010/12/02 06:33:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -43,7 +43,11 @@ module ESMF_FieldBundleRegridMod
     use ESMF_FieldBundleSMMMod
     use ESMF_RHandleMod
     use ESMF_RegridMod
-    
+    use ESMF_GeomBaseMod
+    use ESMF_GridMod
+    use ESMF_StaggerlocMod    
+    use ESMF_FieldSMMMod
+
     implicit none
     private
 !------------------------------------------------------------------------------
@@ -62,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.8 2010/11/30 23:47:43 oehmke Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.9 2010/12/02 06:33:24 oehmke Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -293,6 +297,17 @@ contains
         integer                                       :: rraShift, vectorLengthShift 
         type(ESMF_Field)                              :: srcField, dstField
         type(ESMF_RouteHandle)                        :: rh
+        logical         :: havePrev, matchesPrev, isGridPair
+        type(ESMF_Grid) :: prevSrcGrid, prevDstGrid
+        type(ESMF_StaggerLoc) :: prevSrcStaggerLoc, prevDstStaggerLoc
+        type(ESMF_Grid) :: currSrcGrid, currDstGrid
+        type(ESMF_StaggerLoc) :: currSrcStaggerLoc, currDstStaggerLoc
+        integer(ESMF_KIND_I4), pointer :: tmp_indicies(:,:)
+        integer(ESMF_KIND_I4), pointer :: prev_indicies(:,:)
+        real(ESMF_KIND_R8), pointer :: prev_weights(:)
+        type(ESMF_GeomType) :: srcGeomtype        
+        type(ESMF_GeomType) :: dstGeomtype        
+        integer :: j
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -308,6 +323,10 @@ contains
                 ESMF_CONTEXT, rc)
             return
         endif 
+
+        ! init some variables for optimization
+        havePrev=.false.
+        matchesPrev=.false.
 
         fieldCount = srcFieldBundle%btypep%field_count
 
@@ -336,17 +355,100 @@ contains
           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           
-          ! precompute regrid operation for this Field pair
-          call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=srcMaskValues, &
-            dstField=dstField, dstMaskValues=dstMaskValues, &
-            unmappedDstAction=unmappedDstAction, &
-            routehandle=rh, regridMethod=regridMethod, &
-            regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
-            regridScheme=regridScheme, &
-            rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          
+          ! If these are both Grids, then check for optimization
+          call ESMF_FieldGet(srcField, geomType=srcGeomType, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          call ESMF_FieldGet(dstField, geomType=dstGeomType, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          isGridPair=.false.
+          if ((srcGeomType==ESMF_GEOMTYPE_GRID) .and. (dstGeomType==ESMF_GEOMTYPE_GRID)) then
+             ! Mark that this is a pair of grids and therefore optimizable
+             isGridPair=.true.
+
+             ! Get Grids and staggerlocs
+             call ESMF_FieldGet(srcField, grid=currSrcGrid, staggerloc=currSrcStaggerloc, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+             call ESMF_FieldGet(dstField, grid=currDstGrid, staggerloc=currDstStaggerloc, rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! see if grids match prev grids
+             matchesPrev=.false.
+             if (havePrev) then
+                if ((currSrcStaggerLoc==prevSrcStaggerLoc) .and.  &
+                    (currDstStaggerLoc==prevDstStaggerLoc)) then 
+
+                   if (ESMF_GridMatch(currSrcGrid, prevSrcGrid) .and. &
+                       ESMF_GridMatch(currDstGrid, prevDstGrid)) then
+                      matchesPrev=.true.
+                   endif
+                endif
+             endif
+          endif
+
+          ! precompute regrid operation based on grids, etc.
+          if (isGridPair) then
+             if (matchesPrev) then
+                call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, & 
+                        routehandle=rh, &
+                        factorList=prev_weights, factorIndexList=prev_indicies, &
+                        rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             else ! If it doesn't match make a new previous
+                ! if we have them, get rid of old matrix
+                if (havePrev) then
+                   deallocate(prev_indicies)
+                   deallocate(prev_weights)
+                endif
+
+                ! Get routeHandle as well as matrix info
+                call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=srcMaskValues, &
+                     dstField=dstField, dstMaskValues=dstMaskValues, &
+                     unmappedDstAction=unmappedDstAction, &
+                     routehandle=rh, &
+                     indicies=tmp_indicies, weights=prev_weights, &
+                     regridMethod=regridMethod, &
+                     regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
+                     regridScheme=regridScheme, &
+                     rc=localrc)
+                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+                ! Swap order
+                ! TODO: fix order in regrid, or put a reshape here
+                allocate(prev_indicies(2,size(tmp_indicies,1)))
+                do j=1,size(tmp_indicies,1)
+                   prev_indicies(1,j)=tmp_indicies(j,1)
+                   prev_indicies(2,j)=tmp_indicies(j,2)
+                enddo
+                deallocate(tmp_indicies)
+
+                ! Mark as prev and record info about prev
+                havePrev=.true.
+                prevSrcStaggerLoc=currSrcStaggerLoc
+                prevDstStaggerLoc=currDstStaggerLoc
+                prevSrcGrid=currSrcGrid 
+                prevDstGrid=currDstGrid 
+             endif
+          else ! If not a grid pair no optimization at this point         
+             call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=srcMaskValues, &
+                  dstField=dstField, dstMaskValues=dstMaskValues, &
+                  unmappedDstAction=unmappedDstAction, &
+                  routehandle=rh, regridMethod=regridMethod, &
+                  regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
+                  regridScheme=regridScheme, &
+                  rc=localrc)
+             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
           ! append rh to routehandle and clear rh
           call ESMF_RouteHandleAppendClear(routehandle, appendRoutehandle=rh, &
             rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=localrc)
@@ -364,6 +466,12 @@ contains
           rraShift = rraShift + localDeCount
           vectorLengthShift = vectorLengthShift + 1
         enddo
+
+        ! if we have them, get rid of old matrix
+        if (havePrev) then
+           deallocate(prev_indicies)
+           deallocate(prev_weights)
+        endif
 
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
