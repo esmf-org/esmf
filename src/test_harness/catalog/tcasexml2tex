@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# script to generate tex file from testcase xml
+#
+# command - tcasexml2tex template casename outtex outcat
+#
+# this applies a latex conversion template to an xml file
+# to generate a latex file
+#
+xsltproc -o temp.htex $1 $2
+ESMC_TestHarnessLatexPPUTest temp.htex $3
+cat $3 >> $4
+

@@ -1,10 +1,11 @@
-# $Id: makefile,v 1.11 2010/09/01 20:24:59 garyblock Exp $ 
+# $Id: makefile,v 1.12 2010/12/02 16:06:39 garyblock Exp $ 
 
 ALL:      build_unit_tests
 
 LOCDIR	  = src/test_harness
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_TestHarnessUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_TestHarnessUTest \
+                $(ESMF_TESTDIR)/ESMC_TestHarnessLatexPPUTest
 
 
 include ${ESMF_DIR}/makefile
@@ -22,3 +23,5 @@ ESMF_TestHarnessReport.o: ESMF_TestHarnessTypesMod.o  ESMF_TestHarnessUtilMod.o
 ESMF_TestHarnessParser.o: ESMF_TestHarnessTypesMod.o  ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o ESMF_TestHarnessUtilMod.o
 
 ESMF_TestHarnessUTest.o: ESMF_TestHarnessTypesMod.o ESMF_TestHarnessMod.o ESMF_TestHarnessParser.o ESMF_TestHarnessGridMod.o  ESMF_TestHarnessDistMod.o ESMF_TestHarnessReportMod.o 
+
+#ESMC_TestHarnessLatexPPUTest.o : ESMF_TestHarnessLatexPPUTest.o
