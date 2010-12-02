@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.14 2010/12/02 01:29:22 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.15 2010/12/02 15:55:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,10 +40,11 @@ program ESMF_FieldIOUTest
   ! local variables
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
-  type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr
+  type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_w, Farray_r
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_tw, Farray_tr
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_sw, Farray_sr
+  real(ESMF_KIND_R4), pointer, dimension(:,:) ::  fptr
   ! Note: 
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
@@ -53,8 +54,8 @@ program ESMF_FieldIOUTest
   integer                                 :: rc, de
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
-  integer      :: localDeCount, localPet, petCount
-  integer :: i,j, t, endtime
+  integer      :: localDeCount, localPet, petCount, tlb(2), tub(2)
+  integer :: i,j, t, endtime, k, finalrc
   real*8 :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -452,6 +453,35 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  grid = ESMF_GridCreateShapeTile(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
+    rc=rc)
+  if(rc /= ESMF_SUCCESS) finalrc = rc
+  field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+    maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,1/), rc=rc)
+  if(rc /= ESMF_SUCCESS) finalrc = rc
+  call ESMF_FieldGet(field, farrayPtr=fptr, &
+    totalLBound=tlb, totalUBound=tub, &
+    rc=rc)
+  if(rc /= ESMF_SUCCESS) finalrc = rc
+  print *, tlb, tub
+  do k = 1, 5
+    do i = tlb(1), tub(1)
+      do j = tlb(2), tub(2)
+        fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
+      enddo
+    enddo
+    call ESMF_FieldWrite(field, file='halof.nc', timeslice=k, rc=rc)
+    if(rc /= ESMF_SUCCESS) finalrc = rc
+  enddo
+  call ESMF_GridDestroy(grid, rc=rc)
+  if(rc /= ESMF_SUCCESS) finalrc = rc
+  call ESMF_FieldDestroy(field, rc=rc)
+  if(rc /= ESMF_SUCCESS) finalrc = rc
+  call ESMF_Test((finalrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
