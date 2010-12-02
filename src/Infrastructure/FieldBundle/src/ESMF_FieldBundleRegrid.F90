@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.9 2010/12/02 06:33:24 oehmke Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.10 2010/12/02 06:35:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.9 2010/12/02 06:33:24 oehmke Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.10 2010/12/02 06:35:25 oehmke Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -422,7 +422,7 @@ contains
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
                 ! Swap order
-                ! TODO: fix order in regrid, or put a reshape here
+                ! TODO: fix order in regrid
                 allocate(prev_indicies(2,size(tmp_indicies,1)))
                 do j=1,size(tmp_indicies,1)
                    prev_indicies(1,j)=tmp_indicies(j,1)
