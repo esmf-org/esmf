@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.15 2010/12/02 15:55:13 feiliu Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.16 2010/12/02 17:17:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -460,6 +460,7 @@ program ESMF_FieldIOUTest
     rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc
   field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+    staggerLoc=ESMF_STAGGERLOC_EDGE1, &
     maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,1/), rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc
   call ESMF_FieldGet(field, farrayPtr=fptr, &
