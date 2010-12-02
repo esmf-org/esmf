@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.48 2010/12/02 18:17:16 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.49 2010/12/02 18:27:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.48 2010/12/02 18:17:16 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.49 2010/12/02 18:27:40 oehmke Exp $'
 
 !==============================================================================
 !
@@ -425,7 +425,7 @@ contains
            if (present(regridPoleType)) then
               if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
                  call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
-                 "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_SCHEME_NATIVE or ESMF_REGRID_SCHEME_REGION3D", & 
+                 "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for NON-ESMF_REGRID_SCHEME_FULL3D", & 
                   ESMF_CONTEXT, rc) 
                  return
               endif
