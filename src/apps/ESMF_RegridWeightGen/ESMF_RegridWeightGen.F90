@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.12 2010/11/03 22:48:47 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.13 2010/12/02 16:49:32 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,7 +25,6 @@ program ESMF_RegridWeightGen
       type(ESMF_Grid)    :: srcGrid, dstGrid
       type(ESMF_Field)   :: srcField, dstField
       type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_RouteHandle) :: rh1
       integer(ESMF_KIND_I4), pointer:: indicies(:,:)
       real(ESMF_KIND_R8), pointer :: weights(:)
       character(len=256) :: srcfile, dstfile, wgtfile
@@ -401,7 +400,7 @@ program ESMF_RegridWeightGen
       if (trim(method) .eq. 'bilinear') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
+	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
@@ -411,7 +410,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'patch') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
+	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
@@ -421,7 +420,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'conserve') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, routehandle = rh1, &
+	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_CONSERVE, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
