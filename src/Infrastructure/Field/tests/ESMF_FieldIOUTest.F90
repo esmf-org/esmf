@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.16 2010/12/02 17:17:22 feiliu Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.17 2010/12/03 02:21:40 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -477,11 +477,22 @@ program ESMF_FieldIOUTest
     call ESMF_FieldWrite(field, file='halof.nc', timeslice=k, rc=rc)
     if(rc /= ESMF_SUCCESS) finalrc = rc
   enddo
-  call ESMF_GridDestroy(grid, rc=rc)
-  if(rc /= ESMF_SUCCESS) finalrc = rc
-  call ESMF_FieldDestroy(field, rc=rc)
-  if(rc /= ESMF_SUCCESS) finalrc = rc
   call ESMF_Test((finalrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Destroy Grid"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(grid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Verifying that a Field with no data can be destroyed
+  call ESMF_FieldDestroy(field, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(name, *) "Destroying a Field "
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 !------------------------------------------------------------------------
@@ -491,7 +502,7 @@ program ESMF_FieldIOUTest
   call ESMF_FieldDestroy(field_r, rc=rc)
   call ESMF_FieldDestroy(field_t, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Destroying a Field with no data Test"
+  write(name, *) "Destroying all Fields"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
