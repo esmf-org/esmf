@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.16 2010/11/03 22:48:45 theurich Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.17 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -113,40 +113,40 @@ contains
         localrc = ESMF_SUCCESS
 
         sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/4,3/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/3,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
         do i = 1, 1
             sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridDestroy(xgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -165,40 +165,40 @@ contains
         localrc = ESMF_SUCCESS
 
         sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
         do i = 1, 1
             sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         xgrid = ESMF_XGridCreate(sideA, sideB, area=area, centroid=centroid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridDestroy(xgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -233,39 +233,39 @@ contains
         localrc = ESMF_SUCCESS
 
         call ESMF_VMGetCurrent(vm=vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_VMGet(vm, localPet=lpet, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), destroyDistGrid=.true., rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
         do i = 1, 1
             sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), destroyDistGrid=.true., rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -383,7 +383,7 @@ contains
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreate(sideA, sideB, area=area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -393,83 +393,83 @@ contains
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridGet(xgrid, localDe=0, elementCount=eleCount, &
             exclusiveCount=ec, exclusiveLBound=elb, exclusiveUBound=eub, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         print *, lpet, eleCount, elb, eub
 
         call ESMF_DistGridPrint(distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             call ESMF_DistGridPrint(l_sideAdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_FieldGet(field, farrayPtr=xfptr, &
             exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         xfptr = 0.0
 
         call ESMF_FieldPrint(field, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         ! setup and initialize src and dst Fields
         do i = 1, 2
             srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             fptr = 1.
         enddo
         do i = 1, 1
             dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             fptr = 0.0
@@ -487,20 +487,20 @@ contains
                     factorIndexList=sparseMatA2X(i)%factorIndexList, &
                     factorList=sparseMatA2X(i)%factorList, &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             else
                 call ESMF_FieldSMMStore(srcField(i), field, routehandle=rh_src2xgrid(i), &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
             call ESMF_FieldSMM(srcField(i), field, routehandle=rh_src2xgrid(i), &
                 checkflag=.TRUE.,&
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             print *, '- SMM from A -> X'
@@ -527,20 +527,20 @@ contains
                     factorIndexList=sparseMatX2B(i)%factorIndexList, &
                     factorList=sparseMatX2B(i)%factorList, &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             else
                 call ESMF_FieldSMMStore(field, dstField(i), routehandle=rh_xgrid2dst(i), &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
             call ESMF_FieldSMM(field, dstField(i), routehandle=rh_xgrid2dst(i), &
                 checkflag=.TRUE.,&
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -549,33 +549,33 @@ contains
         print *, fptr ! should be 1/B_area
 
         call ESMF_FieldDestroy(field, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridDestroy(xgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             call ESMF_FieldDestroy(srcField(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_GridDestroy(sideA(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         do i = 1, 1
             call ESMF_FieldDestroy(dstField(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_GridDestroy(sideB(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -620,39 +620,39 @@ contains
         localrc = ESMF_SUCCESS
 
         call ESMF_VMGetCurrent(vm=vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_VMGet(vm, localPet=lpet, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), destroyDistGrid=.true., rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
         do i = 1, 1
             sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), destroyDistGrid=.true., rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -770,7 +770,7 @@ contains
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreate(sideA, sideB, area=area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -780,83 +780,83 @@ contains
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridGet(xgrid, localDe=0, elementCount=eleCount, &
             exclusiveCount=ec, exclusiveLBound=elb, exclusiveUBound=eub, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         print *, lpet, eleCount, elb, eub
 
         call ESMF_DistGridPrint(distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             call ESMF_DistGridPrint(l_sideAdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_FieldGet(field, farrayPtr=xfptr, &
             exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         xfptr = 0.0
 
         call ESMF_FieldPrint(field, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         ! setup and initialize src and dst Fields
         do i = 1, 2
             srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             fptr = i
         enddo
         do i = 1, 1
             dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             fptr = 0.0
@@ -874,13 +874,13 @@ contains
                     factorIndexList=sparseMatA2X(i)%factorIndexList, &
                     factorList=sparseMatA2X(i)%factorList, &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             else
                 call ESMF_FieldSMMStore(srcField(i), field, routehandle=rh_src2xgrid(i), &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
@@ -888,7 +888,7 @@ contains
                 zeroflag=ESMF_REGION_SELECT, &
                 checkflag=.TRUE.,&
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             print *, '- SMM from A -> X'
@@ -915,13 +915,13 @@ contains
                     factorIndexList=sparseMatX2B(i)%factorIndexList, &
                     factorList=sparseMatX2B(i)%factorList, &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             else
                 call ESMF_FieldSMMStore(field, dstField(i), routehandle=rh_xgrid2dst(i), &
                     rc = localrc)
-                if (ESMF_LogMsgFoundError(localrc, &
+                if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
@@ -929,7 +929,7 @@ contains
                 !zeroflag=ESMF_REGION_EMPTY, &
                 checkflag=.TRUE.,&
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -944,7 +944,7 @@ contains
         !offset = 0
         !call ESMF_XGridSerialize(xgrid, buffer, buff_length, offset, &
         !    inquireflag=ESMF_INQUIREONLY, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, &
+        !if (ESMF_LogFoundError(localrc, &
         !    ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rc)) return
         !deallocate (buffer)
@@ -956,52 +956,52 @@ contains
 
         !offset = 0
         !call ESMF_XGridSerialize(xgrid, buffer, buff_length, offset, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, &
+        !if (ESMF_LogFoundError(localrc, &
         !    ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rc)) return
 
         !offset = 0
 
         !xgrid1 = ESMF_XGridDeserialize(buffer, offset, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, &
+        !if (ESMF_LogFoundError(localrc, &
         !    ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rc)) return
 
         !deallocate (buffer)
 
         call ESMF_FieldDestroy(field, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridDestroy(xgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         !call ESMF_XGridDestroy(xgrid1, rc=localrc)
-        !if (ESMF_LogMsgFoundError(localrc, &
+        !if (ESMF_LogFoundError(localrc, &
         !    ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             call ESMF_FieldDestroy(srcField(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_GridDestroy(sideA(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         do i = 1, 1
             call ESMF_FieldDestroy(dstField(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_GridDestroy(sideB(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -1051,20 +1051,20 @@ contains
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             name=gridNameA(1), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/1,2/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             name=gridNameA(2), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         do i = 1, 2
             call ESMF_GridAddCoord(sideA(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
                 rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -1074,13 +1074,13 @@ contains
         centroidA1Y=(/0.5, 1.5/)
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidA1X
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordY = centroidA1Y
@@ -1090,13 +1090,13 @@ contains
         centroidA2Y=(/0.5, 1.5/)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidA2X
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordY = centroidA2Y
@@ -1105,13 +1105,13 @@ contains
         sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
             coordDep1=(/1/), coordDep2=(/2/), &
             name=gridNameB(1), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         do i = 1, 1
             call ESMF_GridAddCoord(sideB(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
                 rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -1121,13 +1121,13 @@ contains
         centroidBY=(/0.75, 1.75/)
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidBX
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordY = centroidBY
@@ -1245,7 +1245,7 @@ contains
         ! Finally ready to do an flux exchange from A side to B side
         xgrid = ESMF_XGridCreate(sideA, sideB, area=area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
@@ -1255,83 +1255,83 @@ contains
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridGet(xgrid, localDe=0, elementCount=eleCount, &
             exclusiveCount=ec, exclusiveLBound=elb, exclusiveUBound=eub, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         print *, eleCount, elb, eub
 
         call ESMF_DistGridPrint(distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             call ESMF_DistGridPrint(l_sideAdg(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         call ESMF_FieldGet(field, farrayPtr=xfptr, &
             exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         xfptr = 0.0
 
         call ESMF_FieldPrint(field, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         ! setup and initialize src and dst Fields
         do i = 1, 2
             srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             fptr = i
         enddo
         do i = 1, 1
             dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             fptr = 0.0
@@ -1346,13 +1346,13 @@ contains
         do i = 1, 2
             call ESMF_FieldRegridStore(xgrid, srcField(i), field, routehandle=rh_src2xgrid(i), &
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
                 checkflag=.TRUE.,&
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             print *, '- SMM from A -> X'
@@ -1376,13 +1376,13 @@ contains
         do i = 1, 1
             call ESMF_FieldRegridStore(xgrid, field, dstField(i), routehandle=rh_xgrid2dst(i), &
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_FieldSMM(field, dstField(i), routehandle=rh_xgrid2dst(i), &
                 checkflag=.TRUE.,&
                 rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
@@ -1391,33 +1391,33 @@ contains
         print *, fptr ! should be 1/B_area
 
         call ESMF_FieldDestroy(field, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_XGridDestroy(xgrid, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         do i = 1, 2
             call ESMF_FieldDestroy(srcField(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_GridDestroy(sideA(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo
 
         do i = 1, 1
             call ESMF_FieldDestroy(dstField(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             call ESMF_GridDestroy(sideB(i), rc = localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
         enddo

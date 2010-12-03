@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.22 2010/05/10 16:15:37 w6ws Exp $
+!  $Id: ESMF_Field_C.F90,v 1.23 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.22 2010/05/10 16:15:37 w6ws Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.23 2010/12/03 05:57:29 theurich Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -63,7 +63,7 @@
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         name=name, &
         rc=rc)    
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
     rc = ESMF_SUCCESS
@@ -91,7 +91,7 @@
     localrc = ESMF_RC_NOT_IMPL
 
     call ESMF_FieldPrint(field, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -122,7 +122,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     call ESMF_FieldGet(field, mesh=mesh, rc=rc)
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     meshp = mesh%this;
@@ -156,7 +156,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     call ESMF_FieldGet(field, array=l_array, rc=rc)
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! because ESMF_Array.this is private, it cannot be accessed directly
@@ -164,7 +164,7 @@
     ! the array object returned to the C interface must consist only of the
     ! this pointer. It must not contain the isInit member.
     call ESMF_ArrayCopyThis(l_array, array, rc)
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     rc = ESMF_SUCCESS
@@ -190,7 +190,7 @@
     rc = ESMF_RC_NOT_IMPL
   
     call ESMF_FieldDestroy(field, rc=rc)
-    if (ESMF_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
   
     rc = ESMF_SUCCESS
@@ -222,14 +222,14 @@
     
     ! destruct internal data allocations
     call ESMF_FieldDestruct(field%ftypep, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
     ! deallocate actual FieldType allocation      
     if (associated(field%ftypep)) then
       deallocate(field%ftypep, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating Field", &
+      if (ESMF_LogFoundAllocError(localrc, "Deallocating Field", &
         ESMF_CONTEXT, rc)) return
     endif
     nullify(field%ftypep)

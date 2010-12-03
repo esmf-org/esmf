@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.150 2010/12/02 18:17:16 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.151 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.150 2010/12/02 18:17:16 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.151 2010/12/03 05:57:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -317,14 +317,14 @@ end function my_xor
        ! First thing to check is that indicies <=> weights
        if (my_xor(present(indicies), present(weights))) then
          localrc = ESMF_RC_ARG_BAD
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
        ! Next, we require that the user request at least something
        if (.not.(present(routehandle) .or. present(indicies))) then
          localrc = ESMF_RC_ARG_BAD
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
@@ -337,7 +337,7 @@ end function my_xor
 
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        has_rh = 0
@@ -354,11 +354,11 @@ end function my_xor
 
        ! Make sure the srcMesh has its internal bits in place
        call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (isMemFreed)  then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- source Mesh has had its coordinate and connectivity info freed", & 
                  ESMF_CONTEXT, rc) 
           return 
@@ -366,11 +366,11 @@ end function my_xor
 
        ! Make sure the dstMesh has its internal bits in place
        call ESMF_MeshGet(dstMesh, isMemFreed=isMemFreed, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (isMemFreed)  then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- destination Mesh has had its coordinate and connectivity info freed", & 
                  ESMF_CONTEXT, rc) 
           return 
@@ -385,7 +385,7 @@ end function my_xor
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
                    localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Now we must allocate the F90 pointers and copy weights
@@ -400,7 +400,7 @@ end function my_xor
        ! Mark route handle created
       if (present(routeHandle)) then 
         call ESMF_RouteHandleSetInitCreated(routeHandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
@@ -451,16 +451,16 @@ end function my_xor
 
        ! global vm for now
        call ESMF_VMGetGlobal(vm, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Make sure the srcMesh has its internal bits in place
        call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (isMemFreed)  then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- Mesh has had its coordinate and connectivity info freed", & 
                  ESMF_CONTEXT, rc) 
           return 
@@ -469,7 +469,7 @@ end function my_xor
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_getiwts(vm, Grid, Mesh, Array, staggerLoc, &
                                   regridScheme, localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
       rc = ESMF_SUCCESS
@@ -521,11 +521,11 @@ end function my_xor
 
        ! Make sure the srcMesh has its internal bits in place
        call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (isMemFreed)  then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- Mesh has had its coordinate and connectivity info freed", & 
                  ESMF_CONTEXT, rc) 
           return 
@@ -534,7 +534,7 @@ end function my_xor
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_getarea(Grid, Mesh, Array, staggerLoc, &
                                   regridScheme, localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
       rc = ESMF_SUCCESS

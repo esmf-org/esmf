@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.13 2010/09/16 17:06:51 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.14 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.13 2010/09/16 17:06:51 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.14 2010/12/03 05:57:59 theurich Exp $'
 
 !==============================================================================
 !
@@ -512,7 +512,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
 
       if (.not.associated(xgrid%xgtypep)) then 
-         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
             "Uninitialized or already destroyed XGrid: xgtypep unassociated", &
              ESMF_CONTEXT, rc)
          return
@@ -522,11 +522,11 @@ contains
 
       ! Make sure the xgrid is ready before trying to look at contents
       call ESMF_BaseGetStatus(xgtypep%base, xgridstatus, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       if (xgridstatus .ne. ESMF_STATUS_READY) then
-         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
             "Uninitialized or already destroyed XGrid: xgridstatus not ready", &
              ESMF_CONTEXT, rc)
          return
@@ -538,7 +538,7 @@ contains
 
       if(associated(xgtypep%area) .and. associated(xgtypep%centroid)) then
         if(size(xgtypep%area, 1) /= size(xgtypep%centroid, 1)) then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
              "number of area cells differs from number of centroid cells", &
              ESMF_CONTEXT, rc)
            return
@@ -548,7 +548,7 @@ contains
       if(associated(xgtypep%sparseMatA2X) .or. associated(xgtypep%sparseMatX2A)) then
         if(associated(xgtypep%distgridA)) then
           if(size(xgtypep%distgridA, 1) /= ngridA) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                "number of distgrids on side A differs from number of Grids on side A", &
                ESMF_CONTEXT, rc)
              return
@@ -558,7 +558,7 @@ contains
 
       if(associated(xgtypep%sparseMatA2X)) then
         if(size(xgtypep%sparseMatA2X, 1) /= ngridA) then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
              "number of sparseMat objects on side A differs from number of Grids on side A", &
              ESMF_CONTEXT, rc)
            return
@@ -566,7 +566,7 @@ contains
         do i = 1, ngridA
           if(size(xgtypep%sparseMatA2X(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatA2X(i)%factorList, 1)) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                "number of elements in sparseMatA2X is inconsistent", &
                ESMF_CONTEXT, rc)
             return
@@ -576,7 +576,7 @@ contains
 
       if(associated(xgtypep%sparseMatX2A)) then
         if(size(xgtypep%sparseMatX2A, 1) /= ngridA) then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
              "number of sparseMat objects on side A differs from number of Grids on side A", &
              ESMF_CONTEXT, rc)
            return
@@ -584,7 +584,7 @@ contains
         do i = 1, ngridA
           if(size(xgtypep%sparseMatX2A(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatX2A(i)%factorList, 1)) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                "number of elements in sparseMatX2A is inconsistent", &
                ESMF_CONTEXT, rc)
             return
@@ -596,7 +596,7 @@ contains
       if(associated(xgtypep%sparseMatB2X) .or. associated(xgtypep%sparseMatX2B)) then
         if(associated(xgtypep%distgridB)) then
           if(size(xgtypep%distgridB, 1) /= ngridB) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                "number of distgrids on side B differs from number of Grids on side B", &
                ESMF_CONTEXT, rc)
              return
@@ -606,7 +606,7 @@ contains
 
       if(associated(xgtypep%sparseMatB2X)) then
         if(size(xgtypep%sparseMatB2X, 1) /= ngridB) then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
              "number of sparseMat objects on side B differs from number of Grids on side B", &
              ESMF_CONTEXT, rc)
            return
@@ -614,7 +614,7 @@ contains
         do i = 1, ngridB
           if(size(xgtypep%sparseMatB2X(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatB2X(i)%factorList, 1)) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                "number of elements in sparseMatB2X is inconsistent", &
                ESMF_CONTEXT, rc)
             return
@@ -624,7 +624,7 @@ contains
 
       if(associated(xgtypep%sparseMatX2B)) then
         if(size(xgtypep%sparseMatX2B, 1) /= ngridB) then
-           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
              "number of sparseMat objects on side B differs from number of Grids on side B", &
              ESMF_CONTEXT, rc)
            return
@@ -632,7 +632,7 @@ contains
         do i = 1, ngridB
           if(size(xgtypep%sparseMatX2B(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatX2B(i)%factorList, 1)) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                "number of elements in sparseMatX2B is inconsistent", &
                ESMF_CONTEXT, rc)
             return
@@ -736,14 +736,14 @@ contains
 
       call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, &
                                  lattreconflag, linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       ! serialize the balanced distgrid
       call C_ESMC_DistGridSerialize(fp%distgridM, buffer(1), length, offset, &
                                    linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rc)) return
 
@@ -811,7 +811,7 @@ contains
                                  eleCountA2X, eleCountX2A, eleCountB2X, eleCountX2B, &
                                  fp%area, fp%centroid, &
                                  buffer(1), length, offset, linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -821,7 +821,7 @@ contains
           do i = 1, ngridA
             call C_ESMC_DistGridSerialize(fp%distgridA(i), buffer(1), length, offset, &
                                          linquireflag, localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -832,7 +832,7 @@ contains
           do i = 1, ngridB
             call C_ESMC_DistGridSerialize(fp%distgridB(i), buffer(1), length, offset, &
                                          linquireflag, localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -846,7 +846,7 @@ contains
                          length=length, offset=offset, &
                          attreconflag=lattreconflag, inquireflag=linquireflag, &
                          rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -859,7 +859,7 @@ contains
                          length=length, offset=offset, &
                          attreconflag=lattreconflag, inquireflag=linquireflag, &
                          rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -872,7 +872,7 @@ contains
                  fp%sparseMatA2X(i)%factorIndexList, &
                  fp%sparseMatA2X(i)%factorList, &
                  buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -884,7 +884,7 @@ contains
                  fp%sparseMatX2A(i)%factorIndexList, &
                  fp%sparseMatX2A(i)%factorList, &
                  buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -896,7 +896,7 @@ contains
                  fp%sparseMatB2X(i)%factorIndexList, &
                  fp%sparseMatB2X(i)%factorList, &
                  buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -908,7 +908,7 @@ contains
                  fp%sparseMatX2B(i)%factorIndexList, &
                  fp%sparseMatX2B(i)%factorList, &
                  buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -987,30 +987,30 @@ contains
 
       ! Shortcut to internals
       allocate(fp, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      if (ESMF_LogFoundAllocError(localrc, &
                                      "space for new XGrid object", &
                                      ESMF_CONTEXT, rc)) return
 
       call ESMF_XGridInitialize(fp, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       ! Deserialize Base
       call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
                                  
       call ESMF_BaseSetInitCreated(fp%base, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       ! Deserialize the balanced distgrid
       call C_ESMC_DistGridDeserialize(fp%distgridM, buffer(1), offset, &
                                    localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rc)) return
 
@@ -1021,7 +1021,7 @@ contains
                                  eleCountA2X, eleCountX2A, eleCountB2X, eleCountX2B, &
                                  fp%area, fp%centroid, step, &
                                  buffer(1), offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -1043,7 +1043,7 @@ contains
                                  eleCountA2X, eleCountX2A, eleCountB2X, eleCountX2B, &
                                  fp%area, fp%centroid, step, &
                                  buffer(1), offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -1081,7 +1081,7 @@ contains
           do i = 1, ngridA
             call C_ESMC_DistGridDeserialize(fp%distgridA(i), buffer(1), offset, &
                                      localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -1091,7 +1091,7 @@ contains
           do i = 1, ngridB
             call C_ESMC_DistGridDeserialize(fp%distgridB(i), buffer(1), offset, &
                                      localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -1102,7 +1102,7 @@ contains
           do i = 1, ngridA
             fp%sideA(i) = ESMF_GridDeserialize(buffer=buffer, offset=offset, &
                                      rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -1112,7 +1112,7 @@ contains
           do i = 1, ngridB
             fp%sideB(i) = ESMF_GridDeserialize(buffer=buffer, offset=offset, &
                                      rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           enddo
@@ -1125,7 +1125,7 @@ contains
                  fp%sparseMatA2X(i)%factorIndexList, &
                  fp%sparseMatA2X(i)%factorList, &
                  buffer(1), offset, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -1137,7 +1137,7 @@ contains
                  fp%sparseMatX2A(i)%factorIndexList, &
                  fp%sparseMatX2A(i)%factorList, &
                  buffer(1), offset, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -1149,7 +1149,7 @@ contains
                  fp%sparseMatB2X(i)%factorIndexList, &
                  fp%sparseMatB2X(i)%factorList, &
                  buffer(1), offset, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo
@@ -1161,7 +1161,7 @@ contains
                  fp%sparseMatX2B(i)%factorIndexList, &
                  fp%sparseMatX2B(i)%factorList, &
                  buffer(1), offset, localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rc)) return
           enddo

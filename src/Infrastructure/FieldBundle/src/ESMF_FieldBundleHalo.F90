@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.7 2010/11/09 06:58:21 eschwab Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.8 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.7 2010/11/09 06:58:21 eschwab Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.8 2010/12/03 05:57:39 theurich Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -135,25 +135,25 @@ contains
         allocate(arrays(fcount))
         do i = 1, fcount
             call ESMF_FieldBundleGet(fieldbundle, i, l_field, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(l_field, array=arrays(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
         arrayBundle = ESMF_ArrayBundleCreate(arrays, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(arrays)
 
         call ESMF_ArrayBundleHalo(arrayBundle, routehandle, &
             checkflag=l_checkflag, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
         call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! return successfully
@@ -199,7 +199,7 @@ contains
             
         ! Call into the RouteHandle code
         call ESMF_RouteHandleRelease(routehandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! return successfully
@@ -274,24 +274,24 @@ contains
         allocate(arrays(fcount))
         do i = 1, fcount
             call ESMF_FieldBundleGet(fieldbundle, i, l_field, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(l_field, array=arrays(i), rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
         arrayBundle = ESMF_ArrayBundleCreate(arrays, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(arrays)
 
         call ESMF_ArrayBundleHaloStore(arrayBundle, routehandle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             
         ! garbage collection
         call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! return successfully

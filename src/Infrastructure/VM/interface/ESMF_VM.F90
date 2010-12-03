@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.120 2010/09/16 04:33:44 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.121 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.120 2010/09/16 04:33:44 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.121 2010/12/03 05:57:59 theurich Exp $"
 
 !==============================================================================
 
@@ -597,7 +597,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -608,7 +608,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
         ESMF_TYPEKIND_I4, reduceflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
       
@@ -657,7 +657,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -668,7 +668,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
         ESMF_TYPEKIND_R4, reduceflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -717,7 +717,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -728,7 +728,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
         ESMF_TYPEKIND_R8, reduceflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -851,12 +851,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -920,12 +920,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMAllGatherNB(vm, sendData, recvData, size, localcommhandle, &
         localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -989,12 +989,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1058,12 +1058,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMAllGatherNB(vm, sendData(1), recvData(1), size, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -1198,7 +1198,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1208,7 +1208,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1257,7 +1257,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1267,7 +1267,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1316,7 +1316,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1326,7 +1326,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1450,7 +1450,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1461,7 +1461,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_I4, reduceflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -1509,7 +1509,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1519,7 +1519,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllReduce(vm, sendData, recvData, 1, ESMF_TYPEKIND_I4, &
       reduceflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1566,7 +1566,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1577,7 +1577,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R4, reduceflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -1626,7 +1626,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1637,7 +1637,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R8, reduceflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -1771,7 +1771,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1781,7 +1781,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1831,7 +1831,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1841,7 +1841,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1891,7 +1891,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -1901,7 +1901,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1949,7 +1949,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMBarrier(vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -2073,12 +2073,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2145,12 +2145,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2215,12 +2215,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2286,12 +2286,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData(1), size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2357,12 +2357,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2427,12 +2427,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2497,12 +2497,12 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMBroadcastNB(vm, bcstData, size, root, localcommhandle, &
           localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -2637,12 +2637,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2707,12 +2707,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2777,12 +2777,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2847,12 +2847,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMGatherNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -2967,7 +2967,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3012,7 +3012,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3057,7 +3057,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3146,7 +3146,7 @@ module ESMF_VMMod
       pthreadsEnabledFlag = pthreadsEnabledFlagArg
     if (present (openMPEnabledFlag))  &
       openMPEnabledFlag = openMPEnabledFlagArg
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3264,7 +3264,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetCurrent(vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code
@@ -3309,7 +3309,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetCurrentID(vmId, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3357,7 +3357,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetVMId(vm, vmId, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3429,7 +3429,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
       threadId, vas, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3483,7 +3483,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPrint(vm, localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -3604,11 +3604,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -3675,11 +3675,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -3746,11 +3746,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -3817,11 +3817,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, src, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMRecvNB(vm, recvData(1), size, src, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -3888,11 +3888,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -3959,11 +3959,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMRecvNB(vm, recvData, size, src, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -4099,7 +4099,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -4110,7 +4110,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_I4, reduceflag, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -4160,7 +4160,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -4171,7 +4171,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R4, reduceflag, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -4221,7 +4221,7 @@ module ESMF_VMMod
     ! Not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           "- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rc)
         return
@@ -4232,7 +4232,7 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R8, reduceflag, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -4360,12 +4360,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -4430,12 +4430,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -4500,12 +4500,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -4570,12 +4570,12 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, root, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMScatterNB(vm, sendData(1), recvData(1), size, root, &
         localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -4685,7 +4685,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
       recvData(1), recvCount, ESMF_TYPEKIND_I4, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -4730,7 +4730,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
       recvData(1), recvCount, ESMF_TYPEKIND_R4, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -4775,7 +4775,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
       recvData(1), recvCount, ESMF_TYPEKIND_R8, root, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -4889,11 +4889,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -4960,11 +4960,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -5031,11 +5031,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -5102,11 +5102,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dst, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMSendNB(vm, sendData(1), size, dst, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -5173,11 +5173,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -5244,11 +5244,11 @@ module ESMF_VMMod
       ! Call into the C++ interface, which will sort out optional arguments.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_VMSendNB(vm, sendData, size, dst, localcommhandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         ! Check if we need to pass back the commhandle
         if (present(commhandle)) then
@@ -5391,12 +5391,12 @@ module ESMF_VMMod
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -5466,12 +5466,12 @@ module ESMF_VMMod
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -5541,12 +5541,12 @@ module ESMF_VMMod
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -5616,12 +5616,12 @@ module ESMF_VMMod
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMSendRecvNB(vm, sendData(1), sendSize, dst, &
         recvData(1), recvSize, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -5691,12 +5691,12 @@ module ESMF_VMMod
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
         recvData, recvSize, src, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
         recvData, recvSize, src, localcommhandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Check if we need to pass back the commhandle
       if (present(commhandle)) then
@@ -5752,7 +5752,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMThreadBarrier(vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -5801,7 +5801,7 @@ module ESMF_VMMod
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMValidate(vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully
@@ -5855,7 +5855,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMCommWait(vm, commhandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -5904,7 +5904,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMCommQueueWait(vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -5950,7 +5950,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMWtime(time, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -5995,7 +5995,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMWtimeDelay(delay, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -6248,7 +6248,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMShutdown(vm, vmplan, vm_info, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -6478,7 +6478,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
@@ -6528,7 +6528,7 @@ module ESMF_VMMod
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanDestruct(vmplan, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code
@@ -6728,7 +6728,7 @@ module ESMF_VMMod
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       npetlist, petlist, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -6800,7 +6800,7 @@ module ESMF_VMMod
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       npetlist, petlist, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -6872,7 +6872,7 @@ module ESMF_VMMod
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       npetlist, petlist, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -6927,7 +6927,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMIdCompare(vmId1, vmId2, ESMF_VMIdCompare, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -6977,7 +6977,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMIdPrint(vmId, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -7021,7 +7021,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMIdCreate(vmId, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -7065,7 +7065,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface
     call c_ESMC_VMIdDestroy(vmId, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -7119,7 +7119,7 @@ module ESMF_VMMod
     
     ! Not implemented features
     if (.not. blocking) then
-      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
         "- non-blocking mode not yet implemented", &
         ESMF_CONTEXT, rc)
       return
@@ -7135,7 +7135,7 @@ module ESMF_VMMod
               if (i == mypet) cycle
               do, k=1, count
                   call ESMF_VMSendVMId (vm, bcstData(k), i, rc=localrc)
-                  if (ESMF_LogMsgFoundError(localrc, &
+                  if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
               end do
@@ -7143,7 +7143,7 @@ module ESMF_VMMod
       else
           do, k=1, count
               call ESMF_VMRecvVMId (vm, bcstData(k), root, rc=localrc)
-              if (ESMF_LogMsgFoundError(localrc, &
+              if (ESMF_LogFoundError(localrc, &
                              ESMF_ERR_PASSTHRU, &
                              ESMF_CONTEXT, rc)) return
           end do
@@ -7155,7 +7155,7 @@ module ESMF_VMMod
       if (blocking) then
         do k=1, count
           call c_ESMC_VMBcastVMId(vm, bcstData(k), root, localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
       endif
@@ -7209,7 +7209,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMRecvVMId(vm, vmId, src, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -7259,7 +7259,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMSendVMId(vm, vmId, dst, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -7314,7 +7314,7 @@ module ESMF_VMMod
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_CommHandleValidate(commhandle, localrc)
     localrc = ESMF_SUCCESS  ! remove when todo is done.
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully

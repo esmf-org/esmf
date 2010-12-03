@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.77 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.78 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.77 2010/11/12 06:57:18 eschwab Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.78 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -173,15 +173,15 @@ contains
     nullify(ESMF_FieldCreateEmpty%ftypep)
 
     allocate(ftype, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating Field information", &
                                      ESMF_CONTEXT, rc)) return
     call ESMF_FieldInitialize(ftype, rc=localrc) 
-    if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+    if (ESMF_LogFoundAllocError(localrc, "Default initialize Field", &
                                      ESMF_CONTEXT, rc)) return
 
     ! Call field construction method
     call ESMF_FieldConstructEmpty(ftype, name, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -195,7 +195,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateEmpty)
 
     call ESMF_FieldValidate(ESMF_FieldCreateEmpty, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -240,7 +240,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
     if (.not.associated(field%ftypep)) then 
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Uninitialized or already destroyed Field: ftypep unassociated", &
         ESMF_CONTEXT, rc)
       return
@@ -248,13 +248,13 @@ contains
 
     ! Destruct all field internals and then free field memory.
     call ESMF_FieldDestruct(field%ftypep, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(field%ftypep%base, ESMF_STATUS_INVALID, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -382,20 +382,20 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
 
     call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
 
     call ESMF_GeomBaseGet(geombase, distgrid=distgrid, dimCount=gridDimCount, &
                       indexflag=indexflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -414,19 +414,19 @@ contains
     endif
 
     call ESMF_DistGridGet(distgrid, dimCount=distgridDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(distgridDimCount) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToArrayMap", &
                                      ESMF_CONTEXT, rc)) return   
 
     ! allocate undistributed Bounds
     allocate(arrayLBound(ungriddedDimCount) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridLBound", &
                                      ESMF_CONTEXT, rc)) return   
     allocate(arrayUBound(ungriddedDimCount) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
     ! Get dimmap and undistibuted bounds
@@ -438,7 +438,7 @@ contains
                             undistLBound=arrayLBound, &
                             undistUBound=arrayUBound,   &
                             rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! create Array
@@ -454,7 +454,7 @@ contains
               undistLBound=arrayLBound, undistUBound=arrayUBound, &
               name=name, &
               rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Default of gridToFieldMap should be {1,2,3...}
@@ -481,7 +481,7 @@ contains
     ftype%geombase  = geombase
     ftype%gridstatus = ESMF_STATUS_READY
     call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
@@ -615,19 +615,19 @@ contains
 
     ! Construct a default name if one is not given
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
     ! make sure the array is a valid object first.
     call ESMF_ArrayValidate(array, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
     call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, &
                       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rc)) return
 
@@ -675,7 +675,7 @@ contains
         ftype%array = array
     else
         newarray = ESMF_ArrayCreate(array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
         ftype%array = newarray
@@ -686,7 +686,7 @@ contains
     ftype%geombase  = geombase
     ftype%gridstatus = ESMF_STATUS_READY
     call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
@@ -736,7 +736,7 @@ contains
 
     ! Construct a default name if one is not given
     call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -745,7 +745,7 @@ contains
     ftypep%datastatus = ESMF_STATUS_UNINIT
 
     call ESMF_BaseSetStatus(ftypep%base, ESMF_STATUS_READY, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -788,7 +788,7 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     call ESMF_BaseGetStatus(ftype%base, fieldstatus, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
@@ -797,7 +797,7 @@ contains
       if((ftype%is_proxy .or. ftype%array_internal) .and. &
         ftype%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayDestroy(ftype%array, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
                                 
@@ -805,7 +805,7 @@ contains
           
           ! mark invalid
           call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       endif
@@ -956,24 +956,24 @@ contains
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
     call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
     if (geomType .eq. ESMF_GEOMTYPE_GRID) then
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &  
+       if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  
            ESMF_CONTEXT, rc)) return  
        call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &  
+       if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  
            ESMF_CONTEXT, rc)) return  
     endif
 
     ! Get rank of proposed Field.  
     call ESMF_ArraySpecGet(arrayspec, rank=memDimCount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
          ESMF_ERR_PASSTHRU, &  
          ESMF_CONTEXT, rc)) return   
 
@@ -982,14 +982,14 @@ contains
     ! number of ungridded Field dimensions,  
     ! and number of undistributed Field Dimensions  
     call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
         if (size(gridToFieldMap) .ne. gridDimCount) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- gridToFieldMap size must equal to grid_rank", &  
                 ESMF_CONTEXT, rc)   
             return  
@@ -1016,7 +1016,7 @@ contains
     else
         call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, &
 	    rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &  
+        if (ESMF_LogFoundError(localrc, &  
             ESMF_ERR_PASSTHRU, &  
             ESMF_CONTEXT, rc)) return  
         ! find out how many grid dimensions are arbitrarily distributed and calculate 
@@ -1042,7 +1042,7 @@ contains
                   do j=1,arbdim
                     if (distgridToGridMap(j) .ne. i) then
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then
-                            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
                                 "- Arb. grid dimensions have to be either all replicated or not replicated", &  
                                 ESMF_CONTEXT, rc)
                             return
@@ -1060,7 +1060,7 @@ contains
     endif
 
     if(fieldDimCount .lt. gridDimCount_norep) then  
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
              "- Field rank must be greater than or equal to its gridded rank", &  
                ESMF_CONTEXT, rc)   
         return
@@ -1069,7 +1069,7 @@ contains
     if(fieldDimCount .gt. gridDimCount_norep) then
       if( (.not. present(ungriddedLBound)) .or. &
           (.not. present(ungriddedUBound)) ) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
          "- ungridded bounds must be present when Field has ungridded dimension(s)", &
            ESMF_CONTEXT, rc)
         return
@@ -1081,7 +1081,7 @@ contains
  
     if (present(ungriddedLBound)) then   
        if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
                "- ungriddedLBound size must equal to array_rank-grid_rank", &  
                ESMF_CONTEXT, rc)   
           return  
@@ -1090,7 +1090,7 @@ contains
  
     if (present(ungriddedUBound)) then   
        if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
                  "- ungriddedUBound size must equal to array_rank-grid_rank", &  
                  ESMF_CONTEXT, rc)   
           return  
@@ -1099,7 +1099,7 @@ contains
  
     if (present(maxHaloLWidth)) then   
         if (size(maxHaloLWidth) .ne. gridDimCount_norep) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- maxHaloLWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
             return  
@@ -1108,7 +1108,7 @@ contains
  
     if (present(maxHaloUWidth)) then   
        if (size(maxHaloUWidth) .ne. gridDimCount_norep) then  
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- maxHaloUWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
            return  
@@ -1124,14 +1124,14 @@ contains
     do i = 1, gridDimCount
        if(localGridToFieldMap(i) .lt. 0 .and. &
          localGridToFieldMap(i) .gt. fieldDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                  "- gridToFieldMap element must be within range 0...array rank", &
                    ESMF_CONTEXT, rc)
            return
        endif
        if(localGridToFieldMap(i) /= 0) then
            if(flipflop(localGridToFieldMap(i))) then
-               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+               call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                      "- gridToFieldMap element must be unique", &
                        ESMF_CONTEXT, rc)
                return
@@ -1156,12 +1156,12 @@ contains
 
     ! allocate Fieldtype
     allocate(ftype, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, &
+    if (ESMF_LogFoundAllocError(localrc, &
                                 "Allocating Field Type", &
                                 ESMF_CONTEXT, rc)) return
 
     call ESMF_FieldInitialize(ftype, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Call construction method to allocate and initialize field internals.
@@ -1171,7 +1171,7 @@ contains
                                 ungriddedUBound, localMaxHaloLWidth(1:gridDimCount_norep), &
                                 localMaxHaloUWidth(1:gridDimCount_norep), name, &
                                 rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &
+       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     else 
@@ -1179,7 +1179,7 @@ contains
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, name=name, &
                                 rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &
+       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
     endif
@@ -1195,7 +1195,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateGBArraySpec)
 
     call ESMF_FieldValidate(ESMF_FieldCreateGBArraySpec, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
       call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
@@ -1352,17 +1352,17 @@ contains
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
     call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
     if (geomType .eq. ESMF_GEOMTYPE_GRID) then
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &  
+       if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  
            ESMF_CONTEXT, rc)) return  
        call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, &  
+       if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  
            ESMF_CONTEXT, rc)) return  
     endif
@@ -1370,7 +1370,7 @@ contains
     ! Get rank of proposed Field.  
     call ESMF_ArrayGet(array, rank=memDimCount, & 
                        indexflag=arrayIndexFlag, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
          ESMF_ERR_PASSTHRU, &  
          ESMF_CONTEXT, rc)) return   
 
@@ -1380,14 +1380,14 @@ contains
     ! and number of undistributed Field Dimensions  
     call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, &
                       indexflag=gridIndexFlag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
  
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
         if (size(gridToFieldMap) .ne. gridDimCount) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- gridToFieldMap size must equal to grid_rank", &  
                 ESMF_CONTEXT, rc)   
             return  
@@ -1414,7 +1414,7 @@ contains
     else
         call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, &
 	    rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &  
+        if (ESMF_LogFoundError(localrc, &  
             ESMF_ERR_PASSTHRU, &  
             ESMF_CONTEXT, rc)) return  
         ! find out how many grid dimensions are arbitrarily distributed and calculate 
@@ -1440,7 +1440,7 @@ contains
                   do j=1,arbdim
                     if (distgridToGridMap(j) .ne. i) then
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then
-                            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+                            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
                                 "- Arb. grid dimensions have to be either all replicated or not replicated", &  
                                 ESMF_CONTEXT, rc)
                             return
@@ -1458,7 +1458,7 @@ contains
     endif
 
     if(fieldDimCount .lt. gridDimCount_norep) then  
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
              "- Field rank must be greater than or equal to its gridded rank", &  
                ESMF_CONTEXT, rc)   
         return
@@ -1467,7 +1467,7 @@ contains
     if(fieldDimCount .gt. gridDimCount_norep) then
       if( (.not. present(ungriddedLBound)) .or. &
           (.not. present(ungriddedUBound)) ) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
          "- ungridded bounds must be present when Field has ungridded dimension(s)", &
            ESMF_CONTEXT, rc)
         return
@@ -1480,7 +1480,7 @@ contains
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
         if (size(gridToFieldMap) .ne. gridDimCount) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- gridToFieldMap size must equal to grid_rank", &  
                 ESMF_CONTEXT, rc)   
             return  
@@ -1489,7 +1489,7 @@ contains
  
     if (present(ungriddedLBound)) then   
        if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
                "- ungriddedLBound size must equal to array_rank-grid_rank", &  
                ESMF_CONTEXT, rc)   
           return  
@@ -1498,7 +1498,7 @@ contains
  
     if (present(ungriddedUBound)) then   
        if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
                  "- ungriddedUBound size must equal to array_rank-grid_rank", &  
                  ESMF_CONTEXT, rc)   
           return  
@@ -1507,7 +1507,7 @@ contains
  
     if (present(maxHaloLWidth)) then   
         if (size(maxHaloLWidth) .ne. gridDimCount_norep) then  
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- maxHaloLWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
             return  
@@ -1516,7 +1516,7 @@ contains
  
     if (present(maxHaloUWidth)) then   
        if (size(maxHaloUWidth) .ne. gridDimCount_norep) then  
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               "- maxHaloUWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rc)   
            return  
@@ -1524,7 +1524,7 @@ contains
     endif  
  
     if (.not.(arrayIndexFlag .eq. gridIndexFlag)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
          "- Array indexflag must be the same as the Grid indexflag", &
            ESMF_CONTEXT, rc)
         return
@@ -1545,14 +1545,14 @@ contains
     do i = 1, gridDimCount
        if(localGridToFieldMap(i) .lt. 0 .and. &
          localGridToFieldMap(i) .gt. fieldDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                  "- gridToFieldMap element must be within range 0...array rank", &
                    ESMF_CONTEXT, rc)
            return
        endif
        if(localGridToFieldMap(i) /= 0) then
            if(flipflop(localGridToFieldMap(i))) then
-               call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+               call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                      "- gridToFieldMap element must be unique", &
                        ESMF_CONTEXT, rc)
                return
@@ -1562,10 +1562,10 @@ contains
     enddo
 
     allocate(ftype, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Field information", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating Field information", &
                                      ESMF_CONTEXT, rc)) return
     call ESMF_FieldInitialize(ftype, rc=localrc) 
-    if (ESMF_LogMsgFoundAllocError(localrc, "Default initialize Field", &
+    if (ESMF_LogFoundAllocError(localrc, "Default initialize Field", &
                                      ESMF_CONTEXT, rc)) return
 
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then
@@ -1577,7 +1577,7 @@ contains
                                          maxHaloLWidth=maxHaloLWidth, &
                                          maxHaloUWidth=maxHaloUWidth, &
                                          name=name, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
     else
@@ -1587,7 +1587,7 @@ contains
                                          ungriddedLBound=ungriddedLBound, &
                                          ungriddedUBound=ungriddedUBound, &
                                          name=name, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
     endif
@@ -1602,7 +1602,7 @@ contains
     ESMF_INIT_SET_CREATED(ESMF_FieldCreateGBArray)
 
     call ESMF_FieldValidate(ESMF_FieldCreateGBArray, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) then
       call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
@@ -1762,7 +1762,7 @@ contains
     ESMF_FieldCreateGBData##mrank##D##mtypekind = & @\
         ESMF_FieldCreateEmpty(name, rc=localrc) @\
 @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -1774,14 +1774,14 @@ contains
         maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
         rc=localrc) @\
 @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
     call ESMF_FieldValidate(ESMF_FieldCreateGBData##mrank##D##mtypekind, & @\
         rc=localrc) @\
 @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -1918,7 +1918,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
     ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind = & @\
         ESMF_FieldCreateEmpty(name, rc=localrc) @\
 @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -1929,14 +1929,14 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
         maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
         rc=localrc) @\
 @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
     call ESMF_FieldValidate(ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind, & @\
         rc=localrc) @\
 @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -2083,13 +2083,13 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateGridTKR = ESMF_FieldCreate(grid, arrayspec, indexflag, &
         staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, name, rc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -2237,13 +2237,13 @@ end function ESMF_FieldCreateGridTKR
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
     if (decompType .eq. ESMF_GRID_ARBITRARY) then
 	if ((present(indexflag)) .or. (present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", &
                  ESMF_CONTEXT, rc) 
            return
@@ -2251,13 +2251,13 @@ end function ESMF_FieldCreateGridTKR
     endif
 
     call ESMF_GridGet(grid, indexFlag=g_indexflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
     if (present(indexflag)) then
       if(.not. (g_indexflag .eq. indexflag)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &   
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
              "- user specified indexflag must be identical with Grid indexflag", &  
                ESMF_CONTEXT, rc)   
         return
@@ -2268,7 +2268,7 @@ end function ESMF_FieldCreateGridTKR
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -2281,7 +2281,7 @@ end function ESMF_FieldCreateGridTKR
  
     ! Create GeomBase from Grid
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -2289,14 +2289,14 @@ end function ESMF_FieldCreateGridTKR
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         maxHaloLWidth, maxHaloUWidth, name, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     !  link the Attribute hierarchies
     linkChange = ESMF_TRUE 
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
                               grid, linkChange, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -2442,13 +2442,13 @@ end function ESMF_FieldCreateGridTKR
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &  
+    if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rc)) return  
 
     if (decompType .eq. ESMF_GRID_ARBITRARY) then
         if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", &
                  ESMF_CONTEXT, rc) 
            return
@@ -2459,7 +2459,7 @@ end function ESMF_FieldCreateGridTKR
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -2472,7 +2472,7 @@ end function ESMF_FieldCreateGridTKR
 
     ! Create GeomBase from Grid
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -2480,14 +2480,14 @@ end function ESMF_FieldCreateGridTKR
         gridToFieldMap, ungriddedLBound, ungriddedUBound, maxHaloLWidth, &
         maxHaloUWidth, name, rc=localrc)
 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
  
     !  link the Attribute hierarchies
     linkChange = ESMF_TRUE
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
                               grid, linkChange, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2673,13 +2673,13 @@ end function ESMF_FieldCreateGridTKR
 @\
 @\
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, &   @\
+    if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rc)) return   @\
 @\
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
                  "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", & @\
                  ESMF_CONTEXT, rc)  @\
            return @\
@@ -2689,7 +2689,7 @@ end function ESMF_FieldCreateGridTKR
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rc)  @\
            return @\
@@ -2702,7 +2702,7 @@ end function ESMF_FieldCreateGridTKR
 @\
     ! Create GeomBase from Grid@\
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -2714,7 +2714,7 @@ end function ESMF_FieldCreateGridTKR
                                ungriddedUBound=ungriddedUBound, & @\
                                maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -2723,7 +2723,7 @@ end function ESMF_FieldCreateGridTKR
     call c_ESMC_AttributeLink( & @\
       ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%base, & @\
       grid, linkChange, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
@@ -2885,13 +2885,13 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 @\
 @\
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, &   @\
+    if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rc)) return   @\
 @\
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
                  "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", & @\
                  ESMF_CONTEXT, rc)  @\
            return @\
@@ -2901,7 +2901,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &  @\
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rc)  @\
            return @\
@@ -2914,7 +2914,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 @\
     ! Create GeomBase from Grid@\
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -2924,7 +2924,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
                                gridToFieldMap=gridToFieldMap, & @\
                                maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -2933,7 +2933,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
     call c_ESMC_AttributeLink( & @\
       ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%base, & @\
       grid, linkChange, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
@@ -3040,13 +3040,13 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateLSTKR = ESMF_FieldCreate(locstream, arrayspec, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, &
         name, rc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -3151,7 +3151,7 @@ end function ESMF_FieldCreateLSTKR
  
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -3159,7 +3159,7 @@ end function ESMF_FieldCreateLSTKR
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         name=name, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -3272,7 +3272,7 @@ end function ESMF_FieldCreateLSTKR
 
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -3280,7 +3280,7 @@ end function ESMF_FieldCreateLSTKR
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name=name, rc=localrc)
 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
@@ -3423,7 +3423,7 @@ end function ESMF_FieldCreateLSTKR
 @\
     ! Create GeomBase from LocStream@\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -3434,7 +3434,7 @@ end function ESMF_FieldCreateLSTKR
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -3554,7 +3554,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 @\
     ! Create GeomBase from LocStream@\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -3563,7 +3563,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -3677,13 +3677,13 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateMeshTKR = ESMF_FieldCreate(mesh, arrayspec, location, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, &
         name, rc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -3793,7 +3793,7 @@ end function ESMF_FieldCreateMeshTKR
  
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -3801,7 +3801,7 @@ end function ESMF_FieldCreateMeshTKR
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         name=name, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -3919,7 +3919,7 @@ end function ESMF_FieldCreateMeshTKR
 
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -3927,7 +3927,7 @@ end function ESMF_FieldCreateMeshTKR
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name=name, rc=localrc)
 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4076,7 +4076,7 @@ end function ESMF_FieldCreateMeshTKR
 @\
     ! Create GeomBase from Mesh@\
     geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -4087,7 +4087,7 @@ end function ESMF_FieldCreateMeshTKR
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -4213,7 +4213,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 @\
     ! Create GeomBase from Mesh@\
     geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -4222,7 +4222,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -4341,13 +4341,13 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, xgridside, gridIndex, arrayspec, &
         gridToFieldMap, ungriddedLBound, ungriddedUBound, &
         name, rc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -4461,7 +4461,7 @@ end function ESMF_FieldCreateXGTKR
 
     ! Create GeomBase from Xgrid
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -4469,7 +4469,7 @@ end function ESMF_FieldCreateXGTKR
         arrayspec, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         name=name, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -4591,7 +4591,7 @@ end function ESMF_FieldCreateXGTKR
 
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
     ! Create Field from GeomBase
@@ -4599,7 +4599,7 @@ end function ESMF_FieldCreateXGTKR
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name=name, rc=localrc)
 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4754,7 +4754,7 @@ end function ESMF_FieldCreateXGTKR
 @\
     ! Create GeomBase from Xgrid@\
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex ,rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -4765,7 +4765,7 @@ end function ESMF_FieldCreateXGTKR
                                ungriddedLBound=ungriddedLBound, & @\
                                ungriddedUBound=ungriddedUBound, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
@@ -4896,7 +4896,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 @\
     ! Create GeomBase from Xgrid@\
     geombase=ESMF_GeomBaseCreate(xgrid,xgridSide,gridIndex,rc=localrc)@\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
                                      ESMF_CONTEXT, rc)) return@\
 @\
 @\
@@ -4905,7 +4905,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
                                farrayPtr, copyflag=copyflag, & @\
                                gridToFieldMap=gridToFieldMap, & @\
                                name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\

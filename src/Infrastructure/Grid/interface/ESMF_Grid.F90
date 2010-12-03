@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.175 2010/11/29 22:55:50 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.176 2010/12/03 05:57:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.175 2010/11/29 22:55:50 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.176 2010/12/03 05:57:50 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -739,19 +739,19 @@ end interface
 
     ! Get Grid decomposition type
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
     ! check for not implemented parameters
     if (present(totalLWidth)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(totalUWidth)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalUWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -761,7 +761,7 @@ end interface
     if (present(staggerloc)) then
 	 if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
  	     (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -775,58 +775,58 @@ end interface
     if (decompType .eq. ESMF_GRID_ARBITRARY) then
 	if (present(staggerEdgeLWidth) .or. present(staggerEdgeUWidth) .or. &
 	    present(staggerAlign)) then
-	    call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+	    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- stagger arguments should not be set for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
 	    return
 	else
 	    ! Call C++ Subroutine to do the create
     	    call c_ESMC_gridaddcoordarb(grid%this,tmp_staggerloc, localrc)
-    	    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       		ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
      else
         !! staggerEdgeLWidth
     	staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
 
     	!! staggerEdgeUWidth
     	staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	   ESMF_CONTEXT, rcToReturn=rc)) return
 
     	!! staggerAlign
     	staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
         !! staggerMemLBound
         staggerMemLBoundArg = ESMF_InterfaceIntCreate(staggerMemLBound, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     	! Call C++ Subroutine to do the create
     	call c_ESMC_gridaddcoord(grid%this,tmp_staggerloc, &
           staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, staggerMemLBoundArg, localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     	! Deallocate helper variables
     	call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
     	call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	  ESMF_CONTEXT, rcToReturn=rc)) return
 
     	call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
-    	  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
             
         call ESMF_InterfaceIntDestroy(staggerMemLBoundArg, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
      endif
@@ -929,22 +929,22 @@ end interface
 
     !! staggerLWidth
     staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggerEdgeUWidth
     staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggeAlign
     staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! staggerAlign
     staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -954,7 +954,7 @@ end interface
     allocate(arrayPointerList(arrayCount))
     do i=1, arrayCount
       call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
@@ -962,21 +962,21 @@ end interface
     call c_ESMC_gridaddcoordarraylist(grid%this,tmp_staggerloc, &
       arrayCount, arrayPointerList, docopy, staggerEdgeLWidthArg,     &
       staggerEdgeUWidthArg, staggerAlignArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! cleanup
     deallocate(arrayPointerList)
     call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -1083,19 +1083,19 @@ end interface
 
     ! Get Grid decomposition type
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
     ! check for not implemented parameters
     if (present(totalLWidth)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalLWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(totalUWidth)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- totalUWidth specification not yet implemented", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -1111,19 +1111,19 @@ end interface
     ! Check if the grid is arbitrary
     if (decompType .eq. ESMF_GRID_ARBITRARY) then
        if (present(staggerEdgeLWidth) .or. present(staggerEdgeUWidth)) then
-	  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerEdgeLWidth and staggerEdigeUWidth are not allowed for arbitrary grid", &
 	         ESMF_CONTEXT, rc) 
           return
        endif
        if (present(staggerAlign)) then
-	  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerAlign is not allowed for arbitrarily distributed grid", &
   	         ESMF_CONTEXT, rc) 
           return
        endif
        if (present(staggerloc) .and. staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-	  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
   	         ESMF_CONTEXT, rc) 
           return
@@ -1131,53 +1131,53 @@ end interface
 
        ! Call C++ Subroutine to do the create
        call c_ESMC_gridadditemarb(grid%this,tmp_staggerloc, item, itemTypeKind, localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     else
 
        !! staggerEdgeLWidth
        staggerEdgeLWidthArg = ESMF_InterfaceIntCreate(staggerEdgeLWidth, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerEdgeUWidth
        staggerEdgeUWidthArg = ESMF_InterfaceIntCreate(staggerEdgeUWidth, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerAlign
        staggerAlignArg = ESMF_InterfaceIntCreate(staggerAlign, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !! staggerMemLBound
        staggerMemLBoundArg = ESMF_InterfaceIntCreate(staggerMemLBound, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Call C++ Subroutine to do the create
        call c_ESMC_gridadditem(grid%this,tmp_staggerloc, item, itemTypeKind, &
           staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, &
           staggerMemLBoundArg,  localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Deallocate helper variables
        call ESMF_InterfaceIntDestroy(staggerEdgeLWidthArg, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        call ESMF_InterfaceIntDestroy(staggerEdgeUWidthArg, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        call ESMF_InterfaceIntDestroy(staggerAlignArg, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        call ESMF_InterfaceIntDestroy(staggerMemLBoundArg, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
  
     endif
@@ -1259,14 +1259,14 @@ end interface
 
     ! Check for Not Implemented options
     if (present(status)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- status not yet implemented", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if (present(defaultflag)) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- defaultflag not yet implemented", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -1274,7 +1274,7 @@ end interface
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcommit(grid%this, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -1342,12 +1342,12 @@ end interface
 
     ! Get Grid decomposition type
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
     ! Check if the grid is arbitrary
     if (decompType .ne. ESMF_GRID_ARBITRARY) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- ESMF_GridConvertIndex only works for arbritrarily distributed grid", & 
                  ESMF_CONTEXT, rc) 
        return
@@ -1356,25 +1356,25 @@ end interface
     ! Get info from Grid
     call ESMF_GridGet(grid, distgrid= distGrid, DimCount=DimCount, &
 		      rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! allocate minIndex and maxIndex
     allocate(minIndex(DimCount), maxIndex(DimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndex and maxIndex", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndex and maxIndex", &
                                      ESMF_CONTEXT, rc)) return 
  
     ! Get minIndex and maxIndex from the grid
     call ESMF_GridGetIndex(grid, minIndex= minIndex, maxIndex=maxIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! find out how many dimensions are arbitrarily distributed
      call ESMF_DistGridGet(distGrid, dimcount = distGridDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (distGridDimCount .gt. dimCount) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid dimension has to be less than or equal to dimCount", & 
                      ESMF_CONTEXT, rc) 
         return 
@@ -1393,7 +1393,7 @@ end interface
 
     ! Check index dimension
     if (size(gridindex) .ne. dimCount) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
             "- gridindex dimension is different from the grid DimCount", & 
             ESMF_CONTEXT, rc) 
        return
@@ -1402,7 +1402,7 @@ end interface
     ! Check index out of bound
     do i=1,dimCount
        if (gridindex(i) .lt. minIndex(i) .and. gridindex(i) .gt. maxIndex(i)) then
-	   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+	   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                "- gridindex is out of bound", & 
                       ESMF_CONTEXT, rc) 
 	   return
@@ -1416,18 +1416,18 @@ end interface
     ! Call the C function to get the index of the 1D distgrid
     !! index
     gridIndexArg = ESMF_InterfaceIntCreate(gridindex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call c_ESMC_gridconvertindex(grid%this, gridIndexArg, index1D, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (undistDimCount .ne. 0) then
       allocate(distgridToGridMap(dimCount), stat=localrc)
       call ESMF_GridGet(grid, arbDim=arbDim, &
 	distgridToGridMap=distgridToGridMap, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       k=1
       allocate(undistdim(undistDimCount))
@@ -1459,7 +1459,7 @@ end interface
 
     ! clean up memory allocation
     call ESMF_InterfaceIntDestroy(GridIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -1578,7 +1578,7 @@ end subroutine ESMF_GridConvertIndex
     ! Both the bounds need to be present if either is.
     if ((present(ungriddedLBound) .or. present(ungriddedUBound)) .and. &
         .not. (present(ungriddedLBound) .and. present(ungriddedUBound))) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                "- if either ungriddedBound is present both need to be", & 
                       ESMF_CONTEXT, rc) 
        return 
@@ -1587,7 +1587,7 @@ end subroutine ESMF_GridConvertIndex
     ! The bounds need to be the same size
     if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
        if (size(ungriddedLBound) .ne. size(ungriddedUBound)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                 "- ungriddedLBound and ungriddedUBound must be the same size ", & 
                   ESMF_CONTEXT, rc) 
           return 
@@ -1603,7 +1603,7 @@ end subroutine ESMF_GridConvertIndex
     ! Get info from Grid
     call ESMF_GridGet(grid, dimCount=dimCount,  &
                       indexflag=indexflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! calc undist Array DimCount
@@ -1612,7 +1612,7 @@ end subroutine ESMF_GridConvertIndex
     ! Make sure gridToArrayMap is correct size
     if (present(gridToArrayMap)) then
        if (size(gridToArrayMap) < dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- gridToArrayMap needs to at least be of the Grid's dimCount", & 
                       ESMF_CONTEXT, rc) 
           return 
@@ -1641,7 +1641,7 @@ end subroutine ESMF_GridConvertIndex
     if (present(gridToArrayMap)) then
        do i=1,dimCount
           if ((gridToArrayMap(i) <0) .or. (gridToArrayMap(i) > arrayDimCount)) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- gridToArrayMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
               return 
@@ -1658,7 +1658,7 @@ end subroutine ESMF_GridConvertIndex
           endif
        enddo
        if (.not. contains_nonzero) then 
-             call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- gridToArrayMap must contains at least one value greater than 0", & 
                           ESMF_CONTEXT, rc) 
               return 
@@ -1667,20 +1667,20 @@ end subroutine ESMF_GridConvertIndex
 
    ! construct ArraySpec
    call ESMF_ArraySpecSet(arrayspec,rank=arrayDimCount,typekind=localTypeKind, rc=localrc)
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(dimCount) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToArrayMap", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToArrayMap", &
                                      ESMF_CONTEXT, rc)) return   
 
     ! allocate undistributed Bounds
     allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridLBound", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridLBound", &
                                      ESMF_CONTEXT, rc)) return   
     allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
                                      ESMF_CONTEXT, rc)) return   
 
 
@@ -1689,7 +1689,7 @@ end subroutine ESMF_GridConvertIndex
                             gridToArrayMap, ungriddedLBound, ungriddedUBound, &
                             distgrid, distgridToArrayMap, arrayLBound, arrayUBound,   &
                             rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -1701,7 +1701,7 @@ end subroutine ESMF_GridConvertIndex
               indexflag=indexflag, &
               undistLBound=arrayLBound, undistUBound=arrayUBound, name=name, &
               rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -1818,7 +1818,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! Get DecomposeType
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -1833,7 +1833,7 @@ end subroutine ESMF_GridConvertIndex
     ! Both the bounds need to be present if either is.
     if ((present(ungriddedLBound) .or. present(ungriddedUBound)) .and. &
         .not. (present(ungriddedLBound) .and. present(ungriddedUBound))) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                "- if either ungriddedBound is present both need to be", & 
                       ESMF_CONTEXT, rc) 
        return 
@@ -1842,7 +1842,7 @@ end subroutine ESMF_GridConvertIndex
     ! The bounds need to be the same size
     if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
        if (size(ungriddedLBound) .ne. size(ungriddedUBound)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                 "- ungriddedLBound and ungriddedUBound must be the same size ", & 
                   ESMF_CONTEXT, rc) 
           return 
@@ -1857,7 +1857,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! Get info from Grid
     call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! calc undist Array DimCount
@@ -1866,7 +1866,7 @@ end subroutine ESMF_GridConvertIndex
     ! Make sure gridToFieldMap is correct size
     if (present(gridToFieldMap)) then
        if (size(gridToFieldMap) < dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- gridToFieldMap needs to at least be of the Grid's dimCount", & 
                       ESMF_CONTEXT, rc) 
           return 
@@ -1875,7 +1875,7 @@ end subroutine ESMF_GridConvertIndex
     
     ! Get grid distgrid
     call ESMF_GridGet(grid, localStaggerLoc, distgrid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! if argument is present, then pass out distgrid
@@ -1909,7 +1909,7 @@ end subroutine ESMF_GridConvertIndex
        if (present(gridToFieldMap)) then
           do i=1,dimCount
              if ((gridToFieldMap(i) <0) .or. (gridToFieldMap(i) > arrayDimCount)) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- gridToFieldMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
                  return 
@@ -1929,7 +1929,7 @@ end subroutine ESMF_GridConvertIndex
              endif
           enddo
           if (.not. contains_nonzero) then 
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                       "- gridToFieldMap must contains at least one value greater than 0", & 
                              ESMF_CONTEXT, rc) 
                 return 
@@ -1939,7 +1939,7 @@ end subroutine ESMF_GridConvertIndex
 
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                       "- distgridToArrayMap is too small", & 
                           ESMF_CONTEXT, rc) 
            return 
@@ -1958,11 +1958,11 @@ end subroutine ESMF_GridConvertIndex
 
        ! allocate distgridToGridMap
        allocate(distgridToGridMap(dimCount) , stat=localrc)
-       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
+       if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
                                         ESMF_CONTEXT, rc)) return   
        ! Get info from Grid
        call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! construct distgridToArrayMap
@@ -1976,10 +1976,10 @@ end subroutine ESMF_GridConvertIndex
 
           !! allocate array dim. info arrays
           allocate(arrayDimType(arrayDimCount) , stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+          if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
                                          ESMF_CONTEXT, rc)) return   
           allocate(arrayDimInd(arrayDimCount) , stat=localrc)
-          if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridUBound", &
+          if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
                                          ESMF_CONTEXT, rc)) return   
 
           !! set which dimensions are used by the distgrid
@@ -2021,7 +2021,7 @@ end subroutine ESMF_GridConvertIndex
     else
        ! Code for Arbitrarily Distributed Grid
        call ESMF_DistGridGet(distgrid, dimCount=distDimCount, rc=localrc)    
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (present(gridToFieldMap)) then
@@ -2045,7 +2045,7 @@ end subroutine ESMF_GridConvertIndex
        if (present(gridToFieldMap)) then
           do i=1,dimCount
              if ((gridToFieldMap(i) <0) .or. (gridToFieldMap(i) > fieldDimCount)) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                       "- gridToFieldMap value is outside range", & 
                           ESMF_CONTEXT, rc) 
                  return 
@@ -2067,12 +2067,12 @@ end subroutine ESMF_GridConvertIndex
        allocate(distgridToGridMap(dimCount))
        call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, &
 		arbdim=arbdim, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < distDimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                       "- distgridToArrayMap is too small", & 
                           ESMF_CONTEXT, rc) 
            return 
@@ -2226,7 +2226,7 @@ end subroutine ESMF_GridConvertIndex
        call ESMF_GridGet(grid, &
             dimCount=dimCount, & 
             rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Get info from old grid to create new Grid.
@@ -2241,7 +2241,7 @@ end subroutine ESMF_GridConvertIndex
             gridAlign=gridAlign(1:dimCount), &
             indexFlag=indexFlag, &
             rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Create New Grid
@@ -2259,7 +2259,7 @@ end subroutine ESMF_GridConvertIndex
             destroyDistGrid=destroyDistGrid, &
             destroyDELayout=destroyDELayout, &
             rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! For Bob:
@@ -2274,7 +2274,7 @@ end subroutine ESMF_GridConvertIndex
        ! Add Coords to new grid       
        do i = 1, nStaggers
            call ESMF_GridAddCoord(newGrid, staggerloc=srcStaggers(i), rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
 
@@ -2289,7 +2289,7 @@ end subroutine ESMF_GridConvertIndex
         do j = 1, nStaggers
           call ESMF_GridGetCoord(grid, coordDim=i, staggerloc=srcStaggers(j), &
                   array=srcA((i-1)*nStaggers+j), rc=localrc)   
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
        enddo
@@ -2309,7 +2309,7 @@ end subroutine ESMF_GridConvertIndex
        ! construct temporary 2D Arrays and fill with data if necessary
        do k=1, dimCount*nStaggers
           call ESMF_ArrayGet(srcA(k), rank=rank, dimCount=dimCount, rc=localrc)          
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (rank==dimCount) then
             ! branch that assumes no replicated dims in Array
@@ -2323,17 +2323,17 @@ end subroutine ESMF_GridConvertIndex
             srcRepl(k) = .true.
             call ESMF_ArrayGet(srcA(k), distgrid=dg, typekind=tk, &
               arrayToDistGridMap=atodMap, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
             srcA2D(k) = ESMF_ArrayCreate(distgrid=dg, typekind=tk, &
               indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_ArrayGet(srcA(k), farrayPtr=fptr, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_ArrayGet(srcA2D(k), farrayPtr=fptr2D, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (atodMap(1)==1) then
               do j=lbound(fptr2D,2), ubound(fptr2D,2)
@@ -2352,7 +2352,7 @@ end subroutine ESMF_GridConvertIndex
        enddo
        
        srcAB = ESMF_ArrayBundleCreate(srcA2D, arrayCount=nStaggers, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
             
 
@@ -2363,7 +2363,7 @@ end subroutine ESMF_GridConvertIndex
         do j = 1, nStaggers
           call ESMF_GridGetCoord(newGrid, coordDim=i, staggerloc=srcStaggers(j), &
                   array=dstA((i-1)*nStaggers+j), rc=localrc)   
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
        enddo 
@@ -2371,7 +2371,7 @@ end subroutine ESMF_GridConvertIndex
        ! construct temporary 2D Arrays
        do k=1, dimCount*nStaggers
           call ESMF_ArrayGet(dstA(k), rank=rank, dimCount=dimCount, rc=localrc)          
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (rank==dimCount) then
             ! branch that assumes no replicated dims in Array
@@ -2382,25 +2382,25 @@ end subroutine ESMF_GridConvertIndex
           else
             dstRepl(k) = .true.
             call ESMF_ArrayGet(dstA(k), distgrid=dg, typekind=tk, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
             dstA2D(k) = ESMF_ArrayCreate(distgrid=dg, typekind=tk, &
               indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           endif
        enddo
        
        dstAB = ESMF_ArrayBundleCreate(dstA2D, arrayCount=nStaggers, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Redist between ArrayBundles
 !       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=routehandle, rc=localrc)
-!       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
 !            ESMF_CONTEXT, rcToReturn=rc)) return
 !       call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=routehandle, rc=localrc)
-!       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
 !            ESMF_CONTEXT, rcToReturn=rc)) return
         
 !TODO: figure out why ArrayBundleRedist() does not seem to work right for
@@ -2408,13 +2408,13 @@ end subroutine ESMF_GridConvertIndex
             
        do k=1, dimCount*nStaggers
          call ESMF_ArrayRedistStore(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
          call ESMF_ArrayRedist(srcA2D(k), dstA2D(k), routehandle=routehandle, rc=localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
          call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
              ESMF_CONTEXT, rcToReturn=rc)) return
        enddo     
             
@@ -2422,13 +2422,13 @@ end subroutine ESMF_GridConvertIndex
        do k=1, dimCount*nStaggers
         if (dstRepl(k)) then
           call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           call ESMF_ArrayGet(dstA(k), farrayPtr=fptr, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           call ESMF_ArrayGet(dstA2D(k), farrayPtr=fptr2D, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (atodMap(1)==1) then
             do i=lbound(fptr2D,1), ubound(fptr2D,1)
@@ -2446,12 +2446,12 @@ end subroutine ESMF_GridConvertIndex
        do k=1, dimCount*nStaggers
          if (srcRepl(k)) then
            call ESMF_ArrayDestroy(srcA2D(k), rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
          endif
          if (dstRepl(k)) then
            call ESMF_ArrayDestroy(dstA2D(k), rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
          endif
        enddo
@@ -2467,13 +2467,13 @@ end subroutine ESMF_GridConvertIndex
 
        ! Destroy ArrayBundles and release Routehandle
 !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
-!       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+!       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
 !            ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayBundleDestroy(dstAB, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Set return value
@@ -2559,14 +2559,14 @@ end subroutine ESMF_GridConvertIndex
 
     ! Get the Grid DimCount ---------------------------------------------------
     call ESMF_GridGet(grid, dimCount=dimCount, indexflag=indexflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (present(regDecomp)) then
         if (size(regDecomp) .lt. dimCount) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- regDecomp size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -2575,7 +2575,7 @@ end subroutine ESMF_GridConvertIndex
 
     if (present(decompFlag)) then
         if (size(decompFlag) .lt. dimCount) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- decompFlag size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -2587,13 +2587,13 @@ end subroutine ESMF_GridConvertIndex
     
     ! Get old distgrid
     call ESMF_GridGet(grid, distgrid=oldDistgrid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
    
     ! Get a couple of sizes
     call ESMF_DistgridGet(oldDistgrid, patchCount=patchCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! XMRKX
@@ -2601,11 +2601,11 @@ end subroutine ESMF_GridConvertIndex
 
     ! Get Index info from DistGrid
     allocate(minIndexPDimPPatch(dimCount,patchCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexPDimPatch", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexPDimPatch", &
                                      ESMF_CONTEXT, rc)) return
 
     allocate(maxIndexPDimPPatch(dimCount,patchCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexPDimPatch", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexPDimPatch", &
                                      ESMF_CONTEXT, rc)) return
 
 
@@ -2613,13 +2613,13 @@ end subroutine ESMF_GridConvertIndex
            minIndexPDimPPatch=minIndexPDimPPatch, &
            maxIndexPDimPPatch=maxIndexPDimPPatch, &
            rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! This doesn't work right now for Multitile Grids
     if (patchCount > 1) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             "- GridCopy with reg distribution not supported for multitile grids", &
             ESMF_CONTEXT, rc)
        return
@@ -2627,14 +2627,14 @@ end subroutine ESMF_GridConvertIndex
 
     ! Set minIndex
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     minIndexLocal(1:dimCount)=minIndexPDimPPatch(1:dimCount,1)
 
     ! Set maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     maxIndexLocal(1:dimCount)=maxIndexPDimPPatch(1:dimCount,1)
@@ -2648,7 +2648,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating regDecompLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating regDecompLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(regDecomp)) then
@@ -2656,10 +2656,10 @@ end subroutine ESMF_GridConvertIndex
     else
        ! The default is 1D divided among all the Pets
        call ESMF_VMGetGlobal(vm,rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        do i=2,dimCount
           regDecompLocal(i)=1
@@ -2672,7 +2672,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating decompFlagLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(decompFlag)) then
@@ -2694,7 +2694,7 @@ end subroutine ESMF_GridConvertIndex
    if (present(petMap)) then
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -2723,7 +2723,7 @@ end subroutine ESMF_GridConvertIndex
 
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! Get rid of list
@@ -2734,7 +2734,7 @@ end subroutine ESMF_GridConvertIndex
 
       !! create a default delayout
       delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if 0
@@ -2747,7 +2747,7 @@ end subroutine ESMF_GridConvertIndex
               regDecomp=regDecompLocal, decompFlag=decompFlagLocal, delayout=delayout,&
               indexflag=indexflag, &
               rc=localrc)   
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -2756,7 +2756,7 @@ end subroutine ESMF_GridConvertIndex
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
                                     rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -2917,10 +2917,10 @@ end subroutine ESMF_GridConvertIndex
     !! Check if the DistGrid is an arbitrary distgrid
     arbDim = -1
     call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if (deCount .gt. 0) then
       allocate(collocationPDim(distDimCount))  ! dimCount
@@ -2929,7 +2929,7 @@ end subroutine ESMF_GridConvertIndex
       do i=1,distDimCount
           call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(i), &
               arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           if (arbSeqIndexFlag) arbDim = i
       enddo
@@ -2937,7 +2937,7 @@ end subroutine ESMF_GridConvertIndex
     endif
 
     if (arbDim .ne. -1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid should not contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rc) 
         return
@@ -2948,29 +2948,29 @@ end subroutine ESMF_GridConvertIndex
 
     !! staggerWidths
     gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distgridToGridMap
     distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
     coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Convert destroyDistGrid flag
@@ -3005,30 +3005,30 @@ end subroutine ESMF_GridConvertIndex
       coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, gridMemLBoundArg,&
       indexflag, intDestroyDistGrid, intDestroyDELayout, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
     call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
@@ -3165,13 +3165,13 @@ end subroutine ESMF_GridConvertIndex
     	rc=localrc)
     !! dimCount1 should be equal or less than dimCount
     if (dimCount1 .gt. dimCount) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid dimension has to be less or equal to dimCount", & 
                           ESMF_CONTEXT, rc) 
         return 
      endif
     if (patchCount .ne. 1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid patch count has to be 1", & 
                           ESMF_CONTEXT, rc) 
         return 
@@ -3183,7 +3183,7 @@ end subroutine ESMF_GridConvertIndex
     !! Grid dimensions that are arbitrarily distributed. 
     if (present(distDim)) then
       if (size(distDim) .ne. distDimCount) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- dimension of distDim has to be the same as the arbitrary distributed dim", & 
                           ESMF_CONTEXT, rc) 
 	return
@@ -3218,25 +3218,25 @@ end subroutine ESMF_GridConvertIndex
 
     !! Arbitrary grid indices
     minIndexArg = ESMF_InterfaceIntCreate(minIndexLocal, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexArg = ESMF_InterfaceIntCreate(maxIndexLocal, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distDim
     distDimArg = ESMF_InterfaceIntCreate(distDimLocal, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_DistGridGet(distgrid,localDe=0, elementCount=localCounts, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! reconstruct the localArbIndex from local1DIndices
     allocate(local1DIndices(localCounts))
     call ESMF_DistGridGet(distgrid,localDe=0, seqIndexList=local1DIndices, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     !! find out the dimension 
@@ -3263,7 +3263,7 @@ end subroutine ESMF_GridConvertIndex
     enddo
 
     localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Check the non-arbitrary dimensions in DistGrid and make sure they are
@@ -3271,22 +3271,22 @@ end subroutine ESMF_GridConvertIndex
     !! First, find out which dimension in DistGrid is arbitrary
     arbDim = -1
     call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     if (deCount .gt. 0) then
       allocate(collocationPDim(dimCount1))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
            collocationPDim=collocationPDim, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i=1,dimCount1
           call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(i), &
               arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           if (arbSeqIndexFlag) arbDim = i
       enddo
@@ -3294,7 +3294,7 @@ end subroutine ESMF_GridConvertIndex
     endif
 
     if (arbDim .eq. -1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid should contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rc) 
 	return
@@ -3305,7 +3305,7 @@ end subroutine ESMF_GridConvertIndex
       allocate(maxIndexPPatch(dimCount1,1))
       call ESMF_DistGridGet(distgrid, minIndexPDimPPatch=minIndexPPatch, &
 	  maxIndexPDimPPatch=maxIndexPPatch, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       allocate(undistMinIndex(undistDimCount))
@@ -3324,7 +3324,7 @@ end subroutine ESMF_GridConvertIndex
         if (arbDim .ne. i) then
           if ((undistMinIndex(k) .ne. minIndexPPatch(i,1)) .or. &
             (undistMaxIndex(k) .ne. maxIndexPPatch(i,1))) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- Grid min/max index does not match with DistGrid min/max index", & 
                ESMF_CONTEXT, rc) 
             return
@@ -3336,10 +3336,10 @@ end subroutine ESMF_GridConvertIndex
 
     !! Description of array factorization
     coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	
     !! Convert destroyDistGrid flag
@@ -3373,7 +3373,7 @@ end subroutine ESMF_GridConvertIndex
       coordDimCountArg, coordDimMapArg, &
       minIndexArg, maxIndexArg, localArbIndexArg, localCounts, &
       intDestroyDistGrid, intDestroyDELayout, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
@@ -3392,22 +3392,22 @@ end subroutine ESMF_GridConvertIndex
     endif
 
     call ESMF_InterfaceIntDestroy(distDimArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
@@ -3502,7 +3502,7 @@ end subroutine ESMF_GridConvertIndex
     grid%this = ESMF_NULL_POINTER
 
     grid = ESMF_GridCreateEmpty(rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3517,7 +3517,7 @@ end subroutine ESMF_GridConvertIndex
 
     if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
     if (localrc .ne. ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3530,7 +3530,7 @@ end subroutine ESMF_GridConvertIndex
     ordinal = 1   ! get the 1st AttPack of type (conv, purp) on 'grid'
     call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
                                'GridSpec', 'General', 'grid', ordinal, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3539,7 +3539,7 @@ end subroutine ESMF_GridConvertIndex
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(1)
     if (localrc.ne.0) then
-      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+      call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
       return
@@ -3547,7 +3547,7 @@ end subroutine ESMF_GridConvertIndex
 
     call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
                                'GridSpec', 'General', 'grid', ordinal, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3556,7 +3556,7 @@ end subroutine ESMF_GridConvertIndex
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(2)
     if (localrc.ne.0) then
-      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+      call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
       return
@@ -3567,7 +3567,7 @@ end subroutine ESMF_GridConvertIndex
     ! use C calls rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
     call c_ESMC_AttributeGetChar(grid, 'RegDecompX', attrValue, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3576,14 +3576,14 @@ end subroutine ESMF_GridConvertIndex
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(1)
     if (localrc.ne.0) then
-      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+      call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
       return
     end if
 
     call c_ESMC_AttributeGetChar(grid, 'RegDecompY', attrValue, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3592,7 +3592,7 @@ end subroutine ESMF_GridConvertIndex
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(2)
     if (localrc.ne.0) then
-      call ESMF_LogMsgSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
+      call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
       return
@@ -3604,7 +3604,7 @@ end subroutine ESMF_GridConvertIndex
     call ESMF_GridSetCommitShapeTile(grid, maxIndex=maxIndex, &
                                      regDecomp=regDecomp, &
                                      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
       return
@@ -3691,28 +3691,28 @@ end subroutine ESMF_GridConvertIndex
     ! get global vm information
     !
     call ESMF_VMGetGlobal(vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
 
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
 
     ! get dimension from distgrid
     call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPDimPPatch=minInd,&
 		         maxIndexPDimPPatch=maxInd, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
 
     if (numDim /=2) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, &
+        call ESMF_LogSetError(ESMF_RC_ARG_RANK, &
 	  "- The distgrid dimCount has to be 2", ESMF_CONTEXT, rc)
 	return
     endif
 
     if (minInd(1,1) /= 1 .and. minInd(2,1) /=1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, &
+        call ESMF_LogSetError(ESMF_RC_ARG_RANK, &
 	  "- The minIndex of distgrip has to be 1", ESMF_CONTEXT, rc)
 	return
     endif
@@ -3720,12 +3720,12 @@ end subroutine ESMF_GridConvertIndex
     if (PetNo == 0) then
        call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
    	  grid_size=totalpoints, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
        ! check if the grid_dim matches with the distgrid dimension
        if (dims(1) /= maxInd(1,1) .and. dims(2) /= maxInd(2,1) ) then
-	  call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+	  call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
 	   "- The grid_dims does not match with distgrid dimension", &
  	    ESMF_CONTEXT, rc)
             return
@@ -3734,7 +3734,7 @@ end subroutine ESMF_GridConvertIndex
        ! if grid_rank is not equal to 2, return error 
        ! Does SCRIP allow 3D datasets?  What will be the format??
        if (totaldims /= 2) then
-	  call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
+	  call ESMF_LogSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
 	  ESMF_CONTEXT, rc)
 	  return
        endif
@@ -3745,7 +3745,7 @@ end subroutine ESMF_GridConvertIndex
        call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
           grid_center_lat=coordY, grid_imask=imask,  &
 	  convertToDeg=.TRUE., rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     endif
 
@@ -3753,16 +3753,16 @@ end subroutine ESMF_GridConvertIndex
     grid = ESMF_GridCreate(distgrid=distgrid, &
 		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
 		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     ! Set coordinate tables 
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     if (PetNo == 0) then
@@ -3771,31 +3771,31 @@ end subroutine ESMF_GridConvertIndex
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     
     ! Latitude
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0) then
        coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
 
     ! Mask
     call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 	item = ESMF_GRIDITEM_MASK, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     if (PetNo == 0) then
@@ -3804,7 +3804,7 @@ end subroutine ESMF_GridConvertIndex
     endif
     call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0)  deallocate(imask, mask2D)
     
@@ -3883,7 +3883,7 @@ subroutine convert_corner_arrays_to_1D(dim1,dim2,cornerX2D,cornerY2D,cornerX,cor
 
   ! Make sure we found a corner
   if (TopCorner .eq. -1) then
-     call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
+     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rc)
      return
   endif
@@ -3925,7 +3925,7 @@ subroutine convert_corner_arrays_to_1D(dim1,dim2,cornerX2D,cornerY2D,cornerX,cor
 
   ! Make sure we found a corner
   if (BtmCorner .eq. -1) then
-     call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
+     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rc)
      return
   endif
@@ -4036,12 +4036,12 @@ end subroutine convert_corner_arrays_to_1D
     ! get global vm information
     !
     call ESMF_VMGetGlobal(vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(decompFlag)) then
@@ -4064,7 +4064,7 @@ end subroutine convert_corner_arrays_to_1D
 
        ! write(*,*) "totalpoints=",totalpoints
 
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
        ! broadcast the values to other PETs
        msgbuf(1)=totaldims
@@ -4072,11 +4072,11 @@ end subroutine convert_corner_arrays_to_1D
        msgbuf(3)=dims(2)
        msgbuf(4)=grid_corners
        call ESMF_VMBroadcast(vm, msgbuf, 4, 0, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     else
       call ESMF_VMBroadcast(vm, msgbuf, 4, 0, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(dims(2))
       totaldims = msgbuf(1)
@@ -4088,14 +4088,14 @@ end subroutine convert_corner_arrays_to_1D
     ! if grid_rank is not equal to 2, return error 
     ! Does SCRIP allow 3D datasets?  What will be the format??
     if (totaldims /= 2) then
-	call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
+	call ESMF_LogSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
 	  ESMF_CONTEXT, rc)
 	return
     endif
 
     ! if user wants corners and there aren't 4 then error
     if (localAddCornerStagger .and. (grid_corners /= 4)) then
-	call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG,"- The SCRIP file has grid_corners/=4, so can't add Grid corners", &
+	call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- The SCRIP file has grid_corners/=4, so can't add Grid corners", &
 	  ESMF_CONTEXT, rc)
 	return
     endif
@@ -4104,7 +4104,7 @@ end subroutine convert_corner_arrays_to_1D
     distgrid=ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=dims, &
               regDecomp=regDecomp, decompflag=decompFlagLocal, &
 	      indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
@@ -4123,7 +4123,7 @@ end subroutine convert_corner_arrays_to_1D
 
           call convert_corner_arrays_to_1D(dims(1),dims(2), cornerX2D,cornerY2D, &
                   cornerX,cornerY, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
           deallocate(cornerX2D, cornerY2D)          
@@ -4141,17 +4141,17 @@ end subroutine convert_corner_arrays_to_1D
 		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
 		indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
 		destroyDELayout=.true., rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     
     ! Set coordinate tables 
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     if (PetNo == 0) then
@@ -4160,29 +4160,29 @@ end subroutine convert_corner_arrays_to_1D
        !call ESMF_ArrayGet(array,minIndexPDimPPatch=lbnd,maxIndexPDimPPatch=ubnd,rc=localrc)
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     ! Latitude
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     if (PetNo == 0) then
        coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     ! Mask
     call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 	item = ESMF_GRIDITEM_MASK, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     if (PetNo == 0) then
@@ -4191,7 +4191,7 @@ end subroutine convert_corner_arrays_to_1D
     endif
     call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) return
 
     if (PetNo == 0) then
@@ -4202,13 +4202,13 @@ end subroutine convert_corner_arrays_to_1D
     ! Put Corners into coordinates
     if (localAddCornerStagger) then 
         call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
        ! Longitude
         call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
   	       array = array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
         call ESMF_GridGet(grid,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex)
@@ -4219,20 +4219,20 @@ end subroutine convert_corner_arrays_to_1D
         endif
 
        call ESMF_ArrayScatter(array, corner2D, rootPet=0, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
 
        ! Latitude
        call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
 	      array = array, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
        if (PetNo == 0) then
            corner2D = RESHAPE(cornerY,(/dims(1), dims(2)+1/))
        endif
 
        call ESMF_ArrayScatter(array, corner2D, rootPet=0, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
 
        if (PetNo == 0) then
@@ -4289,7 +4289,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreateempty(grid%this, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -4585,14 +4585,14 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (size(countsPerDEDim1) .lt. 1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- size 0 countsPerDEDim1 not allowed", & 
                ESMF_CONTEXT, rc) 
          return 
     endif
 
     if (size(countsPerDEDim2) .lt. 1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- size 0 countsPerDEDim2 not allowed", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -4600,7 +4600,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(countsPerDEDim3)) then
         if (size(countsPerDEDim3) .lt. 1) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- size 0 countsPerDEDim3 not allowed", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -4608,21 +4608,21 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -4630,7 +4630,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -4638,7 +4638,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -4647,7 +4647,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -4656,7 +4656,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -4665,7 +4665,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(minIndex)) then
        if (size(minIndex) .ne. dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -4678,7 +4678,7 @@ end function ESMF_GridCreateFrmScripReg
           if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
               (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
               (size(petMap,3) .ne. size(countsPerDEDim3))) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -4687,7 +4687,7 @@ end function ESMF_GridCreateFrmScripReg
           if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
               (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
               (size(petMap,3) .ne. 1)) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -4700,7 +4700,7 @@ end function ESMF_GridCreateFrmScripReg
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -4709,7 +4709,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -4718,7 +4718,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(gridAlign)) then
         if (size(gridAlign) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -4731,7 +4731,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4739,7 +4739,7 @@ end function ESMF_GridCreateFrmScripReg
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4750,7 +4750,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4760,7 +4760,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4776,7 +4776,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4784,7 +4784,7 @@ end function ESMF_GridCreateFrmScripReg
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4795,7 +4795,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4805,7 +4805,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4822,7 +4822,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4830,7 +4830,7 @@ end function ESMF_GridCreateFrmScripReg
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4841,7 +4841,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4851,7 +4851,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -4864,12 +4864,12 @@ end function ESMF_GridCreateFrmScripReg
    ! check for gridMemLBound issues
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
       else if (.not. (indexflag .eq. ESMF_INDEX_USER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -4877,7 +4877,7 @@ end function ESMF_GridCreateFrmScripReg
    else
       if (present(indexflag)) then
          if (indexflag .eq. ESMF_INDEX_USER) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
               return
@@ -4894,18 +4894,18 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Copy vales for countsPerDEDim --------------------------------------------
     allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating countsPerDEDim1Local", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim1Local", &
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim1Local=countsPerDEDim1
 
     allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating countsPerDEDim2Local", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim2Local", &
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
     if (dimCount .gt. 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
-       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating countsPerDEDim3Local", &
+       if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim3Local", &
                                       ESMF_CONTEXT, rc)) return
        countsPerDEDim3Local=countsPerDEDim3
     endif
@@ -4915,7 +4915,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
@@ -4970,7 +4970,7 @@ end function ESMF_GridCreateFrmScripReg
     ! check for not implemented functionality
     if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -4978,7 +4978,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -4986,7 +4986,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -4996,20 +4996,20 @@ end function ESMF_GridCreateFrmScripReg
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -5046,7 +5046,7 @@ end function ESMF_GridCreateFrmScripReg
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
     ! Set default for maxIndex 
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
@@ -5058,7 +5058,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return
    do i=1,dimCount
      distgridToGridMap(i)=i
@@ -5090,13 +5090,13 @@ end function ESMF_GridCreateFrmScripReg
 
   ! generate deblocklist
   allocate(maxPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
   allocate(minPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minPerDEDim", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating minPerDEDim", &
               ESMF_CONTEXT, rc)) return
  allocate(deDimCount(dimCount), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -5132,7 +5132,7 @@ end function ESMF_GridCreateFrmScripReg
 
   ! allocate deblocklist
   allocate(deBlockList(dimCount,2,deCount), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating deBlockList", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating deBlockList", &
               ESMF_CONTEXT, rc)) return
 
   ! Fill in DeBlockList
@@ -5180,7 +5180,7 @@ end function ESMF_GridCreateFrmScripReg
 
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -5209,7 +5209,7 @@ end function ESMF_GridCreateFrmScripReg
 
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! Get rid of list
@@ -5217,22 +5217,22 @@ end function ESMF_GridCreateFrmScripReg
    else
       !! create a default delayout
       delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
    ! Create DistGrid --------------------------------------------------------------
     distgrid=ESMF_DistGridCreate(minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
                deBlockList=deBlockList, delayout=delayout, indexflag=indexflag, rc=localrc)   
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
@@ -5289,7 +5289,7 @@ end function ESMF_GridCreateFrmScripReg
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
                                    rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Clean up memory
@@ -5579,7 +5579,7 @@ end function ESMF_GridCreateFrmScripReg
     ! dimCount
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -5588,7 +5588,7 @@ end function ESMF_GridCreateFrmScripReg
     ! Argument Consistency Checking --------------------------------------------------------------
     if (present(regDecomp)) then
         if (size(regDecomp) .lt. dimCount) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- regDecomp size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -5597,7 +5597,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(decompFlag)) then
         if (size(decompFlag) .lt. dimCount) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- decompFlag size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -5606,21 +5606,21 @@ end function ESMF_GridCreateFrmScripReg
 
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -5628,7 +5628,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -5636,7 +5636,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -5645,7 +5645,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -5654,7 +5654,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -5663,7 +5663,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(minIndex)) then
        if (size(minIndex) .ne. dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -5673,7 +5673,7 @@ end function ESMF_GridCreateFrmScripReg
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -5682,7 +5682,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -5691,7 +5691,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(gridAlign)) then
         if (size(gridAlign) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -5705,7 +5705,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5713,7 +5713,7 @@ end function ESMF_GridCreateFrmScripReg
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5724,7 +5724,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5734,7 +5734,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5750,7 +5750,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5758,7 +5758,7 @@ end function ESMF_GridCreateFrmScripReg
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5769,7 +5769,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5779,7 +5779,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5796,7 +5796,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5804,7 +5804,7 @@ end function ESMF_GridCreateFrmScripReg
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5815,7 +5815,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5825,7 +5825,7 @@ end function ESMF_GridCreateFrmScripReg
          if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -5838,12 +5838,12 @@ end function ESMF_GridCreateFrmScripReg
    ! check for gridMemLBound issues
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
       else if (.not.(indexflag .eq. ESMF_INDEX_USER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -5851,7 +5851,7 @@ end function ESMF_GridCreateFrmScripReg
    else
       if (present(indexflag)) then
          if (indexflag .eq. ESMF_INDEX_USER) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
               return
@@ -5870,7 +5870,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set default for minIndex
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
@@ -5884,14 +5884,14 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set default for maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating regDecompLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating regDecompLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(regDecomp)) then
@@ -5899,10 +5899,10 @@ end function ESMF_GridCreateFrmScripReg
     else
        ! The default is 1D divided among all the Pets
        call ESMF_VMGetGlobal(vm,rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        do i=2,dimCount
           regDecompLocal(i)=1
@@ -5955,7 +5955,7 @@ end function ESMF_GridCreateFrmScripReg
     ! check for not implemented functionality
     if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -5963,7 +5963,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -5971,7 +5971,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -5982,7 +5982,7 @@ end function ESMF_GridCreateFrmScripReg
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
               (size(petMap,2) .ne. regDecompLocal(2)) .or. &
               (size(petMap,3) .ne. regDecompLocal(3))) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -5991,7 +5991,7 @@ end function ESMF_GridCreateFrmScripReg
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
               (size(petMap,2) .ne. regDecompLocal(2)) .or. &
               (size(petMap,3) .ne. 1)) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -6002,20 +6002,20 @@ end function ESMF_GridCreateFrmScripReg
    ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
    ! setup maxIndexLocal to hold modified bounds
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -6037,7 +6037,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating decompFlagLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(decompFlag)) then
@@ -6048,7 +6048,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return          
    do i=1,dimCount
      distgridToGridMap(i)=i
@@ -6070,7 +6070,7 @@ end function ESMF_GridCreateFrmScripReg
    if (present(petMap)) then
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -6099,7 +6099,7 @@ end function ESMF_GridCreateFrmScripReg
 
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! Get rid of list
@@ -6107,7 +6107,7 @@ end function ESMF_GridCreateFrmScripReg
    else      
       !! create a default delayout
       delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
@@ -6121,16 +6121,16 @@ end function ESMF_GridCreateFrmScripReg
               regDecompLastExtra=gridEdgeUWidthLocal, &
 #endif
               rc=localrc)   
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
@@ -6186,7 +6186,7 @@ end function ESMF_GridCreateFrmScripReg
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
                                     rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -6446,7 +6446,7 @@ end function ESMF_GridCreateFrmScripReg
     ! dimCount
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -6456,7 +6456,7 @@ end function ESMF_GridCreateFrmScripReg
     ! localArbIndex
     distDimCount = size(localArbIndex,2)
     if (distDimCount > dimCount) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- the second dim of localArbIndex must be equal or less than grid dimension", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -6464,14 +6464,14 @@ end function ESMF_GridCreateFrmScripReg
  
     allocate(distDimLocal(distDimCount), stat=localrc)
     allocate(isDist(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distDimLocal or isDist", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating distDimLocal or isDist", &
                                      ESMF_CONTEXT, rc)) return
 
     isDist(:)=.false.
     ! check distribution info
     if (present(distDim)) then
        if (size(distDim) .ne. distDimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                  "- distDim must match with the second dimension of localArbIndex", & 
                  ESMF_CONTEXT, rc) 
             return 
@@ -6489,21 +6489,21 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if ((dimCount .lt. 3) .and. present(connDim3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -6511,7 +6511,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (present(minIndex)) then
        if (size(minIndex) .ne. dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -6523,7 +6523,7 @@ end function ESMF_GridCreateFrmScripReg
     ! Set Defaults -------------------------------------------------------------
     ! Set default for minIndex 
     allocate(indexArray(2,dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
@@ -6537,7 +6537,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! dimCount of distributed part
     allocate(distSize(distDimCount),stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distSize", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating distSize", &
                                    ESMF_CONTEXT, rc)) return
 
     do i=1,distDimCount   
@@ -6550,7 +6550,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! can't have all undistributed dimensions
     if (distDimCount .eq. 0) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -6559,14 +6559,14 @@ end function ESMF_GridCreateFrmScripReg
     ! convert localArbIndex into 1D index array for DistGrid
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
     if (size(localArbIndex, 1) .ne. localArbIndexCount) then
-       	  call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
           return
     endif
 
     allocate(local1DIndices(localArbIndexCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating local1DIndices", &
                                      ESMF_CONTEXT, rc)) return
       
     if (localArbIndexCount .gt. 0) then
@@ -6625,7 +6625,7 @@ end function ESMF_GridCreateFrmScripReg
     ! check for not implemented functionality
     if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -6633,7 +6633,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -6641,7 +6641,7 @@ end function ESMF_GridCreateFrmScripReg
 
     if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -6653,10 +6653,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
@@ -6668,7 +6668,7 @@ end function ESMF_GridCreateFrmScripReg
 	  if (coordDep1(i) .eq. ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
 	    return
@@ -6698,7 +6698,7 @@ end function ESMF_GridCreateFrmScripReg
 	  if (coordDep2(i) .eq. ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
 	    return
@@ -6729,7 +6729,7 @@ end function ESMF_GridCreateFrmScripReg
 	    if (coordDep3(i) .eq. ESMF_GRID_ARBDIM) found = .true.
           enddo
 	  if (.not. found) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
 	    return
@@ -6755,10 +6755,10 @@ end function ESMF_GridCreateFrmScripReg
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistDimCount .gt. 0) then
      allocate(undistLBound(undistDimCount), stat=localrc)
-     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
+     if (ESMF_LogFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
      allocate(undistUBound(undistDimCount), stat=localrc)
-     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
+     if (ESMF_LogFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
    
       ! Fill in undistLBound, undistUBound
@@ -6776,11 +6776,11 @@ end function ESMF_GridCreateFrmScripReg
    ! Create DistGrid --------------------------------------------------------------
    if (undistDimCount .gt. 0) then 
        distgrid=ESMF_DistGridCreate(local1DIndices, 1, undistLBound, undistUBound, rc=localrc)   
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    else
       distgrid=ESMF_DistGridCreate(local1DIndices, rc=localrc)   
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    endif
    ! Create Grid from specification -----------------------------------------------
@@ -6791,7 +6791,7 @@ end function ESMF_GridCreateFrmScripReg
                                destroyDistGrid=.true., &
                                destroyDELayout=.false., &
                                rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Clean up memory
@@ -6853,7 +6853,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Call F90/C++ interface subroutine
     call c_ESMC_GridDestroy(grid, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this Grid object as invalid
@@ -6989,12 +6989,12 @@ end function ESMF_GridCreateFrmScripReg
    
     ! Get Grid decomposition type
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
     if (decompType .eq. ESMF_Grid_NONARBITRARY) then
 	if (present(localArbIndexCount) .or. present(localArbIndex) .or. present(arbDim)) then
-         call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- localArbIndexCount, localArbIndex or arbDim does not exist for a non-arbitrarily distributed grid", & 
                  ESMF_CONTEXT, rc)
          return 
@@ -7004,7 +7004,7 @@ end function ESMF_GridCreateFrmScripReg
     ! name 
     if (present(name)) then
       call c_ESMC_GetName(grid, name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -7013,31 +7013,31 @@ end function ESMF_GridCreateFrmScripReg
 
     !! distgridToGridMap
     distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
     coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Grid Boundary Info
     gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Arbitrarily distributed grid local indices
     localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Call C++ Subroutine to do the get
@@ -7048,36 +7048,36 @@ end function ESMF_GridCreateFrmScripReg
       memDimCount, arbDimCount, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localDECount, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
     call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set Deep Classes as created
     if (present(distgrid)) then
        call ESMF_DistGridSetInitCreated(distgrid, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
    	   ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -7140,16 +7140,16 @@ end subroutine ESMF_GridGetDefault
     if (present(tileNo)) then
         ! Get Grid decomposition type
 	call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 	if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	    (tileNo .ne. 1)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
               "- tileNo has to be 1 for arbitrarily distributed grid", & 
               ESMF_CONTEXT, rc) 
 	  return
 	elseif (tileNo .ne. 1) then 
-          call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
               "- multiple tiles is not implemented", & 
               ESMF_CONTEXT, rc) 
 	  return
@@ -7161,22 +7161,22 @@ end subroutine ESMF_GridGetDefault
 
     ! process optional arguments
     minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
      call c_ESMC_gridgetindex(grid, localTileNo, minIndexArg, maxIndexArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
     ! Return successfully
@@ -7238,13 +7238,13 @@ end subroutine ESMF_GridGetDefault
 
     ! Get Grid Dimension
     call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Error check input
     if (present(isLBound)) then
        if (size(isLBound) < dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_RANK, & 
               "- isLBound must have at least the same size as the grid dimCount", & 
               ESMF_CONTEXT, rc) 
 	  return
@@ -7253,7 +7253,7 @@ end subroutine ESMF_GridGetDefault
 
     if (present(isUBound)) then
        if (size(isUBound) < dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_RANK, & 
               "- isUBound must have at least the same size as the grid dimCount", & 
               ESMF_CONTEXT, rc) 
 	  return
@@ -7264,7 +7264,7 @@ end subroutine ESMF_GridGetDefault
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_GridGetPLocalDe(grid, localDE, &
       dimCount, isLBoundTmp, isUBoundTmp, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -7397,22 +7397,22 @@ end subroutine ESMF_GridGetDefault
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -7421,27 +7421,27 @@ end subroutine ESMF_GridGetDefault
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -7515,31 +7515,31 @@ end subroutine ESMF_GridGetDefault
 
     ! process optional arguments
     minIndexArg=ESMF_InterfaceIntCreate(minIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexArg=ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
 
     call c_ESMC_GridGetPSloc(grid, tmp_staggerLoc, &
          staggerDistgrid, minIndexArg, maxIndexArg,localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set Deep Classes as created
     if (present(staggerDistgrid)) then
        call ESMF_DistGridSetInitCreated(staggerDistgrid, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
    	   ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -7567,7 +7567,7 @@ end subroutine ESMF_GridGetDefault
     integer :: localrc
 
     call c_ESMC_gridGetDecompType(grid, decompType, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -7834,18 +7834,18 @@ end subroutine ESMF_GridGetDefault
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check consistency 
     call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr typekind to match Grid typekind 
     if (typekind .ne. ESMF_TYPEKIND_R4) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr typekind does not match Grid typekind", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -7853,7 +7853,7 @@ end subroutine ESMF_GridGetDefault
 
     ! make sure coord is legitimate
     if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- coordinate dimension outside of range specified for this Grid", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -7861,7 +7861,7 @@ end subroutine ESMF_GridGetDefault
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
     if (coordDimCount(coordDim) .ne. 1) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested coordinate dimCount", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -7876,27 +7876,27 @@ end subroutine ESMF_GridGetDefault
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
       return 
     endif 
@@ -7905,7 +7905,7 @@ end subroutine ESMF_GridGetDefault
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -7919,48 +7919,48 @@ end subroutine ESMF_GridGetDefault
     ! Get the Array
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -7969,36 +7969,36 @@ end subroutine ESMF_GridGetDefault
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -8149,18 +8149,18 @@ end subroutine ESMF_GridGetDefault
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check consistency 
     call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr typekind to match Grid typekind 
     if (typekind .ne. ESMF_TYPEKIND_R4) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr typekind does not match Grid typekind", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -8168,7 +8168,7 @@ end subroutine ESMF_GridGetDefault
 
     ! make sure coord is legitimate
     if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- coordinate dimension outside of range specified for this Grid", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -8176,7 +8176,7 @@ end subroutine ESMF_GridGetDefault
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
     if (coordDimCount(coordDim) .ne. 2) then 
-    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+    call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested coordinate dimCount", & 
       ESMF_CONTEXT, rc) 
     return 
@@ -8191,27 +8191,27 @@ end subroutine ESMF_GridGetDefault
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- Negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -8221,7 +8221,7 @@ end subroutine ESMF_GridGetDefault
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -8236,48 +8236,48 @@ end subroutine ESMF_GridGetDefault
 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -8285,36 +8285,36 @@ end subroutine ESMF_GridGetDefault
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -8465,19 +8465,19 @@ end subroutine ESMF_GridGetDefault
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
  if (typekind .ne. ESMF_TYPEKIND_R4) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr typekind does not match Grid typekind", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -8485,7 +8485,7 @@ end subroutine ESMF_GridGetDefault
 
 ! make sure coord is legitimate
 if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -8493,7 +8493,7 @@ if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (coordDimCount(coordDim) .ne. 3) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -8508,28 +8508,28 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- Negative number of localDeCount prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- localDeCount == 0 prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -8540,7 +8540,7 @@ endif
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -8555,18 +8555,18 @@ endif
 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
@@ -8577,31 +8577,31 @@ endif
     if (decompType .ne. ESMF_GRID_ARBITRARY) then
 
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -8609,36 +8609,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     endif
@@ -8791,19 +8791,19 @@ endif
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Check consistency 
     call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr typekind to match Grid typekind 
     if (typekind .ne. ESMF_TYPEKIND_R8) then 
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr typekind does not match Grid typekind", & 
         ESMF_CONTEXT, rc) 
         return 
@@ -8811,7 +8811,7 @@ endif
 
     ! make sure coord is legitimate
     if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
        "- coordinate dimension outside of range specified for this Grid", & 
        ESMF_CONTEXT, rc) 
        return 
@@ -8819,7 +8819,7 @@ endif
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
     if (coordDimCount(coordDim) .ne. 1) then 
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
        "- farrayPtr dimCount does not match requested coordinate dimCount", & 
        ESMF_CONTEXT, rc) 
        return 
@@ -8834,28 +8834,28 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
        "- Negative number of localDeCount prohibits request", & 
        ESMF_CONTEXT, rc) 
        return 
     endif 
 
     if (localDeCount == 0) then 
-       call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
        "- localDeCount == 0 prohibits request", & 
        ESMF_CONTEXT, rc) 
        return 
     endif
  
     if (localDE>=localDeCount) then 
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
            "- localDE too big", & 
            ESMF_CONTEXT, rc) 
        return 
     endif 
 
     if (localDE<0) then 
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
            "- localDE can't be less than 0", & 
            ESMF_CONTEXT, rc) 
         return 
@@ -8865,7 +8865,7 @@ endif
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -8879,49 +8879,49 @@ endif
     ! Get the Array 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -8930,37 +8930,37 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -9111,19 +9111,19 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
  if (typekind .ne. ESMF_TYPEKIND_R8) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr typekind does not match Grid typekind", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9131,7 +9131,7 @@ endif
 
 ! make sure coord is legitimate
 if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9139,7 +9139,7 @@ if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (coordDimCount(coordDim) .ne. 2) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9154,28 +9154,28 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- Negative number of localDeCount prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- localDeCount == 0 prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9185,7 +9185,7 @@ endif
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -9199,49 +9199,49 @@ endif
     ! Get the Array 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -9249,36 +9249,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -9429,19 +9429,19 @@ endif
  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
 
  call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
 
  ! Check consistency 
  call ESMF_GridGet(grid, coordTypeKind=typekind, dimCount=dimCount, coordDimCount=coordDimCount, &
                    localDECount=localDECount, rc=localrc) 
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
  if (typekind .ne. ESMF_TYPEKIND_R8) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr typekind does not match Grid typekind", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9449,7 +9449,7 @@ endif
 
 ! make sure coord is legitimate
 if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9457,7 +9457,7 @@ if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (coordDimCount(coordDim) .ne. 3) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9472,28 +9472,28 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- Negative number of localDeCount prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- localDeCount == 0 prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -9503,7 +9503,7 @@ endif
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -9517,49 +9517,49 @@ endif
     ! Get the Array 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -9567,36 +9567,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -9738,31 +9738,31 @@ endif
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -9770,36 +9770,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -9868,14 +9868,14 @@ endif
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! handle staggerloc
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -9889,13 +9889,13 @@ endif
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridgetcoordintoarray(grid%this,tmp_staggerloc, coordDim, &
       array, docopy, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Set Array as created
     call ESMF_ArraySetInitCreated(array,localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -9975,7 +9975,7 @@ endif
    ! Call into the C++ interface
    call c_esmc_gridgetcoordr4(grid, localDE, tmp_staggerloc, &  
                               index, coord, localrc)
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -10055,7 +10055,7 @@ endif
    ! Call into the C++ interface
    call c_esmc_gridgetcoordr8(grid, localDE, tmp_staggerloc, &  
                               index, coord, localrc)
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -10328,12 +10328,12 @@ endif
     ! Check consistency 
     call ESMF_GridGet(grid, dimCount=dimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount .ne. 1) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested item dimCount", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -10349,27 +10349,27 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
       return 
     endif 
@@ -10384,48 +10384,48 @@ endif
     ! Get the Array 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -10433,36 +10433,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -10614,13 +10614,13 @@ endif
     ! Check consistency 
     call ESMF_GridGet(grid, dimCount=dimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount .ne. 2) then 
-    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+    call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested item dimCount", & 
       ESMF_CONTEXT, rc) 
     return 
@@ -10635,27 +10635,27 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- Negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -10672,48 +10672,48 @@ endif
     ! Get the Array 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -10721,36 +10721,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -10902,12 +10902,12 @@ endif
  ! Check consistency 
  call ESMF_GridGet(grid, dimCount=dimCount, &
                    localDECount=localDECount, rc=localrc) 
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (dimCount .ne. 3) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested item dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -10923,28 +10923,28 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- Negative number of localDeCount prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- localDeCount == 0 prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -10962,49 +10962,49 @@ endif
 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -11012,36 +11012,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -11190,12 +11190,12 @@ endif
     ! Check consistency 
     call ESMF_GridGet(grid, dimCount=dimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount .ne. 1) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested item dimCount", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -11211,27 +11211,27 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
       return 
     endif 
@@ -11246,48 +11246,48 @@ endif
     ! Get the Array 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -11295,36 +11295,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -11476,13 +11476,13 @@ endif
     ! Check consistency 
     call ESMF_GridGet(grid, dimCount=dimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount .ne. 2) then 
-    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+    call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested item dimCount", & 
       ESMF_CONTEXT, rc) 
     return 
@@ -11497,27 +11497,27 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- Negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -11534,48 +11534,48 @@ endif
     ! Get the Array 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -11583,36 +11583,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -11764,12 +11764,12 @@ endif
  ! Check consistency 
  call ESMF_GridGet(grid, dimCount=dimCount, &
                    localDECount=localDECount, rc=localrc) 
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (dimCount .ne. 3) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested item dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -11785,28 +11785,28 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- Negative number of localDeCount prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- localDeCount == 0 prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -11824,49 +11824,49 @@ endif
 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -11874,36 +11874,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -12053,12 +12053,12 @@ endif
     ! Check consistency 
     call ESMF_GridGet(grid, dimCount=dimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount .ne. 1) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested item dimCount", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -12074,27 +12074,27 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
       return 
     endif 
@@ -12109,48 +12109,48 @@ endif
     ! Get the Array 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -12158,36 +12158,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -12339,13 +12339,13 @@ endif
     ! Check consistency 
     call ESMF_GridGet(grid, dimCount=dimCount, &
                       localDECount=localDECount, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
 
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount .ne. 2) then 
-    call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+    call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested item dimCount", & 
       ESMF_CONTEXT, rc) 
     return 
@@ -12360,27 +12360,27 @@ endif
 
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- Negative number of localDeCount prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+      call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
         "- localDeCount == 0 prohibits request", & 
         ESMF_CONTEXT, rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE too big", ESMF_CONTEXT, rc) 
       return 
     endif 
 
     if (localDE<0) then 
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
         "- localDE can't be less than 0", & 
         ESMF_CONTEXT, rc) 
       return 
@@ -12397,48 +12397,48 @@ endif
     ! Get the Array 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -12446,36 +12446,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -12627,12 +12627,12 @@ endif
  ! Check consistency 
  call ESMF_GridGet(grid, dimCount=dimCount, &
                    localDECount=localDECount, rc=localrc) 
- if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+ if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (dimCount .ne. 3) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested item dimCount", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -12648,28 +12648,28 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- Negative number of localDeCount prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogMsgSetError(ESMF_RC_CANNOT_GET, & 
+ call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  "- localDeCount == 0 prohibits request", & 
  ESMF_CONTEXT, rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE too big", & 
  ESMF_CONTEXT, rc) 
  return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+ call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  "- localDE can't be less than 0", & 
  ESMF_CONTEXT, rc) 
  return 
@@ -12687,49 +12687,49 @@ endif
 
     call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
                                     ESMF_DATA_REF, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
     allocate(larrayList(localDeCount))
  
     call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -12737,36 +12737,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully 
@@ -12910,31 +12910,31 @@ endif
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveUBoundArg=ESMF_InterfaceIntCreate(exclusiveUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     exclusiveCountArg=ESMF_InterfaceIntCreate(exclusiveCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLBoundArg=ESMF_InterfaceIntCreate(computationalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUBoundArg=ESMF_InterfaceIntCreate(computationalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalCountArg=ESMF_InterfaceIntCreate(computationalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLBoundArg=ESMF_InterfaceIntCreate(totalLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUBoundArg = ESMF_InterfaceIntCreate(totalUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalCountArg = ESMF_InterfaceIntCreate(totalCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
@@ -12942,36 +12942,36 @@ endif
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate interface ints
     call ESMF_InterfaceIntDestroy(exclusiveLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(exclusiveCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -13049,13 +13049,13 @@ endif
     ! Call C++ Subroutine
     call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, item, &
       array, docopy, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Set Array as created
     call ESMF_ArraySetInitCreated(array,localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -13180,7 +13180,7 @@ endif
 
       call c_ESMC_GridSerialize(grid, buffer, length, offset, &
                                  lattreconflag, linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -13249,7 +13249,7 @@ endif
       ! Call into C++ to Deserialize the Grid
       call c_ESMC_GridDeserialize(grid%this, buffer, offset, &
         lattreconflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -13321,7 +13321,7 @@ endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_GridMatch(grid1, grid2, matchResult, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -13483,45 +13483,45 @@ endif
 
     !! gridEdgeLWidth and gridEdgeUWidth
     gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     gridMemLBoundArg = ESMF_InterfaceIntCreate(gridMemLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distgridToGridMap
     distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! distDim
     distDimArg = ESMF_InterfaceIntCreate(distDim, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Description of array factorization
     coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Index bound and localArbIndex array
     minIndexArg = ESMF_InterfaceIntCreate(minIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexArg = ESMF_InterfaceIntCreate(maxIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     localArbIndexArg = ESMF_InterfaceIntCreate(farray2D=localArbIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !! Convert destroyDistGrid flag
@@ -13554,42 +13554,42 @@ endif
       minIndexArg, maxIndexArg, localArbIndexArg, localArbIndexCount,  &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       gridMemLBoundArg, indexflag,  intDestroyDistGrid, intDestroyDELayout, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
     call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(gridMemLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(distDimArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(minIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(maxIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(localArbIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -13655,14 +13655,14 @@ endif
 !    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
     ! handle staggerloc
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -13676,7 +13676,7 @@ endif
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetcoordfromarray(grid%this,tmp_staggerloc, coordDim, &
       array, docopy, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -13954,14 +13954,14 @@ endif
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if (size(countsPerDEDim1) .lt. 1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- size 0 countsPerDEDim1 not allowed", & 
                ESMF_CONTEXT, rc) 
          return 
     endif
 
     if (size(countsPerDEDim2) .lt. 1) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- size 0 countsPerDEDim2 not allowed", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -13969,7 +13969,7 @@ endif
 
     if (present(countsPerDEDim3)) then
         if (size(countsPerDEDim3) .lt. 1) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- size 0 countsPerDEDim3 not allowed", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -13977,21 +13977,21 @@ endif
     endif
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -13999,7 +13999,7 @@ endif
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -14007,7 +14007,7 @@ endif
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -14016,7 +14016,7 @@ endif
 
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -14025,7 +14025,7 @@ endif
 
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -14034,7 +14034,7 @@ endif
 
     if (present(minIndex)) then
        if (size(minIndex) .ne. dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -14047,7 +14047,7 @@ endif
           if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
               (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
               (size(petMap,3) .ne. size(countsPerDEDim3))) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -14056,7 +14056,7 @@ endif
           if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
               (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
               (size(petMap,3) .ne. 1)) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -14069,7 +14069,7 @@ endif
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -14078,7 +14078,7 @@ endif
 
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -14087,7 +14087,7 @@ endif
 
     if (present(gridAlign)) then
         if (size(gridAlign) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -14100,7 +14100,7 @@ endif
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14108,7 +14108,7 @@ endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14119,7 +14119,7 @@ endif
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14129,7 +14129,7 @@ endif
          if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14145,7 +14145,7 @@ endif
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14153,7 +14153,7 @@ endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14164,7 +14164,7 @@ endif
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14174,7 +14174,7 @@ endif
          if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14191,7 +14191,7 @@ endif
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14199,7 +14199,7 @@ endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14210,7 +14210,7 @@ endif
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14220,7 +14220,7 @@ endif
          if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -14234,12 +14234,12 @@ endif
    ! check for gridMemLBound issues
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
       else if (.not. (indexflag .eq. ESMF_INDEX_USER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -14247,7 +14247,7 @@ endif
    else
       if (present(indexflag)) then
          if (indexflag .eq. ESMF_INDEX_USER) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
               return
@@ -14265,18 +14265,18 @@ endif
 
     ! Copy vales for countsPerDEDim --------------------------------------------
     allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim1Local=countsPerDEDim1
 
     allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
     if (dimCount .gt. 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
-       if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+       if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                       ESMF_CONTEXT, rc)) return
        countsPerDEDim3Local=countsPerDEDim3
     endif
@@ -14286,7 +14286,7 @@ endif
 
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
@@ -14341,7 +14341,7 @@ endif
     ! check for not implemented functionality
     if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -14349,7 +14349,7 @@ endif
 
     if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -14357,7 +14357,7 @@ endif
 
     if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -14365,20 +14365,20 @@ endif
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -14416,7 +14416,7 @@ endif
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
     ! Set default for maxIndex 
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
@@ -14427,7 +14427,7 @@ endif
     endif
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return
    do i=1,dimCount
      distgridToGridMap(i)=i
@@ -14459,13 +14459,13 @@ endif
 
   ! generate deblocklist
   allocate(maxPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
   allocate(minPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minPerDEDim", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating minPerDEDim", &
               ESMF_CONTEXT, rc)) return
  allocate(deDimCount(dimCount), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxPerDEDim", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -14501,7 +14501,7 @@ endif
 
   ! allocate deblocklist
   allocate(deBlockList(dimCount,2,deCount), stat=localrc)
-  if (ESMF_LogMsgFoundAllocError(localrc, "Allocating deBlockList", &
+  if (ESMF_LogFoundAllocError(localrc, "Allocating deBlockList", &
               ESMF_CONTEXT, rc)) return
 
   ! Fill in DeBlockList
@@ -14549,7 +14549,7 @@ endif
 
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -14578,7 +14578,7 @@ endif
 
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! Get rid of list
@@ -14586,23 +14586,23 @@ endif
    else
       !! create a default delayout
       delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
    ! Create DistGrid --------------------------------------------------------------
     distgrid=ESMF_DistGridCreate(minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
                deBlockList=deBlockList, delayout=delayout, indexflag=indexflag, rc=localrc)   
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
@@ -14658,13 +14658,13 @@ endif
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
                                     rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Commit Grid -----------------------------------------------------------------
     call ESMF_GridCommit(grid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -14948,7 +14948,7 @@ endif
     ! dimCount
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -14957,7 +14957,7 @@ endif
     ! Argument Consistency Checking --------------------------------------------------------------
     if (present(regDecomp)) then
         if (size(regDecomp) .lt. dimCount) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- regDecomp size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -14966,7 +14966,7 @@ endif
 
     if (present(decompFlag)) then
         if (size(decompFlag) .lt. dimCount) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                     "- decompFlag size doesn't match Grid dimCount ", & 
                     ESMF_CONTEXT, rc) 
             return 
@@ -14974,21 +14974,21 @@ endif
     endif
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -14996,7 +14996,7 @@ endif
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -15004,7 +15004,7 @@ endif
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep1 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -15013,7 +15013,7 @@ endif
 
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep2 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -15022,7 +15022,7 @@ endif
 
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- coordDep3 size incompatible with grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -15031,7 +15031,7 @@ endif
 
     if (present(minIndex)) then
        if (size(minIndex) .ne. dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -15043,7 +15043,7 @@ endif
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -15052,7 +15052,7 @@ endif
 
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -15061,7 +15061,7 @@ endif
 
     if (present(gridAlign)) then
         if (size(gridAlign) .ne. dimCount) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
               return
@@ -15075,7 +15075,7 @@ endif
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15083,7 +15083,7 @@ endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15094,7 +15094,7 @@ endif
          if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15104,7 +15104,7 @@ endif
          if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15120,7 +15120,7 @@ endif
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15128,7 +15128,7 @@ endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15139,7 +15139,7 @@ endif
          if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15149,7 +15149,7 @@ endif
          if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15166,7 +15166,7 @@ endif
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15174,7 +15174,7 @@ endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15185,7 +15185,7 @@ endif
          if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15195,7 +15195,7 @@ endif
          if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) .gt. 0) then
-                   call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
 		return
@@ -15208,12 +15208,12 @@ endif
    ! check for gridMemLBound issues
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc)  
               return
       else if (.not.(indexflag .eq. ESMF_INDEX_USER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -15221,7 +15221,7 @@ endif
    else
       if (present(indexflag)) then
          if (indexflag .eq. ESMF_INDEX_USER) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
               return
@@ -15240,7 +15240,7 @@ endif
 
     ! Set default for minIndex
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
@@ -15254,14 +15254,14 @@ endif
 
     ! Set default for maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating regDecompLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating regDecompLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(regDecomp)) then
@@ -15269,10 +15269,10 @@ endif
     else
        ! The default is 1D divided among all the Pets
        call ESMF_VMGetGlobal(vm,rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        do i=2,dimCount
           regDecompLocal(i)=1
@@ -15325,7 +15325,7 @@ endif
     ! check for not implemented functionality
     if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -15333,7 +15333,7 @@ endif
 
     if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -15341,7 +15341,7 @@ endif
 
     if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -15353,7 +15353,7 @@ endif
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
               (size(petMap,2) .ne. regDecompLocal(2)) .or. &
               (size(petMap,3) .ne. regDecompLocal(3))) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -15362,7 +15362,7 @@ endif
           if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
               (size(petMap,2) .ne. regDecompLocal(2)) .or. &
               (size(petMap,3) .ne. 1)) then
-              call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+              call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
@@ -15373,20 +15373,20 @@ endif
    ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
    ! setup maxIndexLocal to hold modified bounds
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
                                      ESMF_CONTEXT, rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating gridAlignLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
                              gridEdgeLWidthLocal, gridEdgeUWidthLocal, gridAlignLocal, &
                              rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if 0
@@ -15407,7 +15407,7 @@ endif
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating decompFlagLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating decompFlagLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(decompFlag)) then
@@ -15418,7 +15418,7 @@ endif
 
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distgridToGridMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
                ESMF_CONTEXT, rc)) return          
    do i=1,dimCount
      distgridToGridMap(i)=i
@@ -15441,7 +15441,7 @@ endif
    if (present(petMap)) then
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating petList", &
+      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
               ESMF_CONTEXT, rc)) return
 
 
@@ -15470,7 +15470,7 @@ endif
 
       !! create delayout from the petList
       delayout=ESMF_DELayoutCreate(petList=petList,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       !! Get rid of list
@@ -15478,7 +15478,7 @@ endif
    else      
       !! create a default delayout
       delayout=ESMF_DELayoutCreate(deCount=deCount,rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
@@ -15492,17 +15492,17 @@ endif
               regDecompLastExtra=gridEdgeUWidthLocal, &
 #endif
               rc=localrc)   
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
@@ -15557,13 +15557,13 @@ endif
                                     gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
                                     rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Commit Grid -----------------------------------------------------------------
     call ESMF_GridCommit(grid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -15808,7 +15808,7 @@ endif
     ! dimCount
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -15818,7 +15818,7 @@ endif
     ! localArbIndex
     distDimCount = size(localArbIndex,2)
     if (distDimCount > dimCount) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- the second dim of localArbIndex must be equal or less than grid dimension", & 
                ESMF_CONTEXT, rc) 
          return 
@@ -15826,14 +15826,14 @@ endif
 
     allocate(distDimLocal(distDimCount), stat=localrc)
     allocate(isDist(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distDimLocal or isDist", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating distDimLocal or isDist", &
                                      ESMF_CONTEXT, rc)) return
 
     isDist(:)=.false.
     ! check distribution info
     if (present(distDim)) then
        if (size(distDim) .ne. distDimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                  "- distDim must match with the second dimension of localArbIndex", & 
                  ESMF_CONTEXT, rc) 
             return 
@@ -15851,21 +15851,21 @@ endif
 
     ! Argument Consistency Checking --------------------------------------------------------------
     if ((dimCount .lt. 3) .and. present(connDim3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- connDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- bipolePos3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -15873,7 +15873,7 @@ endif
 
     if (present(minIndex)) then
        if (size(minIndex) .ne. dimCount) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
           return 
@@ -15887,7 +15887,7 @@ endif
     ! Set Defaults -------------------------------------------------------------
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating minIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
     if (present(minIndex)) then
@@ -15900,12 +15900,12 @@ endif
 
     ! Set default for maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating maxIndexLocal", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
     allocate(distSize(distDimCount),stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating distSize", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating distSize", &
                                      ESMF_CONTEXT, rc)) return
 
     do i=1,distDimCount   
@@ -15918,7 +15918,7 @@ endif
 
     ! can't have all undistributed dimensions
     if (distDimCount .eq. 0) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -15926,14 +15926,14 @@ endif
 
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
     if (size(localArbIndex, 1) .ne. localArbIndexCount) then
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
        return
     endif
 
     allocate(local1DIndices(localArbIndexCount), stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Allocating local1DIndices", &
+    if (ESMF_LogFoundAllocError(localrc, "Allocating local1DIndices", &
                                   ESMF_CONTEXT, rc)) return
 
     ! convert localArbIndex into 1D index array for DistGrid
@@ -15993,7 +15993,7 @@ endif
     ! check for not implemented functionality
     if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -16001,7 +16001,7 @@ endif
 
     if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -16009,7 +16009,7 @@ endif
 
     if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
-       call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, & 
+       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -16021,10 +16021,10 @@ endif
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimCount", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
               ESMF_CONTEXT, rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordDimMap", &
+   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
               ESMF_CONTEXT, rc)) return
 
    if (present(coordDep1)) then
@@ -16036,7 +16036,7 @@ endif
 	  if (coordDep1(i) .eq. ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
 	    return
@@ -16066,7 +16066,7 @@ endif
 	  if (coordDep2(i) .eq. ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
 	    return
@@ -16097,7 +16097,7 @@ endif
 	    if (coordDep3(i) .eq. ESMF_GRID_ARBDIM) found = .true.
           enddo
 	  if (.not. found) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
                  ESMF_CONTEXT, rc) 
 	    return
@@ -16123,10 +16123,10 @@ endif
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistDimCount .gt. 0) then
      allocate(undistLBound(undistDimCount), stat=localrc)
-     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistLBound", &
+     if (ESMF_LogFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
      allocate(undistUBound(undistDimCount), stat=localrc)
-     if (ESMF_LogMsgFoundAllocError(localrc, "Allocating undistUBound", &
+     if (ESMF_LogFoundAllocError(localrc, "Allocating undistUBound", &
               ESMF_CONTEXT, rc)) return     
    
       ! Fill in undistLBound, undistUBound
@@ -16144,11 +16144,11 @@ endif
    ! Create DistGrid --------------------------------------------------------------
    if (undistDimCount .gt. 0) then 
        distgrid=ESMF_DistGridCreate(local1DIndices, 1, undistLBound, undistUBound, rc=localrc)   
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    else
       distgrid=ESMF_DistGridCreate(local1DIndices, rc=localrc)   
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
@@ -16162,7 +16162,7 @@ endif
                                destroyDistGrid=.true., &
                                destroyDELayout=.false., &
 			       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Clean up memory
@@ -16181,7 +16181,7 @@ endif
 
     ! Commit Grid -----------------------------------------------------------------
     call ESMF_GridCommit(grid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -16251,14 +16251,14 @@ endif
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! handle staggerloc
     if (present(staggerloc)) then
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
            return
@@ -16272,7 +16272,7 @@ endif
     ! Call C++ Subroutine 
     call c_ESMC_gridsetitemfromarray(grid%this,tmp_staggerloc, item, &
       array, docopy, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -16331,7 +16331,7 @@ endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_GridValidate(grid, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully
@@ -16577,22 +16577,22 @@ endif
 
     ! turn to interfaceint
     lWidthInArg = ESMF_InterfaceIntCreate(lWidthIn, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     uWidthInArg = ESMF_InterfaceIntCreate(uWidthIn, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     alignInArg = ESMF_InterfaceIntCreate(alignIn, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     lWidthOutArg = ESMF_InterfaceIntCreate(lWidthOut, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     uWidthOutArg = ESMF_InterfaceIntCreate(uWidthOut, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     alignOutArg = ESMF_InterfaceIntCreate(alignOut, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call C++ Subroutine for the default
@@ -16600,27 +16600,27 @@ endif
                                lWidthInArg, uWidthInArg, alignInArg, &
                                lWidthOutArg, uWidthOutArg, alignOutArg, &
                                localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Deallocate helper variables
     call ESMF_InterfaceIntDestroy(lWidthInArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(uWidthInArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(alignInArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(lWidthOutArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(uWidthOutArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(alignOutArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -16869,7 +16869,7 @@ endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_GridTest(grid, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully

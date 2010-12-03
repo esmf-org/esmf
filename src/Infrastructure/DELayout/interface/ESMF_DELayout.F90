@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.80 2010/03/04 18:57:42 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.81 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.80 2010/03/04 18:57:42 svasquez Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.81 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -281,10 +281,10 @@ contains
     
     ! Deal with optional array arguments
     deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     petListArg = ESMF_InterfaceIntCreate(petList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark this DELayout as invalid
@@ -293,7 +293,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
       dePinFlag, petListArg, vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -301,10 +301,10 @@ contains
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(deGroupingArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(petListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code
@@ -388,7 +388,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap(1), len_petMap, &
       dePinFlag, vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -495,10 +495,10 @@ contains
     
     ! Deal with optional array arguments
     deGroupingArg = ESMF_InterfaceIntCreate(deGrouping, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     petListArg = ESMF_InterfaceIntCreate(petList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark this DELayout as invalid
@@ -517,7 +517,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
       dePinFlag, petListArg, vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -525,10 +525,10 @@ contains
  
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(deGroupingArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(petListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Set init code
@@ -666,13 +666,13 @@ contains
 
     ! Not implemented features
     if (present(connectionWeightDimList)) then
-      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
         "- connectionWeightDimList not implemented", &
         ESMF_CONTEXT, rc)
       return
     endif
     if (present(cyclicFlagDimList)) then
-      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
         "- cyclicFlagDimList not implemented", &
         ESMF_CONTEXT, rc)
       return
@@ -681,7 +681,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutCreateND(delayout, vmObject, opt_deCountList(1), &
       len_deCountList, opt_petList(1), len_petList, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -735,7 +735,7 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutDestroy(delayout, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this DELayout as invalid
@@ -847,13 +847,13 @@ contains
     
     ! Not implemented features
     if (present(compCapacity)) then
-      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
         "- compCapacity query not implemented", &
         ESMF_CONTEXT, rc)
       return
     endif
     if (present(commCapacity)) then
-      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
         "- commCapacity query not implemented", &
         ESMF_CONTEXT, rc)
       return
@@ -861,23 +861,23 @@ contains
     
     ! Deal with (optional) array arguments
     petMapArg = ESMF_InterfaceIntCreate(petMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     vasMapArg = ESMF_InterfaceIntCreate(vasMap, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     localDeListArg = ESMF_InterfaceIntCreate(localDeList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     vasLocalDeListArg = ESMF_InterfaceIntCreate(vasLocalDeList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutGet(delayout, vm, deCount, petMapArg, vasMapArg, &
       oneToOneFlagArg, dePinFlag, localDeCount, localDeListArg, &
       vasLocalDeCount, vasLocalDeListArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present (oneToOneFlag)) &
       oneToOneFlag = oneToOneFlagArg
@@ -885,22 +885,22 @@ contains
     ! Set init code for deep C++ objects
     if (present(vm)) then
       call ESMF_VMSetInitCreated(vm, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(petMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(vasMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(localDeListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(vasLocalDeListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1005,7 +1005,7 @@ contains
     call c_ESMC_DELayoutGetDeprecated(delayout, deCount, dimCount, localDeCount, &
       opt_localDeList(1), len_localDeList, localDe, oneToOneFlag, logRectFlag, &
       opt_deCountPerDim(1), len_deCountPerDim, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1102,7 +1102,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDELocalInfo(delayout, de, opt_DEcoord(1), len_coord,&
       opt_DEcde(1), len_cde, opt_DEcw(1), len_cw, connectionCount, pid, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! C -> Fortran correction
@@ -1191,7 +1191,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchDE(delayout, de, delayoutMatch, &
       deMatchCount, opt_deMatchList(1), len_deMatchList, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1273,7 +1273,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
       petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1331,7 +1331,7 @@ contains
     
     ! Not implemented features
     if (present(options)) then
-      call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
         "- options not implemented", &
         ESMF_CONTEXT, rc)
       return
@@ -1339,7 +1339,7 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutPrint(delayout, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1392,7 +1392,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutServiceComplete(delayout, de, localrc)
 !TODO: enable LogErr once it is thread-safe
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1459,7 +1459,7 @@ contains
     call c_ESMC_DELayoutServiceOffer(delayout, de, reply, localrc)
     ESMF_DELayoutServiceOffer = reply
 !TODO: enable LogErr once it is thread-safe
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! return successfully
@@ -1508,7 +1508,7 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutValidate(delayout, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1589,7 +1589,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
       petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1665,7 +1665,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutSerialize(delayout, buffer, length, offset, &
                                   linquireflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1723,7 +1723,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, buffer, &
       offset, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set init code

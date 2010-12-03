@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.67 2010/11/18 00:03:26 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.68 2010/12/03 05:57:29 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -473,18 +473,18 @@
  
 ! Initialization
       allocate(config_local, stat=memstat)
-      if (ESMF_LogMsgFoundAllocError(memstat, "Allocating config class", &
+      if (ESMF_LogFoundAllocError(memstat, "Allocating config class", &
                                         ESMF_CONTEXT, rc)) return
 
       allocate(config_local%buffer, config_local%this_line, stat = memstat)
-      if (ESMF_LogMsgFoundAllocError(memstat, "Allocating local buffer 1", &
+      if (ESMF_LogFoundAllocError(memstat, "Allocating local buffer 1", &
                                         ESMF_CONTEXT, rc)) return
 
       ! TODO: Absoft 8 compiler bug necessitates allocating pointer within
       ! derived type via local pointer first.  Absoft 9/Jazz bug necessitates
       ! this must be a separate allocate statement.
       allocate(attr_used_local(NATT_MAX), stat=memstat)
-      if (ESMF_LogMsgFoundAllocError(memstat, "Allocating local buffer 2", &
+      if (ESMF_LogFoundAllocError(memstat, "Allocating local buffer 2", &
                                         ESMF_CONTEXT, rc)) return
 
       config_local%nbuf = 0
@@ -540,13 +540,13 @@
       ! TODO: Absoft 9/Jazz bug necessitates this separate deallocate statement
       ! before the other (must be in reverse order of allocation)
       deallocate(config%cptr%attr_used, stat=memstat)
-      if (ESMF_LogMsgFoundDeallocError(memstat, "Deallocating local buffer 2", &
+      if (ESMF_LogFoundDeallocError(memstat, "Deallocating local buffer 2", &
                                      ESMF_CONTEXT, rc)) return
       deallocate(config%cptr%buffer, config%cptr%this_line, stat = memstat)
-      if (ESMF_LogMsgFoundDeallocError(memstat, "Deallocating local buffer 1", &
+      if (ESMF_LogFoundDeallocError(memstat, "Deallocating local buffer 1", &
                                      ESMF_CONTEXT, rc)) return
       deallocate(config%cptr, stat = memstat)
-      if (ESMF_LogMsgFoundDeallocError(memstat, "Deallocating config type", &
+      if (ESMF_LogFoundDeallocError(memstat, "Deallocating config type", &
                                      ESMF_CONTEXT, rc)) return
       nullify(config%cptr)
 
@@ -610,11 +610,11 @@
       i = index_ ( config%cptr%buffer(1:config%cptr%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
          config%cptr%this_line = BLK // EOL
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, &
+         if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
                                 "label not found", &
                                  ESMF_CONTEXT, rc)) return
       elseif(i.le.0) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+         if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "invalid operation with index_", &
                                  ESMF_CONTEXT, rc)) return
       end if
@@ -1092,11 +1092,11 @@
       localcount = size (valueList)
       if (present (count)) then
 	if (count <= 0) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else if (count > size (valueList)) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else
@@ -1188,11 +1188,11 @@
       localcount = size (valueList)
       if (present (count)) then
 	if (count <= 0) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else if (count > size (valueList)) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else
@@ -1481,11 +1481,11 @@
       localcount = size (valueList)
       if (present (count)) then
 	if (count <= 0) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else if (count > size (valueList)) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else
@@ -1576,11 +1576,11 @@
       localcount = size (valueList)
       if (present (count)) then
 	if (count <= 0) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else if (count > size (valueList)) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else
@@ -1709,7 +1709,7 @@
               ! undo what GetSring() did
               call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
 
-              if (ESMF_LogMsgFoundError(ESMF_RC_CANNOT_GET, &
+              if (ESMF_LogFoundError(ESMF_RC_CANNOT_GET, &
                                 "bad boolean value '" // string // &
                                 "' in configuration file.", &
                                  ESMF_CONTEXT, rc)) return
@@ -1784,11 +1784,11 @@
       localcount = size (valueList)
       if (present (count)) then
 	if (count <= 0) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else if (count > size (valueList)) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                   "invalid SIZE", &
                                    ESMF_CONTEXT, rc)) return
         else
@@ -2118,12 +2118,12 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       call ESMF_ConfigLoadFile_1proc_( config, filename, localrc )
-           if (ESMF_LogMsgFoundError(localrc, &
+           if (ESMF_LogFoundError(localrc, &
                                 "unable to load file: " // trim (filename), &
                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_ConfigParseAttributes( config, unique, localrc )
-           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
       if ( present (delayout) ) then
@@ -2172,7 +2172,7 @@
 !     Open file
 !     ---------     
       call ESMF_UtilIOUnitGet (lu, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       ! A open through an interface to avoid portability problems.
       ! (J.G.)
@@ -2180,7 +2180,7 @@
       call opntext(lu,filename,'old',rc=localrc)
 
       if ( localrc /= ESMF_SUCCESS ) then
-         if (ESMF_LogMsgFoundError(localrc, &
+         if (ESMF_LogFoundError(localrc, &
                               "error opening text file: " // trim (filename), &
                                ESMF_CONTEXT, rc)) return
       end if
@@ -2396,7 +2396,7 @@
                     duplicate = .true.
                     logmsg = "Duplicate label '" // trim(label) // &
                                   "' found in attributes file"
-                    call ESMF_LogMsgSetError(ESMF_RC_DUP_NAME, logmsg, &
+                    call ESMF_LogSetError(ESMF_RC_DUP_NAME, logmsg, &
                                              ESMF_CONTEXT, rc)
                     localrc = ESMF_RC_DUP_NAME
                   endif
@@ -2409,7 +2409,7 @@
                if ( a <= NATT_MAX ) then
                   config%cptr%attr_used(a)%label = label
                else
-                  if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST,    &
+                  if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST,    &
                        "attribute out-of-range; increase NATT_MAX", &
                        ESMF_CONTEXT, rc)) return
                endif
@@ -2560,7 +2560,7 @@
         if ( (j-i) .gt. LSZ) then
            write(logmsg, *) ", attribute label, value & EOL are ", j-i, &
                " characters long, only ", LSZ, " characters allowed per line"
-           if (ESMF_LogMsgFoundError(ESMC_RC_LONG_STR, logmsg, &
+           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
                                      ESMF_CONTEXT, rc)) return
         endif
 
@@ -2569,7 +2569,7 @@
            write(logmsg, *) ", attribute label & value require ", j-i+1, &
                " characters (including EOL & EOB), only ", NBUF_MAX-i, &
                " characters left in config buffer"
-           if (ESMF_LogMsgFoundError(ESMC_RC_LONG_STR, logmsg, &
+           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
                                      ESMF_CONTEXT, rc)) return
         endif
       endif
@@ -2595,7 +2595,7 @@
             if (j-m+1 .gt. LSZ) then
                write(logmsg, *) ", attribute label, value & EOL are ", j-m+1, &
                   " characters long, only ", LSZ, " characters allowed per line"
-               if (ESMF_LogMsgFoundError(ESMC_RC_LONG_STR, logmsg, &
+               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
                                          ESMF_CONTEXT, rc)) return
             endif
 
@@ -2604,7 +2604,7 @@
                write(logmsg, *) ", attribute label & value require ", j-m+1, &
                    " characters (including EOL & EOB), only ", NBUF_MAX-i, &
                    " characters left in config buffer"
-               if (ESMF_LogMsgFoundError(ESMC_RC_LONG_STR, logmsg, &
+               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
                                          ESMF_CONTEXT, rc)) return
             endif
 
@@ -2744,19 +2744,19 @@
       ! validate internal buffer indices
 
       if (config%cptr%nbuf < 0 .or. config%cptr%nbuf > NBUF_MAX) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
+        if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST, &
                                   "config%cptr%nbuf out-of-range.", &
                                   ESMF_CONTEXT, rc)) return
       endif
 
       if (config%cptr%next_line < 0 .or. config%cptr%next_line >= config%cptr%nbuf) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
+        if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST, &
                                   "config%cptr%next_line out-of-range.", &
                                   ESMF_CONTEXT, rc)) return
       endif
 
       if (config%cptr%nattr < 0 .or. config%cptr%nattr > NATT_MAX) then
-        if (ESMF_LogMsgFoundError(ESMF_RC_INTNRL_LIST, &
+        if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST, &
                                   "config%cptr%nattr out-of-range.", &
                                   ESMF_CONTEXT, rc)) return
       endif

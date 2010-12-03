@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.41 2010/11/03 22:48:53 theurich Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.42 2010/12/03 05:58:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -332,7 +332,7 @@ contains
                  !--------------------------------------------------------------
                  call array_redist_test(har%rcrd(kfile)%str(kstr),har%failures,&
                                      har%reportType, VM, localrc)
-                 if (ESMF_LogMsgFoundError(localrc," error array redist test", &
+                 if (ESMF_LogFoundError(localrc," error array redist test", &
                      rcToReturn=returnrc)) return
               else
                  !--------------------------------------------------------------
@@ -340,7 +340,7 @@ contains
                  !--------------------------------------------------------------
 !                call array_regrid_test(har%rcrd(kfile)%str(kstr),             &
 !                                  har%failures, har%reportType, VM, localrc)
-!                if (ESMF_LogMsgFoundError(localrc," error array ssm test",    &
+!                if (ESMF_LogFoundError(localrc," error array ssm test",    &
 !                    rcToReturn=returnrc)) return
               endif
            enddo  ! kstr
@@ -364,7 +364,7 @@ contains
                  !--------------------------------------------------------------
                  call field_redist_test(har%rcrd(kfile)%str(kstr),             &
                            har%failures, har%reportType, VM, localrc)
-                 if (ESMF_LogMsgFoundError(localrc," error field redist test", &
+                 if (ESMF_LogFoundError(localrc," error field redist test", &
                      rcToReturn=returnrc)) return
               else
                  !--------------------------------------------------------------
@@ -372,7 +372,7 @@ contains
                  !--------------------------------------------------------------
                  call field_regrid_test(har%rcrd(kfile)%str(kstr),             &
                            har%failures, har%reportType, VM, localrc)
-                 if (ESMF_LogMsgFoundError(localrc," error field regrid test", &
+                 if (ESMF_LogFoundError(localrc," error field regrid test", &
                      rcToReturn=returnrc)) return
               endif
            enddo  ! kstr
@@ -383,7 +383,7 @@ contains
 
      case default
      ! error - class unknown
-     call ESMF_LogMsgSetError( ESMF_FAILURE," test class of unknown type",     &
+     call ESMF_LogSetError( ESMF_FAILURE," test class of unknown type",     &
                rcToReturn=returnrc)
      return
 

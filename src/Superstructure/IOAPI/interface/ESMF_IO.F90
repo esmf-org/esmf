@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.7 2010/05/07 22:48:32 w6ws Exp $
+! $Id: ESMF_IO.F90,v 1.8 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -139,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.7 2010/05/07 22:48:32 w6ws Exp $'
+      '$Id: ESMF_IO.F90,v 1.8 2010/12/03 05:57:59 theurich Exp $'
 
 !==============================================================================
 !
@@ -242,7 +242,7 @@
 !     call c_ESMC_IOCreate(ESMF_IOCreate, nameLen, name, &
 !                          <object>, fileFormat, fileName, readWriteType, &
 !                          convention, purpose, localrc)
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !         ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     call ESMF_IOSetInitCreated(ESMF_IOCreate)
@@ -306,7 +306,7 @@
 !     invoke C to C++ entry point to allocate and initialize new io
       call c_ESMC_IO_XMLCreate(ESMF_IOCreate, nameLen, name, 0, "", &
                                gridComp%compp%base, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     call ESMF_IOSetInitCreated(ESMF_IOCreate)  TODO
@@ -354,7 +354,7 @@
 !
 !     invoke C to C++ entry point
       call c_ESMC_IO_XMLDestroy(io, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) then 
 !       ! Don't bail out until Delete
         write(*,*)" c_ESMC_IODestroy fails"
@@ -449,7 +449,7 @@
 !     call c_ESMC_IOGet(io, nameLen, tempNameLen, tempName, &
 !                       <object>, fileFormat, fileName, &
 !                       readWriteType, convention, purpose, localrc)
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! copy temp name back to given name to restore native Fortran
@@ -522,7 +522,7 @@
 !
 !     invoke C to C++ entry point
 !     call c_ESMC_IOPrint(io, options, localrc)  TODO
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success
@@ -606,7 +606,7 @@
 !     invoke C to C++ entry point  TODO
 !     call c_ESMC_IORead(io, <object>, fileFormat, fileName, schemaFileName, &
 !                       readWriteType, convention, purpose, localrc)
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success
@@ -672,7 +672,7 @@
 !     invoke C to C++ entry point  TODO
       call c_ESMC_IO_XMLRead(io, fileNameLen, fileName, &
                              schemaFileNameLen, schemaFileName, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success
@@ -726,7 +726,7 @@
 !     invoke C to C++ entry point to allocate and restore io   TODO
 !     call c_ESMC_IOReadRestart(ESMF_IOReadRestart, nameLen, name, &
 !                               iospec, localrc)
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     call ESMF_IOSetInitCreated(ESMF_IOReadRestart)
@@ -817,7 +817,7 @@
 !     invoke C to C++ entry point  TODO
 !     call c_ESMC_IOSet(io, nameLen, name, <object>, fileFormat, fileName, &
 !                       readWriteType, convention, purpose, localrc)
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success
@@ -866,7 +866,7 @@
 !
 !     invoke C to C++ entry point
 !     call c_ESMC_IOValidate(io, options, localrc)   TODO
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success
@@ -946,7 +946,7 @@
 !     invoke C to C++ entry point  TODO
 !     call c_ESMC_IOWrite(io, <object>, fileFormat, fileName, &
 !                         readWriteType, convention, purpose, localrc)
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success
@@ -994,7 +994,7 @@
 !
 !     invoke C to C++ entry point
 !     call c_ESMC_IOWriteRestart(io, iospec, localrc)  TODO
-!     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !       ESMF_CONTEXT, rcToReturn=rc)) return
 !
 !     ! Return success

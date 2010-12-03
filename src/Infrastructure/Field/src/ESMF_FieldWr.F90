@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.10 2010/11/23 21:06:33 samsoncheung Exp $
+! $Id: ESMF_FieldWr.F90,v 1.11 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -148,17 +148,17 @@ contains
         fp => field%ftypep
 
         call c_ESMC_GetName(fp%base, name, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldGet(field, array=array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayWrite(array, file, variableName=trim(name), &
           append=appd_internal, timeslice=time, iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS

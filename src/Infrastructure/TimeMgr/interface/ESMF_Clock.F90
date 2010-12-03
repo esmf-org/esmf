@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.99 2010/12/01 16:03:15 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.100 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.99 2010/12/01 16:03:15 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.100 2010/12/03 05:57:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -328,7 +328,7 @@
         call c_ESMC_ClockAdvance2(clock, timeStep, &
                      ringingAlarmPtrList(1), ringingAlarmPtrList(2), &
                      sizeofRingingAlarmList, ringingAlarmCount, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) then
           ! Not bail out until deallocation
           write(*,*)"c_ESMC_ClockAdvance2 fails"
@@ -338,7 +338,7 @@
         call c_ESMC_ClockAdvance1(clock, timeStep, ringingAlarmPtrList(1), &
                         sizeofRingingAlarmList, ringingAlarmCount, localrc)
         ! Not bail out until deallocation
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) then
           ! Not bail out until deallocation
           write(*,*)"c_ESMC_ClockAdvance1 fails"
@@ -347,7 +347,7 @@
         ! array is not present
         call c_ESMC_ClockAdvance0(clock, timeStep, &
                     sizeofRingingAlarmList, ringingAlarmCount, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) then
           ! Not bail out until deallocation
           write(*,*)"c_ESMC_ClockAdvance0 fails"
@@ -463,7 +463,7 @@
       call c_ESMC_ClockCreateNew(ESMF_ClockCreateNew, nameLen, name, &
                                  timeStep, startTime, stopTime, runDuration, &
                                  runTimeStepCount, refTime, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ClockSetInitCreated(ESMF_ClockCreateNew)
@@ -521,7 +521,7 @@
 
 !     invoke C to C++ entry point to copy clock
       call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ClockSetInitCreated(ESMF_ClockCreateCopy)
@@ -580,7 +580,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockDestroy(clock, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) then 
         ! Don't bail out until Delete
         write(*,*)" c_ESMC_ClockDestroy fails"
@@ -725,7 +725,7 @@
                            currTime, prevTime, currSimTime, prevSimTime, &
                            calendar, calendarType, timeZone, advanceCount, &
                            alarmCount, direction, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
@@ -786,7 +786,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockGetAlarm(clock, nameLen, name, alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    
       call ESMF_AlarmSetInitCreated(alarm)
@@ -882,7 +882,7 @@
         call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
                            alarmPtrList(1), alarmPtrList(2), &
                            sizeofAlarmList, alarmCount, timeStep, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) then
           ! Not bail out until deallocation
           write(*,*)"c_ESMC_ClockGetAlarmList2 fails"
@@ -892,7 +892,7 @@
         call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
                            alarmPtrList(1), &
                            sizeofAlarmList, alarmCount, timeStep, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) then
           ! Not bail out until deallocation
           write(*,*)"c_ESMC_ClockGetAlarmList1 fails"
@@ -961,7 +961,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1010,7 +1010,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsDone(clock, ESMF_ClockIsDone, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1059,7 +1059,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsReverse(clock, ESMF_ClockIsReverse, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1107,7 +1107,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1155,7 +1155,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockIsStopTimeEnabled(clock, ESMF_ClockIsStopTimeEnabled, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1224,7 +1224,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockPrint(clock, options, localrc)   
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1274,7 +1274,7 @@
 !     invoke C to C++ entry point to allocate and restore clock
       call c_ESMC_ClockReadRestart(ESMF_ClockReadRestart, nameLen, name, &
                                    localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ClockSetInitCreated(ESMF_ClockReadRestart)
@@ -1410,7 +1410,7 @@
       call c_ESMC_ClockSet(clock, nameLen, name, timeStep, startTime, &
                            stopTime, runDuration, runTimeStepCount, &
                            refTime, currTime, advanceCount, direction, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1455,7 +1455,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockStopTimeDisable(clock, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1503,7 +1503,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockStopTimeEnable(clock, stopTime, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1549,7 +1549,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockSyncToRealTime(clock, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1600,7 +1600,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockValidate(clock, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1645,7 +1645,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockWriteRestart(clock, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.12 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.13 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -150,12 +150,12 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -173,7 +173,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -194,7 +194,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -213,7 +213,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -234,7 +234,7 @@
 
   call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -253,7 +253,7 @@
 
   call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -265,7 +265,7 @@
   write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D arrayspec)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -273,7 +273,7 @@
   write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D array)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -281,7 +281,7 @@
   write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array) - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -289,7 +289,7 @@
   write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -297,7 +297,7 @@
   write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array pointer) - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -305,7 +305,7 @@
   write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array pointer)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field5, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -327,12 +327,12 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field = ESMF_FieldCreate(grid3d, arrayspec1D, gridToFieldMap =(/1,2,0/),rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -352,7 +352,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -373,7 +373,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -392,7 +392,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -413,7 +413,7 @@
 
   call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -432,7 +432,7 @@
 
   call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -444,7 +444,7 @@
   write(name, *) "Destroy a 2D Field on a 3D arb grid with one replicated dim"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -452,7 +452,7 @@
   write(name, *) "Destroy a 2D Field on a 3D arb grid with one replicated dim and 1d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -460,7 +460,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -468,7 +468,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -476,7 +476,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -484,7 +484,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field5, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -503,12 +503,12 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -526,7 +526,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -547,7 +547,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -566,7 +566,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -587,7 +587,7 @@
 
   call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -606,7 +606,7 @@
 
   call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -618,7 +618,7 @@
   write(name, *) "Destroy a 3D Field on a 3D arb. grid"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -626,7 +626,7 @@
   write(name, *) "Destroy a 3D Field on a 3D arb. grid with 2d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -634,7 +634,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -642,7 +642,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -650,7 +650,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array pointer - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -658,7 +658,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field5, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -677,12 +677,12 @@
 
   field = ESMF_FieldCreate(grid3d, arrayspec3D, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 3) correct = .false.
@@ -702,7 +702,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 3) correct = .false.
@@ -724,7 +724,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 3) correct = .false.
@@ -744,7 +744,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 3) correct = .false.
@@ -756,7 +756,7 @@
   write(name, *) "Destroy a 4D Field on a 3D arb grid with one ungridded dimension"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -764,7 +764,7 @@
   write(name, *) "Destroy a 4D Field on a 3D arb grid with one ungridded dimension and 3d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -772,7 +772,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 3D Fortran array - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -780,7 +780,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 3D Fortran array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -796,12 +796,12 @@
 
   field = ESMF_FieldCreate(grid3d, arrayspec2D, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), gridToFieldMap=(/1,2,0/), rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -821,7 +821,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -844,7 +844,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -865,7 +865,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -877,7 +877,7 @@
   write(name, *) "Destroy a 3D Field on a 3D arb grid with one ungridded dim. and one rep. dim"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -885,7 +885,7 @@
   write(name, *) "Destroy a 3D Field on a 3D arb grid with one ungridded dim. and one rep. dim and 2d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -893,7 +893,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -901,7 +901,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -916,12 +916,12 @@
   rc=ESMF_SUCCESS
 
   field = ESMF_FieldCreate(grid3d, arrayspec1D,gridToFieldMap=(/0,0,1/), rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -940,7 +940,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -962,7 +962,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -982,7 +982,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -1004,7 +1004,7 @@
 
   call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -1024,7 +1024,7 @@
 
   call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -1036,7 +1036,7 @@
   write(name, *) "Destroy a 1D Field on a 3D arb grid with the arb. dims as the replicated dim"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1044,7 +1044,7 @@
   write(name, *) "Destroy a 1D Field on a 3D arb grid with the arb. dims as the replicated dim and 1d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1052,7 +1052,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1060,7 +1060,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1068,7 +1068,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1076,7 +1076,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field5, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1092,12 +1092,12 @@
 
   field = ESMF_FieldCreate(grid3d, arrayspec2D,gridToFieldMap=(/0,0,1/), &
           ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -1117,7 +1117,7 @@
 
   call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -1140,7 +1140,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -1161,7 +1161,7 @@
 
   call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 2) correct = .false.
@@ -1173,7 +1173,7 @@
   write(name, *) "Destroy a 2D Field on a 3D arb grid with the arb.dims as the replicated dim and one ungridded dim"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1181,7 +1181,7 @@
   write(name, *) "Destroy a 2D Field on a 3D arb grid with the arb.dims as the replicated dim and one ungridded dim and 2d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field1, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1189,7 +1189,7 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1197,10 +1197,10 @@
   write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field4, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_GridDestroy(grid2d, rc=localrc);
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1228,7 +1228,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
@@ -1242,7 +1242,7 @@
 
   call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
   if (memDimCount .ne. 1) correct = .false.
@@ -1251,13 +1251,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_FieldDestroy(field, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_FieldDestroy(field2, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
   call ESMF_GridDestroy(grid2d, rc=localrc)
-  call ESMF_LogMsgSetError(localrc, ESMF_ERR_PASSTHRU, &
+  call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)
 
   !-----------------------------------------------------------------------------

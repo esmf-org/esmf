@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.35 2010/10/28 22:54:07 eschwab Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.36 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.35 2010/10/28 22:54:07 eschwab Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.36 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -213,13 +213,13 @@ contains
     arrayCount_opt = size(arrayList)
     if (present(arrayCount)) then
       if (arrayCount < 0) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
           "- arrayCount must be positive", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       if (arrayCount > arrayCount_opt) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
           "- arrayCount cannot be larger than size of arrayList", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -238,7 +238,7 @@ contains
     allocate(arrayPointerList(arrayCount_opt))
     do i=1, arrayCount_opt
       call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
     
@@ -256,7 +256,7 @@ contains
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
         arrayCount_opt, "", len_name, localrc)
     endif    
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Garbage collection
@@ -266,7 +266,7 @@ contains
     linkChange = ESMF_TRUE;
     do i=1,arrayCount_opt
       call c_ESMC_AttributeLink(arraybundle, arrayList(i), linkChange, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
     enddo
 
@@ -323,7 +323,7 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundleDestroy(arraybundle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this ArrayBundle as invalid
@@ -400,7 +400,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundleGet(arraybundle, opt_arrayCount, opt_arrayPtrList, &
       len_arrayPtrList, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code for deep C++ objects
@@ -408,10 +408,10 @@ contains
       do i=1, min(len_arrayPtrList, opt_arrayCount)
         call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), &
           rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArraySetInitCreated(arrayList(i), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
@@ -427,7 +427,7 @@ contains
     ! Special call to get name out of Base class
     if (present(name)) then
       call c_ESMC_GetName(arraybundle, name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
@@ -498,7 +498,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleHalo(arraybundle, routehandle, opt_checkflag, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -545,7 +545,7 @@ contains
         
     ! Call into the RouteHandle code
     call ESMF_RouteHandleRelease(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -659,21 +659,21 @@ contains
 
     ! Deal with (optional) array arguments
     haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     haloUDepthArg = ESMF_InterfaceIntCreate(haloUDepth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleHaloStore(arraybundle, routehandle, &
       opt_halostartregionflag, haloLDepthArg, haloUDepthArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -730,7 +730,7 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundlePrint(arraybundle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -815,24 +815,24 @@ contains
     if(present(iofmt)) iofmtd = iofmt
 
     call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate (Aname(arrayCount))
     allocate (arrayList(arrayCount))
     call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (singlef) then
       ! Get and read the arrays in the Bundle
       do i=1,arrayCount
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayRead(arrayList(i), file=file, variableName=Aname(i), &
           iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     else
@@ -840,11 +840,11 @@ contains
         write(cnum,"(i3.3)") i
         filename = file // cnum
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayRead(arrayList(i), file=filename,  &
                variableName=Aname(i), iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
@@ -918,7 +918,7 @@ contains
       opt_srcArrayBundle = srcArrayBundle
     else
       call ESMF_ArrayBundleSetThisNull(opt_srcArrayBundle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArrayBundle)) then
@@ -926,7 +926,7 @@ contains
       opt_dstArrayBundle = dstArrayBundle
     else
       call ESMF_ArrayBundleSetThisNull(opt_dstArrayBundle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
@@ -937,7 +937,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedist(opt_srcArrayBundle, opt_dstArrayBundle,&
       routehandle, opt_checkflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -984,7 +984,7 @@ contains
         
     ! Call into the RouteHandle code
     call ESMF_RouteHandleRelease(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1111,23 +1111,23 @@ contains
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
       routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1172,23 +1172,23 @@ contains
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
       routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1233,23 +1233,23 @@ contains
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
       routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_R4, factor, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1294,23 +1294,23 @@ contains
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStore(srcArrayBundle, dstArrayBundle, &
       routehandle, srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1409,23 +1409,23 @@ contains
     ! Deal with (optional) array arguments
     srcToDstTransposeMapArg = ESMF_InterfaceIntCreate(srcToDstTransposeMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleRedistStoreNF(srcArrayBundle, dstArrayBundle, &
       routehandle, srcToDstTransposeMapArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! garbage collection
     call ESMF_InterfaceIntDestroy(srcToDstTransposeMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -1506,7 +1506,7 @@ contains
       opt_srcArrayBundle = srcArrayBundle
     else
       call ESMF_ArrayBundleSetThisNull(opt_srcArrayBundle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArrayBundle)) then
@@ -1514,7 +1514,7 @@ contains
       opt_dstArrayBundle = dstArrayBundle
     else
       call ESMF_ArrayBundleSetThisNull(opt_dstArrayBundle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
@@ -1527,7 +1527,7 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
       routehandle, opt_zeroflag, opt_checkflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1574,7 +1574,7 @@ contains
         
     ! Call into the RouteHandle code
     call ESMF_RouteHandleRelease(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1727,24 +1727,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I4, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1793,24 +1793,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_I8, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1859,24 +1859,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R4, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1925,24 +1925,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStore(srcArrayBundle, dstArrayBundle, &
       routehandle, ESMF_TYPEKIND_R8, opt_factorList, len_factorList, &
       factorIndexListArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -2035,12 +2035,12 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
       routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -2092,7 +2092,7 @@ contains
     localrc = ESMF_SUCCESS  ! remove when todo is done.
     
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully
@@ -2188,32 +2188,32 @@ contains
     if (present(timeslice)) time = timeslice
     
     call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate (Aname(arrayCount))
     allocate (arrayList(arrayCount))
     call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (singlef) then
       ! Get and write the first array in the Bundle
       call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_ArrayWrite(arrayList(1), file=file, timeslice=time, iofmt=iofmtd, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Get and write the rest of the arrays in the Bundle
       do i=2,arrayCount
        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_ArrayWrite(arrayList(i), file=file, timeslice=time, &
          append=.true., iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     else
@@ -2222,11 +2222,11 @@ contains
         filename = file // cnum
         ! Get and write the first array in the Bundle
         call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayWrite(arrayList(i), file=trim(filename),  &
            timeslice=time, iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif

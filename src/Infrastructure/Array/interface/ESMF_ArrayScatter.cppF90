@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.22 2010/07/23 18:57:24 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.23 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.22 2010/07/23 18:57:24 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.23 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -211,11 +211,11 @@ contains
       vm_opt = vm @\
     else @\
       call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
     call ESMF_VMGet(vm_opt, localPet=localPet, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     if (localPet==rootPet) then @\
@@ -244,7 +244,7 @@ contains
         call c_ESMC_ArrayScatter(array, farray(mloc), & @\
           ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
           localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       else @\
         ! it is unsafe to use dummy argument farray @\
@@ -252,7 +252,7 @@ contains
         call c_ESMC_ArrayScatter(array, farray_dummy(mloc), & @\
           ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
           localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         deallocate(farray_dummy) @\
       endif @\
@@ -260,7 +260,7 @@ contains
       ! not rootPet -> call through notRoot interface @\
       call ESMF_ArrayScatter(array=array, patch=patch, rootPet=rootPet, & @\
         vm=vm, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
 @\
@@ -297,7 +297,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayScatterNotRoot(array, patch, rootPet, vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
@@ -375,7 +375,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
 !    call c_ESMC_ArrayScatterB(array, larray, rootPET, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayScatterB
@@ -445,7 +445,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
 !      localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayScatterNBRoot
@@ -512,7 +512,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
 !    call c_ESMC_ArrayScatterNB(array, larray, rootPET, de, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayScatterNB

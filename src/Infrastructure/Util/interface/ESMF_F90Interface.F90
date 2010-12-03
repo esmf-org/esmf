@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.10 2010/03/04 18:57:45 svasquez Exp $
+! $Id: ESMF_F90Interface.F90,v 1.11 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@ contains
       else
          call c_ESMC_InterfaceIntCreate1D(array, 0, len, status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
     endif
@@ -125,7 +125,7 @@ contains
       else
          call c_ESMC_InterfaceIntCreate2D(array, 0, len, status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
     endif
@@ -137,7 +137,7 @@ contains
       else
          call c_ESMC_InterfaceIntCreate3D(array, 0, len, status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(len)
     endif
@@ -188,7 +188,7 @@ contains
     
     ! call into the C++ interface
     call c_ESMC_InterfaceIntDestroy(array, status)
-    if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully

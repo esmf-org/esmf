@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.23 2010/10/12 15:35:31 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.24 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.23 2010/10/12 15:35:31 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.24 2010/12/03 05:57:39 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -152,28 +152,28 @@ contains
 
         if (present(srcField)) then
           call ESMF_FieldGet(srcField, array=l_srcArray, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call ESMF_ArraySetThisNull(l_srcArray, localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if (present(dstField)) then
           call ESMF_FieldGet(dstField, array=l_dstArray, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call ESMF_ArraySetThisNull(l_dstArray, localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         
         ! perform Field redist through internal array
         call ESMF_ArrayRedist(srcArray=l_srcArray, dstArray=l_dstArray, &
           routehandle=routehandle, checkflag=checkflag, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! return successfully
@@ -218,7 +218,7 @@ contains
             
         ! Call into the RouteHandle code
         call ESMF_RouteHandleRelease(routehandle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! return successfully
@@ -371,11 +371,11 @@ contains
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -384,7 +384,7 @@ contains
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
             srcToDstTransposeMap, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -428,11 +428,11 @@ contains
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -441,7 +441,7 @@ contains
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
             srcToDstTransposeMap, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -485,11 +485,11 @@ contains
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -498,7 +498,7 @@ contains
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
             srcToDstTransposeMap, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -542,11 +542,11 @@ contains
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -555,7 +555,7 @@ contains
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, factor, & 
             srcToDstTransposeMap, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -698,11 +698,11 @@ contains
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 
@@ -711,7 +711,7 @@ contains
         ! Rely on ArrayRedist to perform sanity checking of the other parameters 
         call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle, & 
             srcToDstTransposeMap, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, & 
+        if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
 

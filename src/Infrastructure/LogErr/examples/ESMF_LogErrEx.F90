@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.37 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.38 2010/12/03 05:57:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -72,12 +72,12 @@
 
 !BOC
     ! LogMsgSetError
-    call ESMF_LogMsgSetError(ESMF_FAILURE, "Convergence failure", &
+    call ESMF_LogSetError(ESMF_FAILURE, "Convergence failure", &
                              rcToReturn=rc2)
     ! LogMsgFoundError
     call ESMF_TimeSet(time, calendarType=ESMF_CAL_NOCALENDAR)
     call ESMF_TimeSyncToRealTime(time, rcToTest)
-    if (ESMF_LogMsgFoundError(rcToTest, "getting wall clock time", &
+    if (ESMF_LogFoundError(rcToTest, "getting wall clock time", &
                               rcToReturn=rc2)) then
         ! Error getting time. The previous call will have printed the error
         ! already into the log file.  Add any additional error handling here.
@@ -86,7 +86,7 @@
 
     ! LogMsgFoundAllocError
     allocate(intptr(10), stat=allocRcToTest)
-    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array", &
+    if (ESMF_LogFoundAllocError(allocRcToTest, "integer array", &
                                    rcToReturn=rc2)) then
         ! Error during allocation.  The previous call will have logged already
         ! an error message into the log.
@@ -122,7 +122,7 @@
 !BOC
     ! LogMsgSetError; ESMF_CONTEXT expands into
     !   __LINE__,ESMF_FILENAME,ESMF_METHOD
-    call ESMF_LogMsgSetError(ESMF_FAILURE, "Interpolation Failure", &
+    call ESMF_LogSetError(ESMF_FAILURE, "Interpolation Failure", &
                              ESMF_CONTEXT, rcToReturn=rc2, log=alog)
 !EOC
 

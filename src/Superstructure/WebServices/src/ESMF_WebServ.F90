@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.4 2010/11/25 00:23:33 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.5 2010/12/03 05:58:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -133,7 +133,7 @@ contains
 
           ! Check return code to make sure send went out ok
           if (localrc /= ESMF_SUCCESS) then
-              call ESMF_LogMsgSetError( &
+              call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       "Error while sending message to non-root pet", &
                       ESMF_CONTEXT, rcToReturn=localrc)
@@ -214,7 +214,7 @@ contains
        call ESMF_VMRecv(vm, recvData=inmsg, count=count, src=0, &
                         blockingflag=ESMF_BLOCKING, rc=localrc)
        if (localrc /= ESMF_SUCCESS) then
-           call ESMF_LogMsgSetError( &
+           call ESMF_LogSetError( &
                    ESMF_RC_NOT_VALID, &
                    "Error while receiving message from root pet", &
                    ESMF_CONTEXT, rcToReturn=localrc)
@@ -234,7 +234,7 @@ contains
 !                                       rc=localrc)
           call ESMF_GridCompInitialize(comp, rc=localrc)
           if (localrc /= ESMF_SUCCESS) then
-              call ESMF_LogMsgSetError( &
+              call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       "Error while calling ESMF Initialize.", &
                       ESMF_CONTEXT, rcToReturn=localrc)
@@ -251,7 +251,7 @@ contains
 !          call ESMF_GridCompRun(comp, exportState=exportState, rc=localrc)
           call ESMF_GridCompRun(comp, rc=localrc)
           if (localrc /= ESMF_SUCCESS) then
-              call ESMF_LogMsgSetError( &
+              call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       "Error while calling ESMF Run.", &
                       ESMF_CONTEXT, rcToReturn=localrc)
@@ -268,7 +268,7 @@ contains
 !          call ESMF_GridCompFinalize(comp, exportState=exportState, rc=localrc)
           call ESMF_GridCompFinalize(comp, rc=localrc)
           if (localrc /= ESMF_SUCCESS) then
-              call ESMF_LogMsgSetError( &
+              call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       "Error while calling ESMF Finalize.", &
                       ESMF_CONTEXT, rcToReturn=localrc)

@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.7 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.8 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@ program ESMF_CubedSphereRegridEx
       call ESMF_Initialize (defaultCalendar=ESMF_CAL_GREGORIAN, &
 			defaultlogfilename="CubedSphereRegridEx.Log", &
                     	defaultlogtype=ESMF_LOG_MULTI, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
 	  ESMF_CONTEXT, rcToReturn=rc)) goto 90
 
       !------------------------------------------------------------------------
@@ -884,7 +884,7 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
     if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
     if (totaldims /= 2) then
-	call ESMF_LogMsgSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
+	call ESMF_LogSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
 	ESMF_CONTEXT, status)
 	return
     endif
@@ -896,7 +896,7 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
     if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
     if (dims(1)*dims(2) /= totalpoints) then
-	call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE,"- The grid_dims does not match with the grid_size", &
+	call ESMF_LogSetError(ESMF_RC_ARG_SIZE,"- The grid_dims does not match with the grid_size", &
 	ESMF_CONTEXT, status)
 	return
     endif
@@ -1058,17 +1058,17 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
 		regDecomp=(/nPetsX, nPetsY/), &
 		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
 		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! Set coordinate tables 
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     allocate(coord2D(xdim,ydim))
@@ -1077,36 +1077,36 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
        call ESMF_ArrayGet(array,minIndexPDimPPatch=lbnd,maxIndexPDimPPatch=ubnd,rc=localrc)
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     
     ! Latitude
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	array = array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     if (PetNo == 0) then
        coord2D = RESHAPE(coordY,(/xdim, ydim/))
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     if (PetNo == 0)  deallocate(coord2D)
     ! create field
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
     field = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! Assign the field values using its latitude values, get the latitude 
     call ESMF_GridGetCoord(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	     computationalLBound=lbnd1, computationalUBound=ubnd1, &
 	     fptr = fptr1, rc=status)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, rc=status)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! fake the data array to use a linear function of its coordinates
@@ -1163,7 +1163,7 @@ subroutine OutputWeightFile(filename, file1, file2, indices, weights, revflag, &
       localCount(1)=size(weights,1)
       allocate(allCounts(PetCnt))
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) goto 90
 
       ! calculate the size of the global weight table
@@ -1175,12 +1175,12 @@ subroutine OutputWeightFile(filename, file1, file2, indices, weights, revflag, &
      !The file is created at PET 0 and only PET0 needs to provide the Src/Dst vertex coords and/or masks.
       if (PetNo == 0) then
          if (.not. (present(SrcVertexCoords))) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
             "- SrcVertexCoords has to be present in PET 0", ESMF_CONTEXT, status)
             return
          endif
          if ((.not. present(coordX)) .or. (.not. present(coordY))) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
             "- DstVertexCoords has to be present in PET 0", ESMF_CONTEXT, status)
             return
          endif

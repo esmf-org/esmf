@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.20 2010/11/03 22:48:47 theurich Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.21 2010/12/03 05:58:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1983,12 +1983,12 @@ function CreateDataField(name, igrid, layout, relloc, r4value, r8value, rc)
       thislayout = layout
   else
       call ESMF_VMGetGlobal(vm, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       thislayout = ESMF_DELayoutCreate(vm, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
   endif
@@ -2002,12 +2002,12 @@ function CreateDataField(name, igrid, layout, relloc, r4value, r8value, rc)
                                                       360.0_ESMF_KIND_R8/), &
                                horzStagger=ESMF_IGRID_HORZ_STAGGER_B_NE, &
                                rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridDistribute(thisigrid, delayout=thislayout, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
   else
@@ -2024,7 +2024,7 @@ function CreateDataField(name, igrid, layout, relloc, r4value, r8value, rc)
   ! default data - both type and value.  only one of r4value or r8value
   ! can be specified.  if neither, default is r8.
   if (present(r4value) .and. present(r8value)) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                                "Cannot specify both *4 and *8 values", &
                                 ESMF_CONTEXT, rc)
       goto 10
@@ -2048,7 +2048,7 @@ function CreateDataField(name, igrid, layout, relloc, r4value, r8value, rc)
       call ESMF_ArraySpecSet(as, rank=2, &
                              typekind=ESMF_TYPEKIND_R4, rc=status)
   endif
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
@@ -2056,21 +2056,21 @@ function CreateDataField(name, igrid, layout, relloc, r4value, r8value, rc)
   CreateDataField = ESMF_FieldCreate(igrid=thisigrid, arrayspec=as, &
                                      horzRelloc=thisrelloc, haloWidth=2, &
                                      name=name, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
   ! initialize the data field
   if (use_r8) then
       call ESMF_FieldGetDataPointer(CreateDataField, r8data, ESMF_DATA_REF, rc=rc)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
  
       r8data(:,:) = thisr8data
   else 
       call ESMF_FieldGetDataPointer(CreateDataField, r4data, ESMF_DATA_REF, rc=rc)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
  
@@ -2101,12 +2101,12 @@ function CreateLayout(which, rc)
   if (present(rc)) rc = ESMF_FAILURE
 
   call ESMF_VMGetGlobal(vm, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
   call ESMF_VMGet(vm, petCount=npets, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
@@ -2163,7 +2163,7 @@ function CreateLayout(which, rc)
 
       end select
   endif
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
@@ -2197,12 +2197,12 @@ function CreateIGrid(which, layout, rc)
       thislayout = layout
   else
       call ESMF_VMGetGlobal(vm, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
     
       call ESMF_VMGet(vm, petCount=npets, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
     
@@ -2279,14 +2279,14 @@ function CreateIGrid(which, layout, rc)
                                             rc=status)
 
   end select
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
 
   ! distribute the igrid across the PETs
   call ESMF_IGridDistribute(CreateIGrid, delayout=thislayout, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
    
@@ -2323,12 +2323,12 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   if (present(rc)) rc = ESMF_FAILURE
 
   call ESMF_VMGetGlobal(vm, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
     
   call ESMF_VMGet(vm, petCount=npets, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
     
@@ -2354,7 +2354,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   counts(2) = ny
 
   allocate(deltas(nz), stat=rc)
-  if (ESMF_LogMsgFoundAllocError(status, "Allocating delta array", &
+  if (ESMF_LogFoundAllocError(status, "Allocating delta array", &
                                        ESMF_CONTEXT, rc)) return
 
   deltas(:) = 100.0
@@ -2366,7 +2366,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
                                       dimUnits=(/ "deg", "deg" /), &
                                       periodic=(/ ESMF_TRUE, ESMF_FALSE /), &
                                       name=name, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
@@ -2374,7 +2374,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   call ESMF_IGridAddVertHeight(igrid, deltas, &
                               vertstagger=ESMF_IGRID_VERT_STAGGER_CENTER, &
                               rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
@@ -2392,7 +2392,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
     if (present(data_xde)) then
        if ((data_xde .le. 0) .or. (data_xde .gt. xde)) then
 
-         call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                                "data_xde must be > 0 and <= xde", &
                                 ESMF_CONTEXT, rc)
          goto 10
@@ -2406,7 +2406,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
     if (present(data_yde)) then
        if ((data_yde .le. 0) .or. (data_yde .gt. yde)) then
 
-         call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                                "data_yde must be > 0 and <= yde", &
                                 ESMF_CONTEXT, rc)
           goto 10
@@ -2417,7 +2417,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
     endif
 
     allocate(xdecounts(xde), ydecounts(yde), stat=status)
-    if (ESMF_LogMsgFoundAllocError(status, "Allocating decount arrays", &
+    if (ESMF_LogFoundAllocError(status, "Allocating decount arrays", &
                                    ESMF_CONTEXT, rc)) return
 
     ! default to 0 data items per DE, then divide up the data counts 
@@ -2442,7 +2442,7 @@ function CreateLatLonIGrid(nx, ny, nz, xde, yde, name, data_xde, data_yde, rc)
   else
     call ESMF_IGridDistribute(igrid, delayout=thislayout, rc=status)
   endif 
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 
@@ -2470,7 +2470,7 @@ function CreateEmptyDataField(name, rc)
 
   rc = ESMF_FAILURE
   CreateEmptyDataField = ESMF_FieldCreateNoData(name=name, rc=status)
-  if (ESMF_LogMsgFoundError(status, &
+  if (ESMF_LogFoundError(status, &
                             ESMF_ERR_PASSTHRU, &
                             ESMF_CONTEXT, rc)) goto 10
 

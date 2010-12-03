@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServComponent_C.F90,v 1.2 2010/11/10 20:16:35 ksaint Exp $
+! $Id: ESMF_WebServComponent_C.F90,v 1.3 2010/12/03 05:58:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
     call ESMF_WebServProcessRequest(comp, impstate, expstate, clock, phase, &
                                     proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, &
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
                                  "Error while processing init request", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -95,7 +95,7 @@
 
     call ESMF_GridCompInitialize(comp, exportState=expState, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, &
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
                                  "Error while calling ESMF Initialize", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -162,7 +162,7 @@
     call ESMF_WebServProcessRequest(comp, impstate, expstate, clock, phase, &
                                     proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, &
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
                                  "Error while processing run request", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -170,7 +170,7 @@
 
     call ESMF_GridCompRun(comp, exportState=expState, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, &
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
                                  "Error while calling ESMF Run", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -237,7 +237,7 @@
     call ESMF_WebServProcessRequest(comp, impstate, expstate, clock, phase, &
                                     proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, &
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
                                  "Error while processing final request", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -245,7 +245,7 @@
 
     call ESMF_GridCompFinalize(comp, exportState=expState, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, &
+        call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
                                  "Error while calling ESMF Finalize", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return

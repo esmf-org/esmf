@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.49 2010/11/12 05:33:06 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.49 2010/11/12 05:33:06 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -191,7 +191,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.49 2010/11/12 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -357,7 +357,7 @@ module ESMF_MeshMod
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -381,7 +381,7 @@ module ESMF_MeshMod
 
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 2) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- MeshAddNodes() should be called before this", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -394,14 +394,14 @@ module ESMF_MeshMod
                              elementIds, elementTypes, &
                              num_elementConn, elementConn, &
                              lregridConserve%regridconserve, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
                       mesh%element_distgrid, &
                       mesh%numOwnedNodes, mesh%numOwnedElements, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return    
 
     !call ESMF_DistGridPrint(mesh%nodal_distgrid)
@@ -489,7 +489,7 @@ module ESMF_MeshMod
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -497,7 +497,7 @@ module ESMF_MeshMod
 
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 1) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- MeshAddNodes() should be called before this", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -506,7 +506,7 @@ module ESMF_MeshMod
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
                              nodeOwners, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Go to next stage 
@@ -569,7 +569,7 @@ module ESMF_MeshMod
     ESMF_MeshCreate3Part%this = ESMF_NULL_POINTER
 
     call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! The C side has been created
@@ -730,7 +730,7 @@ module ESMF_MeshMod
 !    endif
 
     call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init status of arguments
@@ -740,7 +740,7 @@ module ESMF_MeshMod
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
                              nodeOwners, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     num_elems = size(elementTypes)
@@ -749,14 +749,14 @@ module ESMF_MeshMod
                              elementIds, elementTypes, &
                              num_elementConn, elementConn, &
                              lregridConserve%regridconserve, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreate1Part%this, ESMF_MeshCreate1Part%nodal_distgrid, &
                       ESMF_MeshCreate1Part%element_distgrid, &
                       ESMF_MeshCreate1Part%numOwnedNodes, ESMF_MeshCreate1Part%numOwnedElements, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -848,14 +848,14 @@ module ESMF_MeshMod
     if (filetype .eq. ESMF_FILEFORMAT_SCRIP) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
           localConvertToDual, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetype .eq. ESMF_FILEFORMAT_ESMFMESH) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, localConvert3D, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- the filetype has to be either ESMF_FILEFORMAT_ESMFMESH or ESMF_FILEFORMAT_SCRIP", & 
                  ESMF_CONTEXT, rc) 
        return
@@ -948,17 +948,17 @@ end function ESMF_MeshCreateFromFile
     ! get global vm information
     !
     call ESMF_VMGetGlobal(vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Read the mesh definition from the file
     call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, startElmt, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Total number of nodes for the global mesh
@@ -974,7 +974,7 @@ end function ESMF_MeshCreateFromFile
     else
         Mesh = ESMF_MeshCreate3part (2, NodeDim, localrc)
     end if
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! These two arrays are temp arrays
@@ -1013,7 +1013,7 @@ end function ESMF_MeshCreateFromFile
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
     ! NodeOwners1(:) 
     call ESMF_VMAllReduce(vm, NodeUsed, NodeOwners1, NodeCnt, ESMF_MIN, rc=localrc)
-   if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     
 
@@ -1065,7 +1065,7 @@ end function ESMF_MeshCreateFromFile
 
     ! Add nodes
     call ESMF_MeshAddNodes (Mesh, NodeId, NodeCoords1D, NodeOwners, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Need to calculate the total number of ESMF_MESH objects and the start element ID
@@ -1074,7 +1074,7 @@ end function ESMF_MeshCreateFromFile
     allocate(localElmTable(PetCnt))
     sndBuf(1)=TotalElements
     call ESMF_VMAllGather(vm, sndBuf, localElmTable, 1, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     
@@ -1100,7 +1100,7 @@ end function ESMF_MeshCreateFromFile
        localSplitElems(1)=0
     endif
     call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_MAX, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return    
     if (globalSplitElems(1) .eq. 1) then
        existSplitElems=.true.
@@ -1166,7 +1166,7 @@ end function ESMF_MeshCreateFromFile
 
     ! Add elements
     call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! NEED TO SET THIS HERE, BECAUSE MEshAddElements sets it to false
@@ -1251,12 +1251,12 @@ end function ESMF_MeshCreateFromUnstruct
     ! get global vm information
     !
     call ESMF_VMGetGlobal(vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     esmffilename = ".esmf.nc"
@@ -1267,12 +1267,12 @@ end function ESMF_MeshCreateFromUnstruct
         esmf_file_len = len_trim(esmffilename)
         call c_ConvertSCRIP(filename, scrip_file_len, &
           esmffilename, esmf_file_len, dualflag, localrc )
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     call ESMF_VMBarrier(vm)
     ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,convert3D, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
 !      system() is not available on some of the compilers, use open/close to
@@ -1344,7 +1344,7 @@ end function ESMF_MeshCreateFromScrip
                       ESMF_MeshCreateFromPointer%element_distgrid, &
                       ESMF_MeshCreateFromPointer%numOwnedNodes, &
                       ESMF_MeshCreateFromPointer%numOwnedElements, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! The C side has been created
@@ -1406,12 +1406,12 @@ end function ESMF_MeshCreateFromScrip
       if (mesh%isFullyCreated) then
          ! destroy node distgrid          
          call ESMF_DistgridDestroy(mesh%nodal_distgrid, rc=localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
          ! destroy element distgrid          
          call ESMF_DistgridDestroy(mesh%element_distgrid, rc=localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
          ! Get rid of split element map
@@ -1561,7 +1561,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -1570,7 +1570,7 @@ end function ESMF_MeshCreateFromScrip
     if (present(ownedNodeCoords)) then
        ! If mesh has been freed then exit
        if (mesh%isCMeshFreed) then
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                 "- the mesh internals have been freed", & 
                 ESMF_CONTEXT, rc) 
           return
@@ -1578,7 +1578,7 @@ end function ESMF_MeshCreateFromScrip
 
        ! Check array size
        if (size(ownedNodeCoords)<mesh%numOwnedNodes*mesh%spatialDim) then
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- owndedNodeCoords too small to hold coordinates", & 
                 ESMF_CONTEXT, rc) 
           return
@@ -1586,7 +1586,7 @@ end function ESMF_MeshCreateFromScrip
 
        ! Get coords from C
        call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, localrc) 
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -1658,14 +1658,14 @@ end function ESMF_MeshCreateFromScrip
     
     ! If meshs have not been fully created
     if (.not. mesh1%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif        
 
     if (.not. mesh2%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -1674,11 +1674,11 @@ end function ESMF_MeshCreateFromScrip
     ! For now just make match to mean that the Mesh's have the same distgrids because that's
     ! all the fields care about
     matchResultNode=ESMF_DistGridMatch(mesh1%nodal_distgrid, mesh2%nodal_distgrid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     matchResultElem=ESMF_DistGridMatch(mesh1%element_distgrid, mesh2%element_distgrid, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -1752,7 +1752,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -1768,14 +1768,14 @@ end function ESMF_MeshCreateFromScrip
      ! Serialize Node Distgrid
      call c_ESMC_DistgridSerialize(mesh%nodal_distgrid, buffer, length, offset, &
                                  linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
      ! Serialize Element Distgrid
      call c_ESMC_DistgridSerialize(mesh%element_distgrid, buffer, length, offset, &
                                  linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -1789,7 +1789,7 @@ end function ESMF_MeshCreateFromScrip
       ! Serialize other Mesh items
       call c_ESMC_MeshInfoSerialize(intMeshFreed, &
               buffer, length, offset,linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -1797,7 +1797,7 @@ end function ESMF_MeshCreateFromScrip
       if (.not. mesh%isCMeshFreed) then
          call c_ESMC_MeshSerialize(mesh%this, buffer, length, offset, &
                                  linquireflag, localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
@@ -1856,29 +1856,29 @@ end function ESMF_MeshCreateFromScrip
 
      ! Deserialize node Distgrid
      call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%nodal_distgrid, buffer, offset, localrc)
-     if (ESMF_LogMsgFoundError(localrc, &
+     if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%nodal_distgrid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
      ! Deserialize element Distgrid
      call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%element_distgrid, buffer, offset, localrc)
-     if (ESMF_LogMsgFoundError(localrc, &
+     if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%element_distgrid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
       ! Deserialize other ESMF_MeshDeserialize items
       call c_ESMC_MeshInfoDeserialize(intMeshFreed, buffer, offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -1901,7 +1901,7 @@ end function ESMF_MeshCreateFromScrip
       if (.not. ESMF_MeshDeserialize%isCMeshFreed) then
          call c_ESMC_MeshDeserialize(ESMF_MeshDeserialize%this, buffer, &
                                      offset, localrc)
-         if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
    
@@ -1954,7 +1954,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -1962,14 +1962,14 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif    
 
     call C_ESMC_MeshWrite(mesh%this, filename, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = localrc
@@ -2038,7 +2038,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2046,7 +2046,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2063,7 +2063,7 @@ end function ESMF_MeshCreateFromScrip
    ! TODO: ADD GIDS TO THIS INTERFACE AS THEY'RE AVAILABLE FROM C++ METHOD
     call C_ESMC_MeshFindPnt(mesh%this, localunmappedAction, pntDim, pntCount, &
 			    pntList, petList, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -2115,7 +2115,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2123,7 +2123,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2131,7 +2131,7 @@ end function ESMF_MeshCreateFromScrip
 
    ! Call into mesh get areas
     call C_ESMC_MeshGetArea(mesh%this, size(areaList), areaList, localrc);
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -2186,7 +2186,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2194,7 +2194,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2204,7 +2204,7 @@ end function ESMF_MeshCreateFromScrip
     ! current areas
     if (.not. mesh%hasSplitElem) then
        call ESMF_MeshGetElemArea(mesh, areaList, rc=localrc)    
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        if  (present(rc)) rc = ESMF_SUCCESS
        return 
@@ -2213,7 +2213,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! check size of areaList
     if (size(areaList) .lt. mesh%origElemCount) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- area list too small to hold element areas", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2224,7 +2224,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! Get split areas
     call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Put the areas back together
@@ -2289,7 +2289,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2307,7 +2307,7 @@ end function ESMF_MeshCreateFromScrip
       ! copy split Element Map
       if (present(splitElemMap)) then
          if (size(splitElemMap) .lt. size(mesh%splitElemMap)) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- splitElemMap input parameter wrong size ", & 
                  ESMF_CONTEXT, rc) 
             return 
@@ -2319,7 +2319,7 @@ end function ESMF_MeshCreateFromScrip
       if (present(splitElemStart) .or. present(splitElemCount) .or. &
           present(origElemStart)  .or. present(origElemCount) .or. &
           present(splitElemMap)) then
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+          call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has no split elements", & 
                  ESMF_CONTEXT, rc) 
       endif 
@@ -2380,7 +2380,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2388,7 +2388,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2405,13 +2405,13 @@ end function ESMF_MeshCreateFromScrip
 
     ! Get VM
     call ESMF_VMGetCurrent(vm,rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get VM info
     call ESMF_VMGet(vm, localPet=localPet, &
            petcount=petCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !!! Need whole split list so allgather it !!!
@@ -2422,7 +2422,7 @@ end function ESMF_MeshCreateFromScrip
     ! Get List of counts
     localCount(1)=size(mesh%splitElemMap)
     call ESMF_VMAllGather(vm,localCount,globalCount,count=1,rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
@@ -2515,7 +2515,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2523,7 +2523,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogMsgSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rc) 
        return 
@@ -2544,7 +2544,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! Get split areas
     call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return   
 
     ! Allocate array to hold orig areas (before split)
@@ -2552,7 +2552,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! Get split areas
     call ESMF_MeshGetOrigElemArea(mesh, origAreaList, rc=localrc)    
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return   
 
 

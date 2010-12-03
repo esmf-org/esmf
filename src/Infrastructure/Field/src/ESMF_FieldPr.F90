@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.33 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_FieldPr.F90,v 1.34 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ contains
         fp => field%ftypep
 
         call ESMF_BaseGetStatus(fp%base, fieldstatus, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
 
@@ -138,7 +138,7 @@ contains
         write(*,*) "Field Print Starts ====>"
 
         call ESMF_StatusString(fieldstatus, str, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         write(*, *)  "Field status = ", trim(str)
@@ -159,7 +159,7 @@ contains
         endif
 
         call c_ESMC_GetName(fp%base, name, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
@@ -167,7 +167,7 @@ contains
         write(*, *)  "  Name = '",  trim(name), "'"
 
         call ESMF_BasePrint(fp%base, defaultopts, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -176,11 +176,11 @@ contains
         write(*, *)  "Grid status = ", trim(str)
         if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
 !           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
-!          if (ESMF_LogMsgFoundError(localrc, &
+!          if (ESMF_LogFoundError(localrc, &
 !            ESMF_ERR_PASSTHRU, &
 !            ESMF_CONTEXT, rc)) return
           call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
           write(*, *) "gridrank = ", gridrank
@@ -190,11 +190,11 @@ contains
         write(*, *)  "Data status = ", trim(str)
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
           call ESMF_ArrayPrint(fp%array, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
           call ESMF_ArrayGet(fp%array, rank=arrayrank, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
           write(*, *) "arrayrank = ", arrayrank
@@ -285,17 +285,17 @@ contains
         fp => field%ftypep
 
         call c_ESMC_GetName(fp%base, name, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldGet(field, array=array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayRead(array, file, variableName=trim(name), &
           timeslice=time, iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleComm.F90,v 1.9 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldBundleComm.F90,v 1.10 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleComm.F90,v 1.9 2010/03/04 18:57:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleComm.F90,v 1.10 2010/12/03 05:57:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -239,7 +239,7 @@
       ! Call Array method to perform actual work
       call ESMF_IArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%igrid, &
                                btypep%flist(1)%ftypep%mapping, array, status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -326,7 +326,7 @@
           call ESMF_IArrayGather(btypep%flist(i)%ftypep%localfield%localdata, &
                                 btypep%igrid, btypep%flist(i)%ftypep%mapping, &
                                 destinationDE, arrayList(i), status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
       enddo
@@ -414,7 +414,7 @@
 
       ! Validate bundle before going further
       call ESMF_FieldBundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -423,7 +423,7 @@
       ! before looking a bundle, see what kind of mapping is in this handle.
       ! and if the route options request no packing by bundle.
       call ESMF_RouteHandleGet(routehandle, rmaptype=maptype, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -441,11 +441,11 @@
       if (maptype .eq. ESMF_1TO1HANDLEMAP) then
           ! make sure things match
           call ESMF_RouteHandleGet(routehandle, route_count=rcount, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           if (rcount .ne. btypep%field_count) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "FieldBundles do not match FieldBundles used in FieldBundleHaloStore", &
                    ESMF_CONTEXT, rc)
               return
@@ -456,7 +456,7 @@
 
             call ESMF_IArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
                                 routehandle, i, blocking, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
+            if (ESMF_LogFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           enddo
@@ -466,7 +466,7 @@
         if (.not. ESMF_FieldBundleIsCongruent(bundle, rc=status)) then
           ! problem - the map was computed with a congruent bundle
           ! and this one is not.  error out and return. 
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "FieldBundleHaloStore() was called with an incompatible FieldBundle", &
                    ESMF_CONTEXT, rc)
           return
@@ -479,7 +479,7 @@
             ! one shared route in it.
             nitems = btypep%field_count
             allocate(arrayList(nitems), stat=status)
-            if (ESMF_LogMsgFoundAllocError(status, & 
+            if (ESMF_LogFoundAllocError(status, & 
                                           "Allocating arraylist information", &
                                            ESMF_CONTEXT, rc)) return
             ! make a list of arrays
@@ -498,7 +498,7 @@
   
               call ESMF_IArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
                                 routehandle, 1, blocking, rc=status)
-              if (ESMF_LogMsgFoundError(status, &
+              if (ESMF_LogFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
             enddo
@@ -544,7 +544,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -625,7 +625,7 @@
 
       ! Validate bundle before going further
       call ESMF_FieldBundleValidate(bundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -649,7 +649,7 @@
                                   btypep%igrid, &
                                   btypep%flist(1)%ftypep%mapping, routehandle, &
                                   halodirection, routeOptions, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       else
@@ -666,7 +666,7 @@
                                   routehandle, &
                                   halodirection, routeOptions, rc=status)
   
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -770,27 +770,27 @@
       stypep = srcFieldBundle%btypep
       dtypep = dstFieldBundle%btypep
       routehandle = ESMF_RouteHandleCreate(status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! call FieldBundleRedistStore
       call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, parentVM, &
                                   routehandle, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! call FieldBundleRedistRun
       call ESMF_FieldBundleRedistRun(srcFieldBundle, dstFieldBundle, routehandle, &
                                 blocking, commhandle, routeOptions, status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! call FieldBundleRedistRelease
       call ESMF_FieldBundleRedistRelease(routehandle, status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -890,7 +890,7 @@
 
       ! Does validate of both bundles and checks for consistent types.
       condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
      
@@ -918,7 +918,7 @@
       ! before looking a bundle, see what kind of mapping is in this handle.
       ! and if the route options request no packing by bundle.
       call ESMF_RouteHandleGet(routehandle, rmaptype=maptype, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -930,14 +930,14 @@
 
         ! some simple error checks here
         call ESMF_RouteHandleGet(routehandle, route_count=rcount, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+        if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
    
         ! we have already verified that source count == dest count, so either
         ! can be compared against the number of routes in this handle.
         if (rcount .ne. stypep%field_count) then
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                 "RouteHandle and FieldBundles do not have matching Field counts", &
                                      ESMF_CONTEXT, rc)
             return
@@ -952,7 +952,7 @@
                                 dtypep%flist(i)%ftypep%localfield%localFlag, &
                                 routehandle, i, blocking, &
                                 routeOptions, status)
-         if (ESMF_LogMsgFoundError(status, &
+         if (ESMF_LogFoundError(status, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
         enddo
@@ -962,7 +962,7 @@
         ! bundles as inputs.
         if (condition .eq. ESMF_BUNDLECOMM_NONCONGRUENT) then
           ! problem.  routehandle thinks they are.
-          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "FieldBundles do not match FieldBundles used in FieldBundleRedistStore()", &
                    ESMF_CONTEXT, rc)
           return
@@ -986,7 +986,7 @@
               dtypep%flist(1)%ftypep%localfield%localFlag, &
               dstArrayList, stypep%flist(1)%ftypep%localfield%localFlag, &
               routehandle, 1, blocking, routeOptions, status)
-            if (ESMF_LogMsgFoundError(status, &
+            if (ESMF_LogFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) then
                 deallocate(srcArrayList, dstArrayList, stat=status) 
@@ -1006,7 +1006,7 @@
                                  dtypep%flist(i)%ftypep%localfield%localFlag, &
                                  routehandle, 1, blocking, &
                                  routeOptions, status)
-              if (ESMF_LogMsgFoundError(status, &
+              if (ESMF_LogFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) return
              enddo
@@ -1054,7 +1054,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1134,12 +1134,12 @@
 
       ! Validate bundle before going further
       call ESMF_FieldBundleValidate(srcFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldBundleValidate(dstFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -1148,7 +1148,7 @@
       ! of fields, make sure the data types are consistent, etc.
 
       condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
      
@@ -1180,7 +1180,7 @@
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  parentVM, &
                                  routehandle, routeOptions, status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
       else
@@ -1200,7 +1200,7 @@
                                i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
                                parentVM, &
                                routehandle, routeOptions, status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
         enddo
@@ -1271,7 +1271,7 @@
       !call ESMF_IGridReduce(field%btypep%igrid, &
       !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
       !                     rtype, result, status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -1375,7 +1375,7 @@
       stypep = srcFieldBundle%btypep
       dtypep = dstFieldBundle%btypep
       routehandle = ESMF_RouteHandleCreate(localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -1383,7 +1383,7 @@
       call ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, parentVM, &
                                   routehandle, regridMethod, regridNorm, &
                                   srcMask, dstMask, routeOptions, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -1391,13 +1391,13 @@
       call ESMF_FieldBundleRegridRun(srcFieldBundle, dstFieldBundle, routehandle, &
                                 srcMask, dstMask, blocking, commhandle, &
                                 routeOptions, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       ! call FieldBundleRegridRelease
       call ESMF_FieldBundleRegridRelease(routehandle, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -1499,7 +1499,7 @@
 
       ! Does validate of both bundles and checks for consistent types.
       condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
      
@@ -1508,7 +1508,7 @@
       ! before looking a bundle, see what kind of mapping is in this handle.
       ! and if the route options request no packing by bundle.
       call ESMF_RouteHandleGet(routehandle, rmaptype=maptype, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -1539,11 +1539,11 @@
       if (maptype .eq. ESMF_1TO1HANDLEMAP) then
           ! make sure things match
           call ESMF_RouteHandleGet(routehandle, route_count=rcount, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           if (rcount .ne. stypep%field_count) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "FieldBundles do not match FieldBundles used in FieldBundleRegridStore", &
                    ESMF_CONTEXT, rc)
               return
@@ -1562,7 +1562,7 @@
                                   routehandle, i, &
                                   srcMask, dstMask, &
                                   blocking, commhandle, routeOptions, status)
-            if (ESMF_LogMsgFoundError(status, &
+            if (ESMF_LogFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
           enddo
@@ -1572,7 +1572,7 @@
           ! congruent bundles.
           if (condition .eq. ESMF_BUNDLECOMM_NONCONGRUENT) then
             ! problem.  routehandle thinks they are.
-            call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "FieldBundles do not match FieldBundles used in FieldBundleRegridStore()", &
                    ESMF_CONTEXT, rc)
             return
@@ -1604,7 +1604,7 @@
                                  dtypep%flist(1)%ftypep%mapping, hasDstData, &
                                  routehandle, 1, srcMask, dstMask, &
                                  blocking, commhandle, routeOptions, status)
-              if (ESMF_LogMsgFoundError(status, &
+              if (ESMF_LogFoundError(status, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc)) then
                   deallocate(srcArrayList, dstArrayList, stat=status) 
@@ -1628,7 +1628,7 @@
                                   routehandle, 1, &
                                   srcMask, dstMask, &
                                   blocking, commhandle, routeOptions, status)
-                if (ESMF_LogMsgFoundError(status, &
+                if (ESMF_LogFoundError(status, &
                                           ESMF_ERR_PASSTHRU, &
                                           ESMF_CONTEXT, rc)) return
               enddo
@@ -1677,7 +1677,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1769,7 +1769,7 @@
 
       ! Does validate of both bundles and checks for consistent types.
       condition = ESMF_FieldBundleCommPrepCheck(srcFieldBundle, dstFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
      
@@ -1803,7 +1803,7 @@
                                  1, ESMF_ALLTO1HANDLEMAP, 1, &
                                  regridMethod, regridNorm, srcMask, dstMask, &
                                  routeOptions, status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
       else
@@ -1820,7 +1820,7 @@
                                  i, ESMF_1TO1HANDLEMAP, stypep%field_count, &
                                  regridMethod, regridNorm, srcMask, dstMask, &
                                  routeOptions, status)
-            if (ESMF_LogMsgFoundError(status, &
+            if (ESMF_LogFoundError(status, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
         enddo
@@ -1919,11 +1919,11 @@
       !  match up the array indices and the igrid indices.
       call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
                            dataIndexList=dimorder, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 !     call ESMF_IGridGet(btypep%igrid, decomps, rc=status)   !TODO
-      !if (ESMF_LogMsgFoundError(status, &
+      !if (ESMF_LogFoundError(status, &
       !                            ESMF_ERR_PASSTHRU, &
       !                            ESMF_CONTEXT, rc)) return
       decomps(1) = 1    ! TODO: remove this once the igrid call is created
@@ -1932,7 +1932,7 @@
       ! And get the Array sizes
       call ESMF_InternArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -1945,7 +1945,7 @@
       call ESMF_IGridGet(btypep%igrid, delayout=delayout, rc=status)
       call ESMF_IArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
@@ -2024,12 +2024,12 @@
 
       ! Validate bundles before going further
       call ESMF_FieldBundleValidate(srcFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldBundleValidate(dstFieldBundle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
+      if (ESMF_LogFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
@@ -2038,7 +2038,7 @@
 
       ! Make sure both bundles have the same number of fields.
       if (stypep%field_count .ne. dtypep%field_count) then
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                                  "FieldBundles must contain same number of Fields", &
                                  ESMF_CONTEXT, rc)
         return
@@ -2047,7 +2047,7 @@
 
       ! For now, make sure that none of the fields are empty.
       if ((stypep%field_count .le. 0) .or. (dtypep%field_count .le. 0)) then
-        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                                  "FieldBundles must not be empty", &
                                   ESMF_CONTEXT, rc)
         return
@@ -2061,12 +2061,12 @@
       do i=1, stypep%field_count
           call ESMF_InternArrayGet(stypep%flist(1)%ftypep%localfield%localdata, &
                              rank=srank, typekind=skind, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           call ESMF_InternArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, &
                              rank=drank, typekind=dkind, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           
@@ -2076,16 +2076,16 @@
         ! Skip the checking if one is arbitrary and the other is block
 	! ** P Li ** 10/17/2006
           call ESMF_IGridGet(stypep%igrid, igridStorage=sigridStorage, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           call ESMF_IGridGet(dtypep%igrid, igridStorage=digridStorage, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+          if (ESMF_LogFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           if (sigridStorage.eq.digridStorage) then				    
             if (srank .ne. drank) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "Corresponding Fields in FieldBundles must have same data rank", &
                                        ESMF_CONTEXT, rc)
               return
@@ -2093,7 +2093,7 @@
 	  endif
 
           if (skind .ne. dkind) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                   "Corresponding Fields in FieldBundles must have same typekind", &
                                        ESMF_CONTEXT, rc)
               return

@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_errorhandling.tex,v 1.1 2007/05/02 22:01:21 cdeluca Exp $
+% CVS $Id: code_conv_errorhandling.tex,v 1.2 2010/12/03 05:58:07 theurich Exp $
 
 \subsection{Code: Error Handling Conventions}
 
@@ -25,7 +25,7 @@ The {\tt localrc} values are evaluated using the function {\tt ESMF\_LogMsgFound
 
 The convention is to place {\tt ESMF\_LogMsgFoundError()} into a conditional statement that causes a return from the method, with the correctly set {\tt rc}, when an error is found in {\tt localrc}, e.g.:
 \begin{verbatim}
-if (ESMF_LogMsgFoundError(localrc, <other args ...>, rc)) return
+if (ESMF_LogFoundError(localrc, <other args ...>, rc)) return
 \end{verbatim}
 Use of the {\tt ESMF\_LogMsgFoundError()} function is further described in the ESMF Reference Manual.
 
@@ -63,7 +63,7 @@ if (present(rc)) rc=ESMF_RC_NOT_IMPL
 ! ...code...
 if (branch==1) then
 call subsub1(localrc)
-if (ESMF_LogMsgFoundError(localrc, &
+if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
   ESMF_CONTEXT, rc)) then
   !   ... any necessary garbage collection ...
@@ -71,7 +71,7 @@ if (ESMF_LogMsgFoundError(localrc, &
 endif !   ...fully implemented code...
 if (present(rc)) rc=ESMF_SUCCESS
 elseif (branch==2) then call subsub2(localrc)
-if (ESMF_LogMsgFoundError(localrc, &
+if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
   ESMF_CONTEXT, rc)) then
   !   ... any necessary garbage collection ...
@@ -113,7 +113,7 @@ if (present(rc)) rc=ESMF_RC_NOT_SET
 ! ...code...
 if (branch==1) then
 call subsub1(localrc)
-if (ESMF_LogMsgFoundError(localrc, &
+if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
   ESMF_CONTEXT, rc)) then
   !   ... any necessary garbage collection ...      return ! Return point 1
@@ -121,7 +121,7 @@ endif
 !   ...fully implemented code...
 if (present(rc)) rc=ESMF_SUCCESS
 elseif (branch==2) then call subsub2(localrc)
-if (ESMF_LogMsgFoundError(localrc, &
+if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
   ESMF_CONTEXT, rc)) then
   !   ... any necessary garage collection ...

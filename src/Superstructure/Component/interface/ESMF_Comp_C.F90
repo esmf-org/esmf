@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.64 2010/10/14 15:25:37 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.65 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.64 2010/10/14 15:25:37 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.65 2010/12/03 05:57:59 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -218,7 +218,7 @@ recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
   compclass = comp_src%compp
   call ESMF_CompClassSetInitCreated(compclass)
   call c_ESMC_FTableCreate(compclass%this, localrc) 
-  if (ESMF_LogMsgFoundError(localrc, &
+  if (ESMF_LogFoundError(localrc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)) return
   call ESMF_VMGetThis(vm, this)
@@ -304,14 +304,14 @@ subroutine f_esmf_compcollectgarbage(comp, rc)
 
   ! destruct internal data allocations
   call ESMF_CompDestruct(comp%compp, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, &
+  if (ESMF_LogFoundError(localrc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc)) return
 
   ! deallocate actual CompClass allocation      
   if (associated(comp%compp)) then
     deallocate(comp%compp, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating Comp", &
+    if (ESMF_LogFoundAllocError(localrc, "Deallocating Comp", &
       ESMF_CONTEXT, rc)) return
   endif
   nullify(comp%compp)

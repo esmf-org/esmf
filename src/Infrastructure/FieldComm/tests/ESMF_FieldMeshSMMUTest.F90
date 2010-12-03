@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.8 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldMeshSMMUTest.F90,v 1.9 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldMeshSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.8 2010/11/03 22:48:42 theurich Exp $'
+    '$Id: ESMF_FieldMeshSMMUTest.F90,v 1.9 2010/12/03 05:57:39 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -272,12 +272,12 @@ contains
 
           srcField = ESMF_FieldCreate(mesh, arrayspec, &
               rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
           call ESMF_FieldGet(srcField, localDe=0, farrayPtr=srcfptr, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
@@ -287,22 +287,22 @@ contains
 
           ! a one dimensional grid whose index space is an isomorphism with the mesh's
           distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
           grid = ESMF_GridCreate(distgrid=distgrid, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
           dstField = ESMF_FieldCreate(grid, arrayspec, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
           call ESMF_FieldGet(dstField, localDe=0, farrayPtr=dstfptr, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
@@ -325,7 +325,7 @@ contains
               factorIndexList(2,:) = (/1, 2, 3/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                   factorList, factorIndexList, rc=rc)
-              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rc,  ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           else if (localPet == 1) then
@@ -337,7 +337,7 @@ contains
               factorIndexList(2,:) = (/4, 5/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                   factorList, factorIndexList, rc=rc)
-              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rc,  ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           else if (localPet == 2) then
@@ -349,7 +349,7 @@ contains
               factorIndexList(2,:) = (/6, 7/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                   factorList, factorIndexList, rc=rc)
-              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rc,  ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           else if (localPet == 3) then
@@ -361,21 +361,21 @@ contains
               factorIndexList(2,:) = (/8,9/)
               call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
                   factorList, factorIndexList, rc=rc)
-              if (ESMF_LogMsgFoundError(rc,  ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rc,  ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rc)) return
               deallocate(factorList, factorIndexList)
           endif
 
           ! perform smm
           call ESMF_FieldSMM(srcField, dstField, routehandle, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
           ! verify smm
           call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr, &
               exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
@@ -388,13 +388,13 @@ contains
           do i = exlb(1), exub(1)
               if(fptr(i) .ne. i*i) finalrc = ESMF_FAILURE
           enddo
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 
           ! release SMM route handle
           call ESMF_FieldSMMRelease(routehandle, rc=rc)
-          if (ESMF_LogMsgFoundError(rc, &
+          if (ESMF_LogFoundError(rc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rc)) return
 

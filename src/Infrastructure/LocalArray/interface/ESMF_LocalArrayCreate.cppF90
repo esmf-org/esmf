@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.27 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.28 2010/12/03 05:57:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.27 2010/11/12 06:57:18 eschwab Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.28 2010/12/03 05:57:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -313,7 +313,7 @@ end function
     
     ! Check rank argument
     if (rank<1 .or. rank>ESMF_MAXDIM) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         "- Unsupported rank", &
         ESMF_CONTEXT, rc)
       return
@@ -322,7 +322,7 @@ end function
     ! Check that enough info from counts, lbounds and ubounds is present
     if (.not.present(counts)) then
       if (.not.present(lbounds).or..not.present(ubounds)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_OPT, &
+        call ESMF_LogSetError(ESMF_RC_ARG_OPT, &
           "- lbounds and ubounds must be present when counts argument is not present", &
           ESMF_CONTEXT, rc)
         return
@@ -332,7 +332,7 @@ end function
     ! Check size of optional counts and bounds and fill the local variables
     if (present(lbounds)) then
       if (size(lbounds)<rank) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
           "- lbounds argument must be of size rank", &
           ESMF_CONTEXT, rc)
         return
@@ -341,7 +341,7 @@ end function
     endif
     if (present(ubounds)) then
       if (size(ubounds)<rank) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
           "- ubounds argument must be of size rank", &
           ESMF_CONTEXT, rc)
         return
@@ -350,7 +350,7 @@ end function
     endif
     if (present(counts)) then
       if (size(counts)<rank) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
           "- counts argument must be of size rank", &
           ESMF_CONTEXT, rc)
         return
@@ -371,7 +371,7 @@ end function
     ! Check that the local bounds and counts variables match
     do i=1, rank
       if (cnts(i).ne.(ub(i)-lb(i)+1)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
           "- counts and bounds mismatch detected", &
           ESMF_CONTEXT, rc)
         return
@@ -381,13 +381,13 @@ end function
     ! Create an initial LocalArray object that must be completed below
     call c_ESMC_LocalArrayCreateNoData(array, rank, typekind, &
       ESMF_FROM_FORTRAN, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
     ! Complete the initial LocalArray object
     call ESMF_LocalArrConstrF90Ptr(array, cnts, typekind, rank, lb, ub, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -462,14 +462,14 @@ end function
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
     call ESMF_ArraySpecGet(arrayspec, typekind=typekind, rank=rank, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
     
     ! Call the CreateByTKR function to make the array
     ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByTKR(typekind, rank, &
       counts, lbounds, ubounds, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -527,7 +527,7 @@ end function
 
     ! Call into the C++ interface
     call c_ESMC_LocalArrayCreateCopy(larray, larrayOut, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set return value
@@ -651,7 +651,7 @@ end function
       endif @\
     else @\
       if (present(docopy)) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_OPT, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_OPT, & @\
           "- docopy argument is only allowed with associated fptr argument", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -662,7 +662,7 @@ end function
     ! Check that enough info from counts, lbounds and ubounds is present @\
     if (.not.associated(fptr) .and. .not.present(counts)) then @\
       if (.not.present(lbounds) .or. .not.present(ubounds)) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_OPT, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_OPT, & @\
           "- lbounds and ubounds must be present when counts argument is not present", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -672,7 +672,7 @@ end function
     ! Check size of optional counts and bounds and fill the local variables @\
     if (present(lbounds)) then @\
       if (size(lbounds)<mrank) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
           "- lbounds argument must be of size rank", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -680,7 +680,7 @@ end function
       if (associated(fptr)) then @\
         do i=1, mrank @\
           if (lb(i) .ne. lbounds(i)) then @\
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
               "- provided lbounds are incompatible with associated fptr", & @\
               ESMF_CONTEXT, rc) @\
             return @\
@@ -692,7 +692,7 @@ end function
     endif @\
     if (present(ubounds)) then @\
       if (size(ubounds)<mrank) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
           "- ubounds argument must be of size rank", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -700,7 +700,7 @@ end function
       if (associated(fptr)) then @\
         do i=1, mrank @\
           if (ub(i) .ne. ubounds(i)) then @\
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
               "- provided ubounds are incompatible with associated fptr", & @\
               ESMF_CONTEXT, rc) @\
             return @\
@@ -712,7 +712,7 @@ end function
     endif @\
     if (present(counts)) then @\
       if (size(counts)<mrank) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_SIZE, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
           "- counts argument must be of size rank", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -720,7 +720,7 @@ end function
       if (associated(fptr)) then @\
         do i=1, mrank @\
           if (cnts(i) .ne. counts(i)) then @\
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
               "- provided counts are incompatible with associated fptr", & @\
               ESMF_CONTEXT, rc) @\
             return @\
@@ -746,7 +746,7 @@ end function
     ! Check that the local bounds and counts variables match @\
     do i=1, mrank @\
       if (cnts(i) .ne. (ub(i)-lb(i)+1)) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
           "- counts and bounds mismatch detected", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -756,13 +756,13 @@ end function
     ! Call create routine @\
     call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_TYPEKIND_##mtypekind, & @\
       ESMF_FROM_FORTRAN, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
  @\
     call ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, cnts, fptr,& @\
       copy, lb, ub, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
  @\
@@ -834,24 +834,24 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     !   (we will ignore the data) and call deallocate themselves.
 
     call c_ESMC_LocalArrayGetDealloc(larray, dealloc, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
     if (dealloc.eq.ESMF_TRUE) then
       call c_ESMC_LocalArrayGetRank(larray, rank, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       call c_ESMC_LocalArrayGetTypeKind(larray, typekind, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       call ESMF_LocalArrayF90Deallocate(larray, typekind, rank, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       call c_ESMC_LocalArraySetDealloc(larray, ESMF_FALSE, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
@@ -859,7 +859,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     ! Calling deallocate first means this will not return back to F90
     !  before returning for good.
     call c_ESMC_LocalArrayDestroy(larray, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -971,7 +971,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
               lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1003,7 +1003,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
               lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1034,7 +1034,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
               lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1064,7 +1064,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
               lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1094,7 +1094,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
               lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1124,12 +1124,12 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
               lbounds=lbounds, ubounds=ubounds, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
       case default
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+        if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
           "Unsupported typekind", & 
           ESMF_CONTEXT, rc)) return
     end select
@@ -1283,7 +1283,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
             ub(1:size(ubounds)) = ubounds @\
         endif @\
         allocate(newp(mrng), stat=localrc) @\
-        if (ESMF_LogMsgFoundAllocError(localrc, & @\
+        if (ESMF_LogFoundAllocError(localrc, & @\
                              "LocalArray data space", & @\
                              ESMF_CONTEXT, rc)) return @\
     endif @\
@@ -1304,7 +1304,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
                              ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
                              ESMF_ERR_PASSTHRU, & @\
                              ESMF_CONTEXT, rc)) return @\
     else @\
@@ -1312,7 +1312,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
                              ESMF_NULL_POINTER, counts, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
                              ESMF_ERR_PASSTHRU, & @\
                              ESMF_CONTEXT, rc)) return @\
     endif @\
@@ -1332,12 +1332,12 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
 
 #define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
   call c_ESMC_LocalArrayGetFPtr(array, l##mrank##D##mtypekind, localrc) @\
-  if (ESMF_LogMsgFoundError(localrc, & @\
+  if (ESMF_LogFoundError(localrc, & @\
     ESMF_ERR_PASSTHRU, & @\
     ESMF_CONTEXT, rc)) return @\
  @\
   deallocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind, stat=localrc)  @\
-  if (ESMF_LogMsgFoundDeallocError(localrc, "LocalArray deallocation", & @\
+  if (ESMF_LogFoundDeallocError(localrc, "LocalArray deallocation", & @\
     ESMF_CONTEXT, rc)) return @\
  @\
   nullify(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind) @\
@@ -1408,7 +1408,7 @@ AllocDeallocateMacro(integer, I1, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I1, 7, COL7, LEN7, RNG7, LOC7)       
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -1434,7 +1434,7 @@ AllocDeallocateMacro(integer, I2, 7, COL7, LEN7, RNG7, LOC7)
 
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -1458,7 +1458,7 @@ AllocDeallocateMacro(integer, I4, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I4, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -1481,7 +1481,7 @@ AllocDeallocateMacro(integer, I8, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I8, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -1504,7 +1504,7 @@ AllocDeallocateMacro(real, R4, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(real, R4, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -1527,18 +1527,18 @@ AllocDeallocateMacro(real, R8, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
           case default
-                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported kind", & 
                                  ESMF_CONTEXT, rc)) return
         end select
 
 
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1594,11 +1594,11 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
     ! Identify larrayIn TKR
     call c_ESMC_LocalArrayGetRank(larrayIn, rank, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call c_ESMC_LocalArrayGetTypeKind(larrayIn, typekind, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -1634,7 +1634,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             call ESMF_LocalArrayCopy7DI1(larrayIn, larrayOut, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1659,7 +1659,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             call ESMF_LocalArrayCopy7DI2(larrayIn, larrayOut, rc=localrc)
 ^endif
            case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1683,7 +1683,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             call ESMF_LocalArrayCopy7DI4(larrayIn, larrayOut, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1706,7 +1706,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             call ESMF_LocalArrayCopy7DI8(larrayIn, larrayOut, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1729,7 +1729,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             call ESMF_LocalArrayCopy7DR4(larrayIn, larrayOut, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
@@ -1752,16 +1752,16 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
             call ESMF_LocalArrayCopy7DR8(larrayIn, larrayOut, rc=localrc)
 ^endif
           case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
               "Unsupported rank", & 
               ESMF_CONTEXT, rc)) return
         end select
       case default
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+        if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
           "Unsupported typekind", & 
           ESMF_CONTEXT, rc)) return
     end select
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1836,23 +1836,23 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     endif @\
  @\
     call c_ESMC_LocalArrayGetFPtr(arrayIn, wrapIn, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
  @\
     ! Allocate a new buffer and return a copy @\
     call c_ESMC_LocalArrayGetLbounds(arrayOut, lb, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
     call c_ESMC_LocalArrayGetUbounds(arrayOut, ub, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
     ! Macro mrng @\
     ! is a macro that has correct construction of lb and ub elements @\
     allocate(lp(mrng), stat=localrc) @\
-    if (ESMF_LogMsgFoundAllocError(localrc, & @\
+    if (ESMF_LogFoundAllocError(localrc, & @\
       "local data space", & @\
       ESMF_CONTEXT, rc)) return @\
     ! this must do a contents assignment @\
@@ -1860,19 +1860,19 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     ! point to this memory allocation in the arrayOut @\
     wrapOut%ptr##mrank##D##mtypekind => lp  @\
     call c_ESMC_LocalArraySetFPtr(arrayOut, wrapOut, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, & @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rc)) return @\
     if (size(lp) .ne. 0) then @\
       call c_ESMC_LocalArraySetBaseAddr(arrayOut, & @\
         ESMF_DATA_ADDRESS(lp(mloc)), localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
     else @\
       call c_ESMC_LocalArraySetBaseAddr(arrayOut, & @\
         ESMF_NULL_POINTER, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
     endif @\
@@ -1953,7 +1953,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                     lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -1985,7 +1985,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                     lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -2016,7 +2016,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                     lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -2046,7 +2046,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                     lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -2076,7 +2076,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                     lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
@@ -2106,18 +2106,18 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
                                     lb=lbounds, ub=ubounds, rc=localrc)
 ^endif
               case default
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported rank", & 
                                  ESMF_CONTEXT, rc)) return
             end select
           case default
-                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 "Unsupported kind", & 
                                  ESMF_CONTEXT, rc)) return
         end select
 
     ! check localrc for errors
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -2194,7 +2194,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 !call c_esmc_vmpointerprint(fshape) @\
       wrap%ptr##mrank##D##mtypekind => fshape @\
       call c_ESMC_LocalArraySetFPtr(array, wrap, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
       ! some compilers will have made a copy on the way to down here @\
@@ -2204,20 +2204,20 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
       ! with a temporary copy of the actual array. @\
       call c_ESMC_LocalArrayForceFPtr(array, & @\
         ESMF_DATA_ADDRESS(fshape(mloc)), localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
     else @\
       ! first recursion -> get F90ptr member and call subr. recursively @\
       call c_ESMC_LocalArrayGetFPtr(array, wrap, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
       fptr => wrap%ptr##mrank##D##mtypekind @\
 !print *, "First recursion: ", lbound(fptr), ubound(fptr) @\
 !call c_esmc_vmpointerprint(fptr) @\
       call ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, counts, lb, ub, fptr, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
     endif @\
@@ -2337,7 +2337,7 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
         call c_ESMC_LocalArrayPrint(array, defaultopts, localrc) 
     endif
 
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 

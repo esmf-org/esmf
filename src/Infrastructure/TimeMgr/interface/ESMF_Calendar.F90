@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.114 2010/12/01 16:02:21 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.115 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.114 2010/12/01 16:02:21 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.115 2010/12/03 05:57:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -668,7 +668,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_CalendarCreateBuiltIn(ESMF_CalendarCreateBuiltIn, nameLen, &
                                         name, calendartype, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
       ESMF_INIT_SET_CREATED(ESMF_CalendarCreateBuiltIn)
@@ -717,7 +717,7 @@
 
 !     invoke C to C++ entry point to copy calendar
       call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ESMF_INIT_SET_CREATED(ESMF_CalendarCreateCopy)
@@ -820,7 +820,7 @@
                                          secondsPerDay, &
                                          daysPerYear, daysPerYearDn, &
                                          daysPerYearDd, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_CalendarCreateCustom0(ESMF_CalendarCreateCustom, &
@@ -829,7 +829,7 @@
                                          secondsPerDay, &
                                          daysPerYear, daysPerYearDn, &
                                          daysPerYearDd, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     
@@ -876,7 +876,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarDestroy(calendar, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ESMF_INIT_SET_DELETED(calendar)
@@ -915,7 +915,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarFinalize(localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1026,7 +1026,7 @@
                          daysPerMonth(1), sizeofDaysPerMonth, &
                          monthsPerYear, secondsPerDay, secondsPerYear, &
                          daysPerYear, daysPerYearDn, daysPerYearDd, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_CalendarGet0(calendar, nameLen, tempNameLen, tempName, &
@@ -1034,7 +1034,7 @@
                          sizeofDaysPerMonth, &
                          monthsPerYear, secondsPerDay, secondsPerYear, &
                          daysPerYear, daysPerYearDn, daysPerYearDd, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     
@@ -1084,7 +1084,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarInitialize(calendartype, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1136,7 +1136,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI4(calendar, yy, &
                                        ESMF_CalendarIsLeapYearI4, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1188,7 +1188,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI8(calendar, yy_i8, &
                                        ESMF_CalendarIsLeapYearI8, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1253,7 +1253,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarPrint(calendar, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1301,7 +1301,7 @@
 !     invoke C to C++ entry point to allocate and restore calendar
       call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
                                       localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ESMF_INIT_SET_CREATED(ESMF_CalendarReadRestart)
@@ -1368,7 +1368,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetBuiltIn(calendar, nameLen, name, calendartype, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1467,7 +1467,7 @@
                                       secondsPerDay, &
                                       daysPerYear, daysPerYearDn, &
                                       daysPerYearDd, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       else
         call c_ESMC_CalendarSetCustom0(calendar, &
@@ -1476,7 +1476,7 @@
                                       secondsPerDay, &
                                       daysPerYear, daysPerYearDn, &
                                       daysPerYearDd, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
@@ -1520,7 +1520,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultType(calendartype, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1566,7 +1566,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultCal(calendar, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1614,7 +1614,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_CalendarValidate(calendar, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1658,7 +1658,7 @@
 
 !     invoke C to C++ entry point 
       call c_ESMC_CalendarWriteRestart(calendar, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success

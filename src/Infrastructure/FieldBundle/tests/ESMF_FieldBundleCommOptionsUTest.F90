@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.10 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.11 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.10 2010/11/03 22:48:42 theurich Exp $'
+      '$Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.11 2010/12/03 05:57:39 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -398,7 +398,7 @@ contains
       do2d = .TRUE.
 
       call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Create a field in which we determine the number of items 
@@ -425,7 +425,7 @@ contains
       endif
 
       delayout = ESMF_DELayoutCreate(vm, (/ nDE1, nDE2 /), rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       counts(1:3)  = (/  4, 60, 40 /)
@@ -441,14 +441,14 @@ contains
                                       maxGlobalCoordPerDim=maxcoord, &
                                       horzStagger=horz_stagger, &
                                       name="source igrid", rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridDistribute(igrid, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1(1:nDE1), &
                                countsPerDEDim2=countsPerDE2(1:nDE2), &
                                rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up either a 2D or 3D real array
@@ -457,7 +457,7 @@ contains
       else
           call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up a datamap to tell the framework which of the 2 axes
@@ -472,13 +472,13 @@ contains
           call ESMF_FieldDataMapSetDefault(datamap, 3, order, &
                                            counts=counts(1:1), rc=status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Create the field 
       userfield = ESMF_FieldCreate(igrid, arrayspec=arrayspec, datamap=datamap, &
                                   haloWidth=0, name="userfield", rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
   
       ! Get the allocated array back as an F90 array pointer
@@ -487,7 +487,7 @@ contains
       else
           call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, rc=status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set initial data values over whole array to bad value
@@ -537,7 +537,7 @@ contains
 
       ! compute which axes we want decomposed 
       call ESMF_VMGet(vm, petCount=npets, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       if (npets .eq. 1) then
@@ -546,7 +546,7 @@ contains
         decount(:) = (/ 2, npets/2 /)
       endif
       delayout = ESMF_DELayoutCreate(vm, decount, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
 
@@ -570,11 +570,11 @@ contains
                                       maxGlobalCoordPerDim=maxcoord, &
                                       horzStagger=horz_stagger, &
                                       name="source igrid", rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridDistribute(igrid, delayout=delayout, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up a 2d or 3D real array
@@ -583,7 +583,7 @@ contains
       else
           call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up a datamap to tell the framework which of the 2 axes
@@ -598,14 +598,14 @@ contains
           call ESMF_FieldDataMapSetDefault(datamap, 3, order, &
                                            counts=counts(1:1), rc=status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Create the field 
       userfield = ESMF_FieldCreate(igrid, arrayspec=arrayspec, datamap=datamap, &
                                   horzRelloc=ESMF_CELL_CENTER, &
                                   haloWidth=0, name="userfield", rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Get the allocated array back as an F90 array pointer
@@ -614,7 +614,7 @@ contains
       else
         call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, rc=status)
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       status = ESMF_SUCCESS
@@ -660,7 +660,7 @@ contains
 
 
       call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Create a field in which we determine the number of items 
@@ -687,7 +687,7 @@ contains
       endif
 
       delayout = ESMF_DELayoutCreate(vm, (/ nDE1, nDE2 /), rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       counts(1:3)  = (/  4, 60, 40 /)
@@ -703,19 +703,19 @@ contains
                                       maxGlobalCoordPerDim=maxcoord, &
                                       horzStagger=horz_stagger, &
                                       name="source igrid", rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridDistribute(igrid, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1(1:nDE1), &
                                countsPerDEDim2=countsPerDE2(1:nDE2), &
                                rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up a 3D real array
       call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_R8)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set up a datamap to tell the framework which of the 2 axes
@@ -726,18 +726,18 @@ contains
       order(3) = 2
       call ESMF_FieldDataMapSetDefault(datamap, 3, order, &
                                        counts=counts(1:1), rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Create the field 
       userfield = ESMF_FieldCreate(igrid, arrayspec=arrayspec, datamap=datamap, &
                                   haloWidth=0, name="userfield", rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
   
       ! Get the allocated array back as an F90 array pointer
       call ESMF_FieldGetDataPointer(userfield, idata, ESMF_DATA_REF, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! Set initial data values over whole array to bad value
@@ -779,17 +779,17 @@ contains
       ! get the igrid and coordinates
       call ESMF_FieldGet(userfield, igrid=igrid, horzRelloc=relloc, &
                          rank=ranksize, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=relloc, &
                              centerCoord=coordX, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=relloc, &
                              centerCoord=coordy, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       ! get a pointer to the start of the local data block
@@ -803,7 +803,7 @@ contains
          print *, "Unexpected rank", ranksize
          status = ESMF_FAILURE
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       print *, "counts =", counts
@@ -865,21 +865,21 @@ contains
 
       call ESMF_FieldGet(userfield, igrid=igrid, horzRelloc=relloc, &
                          rank=ranksize, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       call ESMF_IGridGetDELocalInfo(igrid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelloc=ESMF_CELL_CENTER, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
       call ESMF_IGridGetCoord(igrid, dim=1, horzRelloc=relloc, &
                              centerCoord=coordX, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
       call ESMF_IGridGetCoord(igrid, dim=2, horzRelloc=relloc, &
                              centerCoord=coordY, rc=status)
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
 
@@ -894,7 +894,7 @@ contains
         print *, "unexpected rank", ranksize
         status = ESMF_FAILURE
       endif
-      if (ESMF_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
       print *, "counts = ", counts

@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.18 2010/03/04 18:57:45 svasquez Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.19 2010/12/03 05:57:54 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@ by both C++ and F90 compilers.
 
 #if 0
 Special macro for use in ESM[F,C]_LogMsgFoundError(), e.g.
-  ESMF_LogMsgFoundError(rcToCheck, ESMF_ERR_PASSTHRU. rcToReturn)
+  ESMF_LogFoundError(rcToCheck, ESMF_ERR_PASSTHRU. rcToReturn)
 #endif
 #define ESMF_ERR_PASSTHRU   "Internal subroutine call returned Error"
 

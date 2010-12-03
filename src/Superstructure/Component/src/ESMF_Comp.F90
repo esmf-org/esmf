@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.202 2010/11/12 06:58:35 eschwab Exp $
+! $Id: ESMF_Comp.F90,v 1.203 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -251,7 +251,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.202 2010/11/12 06:58:35 eschwab Exp $'
+    '$Id: ESMF_Comp.F90,v 1.203 2010/12/03 05:57:59 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -399,7 +399,7 @@ contains
     !todo: call c_ESMC_CompClassValidate(cc, localrc)
     
     ! Use LogErr to handle return code (ESMF_SUCCESS for Validate)
-    ! if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ! if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     !   ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Return success
@@ -543,7 +543,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -568,7 +568,7 @@ contains
 
     ! parent VM
     call ESMF_VMGetCurrent(vm=compp%vm_parent, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
  
@@ -606,12 +606,12 @@ contains
         fullpath = trim(compp%dirPath) // '/' // trim(configFile)
         call ESMF_ConfigLoadFile(compp%config, fullpath, rc=localrc)
         ! TODO: construct a msg string and then call something here.
-        ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
+        ! if (ESMF_LogFoundError(status, msgstr, rc)) return
         if (localrc .ne. ESMF_SUCCESS) then
           write(msgbuf, *) &
             "ERROR: loading config file, unable to open either", &
             " name = ", trim(configFile), " or name = ", trim(fullpath)
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
             msgbuf, &
             ESMF_CONTEXT, rc)
           return
@@ -644,14 +644,14 @@ contains
     if (present(petlist)) then
       compp%npetlist = size(petlist)
       allocate(petlist_loc(compp%npetlist), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "local petlist", &
+      if (ESMF_LogFoundAllocError(localrc, "local petlist", &
         ESMF_CONTEXT, rc)) return 
       compp%petlist => petlist_loc
       compp%petlist = petlist     ! copy contents of petlist
     else
       compp%npetlist = 0
       allocate(compp%petlist(0), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "local petlist", &
+      if (ESMF_LogFoundAllocError(localrc, "local petlist", &
         ESMF_CONTEXT, rc)) return 
     endif
 
@@ -659,7 +659,7 @@ contains
     ! check for consistency between contextflag and petlist
     call ESMF_VMGet(vm=compp%vm_parent, localPet=mypet, petCount=npets, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
     if (present(contextflag)) then
@@ -667,7 +667,7 @@ contains
         if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
           ! conflict between contextflag and petlist -> bail out
           deallocate(compp%petlist) ! local garbage collection for bail-on-error
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
             "Conflict between contextflag and petlist arguments", &
             ESMF_CONTEXT, rc) 
           return
@@ -681,16 +681,16 @@ contains
     ! check for conflict between petlist and current VM petCount
     if (compp%npetlist .gt. 0) then
       call ESMF_VMGetCurrent(vm, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       ! see if pets in the petlist are negative or if they exist
       do i=1, compp%npetlist
         if ((compp%petlist(i) .ge. petCount) .or. (compp%petlist(i) .lt. 0)) then
           deallocate(compp%petlist) ! local garbage collection for bail-on-error
-          call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
             "Conflict between petlist and global pet count", &
             ESMF_CONTEXT, rc)
           return
@@ -700,7 +700,7 @@ contains
 
     ! initialize base class, including component name
     call ESMF_BaseCreate(compp%base, "Component", name, 0, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -720,7 +720,7 @@ contains
     call ESMF_VMPlanConstruct(vmplan=compp%vmplan, vm=compp%vm_parent, &
       npetlist=compp%npetlist, petlist=compp%petlist, &
       contextflag=compp%contextflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
                               
@@ -731,7 +731,7 @@ contains
                               
     ! Create an empty subroutine/internal state table.
     call c_ESMC_FTableCreate(compp%this, localrc) 
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -780,14 +780,14 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
     endif
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
@@ -797,32 +797,32 @@ contains
         ! shut down this component's VM
         call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
           vm_info=compp%vm_info, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif
 
       ! destruct the VMPlan
       call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
       ! deallocate space held for petlist
       deallocate(compp%petlist, stat=localrc)
-      if (ESMF_LogMsgFoundDeallocError(localrc, "local petlist", &
+      if (ESMF_LogFoundDeallocError(localrc, "local petlist", &
         ESMF_CONTEXT, rc)) return 
 
       ! call C++ to release function and data pointer tables.
       call c_ESMC_FTableDestroy(compp%this, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
       ! Release attributes on config
       if(compp%configFile .ne. "uninitialized" ) then
         call ESMF_ConfigDestroy(compp%config, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif
@@ -914,7 +914,7 @@ contains
         
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -924,12 +924,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
     if (status .ne. ESMF_STATUS_READY) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
       return
@@ -978,7 +978,7 @@ contains
       ! only need to call this on PETs that participate
       call c_ESMC_FTableSetStateArgs(compp%this, method, phaseArg, &
         compp%compw, compp%is, compp%es, compp%argclock, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
@@ -986,7 +986,7 @@ contains
     ! callback into user code
     call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
       compp%vm_info, compp%vm_cargo, compp%this, method, phaseArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
       
@@ -1002,7 +1002,7 @@ contains
         compp%vm_cargo, localUserRc, localrc)
       ! localUserRc - return code of registered user callback method
       ! localrc     - return code of ESMF internal callback stack
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       compp%vm_released = .false.       ! indicate child VM has been caught
@@ -1010,11 +1010,11 @@ contains
       if (blocking == ESMF_BLOCKING) then
         ! the current context _is_ the parent context...
         call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
         call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif
@@ -1082,7 +1082,7 @@ contains
         
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1092,12 +1092,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
     if (status .ne. ESMF_STATUS_READY) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1105,7 +1105,7 @@ contains
 
     if (present(name)) then
       call ESMF_GetName(compp%base, name, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
@@ -1161,7 +1161,7 @@ contains
     if (present(currentMethod) .or. present(currentPhase)) then
       call c_ESMC_CompGet(compp%vm_cargo, currentMethodArg, currentPhaseArg, &
         localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
@@ -1176,14 +1176,14 @@ contains
     
     if (present(localPet)) then
       call ESMF_VMGet(compp%vm, localPet=localPet, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
 
     if (present(petCount)) then
       call ESMF_VMGet(compp%vm, petCount=petCount, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
@@ -1233,7 +1233,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1243,12 +1243,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
     if (status .ne. ESMF_STATUS_READY) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1317,7 +1317,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
@@ -1329,7 +1329,7 @@ contains
     endif
 
     call ESMF_GetName(compp%base, cname, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
        
     write (*,*) " Component name = ", trim(cname)
@@ -1384,7 +1384,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1394,12 +1394,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
     if (status .ne. ESMF_STATUS_READY) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1407,7 +1407,7 @@ contains
 
     if (present(name)) then
       call ESMF_SetName(compp%base, name, "Component", rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -1497,7 +1497,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1508,7 +1508,7 @@ contains
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
         ESMF_CONTEXT, rc)
       return
@@ -1518,7 +1518,7 @@ contains
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
@@ -1576,7 +1576,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1587,7 +1587,7 @@ contains
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
         ESMF_CONTEXT, rc)
       return
@@ -1597,7 +1597,7 @@ contains
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
@@ -1655,7 +1655,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1666,7 +1666,7 @@ contains
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
         ESMF_CONTEXT, rc)
       return
@@ -1676,7 +1676,7 @@ contains
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       compp%npetlist, compp%petlist, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
@@ -1715,7 +1715,7 @@ contains
 
     ! Test incoming compp object
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Not a valid pointer to ESMF Component object", &
         ESMF_CONTEXT, rc)
       return
@@ -1725,12 +1725,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
     if (status .ne. ESMF_STATUS_READY) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Unini/destroyed comp", &
         ESMF_CONTEXT, rc)
       return
@@ -1791,7 +1791,7 @@ contains
 
     ! Check input
     if (.not.associated(compp)) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
       return
@@ -1801,12 +1801,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     call ESMF_BaseGetStatus(compp%base, status, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
     if (status .ne. ESMF_STATUS_READY) then
-      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
       return
@@ -1820,7 +1820,7 @@ contains
         compp%vm_cargo, localUserRc, localrc)
       ! localUserRc - return code of registered user callback method
       ! localrc     - return code of ESMF internal callback stack
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       compp%vm_released = .false.       ! indicate child VM has been caught
@@ -1834,11 +1834,11 @@ contains
       if (blocking == ESMF_BLOCKING) then
         ! the current context _is_ the parent context...
         call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
         call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
       endif

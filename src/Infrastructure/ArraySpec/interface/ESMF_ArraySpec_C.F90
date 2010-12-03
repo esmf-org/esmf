@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec_C.F90,v 1.11 2010/05/10 07:20:54 theurich Exp $
+! $Id: ESMF_ArraySpec_C.F90,v 1.12 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_ArraySpec_C.F90,v 1.11 2010/05/10 07:20:54 theurich Exp $'
+!      '$Id: ESMF_ArraySpec_C.F90,v 1.12 2010/12/03 05:57:29 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -64,7 +64,7 @@
 
     call ESMF_ArraySpecSet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
       
@@ -97,7 +97,7 @@
 
     call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, typekind=typekind, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
@@ -128,7 +128,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     call ESMF_ArraySpecGet(arrayspec=arrayspec, rank=rank, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
@@ -159,7 +159,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     call ESMF_ArraySpecGet(arrayspec=arrayspec, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 

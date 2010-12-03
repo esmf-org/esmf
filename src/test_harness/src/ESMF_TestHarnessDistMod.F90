@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessDistMod.F90,v 1.20 2010/11/03 22:48:53 theurich Exp $
+! $Id: ESMF_TestHarnessDistMod.F90,v 1.21 2010/12/03 05:58:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -121,13 +121,13 @@
   ! open the distribution file
   !-----------------------------------------------------------------------------
   localcf = ESMF_ConfigCreate(rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc, "cannot create config object",           &
+  if( ESMF_LogFoundError(localrc, "cannot create config object",           &
                             rcToReturn=localrc) ) return
 
   print*,'Opening Dist specifier file  ',trim( Dfile%filename )
 
   call ESMF_ConfigLoadFile(localcf, trim( Dfile%filename ), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                           &
+  if( ESMF_LogFoundError(localrc,                                           &
          "cannot load config file " // trim( Dfile%filename ),                 &
          rcToReturn=localrc) ) return
 
@@ -144,7 +144,7 @@
   call ESMF_ConfigFindLabel(localcf, trim(distribution_label), rc=localrc )
 
   if (localrc .ne. ESMF_SUCCESS) print*,' could not find distribution label'
-  if( ESMF_LogMsgFoundError(localrc,"could not find distribution label " //    &
+  if( ESMF_LogFoundError(localrc,"could not find distribution label " //    &
           trim(distribution_label), rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
@@ -154,12 +154,12 @@
   !-----------------------------------------------------------------------------
   call ESMF_ConfigGetDim(localcf, nrows, ntmp, trim(distribution_label),       &
                          rc=localrc)
-  if( ESMF_LogMsgFoundError(localrc,                                           &
+  if( ESMF_LogFoundError(localrc,                                           &
          "cannot get descriptor table size in file " // trim(Dfile%filename),  &
          rcToReturn=rc) ) return
 
   if( nrows .le. 0 ) then
-     call ESMF_LogMsgSetError(ESMF_FAILURE,"table "//trim(distribution_label)  &
+     call ESMF_LogSetError(ESMF_FAILURE,"table "//trim(distribution_label)  &
              // " empty in file " //trim(Dfile%filename), rcToReturn=rc)
      return
   endif
@@ -168,18 +168,18 @@
   ! extract the table column lengths of this file
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(distribution_label), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,                                           &
+  if( ESMF_LogFoundError(localrc,                                           &
          "cannot find config label " // trim(distribution_label),              &
          rcToReturn=rc) ) return
 
   allocate( ncolumns(nrows), stat=allocRcToTest )
-  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array ncolumns in "// &
+  if (ESMF_LogFoundAllocError(allocRcToTest, "integer array ncolumns in "// &
      " read_dist_specification", rcToReturn=rc)) then
   endif
 
   do krow=1,nrows
      call ESMF_ConfigNextLine(localcf, tableEnd=flag , rc=localrc)
-     if( ESMF_LogMsgFoundError(localrc,                                        &
+     if( ESMF_LogFoundError(localrc,                                        &
              "cannot advance to next line of table " //                        &
               trim(distribution_label) // " in file " // trim(Dfile%filename), &
               rcToReturn=rc) ) return
@@ -188,7 +188,7 @@
       ncolumns(krow) = ESMF_ConfigGetLen(localcf, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS .or. ncolumns(krow) .lt. 1 ) then
         write(lchar,"(i5)") krow
-        call ESMF_LogMsgSetError( ESMF_FAILURE,                                &
+        call ESMF_LogSetError( ESMF_FAILURE,                                &
                  "problem reading line " // trim(adjustl(lchar)) //            &
                  " of table in file " // trim(Dfile%filename), rcToReturn=rc)
         return
@@ -205,11 +205,11 @@
   ! the number of the current grid being read.
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(distribution_label), rc=localrc )
-  if( ESMF_LogMsgFoundError(localrc,"cannot find config label " //             &
+  if( ESMF_LogFoundError(localrc,"cannot find config label " //             &
           trim(distribution_label),rcToReturn=rc) ) return
 
   allocate( new_row(nrows), stat=allocRcToTest )
-  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array new_row "//     &
+  if (ESMF_LogFoundAllocError(allocRcToTest, "integer array new_row "//     &
      " in read_dist_specification", rcToReturn=rc)) then
   endif
 
@@ -236,11 +236,11 @@
   ! separate grid entries
   !-----------------------------------------------------------------------------
   allocate( Dfile%src_dist(Dfile%nDspecs), stat=allocRcToTest )
-  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array src_dist "//    &
+  if (ESMF_LogFoundAllocError(allocRcToTest, "integer array src_dist "//    &
      " in read_dist_specification", rcToReturn=rc)) then
   endif
   allocate( Dfile%dst_dist(Dfile%nDspecs), stat=allocRcToTest )
-  if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array dst_dist "//    &
+  if (ESMF_LogFoundAllocError(allocRcToTest, "integer array dst_dist "//    &
      " in read_dist_specification", rcToReturn=rc)) then
   endif
 
@@ -255,7 +255,7 @@
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(distribution_label), rc=localrc )
 
-  if( ESMF_LogMsgFoundError(localrc,"cannot find config label " //             &
+  if( ESMF_LogFoundError(localrc,"cannot find config label " //             &
           trim(distribution_label),rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
@@ -282,7 +282,7 @@
        call read_table_string(dtag, kelements, irow, nrows, ncolumns, new_row, &
                 Dfile%filename, distribution_label, localcf, localrc)  
 
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
     endif
     if( debug_flag ) print*,' distribution  ',dtag
@@ -293,12 +293,12 @@
     call read_table_string(ltag, kelements, irow, nrows, ncolumns, new_row,    &
              Dfile%filename, distribution_label, localcf, localrc)  
 
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,rcToReturn=rc)) return
 
     if( trim(adjustL(ltag)) /= "SRC") then
        ! wrong tag, SRC expected - return error 
        write(lchar,"(i5)") irow
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"wrong tag, SRC expected on line "&
+       call ESMF_LogSetError(ESMF_FAILURE,"wrong tag, SRC expected on line "&
                 // trim(lchar) // " of table "// trim(distribution_label) //   &
                 " in file " // trim(Dfile%filename), rcToReturn=rc)
        return
@@ -309,13 +309,13 @@
     !---------------------------------------------------------------------------
     call read_table_integer(src_rank, kelements, irow, nrows, ncolumns,        &
              new_row, Dfile%filename, distribution_label, localcf, localrc)  
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                      &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                      &
              rcToReturn=rc)) return
     if( src_rank < 1 .or. src_rank > 7 ) then
        ! error - unacceptable rank
        write(lchar,"(i5)") irow
        write(lnumb,"(i5)") src_rank
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"unacceptable rank, should be "   &
+       call ESMF_LogSetError(ESMF_FAILURE,"unacceptable rank, should be "   &
                 // "> 1 and <= 7. Rank is " // trim(lnumb) // ". On line " //  &
                 trim(lchar) // " of table " // trim(distribution_label) //     &
                 " in file " // trim(Dfile%filename), rcToReturn=rc)
@@ -323,7 +323,7 @@
     endif
 
     allocate( Dfile%src_dist(idist)%dsize(SrcMem%memRank), stat=allocRcToTest )
-    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array dsize "//    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, "integer array dsize "//    &
        " in read_dist_specification", rcToReturn=rc)) then
     endif
     Dfile%src_dist(idist)%drank = src_rank
@@ -340,7 +340,7 @@
        call read_table_string(ltag, kelements, irow, nrows, ncolumns,          &
                 new_row, Dfile%filename, distribution_label, localcf, localrc)  
 
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                   &
                rcToReturn=rc)) return
 
        if( pattern_query(trim(ltag), "==") /= 0 .or.                           &
@@ -350,7 +350,7 @@
           call read_table_real(tvalue, kelements, irow, nrows, ncolumns,       &
                    new_row, Dfile%filename, distribution_label, localcf, localrc)  
 
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
                   rcToReturn=rc)) return
 
           if( debug_flag ) print*,' operator/value ',trim(ltag),tvalue
@@ -365,7 +365,7 @@
        if( sanity_counter > 8*src_rank ) then
           ! infinite loop - post error and return
           write(lchar,"(i5)") irow
-          call ESMF_LogMsgSetError(ESMF_FAILURE,"SRC while loop not " //       &
+          call ESMF_LogSetError(ESMF_FAILURE,"SRC while loop not " //       &
                    "completing. Line " // trim(lchar) // " of table " //       &
                    trim(distribution_label) // " in file " //                  &
                    trim(Dfile%filename), rcToReturn=rc)
@@ -406,7 +406,7 @@
                 if( n > 1 ) then
                    ! error can't have both equivalence and multiple operators
                    write(lchar,"(i5)") irow
-                   call ESMF_LogMsgSetError(ESMF_FAILURE,"only single operator"&
+                   call ESMF_LogSetError(ESMF_FAILURE,"only single operator"&
                          // " allowed when equivalence operator used. Line "// &
                          trim(lchar) // " of table "//trim(distribution_label) &
                          // " in file " //trim(Dfile%filename), rcToReturn=rc)
@@ -419,7 +419,7 @@
           ! error operator missing for rank
           write(lchar,"(i5)") irow
           write(lnumb,"(i5)") irank
-          call ESMF_LogMsgSetError(ESMF_FAILURE,"operator missing from SRC" // &
+          call ESMF_LogSetError(ESMF_FAILURE,"operator missing from SRC" // &
                    " specification, rank " // trim(lnumb) // " Line " //       & 
                    trim(lchar) // " of table " // trim(distribution_label) //  &
                    " in file " //trim(Dfile%filename), rcToReturn=rc)
@@ -446,7 +446,7 @@
     if( trim(adjustL(ltag)) /= "DST") then
        ! wrong tag, DST expected - return error 
        write(lchar,"(i5)") irow
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"wrong tag, DST expected on line" &
+       call ESMF_LogSetError(ESMF_FAILURE,"wrong tag, DST expected on line" &
                 // trim(lchar) // " of table "// trim(distribution_label) //   &
                 " in file " // trim(Dfile%filename), rcToReturn=rc)
        return
@@ -458,13 +458,13 @@
     call read_table_integer(dst_rank, kelements, irow, nrows, ncolumns,        &
              new_row, Dfile%filename, distribution_label, localcf, localrc)  
     if( debug_flag ) print*,' dst_rank', dst_rank, kelements
-    if (ESMF_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rcToReturn=rc)) return
+    if (ESMF_LogFoundError(localrc,ESMF_ERR_PASSTHRU,rcToReturn=rc)) return
 
     if( dst_rank < 1 .or. dst_rank > 7 ) then
        ! error - unacceptable rank
        write(lchar,"(i5)") irow
        write(lnumb,"(i5)") dst_rank
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"unacceptable rank, should be > " &
+       call ESMF_LogSetError(ESMF_FAILURE,"unacceptable rank, should be > " &
                 // "1 and <= 7. Rank is " // trim(lnumb) // ". On line " //    &
                 trim(lchar) // " of table " // trim(distribution_label) //     &
                 " in file " // trim(Dfile%filename), rcToReturn=rc)
@@ -472,7 +472,7 @@
     endif
 
     allocate( Dfile%dst_dist(idist)%dsize(DstMem%memRank), stat=allocRcToTest )
-    if (ESMF_LogMsgFoundAllocError(allocRcToTest, "integer array dsize "//    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, "integer array dsize "//    &
        " in read_dist_specification", rcToReturn=rc)) then
     endif
     Dfile%dst_dist(idist)%drank = dst_rank
@@ -488,7 +488,7 @@
        call read_table_string(ltag, kelements, irow, nrows, ncolumns,          &
                 new_row, Dfile%filename, distribution_label, localcf, localrc)  
 
-       if (ESMF_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,rcToReturn=rc)) return
+       if (ESMF_LogFoundError(localrc,ESMF_ERR_PASSTHRU,rcToReturn=rc)) return
 
        if( pattern_query(trim(ltag), "==") /= 0 .or.                           &
            pattern_query(trim(ltag), "=+") /= 0 .or.                           &
@@ -497,7 +497,7 @@
           call read_table_real(tvalue, kelements, irow, nrows, ncolumns,       &
                    new_row, Dfile%filename, distribution_label, localcf, localrc)  
 
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
                   rcToReturn=rc)) return
 
           if( debug_flag ) print*,' operator/value ',trim(ltag),tvalue
@@ -512,7 +512,7 @@
        if( sanity_counter > 8*dst_rank ) then
           ! infinite loop - post error and return
           write(lchar,"(i5)") irow
-          call ESMF_LogMsgSetError(ESMF_FAILURE,"DST while loop not completing"&
+          call ESMF_LogSetError(ESMF_FAILURE,"DST while loop not completing"&
                    // " Line " // trim(lchar) // " of table " //               &
                    trim(distribution_label) // " in file " //                  &
                    trim(Dfile%filename), rcToReturn=rc)
@@ -553,7 +553,7 @@
                 if( n > 1 ) then
                    ! error can't have both equivalence and multiple operators
                    write(lchar,"(i5)") irow
-                   call ESMF_LogMsgSetError(ESMF_FAILURE,"only single operator"&
+                   call ESMF_LogSetError(ESMF_FAILURE,"only single operator"&
                    // " allowed when equivalence operator used. Line " //      &
                    trim(lchar) // " of table " // trim(distribution_label) //  &
                    " in file " //trim(Dfile%filename), rcToReturn=rc)
@@ -566,7 +566,7 @@
           ! error no operator for rank
           write(lchar,"(i5)") irow
           write(lnumb,"(i5)") irank
-          call ESMF_LogMsgSetError(ESMF_FAILURE,"operator missing from DST" // &
+          call ESMF_LogSetError(ESMF_FAILURE,"operator missing from DST" // &
                    " specification, rank " // trim(lnumb) // " Line " //       & 
                    trim(lchar) // " of table " // trim(distribution_label) //  &
                    " in file " //trim(Dfile%filename), rcToReturn=rc)
@@ -594,7 +594,7 @@
           ! symbol was found
           write(lchar,"(i5)") irow+1
           write(lnumb,"(i5)") irank
-          call ESMF_LogMsgSetError(ESMF_FAILURE,"next line in table " //      &
+          call ESMF_LogSetError(ESMF_FAILURE,"next line in table " //      &
                 trim(distribution_label) // " should be a new entry, but " // &
                 "instead a continuation symbol was found. Line " //           &
                 trim(lchar) // " of table " // trim(distribution_label) //    &
@@ -604,7 +604,7 @@
        endif
     elseif(irow+1 > nrows .and. trim(ltag) /= "END") then
        ! we should be done and can drop out, but there is no end tag
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"should be at end of " //       &
+       call ESMF_LogSetError(ESMF_FAILURE,"should be at end of " //       &
                 "table " // trim(distribution_label) // " but no end tag" // &
                 " found. File " // trim(Dfile%filename) , rcToReturn=rc)
                 return
@@ -616,7 +616,7 @@
     ! sanity check to catch infinite loops
     out_counter = out_counter + 1
     if(out_counter > 1000 ) then
-       call ESMF_LogMsgSetError(ESMF_FAILURE,"we seem to have gotten into"    &
+       call ESMF_LogSetError(ESMF_FAILURE,"we seem to have gotten into"    &
                 // " an infinite loop reading table " //                      &
                 trim(distribution_label) // " in file " //                    &
                 trim(Dfile%filename), rcToReturn=rc)
@@ -628,7 +628,7 @@
   ! clean up CF     
   !-----------------------------------------------------------------------------
   call ESMF_ConfigDestroy(localcf, rc=localrc) 
-  if( ESMF_LogMsgFoundError(localrc, "cannot destroy config object",            &
+  if( ESMF_LogFoundError(localrc, "cannot destroy config object",            &
                             rcToReturn=rc) ) return
 
   !-----------------------------------------------------------------------------
@@ -690,7 +690,7 @@
         dist%dsize(irank) = value(irank,n)
         if( noper(irank) > 1 ) then
           ! error - should only be one operator when equivalence is found
-          call ESMF_LogMsgSetError(ESMF_FAILURE,"only one operator " //        &
+          call ESMF_LogSetError(ESMF_FAILURE,"only one operator " //        &
                 "should be found when equivalence operator == is used. " //    &
                 " More than one was found. ", rcToReturn=rc)
           return
@@ -706,7 +706,7 @@
 
       else
         ! error - unrecognized operator
-        call ESMF_LogMsgSetError(ESMF_FAILURE,"unrecognized operator " //      &
+        call ESMF_LogSetError(ESMF_FAILURE,"unrecognized operator " //      &
                trim(adjustL(oper(irank,n)%string)) // " found. ", rcToReturn=rc)
         return
       endif

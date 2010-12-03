@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.127 2010/11/29 16:26:53 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.128 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.127 2010/11/29 16:26:53 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.128 2010/12/03 05:57:59 theurich Exp $'
 
 !==============================================================================
 !
@@ -209,14 +209,14 @@ contains
 
     ! Allocate a new comp class
     allocate(compclass, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
+    if (ESMF_LogFoundAllocError(localrc, "Component class", &
       ESMF_CONTEXT, rc)) return
    
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
       configFile=configFile, config=config, clock=clock, petList=petList, &
       contextflag=contextflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) then
       deallocate(compclass)
@@ -279,21 +279,21 @@ contains
 
     ! Check to see if already destroyed
     if (.not.associated(cplcomp%compp)) then  
-      if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+      if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         "CplComp not initialized or already destroyed", &
         ESMF_CONTEXT, rc)) return
     endif
 
     ! call Comp method
     call ESMF_CompDestruct(cplcomp%compp, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(cplcomp%compp%base, ESMF_STATUS_INVALID, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -387,7 +387,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -435,7 +435,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -522,7 +522,7 @@ contains
       clock=clock, configFile=configFile, config=config, &
       currentMethod=currentMethod, currentPhase=currentPhase, &
       localPet=localPet, petCount=petCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -669,7 +669,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -717,7 +717,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -773,7 +773,7 @@ contains
 
     ! call Comp method
     localresult = ESMF_CompIsPetLocal(cplcomp%compp, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -831,7 +831,7 @@ contains
     print *, "Coupler Component:"
     ! call Comp method
     call ESMF_CompPrint(cplcomp%compp, options, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -921,7 +921,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1010,7 +1010,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1057,7 +1057,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1128,7 +1128,7 @@ contains
     ! call Comp method
     call ESMF_CompSet(cplcomp%compp, name, clock=clock, configFile=configFile, &
       config=config, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1209,7 +1209,7 @@ contains
     if (present(phase)) phaseArg = phase
   
     call c_ESMC_SetEntryPoint(cplcomp, method, userRoutine, phaseArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1325,7 +1325,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
     call c_ESMC_SetServices(cplcomp, userRoutine, localUserRc, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1415,7 +1415,7 @@ contains
       call c_ESMC_SetServicesShObj(cplcomp, userRoutine, emptyString, &
         localUserRc, localrc)
     endif
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1485,7 +1485,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
   
     call c_ESMC_SetVM(cplcomp, userRoutine, localUserRc, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1573,7 +1573,7 @@ contains
       call c_ESMC_SetVMShObj(cplcomp, userRoutine, emptyString, localUserRc, &
         localrc)
     endif
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1646,7 +1646,7 @@ contains
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1717,7 +1717,7 @@ contains
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1786,7 +1786,7 @@ contains
     ! call Comp method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1835,7 +1835,7 @@ contains
 
     ! call Comp method
     call ESMF_CompValidate(cplcomp%compp, options, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1891,7 +1891,7 @@ contains
     ! call Comp method
     call ESMF_CompWait(cplcomp%compp, blockingflag=blockingflag, &
       userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1981,7 +1981,7 @@ contains
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

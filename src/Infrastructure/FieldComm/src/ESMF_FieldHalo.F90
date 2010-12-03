@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.5 2010/10/12 15:35:31 feiliu Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.6 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.5 2010/10/12 15:35:31 feiliu Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.6 2010/12/03 05:57:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -169,13 +169,13 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
     call ESMF_FieldGet(field, array=array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Call into the Array interface, which will sort out optional arguments
     call ESMF_ArrayHalo(array, routehandle=routehandle, commflag=commflag, &
       finishedflag=finishedflag, checkflag=checkflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -222,7 +222,7 @@ contains
         
     ! Call into the RouteHandle code
     call ESMF_RouteHandleRelease(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -331,14 +331,14 @@ contains
     
     ! query the field for its internal array
     call ESMF_FieldGet(field, array=array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the Array interface, which will sort out optional arguments
     call ESMF_ArrayHaloStore(array, routehandle=routehandle, &
       halostartregionflag=halostartregionflag, haloLDepth=haloLDepth, &
       haloUDepth=haloUDepth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully

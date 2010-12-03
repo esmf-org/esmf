@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.27 2010/09/24 00:45:38 w6ws Exp $
+! $Id: ESMF_State_C.F90,v 1.28 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.27 2010/09/24 00:45:38 w6ws Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.28 2010/12/03 05:57:59 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -384,7 +384,7 @@
 
     ! destruct internal data allocations
     call ESMF_StateDestruct(state%statep, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rc)) return
@@ -393,7 +393,7 @@
     if (associated(state%statep)) then
       deallocate(state%statep, stat=localrc)
       localrc = merge (ESMF_SUCCESS, ESMF_RC_MEM_DEALLOCATE, localrc == 0)
-      if (ESMF_LogMsgFoundAllocError(localrc, "Deallocating State", &
+      if (ESMF_LogFoundAllocError(localrc, "Deallocating State", &
         ESMF_CONTEXT, &
         rc)) return
     endif

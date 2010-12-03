@@ -1,4 +1,4 @@
-! $Id: Comp1Driver.F90,v 1.2 2010/12/02 15:46:09 ksaint Exp $
+! $Id: Comp1Driver.F90,v 1.3 2010/12/03 05:58:07 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -106,13 +106,13 @@ program ESMF_ArrayRedistSTest
 !  call ESMF_Initialize(vm=vm, rc=localrc)
     call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=localrc)
 
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! Get number of PETs we are running with
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
@@ -122,7 +122,7 @@ program ESMF_ArrayRedistSTest
   comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=localrc)
   !comp1 = ESMF_GridCompCreate(name=cname1, rc=localrc)
   print *, "Created component ", trim(cname1), "rc =", localrc
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
@@ -138,13 +138,13 @@ program ESMF_ArrayRedistSTest
 
   call ESMF_GridCompSetVM(comp1, userRoutine=userm1_setvm, rc=localrc)
   print *, "Comp1 SetVM finished, rc= ", localrc
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompSetServices(comp1, userRoutine=userm1_register, rc=localrc)
   print *, "Comp1 SetServices finished, rc= ", localrc
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
@@ -155,13 +155,13 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
  
   c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
 !  call ESMF_GridCompInitialize(comp1, exportState=c1exp, rc=localrc)
 !  print *, "Comp 1 Initialize finished, rc =", localrc
-!  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
  
@@ -173,7 +173,7 @@ program ESMF_ArrayRedistSTest
 
 !  call ESMF_GridCompRun(comp1, exportState=c1exp, rc=localrc)
 !  print *, "Comp 1 Run returned, rc =", localrc
-!  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
@@ -185,7 +185,7 @@ program ESMF_ArrayRedistSTest
 
 !  call ESMF_GridCompFinalize(comp1, exportState=c1exp, rc=localrc)
 !  print *, "Comp 1 Finalize finished, rc =", localrc
-!  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
@@ -195,23 +195,23 @@ program ESMF_ArrayRedistSTest
 !------------------------------------------------------------------------------
 
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=25, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_TimeSet(stopTime, yy=2004, mm=9, dd=26, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       clock = ESMF_ClockCreate("Application Clock", timeStep, startTime, &
                                 stopTime, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -223,7 +223,7 @@ program ESMF_ArrayRedistSTest
 !------------------------------------------------------------------------------
 
       defaultstate = ESMF_StateCreate("Default State", rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -255,12 +255,12 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 
   call ESMF_GridCompDestroy(comp1, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_StateDestroy(c1exp, rc=localrc)
-  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 

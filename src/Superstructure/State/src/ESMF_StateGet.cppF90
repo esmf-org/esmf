@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cppF90,v 1.8 2010/11/09 06:58:21 eschwab Exp $
+! $Id: ESMF_StateGet.cppF90,v 1.9 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ module ESMF_StateGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateGet.cppF90,v 1.8 2010/11/09 06:58:21 eschwab Exp $'
+    '$Id: ESMF_StateGet.cppF90,v 1.9 2010/12/03 05:57:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -190,7 +190,7 @@ contains
  @\
         ! Test to see if array already associated, and fail if so. @\
         if (associated(dataPointer)) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, & @\
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, & @\
                               "Data Pointer cannot already be associated", & @\
                                ESMF_CONTEXT, rc)) return @\
         endif @\
@@ -200,18 +200,18 @@ contains
          if (present(nestedStateName)) then          @\
             found = ESMF_StateClassFindData(state%statep, dataname=nestedStateName, & @\
                                       expected=trueval, dataitem=dataitem, rc=status)  @\
-            if (ESMF_LogMsgFoundError(status, & @\
+            if (ESMF_LogFoundError(status, & @\
                                     ESMF_ERR_PASSTHRU, & @\
                                     ESMF_CONTEXT, rc)) return @\
             if (.not. found) then                              @\
                 write(errmsg, *) "no nested state found named ", trim(nestedStateName) @\
-                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &   @\
+                if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &   @\
                                          ESMF_CONTEXT, rc)) return     @\
             endif                                                         @\
                                                                         @\
             if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then            @\
                  write(errmsg,*) trim(nestedStateName), " found but not type State" @\
-                 if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &     @\
+                 if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &     @\
                                           ESMF_CONTEXT, rc)) return       @\
              endif                                                           @\
                                                                           @\
@@ -223,12 +223,12 @@ contains
         ! Find object associated with name @\
         found=ESMF_StateClassFindData(top%statep, dataname=itemName, & @\
                       expected=trueval, dataitem=dataitem, rc=status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+        if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
         if (.not. found) then   @\
            write(errmsg, *) "no state item found named ", trim(itemName) @\
-           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &       @\
+           if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &       @\
                                           ESMF_CONTEXT, rc)) return         @\
         endif                                                             @\
 @\
@@ -237,7 +237,7 @@ contains
         if (dataitem%otype .eq. ESMF_STATEITEM_BUNDLE) then @\
            ! make sure we have a field name @\
            if (.not. present(fieldName)) then @\
-              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, & @\
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, & @\
                   "When retrieving fieldbundle data pointer need to provide fieldName", & @\
                   ESMF_CONTEXT, rc)) return    @\
            endif @\
@@ -247,14 +247,14 @@ contains
 !           call ESMF_FieldBundleGetDataPointer(dataitem%datap%bp, & @\
 !                 fieldName, dataPointer, copyflag, status) @\
            status=ESMF_RC_NOT_IMPL @\
-           if (ESMF_LogMsgFoundError(status, & @\
+           if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
         else if (dataitem%otype .eq. ESMF_STATEITEM_FIELD) then @\
 ! TODO:FIELDINTEGRATION uncomment the next line, and erase the next after that @\
 !         call ESMF_FieldGetDataPointer(dataitem%datap%fp, dataPointer, copyflag, status)@\
            status=ESMF_RC_NOT_IMPL @\
-         if (ESMF_LogMsgFoundError(status, & @\
+         if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
         else if (dataitem%otype .eq. ESMF_STATEITEM_ARRAY) then @\
@@ -262,7 +262,7 @@ contains
           ! TODO: remove this when array supports ESMF_DATA_COPY      @\
           if (present(copyflag)) then   @\
              if (copyflag .ne. ESMF_DATA_REF) then                        @\
-                if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, &                       @\
+                if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, &                       @\
                     " must currently use ESMF_DATA_REF when getting data from an Array",& @\
                                       ESMF_CONTEXT, rc)) return              @\
              endif   @\
@@ -270,11 +270,11 @@ contains
                             @\
           ! get pointer     @\
           call ESMF_ArrayGet(dataitem%datap%ap, dataPointer, rc=status) @\
-          if (ESMF_LogMsgFoundError(status, & @\
+          if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
         else  @\
-           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, &                       @\
+           if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, &                       @\
                          " item not of a valid type from which to retrieve a data pointer" , &  @\
                                           ESMF_CONTEXT, rc)) return              @\
         endif @\

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldBundleGetMacros.h,v 1.6 2010/03/04 18:57:43 svasquez Exp $
+! $Id: ESMF_FieldBundleGetMacros.h,v 1.7 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -113,23 +113,23 @@
  @\
         ! Test to see if array already allocated, and fail if so. @\
         if (associated(dataPointer)) then @\
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, & @\
                              "Data Pointer cannot already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         call ESMF_FieldBundleGet(bundle, fieldName, field, status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+        if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_FieldGetInternArray(field, array, rc=status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+        if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_InternArrayGetData(array, dataPointer, copyflag, rc=status) @\
-        if (ESMF_LogMsgFoundError(status, & @\
+        if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\

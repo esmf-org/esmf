@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.10 2010/05/07 22:42:23 w6ws Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.11 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.10 2010/05/07 22:42:23 w6ws Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.11 2010/12/03 05:57:39 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
@@ -155,7 +155,7 @@ contains
 @\
         ! Check the rank of the native array. @\
         call ESMF_FieldGet(field, array=array, rc=localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
+        if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
 @\
@@ -163,7 +163,7 @@ contains
         ! For performance consideration: @\
         ! Rely on ArrayScatter to perform sanity checking of the other parameters @\
         call ESMF_ArrayScatter(array, farray, patch, rootPet, vm, rc=localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
+        if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
 @\
@@ -197,12 +197,12 @@ subroutine ESMF_FieldScatterNotRoot(field, patch, rootPet, vm, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     call ESMF_FieldGet(field, array=array, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
     call ESMF_ArrayScatter(array, patch, rootPet, vm, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 

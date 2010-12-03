@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.33 2010/11/23 21:06:33 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.34 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.33 2010/11/23 21:06:33 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.34 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 
@@ -278,11 +278,11 @@ contains
 @\
     ! Obtain VM info @\
     call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     call ESMF_VMGet(vm_opt, mpiCommunicator=mpic, localPet=localPet, & @\
       petCount=petCount, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     !-------------------------------- @\
@@ -290,19 +290,19 @@ contains
     !-------------------------------- @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, & @\
       pioDofCount=pioDofCount, rc=rc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate(pioDofList(pioDofCount)) @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, & @\
       pioDofList=pioDofList, rc=rc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     !------------------------------------------- @\
     ! Get array dimension counts from ESMF Array @\
     !------------------------------------------- @\
     call ESMF_ArrayGet(array, dimCount=dimC, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate (dimid_xyz(dimC)) @\
     allocate (gDimsIndex(dimC)) @\
@@ -311,11 +311,11 @@ contains
     allocate ( timecount(dimC+1) ) @\
     allocate ( timestart(dimC+1) ) @\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farraywr, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     call ESMF_ArrayGet(array, maxIndexPDimPPatch=maxIndexPDimPPatch, & @\
       minIndexPDimPPatch=minIndexPDimPPatch, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     do i=1,dimC @\
@@ -355,7 +355,7 @@ contains
      case(ESMF_TYPEKIND_R8%dkind) @\
        basepiotype=PIO_double @\
      case default @\
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
               ESMF_CONTEXT, rc) @\
        return @\
     end select @\
@@ -375,7 +375,7 @@ contains
      case('nc4c') @\
        fmtiotype = PIO_iotype_netcdf4c @\
      case default @\
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported IO format", & @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported IO format", & @\
               ESMF_CONTEXT, rc) @\
        return @\
     end select @\
@@ -588,11 +588,11 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 @\
     ! Obtain localPet @\
     call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     call ESMF_VMGet(vm_opt, mpiCommunicator=mpic, localPet=localPet, & @\
       petCount=petCount, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     !-------------------------------- @\
@@ -600,12 +600,12 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     !-------------------------------- @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, & @\
       pioDofCount=pioDofCount, rc=rc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate(pioDofList(pioDofCount)) @\
     call ESMF_ArrayConstructPioDof(array, localDe=0, & @\
       pioDofList=pioDofList, rc=rc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
 @\
@@ -613,18 +613,18 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     ! Get array typekind from ESMF array @\
     !-------------------------------- @\
     call ESMF_ArrayGet(array, dimCount=dimC, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate (gDimsIndex(dimC)) @\
     allocate ( minIndexPDimPPatch(dimC,1) ) @\
     allocate ( maxIndexPDimPPatch(dimC,1) ) @\
 @\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayrd, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     call ESMF_ArrayGet(array, maxIndexPDimPPatch=maxIndexPDimPPatch, & @\
                     minIndexPDimPPatch=minIndexPDimPPatch, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     do i=1,dimC @\
@@ -659,7 +659,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
      case(ESMF_TYPEKIND_R8%dkind) @\
        basepiotype=PIO_double @\
      case default @\
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
               ESMF_CONTEXT, rc) @\
        return @\
     end select @\
@@ -679,7 +679,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
      case('nc4c') @\
        fmtiotype = PIO_iotype_netcdf4c @\
      case default @\
-       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported IO format", & @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported IO format", & @\
               ESMF_CONTEXT, rc) @\
        return @\
     end select @\
@@ -703,7 +703,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
         pioerr = PIO_inq_dimid(FileObj,'time', dimid_time) @\
         pioerr = PIO_inq_dimlen(FileObj, dimid_time, time_len) @\
         if(time .gt. time_len) then @\
-          call ESMF_LogMsgSetError(ESMF_RC_NOT_VALID, & @\
+          call ESMF_LogSetError(ESMF_RC_NOT_VALID, & @\
              "Timeframe is greater than that in file", ESMF_CONTEXT, rc) @\
           return @\
         endif @\    

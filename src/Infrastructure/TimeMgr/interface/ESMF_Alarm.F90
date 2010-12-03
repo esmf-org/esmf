@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.94 2010/12/01 16:02:21 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.95 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.94 2010/12/01 16:02:21 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.95 2010/12/03 05:57:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -375,7 +375,7 @@
                                  ringTime, ringInterval, stopTime, &
                                  ringDuration, ringTimeStepCount, refTime, &
                                  enabled, sticky, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_AlarmSetInitCreated(ESMF_AlarmCreateNew)
@@ -428,7 +428,7 @@
 
 !     invoke C to C++ entry point to copy alarm
       call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_AlarmSetInitCreated(ESMF_AlarmCreateCopy)
@@ -478,7 +478,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmDestroy(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_AlarmSetInitDeleted(alarm)
@@ -523,7 +523,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmDisable(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -566,7 +566,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmEnable(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -698,7 +698,7 @@
                     ringDuration, ringTimeStepCount, &
                     timeStepRingingCount, ringBegin, ringEnd, refTime, &
                     ringing, ringingOnPrevTimeStep, enabled, sticky, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! make work with Init. Stand.
@@ -754,7 +754,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmIsEnabled(alarm, ESMF_AlarmIsEnabled, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -805,7 +805,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_AlarmIsRinging(alarm, ESMF_AlarmIsRinging, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -852,7 +852,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -912,7 +912,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_AlarmNotSticky(alarm, ringDuration, &
                                  ringTimeStepCount, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -990,7 +990,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmPrint(alarm, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1040,7 +1040,7 @@
 !     invoke C to C++ entry point to allocate and restore alarm
       call c_ESMC_AlarmReadRestart(ESMF_AlarmReadRestart, nameLen, name, &
                                    localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1087,7 +1087,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmRingerOff(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1133,7 +1133,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmRingerOn(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1253,7 +1253,7 @@
                            ringInterval, stopTime, ringDuration, &
                            ringTimeStepCount, refTime, ringing, &
                            enabled, sticky, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1306,7 +1306,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmSticky(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1356,7 +1356,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmValidate(alarm, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
       ! Return success
@@ -1408,7 +1408,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1465,7 +1465,7 @@
 !     invoke C to C++ entry point
       call c_ESMC_AlarmWillRingNext(alarm, timeStep,  &
                    ESMF_AlarmWillRingNext, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -1510,7 +1510,7 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_AlarmWriteRestart(alarm, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success

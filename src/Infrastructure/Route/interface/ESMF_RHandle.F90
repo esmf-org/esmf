@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.49 2010/04/29 05:25:24 theurich Exp $
+! $Id: ESMF_RHandle.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.49 2010/04/29 05:25:24 theurich Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -219,7 +219,7 @@ contains
 
     ! Call C++ create code
     call c_ESMC_RouteHandleCreate(rhandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -279,7 +279,7 @@ contains
 
     ! Call C++ destroy code
     call c_ESMC_RouteHandleDestroy(rhandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -330,7 +330,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
     call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -377,7 +377,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
     
     call c_ESMC_RouteHandlePrepXXE(rhandle, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -431,7 +431,7 @@ contains
     
     call c_ESMC_RouteHandleAppendClear(rhandle, appendRoutehandle, &
       rraShift, vectorLengthShift, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -485,14 +485,14 @@ contains
 
     if (present(htype)) then
       call c_ESMC_RouteHandleGetType(rhandle, htype, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
 
     if (present(name)) then
       call c_ESMC_GetName(rhandle, name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -547,14 +547,14 @@ contains
     
     if (present(htype)) then
       call c_ESMC_RouteHandleSetType(rhandle, htype, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     endif
 
     if (present(name)) then
       call c_ESMC_SetName(rhandle, "RouteHandle", name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -609,7 +609,7 @@ contains
     ! TODO: the following code is commented out because the C-side
     !       validate routine is empty
     !    call c_ESMC_RouteHandleValidate(rhandle, localrc)   
-    !if (ESMF_LogMsgFoundError(localrc, &
+    !if (ESMF_LogFoundError(localrc, &
     !                           ESMF_ERR_PASSTHRU, &
     !                           ESMF_CONTEXT, rc)) return
 
@@ -673,7 +673,7 @@ contains
       call c_ESMC_RouteHandlePrint(rhandle, defaultopts, localrc)
     endif
 
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 

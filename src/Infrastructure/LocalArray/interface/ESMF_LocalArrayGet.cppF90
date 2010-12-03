@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.17 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.18 2010/12/03 05:57:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -98,19 +98,19 @@ module ESMF_LocalArrayGetMod
  @\
       ! Check tkr matching between larray and fptr @\
       call ESMF_LocalArrayGet(larray, typekind=typekind, rank=rank, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
       ! check typekind match @\
       if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
           "- fptr typekind does not match LocalArray typekind", & @\
           ESMF_CONTEXT, rc) @\
         return @\
       endif @\
       ! check rank match @\
       if (rank /= mrank) then @\
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
           "- fptr rank does not match LocalArray rank", & @\
           ESMF_CONTEXT, rc) @\
         return @\
@@ -118,30 +118,30 @@ module ESMF_LocalArrayGetMod
  @\
       ! Gain access to the F90 array pointer stored in larray @\
       call c_ESMC_LocalArrayGetFPtr(larray, wrap, localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, & @\
+      if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
  @\
       ! Allocate a new buffer if requested and return a copy @\
       if (copyreq) then @\
         call c_ESMC_LocalArrayGetLbounds(larray, lb, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
+        if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
         call c_ESMC_LocalArrayGetUbounds(larray, ub, localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, & @\
+        if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
         ! Macro mrng @\
         ! is a macro that has correct construction of lb and ub elements @\
         allocate(lp(mrng), stat=localrc) @\
-        if (ESMF_LogMsgFoundAllocError(localrc, & @\
+        if (ESMF_LogFoundAllocError(localrc, & @\
           "local data space", & @\
           ESMF_CONTEXT, rc)) return @\
         ! test if incoming pointer was associated @\
         if (associated(fptr)) then @\
           if (size(fptr) .ne. size(lp)) then @\
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, & @\
+            call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
               "- fptr was associated but of incorrect size", & @\
               ESMF_CONTEXT, rc) @\
             return @\
@@ -203,7 +203,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.17 2010/11/12 06:57:18 eschwab Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.18 2010/12/03 05:57:53 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -313,7 +313,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
 
     call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -323,60 +323,60 @@ contains
 
     if (present(typekind)) then
       call c_ESMC_LocalArrayGetTypeKind(larray, typekind, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(counts)) then
       if (size(counts) < lrank) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           "- size of counts argument is smaller than rank", &
           ESMF_CONTEXT, rc)
         return
       endif
       call c_esmc_localarraygetcounts(larray, counts, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(lbounds)) then
       if (size(lbounds) < lrank) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           "- size of lbounds argument is smaller than rank", &
           ESMF_CONTEXT, rc)
         return
       endif
       call c_ESMC_LocalArrayGetLbounds(larray, lbounds, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(ubounds)) then
       if (size(ubounds) < lrank) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           "- size of ubounds argument is smaller than rank", &
           ESMF_CONTEXT, rc)
         return
       endif
       call c_ESMC_LocalArrayGetUbounds(larray, ubounds, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(base)) then
       call c_ESMC_LocalArrayGetBaseAddr(larray, base, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(name)) then
       call c_ESMC_GetName(larray, name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif

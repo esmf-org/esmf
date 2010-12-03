@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.11 2010/12/02 15:36:37 feiliu Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.12 2010/12/03 05:57:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.11 2010/12/02 15:36:37 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.12 2010/12/03 05:57:39 theurich Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -152,7 +152,7 @@ contains
         call ESMF_FieldBundleSMM(srcFieldBundle=srcFieldBundle, &
           dstFieldBundle=dstFieldBundle, routehandle=routehandle, &
           zeroflag=zeroflag, checkflag=checkflag, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! return successfully
@@ -197,7 +197,7 @@ contains
 
         ! Call into the RouteHandle code
         call ESMF_RouteHandleRelease(routehandle, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! return successfully
@@ -318,7 +318,7 @@ contains
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
 
         if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of Fields", &
                 ESMF_CONTEXT, rc)
             return
@@ -331,11 +331,11 @@ contains
         fieldCount = srcFieldBundle%btypep%field_count
 
         routehandle = ESMF_RouteHandleCreate(rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_RouteHandlePrepXXE(routehandle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! 6) loop over all Fields in FieldBundles, call FieldRegridStore and append rh
@@ -346,22 +346,22 @@ contains
           ! obtain srcField
           call ESMF_FieldBundleGet(srcFieldBundle, fieldIndex=i, field=srcField, &
             rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           
           ! obtain dstField
           call ESMF_FieldBundleGet(dstFieldBundle, fieldIndex=i, field=dstField, &
             rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           
           ! If these are both Grids, then check for optimization
           call ESMF_FieldGet(srcField, geomType=srcGeomType, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
 
           call ESMF_FieldGet(dstField, geomType=dstGeomType, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
 
           isGridPair=.false.
@@ -371,11 +371,11 @@ contains
 
              ! Get Grids and staggerlocs
              call ESMF_FieldGet(srcField, grid=currSrcGrid, staggerloc=currSrcStaggerloc, rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
 
              call ESMF_FieldGet(dstField, grid=currDstGrid, staggerloc=currDstStaggerloc, rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
 
              ! see if grids match prev grids
@@ -399,7 +399,7 @@ contains
                         routehandle=rh, &
                         factorList=prev_weights, factorIndexList=prev_indicies, &
                         rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                      ESMF_CONTEXT, rcToReturn=rc)) return
              else ! If it doesn't match make a new previous
                 ! if we have them, get rid of old matrix
@@ -418,7 +418,7 @@ contains
                      regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
                      regridScheme=regridScheme, &
                      rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
                 ! Swap order
@@ -445,23 +445,23 @@ contains
                   regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
                   regridScheme=regridScheme, &
                   rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
            endif
 
           ! append rh to routehandle and clear rh
           call ESMF_RouteHandleAppendClear(routehandle, appendRoutehandle=rh, &
             rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         
           ! adjust rraShift and vectorLengthShift
           call ESMF_FieldGet(srcField, localDeCount=localDeCount, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           rraShift = rraShift + localDeCount
           call ESMF_FieldGet(dstField, localDeCount=localDeCount, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           rraShift = rraShift + localDeCount
           vectorLengthShift = vectorLengthShift + 1

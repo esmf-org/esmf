@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.351 2010/11/25 05:24:31 w6ws Exp $
+! $Id: ESMF_Field.F90,v 1.352 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.351 2010/11/25 05:24:31 w6ws Exp $'
+    '$Id: ESMF_Field.F90,v 1.352 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 !
@@ -260,7 +260,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       if (.not.associated(field%ftypep)) then 
-         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
             "Uninitialized or already destroyed Field: ftypep unassociated", &
              ESMF_CONTEXT, rc)
          return
@@ -271,11 +271,11 @@ contains
 
       ! make sure the field is ready before trying to look at contents
       call ESMF_BaseGetStatus(ftypep%base, fieldstatus, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
       if (fieldstatus .ne. ESMF_STATUS_READY) then
-         call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
             "Uninitialized or already destroyed Field: fieldstatus not ready", &
              ESMF_CONTEXT, rc)
          return
@@ -284,24 +284,24 @@ contains
       ! make sure there is a grid before asking it questions.
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
           call ESMF_GeomBaseValidate(ftypep%geombase, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
 	  ! get the grid decomp type if geombase is grid
       decompType = ESMF_GRID_NONARBITRARY
           call ESMF_GeomBaseGet(ftypep%geombase, geomType=geomType, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &  
+          if (ESMF_LogFoundError(localrc, &  
             ESMF_ERR_PASSTHRU, &  
             ESMF_CONTEXT, rc)) return  
           
           if (geomType .eq. ESMF_GEOMTYPE_GRID) then
              call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, &  
+             if (ESMF_LogFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  
            	    ESMF_CONTEXT, rc)) return  
              call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-             if (ESMF_LogMsgFoundError(localrc, &  
+             if (ESMF_LogFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  
            	    ESMF_CONTEXT, rc)) return  
           endif   
@@ -309,7 +309,7 @@ contains
           call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                 "Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
                  ESMF_CONTEXT, rc)
              return
@@ -321,7 +321,7 @@ contains
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
-                 call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                 call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                     "Cannot retrieve exclusive bounds from ftypep%grid", &
                      ESMF_CONTEXT, rc)
                  return
@@ -332,7 +332,7 @@ contains
       if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                 "Cannot validate ftypep%array", &
                  ESMF_CONTEXT, rc)
              return
@@ -340,7 +340,7 @@ contains
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
               distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                 "Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
                  ESMF_CONTEXT, rc)
              return
@@ -348,7 +348,7 @@ contains
           
           ! Verify the distgrids in array and grid match.
           if(.not. ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc)) then
-              call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                  "grid DistGrid does not match array DistGrid", &
                   ESMF_CONTEXT, rc)
               return
@@ -366,7 +366,7 @@ contains
                   distgridToPackedArrayMap=distgridToPackedArrayMap, &
                   rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) then
-                 call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                 call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                  "Cannot retrieve distgridToPackedArrayMap from ftypep%array", &
                  ESMF_CONTEXT, rc)
                 return
@@ -379,7 +379,7 @@ contains
             enddo
 
             if ( arrayrank .lt. gridrank_norep) then
-                call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                    "grid rank + ungridded Bound rank not equal to array rank", &
                     ESMF_CONTEXT, rc)
                 return
@@ -482,7 +482,7 @@ contains
 
       call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, &
                                  lattreconflag, linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -492,7 +492,7 @@ contains
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
                                  fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                  buffer(1), length, offset, linquireflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -500,7 +500,7 @@ contains
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
         call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
                                     lattreconflag, linquireflag, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
       endif
@@ -508,7 +508,7 @@ contains
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
           call c_ESMC_ArraySerialize(fp%array, buffer(1), length, offset, &
                                      lattreconflag, linquireflag, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
       endif
@@ -582,18 +582,18 @@ contains
 
       ! Shortcut to internals
       allocate(fp, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, &
+      if (ESMF_LogFoundAllocError(localrc, &
                                      "space for new Field object", &
                                      ESMF_CONTEXT, rc)) return
 
       ! Deserialize Base
       call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
                                  
       call ESMF_BaseSetInitCreated(fp%base, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
@@ -605,14 +605,14 @@ contains
                                    fp%ungriddedLBound, fp%ungriddedUBound, &
                                    fp%maxHaloLWidth, fp%maxHaloUWidth, &
                                    buffer(1), offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+      if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
           fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
                                               lattreconflag, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
           
@@ -622,7 +622,7 @@ contains
               fp%geombase%gbcp%type%type == ESMF_GEOMTYPE_GRID%type) then
             linkChange = ESMF_TRUE
             call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, linkChange, localrc)
-            if (ESMF_LogMsgFoundError(localrc, &
+            if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
           endif
@@ -632,12 +632,12 @@ contains
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
           call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, &
                                       lattreconflag, localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
           call ESMF_ArraySetInitCreated(fp%array,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
       endif

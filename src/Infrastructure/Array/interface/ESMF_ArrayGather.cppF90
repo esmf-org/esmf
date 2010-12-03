@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.19 2010/07/23 18:57:23 theurich Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.20 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.19 2010/07/23 18:57:23 theurich Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.20 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -207,11 +207,11 @@ contains
       vm_opt = vm @\
     else @\
       call ESMF_VMGetCurrent(vm_opt, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
     call ESMF_VMGet(vm_opt, localPet=localPet, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     if (localPet==rootPet) then @\
@@ -240,7 +240,7 @@ contains
         call c_ESMC_ArrayGather(array, farray(mloc), & @\
           ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
           localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       else @\
         ! it is unsafe to use dummy argument farray @\
@@ -248,7 +248,7 @@ contains
         call c_ESMC_ArrayGather(array, farray_dummy(mloc), & @\
           ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
           localrc) @\
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         deallocate(farray_dummy) @\
       endif @\
@@ -256,7 +256,7 @@ contains
       ! not rootPet -> call through notRoot interface @\
       call ESMF_ArrayGather(array=array, patch=patch, rootPet=rootPet, & @\
         vm=vm, rc=localrc) @\
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
 @\
@@ -293,7 +293,7 @@ TypeKindRankDeclarationMacro(ArrayGather)
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayGatherNotRoot(array, patch, rootPet, vm, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully

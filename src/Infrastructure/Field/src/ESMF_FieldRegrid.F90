@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.49 2010/12/02 18:27:40 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.50 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.49 2010/12/02 18:27:40 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.50 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 !
@@ -188,18 +188,18 @@ contains
         ! Now we go through the painful process of extracting the data members
         ! that we need.
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
                    routehandle=routeHandle, zeroflag=zeroflag, &
                    checkflag=checkflag, rc=localrc)
 
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
@@ -209,7 +209,7 @@ contains
         !           routehandle=routeHandle, zeroflag=zeroflag, &
         !           checkflag=checkflag, rc=localrc)
 
-        !if (ESMF_LogMsgFoundError(localrc, &
+        !if (ESMF_LogFoundError(localrc, &
         !                             ESMF_ERR_PASSTHRU, &
         !                             ESMF_CONTEXT, rc)) return
 
@@ -245,7 +245,7 @@ contains
         integer :: localrc
 
         call ESMF_RouteHandleRelease(routehandle=routeHandle, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(rc)) rc = ESMF_SUCCESS
@@ -375,16 +375,16 @@ contains
 
         ! global vm for now
         call ESMF_VMGetGlobal(vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Now we go through the painful process of extracting the data members
         ! that we need.
         call ESMF_FieldGet(srcField, geomtype=srcgeomtype, array=srcArray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (srcgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- RegridStore on XGrid is not supported in this overloaded method", & 
                  ESMF_CONTEXT, rc) 
             return
@@ -392,10 +392,10 @@ contains
                 
 
         call ESMF_FieldGet(dstField, geomtype=dstgeomtype, array=dstArray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (dstgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- RegridStore on XGrid is not supported in this overloaded method", & 
                  ESMF_CONTEXT, rc) 
             return
@@ -424,7 +424,7 @@ contains
         if (lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) then
            if (present(regridPoleType)) then
               if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for NON-ESMF_REGRID_SCHEME_FULL3D", & 
                   ESMF_CONTEXT, rc) 
                  return
@@ -436,7 +436,7 @@ contains
            if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
               if (present(regridPoleType)) then
                  if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
-                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                     "- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_METHOD_CONSERVE", & 
                     ESMF_CONTEXT, rc) 
                    return
@@ -455,13 +455,13 @@ contains
 
         if (localRegridPoleType .eq. ESMF_REGRIDPOLE_NPNTAVG) then
            if (.not. present(regridPoleNPnts)) then
-                       call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                       call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- RegridPoleNPnts must be specified if regridPoleType is ESMF_REGRIDPOLE_NPNTAVG", & 
                  ESMF_CONTEXT, rc) 
             return
            else 
              if (regridPoleNPnts < 1) then
-               call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+               call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- RegridPoleNPnts must be >=1 ", & 
                  ESMF_CONTEXT, rc) 
             return
@@ -492,7 +492,7 @@ contains
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(srcField, grid=srcGrid, &
                  staggerloc=srcStaggerloc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  ! if we're doing conservative then do some checking and
@@ -501,7 +501,7 @@ contains
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
 	    if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- can't currently do conservative regrid on a stagger other then center", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -510,10 +510,10 @@ contains
             ! Can only do conservative on 2D right now
             call ESMF_GridGet(grid=srcGrid, &
                    dimCount=gridDimCount, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (gridDimCount .ne. 2) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only do conservative regridding on 2D grids", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -527,31 +527,31 @@ contains
 
           ! check grid
           call checkGrid(srcGrid,srcStaggerloc,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
           srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, isLatLonDeg, &
                       maskValues=srcMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         else
           call ESMF_FieldGet(srcField, mesh=srcMesh, meshLocation=meshloc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
               if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rc) 
                  return	  
               endif
           else
               if (meshloc .ne. ESMF_MESHLOC_NODE) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- S can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rc) 
                  return	  
@@ -562,7 +562,7 @@ contains
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(dstField, grid=dstGrid, &
                  staggerloc=dstStaggerloc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  ! if we're doing conservative then do some checking and
@@ -571,7 +571,7 @@ contains
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
 	    if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- can't currently do conservative regrid on a stagger other then center", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -580,10 +580,10 @@ contains
             ! Can only do conservative on 2D right now
             call ESMF_GridGet(grid=dstGrid, &
                    dimCount=gridDimCount, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (gridDimCount .ne. 2) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only do conservative regridding on 2D grids", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -597,30 +597,30 @@ contains
 
           ! check grid
           call checkGrid(dstGrid,dstStaggerloc,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
           dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, isLatLonDeg, &
                       maskValues=dstMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
           call ESMF_FieldGet(dstField, mesh=dstMesh, meshLocation=meshloc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
               if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rc) 
                 return	  
               endif
           else
               if (meshloc .ne. ESMF_MESHLOC_NODE) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- D can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rc) 
                 return	  
@@ -638,21 +638,21 @@ contains
               lregridScheme, &
               unmappedDstAction, routeHandle, &
               indicies, weights, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
         ! destroy Meshes, if they were created here
         if (srcgeomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(srcMesh,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
         endif
 
         if (dstgeomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(dstMesh,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
         endif
@@ -736,24 +736,24 @@ contains
         ! first Get necessary information from XGrid and Fields
         call ESMF_XGridGet(xgrid, ngridA=ngrid_a, ngridB=ngrid_b, &
             rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         allocate(gridA(ngrid_a), gridB(ngrid_b))
 
         call ESMF_XGridGet(xgrid, sideA=gridA, sideB=gridB, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(srcField, geomtype=geomtype, &
                rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! locate the Grid or XGrid contained in srcField
         if(geomtype == ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(srcField, grid=srcGrid, &
                    rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
             found = .false.
@@ -768,7 +768,7 @@ contains
             do i = 1, ngrid_b
                 if(ESMF_GridMatch(srcGrid, gridB(i))) then
                     if(found) then
-                        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                            "- duplication of Grid found in XGrid", &
                            ESMF_CONTEXT, rc) 
                         return
@@ -781,7 +781,7 @@ contains
             enddo 
 
             if(.not. found) then
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                    "- cannot Locate src Field Grid in XGrid", &
                    ESMF_CONTEXT, rc) 
                 return
@@ -791,24 +791,24 @@ contains
             if(geomtype == ESMF_GEOMTYPE_XGRID) then
                 call ESMF_FieldGet(srcField, xgrid=srcXGrid, &
                        rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
                 
                 match = ESMF_XGridMatch(xgrid, srcXGrid, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                 if(match) then
                     srcSide = ESMF_XGRID_BALANCED
                     srcIdx = 1
                 else
-                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
                            "- XGrid in srcField doesn't match the input XGrid", &
                            ESMF_CONTEXT, rc) 
                     return
                 endif
             else
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
                        "- src Field is not built on Grid or XGrid", &
                        ESMF_CONTEXT, rc) 
                 return
@@ -818,13 +818,13 @@ contains
         ! locate the Grid or XGrid contained in dstField
         call ESMF_FieldGet(dstField, geomtype=geomtype, &
                rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(geomtype == ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(dstField, grid=dstGrid, &
                    rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
             found = .false.
@@ -839,7 +839,7 @@ contains
             do i = 1, ngrid_b
                 if(ESMF_GridMatch(dstGrid, gridB(i))) then
                     if(found) then
-                        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                            "- duplication of Grid found in XGrid", &
                            ESMF_CONTEXT, rc) 
                         return
@@ -852,7 +852,7 @@ contains
             enddo 
 
             if(.not. found) then
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                    "- cannot Locate dst Field Grid in XGrid", &
                    ESMF_CONTEXT, rc) 
                 return
@@ -862,24 +862,24 @@ contains
             if(geomtype == ESMF_GEOMTYPE_XGRID) then
                 call ESMF_FieldGet(dstField, xgrid=dstXGrid, &
                        rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                 match = ESMF_XGridMatch(xgrid, dstXGrid, rc=localrc)
-                if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                 if(match) then
                     dstSide = ESMF_XGRID_BALANCED
                     dstIdx = 1
                 else
-                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
                            "- XGrid in dstField doesn't match the input XGrid", &
                            ESMF_CONTEXT, rc) 
                     return
                 endif
             else
-                call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, &
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
                        "- src Field is not built on Grid or XGrid", &
                        ESMF_CONTEXT, rc) 
                 return
@@ -888,7 +888,7 @@ contains
 
         ! src and dst Fields should not be on the same side
         if ( srcSide == dstSide ) then
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                "- src and dst Fields should not be on same side of the XGrid", &
                ESMF_CONTEXT, rc) 
             return
@@ -897,29 +897,29 @@ contains
         ! retrieve the correct sparseMat structure
         call ESMF_XGridGet(xgrid, sparseMat, srcSide, srcIdx, &
             dstSide, dstIdx, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
         ! Now we go through the painful process of extracting the data members
         ! that we need. Need to resolve compilation order.
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArraySMMStore(srcArray, dstArray, routeHandle, &
             sparseMat%factorList, sparseMat%factorIndexList, &
             localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         !call ESMF_FieldSMMStore(srcField, dstField, routeHandle, &
         !    sparseMat%factorList, sparseMat%factorIndexList, &
         !    localrc)
-        !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         !  ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(rc)) rc = ESMF_SUCCESS
@@ -988,12 +988,12 @@ contains
         ! Now we go through the painful process of extracting the data members
         ! that we need.
         call ESMF_FieldGet(areaField, typekind=typekind, geomtype=geomtype, array=Array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
 	! Check typekind
         if (typekind .ne. ESMF_TYPEKIND_R8) then
-           call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- Area calculation is only supported for Fields of typekind=ESMF_TYPEKIND_R8", & 
               ESMF_CONTEXT, rc) 
            return
@@ -1024,13 +1024,13 @@ contains
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(areaField, grid=Grid, &
                  staggerloc=staggerLoc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Only Center stagger is supported right now until we figure out what the
           ! control volume for the others should be
 	  if (staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- can't currently calculate area on a stagger other then center", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -1039,10 +1039,10 @@ contains
 	  ! Can only do conservative on 2D right now
           call ESMF_GridGet(grid=Grid, &
                    dimCount=gridDimCount, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (gridDimCount .ne. 2) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only calculate area on 2D grids", & 
                  ESMF_CONTEXT, rc) 
                 return
@@ -1050,28 +1050,28 @@ contains
 
           ! check grid
           call checkGrid(Grid,staggerloc,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
           Mesh = ESMF_GridToMesh(Grid, ESMF_STAGGERLOC_CORNER, isSphere, isLatLonDeg, &
                       maskValues=MaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  ! call into the Regrid GetareaField interface
           call ESMF_RegridGetArea(Grid, Mesh, Array, ESMF_STAGGERLOC_CORNER, lregridScheme, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
         else
           call ESMF_FieldGet(areaField, mesh=Mesh, meshLocation=meshLoc, &
                  localDECount=localDECount, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  if (meshLoc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- can't currently calculate area on a mesh location other than elements", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -1086,12 +1086,12 @@ contains
           ! Get pointer to field data
 	  ! Right now Mesh will only have one DE per PET
           call ESMF_FieldGet(areaField, localDE=0,  farrayPtr=areaFptr, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Get Area
 	  call ESMF_MeshGetElemArea(mesh, areaList=areaFptr, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
         endif
@@ -1100,7 +1100,7 @@ contains
         ! destroy Mesh, if they were created here
         if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(Mesh,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
         endif
@@ -1163,7 +1163,7 @@ contains
 
         ! global vm for now
         call ESMF_VMGetGlobal(vm, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
   !  check Field and Iwts to make sure they are from the same grid
@@ -1171,7 +1171,7 @@ contains
         ! Now we go through the painful process of extracting the data members
         ! that we need.
         call ESMF_FieldGet(Iwts, geomtype=geomtype, array=Array, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Will eventually determine scheme either as a parameter or from properties
@@ -1186,36 +1186,36 @@ contains
         if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(Iwts, grid=Grid, &
                  staggerloc=staggerLoc, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! check grid
           call checkGrid(Grid,staggerloc,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
           Mesh = ESMF_GridToMesh(Grid, staggerLoc, isSphere, &
                       maskValues=MaskValues, regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         else
           call ESMF_FieldGet(Iwts, mesh=Mesh, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         ! call into the Regrid GetIwts interface
         call ESMF_RegridGetIwts(Grid, Mesh, Array, staggerLoc, lregridScheme, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
+        if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
         ! destroy Mesh, if they were created here
         if (geomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(Mesh,rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
         endif
@@ -1241,12 +1241,12 @@ contains
 
         ! Make sure Grid isn't arbitrarily distributed
         call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Error if decompType is ARBITRARY
        if (decompType .eq. ESMF_GRID_ARBITRARY) then
-             call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+             call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can't currently regrid an arbitrarily distributed Grid", & 
                  ESMF_CONTEXT, rc) 
               return
@@ -1255,7 +1255,7 @@ contains
        ! Make sure Grid doesn't contain width 1 DEs
        call ESMF_GridGet(grid,localDECount=localDECount, dimCount=dimCount, &
               rc=localrc)
-       if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        
        ! loop through checking DEs
@@ -1264,13 +1264,13 @@ contains
            ! Get bounds of DE
            call ESMF_GridGet(grid,staggerloc=staggerloc, localDE=lDE, &
                   exclusivecount=ec,rc=localrc)
-           if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! loop and make sure they aren't too small in any dimension
            do i=1,dimCount
               if (ec(i) .lt. 2) then
-                 call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               "- can't currently regrid a grid that contains a DE of width less than 2", & 
                  ESMF_CONTEXT, rc) 
               return

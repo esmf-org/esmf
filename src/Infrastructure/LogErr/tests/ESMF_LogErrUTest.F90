@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.64 2010/11/19 17:33:32 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.65 2010/12/03 05:57:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.64 2010/11/19 17:33:32 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.65 2010/12/03 05:57:53 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -199,7 +199,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -215,7 +215,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogMsgFoundError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -239,7 +239,7 @@
       !EX_UTest
       ! Test Error Msg Found Alloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogMsgFoundAllocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -255,7 +255,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogMsgFoundAllocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -313,7 +313,7 @@
       !EX_UTest
       ! Test Error Msg Found Dealloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogMsgFoundDeallocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -329,7 +329,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogMsgFoundDeallocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.133 2010/11/23 21:06:33 samsoncheung Exp $
+! $Id: ESMF_Array.F90,v 1.134 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.133 2010/11/23 21:06:33 samsoncheung Exp $'
+    '$Id: ESMF_Array.F90,v 1.134 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -417,32 +417,32 @@ contains
     ! Set the name in Base object
     if (present(name)) then
       call c_ESMC_SetName(array, "Array", name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Deal with (optional) array arguments
     computationalLWidthArg = &
       ESMF_InterfaceIntCreate(farray2D=computationalLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUWidthArg = &
       ESMF_InterfaceIntCreate(farray2D=computationalUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySet(array, computationalLWidthArg, &
       computationalUWidthArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -496,7 +496,7 @@ contains
     
     ! Call into the internal method
     call ESMF_ArraySetPLocalDeInternal(array, localDe, rimSeqIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -618,7 +618,7 @@ contains
       opt_srcArray = srcArray
     else
       call ESMF_ArraySetThisNull(opt_srcArray, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if (present(dstArray)) then
@@ -626,7 +626,7 @@ contains
       opt_dstArray = dstArray
     else
       call ESMF_ArraySetThisNull(opt_dstArray, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
@@ -642,7 +642,7 @@ contains
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
       opt_commflag, opt_finishedflag, opt_cancelledflag, opt_zeroflag, &
       opt_checkflag, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! translate back finishedflag
@@ -699,7 +699,7 @@ contains
         
     ! Call into the RouteHandle code
     call ESMF_RouteHandleRelease(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -861,24 +861,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -927,24 +927,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -993,24 +993,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1059,24 +1059,24 @@ contains
     opt_factorList => factorList
     factorIndexListArg = &
       ESMF_InterfaceIntCreate(farray2D=factorIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(factorIndexListArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1177,12 +1177,12 @@ contains
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStoreNF(srcArray, dstArray, routehandle, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! return successfully
@@ -1231,7 +1231,7 @@ contains
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayValidate(array, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! return successfully
@@ -1334,7 +1334,7 @@ contains
 #elif ESMF_NETCDF
       piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
 #else
-      call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
         ESMF_CONTEXT, rc)
       return
@@ -1346,19 +1346,19 @@ contains
       ! binary format selected
       piofmt = "bin"
       if (present(variableName)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
           ESMF_CONTEXT, rc)
         return
       endif
       if (present(timeslice)) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           "The input argument timeslice cannot be sepcified in ESMF_IOFMT_BIN mode",  &
           ESMF_CONTEXT, rc)
         return
       endif
 #else
-      call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
         ESMF_CONTEXT, rc)
       return
@@ -1367,7 +1367,7 @@ contains
     else
 
       ! format option that is not supported
-      call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "this format is not currently supported by the ESMF IO layer", &
         ESMF_CONTEXT, rc)
       return
@@ -1381,7 +1381,7 @@ contains
     !
     ! Obtain typekind and rank
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if(present(variableName)) varname = variableName
  
@@ -1405,26 +1405,26 @@ contains
         select case(rank)
           case (1)
             call ESMF_ArrayWriteIntl1DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_ArrayWriteIntl2DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_ArrayWriteIntl3DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_ArrayWriteIntl4DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
             call ESMF_ArrayWriteIntl5DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
               ESMF_CONTEXT, rc)
             return
         end select
@@ -1434,26 +1434,26 @@ contains
         select case(rank)
           case (1)
             call ESMF_ArrayWriteIntl1DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_ArrayWriteIntl2DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_ArrayWriteIntl3DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_ArrayWriteIntl4DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
             call ESMF_ArrayWriteIntl5DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
               ESMF_CONTEXT, rc)
             return
         end select
@@ -1463,32 +1463,32 @@ contains
         select case(rank)
           case (1)
             call ESMF_ArrayWriteIntl1DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (2)
             call ESMF_ArrayWriteIntl2DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (3)
             call ESMF_ArrayWriteIntl3DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (4)
             call ESMF_ArrayWriteIntl4DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case (5)
             call ESMF_ArrayWriteIntl5DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
               ESMF_CONTEXT, rc)
             return
         end select
 
       case default
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
           ESMF_CONTEXT, rc)
         return
 
@@ -1499,7 +1499,7 @@ contains
 
 #else
     ! Return indicating PIO not present
-    call ESMF_LogMsgSetError(ESMF_RC_LIB_NOT_PRESENT, &
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
       "ESMF must be compiled with PIO support to support I/O methods", &
       ESMF_CONTEXT, rc)
 #endif
@@ -1583,7 +1583,7 @@ contains
 !      rootPET, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayReduceScalarBR8
@@ -1653,7 +1653,7 @@ contains
 !      rootPET, commhandle, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayReduceScalarNBRootR8
@@ -1721,7 +1721,7 @@ contains
 !      rootPET, de, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayReduceScalarNBR8
@@ -1789,7 +1789,7 @@ contains
 !    call c_ESMC_ArrayWaitRoot(array, rootPET, commhandle, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayWaitRoot
@@ -1842,7 +1842,7 @@ contains
 !    call c_ESMC_ArrayWaitDE(array, de, vm, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_ArrayWaitDE

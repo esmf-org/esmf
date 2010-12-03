@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.42 2010/11/23 19:21:06 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.43 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.42 2010/11/23 19:21:06 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.43 2010/12/03 05:57:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -560,7 +560,7 @@
     if (present (length)) length = 0
     localrc = merge (ESMF_SUCCESS, ESMF_RC_ARG_VALUE,  &
         argindex >= 0 .and. argindex <= localargc)
-    if (ESMF_LogMsgFoundError ( localrc,  &
+    if (ESMF_LogFoundError ( localrc,  &
         ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc))  &
       return
 
@@ -643,7 +643,7 @@
 
 #endif
 
-    if (ESMF_LogMsgFoundError ( localrc,  &
+    if (ESMF_LogFoundError ( localrc,  &
         ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc))  &
       return
 

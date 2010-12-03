@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.145 2010/11/29 16:26:53 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.146 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.145 2010/11/29 16:26:53 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.146 2010/12/03 05:57:59 theurich Exp $'
 
 !==============================================================================
 !
@@ -226,7 +226,7 @@ contains
 
     ! Allocate a new comp class
     allocate(compclass, stat=localrc)
-    if (ESMF_LogMsgFoundAllocError(localrc, "compclass", &
+    if (ESMF_LogFoundAllocError(localrc, "compclass", &
       ESMF_CONTEXT, rc)) return
       
     ! call Comp method
@@ -234,7 +234,7 @@ contains
       gridcomptype=gridcomptype, configFile=configFile, config=config, &
       grid=grid, clock=clock, petList=petList, contextflag=contextflag, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) then
       deallocate(compclass)
@@ -297,21 +297,21 @@ contains
 
     ! Check to see if already destroyed
     if (.not.associated(gridcomp%compp)) then
-      if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+      if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         "GridComp not initialized or already destroyed", &
         ESMF_CONTEXT, rc)) return
     endif
 
     ! call Comp method
     call ESMF_CompDestruct(gridcomp%compp, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(gridcomp%compp%base, ESMF_STATUS_INVALID, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -405,7 +405,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -453,7 +453,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -553,7 +553,7 @@ contains
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       ctype=comptype, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -606,7 +606,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
     call c_ESMC_GetEntryPointPhaseCount(gridcomp, method, phaseCount, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -752,7 +752,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -799,7 +799,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -855,7 +855,7 @@ contains
 
     ! call Comp method
     localresult = ESMF_CompIsPetLocal(gridcomp%compp, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -913,7 +913,7 @@ contains
     print *, "Gridded Component:"
     ! call Comp method
     call ESMF_CompPrint(gridcomp%compp, options, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1003,7 +1003,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1092,7 +1092,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1139,7 +1139,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1219,7 +1219,7 @@ contains
     ! call Comp method
     call ESMF_CompSet(gridcomp%compp, name, gridcomptype=gridcomptype, &
       grid=grid, clock=clock, configFile=configFile, config=config, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1300,7 +1300,7 @@ contains
     if (present(phase)) phaseArg = phase
   
     call c_ESMC_SetEntryPoint(gridcomp, method, userRoutine, phaseArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1416,7 +1416,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
     call c_ESMC_SetServices(gridcomp, userRoutine, localUserRc, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1506,7 +1506,7 @@ contains
       call c_ESMC_SetServicesShObj(gridcomp, userRoutine, emptyString, &
         localUserRc, localrc)
     endif
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1576,7 +1576,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
     call c_ESMC_SetVM(gridcomp, userRoutine, localUserRc, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -1665,7 +1665,7 @@ contains
       call c_ESMC_SetVMShObj(gridcomp, userRoutine, emptyString, localUserRc, &
         localrc)
     endif
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1738,7 +1738,7 @@ contains
     ! call Comp method
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1809,7 +1809,7 @@ contains
     ! call Comp method
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1878,7 +1878,7 @@ contains
     ! call Comp method
     call ESMF_CompSetVMMinThreads(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -1927,7 +1927,7 @@ contains
 
     ! call Comp method
     call ESMF_CompValidate(gridcomp%compp, options, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1983,7 +1983,7 @@ contains
     ! call Comp method
     call ESMF_CompWait(gridcomp%compp, blockingflag=blockingflag, &
       userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
 
@@ -2073,7 +2073,7 @@ contains
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

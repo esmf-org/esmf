@@ -73,7 +73,7 @@
 !------------------------------------------------------------------------------
 
     call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -87,12 +87,12 @@
 !------------------------------------------------------------------------------
     
     config = ESMF_ConfigCreate(rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     call ESMF_ConfigLoadFile(config, USER_CONFIG_FILE, rc = localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -106,11 +106,11 @@
 !------------------------------------------------------------------------------
 
     call ESMF_ConfigGetAttribute(config, i_max, 'I Counts:', default=10, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_ConfigGetAttribute(config, j_max, 'J Counts:', default=40, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 
     compGridded = ESMF_GridCompCreate(name="ESMF Gridded Component", rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 
     call ESMF_GridCompSetServices(compGridded, SetServices, rc)
-    if (ESMF_LogMsgFoundError(rc, "Registration failed", rc)) &
+    if (ESMF_LogFoundError(rc, "Registration failed", rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
 !------------------------------------------------------------------------------
@@ -138,23 +138,23 @@
 !------------------------------------------------------------------------------
 
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=25, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_TimeSet(stopTime, yy=2004, mm=9, dd=26, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       clock = ESMF_ClockCreate("Application Clock", timeStep, startTime, &
                                 stopTime, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -171,13 +171,13 @@
 
       grid = ESMF_GridCreateShapeTile(maxIndex=(/i_max, j_max/), &
                              name="source grid", rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Attach the grid to the Component
       call ESMF_GridCompSet(compGridded, grid=grid, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
@@ -188,7 +188,7 @@
 !------------------------------------------------------------------------------
 
       defaultstate = ESMF_StateCreate("Default State", rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
      
@@ -202,17 +202,17 @@
  
       call ESMF_GridCompInitialize(compGridded, defaultstate, defaultstate, &
           clock, rc=localrc)
-      if (ESMF_LogMsgFoundError(rc, "Initialize failed", rc)) &
+      if (ESMF_LogFoundError(rc, "Initialize failed", rc)) &
           call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
  
       call ESMF_GridCompRun(compGridded, defaultstate, defaultstate, &
           clock, rc=localrc)
-      if (ESMF_LogMsgFoundError(rc, "Run failed", rc)) &
+      if (ESMF_LogFoundError(rc, "Run failed", rc)) &
           call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_GridCompFinalize(compGridded, defaultstate, defaultstate, &
           clock, rc=localrc)
-      if (ESMF_LogMsgFoundError(rc, "Finalize failed", rc)) &
+      if (ESMF_LogFoundError(rc, "Finalize failed", rc)) &
           call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
  
  
@@ -221,17 +221,17 @@
 !------------------------------------------------------------------------------
 
       call ESMF_ClockDestroy(clock, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_StateDestroy(defaultstate, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       call ESMF_GridCompDestroy(compGridded, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 

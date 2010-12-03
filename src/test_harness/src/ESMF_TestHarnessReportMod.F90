@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessReportMod.F90,v 1.17 2010/09/16 14:58:39 garyblock Exp $
+! $Id: ESMF_TestHarnessReportMod.F90,v 1.18 2010/12/03 05:58:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -139,7 +139,7 @@
           istatus =-1 
        else
        ! error
-          call ESMF_LogMsgSetError( ESMF_FAILURE,"invalid test status value ", &
+          call ESMF_LogSetError( ESMF_FAILURE,"invalid test status value ", &
                rcToReturn=localrc)
           return
        endif
@@ -358,7 +358,7 @@
            trim(adjustL(l2)), trim(adjustL(PDS%Dfiles(iDfile)%filename)) 
      else
         ! error
-        call ESMF_LogMsgSetError( ESMF_FAILURE,"invalid test status value ",   &
+        call ESMF_LogSetError( ESMF_FAILURE,"invalid test status value ",   &
              rcToReturn=localrc)
         return
      endif
@@ -395,7 +395,7 @@
      case default
      ! error
      print*,"error, report flag improperly set"
-     call ESMF_LogMsgSetError( ESMF_FAILURE," report flag improperly set",     &
+     call ESMF_LogSetError( ESMF_FAILURE," report flag improperly set",     &
                rcToReturn=localrc)
      return
 

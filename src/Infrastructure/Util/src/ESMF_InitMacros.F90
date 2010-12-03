@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.16 2010/05/07 22:40:30 w6ws Exp $
+! $Id: ESMF_InitMacros.F90,v 1.17 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@ end function ESMF_InitCheckDeep
     ! Initialize return code; assume routine not imlemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_IMErr=ESMF_LogMsgFoundError(ESMF_InitCheckDeep(isInit), &
+    ESMF_IMErr=ESMF_LogFoundError(ESMF_InitCheckDeep(isInit), &
                                      "Bad Object", &
                                      line, file, method, &
                                      rc)

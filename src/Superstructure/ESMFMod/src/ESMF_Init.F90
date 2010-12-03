@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.62 2010/11/12 06:59:06 eschwab Exp $
+! $Id: ESMF_Init.F90,v 1.63 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -213,13 +213,13 @@
       
       ! obtain global VM
       call ESMF_VMGetGlobal(localvm, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (present(vm)) vm=localvm
 
       ! block on all PETs
       call ESMF_VMBarrier(localvm, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS

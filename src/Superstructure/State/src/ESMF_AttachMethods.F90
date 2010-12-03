@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.2 2010/03/04 18:57:46 svasquez Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.3 2010/12/03 05:57:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.2 2010/03/04 18:57:46 svasquez Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.3 2010/12/03 05:57:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -128,7 +128,7 @@ module ESMF_AttachMethodsMod
     
     call c_ESMC_MethodTableAdd(state%statep%methodTable, label, userRoutine, &
       localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
  
@@ -191,7 +191,7 @@ module ESMF_AttachMethodsMod
       call c_ESMC_MethodTableAddShObj(state%statep%methodTable, label, &
         userRoutine, emptyString, localrc)
     endif
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
  
@@ -243,7 +243,7 @@ module ESMF_AttachMethodsMod
     
     call c_ESMC_MethodTableExecute(state%statep%methodTable, label, state, &
       localUserRc, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
  
@@ -293,7 +293,7 @@ module ESMF_AttachMethodsMod
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
     
     call c_ESMC_MethodTableRemove(state%statep%methodTable, label, localrc)
-    if (ESMF_LogMsgFoundError(localrc, &
+    if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rc)) return
  

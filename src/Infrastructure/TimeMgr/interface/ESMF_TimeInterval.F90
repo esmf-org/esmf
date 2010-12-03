@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.105 2010/12/02 04:16:17 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.106 2010/12/03 05:57:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.105 2010/12/02 04:16:17 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.106 2010/12/03 05:57:54 theurich Exp $'
 
 !==============================================================================
 !
@@ -1205,7 +1205,7 @@
                                      timeStringLenISOFrac, &
                                      tempTimeStringLenISOFrac, &
                                      tempTimeStringISOFrac, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
@@ -1434,7 +1434,7 @@
                                        timeStringLenISOFrac, &
                                        tempTimeStringLenISOFrac, &
                                        tempTimeStringISOFrac, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
@@ -1662,7 +1662,7 @@
                                   timeStringLenISOFrac, &
                                   tempTimeStringLenISOFrac, &
                                   tempTimeStringISOFrac, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
@@ -1888,7 +1888,7 @@
                                   timeStringLenISOFrac, &
                                   tempTimeStringLenISOFrac, &
                                   tempTimeStringISOFrac, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
@@ -2005,7 +2005,7 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
     
       call c_ESMC_TimeIntervalPrint(timeinterval, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2058,7 +2058,7 @@
 !     invoke C to C++ entry point to restore timeinterval
       call c_ESMC_TimeIntervalReadRestart(timeinterval, nameLen, name, &
                                           localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2204,7 +2204,7 @@
                                      us, ns, d_r8, h_r8, m_r8, s_r8, &
                                      ms_r8, us_r8, ns_r8, &
                                      sN, sN_i8, sD, sD_i8, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2358,7 +2358,7 @@
                                           ms_r8, us_r8, ns_r8, &
                                           sN, sN_i8, sD, sD_i8, &
                                           startTime, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2517,7 +2517,7 @@
                                         ms_r8, us_r8, ns_r8, &
                                         sN, sN_i8, sD, sD_i8, &
                                         calendar, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2669,7 +2669,7 @@
                                            ms_r8, us_r8, ns_r8, &
                                            sN, sN_i8, sD, sD_i8, &
                                            calendarType, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2717,7 +2717,7 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       call c_ESMC_TimeIntervalValidate(timeinterval, options, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
@@ -2762,7 +2762,7 @@
 
 !     invoke C to C++ entry point 
       call c_ESMC_TimeIntervalWriteRestart(timeinterval, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success

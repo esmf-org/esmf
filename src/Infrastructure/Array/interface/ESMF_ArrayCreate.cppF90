@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.57 2010/11/29 16:08:13 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.58 2010/12/03 05:57:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.57 2010/11/29 16:08:13 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.58 2010/12/03 05:57:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -410,7 +410,7 @@ contains
     ! internally for ESMF_INDEX_USER. @\
     allocate(larrayList(1)) @\
     larrayList(1) = ESMF_LocalArrayCreate(farrayPtr, copyflag_opt, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
@@ -418,7 +418,7 @@ contains
       copyflag_opt, distgridToArrayMap, computationalEdgeLWidth, & @\
       computationalEdgeUWidth, computationalLWidth, computationalUWidth, & @\
       totalLWidth, totalUWidth, name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Garbage collection. The ArrayCreate() call will have placed the @\
@@ -573,11 +573,11 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     ! Ensure incoming DistGrid is 1D @\
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, & @\
       rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     if (dimCount /= 1) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
         "- this ArrayCreate() interface requires 1D DistGrid", & @\
         ESMF_CONTEXT, rc) @\
       return @\
@@ -585,11 +585,11 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 @\
     ! Ensure there is only 1 DE/PET @\
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     if (localDeCount /= 1) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
         "- this ArrayCreate() interface only supports 1DE/PETs", & @\
         ESMF_CONTEXT, rc) @\
       return @\
@@ -603,14 +603,14 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
       ESMF_ArrayCreate(farrayPtr, distgrid, copyflag, & @\
       distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), & @\
       name=name, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Set the arbitrary sequence indices in the Array halo rim @\
     call ESMF_ArraySetPLocalDeInternal( & @\
       ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind, & @\
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Return successfully @\
@@ -819,7 +819,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 @\
     ! Check that indexflag does not specify mode that is not supported here @\
     if (indexflag==ESMF_INDEX_USER) then @\
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, & @\
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
         "- ESMF_INDEX_USER not supported as input value", & @\
         ESMF_CONTEXT, rc) @\
       return @\
@@ -833,7 +833,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
     allocate(larrayList(1)) @\
     fptr => farray @\
     larrayList(1) = ESMF_LocalArrayCreate(fptr, rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
@@ -841,14 +841,14 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
       distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
       computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
       undistLBound, undistUBound, name, localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Garbage collection. The ArrayCreate() call will have created a new @\
     ! LocalArray object internally, so the temporary object created above @\
     ! must be deleted here. @\
     call ESMF_LocalArrayDestroy(larrayList(1), rc=localrc) @\
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     deallocate(larrayList) @\
 @\
@@ -1051,7 +1051,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     allocate(larrayPointerList(larrayCount))
     do i=1, larrayCount
       call ESMF_LocalArrayGetThis(larrayList(i), larrayPointerList(i), localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
     
@@ -1063,7 +1063,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !TODO: cannot check for this here because ArrayCreateFromPtr() calls into here!
 !    if (present(indexflag)) then
 !      if (indexflag==ESMF_INDEX_USER) then
-!        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+!        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
 !          "- ESMF_INDEX_USER not supported as input value", &
 !          ESMF_CONTEXT, rc)
 !        return
@@ -1073,35 +1073,35 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeLWidthArg = &
       ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeUWidthArg = &
       ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this Array object as invalid
@@ -1117,7 +1117,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
@@ -1127,38 +1127,38 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif    
       
     ! Garbage collection
     deallocate(larrayPointerList)
     call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -1285,11 +1285,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Ensure incoming DistGrid is 1D
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     if (dimCount /= 1) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "- this ArrayCreate() interface requires 1D DistGrid", &
         ESMF_CONTEXT, rc)
       return
@@ -1297,11 +1297,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
     ! Ensure there is only 1 DE/PET
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     if (localDeCount /= 1) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "- this ArrayCreate() interface only supports 1DE/PETs", &
         ESMF_CONTEXT, rc)
       return
@@ -1315,13 +1315,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       copyflag=copyflag, distgridToArrayMap=distgridToArrayMap, &
       totalUWidth=(/localHaloCount/), undistLBound=undistLBound, &
       undistUBound=undistUBound, name=name, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set the arbitrary sequence indices in the Array halo rim
     call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateLocalArrayArb, &
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Return successfully
@@ -1464,7 +1464,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     
     ! Determine rank from input information
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     rank = dimCount ! default value
@@ -1484,7 +1484,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return    
         
     ! Call into ArraySpec overloaded interface
@@ -1492,7 +1492,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       indexflag, distgridToArrayMap, computationalEdgeLWidth, &
       computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
       totalLWidth, totalUWidth, undistLBound, undistUBound, name, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Return successfully
@@ -1593,7 +1593,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     
     ! Determine rank from input information
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     rank = dimCount ! default value
@@ -1613,14 +1613,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return    
         
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocateArb = ESMF_ArrayCreate(arrayspec, distgrid, &
       haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
       name, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Return successfully
@@ -1774,7 +1774,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Check that indexflag does not specify mode that is not supported here
     if (present(indexflag)) then
       if (indexflag==ESMF_INDEX_USER) then
-        call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
           "- ESMF_INDEX_USER not supported as input value", &
           ESMF_CONTEXT, rc)
         return
@@ -1784,35 +1784,35 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeLWidthArg = &
       ESMF_InterfaceIntCreate(computationalEdgeLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalEdgeUWidthArg = &
       ESMF_InterfaceIntCreate(computationalEdgeUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalLWidthArg = ESMF_InterfaceIntCreate(computationalLWidth, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     computationalUWidthArg = ESMF_InterfaceIntCreate(computationalUWidth, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalLWidthArg = ESMF_InterfaceIntCreate(totalLWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     totalUWidthArg = ESMF_InterfaceIntCreate(totalUWidth, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     undistLBoundArg = ESMF_InterfaceIntCreate(undistLBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     undistUBoundArg = ESMF_InterfaceIntCreate(undistUBound, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Mark this Array object as invalid
@@ -1828,7 +1828,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, name, len_name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
@@ -1838,37 +1838,37 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, &
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
-      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
       
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(computationalUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalLWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(totalUWidthArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(undistLBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(undistUBoundArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
@@ -1976,11 +1976,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Ensure incoming DistGrid is 1D
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     if (dimCount /= 1) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "- this ArrayCreate() interface requires 1D DistGrid", &
         ESMF_CONTEXT, rc)
       return
@@ -1988,11 +1988,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
     ! Ensure there is only 1 DE/PET
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     if (localDeCount /= 1) then
-      call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "- this ArrayCreate() interface only supports 1DE/PETs", &
         ESMF_CONTEXT, rc)
       return
@@ -2006,13 +2006,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), &
       undistLBound=undistLBound, undistUBound=undistUBound, name=name, &
       rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set the arbitrary sequence indices in the Array halo rim
     call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateAllocateASArb, &
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Return successfully
@@ -2066,7 +2066,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
     ! Call into the C++ interface
     call c_ESMC_ArrayCreateCopy(array, arrayOut, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
     ! Set return value
@@ -2120,7 +2120,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayDestroy(array, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Mark this Array object as invalid
@@ -2393,17 +2393,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     
     ! Deal with (optional) array arguments
     rimSeqIndexArg = ESMF_InterfaceIntCreate(farray1D=rimSeqIndex, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_esmc_arraysetplocalde(array, localDe, rimSeqIndexArg, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Garbage collection
     call ESMF_InterfaceIntDestroy(rimSeqIndexArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -2549,7 +2549,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       if (localPET==rootPET) then
         call ESMF_LocalArrayGet(larray, rank=laRank, rc=localrc)
         if (len_haloWidth/=laRank) then
-          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
             "size of haloWidth array does not match rank of LocalArray", &
             ESMF_CONTEXT, rc)) return
         endif
@@ -2570,7 +2570,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      deCount, rootPET, localrc)
 
     ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value

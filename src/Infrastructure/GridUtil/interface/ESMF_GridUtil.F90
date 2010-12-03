@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.20 2010/12/02 18:17:16 oehmke Exp $
+! $Id: ESMF_GridUtil.F90,v 1.21 2010/12/03 05:57:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.20 2010/12/02 18:17:16 oehmke Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.21 2010/12/03 05:57:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -380,7 +380,7 @@ module ESMF_GridUtilMod
 
     ! Error check Grid
     call ESMF_GridGet(grid, indexflag=indexflag, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Handle optional conserve argument
@@ -409,23 +409,23 @@ module ESMF_GridUtilMod
 
     ! Make sure indexflag is ESMF_INDEX_GLOBAL
     if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
-       if (ESMF_LogMsgFoundError(ESMF_RC_ARG_WRONG, &
+       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
 " - Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality", &
        ESMF_CONTEXT, rc)) return
     endif 
 
     ! convert mask values 
     maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
-    	if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	  ESMF_CONTEXT, rcToReturn=rc)) return
  
     call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, localIsLatLonDeg, &
                            theMesh, maskValuesArg, lregridConserve%regridconserve, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       	    ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
