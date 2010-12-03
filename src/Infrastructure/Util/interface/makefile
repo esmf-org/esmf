@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2010/07/13 23:36:15 theurich Exp $ 
+# $Id: makefile,v 1.12 2010/12/03 21:01:02 theurich Exp $ 
 
 ALL: build_here 
 
@@ -8,7 +8,7 @@ SOURCEF	  = ESMF_Util.F90 ESMF_F90Interface.F90 ESMF_Fraction.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
-STOREH    = ESMC_Arg.h ESMC_Interface.h ESMC_Macros.h ESMC_Util.h 
+STOREH    = ESMC_Arg.h ESMC_Interface.h ESMC_Macros.h ESMC_Util.h ESMC_ReturnCodes.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

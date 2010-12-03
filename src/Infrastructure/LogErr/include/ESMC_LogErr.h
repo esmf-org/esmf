@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.82 2010/09/29 22:50:46 svasquez Exp $
+// $Id: ESMC_LogErr.h,v 1.83 2010/12/03 21:01:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "ESMF_ErrReturnCodes.inc"
+#include "ESMC_ReturnCodes.h"
 
 #ifdef __cplusplus
 extern "C"{
