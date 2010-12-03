@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.14 2010/11/05 05:26:25 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.15 2010/12/03 00:19:32 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -470,7 +470,8 @@ end subroutine ESMF_ScripGetVar
 ! !INTERFACE:
 subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcFile, dstFile, srcIsScrip, dstIsScrip,&
-				      title, method, srcArea, dstArea,rc)
+				      title, method, srcArea, dstArea, &
+				      srcFrac, dstFrac, rc)
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: wgtFile
@@ -483,6 +484,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=*), optional, intent(in) :: title
       character(len=*), optional, intent(in) :: method
       real(ESMF_KIND_R8),optional, intent(in) :: srcArea(:),dstArea(:)
+      real(ESMF_KIND_R8),optional, intent(in) :: srcFrac(:), dstFrac(:)
       integer, optional :: rc
 
       integer :: total, localCount(1)
@@ -1260,26 +1262,34 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          endif
 
          ! Write frac_a
-         allocate(frac(srcDim))         
-         frac=1.0
          ncStatus=nf90_inq_varid(ncid,"frac_a",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, frac)          
+	 if (present(srcFrac)) then
+            ncStatus=nf90_put_var(ncid,VarId, srcFrac)          
+	 else
+            allocate(frac(srcDim))         
+            frac=0.0
+            ncStatus=nf90_put_var(ncid,VarId, frac)          
+            deallocate(frac)
+	 endif
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         deallocate(frac)
 
          ! Write frac_b
-         allocate(frac(dstDim))         
-         frac=1.0
          ncStatus=nf90_inq_varid(ncid,"frac_b",VarId)
-         ncStatus=nf90_put_var(ncid,VarId, frac)          
+	 if (present(dstFrac)) then
+            ncStatus=nf90_put_var(ncid,VarId, dstFrac)          
+	 else
+            allocate(frac(dstDim))         
+            frac=1.0
+            ncStatus=nf90_put_var(ncid,VarId, frac)          
+            deallocate(frac)
+         endif
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
            rc)) return
-         deallocate(frac)
 
     end if
 
