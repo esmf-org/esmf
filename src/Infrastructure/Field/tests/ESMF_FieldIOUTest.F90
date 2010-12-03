@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.17 2010/12/03 02:21:40 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.18 2010/12/03 16:59:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -456,6 +456,8 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Write Field"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   grid = ESMF_GridCreateShapeTile(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
     rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc
