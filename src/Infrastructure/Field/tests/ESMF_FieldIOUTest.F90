@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.18 2010/12/03 16:59:34 rokuingh Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.19 2010/12/04 05:14:21 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -456,6 +456,7 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  finalrc = ESMF_SUCCESS                   ! Initialize
   write(name, *) "Write Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   grid = ESMF_GridCreateShapeTile(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
@@ -477,7 +478,11 @@ program ESMF_FieldIOUTest
       enddo
     enddo
     call ESMF_FieldWrite(field, file='halof.nc', timeslice=k, rc=rc)
-    if(rc /= ESMF_SUCCESS) finalrc = rc
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+    if(rc.ne.ESMF_SUCCESS) finalrc = rc
+#else
+    if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) finalrc = rc
+#endif
   enddo
   call ESMF_Test((finalrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
