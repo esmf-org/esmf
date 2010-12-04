@@ -3,9 +3,16 @@ PIO directory README
 
 Current Notes:
 -------------
+Jim Edwards fixed the bug for Halo array written by 1PE.
+Tested on Pleiades, Linux/Intel/MPICH2 and Linux/gfortran/openmpi
+
+svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_2_6
+
+
+Older Notes:
+-----------
 Just updated to PIO 1.2.5:
 svn checkout http://parallelio.googlecode.com/svn/trunk_tags/pio1_2_5
-
 
 Older Notes:
 -----------

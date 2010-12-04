@@ -1386,11 +1386,7 @@ contains
 
     iosystem%num_comptasks = iosystem%num_tasks
     iosystem%union_rank = comp_rank
-    if(iosystem%num_tasks>1) then
-       iosystem%rearr = rearr
-    else
-       iosystem%rearr = pio_rearr_none
-    endif
+    iosystem%rearr = rearr
 
     if(check) call checkmpireturn('init: after call to comm_size: ',ierr)
     ! ---------------------------------------
@@ -1519,35 +1515,8 @@ contains
        iosystem%userearranger= .true.
     endif
 
-#if defined(USEMPIIO) || defined(_PNETCDF) || defined(_NETCDF4)
 #ifndef _MPISERIAL
     call mpi_info_create(iosystem%info,ierr)
-#endif
-    ! turn on mpi-io aggregation 
-    !DBG    print *,'PIO_init: before call to setnumagg'
-    itmp = num_aggregator
-    call mpi_bcast(itmp, 1, mpi_integer, 0, iosystem%comp_comm, ierr)
-    if(itmp .gt. 0) then 
-       write(cb_nodes,('(i5)')) itmp
-#ifdef BGx
-       call PIO_set_hint(iosystem,"bgl_nodes_pset",trim(adjustl(cb_nodes)))
-#else
-       call PIO_set_hint(iosystem,"cb_nodes",trim(adjustl(cb_nodes)))
-#endif       
-       if(iosystem%io_rank==0)  &
-        print *,'Setting number of io aggregators to ',cb_nodes
-    endif
-
-#ifdef PIO_GPFS_HINTS
-    call PIO_set_hint(iosystem,"ibm_largeblock_io","true")
-    if(iosystem%io_rank==0) print *,'Setting ibm_largeblock_io'
-#endif
-#ifdef PIO_LUSTRE_HINTS
-    call PIO_set_hint(iosystem, 'romio_ds_read','disable') 
-    call PIO_set_hint(iosystem,'romio_ds_write','disable') 
-    if(iosystem%io_rank==0) &
-      print *,'Setting romio_ds_read and romio_ds_write to disable'
-#endif
 #endif
 
     if(debug) print *,'iam: ',iosystem%io_rank,__LINE__,'init: userearranger: ',iosystem%userearranger
@@ -1578,6 +1547,27 @@ contains
     
     if(iosystem%ioproc) call mpi_comm_rank(iosystem%io_comm,iosystem%io_rank,ierr)
     if(check) call checkmpireturn('init: after call to comm_rank: ',ierr)
+    ! turn on mpi-io aggregation 
+    !DBG    print *,'PIO_init: before call to setnumagg'
+    itmp = num_aggregator
+    call mpi_bcast(itmp, 1, mpi_integer, 0, iosystem%comp_comm, ierr)
+
+    if(itmp .gt. 0) then 
+       write(cb_nodes,('(i5)')) itmp
+#ifdef BGx
+       call PIO_set_hint(iosystem,"bgl_nodes_pset",trim(adjustl(cb_nodes)))
+#else
+       call PIO_set_hint(iosystem,"cb_nodes",trim(adjustl(cb_nodes)))
+#endif       
+    endif
+
+#ifdef PIO_GPFS_HINTS
+    call PIO_set_hint(iosystem,"ibm_largeblock_io","true")
+#endif
+#ifdef PIO_LUSTRE_HINTS
+    call PIO_set_hint(iosystem, 'romio_ds_read','disable') 
+    call PIO_set_hint(iosystem,'romio_ds_write','disable') 
+#endif
 
 #ifdef TIMING
     call t_stopf("PIO_init")
@@ -1614,7 +1604,9 @@ contains
 
     integer :: i, j, iam, io_leader, comp_leader
     integer(i4), pointer :: iotmp(:)
-
+    character(len=5) :: cb_nodes
+    integer :: itmp
+    
 #ifdef TIMING
     call t_startf("PIO_init")
 #endif
@@ -1759,9 +1751,36 @@ contains
           endif
        end if
     
+#if defined(USEMPIIO) || defined(_PNETCDF) || defined(_NETCDF4)
+#ifndef _MPISERIAL
+       call mpi_info_create(iosystem(i)%info,ierr)
+       ! turn on mpi-io aggregation 
+       !DBG    print *,'PIO_init: before call to setnumagg'
+!       itmp = num_aggregator
+!       call mpi_bcast(itmp, 1, mpi_integer, 0, iosystem%union_comm, ierr)
+!       if(itmp .gt. 0) then 
+!          write(cb_nodes,('(i5)')) itmp
+!#ifdef BGx
+!          call PIO_set_hint(iosystem(i),"bgl_nodes_pset",trim(adjustl(cb_nodes)))
+!#else
+!          call PIO_set_hint(iosystem(i),"cb_nodes",trim(adjustl(cb_nodes)))
+!#endif       
+!       endif
+
+#ifdef PIO_GPFS_HINTS
+       call PIO_set_hint(iosystem(i),"ibm_largeblock_io","true")
+#endif
+#ifdef PIO_LUSTRE_HINTS
+       call PIO_set_hint(iosystem(i), 'romio_ds_read','disable') 
+       call PIO_set_hint(iosystem(i),'romio_ds_write','disable') 
+#endif
+#endif
+#endif
     end do
 
     if(DebugAsync) print*,__FILE__,__LINE__, iosystem(1)%ioranks
+
+
 
     ! This routine does not return
     if(io_comm /= MPI_COMM_NULL) call pio_msg_handler(component_count,iosystem) 
@@ -1848,12 +1867,15 @@ contains
     
     integer :: ierr
 #if defined(USEMPIIO) || defined(_PNETCDF) || defined(_NETCDF4)
-    if(iosystem%info /= mpi_info_null) then
 #ifndef _MPISERIAL
+    if(iosystem%ioproc) then
+       if(iosystem%io_rank==0 .or. Debug) print *,'Setting mpi info: ',hint,'=',hintval
        call mpi_info_set(iosystem%info,hint,hintval,ierr)
-#endif
        call checkmpireturn('PIO_set_hint',ierr)
+    else
+       iosystem%info=mpi_info_null
     end if
+#endif
 #endif
   end subroutine PIO_set_hint
 
@@ -2136,7 +2158,7 @@ contains
     if ( (file%iotype==pio_iotype_pbinary .or. file%iotype==pio_iotype_direct_pbinary) &
          .and. (.not. iosystem%userearranger) ) then
        write(rd_buffer,('(i9)')) 16*1024*1024
-       call mpi_info_set(iosystem%info,'cb_buffer_size',trim(adjustl(rd_buffer)),ierr)
+       call PIO_set_hint(iosystem, "cb_buffer_size",trim(adjustl(rd_buffer)))
     endif
 #endif
 
@@ -2248,7 +2270,7 @@ contains
     if ( (file%iotype==pio_iotype_pbinary .or. file%iotype==pio_iotype_direct_pbinary) &
          .and. (.not. iosystem%userearranger) ) then
        write(rd_buffer,('(i9)')) 16*1024*1024
-       call mpi_info_set(iosystem%info,'cb_buffer_size',trim(adjustl(rd_buffer)),ierr)
+       call PIO_set_hint(iosystem, "cb_buffer_size",trim(adjustl(rd_buffer)))
     endif
 #endif
 #ifndef _NETCDF4
