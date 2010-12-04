@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.112 2010/12/02 18:17:16 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.113 2010/12/04 00:04:30 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,10 +36,19 @@
 // LogErr headers
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
+
+#include <cmath>
+
+
+// Some xlf compilers don't define this
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.112 2010/12/02 18:17:16 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.113 2010/12/04 00:04:30 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -3582,7 +3591,7 @@ Grid::Grid(
 //-----------------------------------------------------------------------------
 
   // Init lat lon flag
-  latLonDeg=false;
+  coordGeom=ESMC_GRIDCOORDGEOM_CART;
   
   // Set default values for grid members
   proto = ESMC_NULL_POINTER; 
@@ -4536,6 +4545,9 @@ int Grid::serialize(
     // the protogrid
 
     // Don't do status since we're changing it anyway
+
+    SERIALIZE_VAR(cp, buffer,loffset,coordGeom,int);
+
     SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind);
 
     SERIALIZE_VAR(cp, buffer,loffset,indexflag,ESMC_IndexFlag);
@@ -4765,6 +4777,8 @@ int Grid::deserialize(
 
   // Set status (instead of reading it)
   status =  ESMC_GRIDSTATUS_SHAPE_READY;
+
+  DESERIALIZE_VAR( buffer,loffset,coordGeom,int);
 
   DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
 
@@ -6911,12 +6925,65 @@ void GridIter::getCoord(
 
   // get coordinates
   grid->getCoordInternal(staggerloc, curDE, curInd, coord);
-
 }
 // Add more types here if necessary
 template void GridIter::getCoord(ESMC_R8 *data);
 template void GridIter::getCoord(ESMC_R4 *data);
 template void GridIter::getCoord(ESMC_I4 *data);
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridIter::getCartCoord()"
+//BOPI
+// !IROUTINE:  getCartCoord
+//
+// !INTERFACE:
+template <class TYPE>
+void GridIter::getCartCoord(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Coordinate output 
+// 
+                        TYPE *coord // (out) input array needs to be at
+                                       // least of size grid CartCoordDimCount    
+ ){
+//
+// !DESCRIPTION:
+//  Returns the cartesian coordinates for an iteration location. Array should be at least
+// be of size Grid CartCoordDimCount.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+
+  // if done then leave
+  if (done) return;
+
+  // get coordinates
+  grid->getCoordInternal(staggerloc, curDE, curInd, coord);
+
+  // transform if necessary to cartesian
+  if (grid->getCoordGeom()==ESMC_GRIDCOORDGEOM_SPH_DEG) {
+    double DEG2RAD = M_PI/180.0;
+    double lon = coord[0];
+    double lat = coord[1];
+    double ninety = 90.0;
+    double theta = DEG2RAD*lon, phi = DEG2RAD*(ninety-lat);
+    coord[0] = std::cos(theta)*std::sin(phi);
+    coord[1] = std::sin(theta)*std::sin(phi);
+    coord[2] = std::cos(phi);    
+  }
+}
+// Add more types here if necessary
+template void GridIter::getCartCoord(ESMC_R8 *data);
+//template void GridIter::getCoord(ESMC_R4 *data);
+//template void GridIter::getCoord(ESMC_I4 *data);
 //-----------------------------------------------------------------------------
 
 
@@ -8502,6 +8569,24 @@ bool Grid::match(
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return true;
 }
+
+int Grid::getCartCoordDimCount() {
+  if (coordGeom==ESMC_GRIDCOORDGEOM_CART) {
+    return dimCount;
+  } else if (coordGeom==ESMC_GRIDCOORDGEOM_SPH_DEG) {
+    if (dimCount==2) {
+      return 3;
+    } else {
+      int rc;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        "- coord geom sphere deg only applies to spheres of dimcount 2", &rc);
+      throw rc;
+      return -1;
+    }
+  }
+}
+
+
 //-----------------------------------------------------------------------------
 
 

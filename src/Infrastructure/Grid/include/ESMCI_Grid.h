@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.72 2010/12/02 18:17:16 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.73 2010/12/04 00:04:30 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -55,6 +55,10 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
 #define ESMC_GRIDITEM_FRAC     3
 #define ESMC_GRIDITEM_COUNT    4
 
+// Define prototype coordGeom flag
+#define ESMC_GRIDCOORDGEOM_CART 0
+#define ESMC_GRIDCOORDGEOM_SPH_DEG 1
+
 /*
 enum ESMC_GridItem {ESMC_GRIDITEM_INVALID=-2,
                     ESMC_GRIDITEM_UNINIT,
@@ -88,8 +92,8 @@ class ProtoGrid;
 class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
 
-  // temporary for indicating regional grids on sphere
-  bool latLonDeg;
+  // prototype for indicating coordGeom
+  int coordGeom;
  
   // holder for set/commit data
   ProtoGrid *proto;
@@ -299,14 +303,18 @@ template <class TYPE>
 
   static bool match(Grid *grid1, Grid *grid2, int *rc=NULL);
 
+
   // Use these when DistGrid topology stuff is in place
   // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
   // bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
+  // Prototype coordGeom call
+  int getCoordGeom() {return coordGeom;}  
+  void setCoordGeom(int _coordGeom) {coordGeom=_coordGeom;}  
+
+  int getCartCoordDimCount();
+
   // Temporary and will go away soon
-  bool isLatLonDeg() { return latLonDeg;}
-  void setLatLonDeg() { latLonDeg=true;}
-  void clearLatLonDeg() { latLonDeg=false;}
   bool isSphere() { return connL[0]==ESMC_GRIDCONN_PERIODIC && connU[0]==ESMC_GRIDCONN_PERIODIC &&
                            connL[1]==ESMC_GRIDCONN_POLE && connU[1]==ESMC_GRIDCONN_POLE; }
   bool isLBndNT(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
@@ -314,6 +322,7 @@ template <class TYPE>
 
   // Temporary create sphere until I have topology setting worked out 
   void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
+  void clearSphere() {connL[0]=ESMC_GRIDCONN_NONE; connU[0]=ESMC_GRIDCONN_NONE; connL[1]=ESMC_GRIDCONN_NONE; connU[1]=ESMC_GRIDCONN_NONE;}
 
   // End of Temporary
   
@@ -710,6 +719,7 @@ int getComputationalUBound(
   int getDE();
   int getPoleID();
   template <class TYPE> void getCoord(TYPE *coord);
+  template <class TYPE> void getCartCoord(TYPE *coord);
   template <class TYPE> void getItem(int item, TYPE *value);
   template <class TYPE> void getArrayData(Array *array, TYPE *data);
   template <class TYPE> void setArrayData(Array *array, TYPE data);
