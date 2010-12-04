@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.15 2010/08/25 16:29:42 oehmke Exp $
+// $Id: ESMCI_Search.C,v 1.16 2010/12/04 00:11:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.15 2010/08/25 16:29:42 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.16 2010/12/04 00:11:39 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -268,7 +268,6 @@ static int found_func(void *c, void *y) {
 
     // Do the is_in calculation
   const MappingBase &map = GetMapping(elem);
-  si.investigated = true;
   double pcoord[3];
   double dist;
     
@@ -282,19 +281,26 @@ static int found_func(void *c, void *y) {
     
   bool in = map.is_in_cell(&node_coord[0], si.coords, &pcoord[0], &dist);
 
-    if (in) {
-      std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-      si.best_dist = 0.0;
-      si.elem = &elem;
-      si.is_in=true;
-      si.elem_masked=elem_masked;
-    } else if (!si.is_in && (dist < si.best_dist)) {
-      // Set up fallback candidate.
-      std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
-      si.best_dist = dist;
-      si.elem = &elem;
-      si.elem_masked=elem_masked;
-    }
+  // if we're too far away don't even consider this as a fall back candidate
+  if (!in && (dist > 1.0E-10)) return 0;
+
+  // In or close enough, so set as a candidate, until someone better comes along...
+  if (in) {
+    std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
+    si.best_dist = 0.0;
+    si.elem = &elem;
+    si.is_in=true;
+    si.elem_masked=elem_masked;
+  } else if (!si.is_in && (dist < si.best_dist)) {
+    // Set up fallback candidate.
+    std::copy(pcoord, pcoord+etopo->spatial_dim, &si.snr.pcoord[0]);
+    si.best_dist = dist;
+    si.elem = &elem;
+    si.elem_masked=elem_masked;
+  }
+
+  // Mark that something is in struct
+  si.investigated = true;
     
   //  return in&&!elem_masked ? 1 : 0;
   return 0;
