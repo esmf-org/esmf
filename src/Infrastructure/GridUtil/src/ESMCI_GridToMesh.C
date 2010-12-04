@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.4 2010/12/02 18:17:16 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.5 2010/12/04 00:05:56 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -96,10 +96,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
   Grid &grid = const_cast<Grid&>(grid_);
 
-
  bool is_sphere = grid.isSphere();
-
- bool is_latlondeg = grid.isLatLonDeg();
 
  // *** Grid error checking here ***
  if (!grid.hasCoordStaggerLoc(staggerLoc))
@@ -116,14 +113,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  mesh.set_parametric_dimension(pdim);
  
  // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
- // At this point the topological and spatial dim of the Grid is the same this should change soon
- UInt sdim = grid.getDimCount();
- 
- if (is_latlondeg) {
-   //std::cout << "g2m, is sphere=1" << std::endl;
-   sdim = 3;
- }
-
+ UInt sdim = grid.getCartCoordDimCount();
  if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
 
  mesh.set_spatial_dimension(sdim);
@@ -393,25 +383,9 @@ Par::Out() << std::endl;
      // Move to corresponding grid node
     gni->moveToLocalID(lid);      
 
-    // If local fill in coords
+    // If local fill in cartesian coords
     if (gni->isLocal()) {
-
-     gni->getCoord(c);
-
-     double DEG2RAD = M_PI/180.0;
-     if (is_latlondeg) {
-
-         double lon = c[0];
-          double lat = c[1];
-          double ninety = 90.0;
-          double theta = DEG2RAD*lon, phi = DEG2RAD*(ninety-lat);
-          c[0] = std::cos(theta)*std::sin(phi);
-          c[1] = std::sin(theta)*std::sin(phi);
-          c[2] = std::cos(phi);
-
- 
-     }
-
+     gni->getCartCoord(c);
     } else { // set to Null value to be ghosted later
       for (int i=0; i<sdim; i++) {
    //     c[i]=std::numeric_limits<double>::max();
