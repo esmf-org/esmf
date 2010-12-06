@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $
+// $Id: ESMCI_OTree.C,v 1.5 2010/12/06 21:43:29 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_OTree.C,v 1.4 2010/03/04 18:57:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_OTree.C,v 1.5 2010/12/06 21:43:29 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -78,7 +78,7 @@ OTree::OTree(
 
   // allocate node mem
   mem=NULL;
-  mem=new ONode[max_size];
+  if (max_size>0) mem=new ONode[max_size];
 
   // Set values
   max_size_mem=max_size;
@@ -254,12 +254,16 @@ void OTree::commit(
   // Reset root
   root=NULL;
 
-  // Scramble to reduce chance of degenerate trees
-  std::random_shuffle (mem,mem+curr_size_mem);  
+  // Record that we're now committed
+  // Do it here in case the tree is empty. 
+  is_committed=true;
 
   // Make first node root
   if (curr_size_mem > 0) root=mem;
   else return; // no nodes, so leave
+
+  // Scramble to reduce chance of degenerate trees
+  std::random_shuffle (mem,mem+curr_size_mem);  
 
   // Add rest of nodes
   for (int i=1; i<curr_size_mem; i++) {
@@ -267,8 +271,6 @@ void OTree::commit(
     _add_onode(root, mem+i);
   }
 
-  // Record that we're now committed
-  is_committed=true;
 }
 //-----------------------------------------------------------------------------
 
