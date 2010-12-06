@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.14 2010/12/03 00:32:47 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.15 2010/12/06 18:29:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -770,7 +770,6 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   endif
 
   call ESMF_DistGridGet(distgrid, elementCountPPatch=elementCount, rc=rc)
-  print *, 'total element in grid:', elementCount(1)
   total = size(indices,1)
   allocate(buffer(total/4))
   j=1
@@ -804,7 +803,6 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
     do i=1,petCnt
        totalCount=totalCount+globalCount(i)
     enddo
-    print *, 'total weight index:', totalCount
   else 
     totalCount=1 ! Because I'm not sure what happens
                  ! if array is not allocated in VM
@@ -814,7 +812,6 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   ! Allocate final area list
   allocate(buffer1(totalCount))
 
-  print *, 'Before VMGatherV line 828'
   ! Gather all areas
   call ESMF_VMGatherV(vm,sendData=buffer, sendCount=localCount(1),&
          recvData=buffer1,recvCounts=globalCount,recvOffsets=globalDispl,&
@@ -822,7 +819,6 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   if (rc /=ESMF_SUCCESS) then
       return
   endif  
-  print *, 'After VMGatherV line 828'
 
   if (PetNo==0) then
     allocate(frac(elementCount(1)))
