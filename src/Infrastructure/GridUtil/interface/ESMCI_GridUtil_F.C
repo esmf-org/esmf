@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.33 2010/12/04 00:05:56 oehmke Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.34 2010/12/06 21:01:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -191,8 +191,8 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
   }
 
   // Reset Grid back to previous state
-  if (!prevIsSphere) grid.clearSphere();
-  grid.setCoordGeom(prevCoordGeom);
+  //  if (!prevIsSphere) grid.clearSphere();
+  //grid.setCoordGeom(prevCoordGeom);
 
 
   *rc = ESMF_SUCCESS;
@@ -251,8 +251,8 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
   }
 
   // Reset Grid back to previous state
-  if (!prevIsSphere) grid.clearSphere();
-  grid.setCoordGeom(prevCoordGeom);
+  //if (!prevIsSphere) grid.clearSphere();
+  //grid.setCoordGeom(prevCoordGeom);
 
 
   // Set return code 
