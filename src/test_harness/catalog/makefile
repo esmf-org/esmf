@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2010/12/02 16:06:39 garyblock Exp $ 
+# $Id: makefile,v 1.2 2010/12/06 21:51:09 garyblock Exp $ 
 
 catalog : testharncatalog
 
@@ -112,6 +112,7 @@ init_work_dir:
 	cp -f $(TH_SRCDIR)/testharnarray.tex $(TH_WORKDIR)/bodyA.tex ; \
 	cp -f $(TH_SRCDIR)/testharnfieldS.tex $(TH_WORKDIR)/bodyFS.tex ; \
 	cp -f $(TH_SRCDIR)/testharnfield.tex $(TH_WORKDIR)/bodyF.tex
+	chmod 644 $(TH_WORKDIR)/body*
 
 ############################################################
 
