@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMC_ReturnCodes.h,v 1.1 2010/12/03 21:01:02 theurich Exp $
+$Id: ESMC_ReturnCodes.h,v 1.2 2010/12/07 06:59:55 eschwab Exp $
 
   Earth System Modeling Framework
   Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -172,4 +172,4 @@ C/C++ Non-symmetric Return Codes 1000
 #define  ESMC_RC_OPTARG_BAD      1000
 
 
-#endif  // ESMC_RETURNCODES_H
+#endif
