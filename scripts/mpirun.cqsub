@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.cqsub,v 1.10 2010/09/24 19:47:46 svasquez Exp $
+# $Id: mpirun.cqsub,v 1.11 2010/12/07 00:02:01 svasquez Exp $
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.
@@ -30,10 +30,12 @@ fi
 num_procs=$2
 prog=$3
 working_dir=`pwd`
+shift 2
+options=$*
 
 echo "exec cqsub -qdebug $ESMF_MPIBATCHOPTIONS -C $working_dir  -n$num_procs -O $prog $prog"
 
-proc_id=`cqsub -qdebug $ESMF_MPIBATCHOPTIONS -C $working_dir -n$num_procs -O $prog $prog`
+proc_id=`cqsub -qdebug $ESMF_MPIBATCHOPTIONS -C $working_dir -n$num_procs -O $prog $options`
 
 # Since this is not an interactive shell, wait for the job to complete.
 
