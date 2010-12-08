@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.43 2010/09/17 05:46:30 theurich Exp $
+% $Id: ESMF_options.tex,v 1.44 2010/12/08 21:42:54 svasquez Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -165,6 +165,7 @@ Valid values are:
          unsafe to access these elements until a call in
          {\tt ESMF\_COMM\_NBTESTFINISH} mode has been issued and has returned
          with {\tt finishedflag} equal to .true., or a call in
+
          {\tt ESMF\_COMM\_NBWAITFINISH} mode has been issued and has returned.
 \item [ESMF\_COMM\_NBTESTFINISH]
          Test whether the transfer of data of a precomputed communication
