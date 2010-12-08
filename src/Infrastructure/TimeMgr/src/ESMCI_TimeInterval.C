@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.15 2010/11/12 06:58:35 eschwab Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.16 2010/12/08 06:59:23 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.15 2010/11/12 06:58:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.16 2010/12/08 06:59:23 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -2437,6 +2437,23 @@ namespace ESMCI{
 
     // TODO: use some form of polymorphism to share logic with operator% and
     //       operator/ (return real) ?
+
+    // For ESMC_EQ, first check if all members are identical (e.g. after
+    // an assignment statement copy:  ti2 = ti1).  If so, return true,
+    // otherwise must perform further analysis based on calendar type
+    // (e.g. for Gregorian, yy=1 is equal to mm=12)
+    if (comparisonType == ESMC_EQ) {
+      if (this->startTime == timeinterval.startTime &&
+          this->endTime   == timeinterval.endTime &&
+          this->calendar  == timeinterval.calendar &&
+          this->yy        == timeinterval.yy &&
+          this->mm        == timeinterval.mm &&
+          this->d         == timeinterval.d &&
+          this->d_r8      == timeinterval.d_r8 &&
+          this->BaseTime::operator==(timeinterval)) {
+        return(true);
+      }
+    }
 
     // calendars must be defined
     if (this->calendar == ESMC_NULL_POINTER ||
