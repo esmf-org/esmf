@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.18 2010/12/03 05:57:39 theurich Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.19 2010/12/08 22:37:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.18 2010/12/03 05:57:39 theurich Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.19 2010/12/08 22:37:43 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -83,7 +83,8 @@ contains
 ! !IROUTINE: ESMF_FieldBundleSMM - Execute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, zeroflag, checkflag, rc)
+  subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, &
+				zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
@@ -130,6 +131,7 @@ contains
 !     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstFieldBundle} will not be
 !     modified prior to the sparse matrix multiplication and results will be
 !     added to the incoming element values. Setting {\tt zeroflag} to 
+!
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination FieldBundle that will be updated by the sparse matrix
 !     multiplication. See section \ref{opt:regionflag} for a complete list of
@@ -323,7 +325,9 @@ contains
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and
-! {\tt factorIndexList} arguments with {\tt size(factorList) = (/0/)} and
+! {\tt factorIndexList} arguments with 
+!
+! {\tt size(factorList) = (/0/)} and
 ! {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
 ! PET does not provide matrix elements. Alternatively, PETs that do not 
 ! provide matrix elements may also call into the overloaded interface
@@ -392,7 +396,9 @@ contains
 !     tensor elements for each sparse matrix factor.
 !
 !     The {\em size 4 format} is more general and does not require a matching
-!     tensor element count. Here the {\tt factorIndexList(1,:)} specifies the
+!     tensor element count. Here the 
+!
+!     {\tt factorIndexList(1,:)} specifies the
 !     sequence index while {\tt factorIndexList(2,:)} specifies the tensor
 !     sequence index of the source element in the {\tt srcFieldBundle}. Further
 !     {\tt factorIndexList(3,:)} specifies the sequence index and
