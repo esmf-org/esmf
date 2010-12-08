@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMC_ReturnCodes.h,v 1.2 2010/12/07 06:59:55 eschwab Exp $
+$Id: ESMC_ReturnCodes.h,v 1.3 2010/12/08 06:25:46 theurich Exp $
 
   Earth System Modeling Framework
   Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -20,6 +20,8 @@ $Id: ESMC_ReturnCodes.h,v 1.2 2010/12/07 06:59:55 eschwab Exp $
 
 
 #if 0
+//BOP
+\begin{verbatim}
 =====================================
 Fortran Symmetric Return Codes 1-500
 =====================================
@@ -171,5 +173,9 @@ C/C++ Non-symmetric Return Codes 1000
 
 #define  ESMC_RC_OPTARG_BAD      1000
 
+#if 0
+\end{verbatim}
+//EOP
+#endif
 
 #endif

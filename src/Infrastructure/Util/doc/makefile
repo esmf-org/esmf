@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2009/03/18 23:57:23 w6ws Exp $
+# $Id: makefile,v 1.9 2010/12/08 06:25:46 theurich Exp $
 
 ALL: onedoc
 
@@ -33,7 +33,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
-TEXFILES_TO_MAKE += ESMF_ErrReturnCodes.tex
+TEXFILES_TO_MAKE += ESMC_ReturnCodes.tex
 
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
@@ -46,9 +46,9 @@ include $(ESMF_DIR)/makefile
 
 # Filter out #if's, #endif's and #define's from error codes file,
 #  which appears as an appendix in the ESMF reference manual.
-ESMF_ErrReturnCodes.tex : ESMF_ErrReturnCodes_chapi.tex
-	$(ESMF_RM) ESMF_ErrReturnCodes.tex
-	$(ESMF_GREPV) 'if' ESMF_ErrReturnCodes_chapi.tex | $(ESMF_SED) 's/#define //' > ESMF_ErrReturnCodes.tex
+ESMC_ReturnCodes.tex : ESMC_ReturnCodes_chapi.tex
+	$(ESMF_RM) ESMC_ReturnCodes.tex
+	$(ESMF_GREPV) 'if' ESMC_ReturnCodes_chapi.tex | $(ESMF_SED) 's/#define //' > ESMC_ReturnCodes.tex
 
 DIRS = 
 
