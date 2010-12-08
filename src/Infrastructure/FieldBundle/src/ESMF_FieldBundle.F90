@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.70 2010/12/03 05:57:39 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.71 2010/12/08 22:24:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -1063,7 +1063,8 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetInfo(fieldbundle, geomtype, grid, mesh, locstream, fieldCount, name, rc)
+      subroutine ESMF_FieldBundleGetInfo(fieldbundle, geomtype, grid, mesh, &
+				locstream, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(in) :: fieldbundle
@@ -2362,7 +2363,8 @@ end function
 ! \label{api:FieldBundleWrite}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, timeslice, iofmt, rc)
+      subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, timeslice, &
+				iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
