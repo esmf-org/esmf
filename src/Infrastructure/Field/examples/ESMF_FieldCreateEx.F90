@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.100 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.101 2010/12/08 21:19:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -287,7 +287,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create a 3D Field with a 2D Grid and a 3D Fortran data array with the gridToFieldMap argument}
+!\subsubsection{Create a 3D Field with a 2D Grid and a 3D Fortran data array with gridToFieldMap argument}
 !\label{sec:field:usage:create_2dgrid_3dptr_map}
 !
 !  Building upon the previous example, we will create a 3D Field from
