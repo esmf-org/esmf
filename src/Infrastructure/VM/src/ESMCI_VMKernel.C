@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.17 2010/12/01 16:34:10 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.18 2010/12/08 16:20:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -2790,7 +2790,6 @@ bool VMK::cancelled(status *status){
     else
       return false;
   }else{
-    printf("VMK: only MPI cancelled status implemented\n");
     return false;
   }
 }
