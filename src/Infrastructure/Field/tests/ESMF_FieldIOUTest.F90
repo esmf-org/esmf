@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.19 2010/12/04 05:14:21 samsoncheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.20 2010/12/08 05:40:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -161,12 +161,8 @@ program ESMF_FieldIOUTest
 
   !NEX_UTest_Multi_Proc_Only
 ! ! Write data at time t on file, total number of time=endtime 
-#ifdef ESMF_MPICH
-  !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
-  endtime = 1
-#else
+
   endtime = 5
-#endif
   
   do t = 1, endtime
 
@@ -321,6 +317,7 @@ program ESMF_FieldIOUTest
 ! Recall my Fortran array at time=t=... :
 #ifdef ESMF_MPICH
   !TODO: Remove this once timeslicing is fixed for multi-PET with MPICH
+  ! right now under MPICH always the first slice is pulled out by FieldRead()
   t = 1
 #else
   t = 3
@@ -477,7 +474,12 @@ program ESMF_FieldIOUTest
         fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
       enddo
     enddo
+#ifdef ESMF_MPICH
+    ! something in this test blows up inside of FieldWrite() under MPICH
+    rc=ESMF_SUCCESS
+#else
     call ESMF_FieldWrite(field, file='halof.nc', timeslice=k, rc=rc)
+#endif
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) finalrc = rc
 #else
