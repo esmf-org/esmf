@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.67 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.68 2010/12/08 21:50:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -6720,6 +6720,11 @@ contains
                 ESMF_CONTEXT, rc)) return
 
             deallocate (buffer)
+
+            call ESMF_FieldValidate(field1, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rc)) return
 
             call ESMF_FieldGet(field1, grid=grid2, array=array2, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
