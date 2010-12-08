@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.39 2010/12/07 06:59:06 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.40 2010/12/08 07:00:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.39 2010/12/07 06:59:06 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.40 2010/12/08 07:00:49 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -304,12 +304,12 @@
       !EX_UTest
       ! Testing ESMF_TimeAssignment(=)(time, time)
       write(name, *) "Assign one time to another test"
-      write(failMsg, *) " Did not return 1/29/2004 12:17:59 or ESMF_SUCCESS"
+      write(failMsg, *) " Did not return time1=startTime2, 1/29/2004 12:17:59 or ESMF_SUCCESS"
       time1 = startTime2  ! exercise default F90 Time = assignment
       call ESMF_TimeGet(time1, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, &
                         calendarType=calendarType, rc=rc)
-      call ESMF_Test((YY==2004 .and. MM==1 .and. DD==29 .and. &
-                      H==12 .and. M==17 .and. S==59 .and. &
+      call ESMF_Test((time1==startTime2 .and. YY==2004 .and. MM==1 .and. &
+                      DD==29 .and. H==12 .and. M==17 .and. S==59 .and. &
                       calendarType==ESMF_CAL_GREGORIAN .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

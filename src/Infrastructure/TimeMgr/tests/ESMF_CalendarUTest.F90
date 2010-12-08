@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.57 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.58 2010/12/08 07:00:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.57 2010/11/03 22:48:43 theurich Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.58 2010/12/08 07:00:49 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,8 +64,7 @@
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: no_leapCalendar, modifiedJulianDayCalendar, &
-		             julianDayCalendar, gregorianCalendar1, &
-                             julianCalendar
+		             julianDayCalendar, gregorianCalendar1, julianCalendar
       type(ESMF_Calendar) :: customCalendar, esmf_360dayCalendar, &
                              gregorianCalendar2
       type(ESMF_CalendarType) :: cal_type1, cal_type2, cal_type
@@ -82,6 +81,7 @@
       integer(ESMF_KIND_I8) :: advanceCounts, julianDay, year, days_i8
       type(ESMF_Time) :: startTime, stopTime
       logical :: bool, calendarsNotEqual, calendarsEqual
+      character(ESMF_MAXSTR) :: cal_name
 
       ! instantiate Time Intervals
       type(ESMF_TimeInterval) :: timeStep
@@ -351,6 +351,21 @@
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_CalendarAssignment(=)(calendar,calendar)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Assignment Test"
+      gregorianCalendar2 = gregorianCalendar  ! exercise default F90 Calendar =
+                                              ! assignment
+      call ESMF_CalendarGet(gregorianCalendar2, calendarType=cal_type, &
+                            name=cal_name, rc=rc)
+      call ESMF_Test((gregorianCalendar2.eq.gregorianCalendar .and. &
+                      cal_type.eq.ESMF_CAL_GREGORIAN .and. &
+                      cal_name.eq."Gregorian"), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------

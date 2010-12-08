@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.54 2010/11/17 06:58:20 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.55 2010/12/08 07:00:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.54 2010/11/17 06:58:20 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.55 2010/12/08 07:00:49 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,13 +68,13 @@
       logical :: bool
 
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock2, domainClock, CLOCK_ATM
+      type(ESMF_Clock) :: clock, clock2, clock3, domainClock, CLOCK_ATM
       logical :: alarmCountPass, isringing, sticky, enabled
       integer(ESMF_KIND_I8) :: forwardCount
       logical :: willRingNext, testPass, alarmsNotEqual, alarmsEqual
       type(ESMF_Direction) :: reverseDirection, forwardDirection
       type(ESMF_Alarm) :: alarm, alarm2, afterAlarm, beforeAlarm
-      type(ESMF_Alarm) :: alarmList(201), alarm6, alarm7
+      type(ESMF_Alarm) :: alarmList(201), alarm6, alarm7, alarm8
       type(ESMF_Alarm) :: alarm5(200), alarm3, alarm4
       type(ESMF_Alarm) :: ALARM_HISTORY
 
@@ -86,7 +86,8 @@
       type(ESMF_TimeInterval) :: TIMEINTERVAL_HISTORY, alarmStep, alarmStep2
       type(ESMF_TimeInterval) :: runDuration, ringDuration
       type(ESMF_Time) :: currentTime, currTime, afterAlarmTime, beforeAlarmTime
-      type(ESMF_Time) :: alarmStopTime, nextTime, prevTime, currentTime2
+      type(ESMF_Time) :: alarmStopTime, nextTime, prevTime, currentTime2, time1
+
       character(ESMF_MAXSTR) :: aName
 #endif
 
@@ -528,6 +529,19 @@
       !call ESMF_AlarmPrint(alarmList(2), "name", rc=rc)
       !call ESMF_AlarmPrint(alarmList(3), "name", rc=rc)
       !print *, "alarmCount = ", alarmCount
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_AlarmAssignment(=)(alarm,alarm)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Alarm Assignment Test"
+      alarm8 = alarm1  ! exercise default F90 Alarm = assignment
+      call ESMF_AlarmGet(alarm8, name=aName, clock=clock3, &
+                         ringTime=time1, rc=rc)
+      call ESMF_Test((alarm8==alarm1 .and. aName=="WAKEUP" .and. &
+                      clock3==clock1 .and. time1==alarmTime), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
@@ -3006,8 +3020,18 @@
       call ESMF_Test (testPass .and. alarmCount == expectedCount, &
                      name, failMsg, result, ESMF_SRCLINE)
 
-      call ESMF_AlarmDestroy (alarm1, rc=rc)
+      ! 
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not show null clock in alarm"
+      write(name, *) "Test alarm after destroying its associated clock"
       call ESMF_ClockDestroy (clock, rc=rc)
+      willRingNext = ESMF_AlarmWillRingNext(alarm1, rc=rc)
+      call ESMF_Test (rc==ESMC_RC_PTR_NULL .and. .not.willRingNext, &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy (alarm1, rc=rc)
 
       ! ----------------------------------------------------------------------------
 

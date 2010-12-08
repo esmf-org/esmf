@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.62 2010/12/07 06:59:06 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.63 2010/12/08 07:00:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.62 2010/12/07 06:59:06 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.63 2010/12/08 07:00:49 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -141,15 +141,20 @@
       !EX_UTest
       ! Testing ESMF_TimeIntervalAssignment(=)(timeinterval, timeinterval)
       write(name, *) "Assign one timeinterval to another test"
-      write(failMsg, *) " Did not return yy=3, mm=5, d=30, h=7, m=8, s=18 or ESMF_SUCCESS"
+      write(failMsg, *) " Did not return timeStep2=timeStep, yy=3, mm=5, d=30, h=7, m=8, s=18 or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=5, d=30, h=7, m=8, s=18, rc=rc)
       timeStep2 = timeStep  ! exercise default F90 TimeInterval = assignment
       call ESMF_TimeIntervalGet(timeStep2, yy=YY, mm=MM, d=D, &
                                 h=H, m=M, s=S, rc=rc)
-      call ESMF_Test((YY.eq.3.and.MM.eq.5.and.D.eq.30.and. &
+      call ESMF_Test((timeStep2.eq.timeStep .and. &
+                      YY.eq.3.and.MM.eq.5.and.D.eq.30.and. &
                       H.eq.7.and.M.eq.8.and.S.eq.18.and. &
                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !call ESMF_TimeIntervalPrint(timeStep2, rc=rc)
+      !call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+      !print *,  "timeStep2.eq.timeStep = ", timeStep2.eq.timeStep
+      !print *, "rc=", rc
       !print *, " yy,mm,d,h,m,s = ", YY, ",", MM, ",", D, ",", H, ",", M, ",", S
       ! ----------------------------------------------------------------------------
       !EX_UTest

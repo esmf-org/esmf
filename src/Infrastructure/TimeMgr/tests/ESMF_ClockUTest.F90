@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.122 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.123 2010/12/08 07:00:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.122 2010/11/03 22:48:43 theurich Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.123 2010/12/08 07:00:49 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -89,22 +89,24 @@
 
       ! instantiate a clock 
       type(ESMF_Clock) :: topClock,  clock_360day, clock_no_leap, &
-			  clock_gregorian, clock1, clock2, clock3
+			  clock_gregorian, clock1, clock2, clock3, clock4
 
 
       ! instantiate a calendar
       type(ESMF_CalendarType) :: cal_type
 
       ! instantiate timestep, start and stop times
-      type(ESMF_Time) :: stopTime, stopTime4, syncTime, previousTime, &
-                         current_time, currentTime, stopTime3, startTime2
+      type(ESMF_Time) :: stopTime, stopTime2, stopTime3, stopTime4, syncTime, &
+                         previousTime, current_time, currentTime, startTime2
       real(ESMF_KIND_R8) :: realSeconds
       integer :: timeStepCount
       integer :: datetime(8)
       integer(ESMF_KIND_I4) :: day, hour
       integer(ESMF_KIND_I8) :: advanceCounts, nTimeSteps, &
                                year_i8, YY_i8, day2, second_i8
-      type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
+      type(ESMF_TimeInterval) :: timeStep2, currentSimTime, previousSimTime, &
+                                 timeDiff
+      character(ESMF_MAXSTR) :: clockName
 #endif
 
       ! initialize ESMF framework
@@ -815,6 +817,20 @@
       write(name, *) "Create Clock copy Test"
       clock1 = ESMF_ClockCreate(clock,  rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_ClockAssignment(=)(clock,clock)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Clock Assignment Test"
+      clock4 = clock  ! exercise default F90 Clock = assignment
+      call ESMF_ClockGet(clock4, name=clockName, startTime=startTime2, &
+                         stopTime=stopTime2, timeStep=timeStep2, rc=rc)
+      call ESMF_Test((clock==clock4 .and. clockName=="Clock 1" .and. &
+                      startTime2==startTime .and. stopTime2==stopTime .and. &
+                      timeStep2==timeStep), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
