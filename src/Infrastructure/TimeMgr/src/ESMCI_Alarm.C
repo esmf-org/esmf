@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.17 2010/12/01 16:09:37 eschwab Exp $
+// $Id: ESMCI_Alarm.C,v 1.18 2010/12/08 06:58:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.17 2010/12/01 16:09:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.18 2010/12/08 06:58:32 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -868,6 +868,7 @@ int Alarm::count=0;
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "alarm %s is not associated with any clock.", name);
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+      if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_PTR_NULL;
       return(false);
     }
 
