@@ -1,4 +1,4 @@
-% $Id: AppDriver_options.tex,v 1.4 2009/10/12 18:38:59 theurich Exp $
+% $Id: AppDriver_options.tex,v 1.5 2010/12/08 22:01:53 svasquez Exp $
 
 \subsubsection{ESMF\_TerminationFlag}
 \label{app:terminationflag}
@@ -20,7 +20,9 @@ Valid values are:
          communication calls, unable to reach the normal termination point.
    \item [ESMF\_FINAL]
          Normal termination of the ESMF application. Wait for all PETs of the
-         global VM to reach {\tt ESMF\_Finalize()} before termination. This is
+         global VM to reach 
+
+	{\tt ESMF\_Finalize()} before termination. This is
          the clean way of terminating an application. {\tt MPI\_Finalize()} will
          be called in case of MPI applications.
    \item [ESMF\_KEEPMPI]
