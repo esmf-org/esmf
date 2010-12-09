@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.11 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.12 2010/12/09 18:46:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -153,7 +153,8 @@
 ! We have the following formula: X = A - (B - C)
 !EOE
 !BOC
-    allocate(audlb(arank-adimCount+gridrank_repdim), audub(arank-adimCount+gridrank_repdim))
+    allocate(audlb(arank-adimCount+gridrank_repdim), &
+	audub(arank-adimCount+gridrank_repdim))
     call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
         computationalLBound=aclb, computationalUBound=acub, &
         totalLBound=atlb, totalUBound=atub, &

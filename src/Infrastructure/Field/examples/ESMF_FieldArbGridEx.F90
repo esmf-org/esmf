@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.9 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.10 2010/12/09 18:51:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -150,7 +150,8 @@
 !EOE
 
 !BOC
-    ! create a 3D grid with the first 2 dimensions collapsed and arbitrarily distributed
+    ! create a 3D grid with the first 2 dimensions collapsed 
+    ! and arbitrarily distributed
     grid3d = ESMF_GridCreateShapeTile("arb3dgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
       minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
       localArbIndex=localArbIndex,localArbIndexCount=localArbIndexCount,rc=rc)
