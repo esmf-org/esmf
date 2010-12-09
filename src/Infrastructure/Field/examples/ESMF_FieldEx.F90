@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.24 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldEx.F90,v 1.25 2010/12/09 18:37:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -134,8 +134,8 @@
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
 
     ! create an Array 
-    array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, indexflag=ESMF_INDEX_DELOCAL, &
-                 rc=rc) 
+    array3d = ESMF_ArrayCreate(farray, distgrid=distgrid3d, &
+	indexflag=ESMF_INDEX_DELOCAL, rc=rc) 
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field
