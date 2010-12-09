@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.37 2010/12/09 20:47:16 svasquez Exp $
+! $Id: ESMF_LocStream.F90,v 1.38 2010/12/09 20:54:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.37 2010/12/09 20:47:16 svasquez Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.38 2010/12/09 20:54:09 svasquez Exp $'
 
 !==============================================================================
 !
@@ -2090,7 +2090,8 @@ end subroutine ESMF_LocStreamGetKeyBounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keyUnits, keyLongName, typekind, rc)
+  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keyUnits, keyLongName, &
+		typekind, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)              :: locstream

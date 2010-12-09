@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.177 2010/12/09 20:29:25 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.178 2010/12/09 20:50:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.177 2010/12/09 20:29:25 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.178 2010/12/09 20:50:11 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -16301,7 +16301,7 @@ endif
 !      an error if the grid is not at least 
 !      {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}. This means 
 !      if a Grid was created with {\tt ESMF\_GridCreateEmpty}
-!      it must also have been finished with 
+!      it must also have been finished with \newline
 !      {\tt ESMF\_GridSetCommitShapeTile}
 !      to be valid. If a Grid was created with another create
 !      call it should automatically have the correct status level
