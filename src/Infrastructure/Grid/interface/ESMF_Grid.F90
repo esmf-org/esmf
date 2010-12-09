@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.176 2010/12/03 05:57:50 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.177 2010/12/09 20:29:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.176 2010/12/03 05:57:50 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.177 2010/12/09 20:29:25 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -667,8 +667,8 @@ end interface
       integer,                intent(in),optional     :: staggerEdgeUWidth(:)
       integer,                intent(in),optional     :: staggerAlign(:)
       integer,                intent(in),optional     :: staggerMemLBound(:)      
-      integer,                intent(in), optional    :: totalLWidth(:)         ! N. IMP
-      integer,                intent(in), optional    :: totalUWidth(:)         ! N. IMP
+      integer,                intent(in), optional    :: totalLWidth(:)    ! N. IMP
+      integer,                intent(in), optional    :: totalUWidth(:)    ! N. IMP
       integer,                intent(out),optional    :: rc
 !
 ! !DESCRIPTION:
