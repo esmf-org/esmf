@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommNBEx.F90,v 1.6 2010/11/03 22:48:39 theurich Exp $
+! $Id: ESMF_ArrayCommNBEx.F90,v 1.7 2010/12/09 20:10:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -197,7 +197,8 @@ program ESMF_ArrayCommNBEx
 ! The user code must decide, depending on the value of the returned
 ! {\tt finishedflag}, whether additional calls are required to finish an
 ! outstanding non-blocking exchange. If so, it can be done by 
-! repeatedly calling with {\tt ESMF\_COMM\_NBTESTFINISH} until 
+! repeatedly calling with \newline
+! {\tt ESMF\_COMM\_NBTESTFINISH} until 
 ! {\tt finishedflag} comes back with a value of {\tt .true.}. Such a loop
 ! allows other pieces of user code to be executed between the calls. 
 ! Alternatively a call with {\tt ESMF\_COMM\_NBWAITFINISH} can be used to
@@ -205,7 +206,8 @@ program ESMF_ArrayCommNBEx
 !
 ! {\em Noteworthy property.}
 ! It is fine to invoke a RouteHandle based communication call
-! with {\tt commflag} set to {\tt ESMF\_COMM\_NBTESTFINISH} or
+! with {\tt commflag} set to \newline
+! {\tt ESMF\_COMM\_NBTESTFINISH} or
 ! {\tt ESMF\_COMM\_NBWAITFINISH} on a specific RouteHandle without there 
 ! being an outstanding non-blocking exchange. In fact, it is not
 ! required that there was ever a call made with {\tt ESMF\_COMM\_NBSTART} for
