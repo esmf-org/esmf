@@ -318,8 +318,9 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc) ! Step a) Set the label location 
-                                                              ! to the beginning of the 
+      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc) ! Step a) Set the label 
+							      ! location to the 
+							      ! beginning of the 
                                                               ! table
 !EOC
 
