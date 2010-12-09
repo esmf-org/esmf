@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.18 2010/11/03 22:48:45 theurich Exp $
+! $Id: ESMF_XGridEx.F90,v 1.19 2010/12/09 21:36:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -130,7 +130,8 @@
     centroidA1Y=(/0.5, 1.5/)
     call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=coordX, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     coordX = centroidA1X
     call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=2, fptr=coordY, rc=localrc)
@@ -142,11 +143,13 @@
     centroidA2Y=(/2.5/)
     call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=coordX, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     coordX = centroidA2X
     call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=2, fptr=coordY, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     coordY = centroidA2Y
 !EOC
 
@@ -158,11 +161,13 @@
     sideB(1) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,2/), &
         coordDep1=(/1/), coordDep2=(/2/), &
         name='destination Grid on side B', rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     do i = 1, 1
         call ESMF_GridAddCoord(sideB(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
 
     ! SideB grid
@@ -170,11 +175,13 @@
     centroidBY=(/0.75, 2.25/)
     call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=1, fptr=coordX, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     coordX = centroidBX
     call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
         coordDim=2, fptr=coordY, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     coordY = centroidBY
 !EOC
 
@@ -325,7 +332,8 @@
     xgrid = ESMF_XGridCreate(sideA, sideB, area=xgrid_area, centroid=centroid, &
         sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
 !EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
 !BOE
 ! Create an {\tt ESMF\_Field} on the XGrid:
@@ -333,7 +341,8 @@
 !BOC
     field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
 !EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 !BOE
 ! Query the Field for its Fortran data pointer and its exclusive bounds:
 !EOE
@@ -341,7 +350,8 @@
     call ESMF_FieldGet(field, farrayPtr=xfptr, &
         exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
 !EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
     xfptr = 0.0
 
@@ -351,17 +361,23 @@
 !EOE
 !BOC
     do i = 1, 2
-        srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, &
+		rank=2, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         fptr = i
     enddo
     do i = 1, 1
-        dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, &
+		rank=2, rc=localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         fptr = 0.0
     enddo
 !EOC
@@ -382,21 +398,24 @@
     ! Compute regrid routehandles. The routehandles can be used repeatedly afterwards.
     ! From A -> X
     do i = 1, 2
-        call ESMF_FieldRegridStore(xgrid, srcField(i), field, routehandle=rh_src2xgrid(i), &
-            rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_FieldRegridStore(xgrid, srcField(i), field, &
+		routehandle=rh_src2xgrid(i), rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
     ! from X -> B
     do i = 1, 1
-        call ESMF_FieldRegridStore(xgrid, field, dstField(i), routehandle=rh_xgrid2dst(i), &
-            rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_FieldRegridStore(xgrid, field, dstField(i), &
+		routehandle=rh_xgrid2dst(i), rc = localrc)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
 
     ! Initialize values in the source Fields on side A
     do i = 1, 2
         call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         fptr = i
     enddo
     ! Initialize values in the destination Field on XGrid
@@ -404,7 +423,8 @@
     ! Initialize values in the destination Field on Side B
     do i = 1, 1
         call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         fptr = 0.0
     enddo
 !EOC
@@ -417,7 +437,8 @@
         call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
             zeroflag=ESMF_REGION_SELECT, &
             rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
 !EOC
 
@@ -441,7 +462,8 @@
     do i = 1, 1
         call ESMF_FieldRegrid(field, dstField(i), routehandle=rh_xgrid2dst(i), &
             rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
 !EOC
 
@@ -474,7 +496,8 @@
         sparseMatX2B=l_sparseMatX2B, &  ! sparse matrix matmul parameters from X to B
         rc=localrc)
 !EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
 !BOC
     call ESMF_XGridGet(xgrid, localDe=0, &
@@ -484,7 +507,8 @@
         exclusiveUBound=eub, &      ! exclusive upper bound
         rc=localrc)
 !EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
 !BOC
     call ESMF_XGridGet(xgrid, &
@@ -493,13 +517,16 @@
         distgrid=distgrid, &        ! the distgrid returned
         rc=localrc)
 !EOC
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
         distgrid=distgrid, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
         distgrid=distgrid, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
 !BOE
 !\subsubsection{Destroying the XGrid and other resources}
@@ -509,23 +536,29 @@
 !BOC
     ! After the regridding is successful. Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
     call ESMF_XGridDestroy(xgrid, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
 
     do i = 1, 2
         call ESMF_FieldDestroy(srcField(i), rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         call ESMF_GridDestroy(sideA(i), rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
 
     do i = 1, 1
         call ESMF_FieldDestroy(dstField(i), rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
         call ESMF_GridDestroy(sideB(i), rc = localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+		terminationflag=ESMF_ABORT)
     enddo
 
     deallocate(sparseMatA2X(1)%factorIndexList, sparseMatA2X(1)%factorList)
