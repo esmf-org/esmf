@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.57 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.58 2010/12/09 19:58:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.57 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.58 2010/12/09 19:58:54 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -111,10 +111,11 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, xgrid, &
-    array, typekind, dimCount, memDimCount, &
-    staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, localDeCount, name, rc) 
+  subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, &
+	grid, mesh, locstream, xgrid, array, typekind, dimCount, memDimCount, &
+    	staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, &
+	ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
+	localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)   :: field    
