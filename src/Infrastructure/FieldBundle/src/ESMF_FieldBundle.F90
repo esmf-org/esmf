@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.72 2010/12/09 17:51:26 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.73 2010/12/09 17:56:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -2364,7 +2364,7 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, timeslice, &
-				iofmt, rc)
+                            iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
