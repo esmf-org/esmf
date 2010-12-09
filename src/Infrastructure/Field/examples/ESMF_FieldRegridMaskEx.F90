@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.13 2010/12/09 18:58:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.13 2010/12/09 18:58:24 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -373,7 +373,7 @@ program ESMF_FieldRegridEx
 !
 ! \medskip
 !
-! {\bf Possible Cause:} The {\tt ESMF\_FieldRegridStore()} method is called more than is necessary. 
+! {\bf Possible Cause:} The {\tt ESMF\_FieldRegridStore()} method is called more than is necessary. \newline
 ! The {\tt ESMF\_FieldRegridStore()} operation is a complex one and can be 
 ! relatively slow for some cases (large Grids, 3D grids, etc.) 
 ! 
