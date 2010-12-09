@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.8 2010/12/09 19:39:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.8 2010/12/09 19:39:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -94,13 +94,13 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC 
-    ! create 1D distgrid and grid decomposed according to the following diagram:
-    ! +----------------+   +-------------------+   +-------------------+   +----------------+
-    ! |     DE 0    |  |   |  |     DE 1    |  |   |  |     DE 2    |  |   |  |     DE 3    |
-    ! |    1 x 16   |  |   |  |    1 x 16   |  |   |  |    1 x 16   |  |   |  |    1 x 16   |
-    ! |             | 1|<->|1 |             | 1|<->|1 |             | 1|<->|1 |             |
-    ! |             |  |   |  |             |  |   |  |             |  |   |  |             |
-    ! +----------------+   +-------------------+   +-------------------+   +----------------+
+! create 1D distgrid and grid decomposed according to the following diagram:
+! +----------------+   +-------------------+   +-------------------+   +----------------+
+! |     DE 0    |  |   |  |     DE 1    |  |   |  |     DE 2    |  |   |  |     DE 3    |
+! |    1 x 16   |  |   |  |    1 x 16   |  |   |  |    1 x 16   |  |   |  |    1 x 16   |
+! |             | 1|<->|1 |             | 1|<->|1 |             | 1|<->|1 |             |
+! |             |  |   |  |             |  |   |  |             |  |   |  |             |
+! +----------------+   +-------------------+   +-------------------+   +----------------+
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/npx/), &
         regDecomp=(/4/), rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -117,7 +117,8 @@
         startx = 2
         endx = 16
 
-        field = ESMF_FieldCreate(grid, fptr, totalUWidth=(/1/), name="temperature", rc=rc)
+        field = ESMF_FieldCreate(grid, fptr, totalUWidth=(/1/), &
+		name="temperature", rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     else if(lpe == 3) then
         allocate(fptr(17), tmp_farray(17))
@@ -127,7 +128,8 @@
         startx = 2
         endx = 16
 
-        field = ESMF_FieldCreate(grid, fptr, totalLWidth=(/1/), name="temperature", rc=rc)
+        field = ESMF_FieldCreate(grid, fptr, totalLWidth=(/1/), &
+		name="temperature", rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     else
         allocate(fptr(18), tmp_farray(18))
@@ -154,10 +156,11 @@
     do iter = 1, 9000
         ! only elements in the exclusive region are updated locally in each domain
         do i = startx, endx
-            tmp_farray(i) = fptr(i)+alpha*alpha*dt/dx/dx*(fptr(i+1)-2.*fptr(i)+fptr(i-1))
+          tmp_farray(i) = fptr(i)+alpha*alpha*dt/dx/dx*(fptr(i+1)-2.*fptr(i)+fptr(i-1))
         enddo
         fptr = tmp_farray
-        ! call halo update to communicate the values in the halo region to neighboring domains
+        ! call halo update to communicate the values in the halo region to 
+	! neighboring domains
         call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     enddo
