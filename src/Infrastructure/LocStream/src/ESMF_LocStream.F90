@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.36 2010/12/03 05:57:50 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.37 2010/12/09 20:47:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.36 2010/12/03 05:57:50 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.37 2010/12/09 20:47:16 svasquez Exp $'
 
 !==============================================================================
 !
@@ -2001,7 +2001,7 @@ contains
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !     \item[{[exclusiveCount]}]
-!          Upon return this holds the number of items in the exclusive region
+!          Upon return this holds the number of items in the exclusive region \newline
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the computational region.
@@ -2227,7 +2227,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !     \item[{[exclusiveUBound]}]
 !          Upon return this holds the upper bounds of the exclusive region.
 !     \item[{[exclusiveCount]}]
-!          Upon return this holds the number of items in the exclusive region
+!          Upon return this holds the number of items in the exclusive region \newline
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the computational region.
