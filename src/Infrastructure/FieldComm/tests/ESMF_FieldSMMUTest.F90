@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.18 2010/12/03 05:57:39 theurich Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.19 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.18 2010/12/03 05:57:39 theurich Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.19 2010/12/09 05:33:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -738,7 +738,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         srcField = ESMF_FieldCreate(grid, srcArray, &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/1/), rc=localrc)
+            totalLWidth=(/1/), totalUWidth=(/1/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -753,7 +753,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         dstField = ESMF_FieldCreate(grid, dstArray, &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/1/), rc=localrc)
+            totalLWidth=(/1/), totalUWidth=(/1/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return

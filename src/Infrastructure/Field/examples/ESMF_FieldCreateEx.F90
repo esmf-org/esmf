@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.101 2010/12/08 21:19:07 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.102 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
     real(ESMF_KIND_R8), dimension(:,:,:), allocatable   :: farray3d
     integer, dimension(3)                                :: gec, fa_shape
     integer, dimension(2)           :: gridToFieldMap2d
-    integer, dimension(2)           :: maxHaloLWidth2d, maxHaloUWidth2d
+    integer, dimension(2)           :: totalLWidth2d, totalUWidth2d
     type(ESMF_VM)                   :: vm
     type(ESMF_Field)                :: field, field1
     type(ESMF_Grid)                 :: grid
@@ -347,7 +347,7 @@
 !  This example is similar to example \ref{sec:field:usage:create_2dgrid_3dptr_map}, 
 !  in addition we will show
 !  a user can associate different halo width to a Fortran array to create
-!  a Field through the maxHaloLWidth and maxHaloUWdith optional arguments.
+!  a Field through the totalLWidth and totalUWidth optional arguments.
 !  A diagram of the dimension configuration from Grid, halos, and Fortran data array
 !  is shown here.
 !\begin{center}
@@ -365,21 +365,21 @@
 !  and by using halos, it also defines a bigger total region to contain 
 !  the entire contiguous memory block of the Fortran array.
 !
-!  The elements of maxHaloLWidth and maxHaloUWidth are applied in the order
+!  The elements of totalLWidth and totalUWidth are applied in the order
 !  distributed dimensions appear in the Fortran array. By definition, 
-!  maxHaloLWidth and maxHaloUWdith are 1 dimensional arrays of non-negative 
+!  totalLWidth and totalUWidth are 1 dimensional arrays of non-negative 
 !  integer values. The size of haloWidth arrays is equal to the number of distributed
 !  dimensions of the Fortran array, which is also equal to the number of
 !  distributed dimensions of the Grid used in the Field creation.
 !
-!  Because the order of maxHaloWidth (representing both maxHaloLWidth and
-!  maxHaloUWdith) element is applied to the order distributed dimensions
+!  Because the order of totalWidth (representing both totalLWidth and
+!  totalUWidth) element is applied to the order distributed dimensions
 !  appear in the Fortran array dimensions, it's quite simple to compute
 !  the shape of distributed dimensions of the Fortran array. They are done
 !  in a similar manner when applying ungriddedLBound and ungriddedUBound 
 !  to ungridded dimensions of the Fortran array defined by rule 2.
 !
-!  Assume we have the mapping from the dimension index of maxHaloWidth
+!  Assume we have the mapping from the dimension index of totalWidth
 !  to the dimension index of Fortran array, called mhw2fa; and we also
 !  have the mapping from dimension index of Fortran array to dimension
 !  index of the Grid, called fa2g. The shape of
@@ -388,8 +388,8 @@
 !  \begin{verbatim}
 !
 !  (4) fa_shape(mhw2fa(k)) = exclusiveCount(fa2g(mhw2fa(k)) + 
-!                            maxHaloUWidth(k) + maxHaloLWidth(k)
-!                        k = 1...size(maxHaloWidth) 
+!                            totalUWidth(k) + totalLWidth(k)
+!                        k = 1...size(totalWidth) 
 !
 !  \end{verbatim}
 !  
@@ -402,7 +402,7 @@
 !  do i = 1, farray_rank
 !     if i-th dimension of Fortran array is distributed
 !         fa_shape(i) = exclusiveCount(fa2g(i)) + 
-!                       maxHaloUWidth(fa_index) + maxHaloLWidth(fa_index)
+!                       totalUWidth(fa_index) + totalLWidth(fa_index)
 !         fa_index = fa_index + 1
 !     endif
 !  enddo
@@ -427,15 +427,15 @@
 !  \begin{verbatim}
 !
 !  (5) fa_shape(k) = exclusiveCount(k) + 
-!                    maxHaloUWidth(k) + maxHaloLWidth(k) 
-!                k = 1...size(maxHaloWidth)
+!                    totalUWidth(k) + totalLWidth(k) 
+!                k = 1...size(totalWidth)
 !
 !  \end{verbatim}
 !
 !  Let's examine an example on how to apply rule 5. Suppose we have a
 !  5D array and a 3D Grid that has its first 3 dimensions mapped to the first
-!  3 dimensions of the Fortran array. maxHaloLWidth=(/1,2,3/), 
-!  maxHaloUWdith=(/7,9,10/), then by rule 5, the following pseudo code
+!  3 dimensions of the Fortran array. totalLWidth=(/1,2,3/), 
+!  totalUWidth=(/7,9,10/), then by rule 5, the following pseudo code
 !  can be used to compute the shape of the first 3 dimensions of the Fortran
 !  array. The shape of the remaining two ungridded dimensions can be
 !  computed according to rule 2.
@@ -444,7 +444,7 @@
 !
 !  do k = 1, 3
 !      fa_shape(k) = exclusiveCount(k) + 
-!                    maxHaloUWidth(k) + maxHaloLWidth(k)) 
+!                    totalUWidth(k) + totalLWidth(k)) 
 !  enddo
 !
 !  \end{verbatim}
@@ -458,8 +458,8 @@
 !  \begin{verbatim}
 !
 !  (6) fa_shape(k+first_distdim_index-1) = exclusiveCount(k) +
-!                                          maxHaloUWidth(k) + maxHaloLWidth(k)
-!                                      k = 1...size(maxHaloWidth)
+!                                          totalUWidth(k) + totalLWidth(k)
+!                                      k = 1...size(totalWidth)
 !
 !  \end{verbatim}
 !
@@ -479,18 +479,18 @@
 !BOC
     gridToFieldMap2d(1) = 1
     gridToFieldMap2d(2) = 2
-    maxHaloLWidth2d(1) = 3
-    maxHaloLWidth2d(2) = 4
-    maxHaloUWidth2d(1) = 3
-    maxHaloUWidth2d(2) = 5
+    totalLWidth2d(1) = 3
+    totalLWidth2d(2) = 4
+    totalUWidth2d(1) = 3
+    totalUWidth2d(2) = 5
     do k = 1, 2
-        fa_shape(k) = gec(k) + maxHaloLWidth2d(k) + maxHaloUWidth2d(k)
+        fa_shape(k) = gec(k) + totalLWidth2d(k) + totalUWidth2d(k)
     end do
     fa_shape(3) = 7          ! 9-3+1
     allocate(farray3d(fa_shape(1), fa_shape(2), fa_shape(3)))
     field = ESMF_FieldCreate(grid, farray3d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
-        maxHaloLWidth=maxHaloLWidth2d, maxHaloUWidth=maxHaloUWidth2d, &
+        totalLWidth=totalLWidth2d, totalUWidth=totalUWidth2d, &
         gridToFieldMap=gridToFieldMap2d, &
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.6 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.6 2010/11/03 22:48:42 theurich Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -229,8 +229,8 @@
     lpe = lpe + 1
     do i = 1, 4
         field(i) = ESMF_FieldCreate(grid, arrayspec, &
-                maxHaloLWidth=(/halo(1,1,i,lpe), halo(1,2,i,lpe)/), &
-                maxHaloUWidth=(/halo(2,1,i,lpe), halo(2,2,i,lpe)/), &
+                totalLWidth=(/halo(1,1,i,lpe), halo(1,2,i,lpe)/), &
+                totalUWidth=(/halo(2,1,i,lpe), halo(2,2,i,lpe)/), &
                 staggerloc=staggers(i), name=names(i), &
                 rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

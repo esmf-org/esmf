@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.11 2010/12/03 05:57:39 theurich Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.11 2010/12/03 05:57:39 theurich Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -152,7 +152,7 @@ contains
 
         do i = 1, 3
             srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
-                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                totalLWidth=(/1/), totalUWidth=(/2/), &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -171,7 +171,7 @@ contains
                 ESMF_CONTEXT, rc)) return
 
             dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
-                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                totalLWidth=(/1/), totalUWidth=(/2/), &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -331,7 +331,7 @@ contains
         do i = 1, 3
             srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/8/), &
-                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                totalLWidth=(/1/), totalUWidth=(/2/), &
                 gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -340,7 +340,7 @@ contains
 
             srcFieldA(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/5/), &
-                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                totalLWidth=(/1/), totalUWidth=(/2/), &
                 gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -366,7 +366,7 @@ contains
 
             dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/8/), &
-                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                totalLWidth=(/1/), totalUWidth=(/2/), &
                 gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -375,7 +375,7 @@ contains
 
             dstFieldA(i) = ESMF_FieldCreate(grid, arrayspec, &
                 ungriddedLBound=(/1/), ungriddedUBound=(/5/), &
-                maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+                totalLWidth=(/1/), totalUWidth=(/2/), &
                 gridToFieldMap=(/2/), &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &

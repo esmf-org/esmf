@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.10 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.11 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -43,8 +43,8 @@
     integer, dimension(4) :: lgridToFieldMap
     integer, dimension(1) :: lungriddedLBound 
     integer, dimension(1) :: lungriddedUBound 
-    integer, dimension(2) :: lmaxHaloLWidth
-    integer, dimension(2) :: lmaxHaloUWidth
+    integer, dimension(2) :: ltotalLWidth
+    integer, dimension(2) :: ltotalUWidth
 
     ! local arguments used to verify field get
     integer                                     :: i, ii, ij, ik
@@ -113,7 +113,7 @@
     field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
         gridToFieldMap=(/1,0,2,0/), &
         ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-        maxHaloLWidth=(/1,1/), maxHaloUWidth=(/4,5/), &
+        totalLWidth=(/1,1/), totalUWidth=(/4,5/), &
         staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -122,7 +122,7 @@
     call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
         dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
         ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-        maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+        totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

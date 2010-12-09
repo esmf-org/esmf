@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.25 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.26 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.25 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.26 2010/12/09 05:33:06 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -116,7 +116,7 @@ contains
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGrid<rank><type><kind>(field, grid, & @\
 !   farray, indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+!   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)        :: field @\
@@ -128,8 +128,8 @@ contains
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
-!   integer,               intent(in), optional :: maxHaloLWidth(:) @\
-!   integer,               intent(in), optional :: maxHaloUWidth(:) @\
+!   integer,               intent(in), optional :: totalLWidth(:) @\
+!   integer,               intent(in), optional :: totalUWidth(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -202,26 +202,26 @@ contains
 !       must be specified. When both are specified the values are checked @\
 !       for consistency.  Note that the the ordering of @\
 !       these ungridded dimensions is the same as their order in the {\tt field}. @\
-! \item [{[maxHaloLWidth]}] @\
+! \item [{[totalLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
+!       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
 !       HALO OPERATION NOT IMPLEMENTED @\
-! \item [{[maxHaloUWidth]}] @\
+! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
+!       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
+!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method.  @\
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
@@ -237,7 +237,7 @@ contains
 ^define ESMF_METHOD "ESMF_FieldSetCommitGrid" @\
   subroutine ESMF_FieldSetCommitGrid##mrank##D##mtypekind(field, grid, farray, & @\
     indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+    ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -249,8 +249,8 @@ contains
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
-    integer, intent(in), optional :: maxHaloLWidth(:) @\
-    integer, intent(in), optional :: maxHaloUWidth(:) @\
+    integer, intent(in), optional :: totalLWidth(:) @\
+    integer, intent(in), optional :: totalUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
@@ -274,9 +274,9 @@ contains
         ESMF_CONTEXT, rc)) return   @\
 @\
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
-        if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then @\
+        if ((present(totalLWidth)) .or. (present(totalUWidth))) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
-                 "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", & @\
+                 "- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
                  ESMF_CONTEXT, rc)  @\
            return @\
         endif @\
@@ -305,7 +305,7 @@ contains
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
     indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
+    ungriddedUBound, totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -332,7 +332,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGridPtr<rank><type><kind>(field, grid, & @\
 !   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
-!   maxHaloLWidth, maxHaloUWidth, rc) @\
+!   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)        :: field @\
@@ -341,8 +341,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: maxHaloLWidth(:) @\
-!   integer,               intent(in), optional :: maxHaloUWidth(:) @\
+!   integer,               intent(in), optional :: totalLWidth(:) @\
+!   integer,               intent(in), optional :: totalUWidth(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -395,26 +395,26 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       entry in the {\tt gridToFieldMap} indicates that the particular @\
 !       Grid dimension will be replicating the Field across the DEs along @\
 !       this direction. @\
-! \item [{[maxHaloLWidth]}] @\
+! \item [{[totalLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
+!       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
 !       HALO OPERATION NOT IMPLEMENTED @\
-! \item [{[maxHaloUWidth]}] @\
+! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
+!       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
+!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method.  @\
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
@@ -430,7 +430,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ^define ESMF_METHOD "ESMF_FieldSetCommitGridPtr" @\
   subroutine ESMF_FieldSetCommitGridPtr##mrank##D##mtypekind(field, grid, farrayPtr, & @\
     copyflag, staggerloc, gridToFieldMap, & @\
-    maxHaloLWidth, maxHaloUWidth, rc) @\
+    totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -439,8 +439,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: maxHaloLWidth(:) @\
-    integer, intent(in), optional :: maxHaloUWidth(:) @\
+    integer, intent(in), optional :: totalLWidth(:) @\
+    integer, intent(in), optional :: totalUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     type(ESMF_StaggerLoc)          :: localStaggerLoc  @\
@@ -464,9 +464,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
         ESMF_CONTEXT, rc)) return   @\
 @\
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
-        if ((present(maxHaloLWidth)) .or. (present(maxHaloUWidth))) then @\
+        if ((present(totalLWidth)) .or. (present(totalUWidth))) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
-                 "- indexflag, maxHaloLWidth or maxHaloUWidth are not allowed for arbitrary grid", & @\
+                 "- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
                  ESMF_CONTEXT, rc)  @\
            return @\
         endif @\
@@ -495,7 +495,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
   ! Do General GeomBase SetCommit @\
   call ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
     copyflag, gridToFieldMap, & @\
-    maxHaloLWidth, maxHaloUWidth, rc=localrc) @\
+    totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
@@ -1344,7 +1344,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGB<rank><type><kind>(field, geombase, & @\
 !   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+!   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)        :: field @\
@@ -1355,8 +1355,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
-!   integer,               intent(in), optional :: maxHaloLWidth(:) @\
-!   integer,               intent(in), optional :: maxHaloUWidth(:) @\
+!   integer,               intent(in), optional :: totalLWidth(:) @\
+!   integer,               intent(in), optional :: totalUWidth(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1423,26 +1423,26 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 !       must be specified. When both are specified the values are checked @\
 !       for consistency.  Note that the the ordering of @\
 !       these ungridded dimensions is the same as their order in the {\tt field}. @\
-! \item [{[maxHaloLWidth]}] @\
+! \item [{[totalLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
+!       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
 !       HALO OPERATION NOT IMPLEMENTED @\
-! \item [{[maxHaloUWidth]}] @\
+! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
+!       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
+!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method.  @\
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
@@ -1458,7 +1458,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 ^define ESMF_METHOD "ESMF_FieldSetCommitGB" @\
   subroutine ESMF_FieldSetCommitGB##mrank##D##mtypekind(field, geombase, farray, & @\
     indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, maxHaloLWidth, maxHaloUWidth, rc) @\
+    ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -1469,8 +1469,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
-    integer, intent(in), optional :: maxHaloLWidth(:) @\
-    integer, intent(in), optional :: maxHaloUWidth(:) @\
+    integer, intent(in), optional :: totalLWidth(:) @\
+    integer, intent(in), optional :: totalUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
@@ -1688,19 +1688,19 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
          endif @\
     endif @\
 @\
-    if (present(maxHaloLWidth)) then  @\
-         if (size(maxHaloLWidth) .ne. gridDimCount_norep) then @\
+    if (present(totalLWidth)) then  @\
+         if (size(totalLWidth) .ne. gridDimCount_norep) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- maxHaloLWidth must equal to gridded dimCount", & @\
+                "- totalLWidth must equal to gridded dimCount", & @\
                 ESMF_CONTEXT, rc)  @\
             return @\
          endif @\
     endif @\
 @\
-    if (present(maxHaloUWidth)) then  @\
-         if (size(maxHaloUWidth) .ne. gridDimCount_norep) then @\
+    if (present(totalUWidth)) then  @\
+         if (size(totalUWidth) .ne. gridDimCount_norep) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
-                "- maxHaloUWidth must equal to gridded dimCount", & @\
+                "- totalUWidth must equal to gridded dimCount", & @\
                 ESMF_CONTEXT, rc)  @\
             return @\
          endif @\
@@ -1731,16 +1731,16 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 	endif @\
     enddo @\
 @\
-    if(present(maxHaloLWidth)) then @\
+    if(present(totalLWidth)) then @\
       localMaxHaloLWidth(1:gridDimCount_norep) = & @\
-         maxHaloLWidth (1:gridDimCount_norep) @\
+         totalLWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloLWidth = 0 @\
     endif @\
 @\
-    if(present(maxHaloUWidth)) then @\
+    if(present(totalUWidth)) then @\
       localMaxHaloUWidth(1:gridDimCount_norep) = & @\
-         maxHaloUWidth (1:gridDimCount_norep) @\
+         totalUWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloUWidth = 0 @\
     endif @\
@@ -1859,9 +1859,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
     ! (The field Sets were all moved here in preparation for this) @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDimCount_norep) = & @\
+    field%ftypep%totalLWidth(1:gridDimCount_norep) = & @\
        localMaxHaloLWidth (1:gridDimCount_norep) @\
-    field%ftypep%maxHaloUWidth(1:gridDimCount_norep) = & @\
+    field%ftypep%totalUWidth(1:gridDimCount_norep) = & @\
        localMaxHaloUWidth (1:gridDimCount_norep) @\
     field%ftypep%ungriddedLBound(1:fieldUngriddedDimCount) = & @\
        localUngriddedLBound(1:fieldUngriddedDimCount) @\
@@ -1897,7 +1897,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGBPtr<rank><type><kind>(field, geombase, & @\
 !   farrayPtr, copyflag, gridToFieldMap, & @\
-!   maxHaloLWidth, maxHaloUWidth, rc) @\
+!   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inou)         :: field @\
@@ -1905,8 +1905,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
 !   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: maxHaloLWidth(:) @\
-!   integer,               intent(in), optional :: maxHaloUWidth(:) @\
+!   integer,               intent(in), optional :: totalLWidth(:) @\
+!   integer,               intent(in), optional :: totalUWidth(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1954,26 +1954,26 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       entry in the {\tt gridToFieldMap} indicates that the particular @\
 !       Grid dimension will be replicating the Field across the DEs along @\
 !       this direction. @\
-! \item [{[maxHaloLWidth]}] @\
+! \item [{[totalLWidth]}] @\
 !       Lower bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in @\
+!       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
 !       HALO OPERATION NOT IMPLEMENTED @\
-! \item [{[maxHaloUWidth]}] @\
+! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
 !       needs to be the same as they appear in the {\tt field}.  Values default @\
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in @\
+!       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt field}.  That is, for each gridded dimension the @\
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth} @\
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored @\
+!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method.  @\
 !       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[rc]}]  @\
@@ -1989,7 +1989,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 ^define ESMF_METHOD "ESMF_FieldSetCommitGBPtr" @\
   subroutine ESMF_FieldSetCommitGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
     copyflag, gridToFieldMap, & @\
-    maxHaloLWidth, maxHaloUWidth, rc) @\
+    totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -1997,8 +1997,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: maxHaloLWidth(:) @\
-    integer, intent(in), optional :: maxHaloUWidth(:) @\
+    integer, intent(in), optional :: totalLWidth(:) @\
+    integer, intent(in), optional :: totalUWidth(:) @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
@@ -2174,19 +2174,19 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     ! ungridded dimensions plus replicated dimensions @\
     fieldUndistDimCount = fieldDimCount-gridDimCount + grid_repdimcount @\
 @\
-    if (present(maxHaloLWidth)) then  @\
-         if (size(maxHaloLWidth) .ne. gridDimCount_norep) then @\
+    if (present(totalLWidth)) then  @\
+         if (size(totalLWidth) .ne. gridDimCount_norep) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
-                  "- maxHaloLWidth must equal to gridded dimCount", & @\
+                  "- totalLWidth must equal to gridded dimCount", & @\
                     ESMF_CONTEXT, rc)  @\
             return @\
          endif @\
     endif @\
 @\
-    if (present(maxHaloUWidth)) then  @\
-         if (size(maxHaloUWidth) .ne. gridDimCount_norep) then @\
+    if (present(totalUWidth)) then  @\
+         if (size(totalUWidth) .ne. gridDimCount_norep) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
-                  "- maxHaloUWidth must equal to gridded dimCount", & @\
+                  "- totalUWidth must equal to gridded dimCount", & @\
                     ESMF_CONTEXT, rc)  @\
             return @\
          endif @\
@@ -2217,16 +2217,16 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
         endif @\
     enddo @\
 @\
-    if(present(maxHaloLWidth)) then @\
+    if(present(totalLWidth)) then @\
       localMaxHaloLWidth(1:gridDimCount_norep) = & @\
-         maxHaloLWidth (1:gridDimCount_norep) @\
+         totalLWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloLWidth = 0 @\
     endif @\
 @\
-    if(present(maxHaloUWidth)) then @\
+    if(present(totalUWidth)) then @\
       localMaxHaloUWidth(1:gridDimCount_norep) = & @\
-         maxHaloUWidth (1:gridDimCount_norep) @\
+         totalUWidth (1:gridDimCount_norep) @\
     else @\
          localMaxHaloUWidth = 0 @\
     endif @\
@@ -2277,9 +2277,9 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     ! (The field Sets were all moved here in preparation for this) @\
     field%ftypep%gridToFieldMap(1:gridDimCount) = & @\
        localGridToFieldMap(1:gridDimCount) @\
-    field%ftypep%maxHaloLWidth(1:gridDimCount_norep) = & @\
+    field%ftypep%totalLWidth(1:gridDimCount_norep) = & @\
        localMaxHaloLWidth (1:gridDimCount_norep) @\
-    field%ftypep%maxHaloUWidth(1:gridDimCount_norep) = & @\
+    field%ftypep%totalUWidth(1:gridDimCount_norep) = & @\
        localMaxHaloUWidth (1:gridDimCount_norep) @\
     field%ftypep%datastatus = ESMF_STATUS_READY @\
     field%ftypep%geombase  = geombase @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.352 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.353 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -85,8 +85,8 @@ module ESMF_FieldMod
     integer                       :: gridToFieldMap(ESMF_MAXDIM)
     integer                       :: ungriddedLBound(ESMF_MAXDIM)
     integer                       :: ungriddedUBound(ESMF_MAXDIM)
-    integer                       :: maxHaloLWidth(ESMF_MAXDIM)
-    integer                       :: maxHaloUWidth(ESMF_MAXDIM)
+    integer                       :: totalLWidth(ESMF_MAXDIM)
+    integer                       :: totalUWidth(ESMF_MAXDIM)
     ESMF_INIT_DECLARE
   end type
 
@@ -129,7 +129,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.352 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.353 2010/12/09 05:33:06 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -490,7 +490,7 @@ contains
                                  fp%datastatus, fp%iostatus, & 
                                  fp%dimCount, fp%gridToFieldMap, &
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
-                                 fp%maxHaloLWidth, fp%maxHaloUWidth, &
+                                 fp%totalLWidth, fp%totalUWidth, &
                                  buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -603,7 +603,7 @@ contains
                                    fp%datastatus, fp%iostatus, &
                                    fp%dimCount, fp%gridToFieldMap, &
                                    fp%ungriddedLBound, fp%ungriddedUBound, &
-                                   fp%maxHaloLWidth, fp%maxHaloUWidth, &
+                                   fp%totalLWidth, fp%totalUWidth, &
                                    buffer(1), offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -726,8 +726,8 @@ contains
         ftypep%gridToFieldMap = -1
         ftypep%ungriddedLBound = -1
         ftypep%ungriddedUBound = -1
-        ftypep%maxHaloLWidth   = -1
-        ftypep%maxHaloUWidth   = -1
+        ftypep%totalLWidth   = -1
+        ftypep%totalUWidth   = -1
 
         if(present(rc)) rc = ESMF_SUCCESS
 

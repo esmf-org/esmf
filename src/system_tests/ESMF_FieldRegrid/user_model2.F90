@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.57 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_model2.F90,v 1.58 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -121,7 +121,7 @@
 
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, &
-                                  maxHaloLWidth=(/0,0/), maxHaloUWidth=(/0,0/), &
+                                  totalLWidth=(/0,0/), totalUWidth=(/0,0/), &
                                   name="humidity", rc=rc)
       if(rc/=ESMF_SUCCESS) return
   
@@ -239,7 +239,7 @@
 
       ! get the grid and coordinates
       call ESMF_FieldGet(humidity, grid=grid, &
-                         maxHaloUWidth=haloUWidth, rc=rc)
+                         totalUWidth=haloUWidth, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       haloWidth=haloUWidth(1)
       call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, &

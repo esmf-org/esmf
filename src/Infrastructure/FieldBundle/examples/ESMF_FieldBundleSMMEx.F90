@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMEx.F90,v 1.11 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldBundleSMMEx.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.11 2010/11/03 22:48:42 theurich Exp $'
+    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -113,7 +113,7 @@
 
     do i = 1, 3
         srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            totalLWidth=(/1/), totalUWidth=(/2/), &
             rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -126,7 +126,7 @@
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
         dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            totalLWidth=(/1/), totalUWidth=(/2/), &
             rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

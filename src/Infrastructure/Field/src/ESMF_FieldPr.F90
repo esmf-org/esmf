@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.34 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_FieldPr.F90,v 1.35 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -200,11 +200,11 @@ contains
           write(*, *) "arrayrank = ", arrayrank
         endif
 
-        write(*, *) "gridToFieldMap ungriddedLBound ungriddedUBound maxHaloLWidth", &
-            " maxHaloUWidth"
+        write(*, *) "gridToFieldMap ungriddedLBound ungriddedUBound totalLWidth", &
+            " totalUWidth"
         do i = 1, ESMF_MAXDIM
             write(*, *) fp%gridToFieldMap(i), fp%ungriddedLBound(i), fp%ungriddedUBound(i), &
-                "    ", fp%maxHaloLWidth(i), fp%maxHaloUWidth(i)
+                "    ", fp%totalLWidth(i), fp%totalUWidth(i)
         enddo
         write(*,*) "Field Print Ends   ====>"
 

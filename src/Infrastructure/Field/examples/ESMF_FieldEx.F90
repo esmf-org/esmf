@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.23 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldEx.F90,v 1.24 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -60,8 +60,8 @@
     integer                    :: gridToFieldMap(3)    
     integer                    :: ungriddedLBound(3)
     integer                    :: ungriddedUBound(3)
-    integer                    :: maxHaloLWidth(3)
-    integer                    :: maxHaloUWidth(3)
+    integer                    :: totalLWidth(3)
+    integer                    :: totalUWidth(3)
     integer                    :: fa_shape(3)
     character(len=32)          :: name
 
@@ -191,7 +191,7 @@
         typekind=typekind, dimCount=dimCount, staggerloc=staggerloc, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & 
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, & 
         name=name, &
         rc=rc)
 !EOC
@@ -483,7 +483,7 @@
     ! use FieldGet to retrieve total counts 
     call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
         ungriddedUBound=(/4,5/), &
-        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         totalCount=fsize, &
         rc=rc)
@@ -495,7 +495,7 @@
     ! create the Field
     field7d = ESMF_FieldCreate(grid5d, farray7d, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -510,7 +510,7 @@
 !BOC
     call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
         ungriddedUBound=(/4,5/), &
-        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         totalLBound=flbound, totalUBound=fubound, &
         rc=rc)
@@ -522,7 +522,7 @@
 
     field7d2 = ESMF_FieldCreate(grid5d, farray7d2, ESMF_INDEX_DELOCAL, &
         ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-        maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+        totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

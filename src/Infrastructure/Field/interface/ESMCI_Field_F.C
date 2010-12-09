@@ -1,4 +1,4 @@
-// $Id: ESMCI_Field_F.C,v 1.15 2010/06/23 23:01:08 theurich Exp $
+// $Id: ESMCI_Field_F.C,v 1.16 2010/12/09 05:33:06 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_Field_F.C,v 1.15 2010/06/23 23:01:08 theurich Exp $";
+             "$Id: ESMCI_Field_F.C,v 1.16 2010/12/09 05:33:06 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -51,8 +51,8 @@ void FTN(c_esmc_fieldserialize)(
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
-                int * maxHaloLWidth,
-                int * maxHaloUWidth,
+                int * totalLWidth,
+                int * totalUWidth,
                 char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buf_l){
@@ -106,10 +106,10 @@ void FTN(c_esmc_fieldserialize)(
       memcpy((void *)ptr, (const void *)ungriddedUBound, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
-      memcpy((void *)ptr, (const void *)maxHaloLWidth, ESMF_MAXDIM*sizeof(int));
+      memcpy((void *)ptr, (const void *)totalLWidth, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
-      memcpy((void *)ptr, (const void *)maxHaloUWidth, ESMF_MAXDIM*sizeof(int));
+      memcpy((void *)ptr, (const void *)totalUWidth, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
 
     *offset = ptr - buffer;
@@ -128,8 +128,8 @@ void FTN(c_esmc_fielddeserialize)(
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
-                int * maxHaloLWidth,
-                int * maxHaloUWidth,
+                int * totalLWidth,
+                int * totalUWidth,
 		char *buffer, int *offset, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
@@ -154,9 +154,9 @@ void FTN(c_esmc_fielddeserialize)(
     ptr += ESMF_MAXDIM*sizeof(int);
     memcpy((void *)ungriddedUBound, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)maxHaloLWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    memcpy((void *)totalLWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
-    memcpy((void *)maxHaloUWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
+    memcpy((void *)totalUWidth, (const void *)ptr, ESMF_MAXDIM*sizeof(int));
     ptr += ESMF_MAXDIM*sizeof(int);
 
     *offset = ptr - buffer;

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.11 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -158,20 +158,20 @@ program Blk2BlkBunRedist
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! create src and dst fields
-    field1 = ESMF_FieldCreate(grid1, arrayspec, maxHaloLWidth=(/2,2/), &
-        maxHaloUWidth=(/0,0/), rc=localrc) 
+    field1 = ESMF_FieldCreate(grid1, arrayspec, totalLWidth=(/2,2/), &
+        totalUWidth=(/0,0/), rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    field3 = ESMF_FieldCreate(grid1, arrayspec, maxHaloLWidth=(/2,2/), &
-        maxHaloUWidth=(/0,0/), rc=localrc) 
+    field3 = ESMF_FieldCreate(grid1, arrayspec, totalLWidth=(/2,2/), &
+        totalUWidth=(/0,0/), rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    field2 = ESMF_FieldCreate(grid2, arrayspec, maxHaloLWidth=(/2,2/), &
-        maxHaloUWidth=(/0,0/), rc=localrc) 
+    field2 = ESMF_FieldCreate(grid2, arrayspec, totalLWidth=(/2,2/), &
+        totalUWidth=(/0,0/), rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)

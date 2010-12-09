@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.56 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.57 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.56 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.57 2010/12/09 05:33:06 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -114,7 +114,7 @@ contains
   subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, grid, mesh, locstream, xgrid, &
     array, typekind, dimCount, memDimCount, &
     staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    maxHaloLWidth, maxHaloUWidth, localDeCount, name, rc) 
+    totalLWidth, totalUWidth, localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)   :: field    
@@ -136,8 +136,8 @@ contains
     integer, intent(out), optional :: gridToFieldMap(:)    
     integer, intent(out), optional :: ungriddedLBound(:)
     integer, intent(out), optional :: ungriddedUBound(:)
-    integer, intent(out), optional :: maxHaloLWidth(:)
-    integer, intent(out), optional :: maxHaloUWidth(:)
+    integer, intent(out), optional :: totalLWidth(:)
+    integer, intent(out), optional :: totalUWidth(:)
     integer, intent(out), optional :: localDeCount
     character(len=*), intent(out), optional :: name
     integer, intent(out), optional :: rc     
@@ -230,26 +230,26 @@ contains
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
-! \item [{[maxHaloLWidth]}]
+! \item [{[totalLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
 !       HALO OPERATION NOT IMPLEMENTED
-! \item [{[maxHaloUWidth]}]
+! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[localDeCount]}]
@@ -440,12 +440,12 @@ contains
         ungriddedUBound = ftype%ungriddedUBound(1:size(ungriddedUBound))
     endif
 
-    if (present(maxHaloLWidth)) then
-        maxHaloLWidth = ftype%maxHaloLWidth(1:size(maxHaloLWidth))
+    if (present(totalLWidth)) then
+        totalLWidth = ftype%totalLWidth(1:size(totalLWidth))
     endif
 
-    if (present(maxHaloUWidth)) then
-        maxHaloUWidth = ftype%maxHaloUWidth(1:size(maxHaloUWidth))
+    if (present(totalUWidth)) then
+        totalUWidth = ftype%totalUWidth(1:size(totalUWidth))
     endif
 
     if (present(typekind)) then
@@ -1111,7 +1111,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     subroutine ESMF_FieldGetGridAllocBounds(grid, localDe, staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
@@ -1121,8 +1121,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(in), optional :: maxHaloLWidth(:)
-    integer, intent(in), optional :: maxHaloUWidth(:)
+    integer, intent(in), optional :: totalLWidth(:)
+    integer, intent(in), optional :: totalUWidth(:)
     integer, intent(out), optional :: totalLBound(:)
     integer, intent(out), optional :: totalUBound(:)
     integer, intent(out), optional :: totalCount(:)
@@ -1181,26 +1181,26 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
-! \item [{[maxHaloLWidth]}]
+! \item [{[totalLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
 !       of dimensions in the {\tt grid}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
 !       HALO OPERATION NOT IMPLEMENTED
-! \item [{[maxHaloUWidth]}]
+! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of dimensions in the {\tt grid}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalLBound]}]
@@ -1248,7 +1248,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     ! call into generic alloc bound calculation subroutine
     call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         totalLBound, totalUBound, totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1656,7 +1656,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
   ! Private name; call using ESMF_FieldGet()
     subroutine ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
@@ -1665,8 +1665,8 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(in), optional :: maxHaloLWidth(:)
-    integer, intent(in), optional :: maxHaloUWidth(:)
+    integer, intent(in), optional :: totalLWidth(:)
+    integer, intent(in), optional :: totalUWidth(:)
     integer, intent(out), optional :: totalLBound(:)
     integer, intent(out), optional :: totalUBound(:)
     integer, intent(out), optional :: totalCount(:)
@@ -1718,26 +1718,26 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       must be specified. When both are specified the values are checked
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
-! \item [{[maxHaloLWidth]}]
+! \item [{[totalLWidth]}]
 !       Lower bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
-!       to 0.  If values for maxHaloLWidth are specified they must be reflected in
+!       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
-!       {\tt field} size should be max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
 !       HALO OPERATION NOT IMPLEMENTED
-! \item [{[maxHaloUWidth]}]
+! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
-!       to 0.  If values for maxHaloUWidth are specified they must be reflected in
+!       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
-!       {\tt field} size should max( {\tt maxHaloLWidth} + {\tt maxHaloUWidth}
+!       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt maxHaloUWidth} is checked for validity and stored
+!       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalLBound]}]
@@ -1911,19 +1911,19 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
         endif 
     endif
 
-    if(present(maxHaloLWidth) ) then
-        if(size(maxHaloLWidth) .ne. gridrank_norep) then
+    if(present(totalLWidth) ) then
+        if(size(totalLWidth) .ne. gridrank_norep) then
            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-              "maxHaloLWidth size must equal to gridded dimension count", &
+              "totalLWidth size must equal to gridded dimension count", &
                ESMF_CONTEXT, rc)
            return
         endif 
     endif
 
-    if(present(maxHaloUWidth) ) then
-        if(size(maxHaloUWidth) .ne. gridrank_norep) then
+    if(present(totalUWidth) ) then
+        if(size(totalUWidth) .ne. gridrank_norep) then
            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-              "maxHaloUWidth size must equal to gridded dimension count", &
+              "totalUWidth size must equal to gridded dimension count", &
                ESMF_CONTEXT, rc)
            return
         endif 
@@ -1933,12 +1933,12 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
     ! allocate the return value arrays
     allocate(l_alb(arrayrank), l_aub(arrayrank), l_ac(arrayrank))
     l_mhlw = 0
-    if(present(maxHaloLWidth)) then
-        l_mhlw(1:size(maxHaloLWidth)) = maxHaloLWidth
+    if(present(totalLWidth)) then
+        l_mhlw(1:size(totalLWidth)) = totalLWidth
     endif
     l_mhuw = 0
-    if(present(maxHaloUWidth)) then
-        l_mhuw(1:size(maxHaloUWidth)) = maxHaloUWidth
+    if(present(totalUWidth)) then
+        l_mhuw(1:size(totalUWidth)) = totalUWidth
     endif
 
     ! First we compute the ungridded bounds:

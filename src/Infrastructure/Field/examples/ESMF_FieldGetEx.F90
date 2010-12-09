@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.17 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.18 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,8 +51,8 @@
     integer                    :: gridToFieldMap(3)    
     integer                    :: ungriddedLBound(3)
     integer                    :: ungriddedUBound(3)
-    integer                    :: maxHaloLWidth(3)
-    integer                    :: maxHaloUWidth(3)
+    integer                    :: totalLWidth(3)
+    integer                    :: totalUWidth(3)
     integer                    :: fa_shape(3)
     character(len=32)          :: name
 
@@ -161,7 +161,7 @@
         typekind=typekind, dimCount=rank, staggerloc=staggerloc, &
         gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, & 
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, & 
         name=name, &
         rc=rc)
 !EOC

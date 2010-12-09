@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.68 2010/12/08 21:50:10 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.69 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width"
@@ -168,7 +168,7 @@
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width, fieldget checked"
@@ -181,7 +181,7 @@
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
@@ -195,7 +195,7 @@
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with halo width, no distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
@@ -210,7 +210,7 @@
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap = (/2,1/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed and remapped, " // &
             "with halo width, no distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
@@ -224,7 +224,7 @@
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap = (/2,1/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed and remapped, " // &
             "with halo width, distgrid padding, using ESMF_STAGGERLOC_EDGE1, fieldget checked"
@@ -238,7 +238,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             gridToFieldMap = (/2,1/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed and remapped, " // &
             "with halo width, distgrid padding, using ESMF_STAGGERLOC_CENTER, fieldget checked"
@@ -251,7 +251,7 @@
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "1,2 dimension swapped"
@@ -265,7 +265,7 @@
             regDecomp=(/4,1/), &
             fieldget=.true., &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "1,2 dimension swapped, fieldget checked"
@@ -277,7 +277,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo"
@@ -289,7 +289,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger"
@@ -302,7 +302,7 @@
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
@@ -315,7 +315,7 @@
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
@@ -329,7 +329,7 @@
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, corner stagger, get test, grid without padding"
@@ -341,7 +341,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, 1,2 dimension swapped"
@@ -353,7 +353,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed and divisible, " // &
             "with extra padding and halo, 1,2 dimension swapped"
@@ -365,7 +365,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "neither dimension divisible, " // &
@@ -378,7 +378,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "neither dimension divisible, " // &
@@ -531,7 +531,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             gridToFieldMap=(/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d 1,3 dim distributed, " // &
             "2nd dimension undistributed, 1,3 dimension swapped"
@@ -546,7 +546,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             gridToFieldMap=(/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d 1,3 dim distributed, " // &
             "2nd dimension undistributed, 1,3 dimension swapped, use GetAllocBounds internally"
@@ -561,7 +561,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             gridToFieldMap=(/3,2/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d 2,3 dim distributed, " // &
             "1st dimension undistributed, 2,3 dimension swapped"
@@ -576,7 +576,7 @@
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             gridToFieldMap=(/3,2/), &
             ungriddedLBound=(/3/), ungriddedUBound=(/9/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/))
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d 2,3 dim distributed, " // &
             "1st dimension undistributed, 2,3 dimension swapped, use GetAllocBounds internally"
@@ -677,7 +677,7 @@
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
             regDecomp=(/4,1,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with halo width"
@@ -691,7 +691,7 @@
             regDecomp=(/4,1,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with halo width, fieldget checked"
@@ -704,7 +704,7 @@
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "1,2 dimension swapped"
@@ -718,7 +718,7 @@
             regDecomp=(/4,1/), &
             fieldget=.true., &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "1,2 dimension swapped, fieldget checked"
@@ -730,7 +730,7 @@
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             regDecomp=(/4,1,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d grid 2d distgrid 2d, " // &
             "with extra padding and halo"
@@ -742,7 +742,7 @@
         call test3d_generic(rc, minindex=(/1,1,1/), maxindex=(/16,20,32/), &
             regDecomp=(/4,1,1/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with extra padding and halo, corner stagger"
@@ -755,7 +755,7 @@
             regDecomp=(/4,1,1/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
@@ -768,7 +768,7 @@
 !            regDecomp=(/4,1,1/), &
 !            staggerloc=ESMF_STAGGERLOC_CENTER, &
 !            fieldget=.true., &
-!            maxHaloLWidth=(/6/), maxHaloUWidth=(/8/))
+!            totalLWidth=(/6/), totalUWidth=(/8/))
 !        write(failMsg, *) ""
 !        write(name, *) "Creating a Field from a fortran array 3d 1st dim distributed, " // &
 !            "with extra padding and halo, center stagger, get test"
@@ -781,7 +781,7 @@
             regDecomp=(/2,2,1/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with extra padding and halo, corner stagger, get test"
@@ -795,7 +795,7 @@
             regDecomp=(/2,2,1/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "with halo, corner stagger, get test, grid without padding"
@@ -807,7 +807,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/4,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "with extra padding and halo, 1,2 dimension swapped"
@@ -819,7 +819,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/16,20/), &
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed and divisible, " // &
             "with extra padding and halo, 1,2 dimension swapped"
@@ -831,7 +831,7 @@
         call test2d_generic(rc, minindex=(/1,1/), maxindex=(/17,21/), &
             regDecomp=(/2,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/))
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 2d both dims distributed, " // &
             "neither dimension divisible, " // &
@@ -846,7 +846,7 @@
             regDecomp=(/2,2,1/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,1,2/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, " // &
@@ -861,7 +861,7 @@
             regDecomp=(/2,1,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, " // &
@@ -875,7 +875,7 @@
             regDecomp=(/2,1,2/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, " // &
@@ -891,7 +891,7 @@
             copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, minindex starts from numbers greater than 1, " // &
@@ -906,7 +906,7 @@
             copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3,2/), &
             fieldget=.true., &
-            maxHaloLWidth=(/6,7,3/), maxHaloUWidth=(/8,9,2/))
+            totalLWidth=(/6,7,3/), totalUWidth=(/8,9,2/))
         write(failMsg, *) ""
         write(name, *) "Creating a Field from a fortran array 3d all dims distributed, " // &
             "neither dimension divisible, " // &
@@ -936,7 +936,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/) &
             )
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
@@ -949,7 +949,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/) &
             )
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
@@ -963,7 +963,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -977,7 +977,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -991,7 +991,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
         write(failMsg, *) ""
@@ -1005,7 +1005,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
         write(failMsg, *) ""
@@ -1021,7 +1021,7 @@
 !        call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/10,20,10,20,10/), &
 !            regDecomp=(/2,1,2,1,1/), &
 !            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-!            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+!            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
 !            copyflag=ESMF_DATA_COPY, &
 !            gridToFieldMap=(/1,2,4,5,7/) &
 !            )
@@ -1036,7 +1036,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,1,2,1,1/), &
             copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
@@ -1051,7 +1051,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,1,2,1,1/), &
             copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
@@ -1066,7 +1066,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
@@ -1081,7 +1081,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
@@ -1096,7 +1096,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridEdgeLWidth=(/1,0,1,0,1/), gridEdgeUWidth=(/0,1,2,1,0/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap=(/1,2,4,5,7/) &
@@ -1113,7 +1113,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridEdgeLWidth=(/1,0,1,0,1/), gridEdgeUWidth=(/0,1,2,1,0/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap=(/1,2,4,5,7/) &
@@ -1130,7 +1130,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             distgridToGridMap=(/3,2,5,4,1/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
@@ -1145,7 +1145,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             distgridToGridMap=(/3,2,5,4,1/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
@@ -1160,7 +1160,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,5,4,1/), &
             gridToFieldMap=(/1,2,4,5,7/) &
@@ -1176,7 +1176,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,5,4,1/), &
             gridToFieldMap=(/1,2,4,5,7/) &
@@ -1192,7 +1192,7 @@
         call test7d_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,2,4,7/) &
@@ -1208,7 +1208,7 @@
         call test7d2_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,2,4,7/) &
@@ -1224,7 +1224,7 @@
         call test7d_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
             ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            totalLWidth=(/1/), totalUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
             gridToFieldMap=(/4/) &
@@ -1240,7 +1240,7 @@
         call test7d2_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
             ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            totalLWidth=(/1/), totalUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
             gridToFieldMap=(/4/) &
@@ -1317,7 +1317,7 @@
             regDecomp=(/2,2,1,1,1,1,1/), &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1335,7 +1335,7 @@
             copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1354,7 +1354,7 @@
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1372,7 +1372,7 @@
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1447,7 +1447,7 @@
             regDecomp=(/2,2,1,1,1,1,1/), &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1465,7 +1465,7 @@
             copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1484,7 +1484,7 @@
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1502,7 +1502,7 @@
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
             gridToFieldMap=(/1,2,4,7,5,6,3/), &
             distgridToGridMap=(/3,2,1,4,7,5,6/), &
-            maxHaloLWidth=(/1,1,1,2,2,1,1/), maxHaloUWidth=(/1,1,2,1,1,1,1/), &
+            totalLWidth=(/1,1,1,2,2,1,1/), totalUWidth=(/1,1,2,1,1,1,1/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1518,7 +1518,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/) &
             )
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
@@ -1531,7 +1531,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1545,7 +1545,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
         write(failMsg, *) ""
@@ -1559,7 +1559,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,1,2,1,1/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
         write(failMsg, *) ""
@@ -1573,7 +1573,7 @@
         call test7d3_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
             ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            totalLWidth=(/1/), totalUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
             gridToFieldMap=(/4/) &
@@ -1589,7 +1589,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,2,4,7/) &
@@ -1619,7 +1619,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1637,7 +1637,7 @@
         call test7d3_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1655,7 +1655,7 @@
         call test7d3_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,2,3,1/), &
-            maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
+            totalLWidth=(/1,1,2/), totalUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1673,7 +1673,7 @@
         call test3d_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
-            maxHaloLWidth=(/1,1/), maxHaloUWidth=(/4,5/), &
+            totalLWidth=(/1,1/), totalUWidth=(/4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1690,7 +1690,7 @@
         ! Create a 3D field from a 4D grid
         call test3d_generic_repdim(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            maxHaloLWidth=(/1,1,0/), maxHaloUWidth=(/4,5,0/), &
+            totalLWidth=(/1,1,0/), totalUWidth=(/4,5,0/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1709,7 +1709,7 @@
             minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1,1/), ungriddedUBound=(/4,2,3,1/), &
-            maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
+            totalLWidth=(/1,1,2/), totalUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1727,7 +1727,7 @@
         call test3d_generic_repdim_sct(rc, &
             minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            maxHaloLWidth=(/1,1,2/), maxHaloUWidth=(/1,4,5/), &
+            totalLWidth=(/1,1,2/), totalUWidth=(/1,4,5/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1745,7 +1745,7 @@
         call test3d_generic_repdim_sct(rc, &
             minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            maxHaloLWidth=(/1,2/), maxHaloUWidth=(/1,4/), &
+            totalLWidth=(/1,2/), totalUWidth=(/1,4/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/2/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
@@ -1764,7 +1764,7 @@
         call test3d_generic_sctptr(rc, &
             minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
-            maxHaloLWidth=(/1,2,1/), maxHaloUWidth=(/1,3,4/), &
+            totalLWidth=(/1,2,1/), totalUWidth=(/1,3,4/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
@@ -1782,7 +1782,7 @@
         call test2d_generic_sctptr(rc, &
             minIndex=(/1,1,1/), maxIndex=(/4,3,4/), &
             regDecomp=(/2,2,1/), &
-            maxHaloLWidth=(/1,2/), maxHaloUWidth=(/3,4/), &
+            totalLWidth=(/1,2/), totalUWidth=(/3,4/), &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1/), &
@@ -1802,7 +1802,7 @@
         call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/) &
             )
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
@@ -1817,7 +1817,7 @@
             gridEdgeLWidth=(/0,0,0,0,0/), gridEdgeUWidth=(/0,0,0,0,0/), &
             fieldget=.true., &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/) &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/) &
             )
         write(failMsg, *) ""
         write(name, *) "Creating a 7D field from a 5D grid and 2D ungridded bounds " // &
@@ -1833,7 +1833,7 @@
             regDecomp=(/2,1,2,1,1/), &
             gridEdgeLWidth=(/0,0,0,0,0/), gridEdgeUWidth=(/1,1,1,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             fieldget=.true. &
             )
         write(failMsg, *) ""
@@ -1847,7 +1847,7 @@
         call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,4,5/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
         write(failMsg, *) ""
@@ -1861,7 +1861,7 @@
         call test7d4_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/4,2,4,2,2/), &
             regDecomp=(/2,1,2,1,1/), &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,1,2,1,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,1,2,1,1/), &
             gridToFieldMap=(/1,2,4,5,7/) &
             )
         write(failMsg, *) ""
@@ -1875,7 +1875,7 @@
         call test7d4_generic(rc, minIndex=(/1/), maxIndex=(/6/), &
             regDecomp=(/4/), &
             ungriddedLBound=(/1,2,1,2,1,2/), ungriddedUBound=(/4,2,3,3,2,4/), &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/2/), &
+            totalLWidth=(/1/), totalUWidth=(/2/), &
             fieldget=.true., &
             distgridToGridMap=(/1/), &
             gridToFieldMap=(/4/) &
@@ -1891,7 +1891,7 @@
         call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             fieldget=.true., &
             distgridToGridMap=(/3,2,1,4/), &
             gridToFieldMap=(/1,2,4,7/) &
@@ -1923,7 +1923,7 @@
         call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
             regDecomp=(/2,1,2,1/), &
             ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
-            maxHaloLWidth=(/1,1,1,2/), maxHaloUWidth=(/2,3,4,5/), &
+            totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
             fieldget=.true., &
@@ -2009,8 +2009,8 @@ contains
         integer, dimension(1) :: gridToFieldMap
         integer, dimension(2) :: ungriddedLBound 
         integer, dimension(3) :: ungriddedUBound 
-        integer, dimension(4) :: maxHaloLWidth
-        integer, dimension(5) :: maxHaloUWidth
+        integer, dimension(4) :: totalLWidth
+        integer, dimension(5) :: totalUWidth
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2019,7 +2019,7 @@ contains
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             dimCount=dimCount, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2282,7 +2282,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
+            totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2317,7 +2317,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
+            totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2352,7 +2352,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
+            totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2377,7 +2377,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
@@ -2387,7 +2387,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
         integer, intent(out)  :: rc
 
@@ -2403,8 +2403,8 @@ contains
         integer, dimension(2) :: lgridToFieldMap
         integer, dimension(2) :: lungriddedLBound 
         integer, dimension(2) :: lungriddedUBound 
-        integer, dimension(2) :: lmaxHaloLWidth
-        integer, dimension(2) :: lmaxHaloUWidth
+        integer, dimension(2) :: ltotalLWidth
+        integer, dimension(2) :: ltotalUWidth
 
         integer, dimension(:,:), pointer  :: farray
         integer, dimension(:,:), pointer  :: farray1
@@ -2447,12 +2447,12 @@ contains
             enddo
         endif
         mhlw = 0
-        if(present(maxHaloLWidth)) then
-            mhlw(1:gridDimCount) = maxHaloLWidth(1:gridDimCount)
+        if(present(totalLWidth)) then
+            mhlw(1:gridDimCount) = totalLWidth(1:gridDimCount)
         endif
         mhuw = 0
-        if(present(maxHaloUWidth)) then
-            mhuw(1:gridDimCount) = maxHaloUWidth(1:gridDimCount)
+        if(present(totalUWidth)) then
+            mhuw(1:gridDimCount) = totalUWidth(1:gridDimCount)
         endif
         fsize=0
         do i = 1, 2
@@ -2463,7 +2463,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             totalCount=fsize, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2494,7 +2494,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2504,7 +2504,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -2775,7 +2775,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, intent(out)  :: rc
         integer, dimension(:)   :: minIndex
@@ -2786,7 +2786,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         type(ESMF_Field)        :: field
@@ -2801,8 +2801,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: lmaxHaloLWidth
-        integer, dimension(3) :: lmaxHaloUWidth
+        integer, dimension(3) :: ltotalLWidth
+        integer, dimension(3) :: ltotalUWidth
 
         real, dimension(:,:,:), allocatable    :: farray
         type(ESMF_VM)                          :: vm
@@ -2850,12 +2850,12 @@ contains
             enddo
         endif
         mhlw = 0
-        if(present(maxHaloLWidth)) then
-            mhlw(1:gridDimCount) = maxHaloLWidth(1:gridDimCount)
+        if(present(totalLWidth)) then
+            mhlw(1:gridDimCount) = totalLWidth(1:gridDimCount)
         endif
         mhuw = 0
-        if(present(maxHaloUWidth)) then
-            mhuw(1:gridDimCount) = maxHaloUWidth(1:gridDimCount)
+        if(present(totalUWidth)) then
+            mhuw(1:gridDimCount) = totalUWidth(1:gridDimCount)
         endif
         fsize = 10
         ! create a couple of mappings following index mapping lemma 1 and lemma 7
@@ -2890,7 +2890,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -2900,7 +2900,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -2929,7 +2929,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, intent(out)  :: rc
         integer, dimension(:)   :: minIndex
@@ -2940,7 +2940,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         type(ESMF_Field)        :: field
@@ -2955,8 +2955,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: lmaxHaloLWidth
-        integer, dimension(3) :: lmaxHaloUWidth
+        integer, dimension(3) :: ltotalLWidth
+        integer, dimension(3) :: ltotalUWidth
 
         real, dimension(:,:,:), allocatable    :: farray
         type(ESMF_VM)                          :: vm
@@ -2976,7 +2976,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             totalCount=fsize, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2998,7 +2998,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc,  gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3008,7 +3008,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -3069,7 +3069,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, &
-            maxHaloLWidth=(/2,2/), maxHaloUWidth=(/3,3/), rc=localrc)
+            totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3318,7 +3318,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             !staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             !ungriddedLBound = (/2,3/), ungriddedUBound=(/4,5/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3353,7 +3353,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             gridToFieldMap=(/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3412,7 +3412,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
-            maxHaloLWidth=(/6,7/), maxHaloUWidth=(/8,9/), rc=localrc)
+            totalLWidth=(/6,7/), totalUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3473,7 +3473,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, & !gridToFieldMap = (/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3534,7 +3534,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/2,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3596,7 +3596,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/1,3/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3662,7 +3662,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CENTER, gridToFieldMap = (/3,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-            maxHaloLWidth=(/2,4/), maxHaloUWidth=(/5,6/), rc=localrc)
+            totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3699,7 +3699,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, dimension(:)   :: minIndex
         integer, dimension(:)   :: maxIndex
@@ -3709,7 +3709,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
         integer, intent(out)  :: rc
 
@@ -3725,8 +3725,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: lmaxHaloLWidth
-        integer, dimension(3) :: lmaxHaloUWidth
+        integer, dimension(3) :: ltotalLWidth
+        integer, dimension(3) :: ltotalUWidth
 
         integer, dimension(:,:,:), pointer  :: farray
         integer, dimension(:,:,:), pointer  :: farray1
@@ -3769,12 +3769,12 @@ contains
             enddo
         endif
         mhlw = 0
-        if(present(maxHaloLWidth)) then
-            mhlw(1:gridDimCount) = maxHaloLWidth(1:gridDimCount)
+        if(present(totalLWidth)) then
+            mhlw(1:gridDimCount) = totalLWidth(1:gridDimCount)
         endif
         mhuw = 0
-        if(present(maxHaloUWidth)) then
-            mhuw(1:gridDimCount) = maxHaloUWidth(1:gridDimCount)
+        if(present(totalUWidth)) then
+            mhuw(1:gridDimCount) = totalUWidth(1:gridDimCount)
         endif
         fsize=0
         do i = 1, 3
@@ -3809,7 +3809,7 @@ contains
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, copyflag=copyflag, &
             staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, rc=localrc)
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -3819,7 +3819,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -3886,12 +3886,12 @@ contains
 
 ! Cannot use the following numbers, cause overflow on most systems due to memory requirement
 !        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/10,23/), &
-!            maxHaloLWidth=(/2,3,4,5,6/), maxHaloUWidth=(/10,11,12,13,14/), &
+!            totalLWidth=(/2,3,4,5,6/), totalUWidth=(/10,11,12,13,14/), &
 !            totalCount=fsize, &
 !            rc=localrc)
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,2,1/), &
             totalCount=fsize, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -3902,7 +3902,7 @@ contains
 
         f8 = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,2,1/), &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3953,7 +3953,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,2,1/), &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -3965,7 +3965,7 @@ contains
 
         f8 = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=(/1,2/), ungriddedUBound=(/2,3/), &
-            maxHaloLWidth=(/1,1,1,2,2/), maxHaloUWidth=(/1,2,3,2,1/), &
+            totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,2,1/), &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3998,7 +3998,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
@@ -4010,7 +4010,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
@@ -4028,8 +4028,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         integer                                     :: ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4056,7 +4056,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalCount=fsize, &
             rc=localrc)
@@ -4090,7 +4090,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray, ESMF_INDEX_DELOCAL, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
             staggerloc=staggerloc, &
@@ -4104,7 +4104,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -4171,7 +4171,7 @@ contains
         copyflag, &
         staggerloc, &
         gridToFieldMap, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
@@ -4182,7 +4182,7 @@ contains
         type(ESMF_CopyFlag), optional     :: copyflag
         type(ESMF_StaggerLoc), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
@@ -4198,8 +4198,8 @@ contains
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4244,7 +4244,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=localStaggerLoc, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -4277,7 +4277,7 @@ contains
         endif
 
         field = ESMF_FieldCreate(grid, farray, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
             staggerloc=localStaggerLoc, &
@@ -4290,7 +4290,7 @@ contains
           if(fieldget) then
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -4400,7 +4400,7 @@ contains
         copyflag, &
         staggerloc, &
         gridToFieldMap, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
@@ -4411,7 +4411,7 @@ contains
         type(ESMF_CopyFlag), optional     :: copyflag
         type(ESMF_StaggerLoc), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), pointer :: farray
@@ -4427,8 +4427,8 @@ contains
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4473,7 +4473,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=localStaggerLoc, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -4511,7 +4511,7 @@ contains
             ESMF_CONTEXT, rc)) return
 
         call ESMF_FieldSetCommit(field, grid, farray, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
             staggerloc=localStaggerLoc, &
@@ -4524,7 +4524,7 @@ contains
           if(fieldget) then
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -4635,7 +4635,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
         integer, intent(out) :: rc
         integer, dimension(:)   :: minIndex
@@ -4647,7 +4647,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), allocatable :: farray
@@ -4665,8 +4665,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         integer                                     :: ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4693,7 +4693,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -4727,7 +4727,7 @@ contains
 
         field = ESMF_FieldCreate(grid, farray=farray, indexflag=ESMF_INDEX_DELOCAL, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
             staggerloc=staggerloc, &
@@ -4741,7 +4741,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -4804,7 +4804,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -4817,7 +4817,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -4837,8 +4837,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -4874,7 +4874,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -4891,7 +4891,7 @@ contains
         ! create field
         field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -4904,7 +4904,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5043,7 +5043,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -5056,7 +5056,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -5076,8 +5076,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5113,7 +5113,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -5130,7 +5130,7 @@ contains
         ! create field
         field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -5142,7 +5142,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5284,7 +5284,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -5297,7 +5297,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -5317,8 +5317,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -5354,7 +5354,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -5371,7 +5371,7 @@ contains
         ! create field
         field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -5383,7 +5383,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5509,7 +5509,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -5522,7 +5522,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -5542,8 +5542,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5580,7 +5580,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -5604,7 +5604,7 @@ contains
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
         call ESMF_FieldSetCommit(field, grid, farray_cr, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -5616,7 +5616,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5759,7 +5759,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -5772,7 +5772,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -5792,8 +5792,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -5830,7 +5830,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -5853,7 +5853,7 @@ contains
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3)))
         call ESMF_FieldSetCommit(field, grid, farray_cr, ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -5865,7 +5865,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -5991,7 +5991,7 @@ contains
         distgridToGridMap, &
         staggerloc, &
         gridToFieldMap, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -6003,7 +6003,7 @@ contains
         integer, dimension(:), optional   :: distgridToGridMap
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -6023,8 +6023,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: lmaxHaloLWidth
-        integer, dimension(3) :: lmaxHaloUWidth
+        integer, dimension(3) :: ltotalLWidth
+        integer, dimension(3) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -6060,7 +6060,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -6082,7 +6082,7 @@ contains
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3)))
         call ESMF_FieldSetCommit(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -6094,7 +6094,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6220,7 +6220,7 @@ contains
         distgridToGridMap, &
         staggerloc, &
         gridToFieldMap, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -6232,7 +6232,7 @@ contains
         integer, dimension(:), optional   :: distgridToGridMap
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -6251,8 +6251,8 @@ contains
         integer, dimension(2) :: lgridToFieldMap
         integer, dimension(2) :: lungriddedLBound 
         integer, dimension(2) :: lungriddedUBound 
-        integer, dimension(2) :: lmaxHaloLWidth
-        integer, dimension(2) :: lmaxHaloUWidth
+        integer, dimension(2) :: ltotalLWidth
+        integer, dimension(2) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij
@@ -6288,7 +6288,7 @@ contains
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -6304,7 +6304,7 @@ contains
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2)))
         call ESMF_FieldSetCommit(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -6316,7 +6316,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6440,7 +6440,7 @@ contains
         staggerloc, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
-        maxHaloLWidth, maxHaloUWidth, &
+        totalLWidth, totalUWidth, &
         fieldget)
 
         ! input arguments
@@ -6454,7 +6454,7 @@ contains
         type(ESMF_STAGGERLOC), optional   :: staggerloc
         integer, dimension(:), optional   :: gridToFieldMap
         integer, dimension(:), optional   :: ungriddedLBound, ungriddedUBound
-        integer, dimension(:), optional   :: maxHaloLWidth, maxHaloUWidth
+        integer, dimension(:), optional   :: totalLWidth, totalUWidth
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
@@ -6475,8 +6475,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: lmaxHaloLWidth
-        integer, dimension(7) :: lmaxHaloUWidth
+        integer, dimension(7) :: ltotalLWidth
+        integer, dimension(7) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -6534,7 +6534,7 @@ contains
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             totalLBound=flb, totalUBound=fub, &
             rc=localrc)
@@ -6588,13 +6588,13 @@ contains
             enddo
         endif
 
-        if(present(maxHaloLWidth)) then
-            l_mhlw(1:gdimCount) = maxHaloLWidth(1:gdimCount)
+        if(present(totalLWidth)) then
+            l_mhlw(1:gdimCount) = totalLWidth(1:gdimCount)
         else
             l_mhlw = 0
         endif
-        if(present(maxHaloUWidth)) then
-            l_mhuw(1:gdimCount) = maxHaloUWidth(1:gdimCount)
+        if(present(totalUWidth)) then
+            l_mhuw(1:gdimCount) = totalUWidth(1:gdimCount)
         else
             l_mhuw = 0
         endif
@@ -6610,7 +6610,7 @@ contains
         array = ESMF_ArrayCreate(farray, staggerdistgrid, ESMF_INDEX_DELOCAL, copyflag, &
             distgridToArrayMap, &
             undistLBound = ungriddedLBound, undistUBound = ungriddedUBound, &
-            totalLWidth=maxHaloLWidth, totalUWidth=maxHaloUWidth, & 
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, & 
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -6619,7 +6619,7 @@ contains
         ! create field
         field = ESMF_FieldCreate(grid, array, copyflag, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-            maxHaloLWidth=maxHaloLWidth, maxHaloUWidth=maxHaloUWidth, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -6641,7 +6641,7 @@ contains
             call ESMF_FieldGet(field, grid=grid1, array=array1, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6672,17 +6672,17 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
-            if(present(maxHaloLWidth)) then
-                do i = 1, size(maxHaloLWidth)
-                    if(lmaxHaloLWidth(i) .ne. maxHaloLWidth(i)) localrc = ESMF_FAILURE
+            if(present(totalLWidth)) then
+                do i = 1, size(totalLWidth)
+                    if(ltotalLWidth(i) .ne. totalLWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
-            if(present(maxHaloUWidth)) then
-                do i = 1, size(maxHaloUWidth)
-                    if(lmaxHaloUWidth(i) .ne. maxHaloUWidth(i)) localrc = ESMF_FAILURE
+            if(present(totalUWidth)) then
+                do i = 1, size(totalUWidth)
+                    if(ltotalUWidth(i) .ne. totalUWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -6729,7 +6729,7 @@ contains
             call ESMF_FieldGet(field1, grid=grid2, array=array2, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
                 ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-                maxHaloLWidth=lmaxHaloLWidth, maxHaloUWidth=lmaxHaloUWidth, &
+                totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -6760,17 +6760,17 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
-            if(present(maxHaloLWidth)) then
-                do i = 1, size(maxHaloLWidth)
-                    if(lmaxHaloLWidth(i) .ne. maxHaloLWidth(i)) localrc = ESMF_FAILURE
+            if(present(totalLWidth)) then
+                do i = 1, size(totalLWidth)
+                    if(ltotalLWidth(i) .ne. totalLWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
             endif
-            if(present(maxHaloUWidth)) then
-                do i = 1, size(maxHaloUWidth)
-                    if(lmaxHaloUWidth(i) .ne. maxHaloUWidth(i)) localrc = ESMF_FAILURE
+            if(present(totalUWidth)) then
+                do i = 1, size(totalUWidth)
+                    if(ltotalUWidth(i) .ne. totalUWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &

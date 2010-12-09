@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.6 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.6 2010/11/03 22:48:42 theurich Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -117,7 +117,7 @@
         startx = 2
         endx = 16
 
-        field = ESMF_FieldCreate(grid, fptr, maxHaloUWidth=(/1/), name="temperature", rc=rc)
+        field = ESMF_FieldCreate(grid, fptr, totalUWidth=(/1/), name="temperature", rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     else if(lpe == 3) then
         allocate(fptr(17), tmp_farray(17))
@@ -127,7 +127,7 @@
         startx = 2
         endx = 16
 
-        field = ESMF_FieldCreate(grid, fptr, maxHaloLWidth=(/1/), name="temperature", rc=rc)
+        field = ESMF_FieldCreate(grid, fptr, totalLWidth=(/1/), name="temperature", rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     else
         allocate(fptr(18), tmp_farray(18))
@@ -136,7 +136,7 @@
         endx = 17
 
         field = ESMF_FieldCreate(grid, fptr, &
-            maxHaloLWidth=(/1/), maxHaloUWidth=(/1/), name="temperature", rc=rc)
+            totalLWidth=(/1/), totalUWidth=(/1/), name="temperature", rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     endif
 

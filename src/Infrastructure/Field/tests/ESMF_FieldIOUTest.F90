@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.20 2010/12/08 05:40:42 theurich Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.21 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Create Field
   field_w=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
-           maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+           totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
            name="temperature",  rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create a field from grid and fortran dummy array"
@@ -169,7 +169,7 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
     ! Create Field with Halo
     field_t=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
-           maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,2/), &
+           totalLWidth=(/1,1/), totalUWidth=(/1,2/), &
            name="temperature",  rc=rc)
     if(rc.ne.ESMF_SUCCESS) then
       countfail = countfail + 1
@@ -461,7 +461,7 @@ program ESMF_FieldIOUTest
   if(rc /= ESMF_SUCCESS) finalrc = rc
   field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
     staggerLoc=ESMF_STAGGERLOC_EDGE1, &
-    maxHaloLWidth=(/1,1/), maxHaloUWidth=(/1,1/), rc=rc)
+    totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc
   call ESMF_FieldGet(field, farrayPtr=fptr, &
     totalLBound=tlb, totalUBound=tub, &

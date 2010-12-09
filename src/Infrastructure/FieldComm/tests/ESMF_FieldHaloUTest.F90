@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloUTest.F90,v 1.4 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldHaloUTest.F90,v 1.5 2010/12/09 05:33:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_FieldHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloUTest.F90,v 1.4 2010/11/03 22:48:42 theurich Exp $'
+    '$Id: ESMF_FieldHaloUTest.F90,v 1.5 2010/12/09 05:33:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -106,7 +106,7 @@ program ESMF_FieldHaloUTest
   write(name, *) "Field Create Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
-    maxHaloLWidth=(/2,2/), maxHaloUWidth=(/2,2/), rc=rc)
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
@@ -376,7 +376,7 @@ call ESMF_FieldPrint(field)
   write(name, *) "Field Create Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
-    maxHaloLWidth=(/2,2/), maxHaloUWidth=(/2,2/), rc=rc)
+    totalLWidth=(/2,2/), totalUWidth=(/2,2/), rc=rc)
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
