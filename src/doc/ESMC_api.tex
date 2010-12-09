@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.5 2010/12/09 16:31:22 svasquez Exp $
+% $Id: ESMC_api.tex,v 1.6 2010/12/09 17:20:53 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,9 @@ field = ESMC_FieldCreate("temp", &rc);
 \subsection{Deep and Shallow Classes}
 \label{sec:deepshallow}
 
-The ESMF contains two types of classes.  {\bf Deep} classes require
+The ESMF contains two types of classes. 
+
+{\bf Deep} classes require
 {\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()} calls.
 They take significant time to set up and should not be created
 in a time-critical portion of code.  Deep objects persist 
