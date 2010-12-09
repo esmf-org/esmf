@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.17 2010/12/03 05:57:39 theurich Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.18 2010/12/09 18:28:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.17 2010/12/03 05:57:39 theurich Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.18 2010/12/09 18:28:32 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -83,7 +83,8 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRedist - Execute a FieldBundle redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, routehandle, checkflag, rc)
+  subroutine ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, routehandle, &
+                           checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
