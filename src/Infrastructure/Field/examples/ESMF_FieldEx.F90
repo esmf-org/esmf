@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.25 2010/12/09 18:37:32 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.26 2010/12/09 18:41:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -516,8 +516,9 @@
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    allocate(farray7d2(flbound(1):fubound(1), flbound(2):fubound(2), flbound(3):fubound(3), &
-                       flbound(4):fubound(4), flbound(5):fubound(5), flbound(6):fubound(6), &
+    allocate(farray7d2(flbound(1):fubound(1), flbound(2):fubound(2), &
+		       flbound(3):fubound(3), flbound(4):fubound(4), &
+		       flbound(5):fubound(5), flbound(6):fubound(6), &
                        flbound(7):fubound(7)) )
 
     field7d2 = ESMF_FieldCreate(grid5d, farray7d2, ESMF_INDEX_DELOCAL, &
