@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.82 2010/09/16 21:11:34 svasquez Exp $ 
+# $Id: makefile,v 1.83 2010/12/09 19:10:20 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -24,15 +24,14 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldIOUTest \
 		RUN_ESMF_FieldStressUTest \
+		RUN_ESMF_FieldRegridXGUTest \
 		RUN_ESMC_FieldUTest
-#		RUN_ESMF_FieldRegridXGUTest \
 
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
                 RUN_ESMF_FieldRegridUTestUNI \
                 RUN_ESMF_FieldRegridCsrvUTestUNI \
                 RUN_ESMF_FieldArbGridUTestUNI \
                 RUN_ESMC_FieldUTestUNI
-#                RUN_ESMF_FieldRegridXGUTestUNI \
 
 #
 # check ESMF_TESTHARNESS_FIELD for default, 
@@ -87,10 +86,7 @@ RUN_ESMF_FieldRegridCsrvUTestUNI:
 	$(MAKE) TNAME=FieldRegridCsrv NP=1 ftest
 
 RUN_ESMF_FieldRegridXGUTest:
-	$(MAKE) TNAME=FieldRegridXG NP=4 ftest
-
-RUN_ESMF_FieldRegridXGUTestUNI:
-	$(MAKE) TNAME=FieldRegridXG NP=1 ftest
+	$(MAKE) TNAME=FieldRegridXG NP=2 ftest
 
 RUN_ESMF_FieldArbGridUTest:
 	$(MAKE) TNAME=FieldArbGrid NP=4 ftest
@@ -100,6 +96,7 @@ RUN_ESMF_FieldIOUTest:
 
 RUN_ESMF_FieldArbGridUTestUNI:
 	$(MAKE) TNAME=FieldArbGrid NP=1 ftest
+
 #
 # FieldStress
 #
