@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.25 2010/12/02 22:45:16 murphysj Exp $
+% $Id: Attribute_pack.tex,v 1.26 2010/12/09 22:13:20 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
@@ -102,7 +102,7 @@ There are many attributes that are used to describe components. There are curren
     \end{itemize}
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}}
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
      {\tt Description} & A multi-line description of the component. & N/A \\
@@ -136,7 +136,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt CompilerName} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
@@ -168,7 +168,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
@@ -194,7 +194,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Date} & The date of the citation. & N/A\\
@@ -232,7 +232,7 @@ There is currently only 1 predefined State-level Attribute package:
     \item Description: This package is used to define whether an ESMF State object is an Import State or Export State.   
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt Intent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history output. & Export,Import \\
@@ -272,7 +272,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the CF Extended Field package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
@@ -304,7 +304,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: ESG has the ability to list variables as either import or export variables. This should not be confused with the ESMF State Attribute Package, which has similiar attributes. This attribute is assigned to individual variables.   This package nests the CF Extended package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Intent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & Export,Import\\
@@ -330,7 +330,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: The CF standard for fields contains an optional standard\_name Attribute. Standard names are controlled vocabularies and not every variable in the earth system sciences contains a standard name. Because of this, ESMF implemented this optional Attribute in its own package. This package nests the CF General package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt StandardName} & The approved CF standard name for a variable if it exists. &  N/A\\
@@ -357,7 +357,7 @@ plications with powerful extraction, regridding, and display capabilities. The E
 red to describe fields.  
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
@@ -403,7 +403,7 @@ There are two grid attribute packages in ESMF.
     \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
 \end{itemize}
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
 {\tt CongruentTiles} & Indicates whether or not all the tiles contained within a grid mosaic are of the same size and shape. & True, False \\
@@ -441,7 +441,7 @@ There are two grid attribute packages in ESMF.
 \end{itemize}
 
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}|}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}|}
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
 {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& N/A\\
@@ -456,7 +456,7 @@ There are two grid attribute packages in ESMF.
 The following is an alphabetical list of all the attributes impletmented in ESMF, their definitions, and which packages they are contained within. A list of attributes by package exists in the following section. 
 
 
-\begin{tabular}{|p{8cm}|p{20cm}|p{10cm}}
+\begin{tabular}{|p{6cm}|p{10cm}|p{10cm}}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
      \hline\hline
