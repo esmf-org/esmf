@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.38 2010/12/09 20:54:09 svasquez Exp $
+! $Id: ESMF_LocStream.F90,v 1.39 2010/12/10 20:05:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.38 2010/12/09 20:54:09 svasquez Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.39 2010/12/10 20:05:31 svasquez Exp $'
 
 !==============================================================================
 !
@@ -2236,6 +2236,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !          Upon return this holds the upper bounds of the computational region.
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region
+!          \newline
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
@@ -2795,6 +2796,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 !          Upon return this holds the upper bounds of the exclusive region.
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region
+!	   \newline
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount}.
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the computational region.
@@ -2802,6 +2804,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 !          Upon return this holds the upper bounds of the computational region.
 !     \item[{[computationalCount]}]
 !          Upon return this holds the number of items in the computational region
+!	   \newline
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
