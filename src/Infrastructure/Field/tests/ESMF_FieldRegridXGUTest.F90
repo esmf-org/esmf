@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.9 2010/12/09 19:13:12 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.10 2010/12/10 14:23:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
         !------------------------------------------------------------------------
-        !EX_UTest
+        !EX_UTest_Multi_Proc_Only
         ! Create an field stress test
         call test_regridxg_const(rc)
         write(failMsg, *) ""
@@ -60,11 +60,11 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest
+        !EX_UTest_Multi_Proc_Only
         ! Create an field stress test
         call test_regridxg(rc)
         write(failMsg, *) ""
-        write(name, *) "Create xgrid and regrid through xgrid"
+        write(name, *) "Create xgrid and regrid through xgrid, variable src flux"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 #endif
