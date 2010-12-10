@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.178 2010/12/09 20:50:11 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.179 2010/12/10 19:59:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.178 2010/12/09 20:50:11 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.179 2010/12/10 19:59:06 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -7646,6 +7646,7 @@ end subroutine ESMF_GridGetDefault
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !     \item[{[exclusiveCount]}]
 !          Upon return this holds the number of items in the exclusive region per dimension
+!	   \newline
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
@@ -9668,6 +9669,7 @@ endif
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
 !     Upon return this holds the number of items in the exclusive region per dimension
+!     \newline
 !     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
 !     be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
@@ -12840,6 +12842,7 @@ endif
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
 !     Upon return this holds the number of items in the exclusive region per dimension
+!     \newline
 !     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
 !     be allocated to be of size equal to the item dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
