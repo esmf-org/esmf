@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.26 2010/12/09 18:41:30 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.27 2010/12/10 21:47:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -490,7 +490,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! allocate the 7d Fortran array based on retrieved total counts
-    allocate(farray7d(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
+    allocate(farray7d(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), &
+			fsize(6), fsize(7)))
 
     ! create the Field
     field7d = ESMF_FieldCreate(grid5d, farray7d, ESMF_INDEX_DELOCAL, &
