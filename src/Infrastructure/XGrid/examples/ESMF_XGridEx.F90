@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.19 2010/12/09 21:36:20 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.20 2010/12/10 20:19:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -116,7 +116,8 @@
     do i = 1, 2
         call ESMF_GridAddCoord(sideA(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
-        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+						terminationflag=ESMF_ABORT)
     enddo
 !EOC
 
