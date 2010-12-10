@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.26 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.27 2010/12/10 20:52:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -53,8 +53,9 @@
 
 !BOC
       ! initialize ESMF framework
-      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, defaultlogfilename="AlarmEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, &
+		    defaultlogfilename="AlarmEx.Log", &
+		    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
