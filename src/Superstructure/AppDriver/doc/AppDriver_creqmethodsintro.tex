@@ -1,4 +1,4 @@
-% $Id: AppDriver_creqmethodsintro.tex,v 1.2 2010/12/09 17:35:12 svasquez Exp $
+% $Id: AppDriver_creqmethodsintro.tex,v 1.3 2010/12/10 19:29:54 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -27,7 +27,8 @@ for the standard ESMF Component methods Initialize, Run, and Finalize.
 Finally, the Component library call {\tt ESMC\_<Grid/Cpl>CompSetVM()} can
 optionally be issues {\em before} calling
 {\tt ESMC\_<Grid/Cpl>CompSetServices()}. Similar to 
-{\tt ESMC\_<Grid/Cpl>CompSetServices()}, the \newline
+{\tt ESMC\_<Grid/Cpl>CompSetServices()}, the 
+\newline
 {\tt ESMC\_<Grid/Cpl>CompSetVM()}
 call requires a public entry point into the Component. It allows the Component
 to adjust certain aspects of its execution environment, i.e. its own VM, before
