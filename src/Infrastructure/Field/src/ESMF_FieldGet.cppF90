@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.58 2010/12/09 19:58:54 svasquez Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.59 2010/12/10 21:55:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.58 2010/12/09 19:58:54 svasquez Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.59 2010/12/10 21:55:33 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -630,7 +630,7 @@ contains
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[exclusiveCount]}] @\
-!   Upon return this holds the number of items in the exclusive region per dimension @\
+!   Upon return this holds the number of items in the exclusive region per dimension \newline @\
 !   (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must @\
 !   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
@@ -785,6 +785,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !     of the regions and their associated bounds and counts. 
 ! \item[{[exclusiveCount]}]
 !     Upon return this holds the number of items in the exclusive region per dimension
+!     \newline
 !     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
 !     be allocated to be of size equal to the field rank.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
