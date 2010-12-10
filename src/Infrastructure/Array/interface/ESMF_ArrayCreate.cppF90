@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.58 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.59 2010/12/10 20:48:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.58 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.59 2010/12/10 20:48:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -229,7 +229,7 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateFromPtr<rank><type><kind>(farrayPtr, & @\
-!   distgrid, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
+!   distgrid, keywordEnforcer, copyflag, distgridToArrayMap, computationalEdgeLWidth, & @\
 !   computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
 !   totalUWidth, name, rc) @\
@@ -237,6 +237,7 @@ contains
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -362,7 +363,7 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateFromPtr" @\
   function ESMF_ArrayCreateFromPtr##mrank##D##mtypekind(farrayPtr, & @\
-    distgrid, copyflag, distgridToArrayMap, & @\
+    distgrid, keywordEnforcer, copyflag, distgridToArrayMap, & @\
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
     totalUWidth, name, rc) @\
@@ -371,6 +372,7 @@ contains
 @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -600,7 +602,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 @\
     ! Call into conventional interface to create the Array object @\
     ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind = & @\
-      ESMF_ArrayCreate(farrayPtr, distgrid, copyflag, & @\
+      ESMF_ArrayCreate(farrayPtr, distgrid, copyflag=copyflag, & @\
       distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), & @\
       name=name, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\

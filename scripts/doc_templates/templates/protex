@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.15 2004/06/03 23:49:46 eschwab Exp $
+#  $Id: protex,v 1.16 2010/12/10 20:48:30 theurich Exp $
 #
 #BOP
 #
@@ -276,6 +276,10 @@ LINE:
 #    ---------------------------------------------------------
      while ( <InputFile> ) {
         chop;     # strip record separator
+        
+#       eliminate/replace keywordEnforcer arguments from API
+        s/keywordEnforcer, //g;
+        s/^[ ]*type\(ESMF_KeywordEnforcer\), optional:: keywordEnforcer.*$/ ---- Argument keyword syntax is required for the following arguments! ----/g;
 
 #       !PARAMETERS: really mean !ARGUMENTS:
 #       ------------------------------------

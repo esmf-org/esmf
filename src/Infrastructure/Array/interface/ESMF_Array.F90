@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.134 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.135 2010/12/10 20:48:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-      
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Array                 ! implemented in ESMF_ArrayCreateMod 
@@ -112,7 +112,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.134 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.135 2010/12/10 20:48:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -365,12 +365,13 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySet()
-  subroutine ESMF_ArraySetDefault(array, name, computationalLWidth, &
+  subroutine ESMF_ArraySetDefault(array, keywordEnforcer, name, computationalLWidth, &
     computationalUWidth, rc)
 
 !
 ! !ARGUMENTS:
     type(ESMF_Array),   intent(inout)           :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),   optional  :: name
     integer,            intent(in),   optional  :: computationalLWidth(:,:)
     integer,            intent(in),   optional  :: computationalUWidth(:,:)
@@ -460,12 +461,13 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySet()
-  subroutine ESMF_ArraySetPLocalDe(array, localDe, rimSeqIndex, rc)
+  subroutine ESMF_ArraySetPLocalDe(array, keywordEnforcer, localDe, rimSeqIndex, rc)
 
 !
 ! !ARGUMENTS:
     type(ESMF_Array),   intent(inout)           :: array
     integer,            intent(in)              :: localDe
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),   optional  :: rimSeqIndex(:)
     integer,            intent(out),  optional  :: rc
 

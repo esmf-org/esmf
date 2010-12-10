@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.107 2010/11/13 00:25:52 eschwab Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.108 2010/12/10 20:48:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -87,6 +87,15 @@
       integer, parameter :: ESMF_PATCHLEVEL    = 0
       character(*), parameter :: ESMF_VERSION_STRING = &
                                  "5.2.0 beta snapshot"
+
+!------------------------------------------------------------------------------
+!
+!    ! Keyword enforcement type
+
+     type ESMF_KeywordEnforcer
+       private
+       integer:: quiet
+     end type
 
 !------------------------------------------------------------------------------
 !
@@ -756,6 +765,8 @@
       public ESMF_ID_FIELDBUNDLE, ESMF_ID_GEOMBASE, ESMF_ID_XGRID
       public ESMF_ID_REGRID, ESMF_ID_LOCSTREAM, ESMF_ID_STATE
       public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
+
+      public ESMF_KeywordEnforcer
 
       public ESMF_Status, ESMF_Pointer, ESMF_TypeKind
       public ESMF_DataValue
