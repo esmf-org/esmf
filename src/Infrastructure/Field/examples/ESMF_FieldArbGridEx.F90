@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.11 2010/12/10 23:08:13 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.12 2010/12/10 23:36:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -181,7 +181,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create a Field on an arbitrarily distributed Grid with replicated dimensions & ungridded bounds}
+!\subsubsection{Create a Field on an arbitrarily distributed Grid with replicated dimensions \& ungridded bounds}
 !\label{sec:field:usage:createArbGridRep}
 !
 !  The next example is slightly more complicated in
