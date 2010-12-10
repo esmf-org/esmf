@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.34 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_MeshEx.F90,v 1.35 2010/12/10 20:13:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -732,8 +732,8 @@ program ESMF_MeshEx
 
 #ifdef ESMF_NETCDF
 !BOC
-   mesh = ESMF_MeshCreate(filename="data/ne4np4-pentagons.nc", filetype=ESMF_FILEFORMAT_SCRIP,  &
-            convert3D=.true., rc=localrc)
+   mesh = ESMF_MeshCreate(filename="data/ne4np4-pentagons.nc", &
+	   filetype=ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -790,8 +790,8 @@ program ESMF_MeshEx
 
 #ifdef ESMF_NETCDF
 !BOC
-   mesh = ESMF_MeshCreate(filename="data/ne4np4-esmf.nc", filetype=ESMF_FILEFORMAT_ESMFMESH, &
-            convert3D=.true., rc=localrc)
+   mesh = ESMF_MeshCreate(filename="data/ne4np4-esmf.nc", &
+            filetype=ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
