@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.115 2010/12/03 05:57:54 theurich Exp $
+! $Id: ESMF_Time.F90,v 1.116 2010/12/10 20:47:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.115 2010/12/03 05:57:54 theurich Exp $'
+      '$Id: ESMF_Time.F90,v 1.116 2010/12/10 20:47:02 svasquez Exp $'
 
 !==============================================================================
 !
@@ -582,6 +582,7 @@
 !
 !     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
 !     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_r8}, and
+!     \newline
 !     {\tt dayOfYear\_intvl} described below, valid calendars are Gregorian,
 !     Julian, No Leap, 360 Day and Custom calendars.  Not valid for
 !     Julian Day, Modified Julian Day, or No Calendar. \\

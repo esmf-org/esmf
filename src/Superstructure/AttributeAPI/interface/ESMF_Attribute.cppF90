@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.71 2010/12/03 05:57:59 theurich Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.72 2010/12/10 20:42:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.71 2010/12/03 05:57:59 theurich Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.72 2010/12/10 20:42:47 svasquez Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1541,7 +1541,9 @@ contains
 !     Requires the third party Xerces C++ XML Parser library to be installed,
 !     v3.1.0 or better.  For more details, see the "ESMF Users Guide",
 !     "Building and Installing the ESMF, Third Party Libraries, Xerces" and
-!     the website "http://xerces.apache.org/xerces-c".  Also please see the
+!     the website 
+!     \newline
+!     "http://xerces.apache.org/xerces-c".  Also please see the
 !     section on Attribute I/O,~\ref{io:attributeio}.
 !
 !     Supported values for <object> are:
@@ -1849,7 +1851,9 @@ contains
 !     Attribute I/O,~\ref{io:attributeio}.
 !
 !     Note:  For an object type of {\tt ESMF\_GridComp}, convention='WaterML',
-!     purpose='TimeSeries', and attwriteflag=ESMF\_ATTWRITE\_XML, an XML file
+!     purpose='TimeSeries', and 
+!     \newline
+!     attwriteflag=ESMF\_ATTWRITE\_XML, an XML file
 !     conforming to a hydrologic standard called WaterML will be written.  See
 !     the following for more information:
 !    
