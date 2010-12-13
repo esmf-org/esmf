@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.36 2010/12/13 22:07:41 svasquez Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.37 2010/12/13 22:11:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.36 2010/12/13 22:07:41 svasquez Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.37 2010/12/13 22:11:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -154,7 +154,7 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  ! Testing ESMF_ArrayOperator(==)(array, array)
+  ! Testing ESMF_ArrayOperator(==)()
   write(name, *) "Array equality after destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   arrayEquality = (arrayAlias==array)
