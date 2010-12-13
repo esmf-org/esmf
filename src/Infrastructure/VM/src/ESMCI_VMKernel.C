@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.18 2010/12/08 16:20:48 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.19 2010/12/13 21:48:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -441,11 +441,8 @@ void VMK::finalize(int finalizeMpi){
   pthread_mutex_destroy(pth_mutex2);
 #endif
   delete pth_mutex2;
-#ifdef ESMF_MPIUNI
-  delete sendChannel[0].shmp;
-#endif
   if (npets==1)
-    delete sendChannel[0].shmp;
+    delete sendChannel[0].shmp; // covers mpiuni and mpi 1PET VM
   delete [] sendChannel;
   delete [] recvChannel;  
   while (*ipshmTop != NULL){
