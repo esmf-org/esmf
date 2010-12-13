@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.59 2010/12/10 20:48:31 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.60 2010/12/13 02:54:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -81,6 +81,7 @@ module ESMF_ArrayCreateMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
   public ESMF_ArrayCreate
   public ESMF_ArrayDestroy
 
@@ -100,7 +101,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.59 2010/12/10 20:48:31 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.60 2010/12/13 02:54:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -137,6 +138,81 @@ module ESMF_ArrayCreateMod
 !EOPI 
   end interface
 
+!===============================================================================
+! ArrayOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayAssignment(=) - Array assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   array1 = array2
+!
+! !ARGUMENTS:
+!   type(ESMF_Array) :: array1
+!   type(ESMF_Array) :: array2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt array1} as an alias to
+!   the same ESMF Array as {\tt array2}. If {\tt array2} is an invalid 
+!   Array object then {\tt array1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array1]
+!     The {\tt ESMF\_Array} object on the left hand side of the assigment.
+!   \item[array2]
+!     The {\tt ESMF\_Array} object on the right hand side of the assigment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayOperator(==) - Array equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (array1 == array2) then ... endif
+!             OR
+!   result = (array1 == array2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Array), intent(in) :: array1
+!   type(ESMF_Array), intent(in) :: array2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt array1} and {\tt array2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF Array object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array1]
+!     The {\tt ESMF\_Array} object on the left hand side of the equality
+!     operation.
+!   \item[array2]
+!     The {\tt ESMF\_Array} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_ArrayEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -147,75 +223,59 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-!===============================================================================
-! ArrayOperator() interfaces
-!===============================================================================
-
-! -------------------------- ESMF-public method -------------------------------
+!-------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayAssignment(=)Doc"
-!BOP
-! !IROUTINE: ESMF_ArrayAssignment(=) - Array assignment operator
+^define ESMF_METHOD "ESMF_ArrayEQ()"
+!BOPI
+! !IROUTINE:  ESMF_ArrayEQ - Compare two Calendars for equality
 !
 ! !INTERFACE:
-!  interface assignment(=)
-!  array1 = array2
-!
-! !ARGUMENTS:
-!    type(ESMF_Array), intent(inout) :: array1
-!    type(ESMF_Array), intent(inout) :: array2
-!
-!
-! !DESCRIPTION:
-!     Set {\tt array1} equal to {\tt array2}.  This is the default Fortran operator, which
-!     is effectively creates an alias to the original {\tt ESMF\_Array} in this
-!     case.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[array1]
-!          The {\tt ESMF\_Array} to be set.
-!     \item[array2]
-!          The {\tt ESMF\_Array} to be copied.
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+  function ESMF_ArrayEQ(array1, array2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_ArrayEQ
 
-! -------------------------- ESMF-public method -------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayOperator(==)Doc"
-!BOP
-! !IROUTINE: ESMF_ArrayOperator(==) - Array equality operator
-!
-! !INTERFACE:
-!  interface operator(==)
-!  if (array1 == array2) then ... endif
-!             OR
-!  result = (array1 == array2)
-! !RETURN_VALUE
-!    logical :: result
-!
 ! !ARGUMENTS:
-!    type(ESMF_Array), intent(inout) :: array1
-!    type(ESMF_Array), intent(inout) :: array2
-!
-!
+    type(ESMF_Array), intent(in) :: array1
+    type(ESMF_Array), intent(in) :: array2
+
 ! !DESCRIPTION:
-!     Test if {\tt array1} is equal to {\tt array2}.  This is the default Fortran operator, which
-!     will return true if the {\tt ESMF\_Array}s are effectively the same, and false
-!     otherwise.
+!   Test if both {\tt array1} and {\tt array2} alias the same ESMF Array 
+!   object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[array1]
-!          First {\tt ESMF\_Array} in comparison.
-!     \item[array2]
-!          Second {\tt ESMF\_Array} in comparison.
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ainit1, ainit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    ainit1 = ESMF_ArrayGetInit(array1)
+    ainit2 = ESMF_ArrayGetInit(array2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (ainit1 .eq. ESMF_INIT_CREATED .and. &
+      ainit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_ArrayEQ = array1%this .eq. array2%this
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(ainit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(ainit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_ArrayEQ = (localrc1.eq.localrc2) .and. (array1%this .eq. array2%this)
+    endif
+
+  end function ESMF_ArrayEQ
+!-------------------------------------------------------------------------------
+
 
 !===============================================================================
 ! ArrayCreate() interfaces

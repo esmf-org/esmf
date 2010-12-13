@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.31 2010/12/10 20:48:31 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.32 2010/12/13 02:54:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.31 2010/12/10 20:48:31 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.32 2010/12/13 02:54:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@ program ESMF_ArrayCreateGetUTest
   type(ESMF_VM):: vm
   integer:: petCount, localPet
   type(ESMF_ArraySpec):: arrayspec, arrayspec2
-  type(ESMF_Array):: array, arrayCpy
+  type(ESMF_Array):: array, arrayAlias, arrayCpy
   type(ESMF_DistGrid):: distgrid, distgrid2
   real(ESMF_KIND_R8)      :: farray1D(10)
   real(ESMF_KIND_R8)      :: farray2D(10,10)
@@ -69,7 +69,8 @@ program ESMF_ArrayCreateGetUTest
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
   integer, allocatable:: computationalLWidth(:,:), computationalUWidth(:,:)
-  
+  logical:: arrayEquality
+    
   integer:: count
   
   
@@ -127,12 +128,41 @@ program ESMF_ArrayCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySet(array, name="MyArrayNewName", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array equality before assignment Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arrayEquality = (arrayAlias.eq.array)
+  call ESMF_Test(.not.arrayEquality, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array assignment and equality Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arrayAlias = array
+  arrayEquality = (arrayAlias.eq.array)
+  call ESMF_Test(arrayEquality, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arrayEquality = (arrayAlias.eq.array)
+  call ESMF_Test(.not.arrayEquality, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Double ArrayDestroy through alias Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayDestroy(arrayAlias, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
