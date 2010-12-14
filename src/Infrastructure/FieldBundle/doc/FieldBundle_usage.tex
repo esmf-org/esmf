@@ -1,4 +1,4 @@
-% $Id: FieldBundle_usage.tex,v 1.7 2010/12/09 17:43:29 svasquez Exp $
+% $Id: FieldBundle_usage.tex,v 1.8 2010/12/14 22:18:17 svasquez Exp $
 
 %\subsection{Use and Examples}
 
@@ -8,9 +8,8 @@ notes on FieldBundle methods.
 
 \subsubsection{Create a FieldBundle}
 
-After creating multiple Fields, a FieldBundle
-can be created by passing a list of the Fields into the 
-method \newline
+After creating multiple Fields by calling {\tt ESMF\_FieldCreate()}, a FieldBundle
+can be created by passing a list of the Fields into the method 
 {\tt ESMF\_FieldBundleCreate()}.  The FieldBundle will contain
 references to the Fields.  An empty FieldBundle can also be created
 and Fields added one at a time or in groups.
