@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.6 2010/12/09 17:20:53 svasquez Exp $
+% $Id: ESMC_api.tex,v 1.7 2010/12/14 16:12:57 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -66,7 +66,8 @@ ESMF classes, so where necessary the user needs to write restart
 values themselves.
 
 \item {\tt ESMC\_<Class>Validate()}, for determining whether a class is 
-internally consistent. \newline
+internally consistent.
+\newline
 For example, {\tt ESMC\_FieldValidate()} checks 
 whether the Array and Grid associated with a Field are consistent.
 
@@ -134,7 +135,7 @@ methods that must bracket the use of ESMF within an application.
 They manage the resources required to run ESMF and shut it down
 gracefully.  ESMF does not support restarts in the same executable, i.e.
 {\tt ESMC\_Initialize()} should not be called after {\tt ESMC\_Finalize()}.
-\item {\tt ESMC\_<Type>CompInitialize()}, {\tt ESMC\_<Type>CompRun()}, and \newline
+\item {\tt ESMC\_<Type>CompInitialize()}, {\tt ESMC\_<Type>CompRun()}, and 
 {\tt ESMC\_<Type>CompFinalize()} are component methods that are used at the 
 highest level within ESMF.  {\tt <Type>} may be {\tt <Grid>}, for 
 Gridded Components such as oceans or atmospheres, or
