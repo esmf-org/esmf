@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.26 2010/12/14 17:11:37 svasquez Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.27 2010/12/14 17:33:58 svasquez Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -20,9 +20,9 @@ If a the source or destination grid is logically rectangular, then {\tt ESMF\_Gr
 coordinates of the input grid are put into the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}). 
 In addition, the corner coordinates are also put into the corner stagger location 
 ({\tt ESMF\_STAGGERLOC\_CORNER}), for conservative regridding. The 2D coordinates are mapped
-into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} by calling 
-{\tt ESMF\_FieldRegridStore()}.   The 
-{\tt ESMF\_MeshCreate()}~\ref{sec:example:UnstructFromFile} method is used to create an ESMF\_Mesh object, if the 
+into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} while calling 
+the method, {\tt ESMF\_FieldRegridStore()}.   The method
+{\tt ESMF\_MeshCreate()}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
 source or destination grid is a cubed sphere grid or an unstructured grid. When making this call, 
 the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates.
 {\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indicies table representing the interpolation matrix. 
