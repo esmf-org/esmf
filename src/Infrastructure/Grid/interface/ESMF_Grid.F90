@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.180 2010/12/10 22:30:21 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.181 2010/12/14 23:49:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.180 2010/12/10 22:30:21 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.181 2010/12/14 23:49:24 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -7351,10 +7351,10 @@ end subroutine ESMF_GridGetDefault
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
-!     Upon return this holds the number of items in the exclusive region per dimension
-!     \newline
-!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
-!      be allocated to be of size equal to the Grid dimCount.
+!     Upon return this holds the number of items,{\tt exclusiveUBound-exclusiveLBound+1},
+!     in the exclusive region per dimension.
+!     {\tt exclusiveCount} must
+!     be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalLBound]}]
@@ -7646,9 +7646,9 @@ end subroutine ESMF_GridGetDefault
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the coord dimCount.
 !     \item[{[exclusiveCount]}]
-!          Upon return this holds the number of items in the exclusive region per dimension
-!	   \newline
-!          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!          Upon return this holds the number of items, {\tt exclusiveUBound-exclusiveLBound+1},
+!          in the exclusive region per dimension.
+!          {\tt exclusiveCount} must
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
@@ -9669,9 +9669,9 @@ endif
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
-!     Upon return this holds the number of items in the exclusive region per dimension
-!     \newline
-!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!     Upon return this holds the number of items, {\tt exclusiveUBound-exclusiveLBound+1},
+!     in the exclusive region per dimension.
+!     {\tt exclusiveCount} must
 !     be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
@@ -12842,9 +12842,9 @@ endif
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[exclusiveCount]}]
-!     Upon return this holds the number of items in the exclusive region per dimension
-!     \newline
-!     (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
+!     Upon return this holds the number of items, {\tt exclusiveUBound-exclusiveLBound+1},
+!     in the exclusive region per dimension.
+!     {\tt exclusiveCount} must
 !     be allocated to be of size equal to the item dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
@@ -16303,9 +16303,9 @@ endif
 !      Note that one of the checks that the Grid validate does
 !      is the Grid status. Currently, the validate will return
 !      an error if the grid is not at least 
-!      {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}. This means 
+!      {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}. This means that
 !      if a Grid was created with {\tt ESMF\_GridCreateEmpty}
-!      it must also have been finished with \newline
+!      it must also have been finished with
 !      {\tt ESMF\_GridSetCommitShapeTile}
 !      to be valid. If a Grid was created with another create
 !      call it should automatically have the correct status level
