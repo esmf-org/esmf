@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.116 2010/12/10 20:47:02 svasquez Exp $
+! $Id: ESMF_Time.F90,v 1.117 2010/12/14 06:58:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.116 2010/12/10 20:47:02 svasquez Exp $'
+      '$Id: ESMF_Time.F90,v 1.117 2010/12/14 06:58:42 eschwab Exp $'
 
 !==============================================================================
 !
@@ -115,13 +115,14 @@
 !     time1 = time2
 !
 ! !ARGUMENTS:
-!     type(ESMF_Time), intent(out) :: time1
-!     type(ESMF_Time), intent(in)  :: time2
+!     type(ESMF_Time) :: time1
+!     type(ESMF_Time) :: time2
 ! 
 ! !DESCRIPTION:
 !     Set {\tt time1} equal to {\tt time2}.  This is the default Fortran
 !     assignment, which creates a complete, independent copy of {\tt time2} 
-!     as {\tt time1}.
+!     as {\tt time1}.  If {\tt time2} is an invalid {\tt ESMF\_Time} object then
+!     {\tt time1} will be equally invalid after the assignment.
 !
 !     The arguments are:
 !     \begin{description} 
