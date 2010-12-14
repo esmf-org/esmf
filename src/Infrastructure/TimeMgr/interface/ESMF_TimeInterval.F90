@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.106 2010/12/03 05:57:54 theurich Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.107 2010/12/14 07:00:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.106 2010/12/03 05:57:54 theurich Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.107 2010/12/14 07:00:08 eschwab Exp $'
 
 !==============================================================================
 !
@@ -137,13 +137,15 @@
 !     timeinterval1 = timeinterval2
 !
 ! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(out) :: timeinterval1
-!     type(ESMF_TimeInterval), intent(in)  :: timeinterval2
+!     type(ESMF_TimeInterval) :: timeinterval1
+!     type(ESMF_TimeInterval) :: timeinterval2
 ! 
 ! !DESCRIPTION:
 !     Set {\tt timeinterval1} equal to {\tt timeinterval2}.  This is the default
 !     Fortran assignment, which creates a complete, independent copy of
-!     {\tt timeinterval2} as {\tt timeinterval1}.
+!     {\tt timeinterval2} as {\tt timeinterval1}.  If {\tt timeinterval2} is an
+!     invalid {\tt ESMF\_TimeInterval} object then {\tt timeinterval1} will be
+!     equally invalid after the assignment.
 !
 !     The arguments are:
 !     \begin{description} 
@@ -469,6 +471,8 @@
 ! !INTERFACE:
       interface operator(*)
 !     product = timeinterval * multiplier
+!                   OR
+!     product = multiplier * timeinterval
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
@@ -482,8 +486,6 @@
 !     multiply a {\tt timeinterval} by an integer {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
 !
-!     Commutative complement to overloaded operator (*) below.
-!     
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]        
@@ -495,42 +497,6 @@
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdTI   ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2     
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:   ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by an integer
-!
-! !INTERFACE:
-!     interface operator(*)
-!     product = multiplier * timeinterval
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: product
-!
-! !ARGUMENTS:
-!     integer(ESMF_KIND_I4),   intent(in) :: multiplier
-!     type(ESMF_TimeInterval), intent(in) :: timeinterval
-!
-! !DESCRIPTION:
-!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to      
-!     multiply a {\tt timeinterval} by an integer {\tt multiplier},
-!     and return the product as an {\tt ESMF\_TimeInterval}. 
-!
-!     Commutative complement to overloaded operator (*) above.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[multiplier]
-!          The integer multiplier.
-!     \item[timeinterval]
-!          The multiplicand.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdIT   ! internal implementation
 !
 ! !REQUIREMENTS:
@@ -545,6 +511,8 @@
 ! !INTERFACE:
 !     interface operator(*)
 !     product = timeinterval * multiplier
+!                   OR
+!     product = multiplier * timeinterval
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
@@ -557,8 +525,6 @@
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
 !     multiply a {\tt timeinterval} by a fraction {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
-!
-!     Commutative complement to overloaded operator (*) below.
 !
 !     The arguments are:
 !     \begin{description}
@@ -571,44 +537,6 @@
 !EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdTF   ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
-!
-!------------------------------------------------------------------------------
-!BOPI
-! TODO: when implemented, change to BOP/EOP
-!
-! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
-!
-! !INTERFACE:
-!     interface operator(*)
-!     product = multiplier * timeinterval
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: product
-!
-! !ARGUMENTS:
-!     type(ESMF_Fraction),     intent(in) :: multiplier
-!     type(ESMF_TimeInterval), intent(in) :: timeinterval
-!
-! !DESCRIPTION:
-!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeinterval} by a fraction {\tt multiplier},
-!     and return the product as an {\tt ESMF\_TimeInterval}.
-!
-!     Commutative complement to overloaded operator (*) above.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[multiplier]
-!          The fraction multiplier.
-!     \item[timeinterval]
-!          The multiplicand.
-!     \end{description}
-!
-!EOPI
-! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdFT   ! internal implementation
 !
 ! !REQUIREMENTS:
@@ -623,6 +551,8 @@
 ! !INTERFACE:
 !     interface operator(*)
 !     product = timeinterval * multiplier
+!                   OR
+!     product = multiplier * timeinterval
 !
 ! !RETURN VALUE:
 !     type(ESMF_TimeInterval) :: product
@@ -635,8 +565,6 @@
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
 !     multiply a {\tt timeinterval} by a double precision {\tt multiplier},
 !     and return the product as an {\tt ESMF\_TimeInterval}.
-!
-!     Commutative complement to overloaded operator (*) below.
 !
 !     The arguments are:
 !     \begin{description}
@@ -649,44 +577,6 @@
 !EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdTR   ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
-!
-!------------------------------------------------------------------------------
-!BOPI
-! TODO: when implemented, change to BOP/EOP
-!
-! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
-!
-! !INTERFACE:
-!     interface operator(*)
-!     product = multiplier * timeinterval
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: product
-!
-! !ARGUMENTS:
-!     real(ESMF_KIND_R8),      intent(in) :: multiplier
-!     type(ESMF_TimeInterval), intent(in) :: timeinterval
-!
-! !DESCRIPTION:
-!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
-!     multiply a {\tt timeinterval} by a double precision {\tt multiplier},
-!     and return the product as an {\tt ESMF\_TimeInterval}.
-!
-!     Commutative complement to overloaded operator (*) above.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[multiplier]
-!          The double precision multiplier.
-!     \item[timeinterval]
-!          The multiplicand.
-!     \end{description}
-!
-!EOPI
-! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdRT   ! internal implementation
 !
 ! !REQUIREMENTS:
