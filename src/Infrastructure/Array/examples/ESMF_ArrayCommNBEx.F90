@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommNBEx.F90,v 1.8 2010/12/14 18:29:04 svasquez Exp $
+! $Id: ESMF_ArrayCommNBEx.F90,v 1.9 2010/12/14 19:11:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -201,7 +201,7 @@ program ESMF_ArrayCommNBEx
 ! {\tt ESMF\_COMM\_NBTESTFINISH} until 
 ! {\tt finishedflag} comes back with a value of {\tt .true.}. Such a loop
 ! allows other pieces of user code to be executed between the calls. 
-! Alternatively a call with {\tt ESMF\_COMM\_NBWAITFINISH} can be used to
+! A call with {\tt ESMF\_COMM\_NBWAITFINISH} can alternatively be used to
 ! block until the exchange has locally finished.
 !
 ! {\em Noteworthy property.}
@@ -209,11 +209,11 @@ program ESMF_ArrayCommNBEx
 ! with {\tt commflag} set to 
 ! {\tt ESMF\_COMM\_NBTESTFINISH} or
 ! {\tt ESMF\_COMM\_NBWAITFINISH} on a specific RouteHandle without there 
-! being an outstanding non-blocking exchange. In fact, it is not
+! being an outstanding non-blocking exchange. As a matter of fact, it is not
 ! required that there was ever a call made with {\tt ESMF\_COMM\_NBSTART} for
 ! the RouteHandle. In these cases the calls made with
 ! {\tt ESMF\_COMM\_NBTESTFINISH} or {\tt ESMF\_COMM\_NBWAITFINISH}  will
-! simply return immediatly (with {\tt finishedflag} set to {\tt .true.}).
+! simply return immediately (with {\tt finishedflag} set to {\tt .true.}).
 !
 ! {\em Noteworthy property.}
 ! It is fine to mix blocking and non-blocking invokations of the same 
