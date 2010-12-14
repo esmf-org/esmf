@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.24 2010/12/10 23:48:50 svasquez Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.25 2010/12/14 16:51:44 svasquez Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -18,9 +18,8 @@ values. This file based regrid weight generation application is fully parallel. 
 Internally this application uses the ESMF public API to generate the interpolation weights.
 If a the source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
 coordinates of the input grid are put into the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}). 
-In addition, for conservative regridding, the corner coordinates are also put into the corner stagger location 
-\newline
-({\tt ESMF\_STAGGERLOC\_CORNER}). The 2D coordinates are mapped
+In addition, the corner coordinates are also put into the corner stagger location 
+({\tt ESMF\_STAGGERLOC\_CORNER}), for conservative regridding. The 2D coordinates are mapped
 into 3D Cartesian coordiantes by setting the {\tt regridScheme} flag to {\tt ESMF\_REGRID\_SCHEME\_FULL3D} while calling 
 {\tt ESMF\_FieldRegridStore()}.   The method
 {\tt ESMF\_MeshCreate()}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
