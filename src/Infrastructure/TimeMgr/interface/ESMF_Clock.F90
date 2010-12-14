@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.100 2010/12/03 05:57:54 theurich Exp $
+! $Id: ESMF_Clock.F90,v 1.101 2010/12/14 06:56:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.100 2010/12/03 05:57:54 theurich Exp $'
+      '$Id: ESMF_Clock.F90,v 1.101 2010/12/14 06:56:31 eschwab Exp $'
 
 !==============================================================================
 !
@@ -119,12 +119,14 @@
 !     clock1 = clock2
 !
 ! !ARGUMENTS:
-!     type(ESMF_Clock), intent(out) :: clock1
-!     type(ESMF_Clock), intent(in)  :: clock2
+!     type(ESMF_Clock) :: clock1
+!     type(ESMF_Clock) :: clock2
 ! 
 ! !DESCRIPTION:
 !     Set {\tt clock1} equal to {\tt clock2}.  This is the default Fortran
 !     assignment, which creates an alias to the original {\tt ESMF\_Clock}.
+!     If {\tt clock2} is an invalid {\tt ESMF\_Clock} object then
+!     {\tt clock1} will be equally invalid after the assignment.
 !
 !     The arguments are:
 !     \begin{description} 
@@ -163,9 +165,14 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Clock} class.
-!     Compare two clocks for equality; return true if equal,
-!     false otherwise.  Comparison is based on IDs, which are distinct
+!     Compare two clocks for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise.  Comparison is based on IDs, which are distinct
 !     for newly created clocks and identical for clocks created as copies.
+!
+!     If either side of the equality test is not in the 
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged.  However, this 
+!     does not affect the return value, which is {\tt .true.} when both 
+!     sides are in the {\em same} status.
 !
 !     The arguments are:
 !     \begin{description}
@@ -203,9 +210,14 @@
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Clock} class.
-!     Compare two clocks for inequality; return true if not equal,
-!     false otherwise.  Comparison is based on IDs, which are distinct
+!     Compare two clocks for inequality; return {\tt .true.} if not equal,
+!     {\tt .false.} otherwise.  Comparison is based on IDs, which are distinct
 !     for newly created clocks and identical for clocks created as copies.
+!
+!     If either side of the equality test is not in the 
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged.  However, this 
+!     does not affect the return value, which is {\tt .true.} when both sides
+!     do not have the {\em same} status.
 !
 !     The arguments are:
 !     \begin{description}
