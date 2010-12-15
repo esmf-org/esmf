@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.39 2010/12/10 20:05:31 svasquez Exp $
+! $Id: ESMF_LocStream.F90,v 1.40 2010/12/15 00:18:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.39 2010/12/10 20:05:31 svasquez Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.40 2010/12/15 00:18:50 svasquez Exp $'
 
 !==============================================================================
 !
@@ -2008,7 +2008,7 @@ contains
 !     \item[{[computationalUBound]}]
 !          Upon return this holds the upper bounds of the computational region.
 !     \item[{[computationalCount]}]
-!          Upon return this holds the number of items in the computational region
+!          Upon return this holds the number of items in the computational region \newline
 !          (i.e. {\tt computationalUBound-computationalLBound+1}). 
 !     \item[{[totalLBound]}]
 !          Upon return this holds the lower bounds of the total region.
