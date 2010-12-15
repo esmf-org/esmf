@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.45 2010/12/15 20:09:33 svasquez Exp $
+% $Id: ESMF_api.tex,v 1.46 2010/12/15 20:26:26 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -47,7 +47,13 @@ initializes variables where appropriate.  It is always written as a
 Fortran function that returns a derived type instance of the class.
 
 \item 
-\begin{sloppypar}{\tt ESMF\_<Class>Set()} and {\tt ESMF\_<Class>Get()}, for setting and retrieving a particular item or flag.  In general, these methods are overloaded for all cases where the item can be manipulated as a name/value pair.  If identifying the item requires more than a name, or if the class is of sufficient complexity that overloading in this way would result in an overwhelming number of options, we define specific {\tt ESMF\_<Class>Set<Something>()} and {\tt ESMF\_<Class>Get<Something>()} interfaces.
+\begin{sloppypar}
+{\tt ESMF\_<Class>Set()} and {\tt ESMF\_<Class>Get()}, for setting and 
+retrieving a particular item or flag.  In general, these methods are overloaded 
+for all cases where the item can be manipulated as a name/value pair.  If identifying 
+the item requires more than a name, or if the class is of sufficient complexity that 
+overloading in this way would result in an overwhelming number of options, we define 
+specific {\tt ESMF\_<Class>Set<Something>()} and {\tt ESMF\_<Class>Get<Something>()} interfaces.
 \end{sloppypar}
 
 \item {\tt ESMF\_<Class>Add()} and 
