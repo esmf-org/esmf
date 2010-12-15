@@ -1,4 +1,4 @@
-% $Id: VM_desc.tex,v 1.15 2010/12/10 20:57:37 svasquez Exp $
+% $Id: VM_desc.tex,v 1.16 2010/12/15 17:42:52 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -20,6 +20,5 @@ The basic elements of a VM are called PETs, which stands for Persistent Executio
 The resource management functions of the VM class become visible when a component, or the driver code, creates sub-components. Section \ref{sec:AppDriverSetVM} discusses this aspect from the Superstructure 
 perspective and provides links to the relevant Component examples in the documentation.
 
-There are two parts to resource management, the parent and the child. When the parent component creates a child component, the parent VM object provides the resources on which the child is created with {\tt ESMF\_GridCompCreate()} or {\tt ESMF\_CplCompCreate()}. The optional {\tt petList} argument to these calls limits the resources that the parent gives to a specific child. The child component, on the other hand, may specify - during its optional 
-\newline
+There are two parts to resource management, the parent and the child. When the parent component creates a child component, the parent VM object provides the resources on which the child is created with {\tt ESMF\_GridCompCreate()} or {\tt ESMF\_CplCompCreate()}. The optional {\tt petList} argument to these calls limits the resources that the parent gives to a specific child. The child component, may specify - during its optional 
 {\tt ESMF\_<Grid/Cpl>CompSetVM()} method - how it wants to arrange the inherited resources in its own VM. After this, all standard ESMF methods of the Component, including {\tt ESMF\_<Grid/Cpl>CompSetServices()}, will execute in the child VM. Notice that the {\tt ESMF\_<Grid/Cpl>CompSetVM()} routine, although part of the child Component, must execute {\em before} the child VM has been started up. It runs in the parent VM context. The child VM is created and started up just before the user-written set services routine, specified as an argument to {\tt ESMF\_<Grid/Cpl>CompSetServices()}, is entered.
