@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.81 2010/11/09 22:42:06 eschwab Exp $
+! $Id: ESMF_StateUTest.F90,v 1.82 2010/12/15 00:58:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.81 2010/11/09 22:42:06 eschwab Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.82 2010/12/15 00:58:41 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -56,6 +56,12 @@
       type(ESMF_ArraySpec)  :: arrayspec
       type(ESMF_DistGrid)   :: distgrid
       type(ESMF_Array)      :: array, array2, arrayGDP, testarray
+
+      type(ESMF_Array)      :: array10, array11, array12
+      type(ESMF_ArrayBundle):: abund10, abund11
+      type(ESMF_Array)      :: alist10(1), alist11(1)
+      type(ESMF_Field)      :: field10, field11, field12
+      type(ESMF_State)      :: state10, state11, state12
 
 #if defined (ESMF_TESTEXHAUSTIVE)
       integer :: itemcount
@@ -961,7 +967,215 @@
       call  ESMF_StateDestroy(state1, rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, &
         ESMF_SRCLINE)
-      print *, "rc = ", rc
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace on Array
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test create an empty State
+      state10 = ESMF_StateCreate (stateName="stateContainer",  &
+        statetype=ESMF_STATE_EXPORT, rc=rc)
+      write (failmsg, *) "Creating state10 for replacement"
+      write (name, *) "Creating state10 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test create an Array for replacement
+
+      array10 = ESMF_ArrayCreate (name="temperatures",  &
+        arrayspec=arrayspec, distgrid=distgrid, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+      write (failmsg, *) "Creating array10 for replacement"
+      write (name, *) "Creating array10 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacement where none exists (should fail)
+      call ESMF_StateReplace (state10, array10, rc=rc)
+      write (failmsg, *) "Replaced an Array which did not exist"
+      write (name, *) "Replace an Array which does not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding in the Array
+      call ESMF_StateAdd (state10, array10, rc=rc)
+      write (failmsg, *) "Adding an Array into a State"
+      write (name, *) "Add an Array which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test create a 2nd Array for replacement, but has same name
+      ! as the 1st Array
+      array11 = ESMF_ArrayCreate (name="temperatures",  &
+        arrayspec=arrayspec, distgrid=distgrid, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+      write (failmsg, *) "Creating array11 for replacement"
+      write (name, *) "Creating array11 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacing the 1st Array with the 2nd one
+      call ESMF_StateReplace (state10, array11, rc=rc)
+      write (failmsg, *) "Replacing a pre-existing Array in a State"
+      write (name, *) "Replace an Array which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace on ArrayBundle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test create an ArrayBundle for replacement
+      alist10(1) = array10
+      abund10 = ESMF_ArrayBundleCreate (name='temp bundle', arrayList=alist10, rc=rc)
+      write (failmsg,*) "Creating ArrayBundle for replacement"
+      write (name, *) "Creating ArrayBundle for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacement where none exists (should fail)
+      call ESMF_StateReplace (state10, abund10, rc=rc)
+      write (failmsg, *) "Replaced an ArrayBundle which did not exist"
+      write (name, *) "Replace an ArrayBundle which does not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding in the ArrayBundle
+      call ESMF_StateAdd (state10, abund10, rc=rc)
+      write (failmsg, *) "Adding an ArrayBundle into a State"
+      write (name, *) "Add an ArrayBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test create a 2nd ArrayBundle for replacement, but has same name
+      ! as the 1st ArrayBundle
+      alist11(1) = array11
+      abund11 = ESMF_ArrayBundleCreate (name='temp bundle', arrayList=alist11, rc=rc)
+      write (failmsg,*) "Creating ArrayBundle11 for replacement"
+      write (name, *) "Creating ArrayBundle11 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+
+      !EX_UTest
+      ! Test replacing the 1st ArrayBundle with the 2nd one
+      call ESMF_StateReplace (state10, abund11, rc=rc)
+      write (failmsg, *) "Replacing a pre-existing ArrayBundle in a State"
+      write (name, *) "Replace an ArrayBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace on Field
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test create an Field for replacement
+
+      field10 = ESMF_FieldCreateEmpty (name="pressures",  &
+        rc=rc)
+      write (failmsg, *) "Creating field10 for replacement"
+      write (name, *) "Creating field10 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacement where none exists (should fail)
+      call ESMF_StateReplace (state10, field10, rc=rc)
+      write (failmsg, *) "Replaced an Field which did not exist"
+      write (name, *) "Replace an Field which does not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding in the Field
+      call ESMF_StateAdd (state10, field10, rc=rc)
+      write (failmsg, *) "Adding an Field into a State"
+      write (name, *) "Add an Field which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test create a 2nd Field for replacement, but has same name
+      ! as the 1st Field
+      field11 = ESMF_FieldCreateEmpty (name="pressures",  &
+        rc=rc)
+      write (failmsg, *) "Creating field11 for replacement"
+      write (name, *) "Creating field11 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacing the 1st Field with the 2nd one
+      call ESMF_StateReplace (state10, field11, rc=rc)
+      write (failmsg, *) "Replacing a pre-existing Field in a State"
+      write (name, *) "Replace an Field which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace on FieldBundle
+      !------------------------------------------------------------------------
+
+      !EX______UTest
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace on nested State
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test create a State for replacement
+
+      state11 = ESMF_StateCreate (stateName="stateContainer2",  &
+        statetype=ESMF_STATE_EXPORT, rc=rc)
+      write (failmsg, *) "Creating state11 for replacement"
+      write (name, *) "Creating state11 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacement where none exists (should fail)
+      call ESMF_StateReplace (state10, nestedState=state11, rc=rc)
+      write (failmsg, *) "Replacing a State which did not exist"
+      write (name, *) "Replace a State which does not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding in the State - making a nested State
+      call ESMF_StateAdd (state10, nestedState=state11, rc=rc)
+      write (failmsg, *) "Adding a nested State into a State"
+      write (name, *) "Add a nested State which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test create a 2nd State for replacement, but has same name
+      ! as the 1st State
+      state12 = ESMF_StateCreate (stateName="stateContainer2",  &
+        statetype=ESMF_STATE_EXPORT, rc=rc)
+      write (failmsg, *) "Creating state12 for replacement"
+      write (name, *) "Creating state12 for replacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacing the 1st State with the 2nd one
+      call ESMF_StateReplace (state10, nestedState=state12, rc=rc)
+      write (failmsg, *) "Replacing a pre-existing nested State in a State"
+      write (name, *) "Replace a State which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
 
 #if 0
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
