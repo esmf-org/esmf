@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.123 2010/12/10 21:06:02 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.124 2010/12/15 17:59:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.123 2010/12/10 21:06:02 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.124 2010/12/15 17:59:14 svasquez Exp $"
 
 !==============================================================================
 
@@ -762,9 +762,10 @@ module ESMF_VMMod
 !   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
 !   \newline
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   This method is overloaded for: 
 !   \newline
+!   {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !   \newline
 !
@@ -1984,9 +1985,10 @@ module ESMF_VMMod
 !   object.
 !   \newline
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   This method is overloaded for: 
 !   \newline
+!   {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
 !   \newline
 !
@@ -2547,9 +2549,10 @@ module ESMF_VMMod
 !   array on the {\tt root} PET.
 !   \newline
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
+!   This method is overloaded for: 
 !   \newline
+!   {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !   \newline
 !
@@ -3519,9 +3522,10 @@ module ESMF_VMMod
 !   object.
 !   \newline
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   This method is overloaded for: 
 !   \newline
+!   {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
 !   \newline
 !
@@ -4272,9 +4276,10 @@ module ESMF_VMMod
 !   (including {\tt root}).
 !   \newline
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   This method is overloaded for: 
 !   \newline
+!   {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
 !   \newline
 !
@@ -5298,9 +5303,10 @@ module ESMF_VMMod
 !   {\tt ESMF\_VM} object. The {\tt sendData} and {\tt recvData} arrays must be
 !   disjoint!\newline
 !
-!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
+!   This method is overloaded for: 
 !   \newline
+!   {\tt ESMF\_TYPEKIND\_I4},
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
 !   \newline
 !
