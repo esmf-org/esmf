@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.124 2010/12/15 17:59:14 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.125 2010/12/15 18:45:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.124 2010/12/15 17:59:14 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.125 2010/12/15 18:45:02 svasquez Exp $"
 
 !==============================================================================
 
@@ -1989,7 +1989,9 @@ module ESMF_VMMod
 !   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
-!   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
+!   \newline
+!   {\tt ESMF\_TYPEKIND\_CHARACTER}.
 !   \newline
 !
 !   The arguments are:
@@ -5307,7 +5309,9 @@ module ESMF_VMMod
 !   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
-!   {\tt ESMF\_TYPEKIND\_LOGICAL}, {\tt ESMF\_TYPEKIND\_CHARACTER}.
+!   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
+!   \newline
+!   {\tt ESMF\_TYPEKIND\_CHARACTER}.
 !   \newline
 !
 !   The arguments are:
