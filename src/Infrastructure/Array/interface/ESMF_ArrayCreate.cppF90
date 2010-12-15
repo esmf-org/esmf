@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.60 2010/12/13 02:54:32 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.61 2010/12/15 22:43:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -82,6 +82,7 @@ module ESMF_ArrayCreateMod
 
 ! - ESMF-public methods:
   public operator(==)
+  public operator(/=)
   public ESMF_ArrayCreate
   public ESMF_ArrayDestroy
 
@@ -101,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.60 2010/12/13 02:54:32 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.61 2010/12/15 22:43:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -214,6 +215,47 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayOperator(/=) - Array not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (array1 == array2) then ... endif
+!             OR
+!   result = (array1 == array2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Array), intent(in) :: array1
+!   type(ESMF_Array), intent(in) :: array2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt array1} and {\tt array2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF Array object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[array1]
+!     The {\tt ESMF\_Array} object on the left hand side of the non-equality
+!     operation.
+!   \item[array2]
+!     The {\tt ESMF\_Array} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_ArrayNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -274,6 +316,44 @@ contains
     endif
 
   end function ESMF_ArrayEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayNE()"
+!BOPI
+! !IROUTINE:  ESMF_ArrayNE - Compare two Calendars for non-equality
+!
+! !INTERFACE:
+  function ESMF_ArrayNE(array1, array2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_ArrayNE
+
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in) :: array1
+    type(ESMF_Array), intent(in) :: array2
+
+! !DESCRIPTION:
+!   Test if both {\tt array1} and {\tt array2} alias the same ESMF Array 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ainit1, ainit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_ArrayNE = .not.ESMF_ArrayEQ(array1, array2)
+
+  end function ESMF_ArrayNE
 !-------------------------------------------------------------------------------
 
 
