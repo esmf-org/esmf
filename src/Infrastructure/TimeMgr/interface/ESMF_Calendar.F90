@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.116 2010/12/14 06:58:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.117 2010/12/15 23:53:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.116 2010/12/14 06:58:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.117 2010/12/15 23:53:40 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -731,11 +731,13 @@
 !          daysPerYearDd (see below) to specify a days-per-year calendar
 !          for any planetary body.  Default = 0.  (Not implemented yet).
 !     \item[{[daysPerYearDn]}]
+!          \begin{sloppypar}
 !          Integer numerator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear (see above) and daysPerYearDd (see below) to
 !          specify a days-per-year calendar for any planetary body.
 !          Default = 0.  (Not implemented yet).
+!          \end{sloppypar}
 !     \item[{[daysPerYearDd]}]
 !          Integer denominator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
