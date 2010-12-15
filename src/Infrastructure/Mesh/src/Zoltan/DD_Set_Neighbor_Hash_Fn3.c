@@ -7,8 +7,8 @@
 /*****************************************************************************
  * CVS File Information :
  *    $RCSfile: DD_Set_Neighbor_Hash_Fn3.c,v $
- *    $Author: dneckels $
- *    $Date: 2007/11/28 16:13:42 $
+ *    $Author: w6ws $
+ *    $Date: 2010/12/15 02:56:26 $
  *    Revision: 1.4 $
  ****************************************************************************/
 
@@ -31,7 +31,7 @@ extern "C" {
 static unsigned int dd_nh3 (ZOLTAN_ID_PTR gid, int gid_length,
  unsigned int nproc) ;
 
-static int remainder ;
+static int remaindr ;
 static int average ;
 static int breakpt ;
 static int total_ ;
@@ -62,8 +62,8 @@ int Zoltan_DD_Set_Neighbor_Hash_Fn3 (
 
    total_    = total ;
    average   = total / dd->nproc ;
-   remainder = total % dd->nproc ;
-   breakpt   = (average+1) * remainder ;
+   remaindr  = total % dd->nproc ;
+   breakpt   = (average+1) * remaindr ;
 
    dd->hash    = dd_nh3 ;
    dd->cleanup = NULL ;                 /* no need to free anything */
@@ -80,7 +80,7 @@ static unsigned int dd_nh3 (ZOLTAN_ID_PTR gid, int gid_length,
    if (id < breakpt)
       return  id/(average+1) ;
    if (id < total_)
-      return remainder + (id-breakpt)/average ;
+      return remaindr + (id-breakpt)/average ;
 
    return 0 ;                    /* error, gid is out of range */
    }
