@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.44 2010/12/08 21:42:54 svasquez Exp $
+% $Id: ESMF_options.tex,v 1.45 2010/12/15 22:13:52 svasquez Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -157,6 +157,7 @@ Valid values are:
          mode guarantees that when the method returns all PET-local data
          transfers, both in-bound and out-bound, have finished. 
 \item [ESMF\_COMM\_NBSTART]
+         \begin{sloppypar}
          Start executing a precomputed communication pattern in non-blocking
          mode. When a method returns from being called in this mode, it
          guarantees that all PET-local out-bound data has been transferred.
@@ -165,8 +166,8 @@ Valid values are:
          unsafe to access these elements until a call in
          {\tt ESMF\_COMM\_NBTESTFINISH} mode has been issued and has returned
          with {\tt finishedflag} equal to .true., or a call in
-
          {\tt ESMF\_COMM\_NBWAITFINISH} mode has been issued and has returned.
+         \end{sloppypar}
 \item [ESMF\_COMM\_NBTESTFINISH]
          Test whether the transfer of data of a precomputed communication
          pattern, started with {\tt ESMF\_COMM\_NBSTART}, has completed.
