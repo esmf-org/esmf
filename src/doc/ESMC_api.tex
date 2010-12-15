@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.7 2010/12/14 16:12:57 svasquez Exp $
+% $Id: ESMC_api.tex,v 1.8 2010/12/15 19:35:18 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -65,13 +65,12 @@ and write restart methods have not yet been implemented for most
 ESMF classes, so where necessary the user needs to write restart 
 values themselves.
 
+\begin{sloppypar}
 \item {\tt ESMC\_<Class>Validate()}, for determining whether a class is 
-internally consistent.
-\newline
-For example, {\tt ESMC\_FieldValidate()} checks 
+internally consistent.  For example, {\tt ESMC\_FieldValidate()} checks 
 whether the Array and Grid associated with a Field are consistent.
-
 \end{itemize}
+\end{sloppypar}
 
 {\bf EXAMPLE}
 
