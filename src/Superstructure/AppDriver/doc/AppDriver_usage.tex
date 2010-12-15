@@ -1,4 +1,4 @@
-% $Id: AppDriver_usage.tex,v 1.17 2010/12/15 22:44:48 svasquez Exp $
+% $Id: AppDriver_usage.tex,v 1.18 2010/12/15 22:57:48 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -17,11 +17,9 @@ application to be treated as a sub-Component of another, larger
 application if desired.  When a simple application is organized in this fashion 
 the standard AppDriver can probably be used without much modification.  
 
-\begin{sloppypar}
 Examples of program organization using the AppDriver can be found in the 
 {\tt src/Superstructure/AppDriver} directory.  A set of subdirectories 
 within the AppDriver directory follows the naming convention:
-\end{sloppypar}
 \begin{verbatim}
 <seq|concur>_<pairwise|hub>_<f|c>driver_<spmd|mpmd>
 \end{verbatim}
