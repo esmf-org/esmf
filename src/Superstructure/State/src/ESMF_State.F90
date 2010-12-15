@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.225 2010/12/08 22:16:15 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.226 2010/12/15 00:57:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,6 +76,7 @@ module ESMF_StateMod
 
       public ESMF_StateAdd
       public ESMF_StateGet
+!      public ESMF_StateIsReconcileNeeded
 !      public ESMF_StateRemove
       public ESMF_StateReplace
 
@@ -101,7 +102,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.225 2010/12/08 22:16:15 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.226 2010/12/15 00:57:38 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -498,7 +499,6 @@ module ESMF_StateMod
       type(ESMF_ArrayBundle) :: temp_list(1)
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2
       type(ESMF_Logical) :: linkChange
-      logical :: localreplaceflag
       integer :: localrc
 
       ! check input variables
@@ -508,11 +508,6 @@ module ESMF_StateMod
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-
-      localreplaceflag = .false.
-      if (present (replaceflag)) then
-        localreplaceflag = replaceflag
-      end if
 
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -3952,7 +3947,7 @@ module ESMF_StateMod
 !EOPI
 !------------------------------------------------------------------------------
 
-    call ESMF_StateAdd (state, nestedState=State, &
+    call ESMF_StateAdd (state, nestedState=nestedState, &
                         proxyflag=.false.,  &
                         replaceflag=.true., &
                         rc=rc)
@@ -4717,7 +4712,7 @@ module ESMF_StateMod
               atodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing item " // trim (rhname) // " was not found", &
+                                      "existing RouteHandle '" // trim (rhname) // "' not found", &
                                       ESMF_CONTEXT, rc)) then
                 deallocate (atodo, stat=memstat)
                 return
@@ -4954,7 +4949,7 @@ module ESMF_StateMod
               atodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing item " // trim (aname) // " was not found", &
+                                      "existing Array '" // trim (aname) // "' not found", &
                                       ESMF_CONTEXT, rc)) then
                 deallocate (atodo, stat=memstat)
                 return
@@ -5189,7 +5184,7 @@ module ESMF_StateMod
               atodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing item " // trim (aname) // " was not found", &
+                                      "existing ArrayBundle '" // trim (aname) // "' not found", &
                                       ESMF_CONTEXT, rc)) then
                 deallocate (atodo, stat=memstat)
                 return
@@ -5422,7 +5417,7 @@ module ESMF_StateMod
               ftodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing item " // trim (fname) // " was not found", &
+                                      "existing Field '" // trim (fname) // "' not found", &
                                       ESMF_CONTEXT, rc)) then
                 deallocate (ftodo, stat=memstat)
                 return
@@ -6028,7 +6023,7 @@ module ESMF_StateMod
           return
         endif
    
-        call c_ESMC_GetName(stypep%base, sname, localrc)
+        call c_ESMC_GetName(states(i)%statep%base, sname, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) then
@@ -6056,7 +6051,7 @@ module ESMF_StateMod
               stodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing item " // trim (sname) // " was not found", &
+                                      "existing nested State '" // trim (sname) // "' not found", &
                                       ESMF_CONTEXT, rc)) then
                 deallocate (stodo, stat=memstat)
                 return
