@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.38 2010/10/15 05:58:44 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.39 2010/12/16 06:52:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.38 2010/10/15 05:58:44 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.39 2010/12/16 06:52:38 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -653,7 +653,7 @@ extern "C" {
   }
   capname.resize(capname.find_last_not_of(" ")+1);
 
-  // Set the attribute on the object.
+  // Remove the attribute package from the object.
   status = (**base).root.AttPackRemove(cconv, cpurp, cobj, capname);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
