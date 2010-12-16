@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.13 2010/11/12 06:58:35 eschwab Exp $
+// $Id: ESMCI_Calendar.C,v 1.14 2010/12/16 06:59:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.13 2010/11/12 06:58:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.14 2010/12/16 06:59:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -2223,7 +2223,24 @@ int Calendar::count=0;
       return(false);
     }
 
-    return(calendarType == calendar.calendarType);
+    // if custom calendars, check properties for equality;
+    // return false as soon as inequality is known, otherwise return true ...
+    if (calendarType          == ESMC_CAL_CUSTOM && 
+        calendar.calendarType == ESMC_CAL_CUSTOM) {
+      if (monthsPerYear != calendar.monthsPerYear) return(false);
+      for (int i=0; i<monthsPerYear; i++) {
+        if (daysPerMonth[i] != calendar.daysPerMonth[i]) return(false);
+      }
+      if (secondsPerDay  != calendar.secondsPerDay)  return(false);
+      if (secondsPerYear != calendar.secondsPerYear) return(false);
+      if (daysPerYear.d  != calendar.daysPerYear.d)  return(false);
+      if (daysPerYear.dN != calendar.daysPerYear.dN) return(false);
+      if (daysPerYear.dD != calendar.daysPerYear.dD) return(false);
+      return(true);  // custom calendars are equal
+    } else {
+      // ... else just check calendar type
+      return(calendarType == calendar.calendarType);
+    }
 
 }  // end Calendar::operator==
 
@@ -2289,7 +2306,24 @@ int Calendar::count=0;
       return(false);
     }
 
-    return(calendarType != calendar.calendarType);
+    // if custom calendars, check properties for equality;
+    // return true as soon as inequality is known, otherwise return false ...
+    if (calendarType          == ESMC_CAL_CUSTOM && 
+        calendar.calendarType == ESMC_CAL_CUSTOM) {
+      if (monthsPerYear != calendar.monthsPerYear) return(true);
+      for (int i=0; i<monthsPerYear; i++) {
+        if (daysPerMonth[i] != calendar.daysPerMonth[i]) return(true);
+      }
+      if (secondsPerDay  != calendar.secondsPerDay)  return(true);
+      if (secondsPerYear != calendar.secondsPerYear) return(true);
+      if (daysPerYear.d  != calendar.daysPerYear.d)  return(true);
+      if (daysPerYear.dN != calendar.daysPerYear.dN) return(true);
+      if (daysPerYear.dD != calendar.daysPerYear.dD) return(true);
+      return(false);  // custom calendars are equal
+    } else {
+      // ... else just check calendar type
+      return(calendarType != calendar.calendarType);
+    }
 
 }  // end Calendar::operator!=
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.58 2010/12/08 07:00:49 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.59 2010/12/16 06:59:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.58 2010/12/08 07:00:49 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.59 2010/12/16 06:59:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -65,8 +65,8 @@
       ! instantiate a calendar
       type(ESMF_Calendar) :: no_leapCalendar, modifiedJulianDayCalendar, &
 		             julianDayCalendar, gregorianCalendar1, julianCalendar
-      type(ESMF_Calendar) :: customCalendar, esmf_360dayCalendar, &
-                             gregorianCalendar2
+      type(ESMF_Calendar) :: customCalendar, customCalendar2, &
+                             esmf_360dayCalendar, gregorianCalendar2
       type(ESMF_CalendarType) :: cal_type1, cal_type2, cal_type
 
       ! instantiate a clock 
@@ -829,6 +829,58 @@
       call ESMF_CalendarValidate(customCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(name, *) "Calendar equality of custom Calendars Test"
+      write(failMsg, *) "Returned not equal"
+      customCalendar2 = ESMF_CalendarCreate("CustomCalendar2", &
+                                          daysPerMonth=days_per_month, &
+					secondsPerDay=86400, &
+					daysPerYear=360, &
+					daysPerYearDn=1, &
+					daysPerYearDd=1, rc=rc)
+      call ESMF_Test((customCalendar.eq.customCalendar2 .and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_CalendarOperator(/=)(calendar1,calendar2)
+      write(name, *) "Calendar inequality of custom Calendars Test"
+      write(failMsg, *) "Returned not equal"
+      call ESMF_Test((.not.(customCalendar.ne.customCalendar2) .and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_CalendarDestroy(customCalendar2, rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_CalendarOperator(/=)(calendar1,calendar2)
+      write(name, *) "Calendar inequality of custom Calendars Test"
+      write(failMsg, *) "Returned equal"
+      customCalendar2 = ESMF_CalendarCreate("CustomCalendar2", &
+                                          daysPerMonth=days_per_month, &
+					secondsPerDay=20000, &
+					daysPerYear=360, &
+					daysPerYearDn=1, &
+					daysPerYearDd=1, rc=rc)
+      call ESMF_Test((customCalendar.ne.customCalendar2 .and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Testing ESMF_CalendarOperator(==)(calendar1,calendar2)
+      write(name, *) "Calendar equality of custom Calendars Test"
+      write(failMsg, *) "Returned equal"
+      call ESMF_Test((.not.(customCalendar.eq.customCalendar2) .and. &
+                      rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_CalendarDestroy(customCalendar2, rc)
       call ESMF_CalendarDestroy(customCalendar, rc)
 
       ! ----------------------------------------------------------------------------
