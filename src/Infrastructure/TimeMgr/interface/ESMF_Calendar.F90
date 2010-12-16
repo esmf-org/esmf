@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.117 2010/12/15 23:53:40 svasquez Exp $
+! $Id: ESMF_Calendar.F90,v 1.118 2010/12/16 04:11:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.117 2010/12/15 23:53:40 svasquez Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.118 2010/12/16 04:11:13 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -935,11 +935,13 @@
 !          an intercalation.  For other calendars, it is the number of days in
 !          every year.  (Not implemented yet).
 !     \item[{[daysPerYearDn]}]
+!          \begin{sloppypar}
 !          Integer fractional number of days per year (numerator).
 !          For calendars with intercalations, daysPerYearDn/daysPerYearDd is
 !          the average fractional number of days per year (e.g. 25/100 for
 !          Julian 4-year intercalation).  For other calendars, it is zero.
 !          (Not implemented yet).
+!          \end{sloppypar}
 !     \item[{[daysPerYearDd]}]
 !          Integer fractional number of days per year (denominator).  See
 !          daysPerYearDn above.  (Not implemented yet).
