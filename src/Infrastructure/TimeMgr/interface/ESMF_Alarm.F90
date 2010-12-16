@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.96 2010/12/14 06:56:31 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.97 2010/12/16 06:55:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.96 2010/12/14 06:56:31 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.97 2010/12/16 06:55:06 eschwab Exp $'
 
 !==============================================================================
 !
@@ -222,7 +222,7 @@
 !     If either side of the equality test is not in the 
 !     {\tt ESMF\_INIT\_CREATED} status an error will be logged.  However, this 
 !     does not affect the return value, which is {\tt .true.} when both sides
-!     do not have the {\em same} status.
+!     are {\em not} in the {\em same} status.
 !
 !     The arguments are:
 !     \begin{description}
