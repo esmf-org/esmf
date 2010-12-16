@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2010/11/11 00:48:34 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2010/12/16 06:17:35 w6ws Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -186,6 +186,6 @@ ESMF_CXXLINKOPTS += -Wl,--enable-auto-import
 ############################################################
 # Shared library options
 #
-ESMF_SL_SUFFIX         = dll
+ESMF_SL_SUFFIX         = dll.a
 ESMF_SL_LIBOPTS       += -shared
 ESMF_SL_LIBLIBS       += -lgfortran
