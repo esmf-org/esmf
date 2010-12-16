@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.118 2010/12/15 00:47:23 svasquez Exp $
+! $Id: ESMF_Time.F90,v 1.119 2010/12/16 06:56:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.118 2010/12/15 00:47:23 svasquez Exp $'
+      '$Id: ESMF_Time.F90,v 1.119 2010/12/16 06:56:23 eschwab Exp $'
 
 !==============================================================================
 !
@@ -273,9 +273,9 @@
 !     type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Overloads the (==) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} and {\tt time2} represent the same instant in time, and 
-!     false otherwise.
+!     Overloads the (==) operator for the {\tt ESMF\_Time} class to return 
+!     {\tt .true.} if {\tt time1} and {\tt time2} represent the same instant 
+!     in time, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -312,9 +312,9 @@
 !     type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Overloads the (/=) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} and {\tt time2} do not represent the same instant in time,
-!     and false otherwise.
+!     Overloads the (/=) operator for the {\tt ESMF\_Time} class to return 
+!     {\tt .true.} if {\tt time1} and {\tt time2} do not represent the same 
+!     instant in time, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -351,8 +351,9 @@
 !     type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Overloads the (<) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is earlier in time than {\tt time2}, and false otherwise.
+!     Overloads the (<) operator for the {\tt ESMF\_Time} class to return 
+!     {\tt .true.} if {\tt time1} is earlier in time than {\tt time2}, and 
+!     {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -389,9 +390,9 @@
 !     type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Overloads the (<=) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is earlier in time or the same time as {\tt time2}, and 
-!     false otherwise.
+!     Overloads the (<=) operator for the {\tt ESMF\_Time} class to return 
+!     {\tt .true.} if {\tt time1} is earlier in time or the same time as 
+!     {\tt time2}, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -428,8 +429,9 @@
 !     type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Overloads the (>) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is later in time than {\tt time2}, and false otherwise.
+!     Overloads the (>) operator for the {\tt ESMF\_Time} class to return 
+!     {\tt .true.} if {\tt time1} is later in time than {\tt time2}, and 
+!     {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -466,9 +468,9 @@
 !     type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Overloads the (>=) operator for the {\tt ESMF\_Time} class to return true
-!     if {\tt time1} is later in time or the same time as {\tt time2}, and 
-!     false otherwise.
+!     Overloads the (>=) operator for the {\tt ESMF\_Time} class to return 
+!     {\tt .true.} if {\tt time1} is later in time or the same time as 
+!     {\tt time2}, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
