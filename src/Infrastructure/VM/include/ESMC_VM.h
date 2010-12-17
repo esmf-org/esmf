@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.57 2010/10/04 22:33:25 svasquez Exp $
+// $Id: ESMC_VM.h,v 1.58 2010/12/17 17:25:08 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,10 +115,12 @@ ESMC_VM ESMC_VMGetCurrent(
 //
 // !DESCRIPTION:
 //
+// \begin{sloppypar}
 //  Get the {\tt ESMC\_VM} object of the current execution context. Calling
 //  {\tt ESMC\_VMGetCurrent()} within an ESMF Component, will return the
 //  same VM object as {\tt ESMC\_GridCompGet(..., vm=vm, ...)} or
 //  {\tt ESMC\_CplCompGet(..., vm=vm, ...)}. 
+// \end{sloppypar}
 //
 //  The main purpose of providing {\tt ESMC\_VMGetCurrent()} is to simplify ESMF
 //  adoption in legacy code. Specifically, code that uses {\tt MPI\_COMM\_WORLD}
