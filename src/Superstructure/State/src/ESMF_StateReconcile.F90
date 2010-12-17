@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.84 2010/12/03 05:57:59 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.85 2010/12/17 03:55:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.84 2010/12/03 05:57:59 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.85 2010/12/17 03:55:46 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -249,6 +249,11 @@
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
     endif
+
+    ! Only clear the reconcileneeded flag at this State level.
+    ! Otherwise, there would be a problem with nested States that
+    ! are aliased into other States.
+    state%statep%reconcileneededflag = .false.
 
     if (present(rc)) rc = ESMF_SUCCESS
 

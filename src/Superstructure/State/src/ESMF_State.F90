@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.226 2010/12/15 00:57:38 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.227 2010/12/17 03:55:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_StateMod
 
       public ESMF_StateAdd
       public ESMF_StateGet
-!      public ESMF_StateIsReconcileNeeded
+      public ESMF_StateIsReconcileNeeded
 !      public ESMF_StateRemove
       public ESMF_StateReplace
 
@@ -102,7 +102,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.226 2010/12/15 00:57:38 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.227 2010/12/17 03:55:46 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3400,6 +3400,115 @@ module ESMF_StateMod
 
       end function ESMF_StateIsNeeded
 #endif
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateIsReconcileNeeded"
+!BOP
+! !IROUTINE: ESMF_StateIsReconcileNeeded -- Return logical true if reconciliation needed
+!
+! !INTERFACE:
+  function ESMF_StateIsReconcileNeeded(state, collectiveflag, vm, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_StateIsReconcileNeeded
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(in)            :: state
+    logical,          intent(in),  optional :: collectiveflag
+    type(ESMF_VM),    intent(in),  optional :: vm
+    integer,          intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Returns true if the {\tt state} needs to be reconciled in order
+!   to be coherent across PETs.  By default, this is a local call.
+!   Optionally, the {\tt collectiveflag} may be set to collectively
+!   determine whether other PETs in the VM may need to be reconciled.
+!
+!   The arguments are:
+!   \begin{description}     
+!   \item[state]
+!     {\tt ESMF\_State} to query.
+!   \item[{[collectiveflag]}]
+!     Perform a collective style call across all PETs in the VM.
+!   \item[vm]
+!     The current {\tt ESMF\_VM} (virtual machine).  All PETs in this
+!     {\tt ESMF\_VM} will exchange information about objects which might
+!     only be known to one or more PETs, and ensure all PETs in this VM
+!     have a consistent view of the object list in this {\tt ESMF\_State}.
+!     Required when {\tt collectiveflag} is set to {\tt .true.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    logical :: localrecflag
+    integer :: localrc
+    integer :: commsend, commrecv
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
+    localrecflag = is_rec_needed_worker (state%statep)
+
+    if (present (collectiveflag)) then
+      if (collectiveflag) then
+
+        if (.not. present (vm)) then
+          localrc = ESMF_FAILURE
+          if (ESMF_LogFoundError(localrc, &
+                                    "VM is required for collective inquiry", &
+                                    ESMF_CONTEXT, rc)) return
+        end if
+
+        commsend = merge (1, 0, localrecflag)
+        call ESMF_VMAllReduce (vm=vm,  &
+            sendData=commsend, recvData=commrecv, reduceflag=ESMF_SUM,  &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        localrecflag = commrecv /= 0
+      end if
+    end if
+
+    ESMF_StateIsReconcileNeeded = localrecflag
+    if (present (rc)) rc = ESMF_SUCCESS
+
+  contains
+
+    recursive function is_rec_needed_worker (sp1) result (is_rec_needed)
+      type(ESMF_StateClass), intent(in) :: sp1
+      logical :: is_rec_needed
+
+      type(ESMF_StateItem) , pointer :: nextitem1
+      integer :: i1
+
+    ! Default return this levels flag
+
+      is_rec_needed = sp1%reconcileneededflag
+      if (is_rec_needed) return
+
+    ! Then search nested States
+
+      do, i1 = 1, sp1%datacount
+        nextitem1 => sp1%datalist(i1)
+        if (nextitem1%otype == ESMF_STATEITEM_STATE) then
+          is_rec_needed =  &
+              is_rec_needed_worker (sp1%datalist(i1)%datap%spp)
+          if (is_rec_needed) return
+        end if
+      end do
+
+    end function is_rec_needed_worker
+
+  end function ESMF_StateIsReconcileNeeded
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StatePrint"
@@ -3549,8 +3658,11 @@ module ESMF_StateMod
        end if
 
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,'(1x,4a,i0)') nestr, "    status: ", trim(msgbuf),  &
+       write (ESMF_IOstdout,'(1x,4a,i0)') nestr,  &
+           "    status: ", trim(msgbuf),  &
            ", object count: ", sp%datacount
+       write (ESMF_IOstdout,'(1x,2a,l)')  nestr,  &
+           "    reconcile needed: ", sp%reconcileneededflag
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
        call c_ESMC_BasePrint(sp%base, level, "brief", localrc)
@@ -3682,6 +3794,75 @@ module ESMF_StateMod
         if (present(rc)) rc = ESMF_SUCCESS
         end subroutine ESMF_StateRead
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateRemove"
+!BOPI
+! !IROUTINE: ESMF_StateRemove - Remove an item from a State
+!
+! !INTERFACE:
+  subroutine ESMF_StateRemove (state, itemName, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)          :: state
+    character(*),     intent(in)             :: itemName
+    integer,          intent(out),  optional :: rc
+!     
+! !DESCRIPTION:
+!      Remove an existing reference to a an item by a {\tt state}.
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!      The {\tt ESMF\_State} to which <item>s will be replaced.
+! \item[itemName]
+!      The name of the item to be removed.  This is a reference only.
+!      The item itself is unchanged.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to remove the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      Since <item>s can be added to multiple containers, it remains
+!      the user's responsibility to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+
+    type(ESMF_StateItem), pointer :: dataitem
+    logical :: exists
+    integer :: localrc
+    character(len=ESMF_MAXSTR) :: errmsg
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+    exists = ESMF_StateClassFindData (state%statep,  &
+                                       dataname=itemName, expected=.true., &
+                                       dataitem=dataitem,  &
+                                       rc=localrc)
+    if (.not. exists) then
+        write(errmsg, *) "can not find " // trim (itemname) // " for removal"
+        if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                    ESMF_CONTEXT, rc)) return
+    end if
+
+    ! Implementation will go here.
+
+    if (present(rc)) rc = localrc
+
+  end subroutine ESMF_StateRemove
 
 !------------------------------------------------------------------------------
 !BOP
@@ -4458,6 +4639,7 @@ module ESMF_StateMod
         endif
         stypep%alloccount = 0
         stypep%datacount = 0
+        stypep%reconcileneededflag = .false.
         nullify(stypep%datalist)
 
 #if defined (ESMF_ENABLENAMEMAP)
@@ -4786,6 +4968,8 @@ module ESMF_StateMod
 
       enddo
 
+      stypep%reconcileneededFlag = .true.
+
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
 10    continue
@@ -5022,6 +5206,8 @@ module ESMF_StateMod
 
       enddo
 
+      stypep%reconcileneededFlag = .true.
+
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
 10    continue
@@ -5257,6 +5443,8 @@ module ESMF_StateMod
 
       enddo
 
+      stypep%reconcileneededFlag = .true.
+
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
 10    continue
@@ -5491,6 +5679,8 @@ module ESMF_StateMod
         endif
 
       enddo
+
+      stypep%reconcileneededFlag = .true.
 
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
@@ -5868,6 +6058,8 @@ module ESMF_StateMod
 
       enddo
 
+      stypep%reconcileneededFlag = .true.
+
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
       ! If not, rc should be already set, and goto 10 to delete before
@@ -6134,6 +6326,8 @@ module ESMF_StateMod
 
       enddo
 
+      stypep%reconcileneededFlag = .true.
+
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
 10    continue
@@ -6255,7 +6449,7 @@ module ESMF_StateMod
         dcount0 = stypep%datacount
         do, i0=1, dcount0
           nextitem0 => stypep%datalist(i0)
-          if (nextitem0%namep == dataname) then
+          if (nextitem0%namep == dataname .and. .not. nextitem0%removedFlag) then
             itemindex = i0
             exit
           end if
@@ -6319,7 +6513,7 @@ module ESMF_StateMod
           dcount1 = sp%datacount
           do, i1=1, dcount1
             nextitem1 => sp%datalist(i1)
-            if (nextitem1%namep == dataname) then
+            if (nextitem1%namep == dataname .and. .not. nextitem1%removedFlag) then
               lindex = i1
               exit
             end if
@@ -6397,7 +6591,7 @@ module ESMF_StateMod
             dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
-              if (nextitem1%namep == itempath_local(:slashpos-1)) then
+              if (nextitem1%namep == itempath_local(:slashpos-1) .and. .not. nextitem1%removedFlag) then
                 lindex = i1
                 exit
               end if
@@ -6433,7 +6627,7 @@ module ESMF_StateMod
             dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
-              if (nextitem1%namep == itempath_local) then
+              if (nextitem1%namep == itempath_local .and. .not. nextitem1%removedFlag) then
                 lindex = i1
                 exit
               end if
@@ -6615,6 +6809,8 @@ module ESMF_StateMod
                                        ESMF_CONTEXT, rc)) return
 #endif
 
+            nextitem%removedFlag = .false.
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -6623,6 +6819,8 @@ module ESMF_StateMod
         endif
 
       enddo
+
+      stypep%reconcileneededFlag = .true.
 
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
