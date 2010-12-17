@@ -225,14 +225,16 @@ PARTICULAR PURPOSE.
 
 --------------------------------------------------------------
 Fortran Compiler version:
-Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 10.1    Build 20081024 Package ID: l_fc_p_10.1.021
+Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 10.1    
+Build 20081024 Package ID: l_fc_p_10.1.021
 Copyright (C) 1985-2008 Intel Corporation.  All rights reserved.
 
 Version 10.1 
 
 --------------------------------------------------------------
 C++ Compiler version:
-Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.1    Build 20081024 Package ID: l_cc_p_10.1.021
+Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.1    
+Build 20081024 Package ID: l_cc_p_10.1.021
 Copyright (C) 1985-2008 Intel Corporation.  All rights reserved.
 
 Version 10.1 
@@ -289,7 +291,8 @@ ESMF_TESTSHAREDOBJ:     OFF
 ESMF_TESTFORCEOPENMP:   OFF
 ESMF_TESTHARNESS_ARRAY: RUN_ESMF_TestHarnessArrayUNI_2
 ESMF_TESTHARNESS_FIELD: RUN_ESMF_TestHarnessFieldUNI_1
-ESMF_MPIRUN:            /nobackupp10/scvasque/daily_builds/intel/esmf/src/Infrastructure/stubs/mpiuni/mpirun
+ESMF_MPIRUN:            /nobackupp10/scvasque/daily_builds/intel/esmf/src/
+                         Infrastructure/stubs/mpiuni/mpirun
  
 --------------------------------------------------------------
  * ESMF environment variables pointing to 3rd party software *
@@ -314,8 +317,10 @@ Location of the C++ linker:        /nasa/intel/cce/10.1.021/bin/icpc
 
 Fortran compiler flags:
 ESMF_F90COMPILEOPTS: -g -fPIC -m64 -mcmodel=small -threads  -openmp
-ESMF_F90COMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/mod/modg/Linux.intel.64.mpiuni.default -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/include 
-ESMF_F90COMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE -DSx86_64_small=1 -DESMF_OS_Linux=1 -DESMF_MPIUNI
+ESMF_F90COMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/mod/modg/
+Linux.intel.64.mpiuni.default -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/include 
+ESMF_F90COMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE -DSx86_64_small=1 -DESMF_OS_Linux=1 
+-DESMF_MPIUNI
 ESMF_F90COMPILEFREECPP: 
 ESMF_F90COMPILEFREENOCPP: 
 ESMF_F90COMPILEFIXCPP: 
@@ -323,27 +328,42 @@ ESMF_F90COMPILEFIXNOCPP:
 
 Fortran linker flags:
 ESMF_F90LINKOPTS:  -m64 -mcmodel=small -threads  -openmp
-ESMF_F90LINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default  -L/nasa/sgi/mpt/1.25/lib -L/nasa/intel/cce/10.1.021/lib/shared -L/nasa/intel/fce/10.1.021/lib/shared -L/nasa/intel/cce/10.1.021/lib -L/nasa/intel/fce/10.1.021/lib -L/nasa/intel/cce/10.1.021/lib -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/ -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64
-ESMF_F90LINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default
-ESMF_F90LINKLIBS:  -limf -lsvml -lm -lipgo -lguide -lstdc++ -lirc -lgcc_s -lgcc -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
-ESMF_F90ESMFLINKLIBS: -lesmf  -limf -lsvml -lm -lipgo -lguide -lstdc++ -lirc -lgcc_s -lgcc -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_F90LINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/
+Linux.intel.64.mpiuni.default  -L/nasa/sgi/mpt/1.25/lib -L/nasa/intel/cce/
+10.1.021/lib/shared -L/nasa/intel/fce/10.1.021/lib/shared -L/nasa/intel/cce/
+10.1.021/lib -L/nasa/intel/fce/10.1.021/lib -L/nasa/intel/cce/10.1.021/lib -L/
+usr/lib64/gcc/x86_64-suse-linux/4.1.2/ -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/
+../../../../lib64
+ESMF_F90LINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/
+Linux.intel.64.mpiuni.default
+ESMF_F90LINKLIBS:  -limf -lsvml -lm -lipgo -lguide -lstdc++ -lirc -lgcc_s -lgcc -lirc 
+-lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_F90ESMFLINKLIBS: -lesmf  -limf -lsvml -lm -lipgo -lguide -lstdc++ -lirc -lgcc_s 
+-lgcc -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
 
 C++ compiler flags:
 ESMF_CXXCOMPILEOPTS: -g -fPIC -m64 -mcmodel=small -pthread  -openmp
-ESMF_CXXCOMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/include   -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/Infrastructure/stubs/mpiuni
-ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DSx86_64_small=1 -DESMF_OS_Linux=1 -D__SDIR__='' -DESMF_MPIUNI
+ESMF_CXXCOMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/include   
+-I/nobackupp10/scvasque/daily_builds/intel/esmf/src/Infrastructure/stubs/mpiuni
+ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DSx86_64_small=1 -DESMF_OS_Linux=1 
+-D__SDIR__='' -DESMF_MPIUNI
 
 C++ linker flags:
 ESMF_CXXLINKOPTS:  -m64 -mcmodel=small -pthread  -openmp
-ESMF_CXXLINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default  -L/nasa/intel/fce/10.1.021/lib/
-ESMF_CXXLINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/Linux.intel.64.mpiuni.default -Wl,-rpath,/nasa/intel/fce/10.1.021/lib/
-ESMF_CXXLINKLIBS:  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
-ESMF_CXXESMFLINKLIBS: -lesmf  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_CXXLINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/
+Linux.intel.64.mpiuni.default  -L/nasa/intel/fce/10.1.021/lib/
+ESMF_CXXLINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/
+Linux.intel.64.mpiuni.default -Wl,-rpath,/nasa/intel/fce/10.1.021/lib/
+ESMF_CXXLINKLIBS:  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc -lpthread 
+-lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_CXXESMFLINKLIBS: -lesmf  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc 
+-lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
 
 
 --------------------------------------------------------------
 Compiling on Thu Oct 21 02:15:56 PDT 2010 on r75i0n8
-Machine characteristics: Linux r75i0n8 2.6.16.60-0.68.1.20100916-nasa #1 SMP Fri Sep 17 17:49:05 UTC 2010 x86_64 x86_64 x86_64 GNU/Linux
+Machine characteristics: Linux r75i0n8 2.6.16.60-0.68.1.20100916-nasa #1 SMP Fri 
+Sep 17 17:49:05 UTC 2010 x86_64 x86_64 x86_64 GNU/Linux
 ==============================================================
 
 \end{verbatim}

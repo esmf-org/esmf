@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.96 2010/11/11 00:01:44 theurich Exp $
+% $Id: ESMF_install.tex,v 1.97 2010/12/17 19:07:20 svasquez Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -150,9 +150,11 @@ location of the desired Parallel-NetCDF library and associated header files:
 When defined, enables the use of Parallel-NetCDF.
 
 \begin{description}
+\begin{sloppypar}
 \item[{\it not set}] (default) PNETCDF-dependent features will be disabled.
 The {\tt ESMF\_PNETCDF\_INCLUDE}, {\tt ESMF\_PNETCDF\_LIBPATH}, and
 {\tt ESMF\_PNETCDF\_LIBS} environment variables will be ignored.
+\end{sloppypar}
 
 \item[{\tt "standard"}] {\tt ESMF\_PNETCDF\_LIBS} will be set to 
 {\tt "-lpnetcdf"}.  The {\tt ESMF\_PNETCDF\_INCLUDE} and 

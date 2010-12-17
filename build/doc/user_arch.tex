@@ -1,4 +1,4 @@
-% $Id: user_arch.tex,v 1.45 2010/10/29 00:04:35 theurich Exp $
+% $Id: user_arch.tex,v 1.46 2010/12/17 19:06:28 svasquez Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
@@ -130,22 +130,27 @@ IRIX64  &\tt default     &\tt mpiuni,{\bf mpi},user     &\tt 32, {\bf 64} \\
 Linux   &\tt absoft      &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64 \\
 Linux   &\tt absoftintel &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64  \\
 Linux   &\tt g95         &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
-        &                &                              &\tt x86\_64\_32, x86\_64\_small, \\
+        &                &                              &\tt x86\_64\_32, \\
+        &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt gfortran    &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64, ia64\_64, \\
-        &                &                              &\tt x86\_64\_32, x86\_64\_small, \\
+        &                &                              &\tt x86\_64\_32, \\
+        &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt intel       &\tt {\bf mpiuni},mpi,mpich,mpich2,mvapich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
-        &                &\tt user,intelmpi,scalimpi    &\tt x86\_64\_32, x86\_64\_small, \\
+        &                &\tt user,intelmpi,scalimpi    &\tt x86\_64\_32, \\
+        &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt intelgcc    &\tt {\bf mpiuni},mpi,mpich,mpich2,lam,openmpi,&\tt 32, 64, ia64\_64, \\
-        &                &\tt user,intelmpi             &\tt x86\_64\_32, x86\_64\_small, \\
+        &                &\tt user,intelmpi             &\tt x86\_64\_32, \\
+        &                &                              &\tt x86\_64\_small, \\
         &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt lahey       &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt nag         &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt nagintel    &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
 Linux   &\tt pathscale   &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
-        &                &                              &\tt x86\_64\_small, x86\_64\_medium \\
+        &                &                              &\tt x86\_64\_small, \\
+        &                &                              &\tt x86\_64\_medium \\
 Linux   &\tt pgi         &\tt {\bf mpiuni},mpich,mpich2,mvapich2,lam,openmpi,user &\tt 32, 64, x86\_64\_32, \\
         &                &\tt scalimpi                  &\tt x86\_64\_small, x86\_64\_medium \\
 Linux   &\tt pgigcc      &\tt {\bf mpiuni},mpich,mpich2,lam,openmpi,user &\tt 32 \\
