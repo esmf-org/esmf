@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.227 2010/12/17 03:55:46 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.228 2010/12/17 17:55:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.227 2010/12/17 03:55:46 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.228 2010/12/17 17:55:00 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3661,7 +3661,7 @@ module ESMF_StateMod
        write (ESMF_IOstdout,'(1x,4a,i0)') nestr,  &
            "    status: ", trim(msgbuf),  &
            ", object count: ", sp%datacount
-       write (ESMF_IOstdout,'(1x,2a,l)')  nestr,  &
+       write (ESMF_IOstdout,'(1x,2a,L1)')  nestr,  &
            "    reconcile needed: ", sp%reconcileneededflag
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
