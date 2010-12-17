@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.32 2010/11/17 17:14:09 eschwab Exp $
+% $Id: ESMF_testing.tex,v 1.33 2010/12/17 19:31:37 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -122,6 +122,7 @@ easily handled by a customized script the user writes and provides to ESMF via
 the {\tt ESMF\_MPIRUN} environment variable. This will override any default
 settings for the configuration and rely on the user provided script instead.
 
+\begin{sloppypar}
 Users that face the need to write a customized mpirun script for their
 parallel execution environment are encouraged to start with the closest match 
 from the ESMF {\tt ./scripts} directory and customize it to their situation.
@@ -132,6 +133,7 @@ platforms is to go to the
 for the platform of interest. Each test report contains the output of
 {\tt gmake info}, which lists the settings of the {\tt ESMF\_MPIxxx} 
 environment variables.
+\end{sloppypar}
 
 Furthermore, the {\tt esmfcontrib} repository on SourceForge hosts a 
 {\tt scripts} module that contains scripts that were customized to certain
@@ -265,7 +267,8 @@ src/Superstructure/Component/tests/ESMF_GridCompCreateUTest.F90
 src/Superstructure/State/tests/ESMF_StateUTest.F90
 
 
-The following unit test files failed to build, failed to execute or crashed during execution:
+The following unit test files failed to build, failed to execute or 
+crashed during execution:
 
 src/Infrastructure/TimeMgr/tests/ESMF_CalendarUTest.F90
 src/Infrastructure/VM/tests/ESMF_VMSendRecvUTest.F90
