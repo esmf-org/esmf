@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.126 2010/12/15 19:14:38 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.127 2010/12/17 17:35:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -184,7 +184,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.126 2010/12/15 19:14:38 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.127 2010/12/17 17:35:39 svasquez Exp $"
 
 !==============================================================================
 
@@ -3230,12 +3230,13 @@ module ESMF_VMMod
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Get the {\tt ESMF\_VM} object of the current execution context. Calling
 !   {\tt ESMF\_VMGetCurrent()} within an ESMF Component, will return the
-!   same VM object as:
-!   \newline
+!   same VM object as
 !   {\tt ESMF\_GridCompGet(..., vm=vm, ...)} or
 !   {\tt ESMF\_CplCompGet(..., vm=vm, ...)}. 
+!   \end{sloppypar}
 ! 
 !   The main purpose of providing {\tt ESMF\_VMGetCurrent()} is to simplify ESMF
 !   adoption in legacy code. Specifically, code that uses {\tt MPI\_COMM\_WORLD}
