@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.228 2010/12/17 17:55:00 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.229 2010/12/18 03:59:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.228 2010/12/17 17:55:00 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.229 2010/12/18 03:59:07 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3661,7 +3661,7 @@ module ESMF_StateMod
        write (ESMF_IOstdout,'(1x,4a,i0)') nestr,  &
            "    status: ", trim(msgbuf),  &
            ", object count: ", sp%datacount
-       write (ESMF_IOstdout,'(1x,2a,L1)')  nestr,  &
+       write (ESMF_IOstdout,'(1x,2a,L1)') nestr,  &
            "    reconcile needed: ", sp%reconcileneededflag
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
@@ -6449,7 +6449,7 @@ module ESMF_StateMod
         dcount0 = stypep%datacount
         do, i0=1, dcount0
           nextitem0 => stypep%datalist(i0)
-          if (nextitem0%namep == dataname .and. .not. nextitem0%removedFlag) then
+          if (nextitem0%namep == dataname) then
             itemindex = i0
             exit
           end if
@@ -6513,7 +6513,7 @@ module ESMF_StateMod
           dcount1 = sp%datacount
           do, i1=1, dcount1
             nextitem1 => sp%datalist(i1)
-            if (nextitem1%namep == dataname .and. .not. nextitem1%removedFlag) then
+            if (nextitem1%namep == dataname) then
               lindex = i1
               exit
             end if
@@ -6591,7 +6591,7 @@ module ESMF_StateMod
             dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
-              if (nextitem1%namep == itempath_local(:slashpos-1) .and. .not. nextitem1%removedFlag) then
+              if (nextitem1%namep == itempath_local(:slashpos-1)) then
                 lindex = i1
                 exit
               end if
@@ -6627,7 +6627,7 @@ module ESMF_StateMod
             dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
-              if (nextitem1%namep == itempath_local .and. .not. nextitem1%removedFlag) then
+              if (nextitem1%namep == itempath_local) then
                 lindex = i1
                 exit
               end if
