@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.34 2010/11/12 06:58:35 eschwab Exp $
+// $Id: ESMCI_Util.h,v 1.35 2010/12/18 04:32:29 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -40,6 +40,8 @@
 // WARNING:  the values of these enums MUST match the values defined
 //  in ../src/ESMF_UtilTypes.F90
 
+// Maximum length of a file name, including its path.
+#define ESMC_MAXPATHLEN 1023
 
 // ESMF class states
 enum ESMC_Status { ESMF_STATUS_UNINIT=1,
