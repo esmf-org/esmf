@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.10 2010/12/10 14:23:11 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.11 2010/12/20 18:15:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidA1X
+        coordX = centroidA1X(lpet+1)
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -163,7 +163,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidA2X
+        if(lpet == 0) coordX = centroidA2X
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -194,7 +194,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidBX
+        coordX = centroidBX(lpet+1)
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -614,7 +614,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidA1X
+        coordX = centroidA1X(lpet+1)
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -630,7 +630,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidA2X
+        if(lpet == 0) coordX = centroidA2X
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -661,7 +661,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidBX
+        coordX = centroidBX(lpet+1)
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
