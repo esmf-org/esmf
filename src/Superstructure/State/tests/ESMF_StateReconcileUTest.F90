@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.32 2010/12/17 03:56:19 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.33 2010/12/21 03:35:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -162,7 +162,7 @@ program ESMF_StateReconcileUTest
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
-    logical :: reconcile_needed
+    logical :: reconcile_needed, recneeded_expected
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -355,10 +355,12 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, the nested State still should have its flag set.  So the
-    ! ESMF_StateIsReconcileNeeded function should return .true..
-    write(failMsg, *) "Did not return .true. for reconciled State"
-    call ESMF_Test(reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
+    ! flag cleared, two nested States still should have their flags set.
+    recneeded_expected = localpet == 0 .or. localpet == 1
+    write(failMsg, *) "Did not return correct result for reconciled State",  &
+        localpet, reconcile_needed, recneeded_expected
+    call ESMF_Test(reconcile_needed .eqv. recneeded_expected,  &
+        name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
@@ -371,10 +373,12 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, the nested State still should have its flag set.  So the
-    ! ESMF_StateIsReconcileNeeded function should return .true..
-    write(failMsg, *) "Did not return .true. for reconciled State"
-    call ESMF_Test(reconcile_needed, name, failMsg, result, ESMF_SRCLINE)
+    ! flag cleared, two nested States still should have their flags set.  So the
+    ! collective ESMF_StateIsReconcileNeeded function should return .true..
+    write(failMsg, *) "Did not return correct collective result for reconciled State",  &
+        localpet, reconcile_needed, recneeded_expected
+    call ESMF_Test(reconcile_needed,  &
+        name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
