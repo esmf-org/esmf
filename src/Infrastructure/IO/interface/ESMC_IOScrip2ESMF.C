@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.3 2010/10/15 23:50:30 oehmke Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.4 2010/12/23 00:03:49 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -304,6 +304,10 @@ void FTN(c_convertscrip)(
   int maxconnection;
   char *c_infile;
   char *c_outfile;
+  char units[80];
+  int isRadian = 0;
+  size_t len;
+  double rad2deg = 180.0/M_PI;
 
 #ifdef ESMF_NETCDF
   // ensure C conform string termination
@@ -377,6 +381,22 @@ void FTN(c_convertscrip)(
   if (status != NC_NOERR) handle_error(status);
   status = nc_get_var_double(ncid1, colonid, cornerlons);
   if (status != NC_NOERR) handle_error(status);
+
+  // get units of grid_cornor_lon
+  status = nc_inq_attlen(ncid1, colonid, "units", &len);
+  if (status != NC_NOERR) handle_error(status);
+  status = nc_get_att_text(ncid1, colonid, "units", units);
+  if (status != NC_NOERR) handle_error(status);
+  units[len] = '\0';
+
+  // convert radian to degree
+  if (!strncmp(units, "radians", 7)) {
+    isRadian=1;
+    for (i = 0; i < gcdim*gsdim; i++) {
+      cornerlats[i] *= rad2deg;
+      cornerlons[i] *= rad2deg;
+    }
+  }
 
   cells = (int*)malloc(sizeof(int)*gcdim*gsdim);
   
@@ -476,14 +496,15 @@ void FTN(c_convertscrip)(
     dims[1]=vdimid;
     status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
     if (status != NC_NOERR) handle_error(status);
-    status = nc_copy_att(ncid1, colatid, "units", ncid2, vertexid);
+    strbuf = "degrees";
+    status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
     dims[0]=celldimid;
     dims[1]=vpcdimid;
     status = nc_def_var(ncid2,"elementConn", NC_INT, 2, dims, &cellid);
     if (status != NC_NOERR) handle_error(status);
     strbuf = "Node indices that define the element connectivity";
-    status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf), strbuf);
+    status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
     fillvalue = -1;
     status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
@@ -491,24 +512,32 @@ void FTN(c_convertscrip)(
     status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
     if (status != NC_NOERR) handle_error(status);
     strbuf = "Number of nodes per element";
-    status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf), strbuf);
+    status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
     if (!nocenter) {
       dims[0]=celldimid;
       dims[1]=vdimid;
       status = nc_def_var(ncid2, "centerCoords", NC_DOUBLE, 2, dims, &ccoordid);
       if (status != NC_NOERR) handle_error(status);
-      status = nc_copy_att(ncid1, ctlatid, "units", ncid2, ccoordid);
+      strbuf = "degrees";
+      status = nc_put_att_text(ncid2, ccoordid, "units", strlen(strbuf)+1, strbuf);
       if (status != NC_NOERR) handle_error(status);
     } 
     if (!noarea) {
       status = nc_def_var(ncid2, "elementArea", NC_DOUBLE, 1, dims, &caid);
       if (status != NC_NOERR) handle_error(status);
-      status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
-      if (status != NC_NOERR) handle_error(status);
-      status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
-      if (status != NC_NOERR) handle_error(status);
-
+      // copy the units and long_name attributes if they exist in the input file
+      int attid;
+      status = nc_inq_attid(ncid1, areaid, "units", &attid);
+      if (status == NC_NOERR) {
+        status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
+        if (status != NC_NOERR) handle_error(status);
+      }    
+      status = nc_inq_attid(ncid1, areaid, "long_name", &attid);
+      if (status == NC_NOERR) {
+        status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
+        if (status != NC_NOERR) handle_error(status);
+      }
     }
     if (!nomask) {
       status = nc_def_var(ncid2, "elementMask", NC_INT, 1, dims, &cmid);
@@ -562,6 +591,17 @@ void FTN(c_convertscrip)(
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
 	inbuf1[i*2]=inbuf[i];
+      }
+      // get units of grid_center_lon
+      status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
+      if (status != NC_NOERR) handle_error(status);
+      status = nc_get_att_text(ncid1, ctlonid, "units", units);
+      if (status != NC_NOERR) handle_error(status);
+      units[len] = '\0';
+      if (!strncmp(units, "radians", 7)) {
+	for (i=0; i<gsdim*2; i++) {
+	  inbuf1[i] *= rad2deg;
+	}
       }
       starts[0]=0;
       starts[1]=0;
@@ -621,7 +661,17 @@ void FTN(c_convertscrip)(
   for (i=0; i<gsdim; i++) {
     inbuf1[i*2]=inbuf[i];
   }
-
+  // get units of grid_center_lon
+  status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
+  if (status != NC_NOERR) handle_error(status);
+  status = nc_get_att_text(ncid1, ctlonid, "units", units);
+  if (status != NC_NOERR) handle_error(status);
+  units[len]='\0';
+  if (!strncmp(units, "radians", 7)) {
+    for (i=0; i<gsdim*2; i++) {
+      inbuf1[i] *= rad2deg;
+    }
+  }
   free(inbuf);
   dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
   dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
@@ -684,7 +734,8 @@ void FTN(c_convertscrip)(
   dims[1]=vdimid;
   status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
   if (status != NC_NOERR) handle_error(status);
-  status = nc_copy_att(ncid1, colatid, "units", ncid2, vertexid);
+  strbuf = "degrees";
+  status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
   dims[0]=celldimid;
   dims[1]=vpcdimid;
@@ -713,7 +764,7 @@ void FTN(c_convertscrip)(
   status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
   if (status != NC_NOERR) handle_error(status);
   strbuf="Dual mesh generated using the cell center coordinates";
-  status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), c_infile);
+  status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   time(&tloc);
   strbuf = ctime(&tloc);
