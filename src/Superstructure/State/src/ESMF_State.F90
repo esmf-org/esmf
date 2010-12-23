@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.229 2010/12/18 03:59:07 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.230 2010/12/23 05:49:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.229 2010/12/18 03:59:07 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.230 2010/12/23 05:49:17 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -6257,8 +6257,11 @@ module ESMF_StateMod
                 ! and not just a placeholder
             endif
 
+            stypep%reconcileneededFlag = .true.
+
             dataitem%otype = ESMF_STATEITEM_STATE
             dataitem%datap%spp => states(i)%statep
+            dataitem%datap%spp%reconcileneededFlag = .true.
         
             ! don't update flags on existing entry
             !dataitem%needed = ESMF_NEEDED
@@ -6316,12 +6319,14 @@ module ESMF_StateMod
 #endif
 
             nextitem%datap%spp => states(i)%statep
+            nextitem%datap%spp%reconcileneededFlag = .false.
  
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
             nextitem%reqrestart = stypep%reqrestart_default
- 
+
+
         endif
 
       enddo
