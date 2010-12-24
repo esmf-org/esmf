@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.32 2010/11/03 22:48:46 theurich Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.33 2010/12/24 00:05:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,8 @@
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: cplname
-    type(ESMF_CplComp) :: cpl
+    type(ESMF_CplComp) :: cpl, cplcompAlias
+    logical:: cplcompBool
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -74,29 +75,75 @@
    ! Initialize framework
    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-
-!-------------------------------------------------------------------------
-!   !
+    !------------------------------------------------------------------------
     !NEX_UTest
-!   !  Test creation of a Coupler Component
     cplname = "One Way Coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-!-------------------------------------------------------------------------
-!   !
+    !------------------------------------------------------------------------
     !NEX_UTest
-!   !  Destroying a component
-
-    call ESMF_CplCompDestroy(cpl, rc=rc)
-
+    write(name, *) "CplComp equality before assignment Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
+    cplcompBool = (cplcompAlias.eq.cpl)
+    call ESMF_Test(.not.cplcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_CplCompAssignment(=)()
+    write(name, *) "CplComp assignment and equality Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    cplcompAlias = cpl
+    cplcompBool = (cplcompAlias.eq.cpl)
+    call ESMF_Test(cplcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "CplCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_CplCompOperator(==)()
+    write(name, *) "CplComp equality after destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    cplcompBool = (cplcompAlias==cpl)
+    call ESMF_Test(.not.cplcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_CplCompOperator(/=)()
+    write(name, *) "CplComp non-equality after destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    cplcompBool = (cplcompAlias/=cpl)
+    call ESMF_Test(cplcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Double CplCompDestroy through alias Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cplcompAlias, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    cplname = "One Way Coupler"
+    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Coupler Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "CplCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_CplCompDestroy(cpl, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
 #ifdef ESMF_TESTEXHAUSTIVE
 !-------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.146 2010/12/03 05:57:59 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.147 2010/12/24 00:05:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -57,6 +57,9 @@ module ESMF_GridCompMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_GridCompCreate
   public ESMF_GridCompDestroy
   public ESMF_GridCompFinalize
@@ -89,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.146 2010/12/03 05:57:59 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.147 2010/12/24 00:05:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -111,6 +114,123 @@ module ESMF_GridCompMod
   end interface
 !------------------------------------------------------------------------------
 
+!===============================================================================
+! GridCompOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompAssignment(=) - GridComp assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   gridcomp1 = gridcomp2
+!
+! !ARGUMENTS:
+!   type(ESMF_GridComp) :: gridcomp1
+!   type(ESMF_GridComp) :: gridcomp2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt gridcomp1} as an alias to
+!   the same ESMF GridComp as {\tt gridcomp2}. If {\tt gridcomp2} is an invalid 
+!   GridComp object then {\tt gridcomp1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gridcomp1]
+!     The {\tt ESMF\_GridComp} object on the left hand side of the assignment.
+!   \item[gridcomp2]
+!     The {\tt ESMF\_GridComp} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompOperator(==) - GridComp equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (gridcomp1 == gridcomp2) then ... endif
+!             OR
+!   result = (gridcomp1 == gridcomp2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_GridComp), intent(in) :: gridcomp1
+!   type(ESMF_GridComp), intent(in) :: gridcomp2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt gridcomp1} and {\tt gridcomp2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF GridComp object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gridcomp1]
+!     The {\tt ESMF\_GridComp} object on the left hand side of the equality
+!     operation.
+!   \item[gridcomp2]
+!     The {\tt ESMF\_GridComp} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_GridCompEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompOperator(/=) - GridComp not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (gridcomp1 == gridcomp2) then ... endif
+!             OR
+!   result = (gridcomp1 == gridcomp2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_GridComp), intent(in) :: gridcomp1
+!   type(ESMF_GridComp), intent(in) :: gridcomp2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt gridcomp1} and {\tt gridcomp2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF GridComp object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[gridcomp1]
+!     The {\tt ESMF\_GridComp} object on the left hand side of the non-equality
+!     operation.
+!   \item[gridcomp2]
+!     The {\tt ESMF\_GridComp} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_GridCompNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -118,6 +238,98 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompEQ()"
+!BOPI
+! !IROUTINE:  ESMF_GridCompEQ - Compare two GridComps for equality
+!
+! !INTERFACE:
+  function ESMF_GridCompEQ(gridcomp1, gridcomp2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_GridCompEQ
+
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) :: gridcomp1
+    type(ESMF_GridComp), intent(in) :: gridcomp2
+
+! !DESCRIPTION:
+!   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE gcinit1, gcinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    gcinit1 = ESMF_GridCompGetInit(gridcomp1)
+    gcinit2 = ESMF_GridCompGetInit(gridcomp2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (gcinit1 .eq. ESMF_INIT_CREATED .and. &
+      gcinit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_GridCompEQ = associated(gridcomp1%compp,gridcomp2%compp)
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(gcinit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(gcinit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_GridCompEQ = (localrc1.eq.localrc2) .and. associated(gridcomp1%compp,gridcomp2%compp)
+    endif
+
+  end function ESMF_GridCompEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompNE()"
+!BOPI
+! !IROUTINE:  ESMF_GridCompNE - Compare two GridComps for non-equality
+!
+! !INTERFACE:
+  function ESMF_GridCompNE(gridcomp1, gridcomp2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_GridCompNE
+
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) :: gridcomp1
+    type(ESMF_GridComp), intent(in) :: gridcomp2
+
+! !DESCRIPTION:
+!   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE gcinit1, gcinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_GridCompNE = .not.ESMF_GridCompEQ(gridcomp1, gridcomp2)
+
+  end function ESMF_GridCompNE
+!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.30 2010/11/03 22:48:47 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.31 2010/12/24 00:05:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -51,14 +51,16 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.30 2010/11/03 22:48:47 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.31 2010/12/24 00:05:35 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: sname
     character(1000) :: testName
     !type(ESMF_Field) :: field1, field2
-    type(ESMF_State) :: state1
+    type(ESMF_State) :: state1, stateAlias
+	logical:: stateBool
+
 
     ! individual test failure messages
     character(ESMF_MAXSTR) :: failMsg
@@ -98,6 +100,62 @@ end module
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       
       !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Create/Destroy an Empty State.
+      sname = "Atmosphere Import"
+      state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "State equality before assignment Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      stateBool = (stateAlias.eq.state1)
+      call ESMF_Test(.not.stateBool, name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing ESMF_StateAssignment(=)()
+      write(name, *) "State assignment and equality Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      stateAlias = state1
+      stateBool = (stateAlias.eq.state1)
+      call ESMF_Test(stateBool, name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "StateDestroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_StateDestroy(state1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing ESMF_StateOperator(==)()
+      write(name, *) "State equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      stateBool = (stateAlias==state1)
+      call ESMF_Test(.not.stateBool, name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing ESMF_StateOperator(/=)()
+      write(name, *) "State non-equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      stateBool = (stateAlias/=state1)
+      call ESMF_Test(stateBool, name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Double StateDestroy through alias Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_StateDestroy(stateAlias, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
       !NEX_UTest   
       ! Create/Destroy an Empty State.
       sname = "Atmosphere Import"
@@ -106,6 +164,7 @@ end module
       write(name, *) "Creating an empty State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !NEX_UTest      
       ! Test printing an Empty State

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.31 2010/11/03 22:48:46 theurich Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.32 2010/12/24 00:05:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -33,7 +33,8 @@
 !   ! Local variables
     integer :: rc
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_GridComp) :: comp1
+    type(ESMF_GridComp) :: comp1, gridcompAlias
+    logical:: gridcompBool
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -68,29 +69,75 @@
         
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-
-!-------------------------------------------------------------------------
-!   !
+    !------------------------------------------------------------------------
     !NEX_UTest
-!   !  Test creation of a Component
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
                                              configFile="grid.rc", rc=rc)  
-
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-!-------------------------------------------------------------------------
-!   !
+    !------------------------------------------------------------------------
     !NEX_UTest
-!   !  Destroying a component
-
-    call ESMF_GridCompDestroy(comp1, rc=rc)
-
+    write(name, *) "GridComp equality before assignment Test"
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
+    gridcompBool = (gridcompAlias.eq.comp1)
+    call ESMF_Test(.not.gridcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_GridCompAssignment(=)()
+    write(name, *) "GridComp assignment and equality Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    gridcompAlias = comp1
+    gridcompBool = (gridcompAlias.eq.comp1)
+    call ESMF_Test(gridcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_GridCompOperator(==)()
+    write(name, *) "GridComp equality after destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    gridcompBool = (gridcompAlias==comp1)
+    call ESMF_Test(.not.gridcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_GridCompOperator(/=)()
+    write(name, *) "GridComp non-equality after destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    gridcompBool = (gridcompAlias/=comp1)
+    call ESMF_Test(gridcompBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Double GridCompDestroy through alias Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_GridCompDestroy(gridcompAlias, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    cname = "Atmosphere"
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
+                                             configFile="grid.rc", rc=rc)  
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "GridCompDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_GridCompDestroy(comp1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE

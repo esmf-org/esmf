@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.128 2010/12/03 05:57:59 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.129 2010/12/24 00:05:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -56,6 +56,9 @@ module ESMF_CplCompMod
 ! !PUBLIC TYPES:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_CplCompCreate
   public ESMF_CplCompDestroy
   public ESMF_CplCompFinalize
@@ -87,7 +90,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.128 2010/12/03 05:57:59 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.129 2010/12/24 00:05:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -109,6 +112,123 @@ module ESMF_CplCompMod
   end interface
 !------------------------------------------------------------------------------
 
+!===============================================================================
+! CplCompOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompAssignment(=) - CplComp assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   cplcomp1 = cplcomp2
+!
+! !ARGUMENTS:
+!   type(ESMF_CplComp) :: cplcomp1
+!   type(ESMF_CplComp) :: cplcomp2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt cplcomp1} as an alias to
+!   the same ESMF CplComp as {\tt cplcomp2}. If {\tt cplcomp2} is an invalid 
+!   CplComp object then {\tt cplcomp1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[cplcomp1]
+!     The {\tt ESMF\_CplComp} object on the left hand side of the assignment.
+!   \item[cplcomp2]
+!     The {\tt ESMF\_CplComp} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompOperator(==) - CplComp equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (cplcomp1 == cplcomp2) then ... endif
+!             OR
+!   result = (cplcomp1 == cplcomp2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_CplComp), intent(in) :: cplcomp1
+!   type(ESMF_CplComp), intent(in) :: cplcomp2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt cplcomp1} and {\tt cplcomp2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF CplComp object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[cplcomp1]
+!     The {\tt ESMF\_CplComp} object on the left hand side of the equality
+!     operation.
+!   \item[cplcomp2]
+!     The {\tt ESMF\_CplComp} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_CplCompEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompOperator(/=) - CplComp not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (cplcomp1 == cplcomp2) then ... endif
+!             OR
+!   result = (cplcomp1 == cplcomp2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_CplComp), intent(in) :: cplcomp1
+!   type(ESMF_CplComp), intent(in) :: cplcomp2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt cplcomp1} and {\tt cplcomp2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF CplComp object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[cplcomp1]
+!     The {\tt ESMF\_CplComp} object on the left hand side of the non-equality
+!     operation.
+!   \item[cplcomp2]
+!     The {\tt ESMF\_CplComp} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_CplCompNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -116,6 +236,98 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompEQ()"
+!BOPI
+! !IROUTINE:  ESMF_CplCompEQ - Compare two CplComps for equality
+!
+! !INTERFACE:
+  function ESMF_CplCompEQ(cplcomp1, cplcomp2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_CplCompEQ
+
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(in) :: cplcomp1
+    type(ESMF_CplComp), intent(in) :: cplcomp2
+
+! !DESCRIPTION:
+!   Test if both {\tt cplcomp1} and {\tt cplcomp2} alias the same ESMF CplComp 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ccinit1, ccinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    ccinit1 = ESMF_CplCompGetInit(cplcomp1)
+    ccinit2 = ESMF_CplCompGetInit(cplcomp2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (ccinit1 .eq. ESMF_INIT_CREATED .and. &
+      ccinit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_CplCompEQ = associated(cplcomp1%compp,cplcomp2%compp)
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(ccinit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(ccinit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_CplCompEQ = (localrc1.eq.localrc2) .and. associated(cplcomp1%compp,cplcomp2%compp)
+    endif
+
+  end function ESMF_CplCompEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompNE()"
+!BOPI
+! !IROUTINE:  ESMF_CplCompNE - Compare two CplComps for non-equality
+!
+! !INTERFACE:
+  function ESMF_CplCompNE(cplcomp1, cplcomp2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_CplCompNE
+
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(in) :: cplcomp1
+    type(ESMF_CplComp), intent(in) :: cplcomp2
+
+! !DESCRIPTION:
+!   Test if both {\tt cplcomp1} and {\tt cplcomp2} alias the same ESMF CplComp 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ccinit1, ccinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_CplCompNE = .not.ESMF_CplCompEQ(cplcomp1, cplcomp2)
+
+  end function ESMF_CplCompNE
+!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
