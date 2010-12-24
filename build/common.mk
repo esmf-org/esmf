@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.328 2010/11/19 03:11:48 theurich Exp $
+#  $Id: common.mk,v 1.329 2010/12/24 00:06:58 rokuingh Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1490,7 +1490,7 @@ endif
 
 CLEAN_DEFDIRS = coredir.*
 CLEAN_DEFAULTS = *.o *.$(ESMF_SL_SUFFIX) *.mod *.txt core ESM*.stdout ESM*.Log PET*.Log *ESMF_LogFile
-CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG
+CLEAN_TEXFILES = *.aux *.bbl *.blg *.log *.toc *.dvi *.ps *.ORIG
 
 clean:
 	$(MAKE) ACTION=tree_clean tree
