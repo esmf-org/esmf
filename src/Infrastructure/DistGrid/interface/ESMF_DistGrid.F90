@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.65 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.66 2010/12/27 22:45:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -89,6 +89,9 @@ module ESMF_DistGridMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_DistGridCreate
   public ESMF_DistGridDestroy
   
@@ -111,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.65 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.66 2010/12/27 22:45:06 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -169,7 +172,123 @@ module ESMF_DistGridMod
 !EOPI 
   end interface
 !==============================================================================
-      
+
+!===============================================================================
+! DistGridOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridAssignment(=) - DistGrid assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   distgrid1 = distgrid2
+!
+! !ARGUMENTS:
+!   type(ESMF_DistGrid) :: distgrid1
+!   type(ESMF_DistGrid) :: distgrid2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt distgrid1} as an alias to
+!   the same ESMF DistGrid as {\tt distgrid2}. If {\tt distgrid2} is an invalid 
+!   DistGrid object then {\tt distgrid1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid1]
+!     The {\tt ESMF\_DistGrid} object on the left hand side of the assignment.
+!   \item[distgrid2]
+!     The {\tt ESMF\_DistGrid} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridOperator(==) - DistGrid equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (distgrid1 == distgrid2) then ... endif
+!             OR
+!   result = (distgrid1 == distgrid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_DistGrid), intent(in) :: distgrid1
+!   type(ESMF_DistGrid), intent(in) :: distgrid2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt distgrid1} and {\tt distgrid2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF DistGrid object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid1]
+!     The {\tt ESMF\_DistGrid} object on the left hand side of the equality
+!     operation.
+!   \item[distgrid2]
+!     The {\tt ESMF\_DistGrid} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_DistGridEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridOperator(/=) - DistGrid not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (distgrid1 == distgrid2) then ... endif
+!             OR
+!   result = (distgrid1 == distgrid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_DistGrid), intent(in) :: distgrid1
+!   type(ESMF_DistGrid), intent(in) :: distgrid2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt distgrid1} and {\tt distgrid2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF DistGrid object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid1]
+!     The {\tt ESMF\_DistGrid} object on the left hand side of the non-equality
+!     operation.
+!   \item[distgrid2]
+!     The {\tt ESMF\_DistGrid} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_DistGridNE
+
+  end interface
+!------------------------------------------------------------------------------
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -179,6 +298,97 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridEQ()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridEQ - Compare two DistGrids for equality
+!
+! !INTERFACE:
+  function ESMF_DistGridEQ(distgrid1, distgrid2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridEQ
+
+! !ARGUMENTS:
+    type(ESMF_DistGrid), intent(in) :: distgrid1
+    type(ESMF_DistGrid), intent(in) :: distgrid2
+
+! !DESCRIPTION:
+!   Test if both {\tt distgrid1} and {\tt distgrid2} alias the same ESMF DistGrid 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE dginit1, dginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    dginit1 = ESMF_DistGridGetInit(distgrid1)
+    dginit2 = ESMF_DistGridGetInit(distgrid2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (dginit1 .eq. ESMF_INIT_CREATED .and. &
+      dginit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_DistGridEQ = distgrid1%this .eq. distgrid2%this
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(dginit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(dginit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_DistGridEQ = (localrc1.eq.localrc2) .and. (distgrid1%this .eq. distgrid2%this)
+    endif
+
+  end function ESMF_DistGridEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridNE()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridNE - Compare two DistGrids for non-equality
+!
+! !INTERFACE:
+  function ESMF_DistGridNE(distgrid1, distgrid2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridNE
+
+! !ARGUMENTS:
+    type(ESMF_DistGrid), intent(in) :: distgrid1
+    type(ESMF_DistGrid), intent(in) :: distgrid2
+
+! !DESCRIPTION:
+!   Test if both {\tt distgrid1} and {\tt distgrid2} alias the same ESMF DistGrid 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE dginit1, dginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_DistGridNE = .not.ESMF_DistGridEQ(distgrid1, distgrid2)
+
+  end function ESMF_DistGridNE
+!-------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD

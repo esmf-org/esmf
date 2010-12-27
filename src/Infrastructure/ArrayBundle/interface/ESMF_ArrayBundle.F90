@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.36 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.37 2010/12/27 22:45:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -72,6 +72,9 @@ module ESMF_ArrayBundleMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
@@ -101,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.36 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.37 2010/12/27 22:45:16 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -148,6 +151,123 @@ module ESMF_ArrayBundleMod
   end interface
 
 
+!===============================================================================
+! ArrayBundleOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayBundleAssignment(=) - ArrayBundle assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   arraybundle1 = arraybundle2
+!
+! !ARGUMENTS:
+!   type(ESMF_ArrayBundle) :: arraybundle1
+!   type(ESMF_ArrayBundle) :: arraybundle2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt arraybundle1} as an alias to
+!   the same ESMF ArrayBundle as {\tt arraybundle2}. If {\tt arraybundle2} is an invalid 
+!   ArrayBundle object then {\tt arraybundle1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle1]
+!     The {\tt ESMF\_ArrayBundle} object on the left hand side of the assignment.
+!   \item[arraybundle2]
+!     The {\tt ESMF\_ArrayBundle} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayBundleOperator(==) - ArrayBundle equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (arraybundle1 == arraybundle2) then ... endif
+!             OR
+!   result = (arraybundle1 == arraybundle2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_ArrayBundle), intent(in) :: arraybundle1
+!   type(ESMF_ArrayBundle), intent(in) :: arraybundle2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt arraybundle1} and {\tt arraybundle2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF ArrayBundle object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle1]
+!     The {\tt ESMF\_ArrayBundle} object on the left hand side of the equality
+!     operation.
+!   \item[arraybundle2]
+!     The {\tt ESMF\_ArrayBundle} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_ArrayBundleEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayBundleOperator(/=) - ArrayBundle not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (arraybundle1 == arraybundle2) then ... endif
+!             OR
+!   result = (arraybundle1 == arraybundle2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_ArrayBundle), intent(in) :: arraybundle1
+!   type(ESMF_ArrayBundle), intent(in) :: arraybundle2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt arraybundle1} and {\tt arraybundle2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF ArrayBundle object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle1]
+!     The {\tt ESMF\_ArrayBundle} object on the left hand side of the non-equality
+!     operation.
+!   \item[arraybundle2]
+!     The {\tt ESMF\_ArrayBundle} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_ArrayBundleNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -156,6 +276,98 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleEQ()"
+!BOPI
+! !IROUTINE:  ESMF_ArrayBundleEQ - Compare two ArrayBundles for equality
+!
+! !INTERFACE:
+  function ESMF_ArrayBundleEQ(arraybundle1, arraybundle2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_ArrayBundleEQ
+
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in) :: arraybundle1
+    type(ESMF_ArrayBundle), intent(in) :: arraybundle2
+
+! !DESCRIPTION:
+!   Test if both {\tt arraybundle1} and {\tt arraybundle2} alias the same ESMF ArrayBundle 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE abinit1, abinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    abinit1 = ESMF_ArrayBundleGetInit(arraybundle1)
+    abinit2 = ESMF_ArrayBundleGetInit(arraybundle2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (abinit1 .eq. ESMF_INIT_CREATED .and. &
+      abinit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_ArrayBundleEQ = arraybundle1%this .eq. arraybundle2%this
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(abinit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(abinit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_ArrayBundleEQ = (localrc1.eq.localrc2) .and. &
+        arraybundle1%this .eq. arraybundle2%this
+    endif
+
+  end function ESMF_ArrayBundleEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleNE()"
+!BOPI
+! !IROUTINE:  ESMF_ArrayBundleNE - Compare two ArrayBundles for non-equality
+!
+! !INTERFACE:
+  function ESMF_ArrayBundleNE(arraybundle1, arraybundle2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_ArrayBundleNE
+
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in) :: arraybundle1
+    type(ESMF_ArrayBundle), intent(in) :: arraybundle2
+
+! !DESCRIPTION:
+!   Test if both {\tt arraybundle1} and {\tt arraybundle2} alias the same ESMF ArrayBundle 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE abinit1, abinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ESMF_ArrayBundleNE = .not.ESMF_ArrayBundleEQ(arraybundle1, arraybundle2)
+
+  end function ESMF_ArrayBundleNE
+!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

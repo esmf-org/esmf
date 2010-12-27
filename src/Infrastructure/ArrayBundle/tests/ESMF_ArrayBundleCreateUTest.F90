@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.9 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.10 2010/12/27 22:45:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.9 2010/11/03 22:48:40 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.10 2010/12/27 22:45:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,8 +54,9 @@ program ESMF_ArrayBundleCreateUTest
   type(ESMF_DistGrid):: distgrid
   type(ESMF_Array):: array(10), arrayOut(5)
   integer:: arrayCount
-  type(ESMF_ArrayBundle):: arraybundle
+  type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
   character (len=80)      :: arrayName
+  logical:: arraybundleBool
   
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -109,6 +110,60 @@ program ESMF_ArrayBundleCreateUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, name="MyArray2", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleCreate Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arraybundle = ESMF_ArrayBundleCreate(arrayList=array, arrayCount=2, &
+    name="MyArrayBundle", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundle equality before assignment Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arraybundleBool = (arraybundleAlias.eq.arraybundle)
+  call ESMF_Test(.not.arraybundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Testing ESMF_ArrayBundleAssignment(=)()
+  write(name, *) "ArrayBundle assignment and equality Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arraybundleAlias = arraybundle
+  arraybundleBool = (arraybundleAlias.eq.arraybundle)
+  call ESMF_Test(arraybundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Testing ESMF_ArrayBundleOperator(==)()
+  write(name, *) "ArrayBundle equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arraybundleBool = (arraybundleAlias==arraybundle)
+  call ESMF_Test(.not.arraybundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Testing ESMF_ArrayBundleOperator(/=)()
+  write(name, *) "ArrayBundle non-equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arraybundleBool = (arraybundleAlias/=arraybundle)
+  call ESMF_Test(arraybundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Double ArrayBundleDestroy through alias Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleDestroy(arraybundleAlias, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.153 2010/11/12 06:57:18 eschwab Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.154 2010/12/27 22:45:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.153 2010/11/12 06:57:18 eschwab Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.154 2010/12/27 22:45:30 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,8 +55,10 @@
       real(ESMF_KIND_R8) :: minCoord(2)
       !type(ESMF_RelLoc) :: rl
       !type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1
+      type(ESMF_Field) :: f1, fieldAlias
       logical          :: isCommitted
+      logical:: fieldBool
+
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -115,13 +117,53 @@
       write(name, *) "Query isCommitted flag from an empty Field"
       call ESMF_Test(((.not.isCommitted).and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
+
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Verifying that a Field with no data can be destroyed
-      call ESMF_FieldDestroy(f1, rc=rc)
+      write(name, *) "Field equality before assignment Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Destroying a Field with no data Test"
+      fieldBool = (fieldAlias.eq.f1)
+      call ESMF_Test(.not.fieldBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Testing ESMF_FieldAssignment(=)()
+      write(name, *) "Field assignment and equality Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldAlias = f1
+      fieldBool = (fieldAlias.eq.f1)
+      call ESMF_Test(fieldBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(name, *) "FieldDestroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_FieldDestroy(f1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Testing ESMF_FieldOperator(==)()
+      write(name, *) "Field equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldBool = (fieldAlias==f1)
+      call ESMF_Test(.not.fieldBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Testing ESMF_FieldOperator(/=)()
+      write(name, *) "Field non-equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldBool = (fieldAlias/=f1)
+      call ESMF_Test(fieldBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      write(name, *) "Double FieldDestroy through alias Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_FieldDestroy(fieldAlias, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
 
 #ifdef ESMF_TESTEXHAUSTIVE
 

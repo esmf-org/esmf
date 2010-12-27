@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.40 2010/12/15 00:18:50 svasquez Exp $
+! $Id: ESMF_LocStream.F90,v 1.41 2010/12/27 22:45:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -103,6 +103,10 @@ module ESMF_LocStreamMod
 ! !PUBLIC TYPES:
   public ESMF_LocStream
   public ESMF_LocStreamType ! For internal use only
+
+   public operator(==)
+   public operator(/=)
+
    public ESMF_LocStreamValidate           ! Check internal consistency
    public ESMF_LocStreamCreate
    public ESMF_LocStreamGet
@@ -130,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.40 2010/12/15 00:18:50 svasquez Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.41 2010/12/27 22:45:49 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -222,6 +226,121 @@ interface ESMF_LocStreamAddKey
 !EOPI 
 end interface
 
+!===============================================================================
+! LocStreamOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LocStreamAssignment(=) - LocStream assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   locstream1 = locstream2
+!
+! !ARGUMENTS:
+!   type(ESMF_LocStream) :: locstream1
+!   type(ESMF_LocStream) :: locstream2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt locstream1} as an alias to
+!   the same ESMF LocStream as {\tt locstream2}. If {\tt locstream2} is an invalid 
+!   LocStream object then {\tt locstream1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[locstream1]
+!     The {\tt ESMF\_LocStream} object on the left hand side of the assignment.
+!   \item[locstream2]
+!     The {\tt ESMF\_LocStream} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LocStreamOperator(==) - LocStream equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (locstream1 == locstream2) then ... endif
+!             OR
+!   result = (locstream1 == locstream2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_LocStream), intent(in) :: locstream1
+!   type(ESMF_LocStream), intent(in) :: locstream2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt locstream1} and {\tt locstream2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF LocStream object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[locstream1]
+!     The {\tt ESMF\_LocStream} object on the left hand side of the equality
+!     operation.
+!   \item[locstream2]
+!     The {\tt ESMF\_LocStream} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_LocStreamEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LocStreamOperator(/=) - LocStream not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (locstream1 == locstream2) then ... endif
+!             OR
+!   result = (locstream1 == locstream2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_LocStream), intent(in) :: locstream1
+!   type(ESMF_LocStream), intent(in) :: locstream2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt locstream1} and {\tt locstream2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF LocStream object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[locstream1]
+!     The {\tt ESMF\_LocStream} object on the left hand side of the non-equality
+!     operation.
+!   \item[locstream2]
+!     The {\tt ESMF\_LocStream} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_LocStreamNE
+
+  end interface
+!------------------------------------------------------------------------------
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -231,6 +350,98 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamEQ()"
+!BOPI
+! !IROUTINE:  ESMF_LocStreamEQ - Compare two LocStreams for equality
+!
+! !INTERFACE:
+  function ESMF_LocStreamEQ(locstream1, locstream2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_LocStreamEQ
+
+! !ARGUMENTS:
+    type(ESMF_LocStream), intent(in) :: locstream1
+    type(ESMF_LocStream), intent(in) :: locstream2
+
+! !DESCRIPTION:
+!   Test if both {\tt locstream1} and {\tt locstream2} alias the same ESMF LocStream 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE lsinit1, lsinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    lsinit1 = ESMF_LocStreamGetInit(locstream1)
+    lsinit2 = ESMF_LocStreamGetInit(locstream2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (lsinit1 .eq. ESMF_INIT_CREATED .and. &
+      lsinit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_LocStreamEQ = associated(locstream1%lstypep,locstream2%lstypep)
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(lsinit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(lsinit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_LocStreamEQ = (localrc1.eq.localrc2) .and. associated(locstream1%lstypep,locstream2%lstypep)
+    endif
+
+  end function ESMF_LocStreamEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocStreamNE()"
+!BOPI
+! !IROUTINE:  ESMF_LocStreamNE - Compare two LocStreams for non-equality
+!
+! !INTERFACE:
+  function ESMF_LocStreamNE(locstream1, locstream2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_LocStreamNE
+
+! !ARGUMENTS:
+    type(ESMF_LocStream), intent(in) :: locstream1
+    type(ESMF_LocStream), intent(in) :: locstream2
+
+! !DESCRIPTION:
+!   Test if both {\tt locstream1} and {\tt locstream2} alias the same ESMF LocStream 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE lsinit1, lsinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_LocStreamNE = .not.ESMF_LocStreamEQ(locstream1, locstream2)
+
+  end function ESMF_LocStreamNE
+!-------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------

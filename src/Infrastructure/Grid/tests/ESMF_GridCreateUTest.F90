@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.106 2010/11/23 02:07:24 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.107 2010/12/27 22:44:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.106 2010/11/23 02:07:24 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.107 2010/12/27 22:44:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@ program ESMF_GridCreateUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name, grid_name
 
-  type(ESMF_Grid) :: grid, grid2
+  type(ESMF_Grid) :: grid, grid2, gridAlias
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: distgrid, distgrid2
   type(ESMF_Array) :: array
@@ -72,6 +72,8 @@ program ESMF_GridCreateUTest
   integer :: petMap2D(2,2,1)
   real(ESMF_KIND_R8), pointer :: fptr(:,:)
 !  integer :: lDE, localDECount
+  logical:: gridBool
+
 
 
   !-----------------------------------------------------------------------------
@@ -88,6 +90,58 @@ program ESMF_GridCreateUTest
   distgrid=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  grid=ESMF_GridCreate(distgrid=distgrid, coordTypeKind=ESMF_TYPEKIND_I4, rc=localrc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid equality before assignment Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  gridBool = (gridAlias.eq.grid)
+  call ESMF_Test(.not.gridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_GridAssignment(=)()
+  write(name, *) "Grid assignment and equality Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  gridAlias = grid
+  gridBool = (gridAlias.eq.grid)
+  call ESMF_Test(gridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "GridDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(grid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_GridOperator(==)()
+  write(name, *) "Grid equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  gridBool = (gridAlias==grid)
+  call ESMF_Test(.not.gridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_GridOperator(/=)()
+  write(name, *) "Grid non-equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  gridBool = (gridAlias/=grid)
+  call ESMF_Test(gridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Double GridDestroy through alias Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridDestroy(gridAlias, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
   !-----------------------------------------------------------------------------
@@ -111,7 +165,7 @@ program ESMF_GridCreateUTest
   !! Check that validate returns true
 !  call ESMF_GridValidate(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) correct=.false.
-  
+
   call ESMF_GridDestroy(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

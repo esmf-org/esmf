@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.182 2010/12/14 23:58:56 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.183 2010/12/27 22:44:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -175,6 +175,10 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !
 !
 ! - ESMF-public methods:
+
+  public operator(==)
+  public operator(/=)
+
   public ESMF_GridAddCoord
   public ESMF_GridCommit
 
@@ -225,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.182 2010/12/14 23:58:56 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.183 2010/12/27 22:44:56 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -641,9 +645,223 @@ end interface
 !
 !==============================================================================
 
-      contains
+!===============================================================================
+! GridOperator() interfaces
+!===============================================================================
 
-!==============================================================================
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GridAssignment(=) - Grid assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   grid1 = grid2
+!
+! !ARGUMENTS:
+!   type(ESMF_Grid) :: grid1
+!   type(ESMF_Grid) :: grid2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt grid1} as an alias to
+!   the same ESMF Grid as {\tt grid2}. If {\tt grid2} is an invalid 
+!   Grid object then {\tt grid1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[grid1]
+!     The {\tt ESMF\_Grid} object on the left hand side of the assignment.
+!   \item[grid2]
+!     The {\tt ESMF\_Grid} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GridOperator(==) - Grid equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (grid1 == grid2) then ... endif
+!             OR
+!   result = (grid1 == grid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Grid), intent(in) :: grid1
+!   type(ESMF_Grid), intent(in) :: grid2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt grid1} and {\tt grid2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF Grid object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[grid1]
+!     The {\tt ESMF\_Grid} object on the left hand side of the equality
+!     operation.
+!   \item[grid2]
+!     The {\tt ESMF\_Grid} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_GridEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_GridOperator(/=) - Grid not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (grid1 == grid2) then ... endif
+!             OR
+!   result = (grid1 == grid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Grid), intent(in) :: grid1
+!   type(ESMF_Grid), intent(in) :: grid2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt grid1} and {\tt grid2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF Grid object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[grid1]
+!     The {\tt ESMF\_Grid} object on the left hand side of the non-equality
+!     operation.
+!   \item[grid2]
+!     The {\tt ESMF\_Grid} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_GridNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridEQ()"
+!BOPI
+! !IROUTINE:  ESMF_GridEQ - Compare two Grids for equality
+!
+! !INTERFACE:
+  function ESMF_GridEQ(grid1, grid2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_GridEQ
+
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in) :: grid1
+    type(ESMF_Grid), intent(in) :: grid2
+
+! !DESCRIPTION:
+!   Test if both {\tt grid1} and {\tt grid2} alias the same ESMF Grid 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ginit1, ginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    ginit1 = ESMF_GridGetInit(grid1)
+    ginit2 = ESMF_GridGetInit(grid2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (ginit1 .eq. ESMF_INIT_CREATED .and. &
+      ginit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_GridEQ = grid1%this .eq. grid2%this
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(ginit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(ginit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_GridEQ = (localrc1.eq.localrc2) .and. (grid1%this .eq. grid2%this)
+    endif
+
+  end function ESMF_GridEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridNE()"
+!BOPI
+! !IROUTINE:  ESMF_GridNE - Compare two Grids for non-equality
+!
+! !INTERFACE:
+  function ESMF_GridNE(grid1, grid2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_GridNE
+
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in) :: grid1
+    type(ESMF_Grid), intent(in) :: grid2
+
+! !DESCRIPTION:
+!   Test if both {\tt grid1} and {\tt grid2} alias the same ESMF Grid 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE ginit1, ginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_GridNE = .not.ESMF_GridEQ(grid1, grid2)
+
+  end function ESMF_GridNE
+!-------------------------------------------------------------------------------
+
 
 
 !------------------------------------------------------------------------------

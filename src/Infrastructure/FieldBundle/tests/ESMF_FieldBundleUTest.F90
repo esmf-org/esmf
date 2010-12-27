@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.24 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.25 2010/12/27 22:45:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -36,13 +36,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.24 2010/11/03 22:48:42 theurich Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.25 2010/12/27 22:45:40 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc, petCount,localPet
       type(ESMF_VM) :: vm
-      type(ESMF_FieldBundle) :: bundle2
+      type(ESMF_FieldBundle) :: bundle2, fieldbundleAlias
+      logical:: fieldbundleBool
+
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -90,8 +92,6 @@
      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-
-
       !NEX_UTest
       !  Verify that an empty FieldBundle can be created
       bundle2 = ESMF_FieldBundleCreate(name="time step 1", rc=rc)
@@ -100,14 +100,54 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !NEX_UTest
+      write(name, *) "FieldBundle equality before assignment Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldbundleBool = (fieldbundleAlias.eq.bundle2)
+      call ESMF_Test(.not.fieldbundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing ESMF_FieldBundleAssignment(=)()
+      write(name, *) "FieldBundle assignment and equality Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldbundleAlias = bundle2
+      fieldbundleBool = (fieldbundleAlias.eq.bundle2)
+      call ESMF_Test(fieldbundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
       ! Test Requirement - Deletion
       ! FieldBundles may be deleted. Data allocated by and included in packed bundles
       ! is deleted along with the bundle. Pointers to field data in unpacked 
       ! bundles are returned at deletion. 
-      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      !NEX_UTest
+      write(name, *) "FieldBundleDestroy Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "FieldBundle Destroy Test"
+      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing ESMF_FieldBundleOperator(==)()
+      write(name, *) "FieldBundle equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldbundleBool = (fieldbundleAlias==bundle2)
+      call ESMF_Test(.not.fieldbundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing ESMF_FieldBundleOperator(/=)()
+      write(name, *) "FieldBundle non-equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      fieldbundleBool = (fieldbundleAlias/=bundle2)
+      call ESMF_Test(fieldbundleBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Double FieldBundleDestroy through alias Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_FieldBundleDestroy(fieldbundleAlias, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE

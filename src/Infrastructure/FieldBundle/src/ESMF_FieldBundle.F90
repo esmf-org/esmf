@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.73 2010/12/09 17:56:54 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.74 2010/12/27 22:45:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -165,6 +165,9 @@
 
        ! public ESMF_FieldBundleCongDataVdate  ! For Standardized Initialization
        ! ESMF_FieldBundleCongrntData(Init) and (GetInit) are private
+
+	   public operator(==)
+	   public operator(/=)
 
        public ESMF_LocalFieldBundleInit     ! For Standardized Initialization
        public ESMF_LocalFieldBundleValidate ! For Standardized Initialization
@@ -335,7 +338,130 @@ end interface
 
 !------------------------------------------------------------------------------
 
-      contains
+!===============================================================================
+! FieldBundleOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldBundleAssignment(=) - FieldBundle assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   fieldbundle1 = fieldbundle2
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle) :: fieldbundle1
+!   type(ESMF_FieldBundle) :: fieldbundle2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt fieldbundle1} as an alias to
+!   the same ESMF FieldBundle as {\tt fieldbundle2}. If {\tt fieldbundle2} is an invalid 
+!   FieldBundle object then {\tt fieldbundle1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldbundle1]
+!     The {\tt ESMF\_FieldBundle} object on the left hand side of the assignment.
+!   \item[fieldbundle2]
+!     The {\tt ESMF\_FieldBundle} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldBundleOperator(==) - FieldBundle equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (fieldbundle1 == fieldbundle2) then ... endif
+!             OR
+!   result = (fieldbundle1 == fieldbundle2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle), intent(in) :: fieldbundle1
+!   type(ESMF_FieldBundle), intent(in) :: fieldbundle2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt fieldbundle1} and {\tt fieldbundle2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF FieldBundle object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldbundle1]
+!     The {\tt ESMF\_FieldBundle} object on the left hand side of the equality
+!     operation.
+!   \item[fieldbundle2]
+!     The {\tt ESMF\_FieldBundle} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_FieldBundleEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldBundleOperator(/=) - FieldBundle not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (fieldbundle1 == fieldbundle2) then ... endif
+!             OR
+!   result = (fieldbundle1 == fieldbundle2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_FieldBundle), intent(in) :: fieldbundle1
+!   type(ESMF_FieldBundle), intent(in) :: fieldbundle2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt fieldbundle1} and {\tt fieldbundle2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF FieldBundle object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fieldbundle1]
+!     The {\tt ESMF\_FieldBundle} object on the left hand side of the non-equality
+!     operation.
+!   \item[fieldbundle2]
+!     The {\tt ESMF\_FieldBundle} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_FieldBundleNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_PackFlags to see if they're the same or not
@@ -354,6 +480,97 @@ function ESMF_pfne(pf1, pf2)
  ESMF_pfne = (pf1%packflag .ne. pf2%packflag)
 end function
 
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleEQ()"
+!BOPI
+! !IROUTINE:  ESMF_FieldBundleEQ - Compare two FieldBundles for equality
+!
+! !INTERFACE:
+  function ESMF_FieldBundleEQ(fieldbundle1, fieldbundle2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_FieldBundleEQ
+
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in) :: fieldbundle1
+    type(ESMF_FieldBundle), intent(in) :: fieldbundle2
+
+! !DESCRIPTION:
+!   Test if both {\tt fieldbundle1} and {\tt fieldbundle2} alias the same ESMF FieldBundle 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE fbinit1, fbinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    fbinit1 = ESMF_FieldBundleGetInit(fieldbundle1)
+    fbinit2 = ESMF_FieldBundleGetInit(fieldbundle2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (fbinit1 .eq. ESMF_INIT_CREATED .and. &
+      fbinit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_FieldBundleEQ = associated(fieldbundle1%btypep,fieldbundle2%btypep)
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(fbinit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(fbinit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_FieldBundleEQ = (localrc1.eq.localrc2) .and. associated(fieldbundle1%btypep,fieldbundle2%btypep)
+    endif
+
+  end function ESMF_FieldBundleEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleNE()"
+!BOPI
+! !IROUTINE:  ESMF_FieldBundleNE - Compare two FieldBundles for non-equality
+!
+! !INTERFACE:
+  function ESMF_FieldBundleNE(fieldbundle1, fieldbundle2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_FieldBundleNE
+
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in) :: fieldbundle1
+    type(ESMF_FieldBundle), intent(in) :: fieldbundle2
+
+! !DESCRIPTION:
+!   Test if both {\tt fieldbundle1} and {\tt fieldbundle2} alias the same ESMF FieldBundle 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE fbinit1, fbinit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_FieldBundleNE = .not.ESMF_FieldBundleEQ(fieldbundle1, fieldbundle2)
+
+  end function ESMF_FieldBundleNE
+!-------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

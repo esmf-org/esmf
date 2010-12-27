@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.28 2010/11/03 22:48:40 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.29 2010/12/27 22:45:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.28 2010/11/03 22:48:40 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.29 2010/12/27 22:45:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@ program ESMF_DistGridCreateGetUTest
   !LOCAL VARIABLES:
   type(ESMF_VM):: vm
   integer:: petCount, localPet, i, localDeCount
-  type(ESMF_DistGrid):: distgrid, distgrid2, distgrid3
+  type(ESMF_DistGrid):: distgrid, distgrid2, distgrid3, distgridAlias
   type(ESMF_DELayout):: delayout
   integer:: dimCount, patchCount, deCount
   logical:: regDecompFlag
@@ -69,6 +69,8 @@ program ESMF_DistGridCreateGetUTest
   logical:: loopResult
   logical:: matchResult
   logical:: arbSeqIndexFlag
+  logical:: distgridBool
+
 
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -101,7 +103,60 @@ program ESMF_DistGridCreateGetUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/1000/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGrid equality before assignment Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgridBool = (distgridAlias.eq.distgrid)
+  call ESMF_Test(.not.distgridBool, name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_DistGridAssignment(=)()
+  write(name, *) "DistGrid assignment and equality Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgridAlias = distgrid
+  distgridBool = (distgridAlias.eq.distgrid)
+  call ESMF_Test(distgridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_DistGridOperator(==)()
+  write(name, *) "DistGrid equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgridBool = (distgridAlias==distgrid)
+  call ESMF_Test(.not.distgridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_DistGridOperator(/=)()
+  write(name, *) "DistGrid non-equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgridBool = (distgridAlias/=distgrid)
+  call ESMF_Test(distgridBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Double DistGridDestroy through alias Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgridAlias, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 1D Single Patch Default"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/1000/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridGet() - dimCount, patchCount, regDecompFlag, DELayout"

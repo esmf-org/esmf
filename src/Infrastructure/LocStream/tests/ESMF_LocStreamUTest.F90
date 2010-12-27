@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStreamUTest.F90,v 1.15 2010/11/03 22:48:43 theurich Exp $
+! $Id: ESMF_LocStreamUTest.F90,v 1.16 2010/12/27 22:45:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_LocStreamCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_LocStreamUTest.F90,v 1.15 2010/11/03 22:48:43 theurich Exp $'
+    '$Id: ESMF_LocStreamUTest.F90,v 1.16 2010/12/27 22:45:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,7 @@ program ESMF_LocStreamCreateUTest
   type(ESMF_DistGrid) :: distgrid, distgridOut
   type(ESMF_DELayout) :: delayout
   type(ESMF_IndexFlag) :: indexflag
-  type(ESMF_LocStream) :: locstream, locstream2, newlocstream
+  type(ESMF_LocStream) :: locstream, locstream2, newlocstream, locstreamAlias
   integer :: ec,el,eu,cc,cl,cu,tc,tl,tu
   integer :: keyCount, localDECount, localDECountOut, i
   real(ESMF_KIND_R8), pointer :: keyDataR8(:),tmpR8(:)
@@ -69,6 +69,8 @@ program ESMF_LocStreamCreateUTest
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
   integer :: numNodes, numElems
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  logical:: locstreamBool
+
 
 
   !-----------------------------------------------------------------------------
@@ -264,12 +266,55 @@ program ESMF_LocStreamCreateUTest
     endif
   endif
 
-  call ESMF_LocStreamDestroy(locstream,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "LocStream equality before assignment Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  locstreamBool = (locstreamAlias.eq.locstream)
+  call ESMF_Test(.not.locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_LocStreamAssignment(=)()
+  write(name, *) "LocStream assignment and equality Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  locstreamAlias = locstream
+  locstreamBool = (locstreamAlias.eq.locstream)
+  call ESMF_Test(locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "LocStreamDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocStreamDestroy(locstream, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_LocStreamOperator(==)()
+  write(name, *) "LocStream equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  locstreamBool = (locstreamAlias==locstream)
+  call ESMF_Test(.not.locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_LocStreamOperator(/=)()
+  write(name, *) "LocStream non-equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  locstreamBool = (locstreamAlias/=locstream)
+  call ESMF_Test(locstreamBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Double LocStreamDestroy through alias Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_LocStreamDestroy(locstreamAlias, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
 
 
   !-----------------------------------------------------------------------------

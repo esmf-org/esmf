@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.79 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.80 2010/12/27 22:45:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -58,6 +58,9 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
+  public operator(==)
+  public operator(/=)
+
   public ESMF_FieldCreate
   public ESMF_FieldCreateEmpty
   public ESMF_FieldDestroy            ! Destroy a Field
@@ -67,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.79 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.80 2010/12/27 22:45:29 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -120,6 +123,124 @@ module ESMF_FieldCreateMod
 !EOPI
 !------------------------------------------------------------------------------
 
+
+!===============================================================================
+! FieldOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAssignment(=) - Field assignment operator
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   field1 = field2
+!
+! !ARGUMENTS:
+!   type(ESMF_Field) :: field1
+!   type(ESMF_Field) :: field2
+!
+!
+! !DESCRIPTION:
+!   The default Fortran assignment, setting {\tt field1} as an alias to
+!   the same ESMF Field as {\tt field2}. If {\tt field2} is an invalid 
+!   Field object then {\tt field1} will be equally invalid after the
+!   assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field1]
+!     The {\tt ESMF\_Field} object on the left hand side of the assignment.
+!   \item[field2]
+!     The {\tt ESMF\_Field} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldOperator(==) - Field equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (field1 == field2) then ... endif
+!             OR
+!   result = (field1 == field2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Field), intent(in) :: field1
+!   type(ESMF_Field), intent(in) :: field2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt field1} and {\tt field2} for equality. If either side of the
+!   equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .true.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF Field object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field1]
+!     The {\tt ESMF\_Field} object on the left hand side of the equality
+!     operation.
+!   \item[field2]
+!     The {\tt ESMF\_Field} object on the right hand side of the equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_FieldEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldOperator(/=) - Field not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (field1 == field2) then ... endif
+!             OR
+!   result = (field1 == field2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Field), intent(in) :: field1
+!   type(ESMF_Field), intent(in) :: field2
+!
+!
+! !DESCRIPTION:
+!   Test {\tt field1} and {\tt field2} for non-equality. If either side of the
+!   non-equality test is not in the {\tt CREATED} status an error will be
+!   logged. However, this does not affect the return value, which is 
+!   {\tt .false.} as long as both sides are in the {\em same} status and
+!   alias the same ESMF Field object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field1]
+!     The {\tt ESMF\_Field} object on the left hand side of the non-equality
+!     operation.
+!   \item[field2]
+!     The {\tt ESMF\_Field} object on the right hand side of the non-equality
+!     operation..
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_FieldNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -127,6 +248,99 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEQ()"
+!BOPI
+! !IROUTINE:  ESMF_FieldEQ - Compare two Fields for equality
+!
+! !INTERFACE:
+  function ESMF_FieldEQ(field1, field2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_FieldEQ
+
+! !ARGUMENTS:
+    type(ESMF_Field), intent(in) :: field1
+    type(ESMF_Field), intent(in) :: field2
+
+! !DESCRIPTION:
+!   Test if both {\tt field1} and {\tt field2} alias the same ESMF Field 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE finit1, finit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    finit1 = ESMF_FieldGetInit(field1)
+    finit2 = ESMF_FieldGetInit(field2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (finit1 .eq. ESMF_INIT_CREATED .and. &
+      finit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_FieldEQ = associated(field1%ftypep,field2%ftypep)
+    else
+      ! log error, convert to return code, and compare
+      lval1 = ESMF_IMErr(finit1, ESMF_CONTEXT, rc=localrc1)
+      lval2 = ESMF_IMErr(finit2, ESMF_CONTEXT, rc=localrc2)
+      ESMF_FieldEQ = (localrc1.eq.localrc2) .and. associated(field1%ftypep,field2%ftypep)
+    endif
+
+  end function ESMF_FieldEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldNE()"
+!BOPI
+! !IROUTINE:  ESMF_FieldNE - Compare two Fields for non-equality
+!
+! !INTERFACE:
+  function ESMF_FieldNE(field1, field2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_FieldNE
+
+! !ARGUMENTS:
+    type(ESMF_Field), intent(in) :: field1
+    type(ESMF_Field), intent(in) :: field2
+
+! !DESCRIPTION:
+!   Test if both {\tt field1} and {\tt field2} alias the same ESMF Field 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE finit1, finit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_FieldNE = .not.ESMF_FieldEQ(field1, field2)
+
+  end function ESMF_FieldNE
+!-------------------------------------------------------------------------------
+
 
 ! ESMF_FieldCreateBa
 !------------------------------------------------------------------------------
