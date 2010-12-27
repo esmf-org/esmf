@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.18 2010/12/27 14:47:33 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.19 2010/12/27 16:06:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.18 2010/12/27 14:47:33 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.19 2010/12/27 16:06:33 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -239,7 +239,7 @@
     deallocate(src_farray, dst_farray, factorList, factorIndexList)
 
 !BOE
-! In the subsequent discussion, we demonstrate how to set up a SMM routehandle
+! In the following discussion, we demonstrate how to set up a SMM routehandle
 ! between a pair of Fields that are different in number of gridded dimensions
 ! and the size of those gridded dimensions. The source Field has a 1D decomposition
 ! with 16 total elements; the destination Field has a 2D decomposition with
@@ -261,12 +261,15 @@
 
     call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
+!EOC
+!BOE
     ! create src_farray, srcArray, and srcField
     ! +  PET0  +  PET1  +  PET2  +  PET3  +
     ! +--------+--------+--------+--------+
     !      1        2        3        4            ! value
     ! 1        4        8        12       16       ! bounds
+!EOE
+!BOC
     allocate(src_farray2(tlb(1):tub(1)) )
     src_farray2 = lpe+1
     srcArray = ESMF_ArrayCreate(src_farray2, distgrid=distgrid, &
@@ -278,6 +281,8 @@
     srcField = ESMF_FieldCreate(grid, srcArray, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!EOC
+!BOE
     ! Create dstField on the following distribution:
     ! +  PET0  +  PET1  +  PET2  +  PET3  +
     ! +--------+--------+--------+--------+
@@ -293,6 +298,8 @@
     ! |   3    |   6    |   9    |   12   |
     ! |        |        |        |        |
     ! +--------+--------+--------+--------+
+!EOE
+!BOC
 
     ! Create the destination Grid
     dstGrid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/3,4/), &
@@ -314,12 +321,14 @@
 !
 ! The sparse matrix is of size 12x16, however only the following entries
 ! are filled:
+! \begin{verbatim}
 ! M(3,1) = 0.1
 ! M(3,10) = 0.4
 ! M(8,2) = 0.25
 ! M(8,16) = 0.5
 ! M(12,1) = 0.3
 ! M(12,16) = 0.7
+! \end{verbatim}
 !
 ! By the definition of matrix calculation, the 8th element on PET2 in the
 ! dstField equals to 0.25*srcField(2) + 0.5*srcField(16) = 0.25*1+0.5*4=2.25
@@ -363,6 +372,8 @@
     print *, lpe, '-', lbound(fptr2d), '-',ubound(fptr2d),'-', fptr2d
 
     ! destroy all objects created in this example to prevent memory leak
+    call ESMF_FieldSMMRelease(routehandle, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(srcField, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(dstField, rc=rc)
