@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.17 2010/12/09 19:04:41 svasquez Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.18 2010/12/27 14:47:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,14 +35,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.17 2010/12/09 19:04:41 svasquez Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.18 2010/12/27 14:47:33 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
     integer :: rc, finalrc
     type(ESMF_Field)                            :: srcField, dstField
     type(ESMF_Field)                            :: srcFieldA, dstFieldA
-    type(ESMF_Grid)                             :: grid
+    type(ESMF_Grid)                             :: grid, dstGrid
     type(ESMF_DistGrid)                         :: distgrid
     type(ESMF_VM)                               :: vm
     type(ESMF_RouteHandle)                      :: routehandle
@@ -51,10 +51,12 @@
     integer                                     :: localrc, lpe, i
 
     integer, allocatable                        :: src_farray(:), dst_farray(:)
-    integer                                     :: fa_shape(1)
+    integer                                     :: fa_shape(1), tlb(1), tub(1)
     integer, pointer                            :: fptr(:)
+    real(ESMF_KIND_R4), pointer                 :: fptr2d(:,:)
+    real(ESMF_KIND_R4), pointer                 :: src_farray2(:)
         
-    integer(ESMF_KIND_I4), allocatable          :: factorList(:)
+    real(ESMF_KIND_R4), allocatable          :: factorList(:)
     integer, allocatable                        :: factorIndexList(:,:)
 
     rc = ESMF_SUCCESS
@@ -235,6 +237,150 @@
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(src_farray, dst_farray, factorList, factorIndexList)
+
+!BOE
+! In the subsequent discussion, we demonstrate how to set up a SMM routehandle
+! between a pair of Fields that are different in number of gridded dimensions
+! and the size of those gridded dimensions. The source Field has a 1D decomposition
+! with 16 total elements; the destination Field has a 2D decomposition with
+! 12 total elements. For ease of understanding of the actual matrix calculation,
+! a global indexing scheme is used. 
+!EOE
+!BOC
+    distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        regDecomp=(/4/), &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    grid = ESMF_GridCreate(distgrid=distgrid, &
+        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        name="grid", rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! create src_farray, srcArray, and srcField
+    ! +  PET0  +  PET1  +  PET2  +  PET3  +
+    ! +--------+--------+--------+--------+
+    !      1        2        3        4            ! value
+    ! 1        4        8        12       16       ! bounds
+    allocate(src_farray2(tlb(1):tub(1)) )
+    src_farray2 = lpe+1
+    srcArray = ESMF_ArrayCreate(src_farray2, distgrid=distgrid, &
+		  indexflag=ESMF_INDEX_GLOBAL, &
+      rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    !print *, lpe, '+', tlb, tub, '+', src_farray2
+
+    srcField = ESMF_FieldCreate(grid, srcArray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Create dstField on the following distribution:
+    ! +  PET0  +  PET1  +  PET2  +  PET3  +
+    ! +--------+--------+--------+--------+
+    ! |        |        |        |        |
+    ! |   1    |   4    |   7    |   10   |
+    ! |        |        |        |        |
+    ! +--------+--------+--------+--------+
+    ! |        |        |        |        |
+    ! |   2    |   5    |   8    |   11   |
+    ! |        |        |        |        |
+    ! +--------+--------+--------+--------+
+    ! |        |        |        |        |
+    ! |   3    |   6    |   9    |   12   |
+    ! |        |        |        |        |
+    ! +--------+--------+--------+--------+
+
+    ! Create the destination Grid
+    dstGrid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/3,4/), &
+      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+      indexflag = ESMF_INDEX_GLOBAL, &
+      regDecomp = (/1,4/), &
+      rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+      indexflag=ESMF_INDEX_GLOBAL, &
+      rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+!BOE
+! Perform sparse matrix multiplication $dst_i$ = $M_{i,j}$ * $src_j$
+! First setup routehandle from source Field to destination Field
+! with prescribed factorList and factorIndexList.
+!
+! The sparse matrix is of size 12x16, however only the following entries
+! are filled:
+! M(3,1) = 0.1
+! M(3,10) = 0.4
+! M(8,2) = 0.25
+! M(8,16) = 0.5
+! M(12,1) = 0.3
+! M(12,16) = 0.7
+!
+! By the definition of matrix calculation, the 8th element on PET2 in the
+! dstField equals to 0.25*srcField(2) + 0.5*srcField(16) = 0.25*1+0.5*4=2.25
+! For simplicity, we will load the factorList and factorIndexList on
+! PET 0 and 1, the SMMStore engine will load balance the parameters on all 4
+! PETs internally for optimal performance. 
+!EOE
+!BOC
+    if(lpe == 0) then
+      allocate(factorList(3), factorIndexList(2,3))
+      factorList=(/0.1,0.4,0.25/)
+      factorIndexList(1,:)=(/1,10,2/)
+      factorIndexList(2,:)=(/3,3,8/)
+      call ESMF_FieldSMMStore(srcField, dstField, routehandle=routehandle, &
+          factorList=factorList, factorIndexList=factorIndexList, rc=localrc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    else if(lpe == 1) then
+      allocate(factorList(3), factorIndexList(2,3))
+      factorList=(/0.5,0.3,0.7/)
+      factorIndexList(1,:)=(/16,1,16/)
+      factorIndexList(2,:)=(/8,12,12/)
+      call ESMF_FieldSMMStore(srcField, dstField, routehandle=routehandle, &
+          factorList=factorList, factorIndexList=factorIndexList, rc=localrc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    else
+      call ESMF_FieldSMMStore(srcField, dstField, routehandle=routehandle, &
+          rc=localrc)
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    endif
+
+    ! 2. use precomputed routehandle to perform SMM
+    call ESMF_FieldSMM(srcfield, dstField, routehandle=routehandle, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!EOC
+
+    ! verify sparse matrix multiplication
+    call ESMF_FieldGet(dstField, localDe=0, farrayPtr=fptr2d, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! Verify that the result data in dstField is correct.
+    print *, lpe, '-', lbound(fptr2d), '-',ubound(fptr2d),'-', fptr2d
+
+    ! destroy all objects created in this example to prevent memory leak
+    call ESMF_FieldDestroy(srcField, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_FieldDestroy(dstField, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    !call ESMF_FieldDestroy(srcFieldA, rc=rc)
+    !if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    !call ESMF_FieldDestroy(dstFieldA, rc=rc)
+    !if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_ArrayDestroy(srcArray, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(grid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_GridDestroy(dstgrid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    deallocate(src_farray2)
+    if(allocated(factorList)) deallocate(factorList, factorIndexList)
 
      call ESMF_Finalize(rc=rc)
 
