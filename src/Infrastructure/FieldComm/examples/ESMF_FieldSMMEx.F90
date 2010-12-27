@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.20 2010/12/27 17:23:48 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.21 2010/12/27 18:57:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.20 2010/12/27 17:23:48 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.21 2010/12/27 18:57:23 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -264,12 +264,12 @@
 !EOC
 !BOE
 ! create 1D src_farray, srcArray, and srcField
-!\begin {verbatim}
+!\begin{verbatim}
 ! +  PET0  +  PET1  +  PET2  +  PET3  +
 ! +--------+--------+--------+--------+
 !      1        2        3        4            ! value
 ! 1        4        8        12       16       ! bounds of seq indices
-!\end {verbatim}
+!\end{verbatim}
 !EOE
 !BOC
     allocate(src_farray2(tlb(1):tub(1)) )
