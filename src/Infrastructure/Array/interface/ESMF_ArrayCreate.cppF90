@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.61 2010/12/15 22:43:47 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.62 2010/12/27 22:44:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.61 2010/12/15 22:43:47 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.62 2010/12/27 22:44:20 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -165,9 +165,9 @@ module ESMF_ArrayCreateMod
 !   The arguments are:
 !   \begin{description}
 !   \item[array1]
-!     The {\tt ESMF\_Array} object on the left hand side of the assigment.
+!     The {\tt ESMF\_Array} object on the left hand side of the assignment.
 !   \item[array2]
-!     The {\tt ESMF\_Array} object on the right hand side of the assigment.
+!     The {\tt ESMF\_Array} object on the right hand side of the assignment.
 !   \end{description}
 !
 !EOP
