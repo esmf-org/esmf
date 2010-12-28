@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.183 2010/12/27 22:44:56 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.184 2010/12/28 18:25:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -176,8 +176,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !
 ! - ESMF-public methods:
 
-  public operator(==)
-  public operator(/=)
+!  public operator(==)  ! already defined below, included here for clarity
+!  public operator(/=)  ! already defined below, included here for clarity
 
   public ESMF_GridAddCoord
   public ESMF_GridCommit
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.183 2010/12/27 22:44:56 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.184 2010/12/28 18:25:02 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
