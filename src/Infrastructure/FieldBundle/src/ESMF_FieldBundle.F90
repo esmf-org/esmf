@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.74 2010/12/27 22:45:40 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.75 2010/12/28 18:54:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -166,8 +166,8 @@
        ! public ESMF_FieldBundleCongDataVdate  ! For Standardized Initialization
        ! ESMF_FieldBundleCongrntData(Init) and (GetInit) are private
 
-	   public operator(==)
-	   public operator(/=)
+!       public operator(==) ! operator defined below, leave this for clarity
+!       public operator(/=) ! operator defined below, leave this for clarity
 
        public ESMF_LocalFieldBundleInit     ! For Standardized Initialization
        public ESMF_LocalFieldBundleValidate ! For Standardized Initialization
