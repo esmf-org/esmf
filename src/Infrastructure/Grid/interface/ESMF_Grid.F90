@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.184 2010/12/28 18:25:02 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.185 2010/12/29 15:38:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -176,8 +176,8 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !
 ! - ESMF-public methods:
 
-!  public operator(==)  ! already defined below, included here for clarity
-!  public operator(/=)  ! already defined below, included here for clarity
+!  public operator(==)  ! operator defined as .eq. below
+!  public operator(/=)  ! operator defined as .eq. below
 
   public ESMF_GridAddCoord
   public ESMF_GridCommit
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.184 2010/12/28 18:25:02 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.185 2010/12/29 15:38:28 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -685,7 +685,7 @@ end interface
 ! !IROUTINE: ESMF_GridOperator(==) - Grid equality operator
 !
 ! !INTERFACE:
-  interface operator(==)
+  interface operator(.eq.)
 !   if (grid1 == grid2) then ... endif
 !             OR
 !   result = (grid1 == grid2)
@@ -726,7 +726,7 @@ end interface
 ! !IROUTINE: ESMF_GridOperator(/=) - Grid not equal operator
 !
 ! !INTERFACE:
-  interface operator(/=)
+  interface operator(.ne.)
 !   if (grid1 == grid2) then ... endif
 !             OR
 !   result = (grid1 == grid2)

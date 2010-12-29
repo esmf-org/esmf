@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.75 2010/12/28 18:54:14 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.76 2010/12/29 15:38:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -166,8 +166,8 @@
        ! public ESMF_FieldBundleCongDataVdate  ! For Standardized Initialization
        ! ESMF_FieldBundleCongrntData(Init) and (GetInit) are private
 
-!       public operator(==) ! operator defined below, leave this for clarity
-!       public operator(/=) ! operator defined below, leave this for clarity
+!       public operator(==) ! operator defined as .eq. below
+!       public operator(/=) ! operator defined as .ne. below
 
        public ESMF_LocalFieldBundleInit     ! For Standardized Initialization
        public ESMF_LocalFieldBundleValidate ! For Standardized Initialization
@@ -378,7 +378,7 @@ end interface
 ! !IROUTINE: ESMF_FieldBundleOperator(==) - FieldBundle equality operator
 !
 ! !INTERFACE:
-  interface operator(==)
+  interface operator(.eq.)
 !   if (fieldbundle1 == fieldbundle2) then ... endif
 !             OR
 !   result = (fieldbundle1 == fieldbundle2)
@@ -419,7 +419,7 @@ end interface
 ! !IROUTINE: ESMF_FieldBundleOperator(/=) - FieldBundle not equal operator
 !
 ! !INTERFACE:
-  interface operator(/=)
+  interface operator(.ne.)
 !   if (fieldbundle1 == fieldbundle2) then ... endif
 !             OR
 !   result = (fieldbundle1 == fieldbundle2)
