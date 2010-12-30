@@ -15,17 +15,18 @@
 !BOP
 !\begin{verbatim}
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 ! EXAMPLE:  This is an AppDriver.F90 file for a sequential ESMF application.
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 !
-!  The ChangeMe.F90 file that's included below contains a number of definitions 
-!  that are used by the AppDriver, such as the name of the application's
-!  main configuration file and the name of the application's SetServices 
-!  routine.  This file is in the same directory as the AppDriver.F90 file.
-!------------------------------------------------------------------------------
+!  The ChangeMe.F90 file that's included below contains a number of 
+!  definitions that are used by the AppDriver, such as the name of the 
+!  application's main configuration file and the name of the application's 
+!  SetServices routine.  This file is in the same directory as the 
+!  AppDriver.F90 file.
+!---------------------------------------------------------------------------
 
 #include "ChangeMe.F90"
 
@@ -42,9 +43,9 @@
 
     implicit none
     
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 !  Define local variables
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 
     ! Components and States
     type(ESMF_GridComp) :: compGridded
@@ -68,9 +69,9 @@
     ! Return codes for error checks
     integer :: rc, localrc
         
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 !  Initialize ESMF.  Note that an output Log is created by default.
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 
     call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -79,12 +80,12 @@
 
     call ESMF_LogWrite("ESMF AppDriver start", ESMF_LOG_INFO)
 
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 !  Create and load a configuration file.
 !  The USER_CONFIG_FILE is set to sample.rc in the ChangeMe.F90 file.
-!  The sample.rc file is also included in the directory with the AppDriver.F90
-!  file.
-!------------------------------------------------------------------------------
+!  The sample.rc file is also included in the directory with the 
+!  AppDriver.F90 file.
+!---------------------------------------------------------------------------
     
     config = ESMF_ConfigCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -96,46 +97,49 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 !  Get configuration information.
 !
 !  A configuration file like sample.rc might include:
 !  - size and coordinate information needed to create the default Grid.
 !  - the default start time, stop time, and running intervals
 !    for the main time loop.
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 
-    call ESMF_ConfigGetAttribute(config, i_max, 'I Counts:', default=10, rc=localrc)
+    call ESMF_ConfigGetAttribute(config, i_max, 'I Counts:', default=10, &
+	rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    call ESMF_ConfigGetAttribute(config, j_max, 'J Counts:', default=40, rc=localrc)
+    call ESMF_ConfigGetAttribute(config, j_max, 'J Counts:', default=40, &
+	rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 !  Create the top Gridded Component.
-!------------------------------------------------------------------------------
+!---------------------------------------------------------------------------
 
-    compGridded = ESMF_GridCompCreate(name="ESMF Gridded Component", rc=localrc)
+    compGridded = ESMF_GridCompCreate(name="ESMF Gridded Component", &
+	rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Register the set services method for the top Gridded Component.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 
     call ESMF_GridCompSetServices(compGridded, SetServices, rc)
     if (ESMF_LogFoundError(rc, "Registration failed", rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Create and initialize a Clock.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -158,7 +162,7 @@
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Create and initialize a Grid.
 !
 !  The default lower indices for the Grid are (/1,1/).
@@ -167,7 +171,7 @@
 !  created with 10 grid cells in the x direction and 40 grid cells in the
 !  y direction.  The Grid section in the Reference Manual shows how to set
 !  coordinates.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 
       grid = ESMF_GridCreateShapeTile(maxIndex=(/i_max, j_max/), &
                              name="source grid", rc=localrc)
@@ -181,24 +185,24 @@
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Create and initialize a State to use for both import and export.
 !  In a real code, separate import and export States would normally be
 !  created.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 
       defaultstate = ESMF_StateCreate("Default State", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
      
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Call the initialize, run, and finalize methods of the top component.
 !  When the initialize method of the top component is called, it will in
 !  turn call the initialize methods of all its child components, they
 !  will initialize their children, and so on.  The same is true of the
 !  run and finalize methods.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
  
       call ESMF_GridCompInitialize(compGridded, defaultstate, defaultstate, &
           clock, rc=localrc)
@@ -216,9 +220,9 @@
           call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
  
  
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Destroy objects.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 
       call ESMF_ClockDestroy(clock, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -235,9 +239,9 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !  Finalize and clean up.
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 
     call ESMF_Finalize()
 
