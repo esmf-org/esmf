@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.147 2010/12/24 00:05:35 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.148 2010/12/30 22:08:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.147 2010/12/24 00:05:35 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.148 2010/12/30 22:08:36 svasquez Exp $'
 
 !==============================================================================
 !
@@ -375,11 +375,13 @@ contains
 !   from within the {\tt ESMF\_GridComp} code once the initialization routine
 !   is called.
 ! \item[{[gridcomptype]}]
+!   \begin{sloppypar}
 !   {\tt ESMF\_GridComp} model type, where model includes 
 !   {\tt ESMF\_ATM, ESMF\_LAND, ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
 !   Note that this has no meaning to the framework, it is an
 !   annotation for user code to query. See section
 !   \ref{opt:gridcomptype} for a complete list of valid types.
+!   \end{sloppypar}
 ! \item[{[grid]}]
 !   Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}. Note that
 !   it is perfectly ok to not pass a Grid in for this argument. This argument is 
@@ -392,18 +394,22 @@ contains
 !   can read in namelist-type information to set parameters for this run.
 !   If both are specified, this object takes priority over {\tt configFile}.
 ! \item[{[configFile]}]
+!   \begin{sloppypar}
 !   The filename of an {\tt ESMF\_Config} format file.  
 !   If specified, this file is opened an {\tt ESMF\_Config} configuration
 !   object is created for the file, and attached to the new component.  
 !   The user can call {\tt ESMF\_GridCompGet()} to get and use the object.
 !   If both are specified, the {\tt config} object takes priority
 !   over this one.
+!   \end{sloppypar}
 ! \item[{[clock]}]
+!   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !   queried and updated by the new {\tt ESMF\_GridComp} as it chooses.
 !   This should
 !   not be the parent component clock, which should be maintained and passed
 !   down to the initialize/run/finalize routines separately.
+!   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
 !   parent component. If {\tt petList} is not specified all of the
