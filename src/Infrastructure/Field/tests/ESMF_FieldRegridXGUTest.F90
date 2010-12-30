@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.13 2010/12/30 19:45:22 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.14 2010/12/30 20:18:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -205,14 +205,14 @@ contains
         coordY = centroidBY
 
         if(lpet == 0) then
-            allocate(sparseMatA2X(1)%factorIndexList(2,5), sparseMatA2X(1)%factorList(5))
+            allocate(sparseMatA2X(1)%factorIndexList(2,6), sparseMatA2X(1)%factorList(6))
         else
-            allocate(sparseMatA2X(1)%factorIndexList(2,6:9), sparseMatA2X(1)%factorList(6:9))
+            allocate(sparseMatA2X(1)%factorIndexList(2,7:9), sparseMatA2X(1)%factorList(7:9))
         endif
         if(lpet == 0) then
-            allocate(sparseMatA2X(2)%factorIndexList(2,2), sparseMatA2X(2)%factorList(2))
+            allocate(sparseMatA2X(2)%factorIndexList(2,1), sparseMatA2X(2)%factorList(1))
         else
-            allocate(sparseMatA2X(2)%factorIndexList(2,3:3), sparseMatA2X(2)%factorList(3:3))
+            allocate(sparseMatA2X(2)%factorIndexList(2,2:3), sparseMatA2X(2)%factorList(2:3))
         endif
         if(lpet == 0) then
             allocate(sparseMatX2B(1)%factorIndexList(2,6), sparseMatX2B(1)%factorList(6))
@@ -228,8 +228,8 @@ contains
             sparseMatA2X(1)%factorIndexList(1,3)=2
             sparseMatA2X(1)%factorIndexList(1,4)=3
             sparseMatA2X(1)%factorIndexList(1,5)=4
-        else
             sparseMatA2X(1)%factorIndexList(1,6)=4
+        else
             sparseMatA2X(1)%factorIndexList(1,7)=3
             sparseMatA2X(1)%factorIndexList(1,8)=4
             sparseMatA2X(1)%factorIndexList(1,9)=4
@@ -240,8 +240,8 @@ contains
             sparseMatA2X(1)%factorIndexList(2,3)=3
             sparseMatA2X(1)%factorIndexList(2,4)=4
             sparseMatA2X(1)%factorIndexList(2,5)=5
-        else
             sparseMatA2X(1)%factorIndexList(2,6)=6
+        else
             sparseMatA2X(1)%factorIndexList(2,7)=7
             sparseMatA2X(1)%factorIndexList(2,8)=8
             sparseMatA2X(1)%factorIndexList(2,9)=9
@@ -249,14 +249,14 @@ contains
         ! setting up mapping between A2 -> X
         if(lpet == 0) then
             sparseMatA2X(2)%factorIndexList(1,1)=1
-            sparseMatA2X(2)%factorIndexList(1,2)=2
         else
+            sparseMatA2X(2)%factorIndexList(1,2)=2
             sparseMatA2X(2)%factorIndexList(1,3)=2
         endif
         if(lpet == 0) then
             sparseMatA2X(2)%factorIndexList(2,1)=10
-            sparseMatA2X(2)%factorIndexList(2,2)=11
         else
+            sparseMatA2X(2)%factorIndexList(2,2)=11
             sparseMatA2X(2)%factorIndexList(2,3)=12
         endif
 
@@ -269,8 +269,8 @@ contains
             sparseMatA2X(1)%factorList(3)=1
             sparseMatA2X(1)%factorList(4)=1
             sparseMatA2X(1)%factorList(5)=1
-        else
             sparseMatA2X(1)%factorList(6)=1
+        else
             sparseMatA2X(1)%factorList(7)=1
             sparseMatA2X(1)%factorList(8)=1
             sparseMatA2X(1)%factorList(9)=1
@@ -278,8 +278,8 @@ contains
         ! setting up mapping between A2 -> X
         if(lpet == 0) then
             sparseMatA2X(2)%factorList(1)=1
-            sparseMatA2X(2)%factorList(2)=1
         else
+            sparseMatA2X(2)%factorList(2)=1
             sparseMatA2X(2)%factorList(3)=1
         endif
     
@@ -674,14 +674,14 @@ contains
         coordY = centroidBY
 
         if(lpet == 0) then
-            allocate(sparseMatA2X(1)%factorIndexList(2,5), sparseMatA2X(1)%factorList(5))
+            allocate(sparseMatA2X(1)%factorIndexList(2,6), sparseMatA2X(1)%factorList(6))
         else
-            allocate(sparseMatA2X(1)%factorIndexList(2,6:9), sparseMatA2X(1)%factorList(6:9))
+            allocate(sparseMatA2X(1)%factorIndexList(2,7:9), sparseMatA2X(1)%factorList(7:9))
         endif
         if(lpet == 0) then
-            allocate(sparseMatA2X(2)%factorIndexList(2,2), sparseMatA2X(2)%factorList(2))
+            allocate(sparseMatA2X(2)%factorIndexList(2,1), sparseMatA2X(2)%factorList(1))
         else
-            allocate(sparseMatA2X(2)%factorIndexList(2,3:3), sparseMatA2X(2)%factorList(3:3))
+            allocate(sparseMatA2X(2)%factorIndexList(2,2:3), sparseMatA2X(2)%factorList(2:3))
         endif
         if(lpet == 0) then
             allocate(sparseMatX2B(1)%factorIndexList(2,6), sparseMatX2B(1)%factorList(6))
@@ -697,8 +697,8 @@ contains
             sparseMatA2X(1)%factorIndexList(1,3)=2
             sparseMatA2X(1)%factorIndexList(1,4)=3
             sparseMatA2X(1)%factorIndexList(1,5)=4
-        else
             sparseMatA2X(1)%factorIndexList(1,6)=4
+        else
             sparseMatA2X(1)%factorIndexList(1,7)=3
             sparseMatA2X(1)%factorIndexList(1,8)=4
             sparseMatA2X(1)%factorIndexList(1,9)=4
@@ -709,8 +709,8 @@ contains
             sparseMatA2X(1)%factorIndexList(2,3)=3
             sparseMatA2X(1)%factorIndexList(2,4)=4
             sparseMatA2X(1)%factorIndexList(2,5)=5
-        else
             sparseMatA2X(1)%factorIndexList(2,6)=6
+        else
             sparseMatA2X(1)%factorIndexList(2,7)=7
             sparseMatA2X(1)%factorIndexList(2,8)=8
             sparseMatA2X(1)%factorIndexList(2,9)=9
@@ -718,14 +718,14 @@ contains
         ! setting up mapping between A2 -> X
         if(lpet == 0) then
             sparseMatA2X(2)%factorIndexList(1,1)=1
-            sparseMatA2X(2)%factorIndexList(1,2)=2
         else
+            sparseMatA2X(2)%factorIndexList(1,2)=2
             sparseMatA2X(2)%factorIndexList(1,3)=2
         endif
         if(lpet == 0) then
             sparseMatA2X(2)%factorIndexList(2,1)=10
-            sparseMatA2X(2)%factorIndexList(2,2)=11
         else
+            sparseMatA2X(2)%factorIndexList(2,2)=11
             sparseMatA2X(2)%factorIndexList(2,3)=12
         endif
 
@@ -738,8 +738,8 @@ contains
             sparseMatA2X(1)%factorList(3)=1
             sparseMatA2X(1)%factorList(4)=1
             sparseMatA2X(1)%factorList(5)=1
-        else
             sparseMatA2X(1)%factorList(6)=1
+        else
             sparseMatA2X(1)%factorList(7)=1
             sparseMatA2X(1)%factorList(8)=1
             sparseMatA2X(1)%factorList(9)=1
@@ -747,8 +747,8 @@ contains
         ! setting up mapping between A2 -> X
         if(lpet == 0) then
             sparseMatA2X(2)%factorList(1)=1
-            sparseMatA2X(2)%factorList(2)=1
         else
+            sparseMatA2X(2)%factorList(2)=1
             sparseMatA2X(2)%factorList(3)=1
         endif
     
