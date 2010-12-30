@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.48 2010/11/03 22:48:46 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.49 2010/12/30 21:50:37 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -59,9 +59,12 @@
       integer, intent(out)  :: rc     ! must not be optional
 
       ! Set the entry points for standard ESMF Component methods
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=GComp_Init, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=GComp_Run, rc=rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=GComp_Final, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+		userRoutine=GComp_Init, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+		userRoutine=GComp_Run, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+		userRoutine=GComp_Final, rc=rc)
 
       rc = ESMF_SUCCESS
 
@@ -91,10 +94,11 @@
     
 !BOC
     subroutine GComp_Init(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp)   :: comp                       ! must not be optional
-      type(ESMF_State)      :: importState, exportState   ! must not be optional
-      type(ESMF_Clock)      :: clock                      ! must not be optional
-      integer, intent(out)  :: rc                         ! must not be optional
+      type(ESMF_GridComp)   :: comp                   ! must not be optional
+      type(ESMF_State)      :: importState            ! must not be optional
+      type(ESMF_State)      :: exportState            ! must not be optional
+      type(ESMF_Clock)      :: clock                  ! must not be optional
+      integer, intent(out)  :: rc                     ! must not be optional
 
       print *, "Gridded Comp Init starting"
 
@@ -137,10 +141,11 @@
         
 !BOC    
     subroutine GComp_Run(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp)   :: comp                       ! must not be optional
-      type(ESMF_State)      :: importState, exportState   ! must not be optional
-      type(ESMF_Clock)      :: clock                      ! must not be optional
-      integer, intent(out)  :: rc                         ! must not be optional
+      type(ESMF_GridComp)   :: comp                   ! must not be optional
+      type(ESMF_State)      :: importState            ! must not be optional
+      type(ESMF_State)      :: exportState            ! must not be optional
+      type(ESMF_Clock)      :: clock                  ! must not be optional
+      integer, intent(out)  :: rc                     ! must not be optional
 
       print *, "Gridded Comp Run starting"
       ! call ESMF_StateGet(), etc to get fields, bundles, arrays
@@ -177,10 +182,11 @@
 
 !BOC
     subroutine GComp_Final(comp, importState, exportState, clock, rc)
-      type(ESMF_GridComp)   :: comp                       ! must not be optional
-      type(ESMF_State)      :: importState, exportState   ! must not be optional
-      type(ESMF_Clock)      :: clock                      ! must not be optional
-      integer, intent(out)  :: rc                         ! must not be optional
+      type(ESMF_GridComp)   :: comp                   ! must not be optional
+      type(ESMF_State)      :: importState            ! must not be optional
+      type(ESMF_State)      :: exportState            ! must not be optional
+      type(ESMF_Clock)      :: clock                  ! must not be optional
+      integer, intent(out)  :: rc                     ! must not be optional
 
       print *, "Gridded Comp Final starting"
     

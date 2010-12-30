@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.7 2010/11/03 22:48:46 theurich Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.8 2010/12/30 21:55:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -110,11 +110,12 @@ module user_mod
       data%testArray(i) = real(i) ! initialize array data
     enddo
     
-    ! In a real ensemble application the initial data would be set to something
-    ! unique for this ensemble member. This could be accomplished for example
-    ! by reading a member specific config file that was specified by the
-    ! driver code. Alternatively, Attributes, set by the driver, could be used
-    ! to label the Component instances as specific ensemble members.
+    ! In a real ensemble application the initial data would be set to 
+    ! something unique for this ensemble member. This could be 
+    ! accomplished for example by reading a member specific config file 
+    ! that was specified by the driver code. Alternatively, Attributes, 
+    ! set by the driver, could be used to label the Component instances 
+    ! as specific ensemble members.
     
     ! Set Internal State
     wrap%p => data
