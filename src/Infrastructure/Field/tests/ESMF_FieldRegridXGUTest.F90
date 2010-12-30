@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.12 2010/12/21 22:16:33 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.13 2010/12/30 19:45:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -120,6 +120,7 @@ contains
         sideA(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
+            regDecomp=(/1,2/), &
             name=gridNameA(1), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -174,6 +175,7 @@ contains
         gridNameB(1) = 'dstGrid 1'
         sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
             coordDep1=(/1/), coordDep2=(/2/), &
+            regDecomp=(/1,2/), &
             name=gridNameB(1), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -587,6 +589,7 @@ contains
         sideA(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
+            regDecomp=(/1,2/), &
             name=gridNameA(1), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -641,6 +644,7 @@ contains
         gridNameB(1) = 'dstGrid 1'
         sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
             coordDep1=(/1/), coordDep2=(/2/), &
+            regDecomp=(/1,2/), &
             name=gridNameB(1), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
