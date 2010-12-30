@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.13 2010/10/05 22:26:51 oehmke Exp $
+// $Id: ESMCI_WMat.C,v 1.14 2010/12/30 22:30:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.13 2010/10/05 22:26:51 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.14 2010/12/30 22:30:20 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -88,14 +88,12 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
     weights.insert(std::make_pair(row, cols));
     
   if (wi.second == false) {
-
     // Get old columns associated with original row 
     std::vector<Entry> &old_cols = wi.first->second;
 
     // temp to put merged results into
     std::vector<Entry> tmp_cols;
     tmp_cols.resize(cols.size()+old_cols.size());
-
     // If nothing to be added then exit
     if (tmp_cols.empty()) return;
 
@@ -106,7 +104,6 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
 
     // Resize old_cols to contain merged and unqiued data
     old_cols.resize(tmp_cols.size());
-
     // Get rid of duplicates and 
     // make sure there are no bad duplicates
     // (e.g. same id, but different values)
@@ -124,9 +121,11 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
 	//       consider .value
 	if ((tmp_cols[i]       == old_cols[j]) &&
 	    (std::abs(tmp_cols[i].value-old_cols[j].value) > 1e-5))
-	  //  printf("ERROR tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n",
-	  //  tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
-	Throw() << "Shouldn't have same entries with different value!";
+	  printf("ERROR dst_id=%d tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n", row.id,
+	   tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
+
+        //	Throw() << "Shouldn't have same entries with different value!";
+
       }
     }
 
@@ -137,14 +136,11 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
     std::vector<Entry>(old_cols).swap(old_cols);
 
   } else {
-    
     // Sort the column entries (invariant used elsewhere).
     std::sort(wi.first->second.begin(), wi.first->second.end());
-
     // compress storage
     std::vector<Entry>(wi.first->second).swap(wi.first->second);
   }
-  
 }
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.10 2010/09/09 20:26:11 oehmke Exp $
+// $Id: ESMCI_Interp.h,v 1.11 2010/12/30 22:30:20 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -167,8 +167,8 @@ public:
   void transfer_parallel();
 
   // interpolation type
-  void mat_transfer_serial(int fpair_num, IWeights &);
-  void mat_transfer_parallel(int fpair_num, IWeights &);
+  void mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac);
+  void mat_transfer_parallel(int fpair_num, IWeights &, IWeights &);
 
   // L2 conservative interpolation matrix generation parallel?
   void interpL2csrvM_serial(const IWeights &, IWeights *, MEField<> const * const, MEField<> const * const);

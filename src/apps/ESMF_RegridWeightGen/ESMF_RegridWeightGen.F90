@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.15 2010/12/06 18:29:31 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.16 2010/12/30 22:30:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -24,6 +24,7 @@ program ESMF_RegridWeightGen
       type(ESMF_Mesh)    :: srcMesh, dstMesh
       type(ESMF_Grid)    :: srcGrid, dstGrid
       type(ESMF_Field)   :: srcField, dstField
+      type(ESMF_Field)   :: srcFracField, dstFracField
       type(ESMF_ArraySpec) :: arrayspec
       integer(ESMF_KIND_I4), pointer:: indicies(:,:)
       real(ESMF_KIND_R8), pointer :: weights(:)
@@ -35,7 +36,7 @@ program ESMF_RegridWeightGen
       integer            :: poleptrs
       integer, pointer   :: dims(:)
       logical            :: convert3D
-      logical            :: isConserve
+      logical            :: isConserve, isSphere
       logical            :: addCorners,convertToDual
       type(ESMF_MeshLoc) :: meshLoc
       logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg
@@ -43,7 +44,7 @@ program ESMF_RegridWeightGen
       character(len=256) :: methodStr
       real(ESMF_KIND_R8), pointer :: srcArea(:)
       real(ESMF_KIND_R8), pointer :: dstArea(:)
-      real(ESMF_KIND_R8), pointer :: dstFrac(:)
+      real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
       character(len=256) :: commandbuf1(3)
       integer            :: commandbuf2(8)
       integer            :: regridScheme
@@ -373,11 +374,21 @@ program ESMF_RegridWeightGen
         meshLoc=ESMF_MESHLOC_ELEMENT
      endif
 
+
+     if (srcIsRegional .and. dstIsRegional) then
+        regridScheme = ESMF_REGRID_SCHEME_REGION3D
+        isSphere=.false.
+     else
+        regridScheme = ESMF_REGRID_SCHEME_FULL3D
+        isSphere=.true.
+     endif
+     
      !Read in the srcfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh
      if (srcIsScrip) then
 	if(srcIsReg) then
-           srcGrid = ESMF_GridCreate(srcfile,(/PetCnt,1/), addCornerStagger=addCorners, rc=rc)
+           srcGrid = ESMF_GridCreate(srcfile,(/PetCnt,1/), addCornerStagger=addCorners, &
+                       isSphere=isSphere, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -387,7 +398,6 @@ program ESMF_RegridWeightGen
            srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
                        convertToDual=convertToDual, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-           !srcField = CreateFieldFromMesh(srcMesh, rc)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
            srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -406,7 +416,8 @@ program ESMF_RegridWeightGen
      ! ESMF_Grid or ESMF_Mesh)
      if (dstIsScrip) then
 	if(dstIsReg) then
-           dstGrid = ESMF_GridCreate(dstfile,(/PetCnt,1/), addCornerStagger=addCorners, rc=rc)
+           dstGrid = ESMF_GridCreate(dstfile,(/PetCnt,1/), addCornerStagger=addCorners, &
+                       isSphere=isSphere, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -432,11 +443,33 @@ program ESMF_RegridWeightGen
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
-      if (srcIsRegional .and. dstIsRegional) then
-        regridScheme = ESMF_REGRID_SCHEME_REGION3D
-      else
-        regridScheme = ESMF_REGRID_SCHEME_FULL3D
+      ! Create Frac Fields if conservative
+      if (isConserve) then
+         if (srcIsReg) then
+            call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            srcFracField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
+
+         if (dstIsReg) then
+            call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            dstFracField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
       endif
+
       maskvals(1) = 0
       if (poleptrs <= 0) poleptrs = 1
       if (trim(method) .eq. 'bilinear') then
@@ -464,6 +497,7 @@ program ESMF_RegridWeightGen
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
 	    indicies=indicies, weights=weights, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
             regridMethod = ESMF_REGRID_METHOD_CONSERVE, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = regridScheme, rc=rc)
@@ -473,6 +507,7 @@ program ESMF_RegridWeightGen
 	     print *, 'The -method is not a recognized interpolation method.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
+
 
       ! Compute areas if conservative
       ! Area only valid on PET 0 right now, when parallel Array
@@ -504,7 +539,25 @@ program ESMF_RegridWeightGen
       ! destination fraction depends on the src mask, dst mask, and the weight
       if (method .eq. 'bilinear' .and. srcIsReg .and. dstIsReg) then
 	call computeFracGrid(dstGrid, vm, indicies, dstFrac, rc)
-      endif    
+      else if (method .eq. 'conserve') then
+         if (srcIsReg) then
+            call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+                 srcFrac, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
+
+         if (dstIsReg) then
+            call gatherFracFieldGrid(dstGrid, dstFracField, petNo, dstFrac, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         else
+            call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+                 dstFrac, rc=rc)
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
+      endif
 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
@@ -512,7 +565,7 @@ program ESMF_RegridWeightGen
             call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodStr, &
-                   srcArea=srcArea, dstArea=dstArea, rc=rc)
+                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else if (method .eq. 'bilinear') then
             call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
@@ -834,6 +887,177 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   deallocate(globalDispl)
 
 end subroutine computeFracGrid
+
+
+subroutine gatherFracFieldGrid(grid, fracField, petNo, frac, rc)
+  type(ESMF_Grid) :: grid
+  type(ESMF_Field) :: fracField
+  integer :: petNo
+  real (ESMF_KIND_R8), pointer :: frac(:)
+  integer :: rc
+  integer :: minIndex(2), maxIndex(2), gridDims(2)
+  real (ESMF_KIND_R8), pointer :: frac2D(:,:)
+  integer :: localrc
+
+
+  ! Get size of Grid
+  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=localrc
+      return
+  endif
+
+  ! Grid size
+  gridDims(1)=maxIndex(1)-minIndex(1)+1
+  gridDims(2)=maxIndex(2)-minIndex(2)+1
+
+
+     ! Allocate memory for area
+     allocate(frac2D(gridDims(1),gridDims(2)))
+
+     ! Get area onto PET 0
+     call ESMF_FieldGather(fracField, farray=frac2D, rootPet=0, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+         rc=localrc
+        return
+     endif
+ 
+     ! Only do this part on PET 0
+     if (petNo .eq. 0) then
+
+        ! Allocate memory for area
+        allocate(frac(gridDims(1)*gridDims(2)))
+
+        ! flatten area
+        frac=RESHAPE(frac2D,(/gridDims(1)*gridDims(2)/))
+
+     endif
+
+     ! deallocate memory for 2D area
+     deallocate(frac2D)
+
+end subroutine gatherFracFieldGrid
+
+
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! AREA ONLY VALID ON PET 0
+subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: VM
+  integer :: petNo,petCnt
+  type(ESMF_Field) :: fracField
+  real (ESMF_KIND_R8), pointer :: frac(:)
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: localFrac(:)
+  real (ESMF_KIND_R8), pointer :: mergedFrac(:)
+  integer :: localrc
+  integer :: localElemCount,i
+  integer (ESMF_KIND_I4) :: localCount(1)
+  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+  integer :: totalCount
+  logical :: hasSplitElem
+  
+  ! Get localFrac from field
+  call ESMF_FieldGet(fracField, localDE=0, farrayPtr=localFrac,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Find out if elements are split
+  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)  
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Get merge frac field depending on if split elements
+  if (hasSplitElem) then 
+     ! Get local size of mesh areas before split
+     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
+          rc=localrc)  
+     if (localrc /=ESMF_SUCCESS) then
+        rc=localrc
+        return
+     endif
+
+     ! allocate space for frac
+     allocate(mergedFrac(localElemCount))
+
+     ! Get local Areas
+     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
+          origfracList=mergedFrac, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=localrc
+        return
+     endif
+
+     ! switch to point to merged areas
+     localFrac=>mergedFrac
+  else 
+     localElemCount=size(localFrac)
+     ! localFrac is gotten from the fracField above
+  endif
+
+
+  ! Allocate List of counts
+  allocate(globalCount(petCnt))
+
+  ! Get List of counts
+  localCount(1)=localElemCount
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Calculate Displacements
+  allocate(globalDispl(petCnt))
+  if (petNo==0) then
+     globalDispl(1)=0
+     do i=2,petCnt
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+     enddo
+  else
+     globalDispl=0
+  endif
+
+
+  ! Sum size
+  if (petNo==0) then
+     totalCount=0
+     do i=1,petCnt
+        totalCount=totalCount+globalCount(i)
+     enddo
+  else 
+     totalCount=1 ! Because I'm not sure what happens
+     ! if array is not allocated in VM
+  endif
+
+  ! Allocate final area list
+  allocate(frac(totalCount))
+
+  ! Gather all areas
+  call ESMF_VMGatherV(vm,sendData=localFrac, sendCount=localElemCount,&
+       recvData=frac,recvCounts=globalCount,recvOffsets=globalDispl,&
+       root=0, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Get rid of helper variables
+  if (hasSplitElem) then 
+     deallocate(mergedFrac) 
+  endif
+  deallocate(globalCount)
+  deallocate(globalDispl)
+  if (petNo .ne. 0) deallocate(frac)
+
+end subroutine gatherFracFieldMesh
+
+
 
 subroutine PrintUsage()
      print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 

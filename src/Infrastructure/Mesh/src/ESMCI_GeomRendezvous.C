@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.C,v 1.9 2010/08/24 16:10:51 oehmke Exp $
+// $Id: ESMCI_GeomRendezvous.C,v 1.10 2010/12/30 22:30:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.9 2010/08/24 16:10:51 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.10 2010/12/30 22:30:20 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -469,7 +469,22 @@ void GeomRend::prep_meshes() {
     srcmesh_rend.RegisterField("mask", smask->GetMEFamily(),
 		 MeshObj::ELEMENT, smask->GetContext(), smask->dim());
   }
-  
+
+
+  MEField<> *src_elem_mask = srcmesh.GetField("elem_mask");
+  if (src_elem_mask != NULL) {
+    srcmesh_rend.RegisterField("elem_mask", src_elem_mask->GetMEFamily(),
+		 MeshObj::ELEMENT, src_elem_mask->GetContext(), src_elem_mask->dim());
+  }
+
+
+  MEField<> *src_elem_area = srcmesh.GetField("elem_area");
+  if (src_elem_area != NULL) {
+    srcmesh_rend.RegisterField("elem_area", src_elem_area->GetMEFamily(),
+		 MeshObj::ELEMENT, src_elem_area->GetContext(), src_elem_area->dim());
+  }
+
+
   // Destination Mesh //
   
   // Mesh dims
@@ -485,7 +500,21 @@ void GeomRend::prep_meshes() {
   if (iter_is_obj) {
     MEField<> &dcoord = *dstmesh.GetCoordField();
     dstmesh_rend.RegisterField("coordinates", dcoord.GetMEFamily(), MeshObj::ELEMENT,
-                        dcoord.GetContext(), dcoord.dim());
+                               dcoord.GetContext(), dcoord.dim());
+
+    MEField<> *dst_elem_mask = dstmesh.GetField("elem_mask");
+    if (dst_elem_mask != NULL) {
+      dstmesh_rend.RegisterField("elem_mask", dst_elem_mask->GetMEFamily(),
+                                 MeshObj::ELEMENT, dst_elem_mask->GetContext(), dst_elem_mask->dim());
+    }
+
+
+    MEField<> *dst_elem_area = dstmesh.GetField("elem_area");
+    if (dst_elem_area != NULL) {
+      dstmesh_rend.RegisterField("elem_area", dst_elem_area->GetMEFamily(),
+                                 MeshObj::ELEMENT, dst_elem_area->GetContext(), dst_elem_area->dim());
+    }
+
   } else {
     
      MEField<> &dcoord = *dstmesh.GetCoordField();
@@ -516,7 +545,7 @@ void GeomRend::migrate_meshes() {
 
   {  
     int num_snd=0;
-    MEField<> *snd[2],*rcv[2];
+    MEField<> *snd[4],*rcv[4];
 
     MEField<> *sc = srcmesh.GetCoordField();
     MEField<> *sc_r = srcmesh_rend.GetCoordField();
@@ -537,6 +566,28 @@ void GeomRend::migrate_meshes() {
       num_snd++;            
     }
 
+    // Do elem masks if necessary
+    MEField<> *sem = srcmesh.GetField("elem_mask");
+    if (sem != NULL) {
+      MEField<> *sem_r = srcmesh_rend.GetField("elem_mask");
+
+      // load mask fields
+      snd[num_snd]=sem;
+      rcv[num_snd]=sem_r;
+      num_snd++;            
+    }
+
+    // Do elem masks if necessary
+    MEField<> *sea = srcmesh.GetField("elem_area");
+    if (sea != NULL) {
+      MEField<> *sea_r = srcmesh_rend.GetField("elem_area");
+
+      // load mask fields
+      snd[num_snd]=sea;
+      rcv[num_snd]=sea_r;
+      num_snd++;            
+    }
+
      srcmesh_rend.Commit();
   
      srcComm.SendFields(num_snd, snd, rcv);
@@ -553,18 +604,62 @@ void GeomRend::migrate_meshes() {
   }
   
 
-  MEField<> *dc = dstmesh.GetCoordField();
-  MEField<> *dm = dstmesh.GetField("mask");
-  
   dstmesh_rend.Commit();
   
   if (iter_is_obj) {    
+    int num_snd=0;
+    MEField<> *snd[4],*rcv[4];
+
+    MEField<> *dc = dstmesh.GetCoordField();
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
-    dstComm.SendFields(1, &dc, &dc_r);
+
+    // load coordinate fields
+    snd[num_snd]=dc;
+    rcv[num_snd]=dc_r;
+    num_snd++;            
+
+    // Do masks if necessary
+    MEField<> *dm = dstmesh.GetField("mask");
+    if (dm != NULL) {
+      MEField<> *dm_r = dstmesh_rend.GetField("mask");
+
+      // load mask fields
+      snd[num_snd]=dm;
+      rcv[num_snd]=dm_r;
+      num_snd++;            
+    }
+
+    // Do elem masks if necessary
+    MEField<> *dem = dstmesh.GetField("elem_mask");
+    if (dem != NULL) {
+      MEField<> *dem_r = dstmesh_rend.GetField("elem_mask");
+
+      // load mask fields
+      snd[num_snd]=dem;
+      rcv[num_snd]=dem_r;
+      num_snd++;            
+    }
+
+    // Do elem area if necessary
+    MEField<> *dea = dstmesh.GetField("elem_area");
+    if (dea != NULL) {
+      MEField<> *dea_r = dstmesh_rend.GetField("elem_area");
+
+      // load mask fields
+      snd[num_snd]=dea;
+      rcv[num_snd]=dea_r;
+      num_snd++;            
+    }
+
+     dstComm.SendFields(num_snd, snd, rcv);
+
   } else {
     int num_snd=0;
     _field *snd[2],*rcv[2];
-    
+
+    MEField<> *dc = dstmesh.GetCoordField();
+    MEField<> *dm = dstmesh.GetField("mask");
+      
     _field *dcf = dc->GetNodalfield();
     _field *dc_rf = dstmesh_rend.Getfield("coordinates_1");
     ThrowRequire(dc_rf);

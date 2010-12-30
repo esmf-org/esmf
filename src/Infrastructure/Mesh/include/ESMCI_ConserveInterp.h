@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.h,v 1.2 2010/09/09 20:26:11 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.h,v 1.3 2010/12/30 22:30:20 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -30,8 +30,11 @@ namespace ESMCI {
 			      std::vector<int> *valid, std::vector<double> *wgts);
 
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
-                             std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
-			      std::vector<int> *valid, std::vector<double> *wgts);
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+                                           std:: vector<char> dst_node_on_bndry, double *src_elem_area,
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas);
+
+  void fill_node_is_on_bndry_list(Mesh &mesh, std::vector<char> *is_on_bndry);
 
 } // namespace
 

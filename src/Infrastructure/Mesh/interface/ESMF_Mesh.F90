@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.51 2010/12/30 22:30:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.51 2010/12/30 22:30:20 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -180,9 +180,12 @@ module ESMF_MeshMod
   public ESMF_MeshFindPnt
   public ESMF_MeshGetElemArea
   public ESMF_MeshGetOrigElemArea
+  public ESMF_MeshGetElemFrac
+  public ESMF_MeshGetOrigElemFrac
   public ESMF_MeshGetElemSplit
   public ESMF_MeshMergeSplitSrcInd
   public ESMF_MeshMergeSplitDstInd
+
   public operator(.eq.), operator(.ne.) 
 
 !EOPI
@@ -191,7 +194,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.50 2010/12/03 05:57:54 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.51 2010/12/30 22:30:20 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2245,6 +2248,201 @@ end function ESMF_MeshCreateFromScrip
   end subroutine ESMF_MeshGetOrigElemArea
 !------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetElemFrac()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetElemFrac - Get frac of elements in mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshGetElemFrac(mesh, fracList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    real(ESMF_KIND_R8), pointer                     :: fracList(:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   Write a mesh to VTK file.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [fracList]
+!         Fractions for the mesh elements will be put here
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+   ! Call into mesh get areas
+    call C_ESMC_MeshGetFrac(mesh%this, size(fracList), fracList, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshGetElemFrac
+!------------------------------------------------------------------------------
+
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetOrigElemFrac()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetOrigElemFrac - Find Frac of elements in mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshGetOrigElemFrac(mesh, splitFracList,origfracList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    real(ESMF_KIND_R8), pointer                     :: splitFracList(:)
+    real(ESMF_KIND_R8), pointer                     :: origfracList(:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   For a Mesh with split elements, get the area of the original 
+!   unsplit element. If not split elements then just get Mesh areas.
+!  
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [fracList]
+!         Fractions for the mesh elements will be put here
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                             :: localrc      ! local return code
+    real(ESMF_KIND_R8), pointer         :: splitAreaList(:)
+    real(ESMF_KIND_R8), pointer         :: origAreaList(:)
+    integer                             :: i,m
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+                 "- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+
+    ! check size of fracList
+    if (size(origfracList) .lt. mesh%origElemCount) then
+       call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+                 "- frac list too small to hold element fracs", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! check size of fracList
+    if (size(splitfracList) .lt. mesh%splitElemCount) then
+       call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+                 "- frac list too small to hold element fracs", & 
+                 ESMF_CONTEXT, rc) 
+       return 
+    endif    
+
+    ! If mesh doesn't have split elements then just copy
+    ! split fractions
+    if (.not. mesh%hasSplitElem) then
+       if (size(splitFracList) .ne. size(origFracList)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+               "- no solit elements so frac list sizes should be the same", & 
+               ESMF_CONTEXT, rc) 
+          return 
+       endif
+       origFracList(:)=splitFracList(:)
+       return 
+    endif    
+
+
+    ! Allocate array to hold split areas
+    allocate(splitAreaList(mesh%splitElemCount))
+    allocate(origAreaList(mesh%origElemCount))
+
+    ! Get split areas
+    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Put the Fracs back together
+    ! TODO: MIGHT MAKE SENSE TO HAVE ONE INTERFACE 
+    ! THAT DOES AREA AND FRAC, SO WE DON'T REPEAT THE AREA CALC.
+    origFracList=0.0_ESMF_KIND_R8
+    origAreaList=0.0_ESMF_KIND_R8
+    do i=1,mesh%splitElemCount
+       m=mesh%splitElemMap(i)-mesh%origElemStart+1
+       origFracList(m)=origFracList(m)+splitAreaList(i)*splitFracList(i)
+       origAreaList(m)=origAreaList(m)+splitAreaList(i)
+    enddo
+
+    ! Normalize by the area again
+    do i=1,mesh%origElemCount
+       origFracList(i)=origFracList(i)/origAreaList(i)
+    enddo
+
+    ! Allocate array to hold split areas
+    deallocate(splitAreaList)
+    deallocate(origAreaList)
+
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshGetOrigElemFrac
+!------------------------------------------------------------------------------
 
 ! -----------------------------------------------------------------------------
 #undef ESMF_METHOD

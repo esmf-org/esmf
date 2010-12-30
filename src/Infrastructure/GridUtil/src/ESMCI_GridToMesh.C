@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.5 2010/12/04 00:05:56 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.6 2010/12/30 22:30:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -117,12 +117,32 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
 
  mesh.set_spatial_dimension(sdim);
- 
+
+ // See if this is for conservative regridding
+ bool isConserve=false;
+ if (*regridConserve == ESMC_REGRID_CONSERVE_ON) isConserve=true;
+
  // see if grid has a mask field
  bool hasMask=false;
+ if (isConserve) {
+   // If conservative check for masking on center stagger
+   if (grid.hasItemStaggerLoc(0, ESMC_GRIDITEM_MASK)) {
+     hasMask=true;
+   } else {
+     hasMask=false;
+   }
+ } else {
+   if (grid.hasItemStaggerLoc(staggerLoc, ESMC_GRIDITEM_MASK)) {
+       hasMask=true;
+   } else {
+     hasMask=false;
+   }
+ }
+ 
+ // Get Mask values if necessary
  int numMaskValues=0;
  int *ptrMaskValues;
- if (grid.hasItemStaggerLoc(staggerLoc, ESMC_GRIDITEM_MASK)) {
+ if (hasMask) {
    if (maskValuesArg != NULL) {
      // Error check mask values
      if (maskValuesArg->dimCount != 1) {
@@ -132,14 +152,23 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
      // Get mask values
      numMaskValues=maskValuesArg->extent[0];
      ptrMaskValues=&(maskValuesArg->array[0]);
-     
-     // Turn on masking
-     hasMask=true;
-   } else {
-     hasMask=false;
    }
  }
+
  
+ // See if grid has area field
+ // (Area only useful for conservative)
+ bool hasArea=false;
+ if (isConserve) {
+   // If conservative check for masking on center stagger
+   if (grid.hasItemStaggerLoc(0, ESMC_GRIDITEM_AREA)) {
+     hasArea=true;
+   } else {
+     hasArea=false;
+   }
+ }
+
+
  // We save the nodes in a linear list so that we can access then as such
  // for cell creation.
  std::map<UInt,MeshObj*> nodemap;
@@ -336,6 +365,7 @@ Par::Out() << std::endl;
      // Now set up the nodal coordinates
    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
 
+#if 0
   if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
     // Register the iwts field
     // TODO:  This should be in a more standard location,
@@ -344,6 +374,8 @@ Par::Out() << std::endl;
     MEField<> *iwts = mesh.RegisterField("iwts",
       MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   }
+#endif
+
 
    // Create whatever fields the user wants
    std::vector<IOField<NodalField>*> nfields;
@@ -355,13 +387,6 @@ Par::Out() << std::endl;
                       );
      nfields.back()->set_output_status(true);
    }
-
-   // Setup the mask field if necessary
-   IOField<NodalField> *node_mask;
-   if (hasMask) {
-     node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
-   }
-
 
 #ifdef G2M_DBG
    IOField<NodalField> *de_field = mesh.RegisterNodalField(mesh, "de", 1);
@@ -413,45 +438,38 @@ Par::Out() << std::endl;
 
    } // ni
 
+   // Setup the fraction field
+   if (isConserve) {
+     // Register mask field on elems
+     Context ctxt; ctxt.flip();
+     MEField<> *elem_frac = mesh.RegisterField("elem_frac",
+                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+   }
 
-   // Loop through Mesh nodes setting up mask
+
+
+   // Setup the mask field if necessary
    if (hasMask) {
-     for (ni = mesh.node_begin(); ni != ne; ++ni) {
-       double *m = node_mask->data(*ni);
-       
-       UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
-       
-       // Move to corresponding grid node
-       gni->moveToLocalID(lid);      
-       
-       // If local fill in coords
-       if (gni->isLocal()) {
-	 ESMC_I4 gm;
+     if (isConserve) {
+       // Register mask field on elems
+       Context ctxt; ctxt.flip();
+       MEField<> *elem_mask = mesh.RegisterField("elem_mask",
+                  MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
-	 // Get Mask value from grid
-	 gni->getItem(ESMC_GRIDITEM_MASK, &gm);
-	 
-	 // See if gm matches any mask values
-	 bool mask=false;
-         for (int i=0; i<numMaskValues; i++) {
-	   ESMC_I4 mv=ptrMaskValues[i];
-	   if (mv==gm) {
-	     mask=true;
-	     break;
-	   }
-	 }
+     } else {
+       IOField<NodalField> *node_mask;
+       node_mask = mesh.RegisterNodalField(mesh, "mask", 1);       
+     }
+   }
 
-	 // Set Mask based on grid mask value
-	 if (mask) {
-	   *m=1.0;
-	 } else {
-	   *m=0.0;
-	 }
-
-       } else { // set to Null value to be ghosted later
-	 *m=0.0;
+   // Setup the area field if necessary
+   if (hasArea) {
+     if (isConserve) {
+       // Register area field on elems
+       Context ctxt; ctxt.flip();
+       MEField<> *elem_area = mesh.RegisterField("elem_area",
+                  MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
        }
-     } // ni
    }
 
    // Now go back and resolve the ownership for shared nodes.  We create a distdir
@@ -528,6 +546,165 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 */
    }
 
+   // Setup the mask field if necessary
+   if (hasMask) {
+     if (isConserve) {
+       // Get mask field on elems
+      MEField<> *elem_mask=mesh.GetField("elem_mask");
+
+       // Loop elemets of the grid.  Here we loop all elements, both owned and not.
+       for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
+         
+         // get the global id of this Grid node
+         int gid=gci->getGlobalID(); 
+      
+         //  Find the corresponding Mesh element
+         Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
+         if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+           Throw() << "Grid entry not in mesh";
+         }
+
+         // Get the element
+         const MeshObj &elem = *mi; 
+
+         // Get mask data
+         double *m=elem_mask->data(elem);
+
+         // Init in case is not locally owned
+         *m=0.0;
+
+         // Only put it in if it's locally owned
+         if (!GetAttr(elem).is_locally_owned()) continue;
+         
+         // Get mask from the Item Array
+         ESMC_I4 gm;
+         
+         // Get Mask value from grid
+         gci->getItem(ESMC_GRIDITEM_MASK, &gm);
+
+         // See if gm matches any mask values
+         bool mask=false;
+         for (int i=0; i<numMaskValues; i++) {
+           ESMC_I4 mv=ptrMaskValues[i];
+           if (mv==gm) {
+             mask=true;
+             break;
+           }
+         }
+           
+         // Set Mask based on grid mask value
+         if (mask) {
+           *m=1.0;
+         } else {
+           *m=0.0;
+         }
+       }
+     } else {
+       // Get mask field on elems
+      MEField<> *node_mask=mesh.GetField("mask");
+
+       for (ni = mesh.node_begin(); ni != ne; ++ni) {
+         double *m = node_mask->data(*ni);
+         
+         UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
+         
+         // Move to corresponding grid node
+         gni->moveToLocalID(lid);      
+         
+         // If local fill in coords
+         if (gni->isLocal()) {
+           ESMC_I4 gm;
+           
+           // Get Mask value from grid
+           gni->getItem(ESMC_GRIDITEM_MASK, &gm);
+           
+           // See if gm matches any mask values
+           bool mask=false;
+           for (int i=0; i<numMaskValues; i++) {
+             ESMC_I4 mv=ptrMaskValues[i];
+             if (mv==gm) {
+               mask=true;
+               break;
+             }
+           }
+           
+           // Set Mask based on grid mask value
+           if (mask) {
+             *m=1.0;
+           } else {
+             *m=0.0;
+           }
+           
+         } else { // set to Null value to be ghosted later
+           *m=0.0;
+         }
+       } // ni
+     }
+   }
+
+
+
+   // Setup the area field if necessary
+   if (hasArea) {
+     if (isConserve) {
+       // Register area field on elems
+       // Get area field on elems
+       MEField<> *elem_area=mesh.GetField("elem_area");
+
+       // Loop elemets of the grid.  Here we loop all elements, both owned and not.
+       for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
+         
+         // get the global id of this Grid node
+         int gid=gci->getGlobalID(); 
+      
+         //  Find the corresponding Mesh element
+         Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
+         if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+           Throw() << "Grid entry not in mesh";
+         }
+      
+         // Get the element
+         const MeshObj &elem = *mi; 
+
+         // Get mask data
+         double *a=elem_area->data(elem);
+         
+         // Init in case is not locally owned
+         *a=0.0;
+         
+         // Only put it in if it's locally owned
+         if (!GetAttr(elem).is_locally_owned()) continue;
+         
+         // Get mask from the Item Array
+         ESMC_R8 ga;
+         
+         // Get Mask value from grid
+         gci->getItem(ESMC_GRIDITEM_AREA, &ga);
+        
+         // Set value
+         *a=ga;
+       }
+     } 
+   }
+
+
+#if 0
+   if (hasMask) {
+   // Test getting getting mask data
+   MEField<> *tst_field_ptr=mesh.GetField("elem_mask");
+
+   printf("tst_field_ptr=%d \n",(int )tst_field_ptr);
+
+   MeshDB::iterator ei=mesh.elem_begin(), ee=mesh.elem_end();
+
+   for (; ei!=ee; ei++) {
+     double *e=tst_field_ptr->data(*ei);
+     if (*e >0.5) printf("%d %f \n",ei->get_id(),*e);
+   }
+
+   }
+#endif
+
 
    // delete Grid Iters
    delete gni;
@@ -588,8 +765,65 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
    delete gni;
 
 }
-
 #undef  ESMC_METHOD
+
+
+  // Assumes array is on center staggerloc of grid
+  void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "CpMeshElemDataToArray()" 
+  Trace __trace("CpMeshElemDataToArray()");
+
+ int localrc;
+ int rc;
+
+
+  // Initialize the parallel environment for mesh (if not already done)
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+
+ if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
+   Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
+  }
+
+    // Loop elemets of the grid.  Here we loop all elements, both owned and not.
+    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerloc);
+    
+    // loop through all nodes in the Grid
+    for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
+      
+      // get the global id of this Grid node
+      int gid=gci->getGlobalID(); 
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
+      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+	Throw() << "Grid entry not in mesh";
+      }
+      
+      // Get the element
+      const MeshObj &elem = *mi; 
+      
+      // Only put it in if it's locally owned
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+
+       // Get the data 
+	double *data = dataToArray->data(elem);
+
+        // DEBUG:  printf("G2M %d %f \n",gid,*data);
+
+       // Put it into the Array
+      gci->setArrayData(&array, *data);
+   }
+
+   // delete Grid Iters
+   delete gci;
+}
+
+
+
 
 
   void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
@@ -661,6 +895,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
       } else {
 	Throw() << "Meshes with parametric dimension != 2 not supported for computing areas";
       }
+
       
        // Put it into the Array
       gci->setArrayData(&array, area);

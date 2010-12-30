@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.113 2010/12/04 00:04:30 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.114 2010/12/30 22:30:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.113 2010/12/04 00:04:30 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.114 2010/12/30 22:30:20 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -7903,6 +7903,100 @@ template void GridCellIter::setArrayData(Array *array, ESMC_R8 data);
 template void GridCellIter::setArrayData(Array *array, ESMC_R4 data);
 template void GridCellIter::setArrayData(Array *array, ESMC_I4 data);
 //-----------------------------------------------------------------------------
+
+ /* XMRKX */
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getArrayData()"
+//BOPI
+// !IROUTINE:  getArrayData
+//
+// !INTERFACE:
+template <class TYPE>
+void GridCellIter::getArrayData(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Data output
+// 
+                            Array *array,
+                            TYPE *data // (out) input array needs to be at
+                                       // least of size grid dimCount    
+ ){
+//
+// !DESCRIPTION:
+// Get data from a passed in Array
+// TODO: Need to come up with a way to handle Arrays with more dimensions than the Grid
+// TODO: Need error checking!!!!!
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  LocalArray *localArray;
+  
+  // if done then leave
+  if (done) return;
+  
+  //// Get LocalArray cooresponding to staggerloc, coord and localDE
+  localArray=array->getLocalarrayList()[curDE];
+  
+  //// Get pointer to LocalArray data
+  localArray->getDataInternal(curInd, data);
+  
+}
+
+// Add more types here if necessary
+template void GridCellIter::getArrayData(Array *array, ESMC_R8 *data);
+template void GridCellIter::getArrayData(Array *array, ESMC_R4 *data);
+template void GridCellIter::getArrayData(Array *array, ESMC_I4 *data);
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GridCellIter::getItem()"
+//BOPI
+// !IROUTINE:  getItem
+//
+// !INTERFACE:
+template <class TYPE>
+void GridCellIter::getItem(
+//
+// !RETURN VALUE:
+//  void
+//
+// !ARGUMENTS:
+//   Value output 
+// 
+ 		       int item,     // item type
+		       TYPE *value // (out) input array needs to be at
+                                       // least of the size of 1 item    
+ ){
+//
+// !DESCRIPTION:
+//  Returns the item value for an iteration location.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+
+  // if done then leave
+  if (done) return;
+
+  // get item data from center stagger (where the data for a cell lives)
+  grid->getItemInternal(item, 0, curDE, curInd, value);
+
+}
+// Add more types here if necessary
+template void GridCellIter::getItem(int item, ESMC_R8 *data);
+template void GridCellIter::getItem(int item, ESMC_R4 *data);
+template void GridCellIter::getItem(int item, ESMC_I4 *data);
+//-----------------------------------------------------------------------------
+
 
 
 

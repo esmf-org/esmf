@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.50 2010/12/03 05:57:29 theurich Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.51 2010/12/30 22:30:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.50 2010/12/03 05:57:29 theurich Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.51 2010/12/30 22:30:20 oehmke Exp $'
 
 !==============================================================================
 !
@@ -264,6 +264,7 @@ contains
                                        dstField, dstMaskValues,        &
                                        unmappedDstAction,              &
                                        routeHandle, indicies, weights, & 
+                                       srcFracField, dstFracField,               &
                                        regridMethod,                   &
                                        regridPoleType, regridPoleNPnts, & 
                                        regridScheme, rc)
@@ -279,6 +280,8 @@ contains
       type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
+      type(ESMF_Field), intent(inout),optional          :: srcFracField
+      type(ESMF_Field), intent(inout),optional          :: dstFracField
       type(ESMF_RegridMethod), intent(in), optional   :: regridMethod
       type(ESMF_RegridPole), intent(in), optional     :: regridPoleType
       integer, intent(in),optional                    :: regridPoleNPnts
@@ -324,6 +327,14 @@ contains
 !           The indices for the sparse matrix.
 !     \item [{[weights]}] 
 !           The weights for the sparse matrix.
+!     \item [{[srcFracField]}] 
+!           The fraction of each source cell participating in the regridding. Only 
+!           valid when regridMethod is {\tt ESMF\_REGRID\_METHOD\_CONSERVE}.
+!           This Field needs to be created on the same location (e.g staggerloc) as the srcField.
+!     \item [{[dstFracField]}] 
+!           The fraction of each destination cell participating in the regridding. Only 
+!           valid when regridMethod is {\tt ESMF\_REGRID\_METHOD\_CONSERVE}.
+!           This Field needs to be created on the same location (e.g staggerloc) as the dstField.
 !     \item [{[regridMethod]}]
 !           The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
 !           valid options. If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
@@ -353,21 +364,24 @@ contains
         integer              :: isSphere
         type(ESMF_GeomType)  :: srcgeomtype
         type(ESMF_GeomType)  :: dstgeomtype
-
         type(ESMF_Grid)      :: srcGrid
         type(ESMF_Grid)      :: dstGrid
         type(ESMF_Array)     :: srcArray
         type(ESMF_Array)     :: dstArray
+        type(ESMF_Array)     :: fracArray
         type(ESMF_VM)        :: vm
         type(ESMF_Mesh)      :: srcMesh
         type(ESMF_Mesh)      :: dstMesh
-        type(ESMF_MeshLoc)   :: meshloc
+        type(ESMF_MeshLoc)   :: srcMeshloc,dstMeshloc,fracMeshloc
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
+        type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
+        type(ESMF_StaggerLoc) :: fracStaggerLoc
         integer              :: gridDimCount
         type(ESMF_RegridPole):: localRegridPoleType
         integer              :: localRegridPoleNPnts
         logical              :: isLatLonDeg
-
+        type(ESMF_RegridConserve) :: regridConserveG2M
+        real(ESMF_KIND_R8), pointer :: fracFptr(:)
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -409,7 +423,6 @@ contains
         else
           lregridScheme = ESMF_REGRID_SCHEME_NATIVE
         endif
-
 
 
         ! Handle optional method argument
@@ -488,6 +501,14 @@ contains
            isLatLonDeg=.false.
         endif
 
+        ! Set conserve flag for GridToMesh
+        if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+           regridConserveG2M=ESMF_REGRID_CONSERVE_ON
+        else
+           regridConserveG2M=ESMF_REGRID_CONSERVE_OFF
+        endif
+
+
         ! If grids, then convert to a mesh to do the regridding
         if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(srcField, grid=srcGrid, &
@@ -522,35 +543,38 @@ contains
             ! Create the mesh from corner stagger to better represent the
             ! control volumes (the following simple assign only works because
             ! we only support 2D right now)
-	    srcStaggerloc=ESMF_STAGGERLOC_CORNER
+	    srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER
+          else 
+            ! If we're not conservative, then use the staggerloc that the field is built upon
+	    srcStaggerlocG2M=srcStaggerloc
           endif
 
           ! check grid
-          call checkGrid(srcGrid,srcStaggerloc,rc=localrc)
+          call checkGrid(srcGrid,srcStaggerlocG2M,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLoc, isSphere, isLatLonDeg, &
-                      maskValues=srcMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, isSphere, isLatLonDeg, &
+                      maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         else
-          call ESMF_FieldGet(srcField, mesh=srcMesh, meshLocation=meshloc, rc=localrc)
+          call ESMF_FieldGet(srcField, mesh=srcMesh, meshLocation=srcMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
-              if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
+              if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rc) 
                  return	  
               endif
           else
-              if (meshloc .ne. ESMF_MESHLOC_NODE) then
+              if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- S can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rc) 
@@ -592,34 +616,37 @@ contains
             ! Create the mesh from corner stagger to better represent the
             ! control volumes (the following simple assign only works because
             ! we only support 2D right now)
-	    dstStaggerloc=ESMF_STAGGERLOC_CORNER
+	    dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER
+          else 
+            ! If we're not conservative, then use the staggerloc that the field is built upon
+	    dstStaggerlocG2M=dstStaggerloc
           endif
 
           ! check grid
-          call checkGrid(dstGrid,dstStaggerloc,rc=localrc)
+          call checkGrid(dstGrid,dstStaggerlocG2M,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLoc, isSphere, isLatLonDeg, &
-                      maskValues=dstMaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, isSphere, isLatLonDeg, &
+                      maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call ESMF_FieldGet(dstField, mesh=dstMesh, meshLocation=meshloc, rc=localrc)
+          call ESMF_FieldGet(dstField, mesh=dstMesh, meshLocation=dstMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
-              if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
+              if (dstMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rc) 
                 return	  
               endif
           else
-              if (meshloc .ne. ESMF_MESHLOC_NODE) then
+              if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  "- D can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rc) 
@@ -642,6 +669,101 @@ contains
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
+        ! Get Fraction info
+        if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+           if (present(srcFracField)) then
+              if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
+                 call ESMF_FieldGet(srcFracField, array=fracArray, staggerloc=fracStaggerloc, &
+                      rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+
+                 ! Make sure the staggerlocs match
+                 if (srcStaggerloc .ne. fracStaggerloc) then
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                         "- srcFracField staggerloc must match srcField staggerloc", &
+                         ESMF_CONTEXT, rc)
+                    return
+                 endif
+
+                 ! Get Frac info
+                 call ESMF_RegridGetFrac(srcGrid, mesh=srcMesh, array=fracArray, &
+                      staggerloc=srcStaggerLocG2M, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
+                 call ESMF_FieldGet(srcFracField, meshlocation=fracMeshloc, &
+                      rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+
+                 ! Make sure the locs match
+                 if (srcMeshLoc .ne. fracMeshLoc) then
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                         "- srcFracField staggerloc must match srcField staggerloc", &
+                         ESMF_CONTEXT, rc)
+                    return
+                 endif
+
+                 ! get frac pointer
+                 call ESMF_FieldGet(srcFracField, localDE=0, farrayPtr=fracFptr,  rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+                 ! Get Frac info
+                 call ESMF_MeshGetElemFrac(srcMesh, fracList=fracFptr, rc=localrc)     
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
+           endif
+
+           if (present(dstFracField)) then
+              if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
+                 call ESMF_FieldGet(dstFracField, array=fracArray, staggerloc=fracStaggerloc, &
+                      rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+
+                 ! Make sure the staggerlocs match
+                 if (dstStaggerloc .ne. fracStaggerloc) then
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                         "- dstFracField Field staggerloc must match dstField staggerloc", &
+                         ESMF_CONTEXT, rc)
+                    return
+                 endif
+
+                 call ESMF_RegridGetFrac(dstGrid, mesh=dstMesh, array=fracArray, &
+                      staggerloc=dstStaggerLocG2M, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
+                 call ESMF_FieldGet(dstFracField, meshlocation=fracMeshloc, &
+                      rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+
+                 ! Make sure the locs match
+                 if (dstMeshLoc .ne. fracMeshLoc) then
+                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                         "- srcFracField staggerloc must match srcField staggerloc", &
+                         ESMF_CONTEXT, rc)
+                    return
+                 endif
+
+                 ! get frac pointer
+                 call ESMF_FieldGet(dstFracField, localDE=0, farrayPtr=fracFptr,  rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+
+                 ! Get Frac info
+                 call ESMF_MeshGetElemFrac(dstMesh, fracList=fracFptr, rc=localrc)     
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
+           endif
+        endif
+     
         ! destroy Meshes, if they were created here
         if (srcgeomtype .ne. ESMF_GEOMTYPE_MESH) then
         call ESMF_MeshDestroy(srcMesh,rc=localrc)

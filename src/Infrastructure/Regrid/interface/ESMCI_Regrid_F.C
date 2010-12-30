@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.52 2010/09/29 03:37:28 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.53 2010/12/30 22:30:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -244,6 +244,7 @@ extern "C" void FTN(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
 
 }
 
+
 extern "C" void FTN(c_esmc_regrid_getarea)(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
@@ -285,6 +286,55 @@ extern "C" void FTN(c_esmc_regrid_getarea)(Grid **gridpp,
 
 }
 
+
+
+// Assumes array is center stagger loc
+extern "C" void FTN(c_esmc_regrid_getfrac)(Grid **gridpp,
+                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                   int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_regrid_getfrac()" 
+  Trace __trace(" FTN(regrid_getfrac)()");
+
+  ESMCI::Array &array = **arraypp;
+  Mesh &mesh = **meshpp;
+  Grid &grid = **gridpp;
+
+  try {
+
+
+    // Get the integration weights
+    MEField<> *frac = mesh.GetField("elem_frac");
+    if (!frac) Throw() << "Could not find elem_frac field on this mesh"
+                             <<std::endl; 
+
+    CpMeshElemDataToArray(grid, *staggerLoc, mesh, array, frac);
+ 
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
 
 
 // Copy the weights stored in the temporary tw into the fortran arrays.  Also,
