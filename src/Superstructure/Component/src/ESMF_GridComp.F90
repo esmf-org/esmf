@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.148 2010/12/30 22:08:36 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.149 2010/12/30 22:18:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.148 2010/12/30 22:08:36 svasquez Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.149 2010/12/30 22:18:43 svasquez Exp $'
 
 !==============================================================================
 !
@@ -1454,7 +1454,8 @@ contains
 ! !IROUTINE: ESMF_GridCompSetEntryPoint - Set user routine as entry point for standard GridComp method
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetEntryPoint(gridcomp, method, userRoutine, phase, rc)
+  subroutine ESMF_GridCompSetEntryPoint(gridcomp, method, userRoutine, &
+		phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in) :: gridcomp
@@ -1583,7 +1584,8 @@ contains
 ! !IROUTINE: ESMF_GridCompSetServices - Call user routine to register GridComp methods
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_GridCompSetServices(gridcomp, userRoutine, userRc, rc)
+  recursive subroutine ESMF_GridCompSetServices(gridcomp, &
+			userRoutine, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)            :: gridcomp
@@ -1618,9 +1620,11 @@ contains
 ! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 ! must not be declared as optional, and the types, intent and order must match.
 !
+! \begin{sloppypar}
 ! The {\tt userRoutine}, when called by the framework, must make successive calls
 ! to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
 ! standard Component Initialize(), Run() and Finalize() methods.
+! \end{sloppypar}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1701,9 +1705,11 @@ contains
 !   end interface
 !
 ! !DESCRIPTION:
+! \begin{sloppypar}
 ! The {\tt userRoutine}, when called by the framework, must make successive calls
 ! to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
 ! standard Component Initialize(), Run() and Finalize() methods.
+! \end{sloppypar}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1815,8 +1821,8 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetVM()
-  recursive subroutine ESMF_GridCompSetVMShObj(gridcomp, userRoutine, sharedObj, &
-    userRc, rc)
+  recursive subroutine ESMF_GridCompSetVMShObj(gridcomp, userRoutine, &
+    sharedObj, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
