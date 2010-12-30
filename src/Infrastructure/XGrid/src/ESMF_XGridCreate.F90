@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.13 2010/12/03 05:57:59 theurich Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.14 2010/12/30 19:40:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.13 2010/12/03 05:57:59 theurich Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.14 2010/12/30 19:40:48 feiliu Exp $'
 
 !==============================================================================
 !
@@ -329,7 +329,7 @@ integer, intent(out), optional  :: rc
         if (ESMF_LogFoundAllocError(localrc, &
             "- Allocating xgtype%centroid ", &
             ESMF_CONTEXT, rc)) return
-        xgtype%area = area
+        xgtype%centroid = centroid
     endif
 
     ! check and copy all the sparse matrix spec structures
