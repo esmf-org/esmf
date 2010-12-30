@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.49 2010/12/30 21:50:37 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.50 2010/12/30 22:41:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -60,11 +60,11 @@
 
       ! Set the entry points for standard ESMF Component methods
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
-		userRoutine=GComp_Init, rc=rc)
+                                userRoutine=GComp_Init, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
-		userRoutine=GComp_Run, rc=rc)
+                                userRoutine=GComp_Run, rc=rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
-		userRoutine=GComp_Final, rc=rc)
+                                userRoutine=GComp_Final, rc=rc)
 
       rc = ESMF_SUCCESS
 
