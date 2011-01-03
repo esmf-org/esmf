@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistEx.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldBundleRedistEx.F90,v 1.13 2011/01/03 22:39:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.13 2011/01/03 22:39:46 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -131,10 +131,12 @@
     enddo
 
     ! perform redist
-    call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, routehandle, rc=rc)
+    call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, &
+         routehandle, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, routehandle, rc=rc)
+    call ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, &
+         routehandle, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! verify redist
@@ -145,8 +147,10 @@
 
         ! Verify that the redistributed data in dstField is correct.
         ! Before the redist op, the dst Field contains all 0. 
-        ! The redist op reset the values to the PE value, verify this is the case.
-        ! MUST use exclusive bounds because Redist operates within excl. region.
+        ! The redist op reset the values to the PE value, 
+        ! verify this is the case.
+        ! MUST use exclusive bounds because Redist operates 
+        ! within excl. region.
         do k = exLB(3), exUB(3)
             do j = exLB(2), exUB(2)
                 do i = exLB(1), exUB(1)

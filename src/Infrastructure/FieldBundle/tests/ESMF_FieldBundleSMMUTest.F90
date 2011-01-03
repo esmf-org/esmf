@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.13 2011/01/03 22:38:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.12 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.13 2011/01/03 22:38:29 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -196,8 +196,8 @@ contains
         factorList = (/1,2,3,4/)
         factorIndexList(1,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
         factorIndexList(2,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
-        call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
-            factorList, factorIndexList, rc=localrc)
+        call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, &
+            routehandle, factorList, factorIndexList, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -289,8 +289,7 @@ contains
 
         ! create distgrid and grid
         distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
-            regDecomp=(/4/), &
-            rc=localrc)
+            regDecomp=(/4/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -413,7 +412,8 @@ contains
             ESMF_CONTEXT, rc)) return
 
         ! perform smm
-        call ESMF_FieldBundleSMM(srcFieldBundleA, dstFieldBundleA, routehandle, rc=localrc)
+        call ESMF_FieldBundleSMM(srcFieldBundleA, dstFieldBundleA, &
+             routehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -428,7 +428,8 @@ contains
 
             ! Verify that the smm data in dstField(l) is correct.
             ! Before the smm op, the dst Field contains all 0. 
-            ! The smm op reset the values to the index value, verify this is the case.
+            ! The smm op reset the values to the index value, verify 
+            ! this is the case.
             ! write(*, '(9I3)') l, lpe, fptr
             do i = exlb(1), exub(1)
               do j = exlb(2), exub(2)

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.129 2010/12/24 00:05:35 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.130 2011/01/03 22:39:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.129 2010/12/24 00:05:35 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.130 2011/01/03 22:39:46 svasquez Exp $'
 
 !==============================================================================
 !
@@ -376,18 +376,22 @@ contains
 !   can read in namelist-type information to set parameters for this run.
 !   If both are specified, this object takes priority over {\tt configFile}.
 ! \item[{[configFile]}]
+!   \begin{sloppypar}
 !   The filename of an {\tt ESMF\_Config} format file.  
 !   If specified, this file is opened, an {\tt ESMF\_Config} configuration
 !   object is created for the file, and attached to the new component.  
 !   The user can call {\tt ESMF\_CplCompGet()} to get and use the object.
 !   If both are specified, the {\tt config} object takes priority 
 !   over this one.
+!   \end{sloppypar}
 ! \item[{[clock]}]
+!   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !   queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
 !   This should
 !   not be the parent component clock, which should be maintained and passed
 !   down to the initialize/run/finalize routines separately.
+!   \end{sloppypar}
 ! \item[{[petList]}]
 !   List of parent {\tt PET}s given to the created child component by the
 !   parent component. If {\tt petList} is not specified all of the
@@ -525,8 +529,8 @@ contains
 ! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, exportState, &
-    clock, blockingflag, phase, userRc, rc)
+  recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
+    exportState, clock, blockingflag, phase, userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1357,7 +1361,8 @@ contains
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, userRoutine, phase, rc)
+  subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, userRoutine, &
+     phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent (in) :: cplcomp
@@ -1486,7 +1491,8 @@ contains
 ! !IROUTINE: ESMF_CplCompSetServices - Call user routine to register CplComp methods
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompSetServices(cplcomp, userRoutine, userRc, rc)
+  recursive subroutine ESMF_CplCompSetServices(cplcomp, userRoutine, &
+     userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)             :: cplcomp
@@ -1521,9 +1527,11 @@ contains
 ! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 ! must not be declared as optional, and the types, intent and order must match.
 !
+! \begin{sloppypar}
 ! The {\tt userRoutine}, when called by the framework, must make successive calls to
 ! {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for standard
 ! Component Initialize(), Run() and Finalize() methods.
+! \end{sloppypar}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1604,9 +1612,11 @@ contains
 !   end interface
 !
 ! !DESCRIPTION:
+! \begin{sloppypar}
 ! The {\tt userRoutine}, when called by the framework, must make successive
 ! calls to {\tt ESMF\_CplCompSetEntryPoint()} to preset callback routines for
 ! standard Component Initialize(), Run() and Finalize() methods.
+! \end{sloppypar}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1717,8 +1727,8 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVM - Set CplComp VM properties in routine located in shared object
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetVM()
-  recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, sharedObj, &
-    userRc, rc)
+  recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, &
+    sharedObj, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp

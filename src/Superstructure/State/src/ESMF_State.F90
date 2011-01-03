@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.231 2010/12/24 00:05:35 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.232 2011/01/03 22:39:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.231 2010/12/24 00:05:35 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.232 2011/01/03 22:39:47 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -2118,8 +2118,8 @@ contains
 ! !INTERFACE:
       function ESMF_StateCreate(stateName, statetype, &
                    fieldbundleList, fieldList, arrayList, nestedStateList, &
-                   nameList, itemCount, &
-                   neededflag, readyflag, validflag, reqforrestartflag, rc)
+                   nameList, itemCount, neededflag, readyflag, validflag, &
+                   reqforrestartflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
@@ -2127,7 +2127,8 @@ contains
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: fieldbundleList
+      type(ESMF_FieldBundle), dimension(:), intent(inout), &
+                              optional :: fieldbundleList
       type(ESMF_Field), dimension(:), intent(inout), optional :: fieldList
       type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
@@ -2165,6 +2166,7 @@ contains
 !   \item[{[nameList]}]
 !    A list (Fortran array) of character string name placeholders.
 !   \item[{[itemCount]}]
+!    \begin{sloppypar}
 !    The total number of things -- FieldBundles, Fields, 
 !    Arrays, States, and Names -- to be added.
 !    If {\tt itemCount} is not specified, it will be computed internally based
@@ -2172,6 +2174,8 @@ contains
 !    If {\tt itemCount} is specified this routine
 !    will do an error check to verify the total number of items found
 !    in the argument lists matches this count of the expected number of items.
+!    \end{sloppypar}
+!    The total number of things -- FieldBundles, Fields, 
 !   \item[{[neededflag]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.
 !    Possible values are listed in Section~\ref{opt:neededflag}.  
@@ -2347,8 +2351,8 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetInfo(state, itemSearch, nestedFlag, name, statetype, &
-			       itemCount, itemNameList, stateitemtypeList, rc)
+      subroutine ESMF_StateGetInfo(state, itemSearch, nestedFlag, name, &
+            statetype, itemCount, itemNameList, stateitemtypeList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in) :: state
@@ -2582,9 +2586,11 @@ contains
 !
 !
 ! !DESCRIPTION:
+!      \begin{sloppypar}
 !      Returns an <item> from an {\tt ESMF\_State} by name.  
 !      If the {\tt ESMF\_State} contains the <item> directly, only
 !      {\tt itemName} is required.
+!      \end{sloppypar}
 !
 !      If the {\tt state} contains nested {\tt ESMF\_State}s,
 !      the {\tt itemName} argument may specify a fully qualified name

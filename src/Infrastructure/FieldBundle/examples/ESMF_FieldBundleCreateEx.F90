@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.8 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.9 2011/01/03 22:39:46 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -27,7 +27,8 @@
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     character (len = ESMF_MAXSTR) :: bname1, fname1, fname2
-    type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
+    type(ESMF_Field) :: field(10), returnedfield1, returnedfield2
+    type(ESMF_Field) :: simplefield
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3
 !\end{verbatim}
 !EOP
@@ -94,7 +95,7 @@
 
 
     simplefield = ESMF_FieldCreate(grid, arrayspec, &
-                                staggerloc=ESMF_STAGGERLOC_CENTER, name="rh", rc=rc)
+                  staggerloc=ESMF_STAGGERLOC_CENTER, name="rh", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

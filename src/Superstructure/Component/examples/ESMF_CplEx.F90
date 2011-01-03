@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.43 2010/11/03 22:48:46 theurich Exp $
+! $Id: ESMF_CplEx.F90,v 1.44 2011/01/03 22:39:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -58,9 +58,12 @@
       integer, intent(out)  :: rc     ! must not be optional
 
       ! Set the entry points for standard ESMF Component methods
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=CPL_Init, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=CPL_Run, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=CPL_Final, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, &
+                          userRoutine=CPL_Init, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, &
+                          userRoutine=CPL_Run, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, &
+                          userRoutine=CPL_Final, rc=rc)
 
       rc = ESMF_SUCCESS
     end subroutine
@@ -89,10 +92,11 @@
     
 !BOC
     subroutine CPL_Init(comp, importState, exportState, clock, rc)
-      type(ESMF_CplComp)    :: comp                       ! must not be optional
-      type(ESMF_State)      :: importState, exportState   ! must not be optional
-      type(ESMF_Clock)      :: clock                      ! must not be optional
-      integer, intent(out)  :: rc                         ! must not be optional
+      type(ESMF_CplComp)    :: comp               ! must not be optional
+      type(ESMF_State)      :: importState        ! must not be optional
+      type(ESMF_State)      :: exportState        ! must not be optional
+      type(ESMF_Clock)      :: clock              ! must not be optional
+      integer, intent(out)  :: rc                 ! must not be optional
 
       print *, "Coupler Init starting"
     
@@ -134,10 +138,11 @@
     
 !BOC
     subroutine CPL_Run(comp, importState, exportState, clock, rc)
-      type(ESMF_CplComp)    :: comp                       ! must not be optional
-      type(ESMF_State)      :: importState, exportState   ! must not be optional
-      type(ESMF_Clock)      :: clock                      ! must not be optional
-      integer, intent(out)  :: rc                         ! must not be optional
+      type(ESMF_CplComp)    :: comp              ! must not be optional
+      type(ESMF_State)      :: importState       ! must not be optional
+      type(ESMF_State)      :: exportState       ! must not be optional
+      type(ESMF_Clock)      :: clock             ! must not be optional
+      integer, intent(out)  :: rc                ! must not be optional
 
       print *, "Coupler Run starting"
 
@@ -171,10 +176,11 @@
     
 !BOC
     subroutine CPL_Final(comp, importState, exportState, clock, rc)
-      type(ESMF_CplComp)    :: comp                       ! must not be optional
-      type(ESMF_State)      :: importState, exportState   ! must not be optional
-      type(ESMF_Clock)      :: clock                      ! must not be optional
-      integer, intent(out)  :: rc                         ! must not be optional
+      type(ESMF_CplComp)    :: comp                ! must not be optional
+      type(ESMF_State)      :: importState         ! must not be optional
+      type(ESMF_State)      :: exportState         ! must not be optional
+      type(ESMF_Clock)      :: clock               ! must not be optional
+      integer, intent(out)  :: rc                  ! must not be optional
 
       print *, "Coupler Final starting"
     
