@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.6 2010/12/30 22:30:20 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.7 2011/01/04 19:26:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -531,21 +531,6 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
    mesh.Commit();
 
-   {
-     std::vector<MEField<>*> fds;
-
-     Mesh::FieldReg::MEField_iterator fi = mesh.Field_begin(), fe = mesh.Field_end();
-
-     for (; fi != fe; ++fi) fds.push_back(&*fi);
-
-     mesh.HaloFields(fds.size(), &fds[0]);
- 
-/*
-     MEField<> *cptr = mesh.GetCoordField();
-     mesh.HaloFields(1, &cptr);
-*/
-   }
-
    // Setup the mask field if necessary
    if (hasMask) {
      if (isConserve) {
@@ -704,6 +689,18 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
    }
 #endif
+
+
+   // Halo Fields
+   {
+     std::vector<MEField<>*> fds;
+
+     Mesh::FieldReg::MEField_iterator fi = mesh.Field_begin(), fe = mesh.Field_end();
+
+     for (; fi != fe; ++fi) fds.push_back(&*fi);
+
+     mesh.HaloFields(fds.size(), &fds[0]);
+   }
 
 
    // delete Grid Iters
