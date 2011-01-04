@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.9 2011/01/04 05:53:32 svasquez Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.10 2011/01/04 22:45:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.9 2011/01/04 05:53:32 svasquez Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.10 2011/01/04 22:45:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -95,12 +95,12 @@
 
 !BOC 
 ! create 1D distgrid and grid decomposed according to the following diagram:
-! +----------------+   +-------------------+   +-------------------+   +----------------+
-! |     DE 0    |  |   |  |     DE 1    |  |   |  |     DE 2    |  |   |  |     DE 3    |
-! |    1 x 16   |  |   |  |    1 x 16   |  |   |  |    1 x 16   |  |   |  |    1 x 16   |
-! |             | 1|<->|1 |             | 1|<->|1 |             | 1|<->|1 |             |
-! |             |  |   |  |             |  |   |  |             |  |   |  |             |
-! +----------------+   +-------------------+   +-------------------+   +----------------+
+! +------------+   +----------------+   +---------------+   +--------------+
+! |   DE 0  |  |   |  |   DE 1   |  |   |  |   DE 2  |  |   |  |   DE 3    |
+! |  1 x 16 |  |   |  |  1 x 16  |  |   |  |  1 x 16 |  |   |  |  1 x 16   |
+! |         | 1|<->|1 |          | 1|<->|1 |         | 1|<->|1 |           |
+! |         |  |   |  |          |  |   |  |         |  |   |  |           |
+! +------------+   +----------------+   +---------------+   +--------------+
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/npx/), &
         regDecomp=(/4/), rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
