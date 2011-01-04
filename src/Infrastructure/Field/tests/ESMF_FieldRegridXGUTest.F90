@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.14 2010/12/30 20:18:39 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.15 2011/01/04 20:39:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@ contains
         type(ESMF_VM)                       :: vm
 
         real(ESMF_KIND_R8)                  :: centroidA1X(2), centroidA1Y(2)
-        real(ESMF_KIND_R8)                  :: centroidA2X(1), centroidA2Y(2)
+        real(ESMF_KIND_R8)                  :: centroidA2X(2), centroidA2Y(1)
         real(ESMF_KIND_R8)                  :: centroidBX(2), centroidBY(2)
         real(ESMF_KIND_R8), pointer         :: coordX(:), coordY(:)
         character(len=16)                   :: gridNameA(2), gridNameB(1)
@@ -125,9 +125,10 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/1,2/), &
+        sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/2,1/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
+            regDecomp=(/2,1/), &
             name=gridNameA(2), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -148,29 +149,29 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidA1X(lpet+1)
+        coordX = centroidA1X
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordY = centroidA1Y
+        coordY = centroidA1Y(lpet+1)
 
         ! SideA second grid
-        centroidA2X=(/2.5/)
-        centroidA2Y=(/0.5, 1.5/)
+        centroidA2X=(/0.5, 1.5/)
+        centroidA2Y=(/2.5/)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        if(lpet == 0) coordX = centroidA2X
+        coordX = centroidA2X(lpet+1)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordY = centroidA2Y
+        if(lpet == 0) coordY = centroidA2Y
 
         gridNameB(1) = 'dstGrid 1'
         sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
@@ -189,20 +190,20 @@ contains
         enddo
 
         ! SideB grid
-        centroidBX=(/0.75, 2.25/)
-        centroidBY=(/0.75, 1.75/)
+        centroidBX=(/0.75, 1.75/)
+        centroidBY=(/0.75, 2.25/)
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidBX(lpet+1)
+        coordX = centroidBX
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordY = centroidBY
+        coordY = centroidBY(lpet+1)
 
         if(lpet == 0) then
             allocate(sparseMatA2X(1)%factorIndexList(2,6), sparseMatA2X(1)%factorList(6))
@@ -566,7 +567,7 @@ contains
         type(ESMF_VM)                       :: vm
 
         real(ESMF_KIND_R8)                  :: centroidA1X(2), centroidA1Y(2)
-        real(ESMF_KIND_R8)                  :: centroidA2X(1), centroidA2Y(2)
+        real(ESMF_KIND_R8)                  :: centroidA2X(2), centroidA2Y(1)
         real(ESMF_KIND_R8)                  :: centroidBX(2), centroidBY(2)
         real(ESMF_KIND_R8), pointer         :: coordX(:), coordY(:)
         character(len=16)                   :: gridNameA(2), gridNameB(1)
@@ -594,9 +595,10 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/1,2/), &
+        sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/2,1/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
+            regDecomp=(/2,1/), &
             name=gridNameA(2), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -617,29 +619,29 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidA1X(lpet+1)
+        coordX = centroidA1X
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordY = centroidA1Y
+        coordY = centroidA1Y(lpet+1)
 
         ! SideA second grid
-        centroidA2X=(/2.5/)
-        centroidA2Y=(/0.5, 1.5/)
+        centroidA2X=(/0.5, 1.5/)
+        centroidA2Y=(/2.5/)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        if(lpet == 0) coordX = centroidA2X
+        coordX = centroidA2X(lpet+1)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordY = centroidA2Y
+        if(lpet == 0) coordY = centroidA2Y
 
         gridNameB(1) = 'dstGrid 1'
         sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
@@ -658,20 +660,20 @@ contains
         enddo
 
         ! SideB grid
-        centroidBX=(/0.75, 2.25/)
-        centroidBY=(/0.75, 1.75/)
+        centroidBX=(/0.75, 1.75/)
+        centroidBY=(/0.75, 2.25/)
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=1, fptr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordX = centroidBX(lpet+1)
+        coordX = centroidBX
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
             coordDim=2, fptr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        coordY = centroidBY
+        coordY = centroidBY(lpet+1)
 
         if(lpet == 0) then
             allocate(sparseMatA2X(1)%factorIndexList(2,6), sparseMatA2X(1)%factorList(6))
