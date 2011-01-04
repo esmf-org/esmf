@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.80 2010/12/27 22:45:29 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.81 2011/01/04 23:52:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.80 2010/12/27 22:45:29 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.81 2011/01/04 23:52:21 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -3529,9 +3529,11 @@ end function ESMF_FieldCreateLSTKR
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
+! \begin{sloppypar} @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_LocStream}. @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
+! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3683,10 +3685,12 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 !   integer, intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
+! \begin{sloppypar} @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_LocStream}. @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not @\
 ! deallocate the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -3832,9 +3836,11 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! \item [rank]
 !       The rank of the Field.
 ! \item [{[location]}]
+!       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -3942,9 +3948,11 @@ end function ESMF_FieldCreateMeshTKR
 ! \item [arrayspec]
 !       Data type and kind specification. 
 ! \item [{[location]}]
+!       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -4064,9 +4072,11 @@ end function ESMF_FieldCreateMeshTKR
 ! \item [array]
 !       {\tt ESMF\_Array} object.
 ! \item [{[location]}]
+!       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item [{[copyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
 !       For valid values see \ref{opt:copyflag}.  The default is
@@ -4190,9 +4200,11 @@ end function ESMF_FieldCreateMeshTKR
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
 ! \item [{[location]}] @\
+!       \begin{sloppypar} @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       \end{sloppypar} @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
@@ -4351,9 +4363,11 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[location]}] @\
+!       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       \end{sloppypar}
 ! \item [{[copyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -4576,8 +4590,8 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArraySpec(xgrid, xgridSide, gridIndex, arrayspec, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  function ESMF_FieldCreateXGArraySpec(xgrid, xgridSide, gridIndex, &
+    arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -4700,8 +4714,8 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArray(xgrid, xgridSide, gridIndex, array, copyflag, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  function ESMF_FieldCreateXGArray(xgrid, xgridSide, gridIndex, array, &
+    copyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -4998,9 +5012,8 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
-! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridSide, gridIndex, & @\
-!   farrayPtr, copyflag, gridToFieldMap, & @\
-!   name, rc) @\
+! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridSide, & @\
+!   gridIndex, farrayPtr, copyflag, gridToFieldMap, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr<rank><type><kind> @\

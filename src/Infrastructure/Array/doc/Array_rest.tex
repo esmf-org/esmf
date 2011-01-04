@@ -1,10 +1,12 @@
-% $Id: Array_rest.tex,v 1.11 2010/07/08 16:29:50 theurich Exp $
+% $Id: Array_rest.tex,v 1.12 2011/01/04 23:52:21 svasquez Exp $
 
 %\subsubsection{Restrictions and Future Work}
 \begin{itemize}
 \label{Array:rest}
 
+\begin{sloppypar}
 \item {\bf CAUTION:} Depending on the specific {\tt ESMF\_ArrayCreate()} entry point used during Array creation, certain Fortran operations are not supported on the Fortran array pointer {\tt farrayPtr}, returned by {\tt ESMF\_ArrayGet()}. Only if the {\tt ESMF\_ArrayCreate()} {\em from pointer} variant was used, will the returned {\tt farrayPtr} variable contain the original bounds information, and be suitable for the Fortran {\tt deallocate()} call. This limitation is a direct consequence of the Fortran 95 standard relating to the passing of array arguments. Fortran array pointers returned from an Array that was created through the {\em assumed shape array} variant of {\tt ESMF\_ArrayCreate()} will have bounds that are consistent with the other arguments specified during Array creation. These pointers are not suitable for deallocation in accordance to the Fortran 95 standard.
+\end{sloppypar}
 
 \item {\bf 1D limit:} ArrayHalo(), ArrayRedist() and ArraySMM() operations on Arrays created on DistGrids with arbitrary sequence indices are currently limited to 1D arbitrary DistGrids. There is no restriction on the number, size
 and mapping of undistributed Array dimensions in the presence of such a 1D
