@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.19 2011/01/03 22:42:42 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.20 2011/01/04 19:27:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -111,7 +111,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1514,8 +1513,6 @@ write(*,*) "LOCALRC=",localrc
         return
      endif
 
-
-
      !! set coords
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
@@ -1547,7 +1544,6 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, dstMaskValues=(/1,2,3,4/), &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           rc=localrc)
