@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.27 2010/12/10 21:47:33 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.28 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -119,16 +119,17 @@
 
     ! create a 3D data Field from a Grid and Array.
     ! first create a Grid 
-    grid3d = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/xdim,ydim,zdim/), &
-                            regDecomp=(/2,2,1/), name="grid", rc=rc)
+    grid3d = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), &
+            maxIndex=(/xdim,ydim,zdim/), &
+            regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_GridGet(grid=grid3d, staggerloc=ESMF_STAGGERLOC_CENTER, &
            staggerDistgrid=distgrid3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(grid=grid3d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        totalCount=fa_shape, rc=rc)
+    call ESMF_FieldGet(grid=grid3d, localDe=0, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, totalCount=fa_shape, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
@@ -337,8 +338,8 @@
 !EOE
 
 !BOC
-    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/180,360/), &
-          regDecomp=(/2,2/), name="atmgrid", rc=rc)
+    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), &
+          maxIndex=(/180,360/), regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc)
@@ -437,8 +438,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! use FieldGet to retrieve total counts 
-    call ESMF_FieldGet(grid2d, localDe=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
-        totalCount=ftc, rc=rc)
+    call ESMF_FieldGet(grid2d, localDe=0, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, totalCount=ftc, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! allocate the 2d Fortran array based on retrieved total counts
@@ -472,8 +473,8 @@
 
 !BOC
     ! create a 5d distgrid
-    distgrid5d = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), maxIndex=(/10,4,10,4,6/), &
-        regDecomp=(/2,1,2,1,1/), rc=rc)
+    distgrid5d = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), &
+        maxIndex=(/10,4,10,4,6/), regDecomp=(/2,1,2,1,1/), rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a 5d Grid

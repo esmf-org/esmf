@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.8 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.7 2010/12/09 05:33:06 rokuingh Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.8 2011/01/04 01:16:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -66,8 +66,10 @@
 ! \subsubsection{Perform FieldBundle halo update}
 ! \label{sec:fieldbundle:usage:halo}
 !
+!\begin{sloppypar}
 ! {\tt ESMF\_FieldBundleHalo} interface can be used to perform halo update
 ! of all the Fields contained in the {\tt ESMF\_FieldBundle}.
+!\end{sloppypar}
 ! 
 !
 ! In this example, we will set up a FieldBundle for a 2D viscous and compressible
@@ -239,7 +241,8 @@
     enddo
 
     ! compute the routehandle
-    call ESMF_FieldBundleHaloStore(fieldBundle, routehandle=routehandle, rc=rc)
+    call ESMF_FieldBundleHaloStore(fieldBundle, routehandle=routehandle, &
+                                   rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     do iter = 1, 10
@@ -252,13 +255,14 @@
             fptr = 0.
             ! only update the exclusive region on local PET
             do j = excllb(1), exclub(1)
-                do k = excllb(2), exclub(2)
-                    fptr(j,k) = iter * cos(2.*PI*j/sizes(1))*sin(2.*PI*k/sizes(2))
-                enddo 
+              do k = excllb(2), exclub(2)
+                fptr(j,k) = iter * cos(2.*PI*j/sizes(1))*sin(2.*PI*k/sizes(2))
+              enddo 
             enddo 
         enddo
         ! call halo execution to update the data in the halo region,
-        ! it can be verified that the halo regions change from 0. to non zero values.
+        ! it can be verified that the halo regions change from 0. 
+        ! to non zero values.
         call ESMF_FieldBundleHalo(fieldbundle, routehandle=routehandle, rc=rc)
         if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     enddo

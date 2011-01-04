@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.102 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.103 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -122,6 +122,7 @@
 !  and initialized based on the computed shape.  A Field can either be created in one shot
 !  created empty and finished using {\tt ESMF\_FieldSetCommit}.
 !
+!  \begin{sloppypar}
 !  There are important details that can be skipped but are good to know for {\tt ESMF\_FieldSetCommit}
 !  and {\tt ESMF\_FieldCreate} from a Fortran data array. 1) these methods require {\em each PET contains
 !  exactly one DE}. This implies that a code using FieldCreate from a data array or FieldSetCommit must
@@ -129,6 +130,7 @@
 !  will cause run time failures. 2) the bounds and counts retrieved from GridGet are DE specific
 !  or equivalently PET specific, which means that {\em the Fortran array shape could be different from one
 !  PET to another}. 
+!  \end{sloppypar}
 !  
 !EOE
 

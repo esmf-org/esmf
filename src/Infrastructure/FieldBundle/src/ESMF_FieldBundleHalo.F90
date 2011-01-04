@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.8 2010/12/03 05:57:39 theurich Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.9 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.8 2010/12/03 05:57:39 theurich Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.9 2011/01/04 01:16:03 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -83,8 +83,10 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Execute a precomputed FieldBundle halo operation for the Fields in fieldbundle.
 !   See {\tt ESMF\_FieldBundleStore()} on how to compute routehandle.
+!   \end{sloppypar}
 !
 !   \begin{description}
 !   \item [fieldbundle]

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.18 2010/12/09 18:28:32 svasquez Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.19 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.18 2010/12/09 18:28:32 svasquez Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.19 2011/01/04 01:16:03 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -83,8 +83,8 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRedist - Execute a FieldBundle redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, routehandle, &
-                           checkflag, rc)
+  subroutine ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, &
+         routehandle, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
@@ -94,6 +94,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Execute a precomputed FieldBundle redistribution from {\tt srcFieldBundle} to
 !   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
 !   weakly congruent and typekind conform with the respective FieldBundles used during 
@@ -104,6 +105,7 @@ contains
 !   dimension, are permitted to be different. This means that the same {\tt routehandle} 
 !   can be applied to a large class of similar Fields that differ in the number of 
 !   elements in the left most undistributed dimensions. 
+!   \end{sloppypar}
 !
 !   It is erroneous to specify the identical FieldBundle object for {\tt srcFieldBundle} and
 !   {\tt dstFieldBundle} arguments.
@@ -292,8 +294,8 @@ contains
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleRedistStore() 
-! subroutine ESMF_FieldBundleRedistStore<type><kind>(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, factor, srcToDstTransposeMap, rc) 
+! subroutine ESMF_FieldBundleRedistStore<type><kind>(srcFieldBundle, &
+!        dstFieldBundle, & routehandle, factor, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
@@ -379,16 +381,16 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
-    subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+    subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, &
+        dstFieldBundle, routehandle, factor, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I4),  intent(in)            :: factor
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
+        integer,              intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,              intent(out), optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -485,8 +487,8 @@ contains
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I8),  intent(in)            :: factor
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
+        integer,             intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,             intent(out), optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 
@@ -767,11 +769,12 @@ contains
 !   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
 !   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   integer,                  intent(in) , optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out), optional :: rc 
+!   integer,             intent(in) , optional :: srcToDstTransposeMap(:)
+!   integer,             intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
 !
+! \begin{sloppypar}
 ! Store a FieldBundle redistribution operation from {\tt srcFieldBundle}
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -781,6 +784,7 @@ contains
 ! PET does not provide matrix elements. Alternatively, PETs that do not 
 ! provide matrix elements may also call into the overloaded interface
 ! {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+! \end{sloppypar}
 ! 
 ! Both {\tt srcFieldBundle} and {\tt dstFieldBundle} are interpreted as sequentialized 
 ! vectors. The 

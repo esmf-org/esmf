@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.12 2010/12/10 23:36:15 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.13 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -152,7 +152,8 @@
 !BOC
     ! create a 3D grid with the first 2 dimensions collapsed 
     ! and arbitrarily distributed
-    grid3d = ESMF_GridCreateShapeTile("arb3dgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+    grid3d = ESMF_GridCreateShapeTile("arb3dgrid", &
+      coordTypeKind=ESMF_TYPEKIND_R8, &
       minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
       localArbIndex=localArbIndex,localArbIndexCount=localArbIndexCount,rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -167,7 +168,8 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=rc)
-    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', &
+                                memDimCount, dimCount
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     ! verify that the dimension counts are correct
@@ -204,7 +206,8 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=rc)
-    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', &
+                                memDimCount, dimCount
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     if (memDimCount .ne. 2) correct = .false.

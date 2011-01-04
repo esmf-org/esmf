@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.13 2010/12/08 22:27:13 svasquez Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.14 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.13 2010/12/08 22:27:13 svasquez Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.14 2011/01/04 01:16:03 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -78,8 +78,8 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRegrid - Execute a FieldBundle regrid operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, routehandle, &
-				zeroflag, checkflag, rc)
+  subroutine ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, &
+         routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
@@ -90,6 +90,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Execute a precomputed FieldBundle regrid from {\tt srcFieldBundle} to
 !   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
 !   congruent and typekind conform with the respective FieldBundles used during 
@@ -100,6 +101,7 @@ contains
 !   dimension, are permitted to be different. This means that the same {\tt routehandle} 
 !   can be applied to a large class of similar Fields that differ in the number of 
 !   elements in the left most undistributed dimensions. 
+!   \end{sloppypar}
 !
 !   It is erroneous to specify the identical FieldBundle object for {\tt srcFieldBundle} and
 !   {\tt dstFieldBundle} arguments.
@@ -117,6 +119,7 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[zeroflag]}]
+!     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstFieldBundle} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
@@ -127,6 +130,7 @@ contains
 !     destination FieldBundle that will be updated by the sparse matrix
 !     multiplication. See section \ref{opt:regionflag} for a complete list of
 !     valid settings.
+!     \end{sloppypar}
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input FieldBundle pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -214,24 +218,24 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, srcMaskValues, &
-                                           dstFieldBundle, dstMaskValues, &
-                                           unmappedDstAction,              &
-                                           regridMethod, &
-                                           regridPoleType, regridPoleNPnts, &
-                                           regridScheme, routehandle, rc)
+                                       dstFieldBundle, dstMaskValues, &
+                                       unmappedDstAction,              &
+                                       regridMethod, &
+                                       regridPoleType, regridPoleNPnts, &
+                                       regridScheme, routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)                :: srcFieldBundle
-    integer(ESMF_KIND_I4), intent(in), optional          :: srcMaskValues(:)
-    type(ESMF_FieldBundle), intent(inout)                :: dstFieldBundle
-    integer(ESMF_KIND_I4), intent(in), optional          :: dstMaskValues(:)
-    type(ESMF_UnmappedAction), intent(in), optional      :: unmappedDstAction
-    type(ESMF_RegridMethod), intent(in), optional        :: regridMethod
-      type(ESMF_RegridPole), intent(in), optional        :: regridPoleType
-      integer, intent(in),optional                       :: regridPoleNPnts
-    integer, intent(in), optional                        :: regridScheme
-    type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    integer,                intent(out),        optional :: rc
+    type(ESMF_FieldBundle), intent(inout)             :: srcFieldBundle
+    integer(ESMF_KIND_I4), intent(in), optional       :: srcMaskValues(:)
+    type(ESMF_FieldBundle), intent(inout)             :: dstFieldBundle
+    integer(ESMF_KIND_I4), intent(in), optional       :: dstMaskValues(:)
+    type(ESMF_UnmappedAction), intent(in), optional   :: unmappedDstAction
+    type(ESMF_RegridMethod), intent(in), optional     :: regridMethod
+      type(ESMF_RegridPole), intent(in), optional     :: regridPoleType
+      integer, intent(in),optional                    :: regridPoleNPnts
+    integer, intent(in), optional                     :: regridScheme
+    type(ESMF_RouteHandle), intent(inout)             :: routehandle
+    integer,                intent(out),     optional :: rc
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and

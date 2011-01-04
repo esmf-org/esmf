@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.12 2010/12/09 18:46:36 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.13 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -76,9 +76,11 @@
 !\subsubsection{Create a Field with replicated dimensions}
 !\label{sec:field:usage:create_repdim}
 !
+!  \begin{sloppypar}
 !  In this example an {\tt ESMF\_Field} with replicated dimension is created from an {\tt ESMF\_Grid} and 
 !  an {\tt ESMF\_Arrayspec}. A user can also use other {\tt ESMF\_FieldCreate()} methods to create replicated
 !  dimension Field, this example illustrates the key concepts and use of a replicated dimension Field.
+!  \end{sloppypar}
 !
 !  Normally gridToFieldMap argument in {\tt ESMF\_FieldCreate()} should not contain
 !  0 value entries. However, for Field with replicated dimension, a 0 entry in gridToFieldMap
@@ -90,8 +92,8 @@
 
 !BOC
     ! create 4D distgrid
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), maxIndex=(/6,4,6,4/), &
-        regDecomp=(/2,1,2,1/), rc=rc)
+    distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
+        maxIndex=(/6,4,6,4/), regDecomp=(/2,1,2,1/), rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create 4D grid on top of the 4D distgrid
@@ -120,18 +122,18 @@
 
     ! get basic information from the field
     call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
-        dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
-        ungriddedLBound=lungriddedLBound, ungriddedUBound=lungriddedUBound, &
-        totalLWidth=ltotalLWidth, totalUWidth=ltotalUWidth, &
-        rc=rc)
+        dimCount=dimCount, staggerloc=lstaggerloc, &
+        gridToFieldMap=lgridToFieldMap, ungriddedLBound=lungriddedLBound, &
+        ungriddedUBound=lungriddedUBound, totalLWidth=ltotalLWidth, &
+        totalUWidth=ltotalUWidth, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! get bounds information from the field
     call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
         exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
-        computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
-        totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, &
-        rc=rc)
+        computationalLBound=fclb, computationalUBound=fcub, &
+        computationalCount=fcc, totalLBound=ftlb, totalUBound=ftub, &
+        totalCount=ftc, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE

@@ -1,4 +1,4 @@
-% $Id: Field_options.tex,v 1.4 2010/12/08 19:01:48 eschwab Exp $
+% $Id: Field_options.tex,v 1.5 2011/01/04 01:16:03 svasquez Exp $
 
 
 
@@ -20,7 +20,9 @@ Valid values are:
 \subsubsection{ESMF\_RegridPole}
 \label{opt:regridpole}
 {\sf DESCRIPTION:\\}  
+\begin{sloppypar}
 When interpolating between two Grids which have been mapped to a sphere (using the {\tt ESMF\_REGRID\_SCHEME\_FULL3D} option to {\tt ESMF\_FieldRegridStore()}) these can be used to specify the type of artificial pole to create on the source Grid during interpolation. Creating the pole allows destination points above the top row or below the bottom row of the source Grid to still be mapped.
+\end{sloppypar}
 
 Valid values are:
 \begin{description}

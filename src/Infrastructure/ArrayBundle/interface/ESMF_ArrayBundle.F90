@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.37 2010/12/27 22:45:16 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.38 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.37 2010/12/27 22:45:16 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.38 2011/01/04 01:16:03 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -169,10 +169,12 @@ module ESMF_ArrayBundleMod
 !
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   The default Fortran assignment, setting {\tt arraybundle1} as an alias to
 !   the same ESMF ArrayBundle as {\tt arraybundle2}. If {\tt arraybundle2} is an invalid 
 !   ArrayBundle object then {\tt arraybundle1} will be equally invalid after the
 !   assignment.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}

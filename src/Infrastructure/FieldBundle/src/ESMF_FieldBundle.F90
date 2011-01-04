@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.76 2010/12/29 15:38:28 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.77 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -659,7 +659,8 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAdd()
-      subroutine ESMF_FieldBundleAddFieldList(fieldbundle, fieldCount, fieldList, rc)
+      subroutine ESMF_FieldBundleAddFieldList(fieldbundle, fieldCount, &
+          fieldList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout) :: fieldbundle        
@@ -777,9 +778,12 @@ end function
 !      Must be equal to or less than the number of 
 !      {\tt ESMF\_Field}s in the {\tt fieldList}.
 !   \item [fieldList]
+!      \begin{sloppypar}
 !      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
 !      items will be added to the new {\tt ESMF\_FieldBundle}.
+!      \end{sloppypar}
 !   \item [{[packflag]}]
+!      \begin{sloppypar}
 !      The packing option is not yet implemented.  
 !      See Section~\ref{sec:bundlerest}
 !      for a description of packing, and Section~\ref{opt:packflag} for 
@@ -789,6 +793,7 @@ end function
 !      than being copied into a single contiguous buffer.  
 !      This is the case no matter what value, if any, is passed in for
 !      this argument.
+!      \end{sloppypar}
 !   \item [{[name]}]
 !      {\tt ESMF\_FieldBundle} name.  A default name is generated if
 !      one is not specified.
@@ -1752,7 +1757,8 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldByNum(fieldbundle, fieldIndex, field, rc)
+      subroutine ESMF_FieldBundleGetFieldByNum(fieldbundle, fieldIndex, &
+           field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(in) :: fieldbundle
@@ -1832,7 +1838,8 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldNames(fieldbundle, nameList, nameCount, rc)
+      subroutine ESMF_FieldBundleGetFieldNames(fieldbundle, nameList, &
+          nameCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(in) :: fieldbundle 
@@ -1998,7 +2005,8 @@ end function
 ! \label{api:FieldBundleRead}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRead(fieldbundle, file, singleFile, iofmt, rc)
+      subroutine ESMF_FieldBundleRead(fieldbundle, file, singleFile, &
+         iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
@@ -2032,8 +2040,10 @@ end function
 !      argument "file". That is, a set of files are named: [file\_name]001,
 !      [file\_name]002, [file\_name]003,...
 !     \item[{[iofmt]}]
+!     \begin{sloppypar}
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!     \end{sloppypar}
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2270,10 +2280,12 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Sets the {\tt grid} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
 !   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
 !   associated with the same {\tt ESMF\_Grid}.  Returns an error if 
 !   there is already an {\tt ESMF\_Grid} associated with the {\tt fieldbundle}.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -2362,10 +2374,12 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Sets the {\tt mesh} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
 !   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
 !   associated with the same {\tt ESMF\_Mesh}.  Returns an error if 
 !   there is already an {\tt ESMF\_Mesh} associated with the {\tt fieldbundle}.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -2580,8 +2594,8 @@ end function
 ! \label{api:FieldBundleWrite}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, timeslice, &
-                            iofmt, rc)
+      subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, &
+            timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
@@ -2624,8 +2638,10 @@ end function
 !      time. By default, i.e. by omitting the {\tt timeslice} argument, no
 !      provisions for time slicing are made in the output file.
 !     \item[{[iofmt]}]
+!      \begin{sloppypar}
 !      The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !      of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!      \end{sloppypar}
 !     \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.19 2010/12/08 22:37:43 svasquez Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.20 2011/01/04 01:16:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.19 2010/12/08 22:37:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.20 2011/01/04 01:16:03 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -83,8 +83,8 @@ contains
 ! !IROUTINE: ESMF_FieldBundleSMM - Execute a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, &
-				zeroflag, checkflag, rc)
+  subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, &
+        routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
@@ -308,8 +308,8 @@ contains
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
-! subroutine ESMF_FieldBundleSMMStore<type><kind>(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, factorList, factorIndexList, rc) 
+! subroutine ESMF_FieldBundleSMMStore<type><kind>(srcFieldBundle, &
+!        dstFieldBundle,  routehandle, factorList, factorIndexList, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
@@ -321,17 +321,18 @@ contains
 ! 
 ! !DESCRIPTION: 
 ! 
+! \begin{sloppypar}
 ! Store a FieldBundle sparse matrix multiplication operation from {\tt srcFieldBundle}
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
 ! {\tt factorIndexList} arguments. Providing {\tt factorList} and
 ! {\tt factorIndexList} arguments with 
-!
 ! {\tt size(factorList) = (/0/)} and
 ! {\tt size(factorIndexList) = (/2,0/)} or {\tt (/4,0/)} indicates that a 
 ! PET does not provide matrix elements. Alternatively, PETs that do not 
 ! provide matrix elements may also call into the overloaded interface
 ! {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+! \end{sloppypar}
 !  
 ! Both {\tt srcFieldBundle} and {\tt dstFieldBundle} are interpreted as sequentialized 
 ! vectors. The 
@@ -382,9 +383,11 @@ contains
 ! \item [factorIndexList]
 !     Pairs of sequence indices for the factors stored in {\tt factorList}.
 !
+!     \begin{sloppypar}
 !     The second dimension of {\tt factorIndexList} steps through the list of
 !     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
 !     dimension of {\tt factorIndexList} is either of size 2 or size 4.
+!     \end{sloppypar}
 !
 !     In the {\em size 2 format} {\tt factorIndexList(1,:)} specifies the
 !     sequence index of the source element in the {\tt srcFieldBundle} while
