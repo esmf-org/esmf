@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.38 2010/11/03 22:48:42 theurich Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.39 2011/01/04 05:53:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.38 2010/11/03 22:48:42 theurich Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.39 2011/01/04 05:53:32 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -102,8 +102,8 @@
 
     allocate(farray(fa_shape(1), fa_shape(2)))
     farray = lpe
-    array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-        rc=rc)
+    array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     field = ESMF_FieldCreate(grid, array, rc=rc)
@@ -126,13 +126,13 @@
     !    |        |         |
     ! 20 +--------+---------+
     if(lpe .eq. 0) then
-        do i = 1, 2
-            do j = 1, 2
-                if(farrayDst(i, j) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
-                if(farrayDst(i*5, j*10) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
-            enddo
-        enddo
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+       do i = 1, 2
+          do j = 1, 2
+             if(farrayDst(i, j) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
+             if(farrayDst(i*5, j*10) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
+          enddo
+       enddo
+      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     endif
 
     ! destroy all objects created in this example to prevent memory leak
@@ -174,8 +174,8 @@
 
     allocate(farray(fa_shape(1), fa_shape(2)))
     farray = lpe
-    array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
-        rc=rc)
+    array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
+        indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     field = ESMF_FieldCreate(grid, array, rc=rc)

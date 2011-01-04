@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.34 2010/12/09 19:28:16 svasquez Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.35 2011/01/04 05:53:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.34 2010/12/09 19:28:16 svasquez Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.35 2011/01/04 05:53:32 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -81,9 +81,11 @@
 ! In the version of {\tt ESMF\_FieldRedist} without factor argument, a default value
 ! of 1 is used.
 ! 
+! \begin{sloppypar}
 ! In this example, we first create two 1D Fields, a source Field and a destination
 ! Field. Then we use {\tt ESMF\_FieldRedist} to
 ! redistribute data from source Field to destination Field.
+! \end{sloppypar}
 !EOE
 !BOC 
 
@@ -235,7 +237,8 @@
     ! a one dimensional grid whose elements are all located on PET 0
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
         regDecomp=(/1/), rc=rc)
-    grid = ESMF_GridCreate(distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+    grid = ESMF_GridCreate(distgrid=distgrid, &
+                     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
@@ -426,7 +429,8 @@
 ! Perform the redistribution from source Field to destination Field.
 !EOE
 !BOC
-     call ESMF_FieldRedistStore(srcField, dstField, routehandle=routehandle, rc=rc)
+     call ESMF_FieldRedistStore(srcField, dstField, routehandle=routehandle, &
+             rc=rc)
      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
      call ESMF_FieldRedist(srcField, dstField, routehandle=routehandle, rc=rc)
      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

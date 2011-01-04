@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.13 2011/01/04 01:16:03 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.14 2011/01/04 05:53:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -167,7 +167,8 @@
     field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=rc)
+    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, &
+                       rc=rc)
     if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', &
                                 memDimCount, dimCount
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -205,7 +206,8 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=rc)
+    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, &
+                       rc=rc)
     if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', &
                                 memDimCount, dimCount
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

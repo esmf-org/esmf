@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.20 2011/01/04 01:16:03 svasquez Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.21 2011/01/04 05:53:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.20 2011/01/04 01:16:03 svasquez Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.21 2011/01/04 05:53:31 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -809,6 +809,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 !
+! \begin{sloppypar}
 ! Store a FieldBundle sparse matrix multiplication operation from {\tt srcFieldBundle}
 ! to {\tt dstFieldBundle}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -818,6 +819,7 @@ contains
 ! PET does not provide matrix elements. Alternatively, PETs that do not 
 ! provide matrix elements may also call into the overloaded interface
 ! {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+! \end{sloppypar}
 ! 
 ! Both {\tt srcFieldBundle} and {\tt dstFieldBundle} are interpreted as sequentialized 
 ! vectors. The 
@@ -844,10 +846,11 @@ contains
 !   can be applied to a large class of similar Fields that differ in the number of 
 !   elements in the left most undistributed dimensions. 
 !  
-! This method is overloaded for:\newline
-! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
+! \begin{sloppypar}
+! This method is overloaded for
+! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8}, 
 ! {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-! \newline
+! \end{sloppypar}
 !
 ! This call is collective across the current VM.  
 ! 

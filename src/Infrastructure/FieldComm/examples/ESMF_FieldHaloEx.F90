@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.8 2010/12/09 19:39:41 svasquez Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.9 2011/01/04 05:53:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.8 2010/12/09 19:39:41 svasquez Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.9 2011/01/04 05:53:32 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -108,7 +108,8 @@
     grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! set up initial condition and boundary conditions of the temperature Field
+    ! set up initial condition and boundary conditions of the 
+    ! temperature Field
     if(lpe == 0) then
         allocate(fptr(17), tmp_farray(17))
         fptr = 20.
@@ -154,15 +155,17 @@
     ! Solution converges after about 9000 steps based on apriori knowledge.
     ! The result is a linear temperature profile stored in field.
     do iter = 1, 9000
-        ! only elements in the exclusive region are updated locally in each domain
-        do i = startx, endx
-          tmp_farray(i) = fptr(i)+alpha*alpha*dt/dx/dx*(fptr(i+1)-2.*fptr(i)+fptr(i-1))
-        enddo
-        fptr = tmp_farray
-        ! call halo update to communicate the values in the halo region to 
-	! neighboring domains
-        call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+     ! only elements in the exclusive region are updated locally 
+     ! in each domain
+     do i = startx, endx
+       tmp_farray(i) = &
+       fptr(i)+alpha*alpha*dt/dx/dx*(fptr(i+1)-2.*fptr(i)+fptr(i-1))
+      enddo
+      fptr = tmp_farray
+     ! call halo update to communicate the values in the halo region to 
+     ! neighboring domains
+     call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
+     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     enddo
 
     ! release the halo routehandle
