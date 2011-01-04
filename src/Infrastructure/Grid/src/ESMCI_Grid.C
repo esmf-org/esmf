@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.114 2010/12/30 22:30:20 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.115 2011/01/04 22:57:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.114 2010/12/30 22:30:20 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.115 2011/01/04 22:57:00 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -4545,8 +4545,10 @@ int Grid::serialize(
     // the protogrid
 
     // Don't do status since we're changing it anyway
-
+  
     SERIALIZE_VAR(cp, buffer,loffset,coordGeom,int);
+
+    SERIALIZE_VAR(cp, buffer,loffset, decompType, ESMC_GridDecompType);
 
     SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind);
 
@@ -4778,7 +4780,9 @@ int Grid::deserialize(
   // Set status (instead of reading it)
   status =  ESMC_GRIDSTATUS_SHAPE_READY;
 
-  DESERIALIZE_VAR( buffer,loffset,coordGeom,int);
+  DESERIALIZE_VAR( buffer,loffset, coordGeom, int);
+
+  DESERIALIZE_VAR( buffer,loffset, decompType, ESMC_GridDecompType);
 
   DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind);
 
