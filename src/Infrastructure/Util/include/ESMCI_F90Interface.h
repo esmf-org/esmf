@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.10 2010/06/16 00:50:43 theurich Exp $
+// $Id: ESMCI_F90Interface.h,v 1.11 2011/01/05 01:34:24 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -34,6 +34,8 @@
 //-------------------------------------------------------------------------
 
 #include <vector>
+
+#include <cstddef>
 
 namespace ESMCI {
 
