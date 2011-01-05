@@ -1,7 +1,7 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.29 2010/11/03 22:48:46 theurich Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2010, University Corporation for Atmospheric Research,
+! Copyright 2002-2011, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.29 2010/11/03 22:48:46 theurich Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

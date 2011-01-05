@@ -1,7 +1,7 @@
-// $Id: ESMC_ArraySpec.h,v 1.20 2010/09/29 22:41:37 svasquez Exp $
+// $Id: ESMC_ArraySpec.h,v 1.21 2011/01/05 20:05:40 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2010, University Corporation for Atmospheric Research, 
+// Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 

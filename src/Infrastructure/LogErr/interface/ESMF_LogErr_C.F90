@@ -1,7 +1,7 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.15 2010/05/10 07:20:54 theurich Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.16 2011/01/05 20:05:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2010, University Corporation for Atmospheric Research, 
+! Copyright 2002-2011, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.15 2010/05/10 07:20:54 theurich Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.16 2011/01/05 20:05:44 svasquez Exp $'
 !==============================================================================
 
   subroutine f_esmf_logwrite0(msg,msgtype,rc)

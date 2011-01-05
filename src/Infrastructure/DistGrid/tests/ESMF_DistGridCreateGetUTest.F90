@@ -1,7 +1,7 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.29 2010/12/27 22:45:06 rokuingh Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.30 2011/01/05 20:05:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2010, University Corporation for Atmospheric Research,
+! Copyright 2002-2011, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.29 2010/12/27 22:45:06 rokuingh Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.30 2011/01/05 20:05:42 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"

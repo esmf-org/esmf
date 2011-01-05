@@ -1,7 +1,7 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.31 2010/11/05 21:22:53 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.32 2011/01/05 20:05:41 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2010, University Corporation for Atmospheric Research,
+// Copyright 2002-2011, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.31 2010/11/05 21:22:53 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.32 2011/01/05 20:05:41 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
