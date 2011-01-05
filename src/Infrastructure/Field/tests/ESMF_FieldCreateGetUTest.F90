@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.69 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.70 2011/01/05 18:14:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1920,9 +1920,9 @@
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 4D grid and 3D ungridded bounds
         ! this test fails since grid padding is currently hardcoded in test7d4
-        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,4/), &
+        call test7d4_generic(rc, minIndex=(/1,1,1,1/), maxIndex=(/3,4,3,2/), &
             regDecomp=(/2,1,2,1/), &
-            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/4,2,3/), &
+            ungriddedLBound=(/1,2,1/), ungriddedUBound=(/2,2,3/), &
             totalLWidth=(/1,1,1,2/), totalUWidth=(/2,3,4,5/), &
             copyflag=ESMF_DATA_COPY, &
             staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -1934,7 +1934,7 @@
         write(name, *) "Creating a 7D field from a 4D grid and 3D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger"
-        call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
         !------------------------------------------------------------------------
         !NEX_UTest_Multi_Proc_Only
