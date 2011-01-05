@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.83 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.84 2011/01/05 22:26:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.83 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.84 2011/01/05 22:26:05 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -360,11 +360,13 @@ contains
     integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
+! \begin{sloppypar}
 ! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 ! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
 ! it. Attributes can be added to an empty Field object. For an example and
 ! associated documentation using this method see Section 
 ! \ref{sec:field:usage:create_empty_setcommit}.
+! \end{sloppypar}
 !
 !
 ! The arguments are:

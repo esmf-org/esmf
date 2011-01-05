@@ -1,11 +1,13 @@
-% $Id: Field_rest.tex,v 1.8 2010/10/14 21:32:06 oehmke Exp $
+% $Id: Field_rest.tex,v 1.9 2011/01/05 22:26:05 svasquez Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 \label{Field:rest}
 
+\begin{sloppypar}
 \item {\bf CAUTION:} It depends on the specific entry point of {\tt ESMF\_FieldCreate()} used during Field creation, which Fortran operations are supported on the Fortran array pointer {\tt farrayPtr}, returned by {\tt ESMF\_FieldGet()}. Only if the {\tt ESMF\_FieldCreate()} {\em from pointer} variant was used, will the returned {\tt farrayPtr} variable contain the original bounds information, and be suitable for the Fortran {\tt deallocate()} call. This limitation is a direct consequence of the Fortran 95 standard relating to the passing of array arguments.
+\end{sloppypar}
 
 \item {\bf No mathematical operators.}  The Fields class does not 
 currently support advanced

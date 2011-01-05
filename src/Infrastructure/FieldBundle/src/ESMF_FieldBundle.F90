@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.78 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.79 2011/01/05 22:26:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -356,10 +356,12 @@ end interface
 !
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   The default Fortran assignment, setting {\tt fieldbundle1} as an alias to
 !   the same ESMF FieldBundle as {\tt fieldbundle2}. If {\tt fieldbundle2} is an invalid 
 !   FieldBundle object then {\tt fieldbundle1} will be equally invalid after the
 !   assignment.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -685,8 +687,10 @@ end function
 !           {\tt ESMF\_FieldBundle}; must be equal to or less than the 
 !           number of items in the {\tt fieldList}.
 !     \item [fieldList]
+!           \begin{sloppypar}
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_FieldBundle}.
+!           \end{sloppypar}
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

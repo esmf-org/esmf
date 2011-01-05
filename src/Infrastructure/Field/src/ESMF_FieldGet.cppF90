@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.61 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.62 2011/01/05 22:26:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.61 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.62 2011/01/05 22:26:05 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -192,12 +192,16 @@ contains
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
 ! \item [{[meshLocation]}]
+!       \begin{sloppypar}
 !       The part of the mesh to build the Field on. Can be either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item [{[xgridSide]}]
+!       \begin{sloppypar}
 !        The side of the XGrid that the Field was created on (either ESMF\_XGRID\_SIDEA,
 !        ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). 
+!       \end{sloppypar}
 ! \item [{[gridIndex]}]
 !        If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which 
 !        Grid/Mesh on that side the Field was created on. 
@@ -578,8 +582,8 @@ contains
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldGet() @\
-! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, farrayPtr, & @\
-!   exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, & @\
+!   farrayPtr, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
 !   computationalLBound, computationalUBound, computationalCount, & @\
 !   totalLBound, totalUBound, totalCount, rc) @\
 ! @\
@@ -637,15 +641,19 @@ contains
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[computationalLBound]}] @\
+!   \begin{sloppypar} @\
 !   Upon return this holds the lower bounds of the computational region. @\
 !   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
+!   \end{sloppypar} @\
 ! \item[{[computationalUBound]}] @\
+!   \begin{sloppypar} @\
 !   Upon return this holds the lower bounds of the computational region. @\
-!   {\tt computationalLBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
+!   {\tt computationalUBound} must be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
+!   \end{sloppypar} @\
 ! \item[{[computationalCount]}] @\
 !   Upon return this holds the number of items in the computational region per dimension @\
 !   (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must @\
@@ -663,11 +671,13 @@ contains
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
 ! \item[{[totalCount]}] @\
+!   \begin{sloppypar} @\
 !   Upon return this holds the number of items in the total region per dimension @\
 !   (i.e. {\tt totalUBound-totalLBound+1}). {\tt computationalCount} must @\
 !   be allocated to be of size equal to {\tt field}|s {\tt dimCount}. @\
 !   See section \ref{Array_regions_and_default_bounds} for a description @\
 !   of the regions and their associated bounds and counts.  @\
+!   \end{sloppypar} @\
 ! \item [{[rc]}]  @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -742,8 +752,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGetBounds()
   subroutine ESMF_FieldGetBounds(field, localDe, exclusiveLBound, &
-    exclusiveUBound, exclusiveCount, computationalLBound, computationalUBound, &
-    computationalCount, totalLBound, totalUBound, totalCount, rc)
+    exclusiveUBound, exclusiveCount, computationalLBound, &
+    computationalUBound, computationalCount, totalLBound, &
+    totalUBound, totalCount, rc)
 
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(in) :: field
@@ -814,9 +825,11 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !     Upon return this holds the upper bounds of the total region.
 !     {\tt totalUBound} must be allocated to be of size equal to the field rank.
 ! \item[{[totalCount]}]
+!     \begin{sloppypar}
 !     Upon return this holds the number of items in the total region per dimension
 !     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !      be allocated to be of size equal to the field rank.
+!     \end{sloppypar}
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1207,13 +1220,18 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       in preparation for the implementation of the halo method. 
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalLBound]}]
+!       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
+!       The relative lower bounds of Fortran data array to be used
 ! \item [{[totalUBound]}]
+!       \begin{sloppypar}
 !       The relative upper bounds of Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
@@ -1339,13 +1357,17 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[totalLBound]}]
+!       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalUBound]}]
+!       \begin{sloppypar}
 !       The relative upper bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
@@ -1465,13 +1487,17 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[totalLBound]}]
+!       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalUBound]}]
+!       \begin{sloppypar}
 !       The relative upper bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
@@ -1598,16 +1624,20 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[totalLBound]}]
+!       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalUBound]}]
+!       \begin{sloppypar}
 !       The relative upper bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
 !       This is an output variable from this user interface.
 !
 ! \item[{[rc]}]
@@ -1744,13 +1774,17 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       in preparation for the implementation of the halo method. 
 !       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalLBound]}]
+!       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalUBound]}]
+!       \begin{sloppypar}
 !       The relative upper bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
+!       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
 !       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
