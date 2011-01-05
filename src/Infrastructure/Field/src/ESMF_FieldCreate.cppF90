@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.81 2011/01/04 23:52:21 svasquez Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.82 2011/01/05 00:05:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.81 2011/01/04 23:52:21 svasquez Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.82 2011/01/05 00:05:13 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -4363,11 +4363,11 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
 ! \item [{[location]}] @\
-!       \begin{sloppypar}
+!       \begin{sloppypar} @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
-!       \end{sloppypar}
+!       \end{sloppypar} @\
 ! \item [{[copyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
