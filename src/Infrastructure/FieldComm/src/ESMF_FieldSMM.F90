@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.20 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.21 2011/01/05 23:26:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.20 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.21 2011/01/05 23:26:30 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -78,7 +78,8 @@ contains
 ! !IROUTINE: ESMF_FieldSMM - Execute a Field sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldSMM(srcField, dstField, routehandle, zeroflag, checkflag, rc)
+  subroutine ESMF_FieldSMM(srcField, dstField, routehandle, &
+             zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_Field),       intent(inout),optional  :: srcField
@@ -89,6 +90,7 @@ contains
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Execute a precomputed Field sparse matrix multiplication from {\tt srcField} to
 !   {\tt dstField}. Both {\tt srcField} and {\tt dstField} must be
 !   congruent and typekind conform with the respective Fields used during 
@@ -105,6 +107,7 @@ contains
 !   Not providing a non-default gridToFieldMap during Field creation and then
 !   using such Fields in a weakly congruent manner in Field communication methods
 !   leads to undefined behavior.
+!   \end{sloppypar}
 !
 !   It is erroneous to specify the identical Field object for {\tt srcField} and
 !   {\tt dstField} arguments.
@@ -125,6 +128,7 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[zeroflag]}]
+!     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstField} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
@@ -135,6 +139,7 @@ contains
 !     destination Field that will be updated by the sparse matrix
 !     multiplication. See section \ref{opt:regionflag} for a complete list of
 !     valid settings.
+!     \end{sloppypar}
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Field pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -259,6 +264,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 ! 
+! \begin{sloppypar}
 ! Store a Field sparse matrix multiplication operation from {\tt srcField}
 ! to {\tt dstField}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -268,6 +274,7 @@ contains
 ! PET does not provide matrix elements. Alternatively, PETs that do not 
 ! provide matrix elements may also call into the overloaded interface
 ! {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+! \end{sloppypar}
 !  
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The 
@@ -324,9 +331,12 @@ contains
 ! \item [factorIndexList]
 !     Pairs of sequence indices for the factors stored in {\tt factorList}.
 !
+!     \begin{sloppypar}
 !     The second dimension of {\tt factorIndexList} steps through the list of
 !     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
 !     dimension of {\tt factorIndexList} is either of size 2 or size 4.
+!     \end{sloppypar}
+!     The second dimension of {\tt factorIndexList} steps through the list of
 !
 !     In the {\em size 2 format} {\tt factorIndexList(1,:)} specifies the
 !     sequence index of the source element in the {\tt srcField} while
@@ -337,6 +347,7 @@ contains
 !     Under this condition an identiy matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
+!     \begin{sloppypar}
 !     The {\em size 4 format} is more general and does not require a matching
 !     tensor element count. Here the {\tt factorIndexList(1,:)} specifies the
 !     sequence index while {\tt factorIndexList(2,:)} specifies the tensor
@@ -344,6 +355,7 @@ contains
 !     {\tt factorIndexList(3,:)} specifies the sequence index and
 !     {\tt factorIndexList(4,:)} specifies the tensor sequence index of the 
 !     destination element in the {\tt dstField}.
+!     \end{sloppypar}
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Field {\em sequence indices} and {\em tensor sequence indices}.
@@ -602,6 +614,7 @@ contains
 ! 
 ! !DESCRIPTION: 
 !
+! \begin{sloppypar}
 ! Store a Field sparse matrix multiplication operation from {\tt srcField}
 ! to {\tt dstField}. PETs that specify non-zero matrix coefficients must use
 ! the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -611,6 +624,7 @@ contains
 ! PET does not provide matrix elements. Alternatively, PETs that do not 
 ! provide matrix elements may also call into the overloaded interface
 ! {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+! \end{sloppypar}
 ! 
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.36 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldPr.F90,v 1.37 2011/01/05 23:26:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -253,8 +253,10 @@ contains
 !   \item[timeslice]
 !     Number of slices to be read from file, starting from the 1st slice
 !   \item[{[iofmt]}]
+!     \begin{sloppypar}
 !     The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
 !     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!     \end{sloppypar}
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.25 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.26 2011/01/05 23:26:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.25 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.26 2011/01/05 23:26:30 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -236,11 +236,11 @@ contains
 !        routehandle, factor, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(inout)         :: srcField  
-!   type(ESMF_Field),         intent(inout)         :: dstField  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor 
-!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:) 
+!   type(ESMF_Field),         intent(inout)        :: srcField  
+!   type(ESMF_Field),         intent(inout)        :: dstField  
+!   type(ESMF_RouteHandle),   intent(inout)        :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)           :: factor 
+!   integer,                  intent(in), optional :: srcToDstTransposeMap(:) 
 !   integer,                  intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -572,11 +572,11 @@ contains
 !        routehandle, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(inout)         :: srcField  
-!   type(ESMF_Field),         intent(inout)         :: dstField  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:) 
-!   integer,                  intent(out), optional :: rc 
+!   type(ESMF_Field),       intent(inout)         :: srcField  
+!   type(ESMF_Field),       intent(inout)         :: dstField  
+!   type(ESMF_RouteHandle), intent(inout)         :: routehandle
+!   integer,                intent(in),  optional :: srcToDstTransposeMap(:) 
+!   integer,                intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
 ! 

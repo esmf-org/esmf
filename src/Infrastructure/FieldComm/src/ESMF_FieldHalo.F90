@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.7 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.8 2011/01/05 23:26:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.7 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.8 2011/01/05 23:26:30 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -136,6 +136,7 @@ contains
 !     resulting in a blocking operation.
 !     See section \ref{opt:commflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
+!     \begin{sloppypar}
 !     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
@@ -143,6 +144,7 @@ contains
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!     \end{sloppypar}
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Field pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -245,7 +247,8 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(inout)                :: field
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    type(ESMF_HaloStartRegionFlag), intent(in), &
+                            optional :: halostartregionflag
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -296,11 +299,13 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[halostartregionflag]}]
+!     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
 !     See section \ref{opt:halostartregionflag} for a complete list of
 !     valid settings.
+!     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
 !     This vector specifies the lower corner of the effective halo
 !     region with respect to the lower corner of {\tt halostartregionflag}.

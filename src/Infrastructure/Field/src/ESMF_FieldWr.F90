@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.12 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldWr.F90,v 1.13 2011/01/05 23:26:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -112,8 +112,10 @@ contains
 !     time. By default, i.e. by omitting the {\tt timeslice} argument, no
 !     provisions for time slicing are made in the output file.
 !   \item[{[iofmt]}]
+!     \begin{sloppypar}
 !     The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !     of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!     \end{sloppypar}
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
