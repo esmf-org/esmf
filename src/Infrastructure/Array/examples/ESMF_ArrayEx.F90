@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.65 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.66 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1069,6 +1069,7 @@ program ESMF_ArrayEx
 ! dimensions. The index space dimensionality is equal to the number of 
 ! decomposed Array dimensions.
 !
+! \begin{sloppypar}
 ! Array dimensions that are not mapped to DistGrid dimensions are the 
 ! {\em undistributed} dimensions of the Array. They are not part
 ! of the index space. The mapping is specified during {\tt ESMF\_ArrayCreate()}
@@ -1076,6 +1077,7 @@ program ESMF_ArrayEx
 ! not been associated with Array dimensions are {\em replicating} dimensions.
 ! The Array will be replicated across the DEs that lie along replication
 ! DistGrid dimensions.
+! \end{sloppypar}
 !
 ! Undistributed Array dimensions can be used to store multi-dimensional data for
 ! each Array index space element. One application of this is to store the 
@@ -1210,8 +1212,8 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, arrayToDistGridMap=arrayToDistGridMap, &
     exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, &
     localDeCount=localDeCount, rc=rc)  
-  if (arrayToDistGridMap(2) /= 0) then   ! check if extra dimension at expected index
-    ! indicate problem and bail out
+  if (arrayToDistGridMap(2) /= 0) then   ! check if extra dimension at 
+    ! expected index indicate problem and bail out
   endif
   ! obtain larrayList for local DEs
   allocate(larrayList(localDeCount))
@@ -1358,7 +1360,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    distgridToArrayMap=(/0,1/), undistLBound=(/11/), undistUBound=(/14/), rc=rc)
+    distgridToArrayMap=(/0,1/), undistLBound=(/11/), &
+    undistUBound=(/14/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
@@ -1375,8 +1378,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), undistUBound=(/14,22/), &
-    rc=rc)
+    distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), &
+    undistUBound=(/14,22/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE

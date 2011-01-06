@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbHaloEx.F90,v 1.8 2011/01/05 20:05:39 svasquez Exp $
+! $Id: ESMF_ArrayArbHaloEx.F90,v 1.9 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@ program ESMF_ArrayArbHaloEx
 ! number of local Array elements.
 !EOE
 !BOC
-  allocate(farrayPtr1d(5+localPet+1)) ! use explicit Fortran allocate statement
+  allocate(farrayPtr1d(5+localPet+1)) !use explicit Fortran allocate statement
   
   if (localPet==0) then
     array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
@@ -321,17 +321,20 @@ program ESMF_ArrayArbHaloEx
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-      haloSeqIndexList=(/1,2/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
+      haloSeqIndexList=(/1,2/), undistLBound=(/1/), undistUBound=(/3/), &
+      rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-      haloSeqIndexList=(/1,2,3/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
+      haloSeqIndexList=(/1,2,3/), undistLBound=(/1/), undistUBound=(/3/), &
+      rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-      haloSeqIndexList=(/1,2,3,4/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
+      haloSeqIndexList=(/1,2,3,4/), undistLBound=(/1/), undistUBound=(/3/), &
+      rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
 !EOC

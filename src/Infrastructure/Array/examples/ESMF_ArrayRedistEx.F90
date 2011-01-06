@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.16 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.17 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -204,10 +204,12 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
 !BOE
+! \begin{sloppypar}
 ! In {\em default} mode, i.e. without providing the optional
 ! {\tt srcToDstTransposeMap} argument, {\tt ESMF\_ArrayRedistStore()} does not
 ! require equal number of dimensions in source and destination Array. Only the
 ! total number of elements must match.
+! \end{sloppypar}
 !
 ! Specifying {\tt srcToDstTransposeMap} switches {\tt ESMF\_ArrayRedistStore()}
 ! into {\em transpose} mode. In this mode each dimension of {\tt srcArray}
@@ -216,7 +218,8 @@ program ESMF_ArrayRedistEx
 ! 
 !EOE
 !BOC
-  dstDistgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/20,10/), rc=rc)
+  dstDistgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/20,10/), &
+      rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -271,11 +274,13 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
+! \begin{sloppypar}
 ! The transpose mode of {\tt ESMF\_ArrayRedist()} is not limited to
 ! distributed dimensions of Arrays. The {\tt srcToDstTransposeMap} argument
 ! can be used to transpose undistributed dimensions in the same manner.
 ! Furthermore transposing distributed and undistributed dimensions between
 ! Arrays is also supported.
+! \end{sloppypar}
 !
 ! The {\tt srcArray} used in the following examples is of rank 4 with 2 
 ! distributed and 2 undistributed dimensions. The distributed dimensions
@@ -432,6 +437,7 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
+! \begin{sloppypar}
 ! The default mode of Array redistribution, i.e. without providing a
 ! {\tt srcToDstTransposeMap} to {\tt ESMF\_ArrayRedistStore()}, also supports
 ! undistributed Array dimensions. The requirement in this case is that the 
@@ -439,6 +445,7 @@ program ESMF_ArrayRedistEx
 ! undistributed dimensions, be the same for source and destination Array.
 ! In this mode the number of undistributed dimensions need not match between
 ! source and destination.
+! \end{sloppypar}
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)

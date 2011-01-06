@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMEx.F90,v 1.13 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleSMMEx.F90,v 1.14 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.13 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.14 2011/01/06 23:59:29 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -145,12 +145,13 @@
     factorList = (/1,2,3,4/)
     factorIndexList(1,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
     factorIndexList(2,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
-    call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, routehandle, &
-        factorList, factorIndexList, rc=rc)
+    call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, &
+        routehandle, factorList, factorIndexList, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! perform smm
-    call ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, rc=rc)
+    call ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, &
+          rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! verify smm
@@ -161,7 +162,8 @@
 
         ! Verify that the smm data in dstField(l) is correct.
         ! Before the smm op, the dst Field contains all 0. 
-        ! The smm op reset the values to the index value, verify this is the case.
+        ! The smm op reset the values to the index value, verify 
+        ! this is the case.
         !write(*, '(9I3)') l, lpe, fptr
         do i = exlb(1), exub(1)
             if(fptr(i) .ne. i) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.20 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.21 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.20 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.21 2011/01/06 23:59:29 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -298,12 +298,12 @@ contains
 !        dstFieldBundle, & routehandle, factor, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
-!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out), optional :: rc 
+!   type(ESMF_FieldBundle),   intent(in)        :: srcFieldBundle  
+!   type(ESMF_FieldBundle),   intent(inout)     :: dstFieldBundle  
+!   type(ESMF_RouteHandle),   intent(inout)     :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)        :: factor
+!   integer,               intent(in),  optional :: srcToDstTransposeMap(:)
+!   integer,               intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
 ! 
@@ -385,10 +385,10 @@ contains
         dstFieldBundle, routehandle, factor, srcToDstTransposeMap, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I4),  intent(in)            :: factor
+        type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
+        type(ESMF_RouteHandle), intent(inout)       :: routehandle
+        integer(ESMF_KIND_I4),  intent(in)          :: factor
         integer,              intent(in) , optional :: srcToDstTransposeMap(:)
         integer,              intent(out), optional :: rc 
 
@@ -483,10 +483,10 @@ contains
         routehandle, factor, srcToDstTransposeMap, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        integer(ESMF_KIND_I8),  intent(in)            :: factor
+        type(ESMF_FieldBundle), intent(in)         :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(inout)      :: dstFieldBundle  
+        type(ESMF_RouteHandle), intent(inout)      :: routehandle
+        integer(ESMF_KIND_I8),  intent(in)         :: factor
         integer,             intent(in) , optional :: srcToDstTransposeMap(:)
         integer,             intent(out), optional :: rc 
 
@@ -578,12 +578,12 @@ contains
         routehandle, factor, srcToDstTransposeMap, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
-        type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
-        type(ESMF_RouteHandle), intent(inout)         :: routehandle
-        real(ESMF_KIND_R4),     intent(in)            :: factor
-        integer,                intent(in) , optional :: srcToDstTransposeMap(:)
-        integer,                intent(out), optional :: rc 
+        type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
+        type(ESMF_RouteHandle), intent(inout)       :: routehandle
+        real(ESMF_KIND_R4),   intent(in)            :: factor
+        integer,              intent(in) , optional :: srcToDstTransposeMap(:)
+        integer,              intent(out), optional :: rc 
 
 !EOPI
         ! local variables as temporary input/output arguments 

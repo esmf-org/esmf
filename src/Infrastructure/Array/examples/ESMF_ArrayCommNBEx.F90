@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommNBEx.F90,v 1.10 2011/01/05 20:05:39 svasquez Exp $
+! $Id: ESMF_ArrayCommNBEx.F90,v 1.11 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -150,8 +150,10 @@ program ESMF_ArrayCommNBEx
 ! this phase of the non-blocking execution. It is unsafe to access these
 ! elements until the exchange has finished locally.
 !
+! \begin{sloppypar}
 ! One way to ensure that the exchange has finished locally is to call 
 ! with {\tt commflag} set to {\tt ESMF\_COMM\_NBWAITFINISH}.
+! \end{sloppypar}
 !EOE
 
 !BOC
@@ -168,6 +170,7 @@ program ESMF_ArrayCommNBEx
 ! and out-bound data elements in {\tt dstArray} and {\tt srcArray}, 
 ! respectively.
 !
+! \begin{sloppypar}
 ! Some situations require more flexibility than is provided by the 
 ! {\tt ESMF\_COMM\_NBSTART} - {\tt ESMF\_COMM\_NBWAITFINISH} pair. For
 ! instance, a Component that needs to interact with several other Components,
@@ -176,6 +179,7 @@ program ESMF_ArrayCommNBEx
 ! any of the outstanding exchanges may potentially block for a long time, 
 ! lowering the throughput. In the worst case a dead lock situation may arrise.
 ! Calling with {\tt commflag = ESMF\_COMM\_NBTESTFINISH} addresses this problem.
+! \end{sloppypar}
 !EOE
 
 !BOC

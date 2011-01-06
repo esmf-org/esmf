@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.19 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.20 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -186,6 +186,7 @@ program ESMF_ArraySparseMatMulEx
 ! number. Specifying a pair of source and destination elements takes two integer
 ! number regardless of the number of dimensions.
 !
+! \begin{sloppypar}
 ! The information required to carry out a sparse matrix multiplication are the
 ! pair of source and destination sequence indices and the associated
 ! multiplication factor for each pair. ESMF requires this information in form of
@@ -199,6 +200,7 @@ program ESMF_ArraySparseMatMulEx
 ! are stored in the first row of {\tt 
 ! factorIndexList} while the sequence indices of the destination Array elements are
 ! stored in the second row.
+! \end{sloppypar}
 !
 ! Each PET in the current VM must call into {\tt ESMF\_ArraySMMStore()}
 ! to precompute and store the communication pattern for the sparse matrix

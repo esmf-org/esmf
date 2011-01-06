@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.22 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.23 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -18,6 +18,7 @@
 ! \subsubsection{Array from {\tt ESMF\_LocalArray}}
 ! \label{Array:LocalArray}
 !
+! \begin{sloppypar}
 ! Alternative to the direct usage of Fortran arrays during Array creation
 ! it is also possible to first create an {\tt ESMF\_LocalArray} and create the
 ! Array from it. While this may seem more burdensome for the 1 DE per PET cases
@@ -25,6 +26,7 @@
 ! generalization to the multiple DE per PET case. The following example first
 ! recaptures the previous example using an {\tt ESMF\_LocalArray} and then
 ! expands to the multiple DE per PET case.
+! \end{sloppypar}
 !EOE
 !BOC
 program ESMF_ArrayLarrayEx
@@ -40,16 +42,16 @@ program ESMF_ArrayLarrayEx
 !EOE
 !BOC
   ! local variables
-  real(ESMF_KIND_R8), pointer :: farrayP(:,:)       ! Fortran array pointer
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching Fortran array pointer 
-  type(ESMF_LocalArray)       :: larray             ! ESMF_LocalArray object
-  type(ESMF_LocalArray)       :: larrayRef          ! ESMF_LocalArray object
-  type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
-  type(ESMF_Array)            :: array              ! Array object
+  real(ESMF_KIND_R8), pointer :: farrayP(:,:)   ! Fortran array pointer
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:) ! matching Fortran array pointer 
+  type(ESMF_LocalArray)       :: larray         ! ESMF_LocalArray object
+  type(ESMF_LocalArray)       :: larrayRef      ! ESMF_LocalArray object
+  type(ESMF_DistGrid)         :: distgrid       ! DistGrid object
+  type(ESMF_Array)            :: array          ! Array object
   integer                     :: rc, i, j, de
   real                        :: localSum
-  type(ESMF_LocalArray), allocatable :: larrayList(:)      ! ESMF_LocalArray object list
-  type(ESMF_LocalArray), allocatable :: larrayRefList(:)   ! ESMF_LocalArray object list
+  type(ESMF_LocalArray), allocatable :: larrayList(:) ! LocalArray object list
+  type(ESMF_LocalArray), allocatable :: larrayRefList(:) ! LocalArray object list
   
   type(ESMF_VM):: vm
   integer:: localPet, petCount
@@ -214,10 +216,10 @@ program ESMF_ArrayLarrayEx
   allocate(larrayList(2))   ! 2 DEs per PET
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 123.456d0
-  larrayList(1) = ESMF_LocalArrayCreate(farrayP, ESMF_DATA_REF, rc=rc)  ! 1st DE
+  larrayList(1) = ESMF_LocalArrayCreate(farrayP, ESMF_DATA_REF, rc=rc) !1st DE
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 456.789d0
-  larrayList(2) = ESMF_LocalArrayCreate(farrayP, ESMF_DATA_REF, rc=rc)  ! 2nd DE  
+  larrayList(2) = ESMF_LocalArrayCreate(farrayP, ESMF_DATA_REF, rc=rc) !2nd DE  
 !EOC
 !BOE
 ! Notice that it is perfectly fine to {\em re}-use {\tt farrayP} for all

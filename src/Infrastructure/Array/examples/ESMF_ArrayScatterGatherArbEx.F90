@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.7 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.8 2011/01/06 23:59:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -76,7 +76,8 @@ program ESMF_ArrayScatterGatherArbEx
   allocate(arbSeqIndexList(10))   ! each PET will have 10 elements
   
   do i=1, 10
-    arbSeqIndexList(i) = (i-1)*petCount + localPet+1 ! initialize unique seq. indices
+    arbSeqIndexList(i) = (i-1)*petCount + localPet+1 ! initialize unique 
+                                                     ! seq. indices
   enddo
   
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, rc=rc)
