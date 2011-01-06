@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.39 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.40 2011/01/06 00:10:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.39 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.40 2011/01/06 00:10:53 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -782,12 +782,14 @@ contains
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)                :: arraybundle
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    type(ESMF_HaloStartRegionFlag), intent(in), &
+                            optional :: halostartregionflag
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Store an ArrayBundle halo operation over the data in {\tt arraybundle}. By 
 !   default, i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth}
 !   and {\tt haloUDepth}, all elements in the total Array regions that lie
@@ -796,6 +798,7 @@ contains
 !   halo source element, i.e. an exclusive element on one of the DEs, will be
 !   updated under the halo operation. Elements that have no associated source
 !   remain unchanged under halo.
+!   \end{sloppypar}
 !
 !   Specifying {\tt halostartregionflag} allows to change the shape of the 
 !   effective halo region from the inside. Setting this flag to
@@ -834,11 +837,13 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[halostartregionflag]}]
+!     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
 !     See section \ref{opt:halostartregionflag} for a complete list of
 !     valid settings.
+!     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
 !     This vector specifies the lower corner of the effective halo
 !     region with respect to the lower corner of {\tt halostartregionflag}.
@@ -997,8 +1002,10 @@ contains
 !     argument "file". That is, a set of files are named: [file\_name]001,
 !     [file\_name]002, [file\_name]003,...
 !   \item[{[iofmt]}]
+!     \begin{sloppypar}
 !     The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1092,8 +1099,10 @@ contains
     integer,                intent(out),    optional  :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Execute a precomputed ArrayBundle redistribution from the Arrays in
 !   {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
+!   \end{sloppypar}
 !
 !   This call is {\em collective} across the current VM.
 !
@@ -1218,12 +1227,12 @@ contains
 !   dstArrayBundle, routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),   intent(in)              :: srcArrayBundle
-!   type(ESMF_ArrayBundle),   intent(inout)           :: dstArrayBundle
-!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)              :: factor
-!   integer,                  intent(in),   optional  :: srcToDstTransposeMap(:)
-!   integer,                  intent(out),  optional  :: rc
+!   type(ESMF_ArrayBundle),   intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle),   intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
+!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
+!   integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
@@ -1546,11 +1555,11 @@ contains
     routehandle, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    integer,                intent(in),  optional :: srcToDstTransposeMap(:)
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
@@ -1656,8 +1665,8 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleSMM - Execute an ArrayBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, routehandle, &
-    zeroflag, checkflag, rc)
+  subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, &
+    routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
@@ -1808,12 +1817,12 @@ contains
 !   dstArrayBundle, routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-!   type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>), target, intent(in)        :: factorList(:)
-!   integer,                    intent(in)              :: factorIndexList(:,:)
-!   integer,                    intent(out),  optional  :: rc
+!   type(ESMF_ArrayBundle),   intent(in)             :: srcArrayBundle
+!   type(ESMF_ArrayBundle),   intent(inout)          :: dstArrayBundle
+!   type(ESMF_RouteHandle),   intent(inout)          :: routehandle
+!   <type>(ESMF_KIND_<kind>), target, intent(in)     :: factorList(:)
+!   integer,                   intent(in)            :: factorIndexList(:,:)
+!   integer,                   intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle sparse matrix multiplication operation from
@@ -1871,9 +1880,11 @@ contains
 !   \item [factorIndexList]
 !     Pairs of sequence indices for the factors stored in {\tt factorList}.
 !
+!     \begin{sloppypar}
 !     The second dimension of {\tt factorIndexList} steps through the list of
 !     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
 !     dimension of {\tt factorIndexList} is either of size 2 or size 4.
+!     \end{sloppypar}
 !
 !     In the {\em size 2 format} {\tt factorIndexList(1,:)} specifies the
 !     sequence index of the source element in the source Array while
@@ -1884,6 +1895,7 @@ contains
 !     Under this condition an identiy matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
+!     \begin{sloppypar}
 !     The {\em size 4 format} is more general and does not require a matching
 !     tensor element count. Here the {\tt factorIndexList(1,:)} specifies the
 !     sequence index while {\tt factorIndexList(2,:)} specifies the tensor
@@ -1891,6 +1903,7 @@ contains
 !     {\tt factorIndexList(3,:)} specifies the sequence index and
 !     {\tt factorIndexList(4,:)} specifies the tensor sequence index of the 
 !     destination element in the destination Array.
+!     \end{sloppypar}
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Array {\em sequence indices} and {\em tensor sequence indices}.
@@ -2324,7 +2337,8 @@ contains
 ! \label{api:ArrayBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, timeslice, iofmt, rc)
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, timeslice, &
+             iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
@@ -2368,8 +2382,10 @@ contains
 !     time. By default, i.e. by omitting the {\tt timeslice} argument, no
 !     provisions for time slicing are made in the output file.
 !   \item[{[iofmt]}]
+!     \begin{sloppypar}
 !     The IO format. Please see Section~\ref{opt:iofmtflag} for the list
 !     of options.  If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!     \end{sloppypar}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

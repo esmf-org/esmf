@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.12 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.13 2011/01/06 00:10:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -60,11 +60,13 @@ program ESMF_ArrayBundleEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   allocate(arrayList(2))
-  arrayList(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  arrayList(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+                 rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
-  arrayList(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
+  arrayList(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+                 rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -112,9 +114,11 @@ program ESMF_ArrayBundleEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOE
+! \begin{sloppypar}
 ! The {\tt arrayCount} can be used to correctly allocate the {\tt arrayList}
 ! variable for a second call to {\tt ESMF\_ArrayBundleGet()} to gain access
 ! to the bundled Array objects.
+! \end{sloppypar}
 !EOE
 
 !BOC
