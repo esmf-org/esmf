@@ -1,4 +1,4 @@
-% $Id: DistGrid_cdesc.tex,v 1.3 2011/01/07 18:32:16 rokuingh Exp $
+% $Id: DistGrid_cdesc.tex,v 1.4 2011/01/07 21:09:50 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,11 +23,11 @@ the DistGrid defines the data distribution of a domain decomposition across the
 computational resources of an ESMF Component.
 
 The global domain is defined as the union or ``tilework'' of logically
-rectangular (LR) sub-domains or {\em tilees}. The DistGrid create methods allow
+rectangular (LR) sub-domains or {\em tiles}. The DistGrid create methods allow
 the specification of such a tilework global domain and its decomposition into
 exclusive, DE-local LR regions according to various degrees of user specified
 constraints. Complex index space topologies can be constructed by specifying
-connection relationships between tilees during creation.
+connection relationships between tiles during creation.
 
 The DistGrid class holds domain information for all DEs. Each DE is associated
 with a local LR region. No overlap of the regions is allowed. The DistGrid

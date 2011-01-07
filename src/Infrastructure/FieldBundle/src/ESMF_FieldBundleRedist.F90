@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.22 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.23 2011/01/07 21:09:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.22 2011/01/07 18:32:17 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.23 2011/01/07 21:09:51 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -318,7 +318,7 @@ contains
 ! Both {\tt srcFieldBundle} and {\tt dstFieldBundle} are interpreted as sequentialized 
 ! vectors. The 
 ! sequence is defined by the order of DistGrid dimensions and the order of 
-! tilees within the DistGrid or by user-supplied arbitrary sequence indices. See 
+! tiles within the DistGrid or by user-supplied arbitrary sequence indices. See 
 ! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
 ! Redistribution corresponds to an identity mapping of the source FieldBundle vector to 
 ! the destination FieldBundle vector. 
@@ -789,7 +789,7 @@ contains
 ! Both {\tt srcFieldBundle} and {\tt dstFieldBundle} are interpreted as sequentialized 
 ! vectors. The 
 ! sequence is defined by the order of DistGrid dimensions and the order of 
-! tilees within the DistGrid or by user-supplied arbitrary sequence indices. See 
+! tiles within the DistGrid or by user-supplied arbitrary sequence indices. See 
 ! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
 ! Redistribution corresponds to an identity mapping of the source FieldBundle vector to 
 ! the destination FieldBundle vector. 

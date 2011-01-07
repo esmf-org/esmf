@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.36 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.37 2011/01/07 21:09:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -586,9 +586,9 @@ program ESMF_DistGridEx
 !BOE
 ! \subsubsection{Single tile DistGrid with periodic boundaries}
 ! 
-! By default the edges of all tilees have solid wall boundary conditions. 
+! By default the edges of all tiles have solid wall boundary conditions. 
 ! Periodic boundary conditions can be imposed by specifying connections between
-! tilees. For the single LR domain of the last section periodic boundaries 
+! tiles. For the single LR domain of the last section periodic boundaries 
 ! along the first dimension are imposed by adding a
 ! {\tt connectionList} argument with only one element to the create call.
 !
@@ -662,7 +662,7 @@ program ESMF_DistGridEx
 ! arguments of {\tt ESMF\_DistGridCreate()} are promoted to rank 2, the 
 ! second dimension being the tile count index.
 ! 
-! The following 2D tilework domain consisting of 3 LR tilees will 
+! The following 2D tilework domain consisting of 3 LR tiles will 
 ! be used in the examples of this section:
 ! \begin{verbatim}
 !   ----------------------------------------> 2nd dim
@@ -691,8 +691,8 @@ program ESMF_DistGridEx
 ! {\tt minIndex} and {\tt maxIndex} arrays.
 !EOE
 !BOC
-  allocate(minIndex(2,3))    ! (dimCount, number of tilees)
-  allocate(maxIndex(2,3))    ! (dimCount, number of tilees)
+  allocate(minIndex(2,3))    ! (dimCount, number of tiles)
+  allocate(maxIndex(2,3))    ! (dimCount, number of tiles)
   minIndex(:,1) = (/11,1/)
   maxIndex(:,1) = (/20,10/)
   minIndex(:,2) = (/11,11/)
@@ -706,7 +706,7 @@ program ESMF_DistGridEx
 ! single DE.
 !EOE
 !BOC
-  allocate(regDecomp(2,3))    ! (dimCount, number of tilees)
+  allocate(regDecomp(2,3))    ! (dimCount, number of tiles)
   regDecomp(:,1) = (/1,1/)    ! one DE
   regDecomp(:,2) = (/1,1/)    ! one DE
   regDecomp(:,3) = (/1,1/)    ! one DE
@@ -728,7 +728,7 @@ program ESMF_DistGridEx
 
 !BOE
 ! The default DE labeling sequence is identical to the tile labeling sequence
-! and follows the sequence in which the tilees are defined during the create
+! and follows the sequence in which the tiles are defined during the create
 ! call. However, DE labels start at 0 whereas tile labels start at 1. In this 
 ! case the DE labels look as:
 ! \begin{verbatim}

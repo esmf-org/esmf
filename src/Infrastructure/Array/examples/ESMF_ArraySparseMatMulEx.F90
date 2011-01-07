@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.21 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.22 2011/01/07 21:09:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@ program ESMF_ArraySparseMatMulEx
 ! The default sequence index rule assigns index $1$ to the {\tt minIndex} corner
 ! element of the first tile of the DistGrid on which the Array is defined. It then
 ! increments the sequence index by $1$ for each element running through the
-! DistGrid dimensions by order. The index space position of the DistGrid tilees
+! DistGrid dimensions by order. The index space position of the DistGrid tiles
 ! does not affect the sequence labeling of elements. The default sequence indices
 ! for
 !EOE
@@ -142,7 +142,7 @@ program ESMF_ArraySparseMatMulEx
 ! extra elements are either updated by the computational kernel or by Array halo
 ! operations (not yet implemented!).
 !
-! An alternative way to assign sequence indices to all the elements in the tilees
+! An alternative way to assign sequence indices to all the elements in the tiles
 ! covered by a DistGrid object is to use a special {\tt ESMF\_DistGridCreate()}
 ! call. This call has been specifically designed for 1D cases with arbitrary,
 ! user-supplied sequence indices.

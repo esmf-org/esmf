@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.51 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.52 2011/01/07 21:09:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.51 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.52 2011/01/07 21:09:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -272,7 +272,7 @@ contains
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
 !   \item[{[tileCount]}]
-!     Number of tilees in {\tt distgrid}.
+!     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPDimPTile]}]
 !     Lower index space corner per {\tt dim}, per {\tt tile}, with
 !     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.67 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.68 2011/01/07 21:09:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -238,7 +238,7 @@ program ESMF_ArrayEx
 ! \begin{itemize}
 ! \item The extent and topology of the global domain covered by the Array object
 !       in terms of indexed elements. The total extent may be a composition or 
-!       tilework of smaller logically rectangular (LR) domain pieces or tilees.
+!       tilework of smaller logically rectangular (LR) domain pieces or tiles.
 ! \item The decomposition of the entire domain into "element exclusive" DE-local
 !       LR chunks. {\em Element exclusive} means that there is no element overlap
 !       between DE-local chunks. This, however, does not exclude degeneracies 
@@ -1455,15 +1455,15 @@ program ESMF_ArrayEx
 ! and Array objects are discussed in this section.
 !
 ! The bipolar region can either be defined as a single tile DistGrid or
-! it can be composed of two or more separate tilees. In this example two
-! tilees, each covering half of the index space of the bipolar region, will be
+! it can be composed of two or more separate tiles. In this example two
+! tiles, each covering half of the index space of the bipolar region, will be
 ! used.
 !
 ! The index space of the bipolar region remains logically rectangular (LR) and
 ! is assumed to be of size 360 x 50 elements for this example. The index order
 ! in the example is assumed $i,j$. The line for $j=1$ corresponds to a line of 
 ! constant latitude in the spherical coordinate system and the {\em bipolar
-! fold} is along $j=50$. Two equal sized tilees of each 180 x 50 elements need
+! fold} is along $j=50$. Two equal sized tiles of each 180 x 50 elements need
 ! to be connected in a way that corresponds to the bipolar topology.
 ! 
 !EOEI
@@ -1476,7 +1476,7 @@ program ESMF_ArrayEx
 !BOEI
 ! With this {\tt connectionList} it is now
 ! possible to define a DistGrid object that captures the index space topology
-! for a bipolar grid. The DistGrid consists of two tilees which need to be
+! for a bipolar grid. The DistGrid consists of two tiles which need to be
 ! provided in {\tt minIndex} and {\tt maxIndex} list arguments.
 !EOEI
 !BOCI

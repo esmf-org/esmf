@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.117 2011/01/07 18:32:17 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.118 2011/01/07 21:09:51 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.117 2011/01/07 18:32:17 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.118 2011/01/07 21:09:51 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -5096,7 +5096,7 @@ static  void _free3D(Type ****array)
     // Get map between local and global DEs
     const int *localDEList=delayout->getLocalDeList();
    
-    // Get map between DEs and tilees
+    // Get map between DEs and tiles
     const int *DETileList = distgrid->getTileListPDe();
 
     // Get list of tile min and maxs

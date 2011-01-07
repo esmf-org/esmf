@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.52 2011/01/07 18:32:16 rokuingh Exp $
+// $Id: ESMCI_DistGrid.C,v 1.53 2011/01/07 21:09:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.52 2011/01/07 18:32:16 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.53 2011/01/07 21:09:50 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1529,8 +1529,8 @@ DistGrid *DistGrid::create(
   int *maxIndexPDimPDe = new int[dimCount*deCount];
   
   // the following differs from the single tile case in that there is an
-  // extra outer loop over tilees. The indexCountPDimPDe and
-  // indexListPDimPLocalDe arrays are on DE basis, independent of tilees.
+  // extra outer loop over tiles. The indexCountPDimPDe and
+  // indexListPDimPLocalDe arrays are on DE basis, independent of tiles.
 
   int deTileStart = 0;  // reset  
   for (int tile=0; tile<tileCount; tile++){
@@ -3048,7 +3048,7 @@ int DistGrid::getSequenceIndexLocalDe(
   }else{
     // determine the sequentialized index by construction of default tile rule
     const int *localDeList = delayout->getLocalDeList();
-    int tile = tileListPDe[localDeList[localDe]];  // tilees are basis 1 !!!!
+    int tile = tileListPDe[localDeList[localDe]];  // tiles are basis 1 !!!!
     if (tile == 0){
       // means that the localDe does not have any elements thus not on tile
       seqindex = -1;  // indicate no seqIndex
@@ -3209,7 +3209,7 @@ int DistGrid::getSequenceIndexTile(
       - minIndexPDimPTile[(tile-1)*dimCount+i];
   }
   if (onTile){
-    // add all the elements of previous tilees
+    // add all the elements of previous tiles
     for (int i=0; i<tile-2; i++)
       seqindex += elementCountPTile[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!

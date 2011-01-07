@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.68 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.69 2011/01/07 21:09:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.68 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.69 2011/01/07 21:09:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -440,7 +440,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -451,7 +451,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -702,7 +702,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -713,7 +713,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -898,7 +898,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -909,7 +909,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -1074,7 +1074,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -1085,7 +1085,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -1266,7 +1266,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -1277,7 +1277,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -1388,13 +1388,13 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
-!     rectangular (LR) tilees with regular decomposition. A regular
+!     rectangular (LR) tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     tilework of tilees is expressed by a list of DE count vectors, one
+!     tilework of tiles is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tilees than there are DEs.
+!     erroneous to provide more tiles than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1414,7 +1414,7 @@ contains
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tilees. 
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tiles. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[regDecompFirstExtra]}]
@@ -1435,7 +1435,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -1446,7 +1446,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -1599,13 +1599,13 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
-!     rectangular (LR) tilees with regular decomposition. A regular
+!     rectangular (LR) tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     tilework of tilees is expressed by a list of DE count vectors, one
+!     tilework of tiles is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tilees than there are DEs.
+!     erroneous to provide more tiles than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1643,7 +1643,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -1654,7 +1654,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -1762,13 +1762,13 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
-!     rectangular (LR) tilees with regular decomposition. A regular
+!     rectangular (LR) tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     tilework of tilees is expressed by a list of DE count vectors, one
+!     tilework of tiles is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tilees than there are DEs.
+!     erroneous to provide more tiles than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1788,7 +1788,7 @@ contains
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tilees. 
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tiles. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[deLabelList]}]
@@ -1801,7 +1801,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -1812,7 +1812,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -1924,7 +1924,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
-!     rectangular (LR) tilees with decomposition specified by {\tt deBlockList}.
+!     rectangular (LR) tiles with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1962,7 +1962,7 @@ contains
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tilees in index space. The second dimension
+!          List of connections between tiles in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
@@ -1973,7 +1973,7 @@ contains
 !          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tilees respectively,
+!                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
 !                minIndex to tile B's minIndex.
 !          \item {\tt orientationVector} associates each dimension of tile A
@@ -2447,7 +2447,7 @@ contains
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
 !   \item[{[tileCount]}]
-!     Number of tilees in {\tt distgrid}.
+!     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPDimPTile]}]
 !     Lower index space corner per {\tt dim}, per {\tt tile}, with
 !     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
@@ -3147,9 +3147,9 @@ contains
 !        be dimensioned to hold exactly the number of integers that result from
 !        the input information.
 !     \item[tileIndexA] 
-!        Index of one of the two tilees that are to be connected.
+!        Index of one of the two tiles that are to be connected.
 !     \item[tileIndexB] 
-!        Index of one of the two tilees that are to be connected.
+!        Index of one of the two tiles that are to be connected.
 !     \item[positionVector] 
 !        Position of tile B's minIndex with respect to tile A's minIndex.
 !     \item[{[orientationVector]}]

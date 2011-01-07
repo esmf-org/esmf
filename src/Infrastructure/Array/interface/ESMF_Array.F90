@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.139 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.140 2011/01/07 21:09:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.139 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.140 2011/01/07 21:09:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -753,7 +753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of tilees within the DistGrid or by user-supplied arbitrary
+!   the order of tiles within the DistGrid or by user-supplied arbitrary
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !
@@ -1129,7 +1129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of tilees within the DistGrid or by user-supplied arbitrary
+!   the order of tiles within the DistGrid or by user-supplied arbitrary
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !

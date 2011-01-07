@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.123 2011/01/07 18:32:16 rokuingh Exp $
+// $Id: ESMCI_Array.C,v 1.124 2011/01/07 21:09:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.123 2011/01/07 18:32:16 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.124 2011/01/07 21:09:50 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4333,12 +4333,12 @@ int Array::redistStore(
       return rc;
     }
 
-    // src and dst Arrays must be have same number of tilees
+    // src and dst Arrays must be have same number of tiles
     int tileCount = srcArray->distgrid->getTileCount();
     if (tileCount != dstArray->distgrid->getTileCount()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "- in transpose mode srcArray and dstArray must have same number of"
-        " tilees", &rc);
+        " tiles", &rc);
       return rc;
     }
 

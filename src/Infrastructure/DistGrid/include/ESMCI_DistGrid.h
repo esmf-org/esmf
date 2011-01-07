@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.35 2011/01/07 18:32:16 rokuingh Exp $
+// $Id: ESMCI_DistGrid.h,v 1.36 2011/01/07 21:09:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ namespace ESMCI {
 
    private:
     int dimCount;                 // rank of DistGrid
-    int tileCount;               // number of tilees in DistGrid
+    int tileCount;               // number of tiles in DistGrid
     int *minIndexPDimPTile;      // lower corner indices [dimCount*tileCount]
     int *maxIndexPDimPTile;      // upper corner indices [dimCount*tileCount]
     int *elementCountPTile;      // number of elements [tileCount]
