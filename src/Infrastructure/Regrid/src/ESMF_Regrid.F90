@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.154 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.155 2011/01/07 20:49:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 ! Regridding includes any process that transforms a field from one ESMF
 ! igrid to another, including:
 ! \begin{itemize}
-! \item bilinear or tile-recovery interpolation
+! \item bilinear or patch-recovery interpolation
 ! \end{itemize}
 !
 !------------------------------------------------------------------------------
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.154 2011/01/07 18:32:17 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.155 2011/01/07 20:49:07 rokuingh Exp $'
 
 !==============================================================================
 !

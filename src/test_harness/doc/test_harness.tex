@@ -385,7 +385,7 @@ with multiple species or tracers represented by the third dimension.
 The action of redistribution and remapping are signified by the symbols $-- \!\!\! >$ and $=\chi=>$ 
 respectively, where $\chi$ refers to a character key representing a specific interpolation method. 
 The currently supported interpolation methods are $B$ for first order bilinear and $P$ 
-for the tile recovery method, which provides a smoother first order surface, which can meaningly differentiated. 
+for the patch recovery method, which provides a smoother first order surface, which can meaningly differentiated. 
 Future implementations will include $C$, for first order conservative, $S$ for second order bilinear, 
 and $N$ for nearest neighbor. The character $X$ is reserved for unknown or user provided methods. 
 
@@ -394,7 +394,7 @@ and $N$ for nearest neighbor. The character $X$ is reserved for unknown or user 
 {$\chi$} & {\em Action} \\
 \hline \hline
   B & first order bilinear interpolation \\
-  P & tile recovery interpolation \\
+  P & patch recovery interpolation \\
     &                                        \\
   C & first order conservative interpolation \\
   S & second order conservative interpolation \\
