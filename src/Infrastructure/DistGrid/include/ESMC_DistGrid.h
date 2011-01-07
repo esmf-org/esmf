@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.h,v 1.46 2011/01/05 20:05:42 svasquez Exp $
+// $Id: ESMC_DistGrid.h,v 1.47 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ ESMC_DistGrid ESMC_DistGridCreate(
 //
 // !DESCRIPTION:
 //  Create an {\tt ESMC\_DistGrid} from a single logically rectangular (LR) 
-//  patch with default decomposition. The default decomposition is 
+//  tile with default decomposition. The default decomposition is 
 //  {\tt deCount}$ \times 1 \times ... \times 1$, where {\tt deCount} is the
 //  number of DEs in a default DELayout, equal to {\tt petCount}. This means
 //  that the default decomposition will be into as many DEs as there are PETs,
@@ -69,9 +69,9 @@ ESMC_DistGrid ESMC_DistGridCreate(
 //  The arguments are:
 //  \begin{description}
 //  \item[minIndex]
-//    Global coordinate tuple of the lower corner of the patch.
+//    Global coordinate tuple of the lower corner of the tile.
 //  \item[maxIndex]
-//    Global coordinate tuple of the upper corner of the patch.
+//    Global coordinate tuple of the upper corner of the tile.
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}

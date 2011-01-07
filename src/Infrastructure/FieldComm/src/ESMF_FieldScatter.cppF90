@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.12 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.13 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.12 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.13 2011/01/07 18:32:17 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
@@ -73,13 +73,13 @@ contains
 ! !IROUTINE: ESMF_FieldScatter - Scatter a Fortran array across the ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_FieldScatter<rank><type><kind>(field, farray, patch, & @\
+! subroutine ESMF_FieldScatter<rank><type><kind>(field, farray, tile, & @\
 !   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),           intent(inout)           :: field @\
 !   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
-!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in),   optional  :: tile @\
 !   integer,                    intent(in)              :: rootPet @\
 !   type(ESMF_VM),              intent(in),   optional  :: vm @\
 !   integer,                    intent(out),  optional  :: rc @\
@@ -88,10 +88,10 @@ contains
 ! !DESCRIPTION: @\
 !   Scatter the data of {\tt farray} located on {\tt rootPET} @\
 !   across an {ESMF\_Field} object. A single {\tt farray} must be @\
-!   scattered across a single DistGrid patch in Field. The optional {\tt patch} @\
-!   argument allows selection of the patch. For Fields defined on a single @\
-!   patch DistGrid the default selection (patch 1) will be correct. The @\
-!   shape of {\tt farray} must match the shape of the patch in Field. @\
+!   scattered across a single DistGrid tile in Field. The optional {\tt tile} @\
+!   argument allows selection of the tile. For Fields defined on a single @\
+!   tile DistGrid the default selection (tile 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the tile in Field. @\
 ! @\
 !   If the Field contains replicating DistGrid dimensions data will be @\
 !   scattered across all of the replicated pieces. @\
@@ -110,9 +110,9 @@ contains
 !   \item[{[farray]}] @\
 !     The Fortran array that is to be scattered. Only root @\
 !     must provide a valid {\tt farray}. @\
-!   \item[{[patch]}] @\
-!     The DistGrid patch in {\tt field} into which to scatter {\tt farray}. @\
-!     By default {\tt farray} will be scattered into patch 1. @\
+!   \item[{[tile]}] @\
+!     The DistGrid tile in {\tt field} into which to scatter {\tt farray}. @\
+!     By default {\tt farray} will be scattered into tile 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid data in {\tt farray}. @\
 !   \item[{[vm]}] @\
@@ -130,12 +130,12 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldScatter" @\
     subroutine ESMF_FieldScatter##mrank##D##mtypekind(field,  farray, & @\
-        patch, rootPet, vm, rc) @\
+        tile, rootPet, vm, rc) @\
 @\
         ! input arguments @\
         type(ESMF_Field)                                       :: field  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-        integer, intent(in), optional                          :: patch     @\
+        integer, intent(in), optional                          :: tile     @\
         integer, intent(in)                                    :: rootPet @\
         type(ESMF_VM), intent(in), optional                    :: vm  @\
         integer, intent(out), optional                         :: rc  @\
@@ -162,7 +162,7 @@ contains
         ! perform scatter through internal array @\
         ! For performance consideration: @\
         ! Rely on ArrayScatter to perform sanity checking of the other parameters @\
-        call ESMF_ArrayScatter(array, farray, patch, rootPet, vm, rc=localrc) @\
+        call ESMF_ArrayScatter(array, farray, tile, rootPet, vm, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
@@ -176,10 +176,10 @@ TypeKindRankDeclarationMacro(FieldScatter)
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldScatter"
-subroutine ESMF_FieldScatterNotRoot(field, patch, rootPet, vm, rc)
+subroutine ESMF_FieldScatterNotRoot(field, tile, rootPet, vm, rc)
 
     type(ESMF_Field),           intent(inout)           :: field
-    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in),   optional  :: tile
     integer,                    intent(in)              :: rootPet
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc
@@ -201,7 +201,7 @@ subroutine ESMF_FieldScatterNotRoot(field, patch, rootPet, vm, rc)
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
 
-    call ESMF_ArrayScatter(array, patch, rootPet, vm, rc=localrc)
+    call ESMF_ArrayScatter(array, tile, rootPet, vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return

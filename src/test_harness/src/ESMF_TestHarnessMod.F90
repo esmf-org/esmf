@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.56 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.57 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1186,7 +1186,7 @@ logical                       :: checkpoint = .FALSE.
     noconnections = .FALSE. 
       ! multiply connected domains are not currently supported
   else
-    ! no patch connections specified
+    ! no tile connections specified
     noconnections = .TRUE.  
 
   endif
@@ -1220,7 +1220,7 @@ logical                       :: checkpoint = .FALSE.
     ! singlely periodic connection
 
     call ESMF_DistGridConnection(connection=connectionList(:,1),               &
-                                 patchIndexA=1, patchIndexB=1,                 &
+                                 tileIndexA=1, tileIndexB=1,                 &
                                  positionVector=positionVector,                &
                                  orientationVector=orientationVector,          &
                                  rc=localrc)

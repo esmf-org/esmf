@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.45 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMCI_Array_F.C,v 1.46 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -845,7 +845,7 @@ extern "C" {
   
   void FTN(c_esmc_arraygather)(ESMCI::Array **array, void *farray,
     ESMC_TypeKind *typekind, int *rank, int *counts,
-    int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
+    int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraygather()"
     // Initialize return code; assume routine not implemented
@@ -856,14 +856,14 @@ extern "C" {
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->gather(
-      farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
+      farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
   void FTN(c_esmc_arraygathernotroot)(ESMCI::Array **array,
-    int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
+    int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraygathernotroot()"
     // Initialize return code; assume routine not implemented
@@ -874,7 +874,7 @@ extern "C" {
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->gather(
-      NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
+      NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -882,7 +882,7 @@ extern "C" {
   
   void FTN(c_esmc_arrayscatter)(ESMCI::Array **array, void *farray,
     ESMC_TypeKind *typekind, int *rank, int *counts,
-    int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
+    int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatter()"
     // Initialize return code; assume routine not implemented
@@ -893,14 +893,14 @@ extern "C" {
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->scatter(
-      farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(patch),
+      farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
   void FTN(c_esmc_arrayscatternotroot)(ESMCI::Array **array,
-    int *patch, int *rootPet, ESMCI::VM **vm, int *rc){
+    int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatternotroot()"
     // Initialize return code; assume routine not implemented
@@ -911,7 +911,7 @@ extern "C" {
     else opt_vm = *vm;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->scatter(
-      NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(patch),
+      NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
       ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.8 2011/01/06 23:59:29 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.9 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -56,9 +56,9 @@ program ESMF_ArrayScatterGatherArbEx
 ! The {\tt ESMF\_ArrayScatter()} and {\tt ESMF\_ArrayGather()} calls, 
 ! introduced in section \ref{Array:ScatterGather}, provide a convenient
 ! way of communicating data between a Fortran array and all of the DEs of
-! a single Array patch. A key requirement of {\tt ESMF\_ArrayScatter()}
+! a single Array tile. A key requirement of {\tt ESMF\_ArrayScatter()}
 ! and {\tt ESMF\_ArrayGather()} is that the {\em shape} of the Fortran array
-! and the Array patch must match. This means that the {\tt dimCount} must be
+! and the Array tile must match. This means that the {\tt dimCount} must be
 ! equal, and that the size of each dimension must match. Element reordering
 ! during scatter and gather is only supported on a per dimension level,
 ! based on the {\tt decompflag} option available during DistGrid creation.

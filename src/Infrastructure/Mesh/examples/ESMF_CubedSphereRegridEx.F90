@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.9 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.10 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1074,7 +1074,7 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     allocate(coord2D(xdim,ydim))
     if (PetNo == 0) then
        coord2D = RESHAPE(coordX,(/xdim, ydim/))
-       call ESMF_ArrayGet(array,minIndexPDimPPatch=lbnd,maxIndexPDimPPatch=ubnd,rc=localrc)
+       call ESMF_ArrayGet(array,minIndexPDimPTile=lbnd,maxIndexPDimPTile=ubnd,rc=localrc)
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

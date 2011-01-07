@@ -2244,8 +2244,8 @@ extern "C" {
        // Get stagger width
        staggerEdgeLWidth=grid->getStaggerEdgeLWidth(staggerloc);
 
-       // get the minIndex of the first patch
-       const int *minIndexDG=distgrid->getMinIndexPDimPPatch();
+       // get the minIndex of the first tile
+       const int *minIndexDG=distgrid->getMinIndexPDimPTile();
 
 
        // Fill in the output array
@@ -2278,8 +2278,8 @@ extern "C" {
 	// Get stagger width
 	staggerEdgeUWidth=grid->getStaggerEdgeUWidth(staggerloc);
 
-	// get the minIndex of the first patch
-	const int *maxIndexDG=distgrid->getMaxIndexPDimPPatch();
+	// get the minIndex of the first tile
+	const int *maxIndexDG=distgrid->getMaxIndexPDimPTile();
 
 	// Fill in the output array
 	for (int i=0; i<dimCount; i++) {

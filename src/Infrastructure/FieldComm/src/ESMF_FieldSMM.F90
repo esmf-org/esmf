@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.21 2011/01/05 23:26:30 svasquez Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.22 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.21 2011/01/05 23:26:30 svasquez Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.22 2011/01/07 18:32:17 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -279,7 +279,7 @@ contains
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The 
 ! sequence is defined by the order of DistGrid dimensions and the order of 
-! patches within the DistGrid or by user-supplied arbitrary sequence indices. See 
+! tilees within the DistGrid or by user-supplied arbitrary sequence indices. See 
 ! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
 ! SMM corresponds to an identity mapping of the source Field vector to 
 ! the destination Field vector. 
@@ -629,7 +629,7 @@ contains
 ! Both {\tt srcField} and {\tt dstField} are interpreted as sequentialized 
 ! vectors. The 
 ! sequence is defined by the order of DistGrid dimensions and the order of 
-! patches within the DistGrid or by user-supplied arbitrary sequence indices. See 
+! tilees within the DistGrid or by user-supplied arbitrary sequence indices. See 
 ! section \ref{Array:SparseMatMul} for details on the definition of {\em sequence indices}. 
 ! SMM corresponds to an identity mapping of the source Field vector to 
 ! the destination Field vector. 

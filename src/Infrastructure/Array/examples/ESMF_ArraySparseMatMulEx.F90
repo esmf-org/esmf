@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.20 2011/01/06 23:59:29 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.21 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -71,8 +71,8 @@ program ESMF_ArraySparseMatMulEx
 ! information about the non-zero elements. One option is to store the value
 ! of each coefficient together with the corresponding destination element index
 ! and source element index. Destination and source indices could be expressed in
-! terms of the corresponding DistGrid patch index together with the coordinate
-! tuple within the patch. While this format may be the most natural way to
+! terms of the corresponding DistGrid tile index together with the coordinate
+! tuple within the tile. While this format may be the most natural way to
 ! express elements in the source and destination Array, it has two major drawbacks.
 ! First the coordinate tuple is {\tt dimCount} specific and second the format
 ! is extremely bulky. For 2D source and destination Arrays it would require 6
@@ -87,9 +87,9 @@ program ESMF_ArraySparseMatMulEx
 ! matrix multiplication}.
 !
 ! The default sequence index rule assigns index $1$ to the {\tt minIndex} corner
-! element of the first patch of the DistGrid on which the Array is defined. It then
+! element of the first tile of the DistGrid on which the Array is defined. It then
 ! increments the sequence index by $1$ for each element running through the
-! DistGrid dimensions by order. The index space position of the DistGrid patches
+! DistGrid dimensions by order. The index space position of the DistGrid tilees
 ! does not affect the sequence labeling of elements. The default sequence indices
 ! for
 !EOE
@@ -142,7 +142,7 @@ program ESMF_ArraySparseMatMulEx
 ! extra elements are either updated by the computational kernel or by Array halo
 ! operations (not yet implemented!).
 !
-! An alternative way to assign sequence indices to all the elements in the patches
+! An alternative way to assign sequence indices to all the elements in the tilees
 ! covered by a DistGrid object is to use a special {\tt ESMF\_DistGridCreate()}
 ! call. This call has been specifically designed for 1D cases with arbitrary,
 ! user-supplied sequence indices.

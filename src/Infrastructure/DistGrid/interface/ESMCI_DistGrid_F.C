@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.29 2011/01/05 20:05:42 svasquez Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.30 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -196,14 +196,14 @@ extern "C" {
   }
 
   void FTN(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
-    int *dimCount, int *patchCount,
-    ESMCI::InterfaceInt **minIndexPDimPPatch,
-    ESMCI::InterfaceInt **maxIndexPDimPPatch,
-    ESMCI::InterfaceInt **elementCountPPatch,
+    int *dimCount, int *tileCount,
+    ESMCI::InterfaceInt **minIndexPDimPTile,
+    ESMCI::InterfaceInt **maxIndexPDimPTile,
+    ESMCI::InterfaceInt **elementCountPTile,
     ESMCI::InterfaceInt **minIndexPDimPDe,
     ESMCI::InterfaceInt **maxIndexPDimPDe,
     ESMCI::InterfaceInt **elementCountPDe,
-    ESMCI::InterfaceInt **patchListPDe,
+    ESMCI::InterfaceInt **tileListPDe,
     ESMCI::InterfaceInt **indexCountPDimPDe,
     ESMCI::InterfaceInt **collocationPDim,
     ESMC_Logical *regDecompFlag, ESMCI::DELayout **delayout, int *rc){
@@ -215,8 +215,8 @@ extern "C" {
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(delayout) != ESMC_NULL_POINTER)
       *delayout = (*ptr)->getDELayout();
-    if (ESMC_NOT_PRESENT_FILTER(patchCount) != ESMC_NULL_POINTER)
-      *patchCount = (*ptr)->getPatchCount();
+    if (ESMC_NOT_PRESENT_FILTER(tileCount) != ESMC_NULL_POINTER)
+      *tileCount = (*ptr)->getTileCount();
     if (ESMC_NOT_PRESENT_FILTER(dimCount) != ESMC_NULL_POINTER)
       *dimCount = (*ptr)->getDimCount();
     if (ESMC_NOT_PRESENT_FILTER(regDecompFlag) != ESMC_NULL_POINTER){
@@ -225,85 +225,85 @@ extern "C" {
       else
         *regDecompFlag = ESMF_FALSE;
     }
-    // fill minIndexPDimPPatch
-    if (*minIndexPDimPPatch != NULL){
-      // minIndexPDimPPatch was provided -> do some error checking
-      if ((*minIndexPDimPPatch)->dimCount != 2){
+    // fill minIndexPDimPTile
+    if (*minIndexPDimPTile != NULL){
+      // minIndexPDimPTile was provided -> do some error checking
+      if ((*minIndexPDimPTile)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- minIndexPDimPPatch array must be of rank 2", rc);
+          "- minIndexPDimPTile array must be of rank 2", rc);
         return;
       }
-      if ((*minIndexPDimPPatch)->extent[0] < (*ptr)->getDimCount()){
+      if ((*minIndexPDimPTile)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of minIndexPDimPPatch array must be of size 'dimCount'",
+          "- 1st dim of minIndexPDimPTile array must be of size 'dimCount'",
           rc);
         return;
       }
-      if ((*minIndexPDimPPatch)->extent[1] < (*ptr)->getPatchCount()){
+      if ((*minIndexPDimPTile)->extent[1] < (*ptr)->getTileCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of minIndexPDimPPatch array must be of size 'patchCount'",
+          "- 2nd dim of minIndexPDimPTile array must be of size 'tileCount'",
           rc);
         return;
       }
-      // fill in the values: The interface allows to pass in minIndexPDimPPatch
-      // arrays which are larger than dimCount x patchCount. Consequently it is
+      // fill in the values: The interface allows to pass in minIndexPDimPTile
+      // arrays which are larger than dimCount x tileCount. Consequently it is
       // necessary to memcpy strips of contiguous data since it cannot be
-      // assumed that all data ends up contiguous in the minIndexPDimPPatch
+      // assumed that all data ends up contiguous in the minIndexPDimPTile
       // array.
-      for (int i=0; i<(*ptr)->getPatchCount(); i++)
+      for (int i=0; i<(*ptr)->getTileCount(); i++)
         memcpy(
-          &((*minIndexPDimPPatch)->array[i*((*minIndexPDimPPatch)->extent[0])]),
-          &(((*ptr)->getMinIndexPDimPPatch())[i*(*ptr)->getDimCount()]),
+          &((*minIndexPDimPTile)->array[i*((*minIndexPDimPTile)->extent[0])]),
+          &(((*ptr)->getMinIndexPDimPTile())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
     }
-    // fill maxIndexPDimPPatch
-    if (*maxIndexPDimPPatch != NULL){
-      // maxIndexPDimPPatch was provided -> do some error checking
-      if ((*maxIndexPDimPPatch)->dimCount != 2){
+    // fill maxIndexPDimPTile
+    if (*maxIndexPDimPTile != NULL){
+      // maxIndexPDimPTile was provided -> do some error checking
+      if ((*maxIndexPDimPTile)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- maxIndexPDimPPatch array must be of rank 2", rc);
+          "- maxIndexPDimPTile array must be of rank 2", rc);
         return;
       }
-      if ((*maxIndexPDimPPatch)->extent[0] < (*ptr)->getDimCount()){
+      if ((*maxIndexPDimPTile)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of maxIndexPDimPPatch array must be of size 'dimCount'",
+          "- 1st dim of maxIndexPDimPTile array must be of size 'dimCount'",
           rc);
         return;
       }
-      if ((*maxIndexPDimPPatch)->extent[1] < (*ptr)->getPatchCount()){
+      if ((*maxIndexPDimPTile)->extent[1] < (*ptr)->getTileCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of maxIndexPDimPPatch array must be of size 'patchCount'",
+          "- 2nd dim of maxIndexPDimPTile array must be of size 'tileCount'",
           rc);
         return;
       }
-      // fill in the values: The interface allows to pass in maxIndexPDimPPatch
-      // arrays which are larger than dimCount x patchCount. Consequently it is
+      // fill in the values: The interface allows to pass in maxIndexPDimPTile
+      // arrays which are larger than dimCount x tileCount. Consequently it is
       // necessary to memcpy strips of contiguous data since it cannot be
-      // assumed that all data ends up contiguous in the maxIndexPDimPPatch
+      // assumed that all data ends up contiguous in the maxIndexPDimPTile
       // array.
-      for (int i=0; i<(*ptr)->getPatchCount(); i++)
+      for (int i=0; i<(*ptr)->getTileCount(); i++)
         memcpy(
-          &((*maxIndexPDimPPatch)->array[i*((*maxIndexPDimPPatch)->extent[0])]),
-          &(((*ptr)->getMaxIndexPDimPPatch())[i*(*ptr)->getDimCount()]),
+          &((*maxIndexPDimPTile)->array[i*((*maxIndexPDimPTile)->extent[0])]),
+          &(((*ptr)->getMaxIndexPDimPTile())[i*(*ptr)->getDimCount()]),
           sizeof(int)*(*ptr)->getDimCount());
     }
-    // fill elementCountPPatch
-    if (*elementCountPPatch != NULL){
-      // elementCountPPatch was provided -> do some error checking
-      if ((*elementCountPPatch)->dimCount != 1){
+    // fill elementCountPTile
+    if (*elementCountPTile != NULL){
+      // elementCountPTile was provided -> do some error checking
+      if ((*elementCountPTile)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- elementCountPPatch array must be of rank 1", rc);
+          "- elementCountPTile array must be of rank 1", rc);
         return;
       }
-      if ((*elementCountPPatch)->extent[0] < (*ptr)->getPatchCount()){
+      if ((*elementCountPTile)->extent[0] < (*ptr)->getTileCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of elementCountPPatch array must be of size 'patchCount'",
+          "- 1st dim of elementCountPTile array must be of size 'tileCount'",
           rc);
         return;
       }
       // fill in values
-      memcpy((*elementCountPPatch)->array, (*ptr)->getElementCountPPatch(),
-        sizeof(int)*(*ptr)->getPatchCount());
+      memcpy((*elementCountPTile)->array, (*ptr)->getElementCountPTile(),
+        sizeof(int)*(*ptr)->getTileCount());
     }
     // fill minIndexPDimPDe
     if (*minIndexPDimPDe != NULL){
@@ -385,21 +385,21 @@ extern "C" {
       memcpy((*elementCountPDe)->array, (*ptr)->getElementCountPDe(),
         sizeof(int)*(*ptr)->getDELayout()->getDeCount());
     }
-    // fill patchListPDe
-    if (*patchListPDe != NULL){
-      // patchListPDe was provided -> do some error checking
-      if ((*patchListPDe)->dimCount != 1){
+    // fill tileListPDe
+    if (*tileListPDe != NULL){
+      // tileListPDe was provided -> do some error checking
+      if ((*tileListPDe)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- patchListPDe array must be of rank 1", rc);
+          "- tileListPDe array must be of rank 1", rc);
         return;
       }
-      if ((*patchListPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
+      if ((*tileListPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of patchListPDe array must be of size 'deCount'", rc);
+          "- 1st dim of tileListPDe array must be of size 'deCount'", rc);
         return;
       }
       // fill in values
-      memcpy((*patchListPDe)->array, (*ptr)->getPatchListPDe(),
+      memcpy((*tileListPDe)->array, (*ptr)->getTileListPDe(),
         sizeof(int)*(*ptr)->getDELayout()->getDeCount());
     }
     // fill indexCountPDimPDe
@@ -592,8 +592,8 @@ extern "C" {
   }
   
   void FTN(c_esmc_distgridconnection)(
-    ESMCI::InterfaceInt **connection, int *patchIndexA,
-    int *patchIndexB, ESMCI::InterfaceInt **positionVector,
+    ESMCI::InterfaceInt **connection, int *tileIndexA,
+    int *tileIndexB, ESMCI::InterfaceInt **positionVector,
     ESMCI::InterfaceInt **orientationVector,
     int *rc){
 #undef  ESMC_METHOD
@@ -602,8 +602,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
-      ESMCI::DistGrid::connection(*connection, *patchIndexA,
-      *patchIndexB, *positionVector, *orientationVector), 
+      ESMCI::DistGrid::connection(*connection, *tileIndexA,
+      *tileIndexB, *positionVector, *orientationVector), 
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

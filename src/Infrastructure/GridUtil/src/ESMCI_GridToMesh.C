@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.8 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.9 2011/01/07 18:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ namespace ESMCI {
 // *** Convert a grid to a mesh.  The staggerLoc should describe
 // whether the mesh is at the dual location or coincident with the
 // grid itself.  I am not sure how this is going to work, though,
-// since the dual of a nice multi-patch grid could be a very bad
+// since the dual of a nice multi-tile grid could be a very bad
 // object, not representable by a mesh.
 //
 //   o------------o-------------o
@@ -77,7 +77,7 @@ namespace ESMCI {
 //
 // I think there is work here.  
 // For the moment, we should at least be able to represent the grid itself,
-// and, maybe, for simple single patch grids with a periodic component,
+// and, maybe, for simple single tile grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
 // SCRIP.  
 

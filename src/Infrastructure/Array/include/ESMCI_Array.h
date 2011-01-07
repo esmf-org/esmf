@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.57 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMCI_Array.h,v 1.58 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -240,7 +240,7 @@ namespace ESMCI {
       const;
     SeqIndex getSequenceIndexExclusive(int localDe, int const *index,
       int depth=0, int *rc=NULL) const;
-    SeqIndex getSequenceIndexPatch(int patch, const int *index, int *rc=NULL)
+    SeqIndex getSequenceIndexTile(int tile, const int *index, int *rc=NULL)
       const;
     int getTensorSequenceIndex(const int *index, int *rc=NULL)const;
     int getArbSequenceIndexOffset(const int *index, int *rc=NULL)const;
@@ -262,9 +262,9 @@ namespace ESMCI {
       const ESMC_AttReconcileFlag &attreconflag);
     // comms
     int gather(void *array, ESMC_TypeKind typekind, int rank,
-      int *counts, int *patch, int rootPet, VM *vm);
+      int *counts, int *tile, int rootPet, VM *vm);
     int scatter(void *array, ESMC_TypeKind typekind, int rank,
-      int *counts, int *patch, int rootPet, VM *vm);
+      int *counts, int *tile, int rootPet, VM *vm);
     static int haloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
       InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL);

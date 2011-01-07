@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.15 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.16 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -97,9 +97,9 @@ program ESMF_ArrayScatterGatherEx
 !EOC
 !BOE
 ! The destination of the ArrayScatter() operation are all the DEs of a single
-! patch. For multi-patch Arrays the destination patch can be specified. The 
+! tile. For multi-tile Arrays the destination tile can be specified. The 
 ! shape of the scattered Fortran array must match the shape of the destination
-! patch in the ESMF Array.
+! tile in the ESMF Array.
 !
 ! Gathering data decomposed and distributed across the DEs of an ESMF Array
 ! object into a single Fortran array on root PET is accomplished by calling
@@ -120,9 +120,9 @@ program ESMF_ArrayScatterGatherEx
 !EOC
 !BOE
 ! The source of the ArrayGather() operation are all the DEs of a single
-! patch. For multi-patch Arrays the source patch can be specified. The 
+! tile. For multi-tile Arrays the source tile can be specified. The 
 ! shape of the gathered Fortran array must match the shape of the source
-! patch in the ESMF Array.
+! tile in the ESMF Array.
 !EOE
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

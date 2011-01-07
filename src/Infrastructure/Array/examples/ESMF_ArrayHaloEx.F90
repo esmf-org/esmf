@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloEx.F90,v 1.7 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayHaloEx.F90,v 1.8 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -292,7 +292,7 @@ program ESMF_ArrayHaloEx
 !BOC
   allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
   call ESMF_DistGridConnection(connection=connectionList(:,1), &
-     patchIndexA=1, patchIndexB=1, &
+     tileIndexA=1, tileIndexB=1, &
      positionVector=(/10, 0/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

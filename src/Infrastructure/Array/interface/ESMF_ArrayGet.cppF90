@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.50 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.51 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.50 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.51 2011/01/07 18:32:16 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -135,8 +135,8 @@ contains
     arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
     exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
     totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
-    totalUWidth, name, distgrid, dimCount, patchCount, minIndexPDimPPatch, &
-    maxIndexPDimPPatch, patchListPDe, indexCountPDimPDe, delayout, deCount, &
+    totalUWidth, name, distgrid, dimCount, tileCount, minIndexPDimPTile, &
+    maxIndexPDimPTile, tileListPDe, indexCountPDimPDe, delayout, deCount, &
     localDeCount, localDeList, rc)
 !
 ! !ARGUMENTS:
@@ -164,10 +164,10 @@ contains
     character(len=*),              intent(out), optional :: name
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
-    integer,                       intent(out), optional :: patchCount
-    integer,                       intent(out), optional :: minIndexPDimPPatch(:,:)
-    integer,                       intent(out), optional :: maxIndexPDimPPatch(:,:)
-    integer,                       intent(out), optional :: patchListPDe(:)
+    integer,                       intent(out), optional :: tileCount
+    integer,                       intent(out), optional :: minIndexPDimPTile(:,:)
+    integer,                       intent(out), optional :: maxIndexPDimPTile(:,:)
+    integer,                       intent(out), optional :: tileListPDe(:)
     integer,                       intent(out), optional :: indexCountPDimPDe(:,:)
     type(ESMF_DELayout),           intent(out), optional :: delayout
     integer,                       intent(out), optional :: deCount
@@ -271,17 +271,17 @@ contains
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
-!   \item[{[patchCount]}]
-!     Number of patches in {\tt distgrid}.
-!   \item[{[minIndexPDimPPatch]}]
-!     Lower index space corner per {\tt dim}, per {\tt patch}, with
-!     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
-!   \item[{[maxIndexPDimPPatch]}]
-!     Upper index space corner per {\tt dim}, per {\tt patch}, with
-!     {\tt size(maxIndexPDimPPatch) == (/dimCount, patchCount/)}.
-!   \item[{[patchListPDe]}]
-!     List of patch id numbers, one for each DE, with
-!     {\tt size(patchListPDe) == (/deCount/)}
+!   \item[{[tileCount]}]
+!     Number of tilees in {\tt distgrid}.
+!   \item[{[minIndexPDimPTile]}]
+!     Lower index space corner per {\tt dim}, per {\tt tile}, with
+!     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
+!   \item[{[maxIndexPDimPTile]}]
+!     Upper index space corner per {\tt dim}, per {\tt tile}, with
+!     {\tt size(maxIndexPDimPTile) == (/dimCount, tileCount/)}.
+!   \item[{[tileListPDe]}]
+!     List of tile id numbers, one for each DE, with
+!     {\tt size(tileListPDe) == (/deCount/)}
 !   \item[{[indexCountPDimPDe]}]
 !     Array of extents per {\tt dim}, per {\tt de}, with
 !     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
@@ -492,8 +492,8 @@ contains
     
     ! Obtain DistGrid information
     call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, &
-      patchCount=patchCount, minIndexPDimPPatch=minIndexPDimPPatch, &
-      maxIndexPDimPPatch=maxIndexPDimPPatch, patchListPDe=patchListPDe, &
+      tileCount=tileCount, minIndexPDimPTile=minIndexPDimPTile, &
+      maxIndexPDimPTile=maxIndexPDimPTile, tileListPDe=tileListPDe, &
       indexCountPDimPDe=indexCountPDimPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -557,7 +557,7 @@ contains
 !   \item[{[indexCount]}]
 !     DistGrid indexCount associated with {\tt localDe, dim}.
 !   \item[{[indexList]}]
-!     List of DistGrid patch-local indices for {\tt localDe} along dimension 
+!     List of DistGrid tile-local indices for {\tt localDe} along dimension 
 !     {\tt dim}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -653,7 +653,7 @@ contains
 #define ArrayGetFPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array patch via Fortran array pointer @\
+! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array tile via Fortran array pointer @\
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
@@ -754,7 +754,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetLarray()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array patch via LocalArray object.
+! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array tile via LocalArray object.
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()

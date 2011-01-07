@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.6 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.7 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.6 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.7 2011/01/07 18:32:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -576,14 +576,14 @@ contains
   type(ESMF_Array) :: lonArrayA
   type(ESMF_Array) :: srcArrayA
   type(ESMF_RouteHandle) :: routeHandle
-  type(ESMF_RouteHandle) :: routeHandlePatch
+  type(ESMF_RouteHandle) :: routeHandleTile
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   integer(ESMF_KIND_I4), pointer :: maskB(:,:), maskA(:,:)
   real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
   real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
   real(ESMF_KIND_R8), pointer :: fptr(:,:),fptr2(:,:)
-  real(ESMF_KIND_R8), pointer :: fptrPatch(:,:)
+  real(ESMF_KIND_R8), pointer :: fptrTile(:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2,i3, index(2)

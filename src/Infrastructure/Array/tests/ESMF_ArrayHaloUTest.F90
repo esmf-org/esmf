@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.12 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.13 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.12 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.13 2011/01/07 18:32:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1605,7 +1605,7 @@ program ESMF_ArrayHaloUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
   call ESMF_DistGridConnection(connection=connectionList(:,1), &
-     patchIndexA=1, patchIndexB=1, &
+     tileIndexA=1, tileIndexB=1, &
      positionVector=(/0, 20/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

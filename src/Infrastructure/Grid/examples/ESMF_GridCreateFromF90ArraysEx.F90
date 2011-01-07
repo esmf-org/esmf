@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.10 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.11 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -141,7 +141,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC 
-     patchGrid = ESMF_GridCreate(arrays=gridCoordArrays, &
+     tileGrid = ESMF_GridCreate(arrays=gridCoordArrays, &
                                staggerLocs=staggerlocs,rc=rc)
 !EOC  
 

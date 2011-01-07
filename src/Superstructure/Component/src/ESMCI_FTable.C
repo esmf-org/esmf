@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.46 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMCI_FTable.C,v 1.47 2011/01/07 18:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.46 2011/01/05 20:05:47 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.47 2011/01/07 18:32:17 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1750,7 +1750,7 @@ FTable::~FTable(void) {
 // and finally, component routines can be called with either a single
 // state or a pair of states. we can require that the user specify the
 // interface at registration time, or we can decide at run time which
-// form was called and dispatch the corresponding entry point.
+// form was called and distile the corresponding entry point.
 // for now i'm going to fill both types of component entry points for each
 // registration.  i can always remove that code if we force the user
 // to specify at registration time what format the states are expected in.

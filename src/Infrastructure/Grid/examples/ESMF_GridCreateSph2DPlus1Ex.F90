@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.9 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.10 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ program ESMF_GridCreateEx
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 
 !BOE    
-! Construct a single patch spherical domain without connection across
+! Construct a single tile spherical domain without connection across
 ! the poles.
 !EOE
 
@@ -66,7 +66,7 @@ program ESMF_GridCreateEx
       allocate( connectionList(2*2,2) )
       call ESMF_ConnectionElementConstruct(                          &
                           connectionElement=connectionList(:,1),     &
-                          patchIndexA=1, patchIndexB=1,              &
+                          tileIndexA=1, tileIndexB=1,              &
                           positionVector = (/gridSize(1),0/),        &
                           repetitionVector= (/1,0/), rc=rc)
 

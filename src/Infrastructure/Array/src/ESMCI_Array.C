@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.122 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMCI_Array.C,v 1.123 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.122 2011/01/05 20:05:40 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.123 2011/01/07 18:32:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -706,7 +706,7 @@ Array *Array::create(
     memcpy(computationalUBound, exclusiveUBound,
       localDeCount*redDimCount*sizeof(int));
   }
-  // modify computational bounds on patch edges
+  // modify computational bounds on tile edges
   for (int j=0; j<localDeCount; j++){
     for (int i=0; i<dimCount; i++){
       if (int k=distgridToPackedArrayMap[i]){
@@ -1395,7 +1395,7 @@ Array *Array::create(
     memcpy(computationalUBound, exclusiveUBound,
       localDeCount*redDimCount*sizeof(int));
   }
-  // modify computational bounds on patch edges
+  // modify computational bounds on tile edges
   for (int j=0; j<localDeCount; j++){
     for (int i=0; i<dimCount; i++){
       if (int k=distgridToPackedArrayMap[i]){
@@ -1965,26 +1965,26 @@ SeqIndex Array::getSequenceIndexExclusive(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::getSequenceIndexPatch()"
+#define ESMC_METHOD "ESMCI::Array::getSequenceIndexTile()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::getSequenceIndexPatch
+// !IROUTINE:  ESMCI::Array::getSequenceIndexTile
 //
 // !INTERFACE:
-SeqIndex Array::getSequenceIndexPatch(
+SeqIndex Array::getSequenceIndexTile(
 //
 // !RETURN VALUE:
 //    SeqIndex sequence index
 //
 // !ARGUMENTS:
 //
-  int patch,                        // in - patch = {1,..., patchCount}
-  const int *index,                 // in - index tuple within patch 
+  int tile,                        // in - tile = {1,..., tileCount}
+  const int *index,                 // in - index tuple within tile 
                                     //    - basis 0
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
-//    Get sequential index - assuming index input to be basis 0 in patch region
+//    Get sequential index - assuming index input to be basis 0 in tile region
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2011,7 +2011,7 @@ SeqIndex Array::getSequenceIndexPatch(
   }
   // determine the sequentialized index for decomposed dimensions
   int decompSeqIndex;
-  decompSeqIndex = distgrid->getSequenceIndexPatchRelative(patch, decompIndex,
+  decompSeqIndex = distgrid->getSequenceIndexTileRelative(tile, decompIndex,
     0, &localrc);  
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
     return seqIndex;
@@ -2894,7 +2894,7 @@ int Array::gather(
   ESMC_TypeKind typekindArg,            // in -
   int rankArg,                          // in -
   int *counts,                          // in -
-  int *patchArg,                        // in -
+  int *tileArg,                        // in -
   int rootPet,                          // in -
   VM *vm                                // in -
   ){    
@@ -2927,23 +2927,23 @@ int Array::gather(
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
   
-  // deal with optional patch argument
-  int patch = 1;  // default
-  if (patchArg)
-    patch = *patchArg;
-  int patchCount = distgrid->getPatchCount();
-  if (patch < 1 || patch > patchCount){
+  // deal with optional tile argument
+  int tile = 1;  // default
+  if (tileArg)
+    tile = *tileArg;
+  int tileCount = distgrid->getTileCount();
+  if (tile < 1 || tile > tileCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-      "- Specified patch out of bounds", &rc);
+      "- Specified tile out of bounds", &rc);
     return rc;
   }
-  const int *patchListPDe = distgrid->getPatchListPDe();
+  const int *tileListPDe = distgrid->getTileListPDe();
 
-  // get minIndexPDim and maxIndexPDim for patch
-  const int *minIndexPDim = distgrid->getMinIndexPDimPPatch(patch, &localrc);
+  // get minIndexPDim and maxIndexPDim for tile
+  const int *minIndexPDim = distgrid->getMinIndexPDimPTile(tile, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  const int *maxIndexPDim = distgrid->getMaxIndexPDimPPatch(patch, &localrc);
+  const int *maxIndexPDim = distgrid->getMaxIndexPDimPTile(tile, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -3020,7 +3020,7 @@ int Array::gather(
   char **sendBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    if (patchListPDe[de] != patch) continue; // skip to next local DE
+    if (tileListPDe[de] != tile) continue; // skip to next local DE
     sendBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     int sendSize =
       exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
@@ -3074,8 +3074,8 @@ int Array::gather(
     recvBuffer = new char*[deCount]; // contiguous recvBuffer
     for (int i=0; i<deCount; i++){
       int de = i;
-      if (patchListPDe[de] == patch){
-        // this DE is located on sending patch
+      if (tileListPDe[de] == tile){
+        // this DE is located on sending tile
         // prepare contiguous recvBuffer for this DE and issue non-blocking recv
         int recvSize =
           exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
@@ -3106,7 +3106,7 @@ int Array::gather(
           nbCount = 0;  // reset
         }
         
-      } // DE on patch
+      } // DE on tile
     } // i -> de
 //printf("clearing Gather() boost at nbCount = %d\n", nbCount);
     // wait for nb-recvs to finish before exiting
@@ -3127,8 +3127,8 @@ int Array::gather(
     // rootPet gathers information from _all_ DEs
     for (int i=0; i<deCount; i++){
       int de = i;
-      if (patchListPDe[de] == patch){
-        // this DE is located on sending patch
+      if (tileListPDe[de] == tile){
+        // this DE is located on sending tile
         int **indexList = new int*[dimCount];
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
@@ -3220,15 +3220,15 @@ int Array::gather(
           if(contigFlagPDimPDe[de*dimCount+j]==0)
             delete [] indexList[j];
         delete [] indexList;
-      } // DE on patch
+      } // DE on tile
     } // i -> de
   }else{
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
     for (int i=0; i<localDeCount; i++){
       int de = localDeList[i];
-      if (patchListPDe[de] == patch){
-        // this DE is located on receiving patch -> must send info to rootPet
+      if (tileListPDe[de] == tile){
+        // this DE is located on receiving tile -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
           if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
@@ -3242,7 +3242,7 @@ int Array::gather(
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
         } // j
-      } // DE on patch
+      } // DE on tile
     } // i -> de
     // wait for all outstanding indexList sends issued by fillIndexListPDimPDe()
     for (int j=0; j<commhListCount; j++){
@@ -3255,14 +3255,14 @@ int Array::gather(
   if (localPet == rootPet){
     for (int i=0; i<deCount; i++){
       int de = i;
-      if (patchListPDe[de] == patch)
+      if (tileListPDe[de] == tile)
         delete [] recvBuffer[de];
     }    
     delete [] recvBuffer;
   }
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    if (patchListPDe[de] != patch) continue; // skip to next local DE
+    if (tileListPDe[de] != tile) continue; // skip to next local DE
     if (!contiguousFlag[i])
       delete [] sendBuffer[i];
   }
@@ -3295,7 +3295,7 @@ int Array::scatter(
   ESMC_TypeKind typekindArg,            // in -
   int rankArg,                          // in -
   int *counts,                          // in -
-  int *patchArg,                        // in -
+  int *tileArg,                        // in -
   int rootPet,                          // in -
   VM *vm                                // in -
   ){    
@@ -3327,23 +3327,23 @@ int Array::scatter(
   // query the VM
   int localPet = vm->getLocalPet();
   
-  // deal with optional patch argument
-  int patch = 1;  // default
-  if (patchArg)
-    patch = *patchArg;
-  int patchCount = distgrid->getPatchCount();
-  if (patch < 1 || patch > patchCount){
+  // deal with optional tile argument
+  int tile = 1;  // default
+  if (tileArg)
+    tile = *tileArg;
+  int tileCount = distgrid->getTileCount();
+  if (tile < 1 || tile > tileCount){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-      "- Specified patch out of bounds", &rc);
+      "- Specified tile out of bounds", &rc);
     return rc;
   }
-  const int *patchListPDe = distgrid->getPatchListPDe();
+  const int *tileListPDe = distgrid->getTileListPDe();
 
-  // get minIndexPDim and maxIndexPDim for patch
-  const int *minIndexPDim = distgrid->getMinIndexPDimPPatch(patch, &localrc);
+  // get minIndexPDim and maxIndexPDim for tile
+  const int *minIndexPDim = distgrid->getMinIndexPDimPTile(tile, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
-  const int *maxIndexPDim = distgrid->getMaxIndexPDimPPatch(patch, &localrc);
+  const int *maxIndexPDim = distgrid->getMaxIndexPDimPTile(tile, &localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -3419,7 +3419,7 @@ int Array::scatter(
   char **recvBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    if (patchListPDe[de] != patch) continue; // skip to next local DE
+    if (tileListPDe[de] != tile) continue; // skip to next local DE
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     int recvSize =
       exclusiveElementCountPDe[de]*tensorElementCount*dataSize; // bytes
@@ -3455,8 +3455,8 @@ int Array::scatter(
     char **sendBuffer = new char*[deCount]; // contiguous sendBuffer
     for (int i=0; i<deCount; i++){
       int de = i;
-      if (patchListPDe[de] == patch){
-        // this DE is located on receiving patch
+      if (tileListPDe[de] == tile){
+        // this DE is located on receiving tile
         int **indexList = new int*[dimCount];
         int tensorIndex=0;  // reset
         int commhListCount = 0;  // reset
@@ -3581,7 +3581,7 @@ int Array::scatter(
           nbCount = 0;  // reset
         }
         
-      } // DE on patch
+      } // DE on tile
     } // i -> de
 //printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
     // wait for nb-sends to finish before exiting
@@ -3594,7 +3594,7 @@ int Array::scatter(
     // TODO: move the delete [] sendBuffer[] into nb-wait loops to lower
     // TODO: memory foot print.
     for (int i=0; i<deCount; i++)
-      if (patchListPDe[i] == patch)
+      if (tileListPDe[i] == tile)
         delete [] sendBuffer[i];
     delete [] sendBuffer;
   }
@@ -3606,8 +3606,8 @@ int Array::scatter(
     int commhListCount = 0;  // reset
     for (int i=0; i<localDeCount; i++){
       int de = localDeList[i];
-      if (patchListPDe[de] == patch){
-        // this DE is located on receiving patch -> must send info to rootPet
+      if (tileListPDe[de] == tile){
+        // this DE is located on receiving tile -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
           if(distgridToArrayMap[j]!=0 && contigFlagPDimPDe[de*dimCount+j]==0){
             // associated and non-contiguous dimension
@@ -3621,7 +3621,7 @@ int Array::scatter(
               ESMF_ERR_PASSTHRU, &rc)) return rc;
           }
         } // j
-      } // DE on patch
+      } // DE on tile
     } // i -> de
     // wait for all outstanding indexList sends issued by fillIndexListPDimPDe()
     for (int j=0; j<commhListCount; j++){
@@ -3637,7 +3637,7 @@ int Array::scatter(
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
-    if (patchListPDe[de] != patch) continue; // skip to next local DE
+    if (tileListPDe[de] != tile) continue; // skip to next local DE
     if (!contiguousFlag[i]){
       // only if this DE has a non-contiguous decomposition the contiguous
       // receive buffer must be copied into DE-local array segment piece by p.
@@ -4268,15 +4268,15 @@ int Array::redistStore(
     
     // src and dst Arrays must have identical number of exclusive elements
     int srcElementCount = 0; // init
-    const int *srcElementCountPPatch =
-      srcArray->distgrid->getElementCountPPatch();
-    for (int i=0; i<srcArray->distgrid->getPatchCount(); i++)
-      srcElementCount += srcElementCountPPatch[i];
+    const int *srcElementCountPTile =
+      srcArray->distgrid->getElementCountPTile();
+    for (int i=0; i<srcArray->distgrid->getTileCount(); i++)
+      srcElementCount += srcElementCountPTile[i];
     int dstElementCount = 0; // init
-    const int *dstElementCountPPatch =
-      dstArray->distgrid->getElementCountPPatch();
-    for (int i=0; i<dstArray->distgrid->getPatchCount(); i++)
-      dstElementCount += dstElementCountPPatch[i];
+    const int *dstElementCountPTile =
+      dstArray->distgrid->getElementCountPTile();
+    for (int i=0; i<dstArray->distgrid->getTileCount(); i++)
+      dstElementCount += dstElementCountPTile[i];
     if (srcElementCount != dstElementCount){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "- srcArray and dstArray must provide identical number of exclusive"
@@ -4333,12 +4333,12 @@ int Array::redistStore(
       return rc;
     }
 
-    // src and dst Arrays must be have same number of patches
-    int patchCount = srcArray->distgrid->getPatchCount();
-    if (patchCount != dstArray->distgrid->getPatchCount()){
+    // src and dst Arrays must be have same number of tilees
+    int tileCount = srcArray->distgrid->getTileCount();
+    if (tileCount != dstArray->distgrid->getTileCount()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "- in transpose mode srcArray and dstArray must have same number of"
-        " patches", &rc);
+        " tilees", &rc);
       return rc;
     }
 
@@ -4368,17 +4368,17 @@ int Array::redistStore(
       }
     }
     
-    // size of dims in src and dst Arrays must pairwise match in each patch
+    // size of dims in src and dst Arrays must pairwise match in each tile
     const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
     const int *dstArrayToDistGridMap = dstArray->getArrayToDistGridMap();
-    const int *srcMinIndexPDimPPatch =
-      srcArray->distgrid->getMinIndexPDimPPatch();
-    const int *dstMinIndexPDimPPatch =
-      dstArray->distgrid->getMinIndexPDimPPatch();
-    const int *srcMaxIndexPDimPPatch =
-      srcArray->distgrid->getMaxIndexPDimPPatch();
-    const int *dstMaxIndexPDimPPatch =
-      dstArray->distgrid->getMaxIndexPDimPPatch();
+    const int *srcMinIndexPDimPTile =
+      srcArray->distgrid->getMinIndexPDimPTile();
+    const int *dstMinIndexPDimPTile =
+      dstArray->distgrid->getMinIndexPDimPTile();
+    const int *srcMaxIndexPDimPTile =
+      srcArray->distgrid->getMaxIndexPDimPTile();
+    const int *dstMaxIndexPDimPTile =
+      dstArray->distgrid->getMaxIndexPDimPTile();
     int srcDimCount = srcArray->distgrid->getDimCount();
     int dstDimCount = dstArray->distgrid->getDimCount();
     // prepare dstArrayToTensorMap
@@ -4392,14 +4392,14 @@ int Array::redistStore(
       }
     }
     factorListCount = 0;
-    int *localStart = new int[patchCount];  // localPet's start index
-    int *localSize = new int[patchCount];   // localPet's number of elements
-    for (int i=0; i<patchCount; i++){
-      int patchFactorListCount = 1;
+    int *localStart = new int[tileCount];  // localPet's start index
+    int *localSize = new int[tileCount];   // localPet's number of elements
+    for (int i=0; i<tileCount; i++){
+      int tileFactorListCount = 1;
       // prepare decomposition along last distributed dim in srcArray
       //TODO: this assumes that srcArray has at least one distr. dim
-      int lastDimSize = srcMaxIndexPDimPPatch[i*srcDimCount+srcDimCount-1]
-        - srcMinIndexPDimPPatch[i*srcDimCount+srcDimCount-1] + 1;
+      int lastDimSize = srcMaxIndexPDimPTile[i*srcDimCount+srcDimCount-1]
+        - srcMinIndexPDimPTile[i*srcDimCount+srcDimCount-1] + 1;
       int intervalSize = lastDimSize/petCount;
       int extraElements = lastDimSize%petCount;
       localStart[i] = 0;  // initialize
@@ -4412,7 +4412,7 @@ int Array::redistStore(
 #if 0
 fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i]);
 #endif
-      // check every patch
+      // check every tile
       int srcTensorIndex = 0;
       int dstTensorIndex = 0;
       for (int jj=0; jj<rank; jj++){
@@ -4422,26 +4422,26 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
         if (j){
           // decomposed dimension 
           --j;  // shift to basis 0
-          srcSize = srcMaxIndexPDimPPatch[i*srcDimCount+j]
-            - srcMinIndexPDimPPatch[i*srcDimCount+j] + 1;
+          srcSize = srcMaxIndexPDimPTile[i*srcDimCount+j]
+            - srcMinIndexPDimPTile[i*srcDimCount+j] + 1;
           if (j == srcDimCount-1)
-            patchFactorListCount *= localSize[i];
+            tileFactorListCount *= localSize[i];
           else
-            patchFactorListCount *= srcSize;
+            tileFactorListCount *= srcSize;
         }else{
           // tensor dimension
           srcSize = srcArray->undistUBound[srcTensorIndex]
             - srcArray->undistLBound[srcTensorIndex] + 1;
           ++srcTensorIndex;
-          patchFactorListCount *= srcSize;
+          tileFactorListCount *= srcSize;
         }
         int jjj = srcToDstTMap[jj];         // src -> dst dimension mapping
         j = dstArrayToDistGridMap[jjj];     // j is dimIndex bas 1, or 0 undist.
         if (j){
           // decomposed dimension 
           --j;  // shift to basis 0
-          dstSize = dstMaxIndexPDimPPatch[i*dstDimCount+j]
-            - dstMinIndexPDimPPatch[i*dstDimCount+j] + 1;
+          dstSize = dstMaxIndexPDimPTile[i*dstDimCount+j]
+            - dstMinIndexPDimPTile[i*dstDimCount+j] + 1;
         }else{
           // tensor dimension
           dstTensorIndex = dstArrayToTensorMap[jjj];
@@ -4458,7 +4458,7 @@ fprintf(stderr, "%d, %d\n", srcSize, dstSize);
           return rc;
         }
       }
-      factorListCount += patchFactorListCount;
+      factorListCount += tileFactorListCount;
     }
 #if 0
 fprintf(stderr, "factorListCount = %d\n", factorListCount);
@@ -4470,7 +4470,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     // prepare to fill in factorIndexList elements
     int factorIndexListIndex = 0; // reset
     int *dstTuple = new int[rank];
-    for (int i=0; i<patchCount; i++){
+    for (int i=0; i<tileCount; i++){
       // initialize multi dim index loop
       vector<int> offsets;
       vector<int> sizes;
@@ -4486,8 +4486,8 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
             sizes.push_back(localSize[i]);
           }else{
             offsets.push_back(0);
-            sizes.push_back(srcMaxIndexPDimPPatch[i*srcDimCount+j]
-              - srcMinIndexPDimPPatch[i*srcDimCount+j] + 1);
+            sizes.push_back(srcMaxIndexPDimPTile[i*srcDimCount+j]
+              - srcMinIndexPDimPTile[i*srcDimCount+j] + 1);
           }
         }else{
           // tensor dimension
@@ -4506,8 +4506,8 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         for (int j=0; j<rank; j++)
           dstTuple[srcToDstTMap[j]] = srcTuple[j];
         // determine seq indices
-        SeqIndex srcSeqIndex = srcArray->getSequenceIndexPatch(i+1, srcTuple);
-        SeqIndex dstSeqIndex = dstArray->getSequenceIndexPatch(i+1, dstTuple);
+        SeqIndex srcSeqIndex = srcArray->getSequenceIndexTile(i+1, srcTuple);
+        SeqIndex dstSeqIndex = dstArray->getSequenceIndexTile(i+1, dstTuple);
         // fill this info into factorIndexList
         int fili = 4*factorIndexListIndex;
         factorIndexList[fili]   = srcSeqIndex.decompSeqIndex;

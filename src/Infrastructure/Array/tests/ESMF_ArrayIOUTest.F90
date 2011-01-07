@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.28 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.29 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -559,8 +559,8 @@ program ESMF_ArrayIOUTest
   !NEX_UTest_Multi_Proc_Only
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   r8Max(1) = 0.0  ! initialize
-  call ESMF_ArrayGather(array_diff, FarrayGr_1, patch=1, rootPet=0, rc=rc)
-  call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, patch=1, rootPet=0, rc=rc)
+  call ESMF_ArrayGather(array_diff, FarrayGr_1, tile=1, rootPet=0, rc=rc)
+  call ESMF_ArrayGather(array_wouthalo, FarrayGr_2, tile=1, rootPet=0, rc=rc)
   write(name, *) "Compare read in data from a different distgrid"
   write(failMsg, *) "Comparison failed"
   if (localPet .eq.0) then

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.116 2011/01/05 20:05:43 svasquez Exp $
+// $Id: ESMCI_Grid.C,v 1.117 2011/01/07 18:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.116 2011/01/05 20:05:43 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.117 2011/01/07 18:32:17 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -5096,12 +5096,12 @@ static  void _free3D(Type ****array)
     // Get map between local and global DEs
     const int *localDEList=delayout->getLocalDeList();
    
-    // Get map between DEs and patches
-    const int *DEPatchList = distgrid->getPatchListPDe();
+    // Get map between DEs and tilees
+    const int *DETileList = distgrid->getTileListPDe();
 
-    // Get list of patch min and maxs
-    const int *patchMinIndexList = distgrid->getMinIndexPDimPPatch();
-    const int *patchMaxIndexList = distgrid->getMaxIndexPDimPPatch();
+    // Get list of tile min and maxs
+    const int *tileMinIndexList = distgrid->getMinIndexPDimPTile();
+    const int *tileMaxIndexList = distgrid->getMaxIndexPDimPTile();
 
     // Get Extents of index lists
     const int *deIndexListExtentList=distgrid->getIndexCountPDimPDe();
@@ -5121,19 +5121,19 @@ static  void _free3D(Type ****array)
       //// get global de
       int gDE=localDEList[lDE];
 
-      //// get patch
-      int patch=DEPatchList[gDE];
+      //// get tile
+      int tile=DETileList[gDE];
 
-      //// Avoid patch 0 because they're 0 sized
-      if (patch != 0) {
+      //// Avoid tile 0 because they're 0 sized
+      if (tile != 0) {
         //// get the extents for this de
         const int *deExtent=deIndexListExtentList+gDE*dimCount;
         
-        //// get patch min/max
-        const int *patchMin=distgrid->getMinIndexPDimPPatch(patch, &localrc);
+        //// get tile min/max
+        const int *tileMin=distgrid->getMinIndexPDimPTile(tile, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                                                   ESMF_ERR_PASSTHRU, &rc)) return rc;
-        const int *patchMax=distgrid->getMaxIndexPDimPPatch(patch, &localrc);
+        const int *tileMax=distgrid->getMaxIndexPDimPTile(tile, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                                                   ESMF_ERR_PASSTHRU, &rc)) return rc;
         
@@ -5162,12 +5162,12 @@ static  void _free3D(Type ****array)
           
           // if we're not at the min then we're not a lower bound 
           // so turn off the bit
-          if (indexList[0] != patchMin[d]) {
+          if (indexList[0] != tileMin[d]) {
             isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
           } 
           
           // if we're at the min then we're a lower bound
-          if (indexList[deExtent[d]-1]!=patchMax[d]) {
+          if (indexList[deExtent[d]-1]!=tileMax[d]) {
             isDEUBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
           }
         }
@@ -5599,10 +5599,10 @@ int construct(
 
   }  
 
-  // reconstruct minIndex and maxIndex from distGrid's min and maxIndexPDimPPatch and 
+  // reconstruct minIndex and maxIndex from distGrid's min and maxIndexPDimPTile and 
   // undistGridLand UBounds and distgridToGridMap
-  distGridMinIndex = distgridArg->getMinIndexPDimPPatch();
-  distGridMaxIndex = distgridArg->getMaxIndexPDimPPatch();
+  distGridMinIndex = distgridArg->getMinIndexPDimPTile();
+  distGridMaxIndex = distgridArg->getMaxIndexPDimPTile();
 
   // allocate minIndex and maxIndex and fill them
   minIndex = new int[dimCount];
@@ -6362,15 +6362,15 @@ void GridIter::setDEBnds(
   // Temporarily set min/max
   int localrc;
   const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeList();
-  const int *DEPatchList = staggerDistgrid->getPatchListPDe();
-  int patch=DEPatchList[localDEList[localDE]];
+  const int *DETileList = staggerDistgrid->getTileListPDe();
+  int tile=DETileList[localDEList[localDE]];
 
-  const int *patchMin=staggerDistgrid->getMinIndexPDimPPatch(patch, &localrc);
-  const int *patchMax=staggerDistgrid->getMaxIndexPDimPPatch(patch, &localrc);
+  const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
+  const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
     
    for (int i=0; i<rank; i++) {
-    minInd[i]=patchMin[i];
-    maxInd[i]=patchMax[i];
+    minInd[i]=tileMin[i];
+    maxInd[i]=tileMax[i];
   }
 
 #if 0
@@ -6632,8 +6632,8 @@ int GridIter::getGlobalID(
   }
 
 
-  // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
-  gid=staggerDistgrid->getSequenceIndexPatch(1,deBasedInd,0,&localrc);
+  // NOTE THAT THIS ONLY WORKS FOR SINGLE TILE GRIDS WITH GLOBAL INDEXING
+  gid=staggerDistgrid->getSequenceIndexTile(1,deBasedInd,0,&localrc);
 
   //  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
@@ -7334,15 +7334,15 @@ void GridCellIter::setDEBnds(
   // Temporarily set min/max
   int localrc;
   const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeList();
-  const int *DEPatchList = staggerDistgrid->getPatchListPDe();
-  int patch=DEPatchList[localDEList[localDE]];
+  const int *DETileList = staggerDistgrid->getTileListPDe();
+  int tile=DETileList[localDEList[localDE]];
 
-  const int *patchMin=staggerDistgrid->getMinIndexPDimPPatch(patch, &localrc);
-  const int *patchMax=staggerDistgrid->getMaxIndexPDimPPatch(patch, &localrc);
+  const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
+  const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
     
    for (int i=0; i<rank; i++) {
-    minInd[i]=patchMin[i];
-    maxInd[i]=patchMax[i];
+    minInd[i]=tileMin[i];
+    maxInd[i]=tileMax[i];
   }
 
 
@@ -7597,15 +7597,15 @@ int GridCellIter::getGlobalID(
 #else
 
 
-  // NOTE THAT THIS ONLY WORKS FOR SINGLE PATCH GRIDS WITH GLOBAL INDEXING
-  //  gid=staggerDistgrid->getSequenceIndexPatch(1,curInd,0,&localrc);
+  // NOTE THAT THIS ONLY WORKS FOR SINGLE TILE GRIDS WITH GLOBAL INDEXING
+  //  gid=staggerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
 
 
   // TODO: There is an assumption here that the center and the stagger that this iterator
   // was created on have the same align. This problem will go away when we put in the 
   // the topo stuff, becasue then we will be doing stuff relative to the bottom of the DE, but
   // if this change doesn't happen, then need to take care of that. 
-  gid=centerDistgrid->getSequenceIndexPatch(1,curInd,0,&localrc);
+  gid=centerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
 
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif

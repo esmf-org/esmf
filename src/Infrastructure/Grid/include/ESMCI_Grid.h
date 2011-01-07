@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.75 2011/01/05 20:05:43 svasquez Exp $
+// $Id: ESMCI_Grid.h,v 1.76 2011/01/07 18:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -271,7 +271,7 @@ template <class TYPE>
   int getDimCount(void) const {return dimCount;}
   int getDistDimCount(void) const {return distDimCount;}
   int getUndistDimCount(void) const {return undistDimCount;}
-  int getTileCount(void) const {return distgrid->getPatchCount();}
+  int getTileCount(void) const {return distgrid->getTileCount();}
   int getStaggerLocCount(void) const {return staggerLocCount;}
   ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
   ESMC_TypeKind getTypeKind(void) const {return typekind;}
@@ -696,8 +696,8 @@ int getComputationalUBound(
     bool cellNodes; // include all the nodes attached to cells on this PET's Grid
 
     // Temporary and will go away soon
-    int minInd[ESMF_MAXDIM];  // minimum of patch
-    int maxInd[ESMF_MAXDIM];  // maximum of patch
+    int minInd[ESMF_MAXDIM];  // minimum of tile
+    int maxInd[ESMF_MAXDIM];  // maximum of tile
 
 
     void setDEBnds(int localDE);
@@ -761,8 +761,8 @@ int getComputationalUBound(
     void getDEBnds(int localDE,int *uBnd,int *lBnd);
 
     // Temporary and will go away soon
-    int minInd[ESMF_MAXDIM];  // minimum of patch
-    int maxInd[ESMF_MAXDIM];  // maximum of patch
+    int minInd[ESMF_MAXDIM];  // minimum of tile
+    int maxInd[ESMF_MAXDIM];  // maximum of tile
 
   public:
 

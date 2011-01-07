@@ -385,7 +385,7 @@ with multiple species or tracers represented by the third dimension.
 The action of redistribution and remapping are signified by the symbols $-- \!\!\! >$ and $=\chi=>$ 
 respectively, where $\chi$ refers to a character key representing a specific interpolation method. 
 The currently supported interpolation methods are $B$ for first order bilinear and $P$ 
-for the patch recovery method, which provides a smoother first order surface, which can meaningly differentiated. 
+for the tile recovery method, which provides a smoother first order surface, which can meaningly differentiated. 
 Future implementations will include $C$, for first order conservative, $S$ for second order bilinear, 
 and $N$ for nearest neighbor. The character $X$ is reserved for unknown or user provided methods. 
 
@@ -394,7 +394,7 @@ and $N$ for nearest neighbor. The character $X$ is reserved for unknown or user 
 {$\chi$} & {\em Action} \\
 \hline \hline
   B & first order bilinear interpolation \\
-  P & patch recovery interpolation \\
+  P & tile recovery interpolation \\
     &                                        \\
   C & first order conservative interpolation \\
   S & second order conservative interpolation \\
@@ -480,7 +480,7 @@ It is possible to represent more general data structures which cannot be describ
 For example, in models with nested grids or which employ multi-grid methods, it is useful to have an indexed structure of  logically rectangular blocks of memory, where each block is generally a different shape and size. Such a structure can be represented with parentheses as delimiters, such as
 \begin{center}
 \begin{verbatim}
-   ( patch , [ B1 G1; B2 G2 ] )
+   ( tile , [ B1 G1; B2 G2 ] )
 \end{verbatim}
 \end{center}
 Here we have a collection of 2D blocks of memory, each block being associated with a 2D grid and being distributed in both dimensions.

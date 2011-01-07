@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.63 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.64 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.63 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.64 2011/01/07 18:32:16 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -458,13 +458,13 @@ contains
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the computational @\
 !      region with respect to the lower corner of the exclusive region for DEs @\
-!      that are located on the edge of a patch. @\
+!      that are located on the edge of a tile. @\
 !      The default is a zero vector. @\
 ! \item[{[computationalEdgeUWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the upper corner of the computational @\
 !      region with respect to the upper corner of the exclusive region for DEs @\
-!      that are located on the edge of a patch. @\
+!      that are located on the edge of a tile. @\
 !      The default is a zero vector. @\
 ! \item[{[computationalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
@@ -863,13 +863,13 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the computational @\
 !      region with respect to the lower corner of the exclusive region for DEs @\
-!      that are located on the edge of a patch. @\
+!      that are located on the edge of a tile. @\
 !      The default is a zero vector. @\
 ! \item[{[computationalEdgeUWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the upper corner of the computational @\
 !      region with respect to the upper corner of the exclusive region for DEs @\
-!      that are located on the edge of a patch. @\
+!      that are located on the edge of a tile. @\
 !      The default is a zero vector. @\
 ! \item[{[computationalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
@@ -1114,12 +1114,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region for DEs
-!      that are located on the edge of a patch.
+!      that are located on the edge of a tile.
 ! \item[{[computationalEdgeUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region for DEs
-!      that are located on the edge of a patch.
+!      that are located on the edge of a tile.
 ! \item[{[computationalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -1553,12 +1553,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region for DEs
-!      that are located on the edge of a patch.
+!      that are located on the edge of a tile.
 ! \item[{[computationalEdgeUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region for DEs
-!      that are located on the edge of a patch.
+!      that are located on the edge of a tile.
 ! \item[{[computationalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
@@ -1852,12 +1852,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational
 !      region with respect to the lower corner of the exclusive region for DEs
-!      that are located on the edge of a patch.
+!      that are located on the edge of a tile.
 ! \item[{[computationalEdgeUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the computational
 !      region with respect to the upper corner of the exclusive region for DEs
-!      that are located on the edge of a patch.
+!      that are located on the edge of a tile.
 ! \item[{[computationalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the computational

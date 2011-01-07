@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.13 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.14 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.13 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.14 2011/01/07 18:32:17 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -73,13 +73,13 @@ contains
 ! !IROUTINE: ESMF_FieldGather - Gather a Fortran array from an ESMF_Field @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_FieldGather<rank><type><kind>(field, farray, patch, & @\
+! subroutine ESMF_FieldGather<rank><type><kind>(field, farray, tile, & @\
 !   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),           intent(inout)           :: field @\
 !   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
-!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in),   optional  :: tile @\
 !   integer,                    intent(in)              :: rootPet @\
 !   type(ESMF_VM),              intent(in),   optional  :: vm @\
 !   integer,                    intent(out),  optional  :: rc @\
@@ -87,11 +87,11 @@ contains
 ! @\
 ! !DESCRIPTION: @\
 !   Gather the data of an {ESMF\_Field} object into the {\tt farray} located on @\
-!   {\tt rootPET}. A single DistGrid patch of {\tt array} must be @\
-!   gathered into {\tt farray}. The optional {\tt patch} @\
-!   argument allows selection of the patch. For Fields defined on a single @\
-!   patch DistGrid the default selection (patch 1) will be correct. The @\
-!   shape of {\tt farray} must match the shape of the patch in Field. @\
+!   {\tt rootPET}. A single DistGrid tile of {\tt array} must be @\
+!   gathered into {\tt farray}. The optional {\tt tile} @\
+!   argument allows selection of the tile. For Fields defined on a single @\
+!   tile DistGrid the default selection (tile 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the tile in Field. @\
 ! @\
 !   If the Field contains replicating DistGrid dimensions data will be @\
 !   gathered from the numerically higher DEs. Replicated data elements in @\
@@ -111,9 +111,9 @@ contains
 !   \item[{[farray]}] @\
 !     The Fortran array into which to gather data. Only root @\
 !     must provide a valid {\tt farray}. @\
-!   \item[{[patch]}] @\
-!     The DistGrid patch in {\tt field} from which to gather {\tt farray}. @\
-!     By default {\tt farray} will be gathered from patch 1. @\
+!   \item[{[tile]}] @\
+!     The DistGrid tile in {\tt field} from which to gather {\tt farray}. @\
+!     By default {\tt farray} will be gathered from tile 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid destination array, i.e. {\tt farray}. @\
 !   \item[{[vm]}] @\
@@ -131,12 +131,12 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldGather" @\
     subroutine ESMF_FieldGather##mrank##D##mtypekind(field,  farray, & @\
-        patch, rootPet, vm, rc) @\
+        tile, rootPet, vm, rc) @\
 @\
         ! input arguments @\
         type(ESMF_Field)                                       :: field  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-        integer, intent(in), optional                          :: patch     @\
+        integer, intent(in), optional                          :: tile     @\
         integer, intent(in)                                    :: rootPet @\
         type(ESMF_VM), intent(in), optional                    :: vm  @\
         integer, intent(out), optional                         :: rc  @\
@@ -160,7 +160,7 @@ contains
             ESMF_CONTEXT, rc)) return @\
 @\
         ! perform gather through internal array @\
-        call ESMF_ArrayGather(array, farray, patch, rootPet, vm, rc=localrc) @\
+        call ESMF_ArrayGather(array, farray, tile, rootPet, vm, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rc)) return @\
@@ -174,10 +174,10 @@ TypeKindRankDeclarationMacro(FieldGather)
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGather"
-subroutine ESMF_FieldGatherNotRoot(field, patch, rootPet, vm, rc)
+subroutine ESMF_FieldGatherNotRoot(field, tile, rootPet, vm, rc)
 
         type(ESMF_Field),           intent(inout)           :: field
-        integer,                    intent(in),   optional  :: patch
+        integer,                    intent(in),   optional  :: tile
         integer,                    intent(in)              :: rootPet
         type(ESMF_VM),              intent(in),   optional  :: vm
         integer,                    intent(out),  optional  :: rc
@@ -199,7 +199,7 @@ subroutine ESMF_FieldGatherNotRoot(field, patch, rootPet, vm, rc)
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        call ESMF_ArrayGather(array, patch, rootPet, vm, rc=localrc)
+        call ESMF_ArrayGather(array, tile, rootPet, vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return

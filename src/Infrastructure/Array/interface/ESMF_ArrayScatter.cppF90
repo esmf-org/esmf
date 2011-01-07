@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.24 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.25 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.24 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.25 2011/01/07 18:32:16 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -126,13 +126,13 @@ contains
 ! !IROUTINE: ESMF_ArrayScatter - Scatter a Fortran array across the ESMF_Array @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_ArrayScatter<rank><type><kind>(array, farray, patch, & @\
+! subroutine ESMF_ArrayScatter<rank><type><kind>(array, farray, tile, & @\
 !   rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
 !   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
-!   integer,                    intent(in),   optional  :: patch @\
+!   integer,                    intent(in),   optional  :: tile @\
 !   integer,                    intent(in)              :: rootPet @\
 !   type(ESMF_VM),              intent(in),   optional  :: vm @\
 !   integer,                    intent(out),  optional  :: rc @\
@@ -141,10 +141,10 @@ contains
 ! !DESCRIPTION: @\
 !   Scatter the data of {\tt farray} located on {\tt rootPET} @\
 !   across an {ESMF\_Array} object. A single {\tt farray} must be @\
-!   scattered across a single DistGrid patch in Array. The optional {\tt patch} @\
-!   argument allows selection of the patch. For Arrays defined on a single @\
-!   patch DistGrid the default selection (patch 1) will be correct. The @\
-!   shape of {\tt farray} must match the shape of the patch in Array. @\
+!   scattered across a single DistGrid tile in Array. The optional {\tt tile} @\
+!   argument allows selection of the tile. For Arrays defined on a single @\
+!   tile DistGrid the default selection (tile 1) will be correct. The @\
+!   shape of {\tt farray} must match the shape of the tile in Array. @\
 ! @\
 !   If the Array contains replicating DistGrid dimensions data will be @\
 !   scattered across all of the replicated pieces. @\
@@ -160,9 +160,9 @@ contains
 !   \item[{[farray]}] @\
 !     The Fortran array that is to be scattered. Only root @\
 !     must provide a valid {\tt farray}. @\
-!   \item[{[patch]}] @\
-!     The DistGrid patch in {\tt array} into which to scatter {\tt farray}. @\
-!     By default {\tt farray} will be scattered into patch 1. @\
+!   \item[{[tile]}] @\
+!     The DistGrid tile in {\tt array} into which to scatter {\tt farray}. @\
+!     By default {\tt farray} will be scattered into tile 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid data in {\tt farray}. @\
 !   \item[{[vm]}] @\
@@ -179,12 +179,12 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayScatter" @\
-  subroutine ESMF_ArrayScatter##mrank##D##mtypekind(array, farray, patch, & @\
+  subroutine ESMF_ArrayScatter##mrank##D##mtypekind(array, farray, tile, & @\
     rootPet, vm, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
-    integer,                    intent(in),   optional  :: patch @\
+    integer,                    intent(in),   optional  :: tile @\
     integer,                    intent(in)              :: rootPet @\
     type(ESMF_VM),              intent(in),   optional  :: vm @\
     integer,                    intent(out),  optional  :: rc @\
@@ -242,7 +242,7 @@ contains
       if (count > 0) then @\
         ! it is safe to use dummy argument farray @\
         call c_ESMC_ArrayScatter(array, farray(mloc), & @\
-          ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
+          ESMF_TYPEKIND_##mtypekind, mrank, counts, tile, rootPet, vm, & @\
           localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -250,7 +250,7 @@ contains
         ! it is unsafe to use dummy argument farray @\
         allocate(farray_dummy(mloc))  ! allocate a single element @\
         call c_ESMC_ArrayScatter(array, farray_dummy(mloc), & @\
-          ESMF_TYPEKIND_##mtypekind, mrank, counts, patch, rootPet, vm, & @\
+          ESMF_TYPEKIND_##mtypekind, mrank, counts, tile, rootPet, vm, & @\
           localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -258,7 +258,7 @@ contains
       endif @\
     else @\
       ! not rootPet -> call through notRoot interface @\
-      call ESMF_ArrayScatter(array=array, patch=patch, rootPet=rootPet, & @\
+      call ESMF_ArrayScatter(array=array, tile=tile, rootPet=rootPet, & @\
         vm=vm, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -276,10 +276,10 @@ TypeKindRankDeclarationMacro(ArrayScatter)
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayScatter"
-  subroutine ESMF_ArrayScatterNotRoot(array, patch, rootPet, vm, rc)
+  subroutine ESMF_ArrayScatterNotRoot(array, tile, rootPet, vm, rc)
 
     type(ESMF_Array),           intent(inout)           :: array
-    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in),   optional  :: tile
     integer,                    intent(in)              :: rootPet
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc
@@ -296,7 +296,7 @@ TypeKindRankDeclarationMacro(ArrayScatter)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayScatterNotRoot(array, patch, rootPet, vm, localrc)
+    call c_ESMC_ArrayScatterNotRoot(array, tile, rootPet, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

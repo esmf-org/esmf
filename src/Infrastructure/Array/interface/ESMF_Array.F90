@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.138 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_Array.F90,v 1.139 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.138 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_Array.F90,v 1.139 2011/01/07 18:32:16 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -292,7 +292,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayReduce()
   subroutine ESMF_ArrayReduceFarray(array, farray, reduceflag, rootPET, &
-    dimList, patch, vm, rc)
+    dimList, tile, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(inout)           :: array
@@ -300,7 +300,7 @@ contains
     type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
     integer,                    intent(in)              :: rootPET
     integer,                    intent(in)              :: dimList(:)
-    integer,                    intent(in),   optional  :: patch
+    integer,                    intent(in),   optional  :: tile
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc  
 !         
@@ -310,10 +310,10 @@ contains
 !     into {\tt farray} on {\tt rootPET} according to the operation specified 
 !     in {\tt reduceflag}. Only root must provide a valid {\tt farray} argument.
 !     
-!     This partial reduction operation is patch specific, i.e. only a single
-!     DistGrid patch of the Array will be reduced. The patch can be selected
-!     by the optional {\tt patch} argument. The shape of the provided 
-!     {\tt farray} argument must match that of the Array patch reduced by the
+!     This partial reduction operation is tile specific, i.e. only a single
+!     DistGrid tile of the Array will be reduced. The tile can be selected
+!     by the optional {\tt tile} argument. The shape of the provided 
+!     {\tt farray} argument must match that of the Array tile reduced by the
 !     dimensions specified in {\tt dimList}.
 !      
 !
@@ -337,9 +337,9 @@ contains
 !          root.
 !     \item[dimList]
 !        List of Array dimensions to be reduced.
-!     \item[{[patch]}]
-!        The DistGrid patch in {\tt array} to reduce into {\tt farray}.
-!        By default patch 1 of {\tt farray} will be reduced.
+!     \item[{[tile]}]
+!        The DistGrid tile in {\tt array} to reduce into {\tt farray}.
+!        By default tile 1 of {\tt farray} will be reduced.
 !     \item[{[vm]}]
 !        Optional {\tt ESMF\_VM} object of the current context. Providing the
 !        VM of the current context will lower the method's overhead.
@@ -753,7 +753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid or by user-supplied arbitrary
+!   the order of tilees within the DistGrid or by user-supplied arbitrary
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !
@@ -1129,7 +1129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
-!   the order of patches within the DistGrid or by user-supplied arbitrary
+!   the order of tilees within the DistGrid or by user-supplied arbitrary
 !   sequence indices. See section \ref{Array:SparseMatMul} for details on the
 !   definition of {\em sequence indices}.
 !

@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.21 2011/01/05 20:05:47 svasquez Exp $
+% $Id: Component_crefdoc.ctex,v 1.22 2011/01/07 18:32:17 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf Component Reference}}
 \newcommand{\myauthors}{\large {\it Gerhard Theurich}}
-% these are temporary patches until something more
+% these are temporary tilees until something more
 % permanent is done to the protex script.
 \newlength{\oldparskip}
 \newlength{\oldparindent}

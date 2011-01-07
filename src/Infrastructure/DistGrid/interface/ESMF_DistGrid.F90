@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.67 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.68 2011/01/07 18:32:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.67 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.68 2011/01/07 18:32:16 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -438,24 +438,24 @@ contains
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[{[rc]}]
@@ -568,7 +568,7 @@ contains
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -664,17 +664,17 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     patch with regular decomposition. A regular decomposition is of the same 
-!     rank as the patch and decomposes each dimension into a fixed number of 
-!     DEs. A regular decomposition of a single patch is expressed by a 
+!     tile with regular decomposition. A regular decomposition is of the same 
+!     rank as the tile and decomposes each dimension into a fixed number of 
+!     DEs. A regular decomposition of a single tile is expressed by a 
 !     single {\tt regDecomp} list of DE counts in each dimension.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the patch.
+!          Global coordinate tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the patch.
+!          Global coordinate tuple of the upper corner of the tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -683,7 +683,7 @@ contains
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
-!          patch is to be divided between the DEs. The default setting
+!          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
 !          \ref{opt:decompflag} for a list of valid decomposition flag options.
 !     \item[{[regDecompFirstExtra]}]
@@ -700,24 +700,24 @@ contains
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[{[delayout]}]
@@ -862,14 +862,14 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     patch with decomposition specified by {\tt deBlockList}.
+!     tile with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the patch.
+!          Global coordinate tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the patch.
+!          Global coordinate tuple of the upper corner of the tile.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -896,24 +896,24 @@ contains
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[{[delayout]}]
@@ -1035,18 +1035,18 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     patch with regular decomposition. A regular
-!     decomposition is of the same rank as the patch and decomposes
+!     tile with regular decomposition. A regular
+!     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     single patch is expressed by a single {\tt regDecomp} list of DE counts
+!     single tile is expressed by a single {\tt regDecomp} list of DE counts
 !     in each dimension.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the patch.
+!          Global coordinate tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the patch.
+!          Global coordinate tuple of the upper corner of the tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -1055,7 +1055,7 @@ contains
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
-!          patch is to be divided between the DEs. The default setting
+!          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
 !          \ref{opt:decompflag} for a list of valid decomposition flag options.
 !     \item[{[regDecompFirstExtra]}]
@@ -1072,24 +1072,24 @@ contains
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[fastAxis]
@@ -1230,14 +1230,14 @@ contains
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
-!     patch with decomposition specified by {\tt deBlockList}.
+!     tile with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the patch.
+!          Global coordinate tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the patch.
+!          Global coordinate tuple of the upper corner of the tile.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -1247,7 +1247,7 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   patchID
+!                   | 1  minIndex(1)    maxIndex(1)   tileID
 !                   | 2  minIndex(2)    maxIndex(2)   (not used)
 !                   | .  minIndex(.)    maxIndex(.)   (not used)
 !                   | .
@@ -1264,24 +1264,24 @@ contains
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[fastAxis]
@@ -1361,7 +1361,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDP()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1387,70 +1387,70 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
-!     rectangular (LR) patches with regular decomposition. A regular
-!     decomposition is of the same rank as the patch and decomposes
+!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     rectangular (LR) tilees with regular decomposition. A regular
+!     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     patchwork of patches is expressed by a list of DE count vectors, one
-!     vector for each patch. Each vector contained in the 
+!     tilework of tilees is expressed by a list of DE count vectors, one
+!     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more patches than there are DEs.
+!     erroneous to provide more tilees than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
-!          index indicates the patch number. The default decomposition will
+!          index indicates the tile number. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
 !          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
 !          default decomposition will be into as many DEs as there are 
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
-!          patch is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
+!          tile is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tilees. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
-!          flag options. The second index indicates the patch number.
+!          flag options. The second index indicates the tile number.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
 !          decomposition. The default is a zero vector. The second index 
-!          indicates the patch number.
+!          indicates the tile number.
 !     \item[{[regDecompLastExtra]}]
 !          Extra elements on the last DEs along each dimension in a regular
 !          decomposition. The default is a zero vector. The second index 
-!          indicates the patch number.
+!          indicates the tile number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
-!          elements in the sequence as they appear following the patch index.
+!          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[{[delayout]}]
@@ -1575,7 +1575,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBP()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1598,23 +1598,23 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBP
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
-!     rectangular (LR) patches with regular decomposition. A regular
-!     decomposition is of the same rank as the patch and decomposes
+!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     rectangular (LR) tilees with regular decomposition. A regular
+!     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     patchwork of patches is expressed by a list of DE count vectors, one
-!     vector for each patch. Each vector contained in the 
+!     tilework of tilees is expressed by a list of DE count vectors, one
+!     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more patches than there are DEs.
+!     erroneous to provide more tilees than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -1624,7 +1624,7 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   patchID
+!                   | 1  minIndex(1)    maxIndex(1)   tileID
 !                   | 2  minIndex(2)    maxIndex(2)   (not used)
 !                   | .  minIndex(.)    maxIndex(.)   (not used)
 !                   | .
@@ -1636,29 +1636,29 @@ contains
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
-!          elements in the sequence as they appear following the patch index.
+!          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[{[delayout]}]
@@ -1737,7 +1737,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1761,62 +1761,62 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDPFA
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
-!     rectangular (LR) patches with regular decomposition. A regular
-!     decomposition is of the same rank as the patch and decomposes
+!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     rectangular (LR) tilees with regular decomposition. A regular
+!     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     patchwork of patches is expressed by a list of DE count vectors, one
-!     vector for each patch. Each vector contained in the 
+!     tilework of tilees is expressed by a list of DE count vectors, one
+!     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more patches than there are DEs.
+!     erroneous to provide more tilees than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
-!          index indicates the patch number. The default decomposition will
+!          index indicates the tile number. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
 !          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
 !          default decomposition will be into as many DEs as there are 
 !          PETs and the distribution will be 1 DE per PET.
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
-!          patch is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all patches. 
+!          tile is to be divided between the DEs. The default setting
+!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tilees. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
-!          flag options. The second index indicates the patch number.
+!          flag options. The second index indicates the tile number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
-!          elements in the sequence as they appear following the patch index.
+!          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[fastAxis]
@@ -1900,7 +1900,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from patchwork with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1923,17 +1923,17 @@ contains
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBPFA
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a patchwork of logically 
-!     rectangular (LR) patches with decomposition specified by {\tt deBlockList}.
+!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     rectangular (LR) tilees with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
 !          The first index provides the global coordinate tuple of the lower 
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
 !          The first index provides the global coordinate tuple of the upper
-!          corner of a patch. The second index indicates the patch number.
+!          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local LR blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements, which are defined by the first
@@ -1943,7 +1943,7 @@ contains
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
 !                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   patchID
+!                   | 1  minIndex(1)    maxIndex(1)   tileID
 !                   | 2  minIndex(2)    maxIndex(2)   (not used)
 !                   | .  minIndex(.)    maxIndex(.)   (not used)
 !                   | .
@@ -1955,29 +1955,29 @@ contains
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
-!          elements in the sequence as they appear following the patch index.
+!          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as patch local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between patches in index space. The second dimension
+!          List of connections between tilees in index space. The second dimension
 !          of {\tt connectionList} steps through the connection interface elements, 
 !          defined by the first index. The first index must be of size
 !          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
 !          decomposed index space. Each {\tt connectionList} element specifies
 !          the connection interface in the format
 !
-!         {\tt (/patchIndex\_A,
-!          patchIndex\_B, positionVector, orientationVector/)} where:
+!         {\tt (/tileIndex\_A,
+!          tileIndex\_B, positionVector, orientationVector/)} where:
 !          \begin{itemize}
-!          \item {\tt patchIndex\_A} and {\tt patchIndex\_B} are the patch
-!                index of the two connected patches respectively,
-!          \item {\tt positionVector} is the vector that points from patch A's
-!                minIndex to patch B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of patch A
-!                with a dimension in patch B's index space. Negative index
+!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
+!                index of the two connected tilees respectively,
+!          \item {\tt positionVector} is the vector that points from tile A's
+!                minIndex to tile B's minIndex.
+!          \item {\tt orientationVector} associates each dimension of tile A
+!                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
 !          \end{itemize}
 !     \item[fastAxis]
@@ -2412,23 +2412,23 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetDefault(distgrid, delayout, dimCount, patchCount, &
-    minIndexPDimPPatch, maxIndexPDimPPatch, elementCountPPatch, &
-    minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, patchListPDe, &
+  subroutine ESMF_DistGridGetDefault(distgrid, delayout, dimCount, tileCount, &
+    minIndexPDimPTile, maxIndexPDimPTile, elementCountPTile, &
+    minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, tileListPDe, &
     indexCountPDimPDe, collocationPDim, regDecompFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     type(ESMF_DELayout),    intent(out), optional :: delayout
     integer,                intent(out), optional :: dimCount
-    integer,                intent(out), optional :: patchCount
-    integer,        target, intent(out), optional :: minIndexPDimPPatch(:,:)
-    integer,        target, intent(out), optional :: maxIndexPDimPPatch(:,:)
-    integer,        target, intent(out), optional :: elementCountPPatch(:)
+    integer,                intent(out), optional :: tileCount
+    integer,        target, intent(out), optional :: minIndexPDimPTile(:,:)
+    integer,        target, intent(out), optional :: maxIndexPDimPTile(:,:)
+    integer,        target, intent(out), optional :: elementCountPTile(:)
     integer,        target, intent(out), optional :: minIndexPDimPDe(:,:)
     integer,        target, intent(out), optional :: maxIndexPDimPDe(:,:)
     integer,        target, intent(out), optional :: elementCountPDe(:)
-    integer,        target, intent(out), optional :: patchListPDe(:)
+    integer,        target, intent(out), optional :: tileListPDe(:)
     integer,        target, intent(out), optional :: indexCountPDimPDe(:,:)
     integer,        target, intent(out), optional :: collocationPDim(:)
     logical,                intent(out), optional :: regDecompFlag
@@ -2446,17 +2446,17 @@ contains
 !     {\tt ESMF\_DELayout} object associated with {\tt distgrid}.
 !   \item[{[dimCount]}]
 !     Number of dimensions (rank) of {\tt distgrid}.
-!   \item[{[patchCount]}]
-!     Number of patches in {\tt distgrid}.
-!   \item[{[minIndexPDimPPatch]}]
-!     Lower index space corner per {\tt dim}, per {\tt patch}, with
-!     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
-!   \item[{[maxIndexPDimPPatch]}]
-!     Upper index space corner per {\tt dim}, per {\tt patch}, with
-!     {\tt size(minIndexPDimPPatch) == (/dimCount, patchCount/)}.
-!   \item[{[elementCountPPatch]}]
-!     Number of elements in exclusive region per patch, with
-!     {\tt size(elementCountPPatch) == (/patchCount/)}
+!   \item[{[tileCount]}]
+!     Number of tilees in {\tt distgrid}.
+!   \item[{[minIndexPDimPTile]}]
+!     Lower index space corner per {\tt dim}, per {\tt tile}, with
+!     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
+!   \item[{[maxIndexPDimPTile]}]
+!     Upper index space corner per {\tt dim}, per {\tt tile}, with
+!     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
+!   \item[{[elementCountPTile]}]
+!     Number of elements in exclusive region per tile, with
+!     {\tt size(elementCountPTile) == (/tileCount/)}
 !   \item[{[minIndexPDimPDe]}]
 !     Lower index space corner per {\tt dim}, per {\tt De}, with
 !     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
@@ -2466,9 +2466,9 @@ contains
 !   \item[{[elementCountPDe]}]
 !     Number of elements in exclusive region per DE, with
 !     {\tt size(elementCountPDe) == (/deCount/)}
-!   \item[{[patchListPDe]}]
-!     List of patch id numbers, one for each DE, with
-!     {\tt size(patchListPDe) == (/deCount/)}
+!   \item[{[tileListPDe]}]
+!     List of tile id numbers, one for each DE, with
+!     {\tt size(tileListPDe) == (/deCount/)}
 !   \item[{[indexCountPDimPDe]}]
 !     Array of extents per {\tt dim}, per {\tt de}, with
 !     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
@@ -2485,13 +2485,13 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc                ! local return code
-    type(ESMF_InterfaceInt) :: minIndexPDimPPatchArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexPDimPPatchArg  ! helper variable
-    type(ESMF_InterfaceInt) :: elementCountPPatchArg  ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexPDimPTileArg  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexPDimPTileArg  ! helper variable
+    type(ESMF_InterfaceInt) :: elementCountPTileArg  ! helper variable
     type(ESMF_InterfaceInt) :: minIndexPDimPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexPDimPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
-    type(ESMF_InterfaceInt) :: patchListPDeArg        ! helper variable
+    type(ESMF_InterfaceInt) :: tileListPDeArg        ! helper variable
     type(ESMF_InterfaceInt) :: indexCountPDimPDeArg   ! helper variable
     type(ESMF_InterfaceInt) :: collocationPDimArg     ! helper variable
     type(ESMF_Logical)      :: regDecompFlagArg       ! helper variable
@@ -2504,15 +2504,15 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    minIndexPDimPPatchArg = &
-      ESMF_InterfaceIntCreate(farray2D=minIndexPDimPPatch, rc=localrc)
+    minIndexPDimPTileArg = &
+      ESMF_InterfaceIntCreate(farray2D=minIndexPDimPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexPDimPPatchArg = &
-      ESMF_InterfaceIntCreate(farray2D=maxIndexPDimPPatch, rc=localrc)
+    maxIndexPDimPTileArg = &
+      ESMF_InterfaceIntCreate(farray2D=maxIndexPDimPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    elementCountPPatchArg = ESMF_InterfaceIntCreate(elementCountPPatch, &
+    elementCountPTileArg = ESMF_InterfaceIntCreate(elementCountPTile, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2527,7 +2527,7 @@ contains
     elementCountPDeArg = ESMF_InterfaceIntCreate(elementCountPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    patchListPDeArg = ESMF_InterfaceIntCreate(patchListPDe, rc=localrc)
+    tileListPDeArg = ESMF_InterfaceIntCreate(tileListPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     indexCountPDimPDeArg = ESMF_InterfaceIntCreate(farray2D=indexCountPDimPDe, &
@@ -2539,10 +2539,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_DistGridGet(distgrid, dimCount, patchCount, &
-      minIndexPDimPPatchArg, maxIndexPDimPPatchArg, elementCountPPatchArg, &
+    call c_ESMC_DistGridGet(distgrid, dimCount, tileCount, &
+      minIndexPDimPTileArg, maxIndexPDimPTileArg, elementCountPTileArg, &
       minIndexPDimPDeArg, maxIndexPDimPDeArg, elementCountPDeArg, &
-      patchListPDeArg, indexCountPDimPDeArg, collocationPDimArg, &
+      tileListPDeArg, indexCountPDimPDeArg, collocationPDimArg, &
       regDecompFlagArg, delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2558,13 +2558,13 @@ contains
     endif
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexPDimPPatchArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexPDimPTileArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexPDimPPatchArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexPDimPTileArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(elementCountPPatchArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(elementCountPTileArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(minIndexPDimPDeArg, rc=localrc)
@@ -2576,7 +2576,7 @@ contains
     call ESMF_InterfaceIntDestroy(elementCountPDeArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(patchListPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(tileListPDeArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(indexCountPDimPDeArg, rc=localrc)
@@ -2601,13 +2601,13 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetPDe(distgrid, de, regDecompDeCoord, patch, rc)
+  subroutine ESMF_DistGridGetPDe(distgrid, de, regDecompDeCoord, tile, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: de
     integer, target,        intent(out), optional :: regDecompDeCoord(:)
-    integer,                intent(out), optional :: patch
+    integer,                intent(out), optional :: tile
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2622,7 +2622,7 @@ contains
 !     DE for which information is requested. {\tt \[0,..,deCount-1\]}
 !   \item[{[regDecompDeCoord]}]
 !     For regular decompositions upon return this array holds the coordinate
-!     tuple of the specified DE with respect to the local patch. For other
+!     tuple of the specified DE with respect to the local tile. For other
 !     decompositions a run-time warning will be issued if
 !     {\tt regDecompDeCoord} is requested.
 !   \item[{[rc]}]
@@ -2641,7 +2641,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! call into the C++ interface, which will sort out optional arguments
-!    call c_ESMC_DistGridGet(distgrid, delayout, patchCount, patchListArg, &
+!    call c_ESMC_DistGridGet(distgrid, delayout, tileCount, tileListArg, &
 !      dimCount, dimExtentArg, regDecompFlag, localrc)
 !    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 !      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2690,7 +2690,7 @@ contains
 !     Indicates whether collocation is associated with arbitrary sequence
 !     indices.
 !   \item[{[seqIndexList]}]
-!     List of DistGrid patch-local sequence indices for {\tt localDe}, with
+!     List of DistGrid tile-local sequence indices for {\tt localDe}, with
 !     {\tt size(seqIndexList) == (/elementCountPDe(localDe)/)}.
 !   \item[{[elementCount]}]
 !     Number of elements in the localDe, i.e. identical to
@@ -2769,7 +2769,7 @@ contains
 !   \item[dim] 
 !     Dimension for which information is requested. {\tt [1,..,dimCount]}
 !   \item[indexList]
-!     Upon return this holds the list of DistGrid patch-local indices
+!     Upon return this holds the list of DistGrid tile-local indices
 !     for {\tt localDe} along dimension {\tt dim}. The supplied variable 
 !     must be at least of size {\tt indexCountPDimPDe(dim, de(localDe))}.
 !   \item[{[rc]}] 
@@ -3124,13 +3124,13 @@ contains
 !BOP
 ! !IROUTINE: ESMF_DistGridConnection - Construct a DistGrid connection element
 ! !INTERFACE:
-  subroutine ESMF_DistGridConnection(connection, patchIndexA, patchIndexB, &
+  subroutine ESMF_DistGridConnection(connection, tileIndexA, tileIndexB, &
     positionVector, orientationVector, rc)
 !
 ! !ARGUMENTS:
     integer,        target, intent(out)           :: connection(:)
-    integer,                intent(in)            :: patchIndexA
-    integer,                intent(in)            :: patchIndexB
+    integer,                intent(in)            :: tileIndexA
+    integer,                intent(in)            :: tileIndexB
     integer,                intent(in)            :: positionVector(:)
     integer,                intent(in),  optional :: orientationVector(:)
     integer,                intent(out), optional :: rc
@@ -3146,19 +3146,19 @@ contains
 !        Element to be constructed. The provided {\tt connection} must 
 !        be dimensioned to hold exactly the number of integers that result from
 !        the input information.
-!     \item[patchIndexA] 
-!        Index of one of the two patches that are to be connected.
-!     \item[patchIndexB] 
-!        Index of one of the two patches that are to be connected.
+!     \item[tileIndexA] 
+!        Index of one of the two tilees that are to be connected.
+!     \item[tileIndexB] 
+!        Index of one of the two tilees that are to be connected.
 !     \item[positionVector] 
-!        Position of patch B's minIndex with respect to patch A's minIndex.
+!        Position of tile B's minIndex with respect to tile A's minIndex.
 !     \item[{[orientationVector]}]
-!        Associates each dimension of patch A with a dimension in patch B's 
+!        Associates each dimension of tile A with a dimension in tile B's 
 !        index space. Negative index values may be used to indicate a 
 !        reversal in index orientation. It is erroneous to associate multiple
-!        dimensions of patch A with the same index in patch B. By default
+!        dimensions of tile A with the same index in tile B. By default
 !        {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as
-!        patch A.
+!        tile A.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3188,7 +3188,7 @@ contains
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridConnection(connectionArg, &
-      patchIndexA, patchIndexB, positionVectorArg, orientationVectorArg, &
+      tileIndexA, tileIndexB, positionVectorArg, orientationVectorArg, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

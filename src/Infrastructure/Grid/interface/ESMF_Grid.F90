@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.187 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.188 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.187 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.188 2011/01/07 18:32:17 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2745,7 +2745,7 @@ end subroutine ESMF_GridConvertIndex
 !      If not specified, the default decomposition will be petCountx1x1..x1. 
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
-!      patch is to be divided between the DEs. The default setting
+!      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
@@ -2764,9 +2764,9 @@ end subroutine ESMF_GridConvertIndex
     integer, pointer     :: regDecompLocal(:)
     type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
     integer              :: deCount
-    integer              :: i1,i2,i3,k, patchCount
-    integer,pointer      :: minIndexPDimPPatch(:,:)
-    integer,pointer      :: maxIndexPDimPPatch(:,:)
+    integer              :: i1,i2,i3,k, tileCount
+    integer,pointer      :: minIndexPDimPTile(:,:)
+    integer,pointer      :: maxIndexPDimPTile(:,:)
     integer,pointer      :: minIndexLocal(:)
     integer,pointer      :: maxIndexLocal(:)
     type(ESMF_IndexFlag) :: indexflag
@@ -2810,7 +2810,7 @@ end subroutine ESMF_GridConvertIndex
 
    
     ! Get a couple of sizes
-    call ESMF_DistgridGet(oldDistgrid, patchCount=patchCount, rc=localrc)
+    call ESMF_DistgridGet(oldDistgrid, tileCount=tileCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2818,25 +2818,25 @@ end subroutine ESMF_GridConvertIndex
 
 
     ! Get Index info from DistGrid
-    allocate(minIndexPDimPPatch(dimCount,patchCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexPDimPatch", &
+    allocate(minIndexPDimPTile(dimCount,tileCount), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexPDimTile", &
                                      ESMF_CONTEXT, rc)) return
 
-    allocate(maxIndexPDimPPatch(dimCount,patchCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexPDimPatch", &
+    allocate(maxIndexPDimPTile(dimCount,tileCount), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexPDimTile", &
                                      ESMF_CONTEXT, rc)) return
 
 
     call ESMF_DistgridGet(oldDistgrid, &
-           minIndexPDimPPatch=minIndexPDimPPatch, &
-           maxIndexPDimPPatch=maxIndexPDimPPatch, &
+           minIndexPDimPTile=minIndexPDimPTile, &
+           maxIndexPDimPTile=maxIndexPDimPTile, &
            rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! This doesn't work right now for Multitile Grids
-    if (patchCount > 1) then
+    if (tileCount > 1) then
        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             "- GridCopy with reg distribution not supported for multitile grids", &
             ESMF_CONTEXT, rc)
@@ -2848,20 +2848,20 @@ end subroutine ESMF_GridConvertIndex
     if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
-    minIndexLocal(1:dimCount)=minIndexPDimPPatch(1:dimCount,1)
+    minIndexLocal(1:dimCount)=minIndexPDimPTile(1:dimCount,1)
 
     ! Set maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
                                      ESMF_CONTEXT, rc)) return
 
-    maxIndexLocal(1:dimCount)=maxIndexPDimPPatch(1:dimCount,1)
+    maxIndexLocal(1:dimCount)=maxIndexPDimPTile(1:dimCount,1)
 
 
 
     ! Free memory from distgrid get
-    deallocate(minIndexPDimPPatch)
-    deallocate(maxIndexPDimPPatch)
+    deallocate(minIndexPDimPTile)
+    deallocate(maxIndexPDimPTile)
 
 
     ! Set default for regDecomp 
@@ -3351,8 +3351,8 @@ end subroutine ESMF_GridConvertIndex
     integer :: dimCount, distDimCount, undistDimCount, dimCount1
     integer, pointer :: local1DIndices(:), localArbIndex(:,:), distSize(:)
     integer, pointer :: undistMinIndex(:), undistMaxIndex(:)
-    integer, pointer :: minIndexPPatch(:,:), maxIndexPPatch(:,:)
-    integer :: patchCount, localCounts
+    integer, pointer :: minIndexPTile(:,:), maxIndexPTile(:,:)
+    integer :: tileCount, localCounts
     integer, pointer :: minIndexLocal(:), maxIndexLocal(:)
     logical, pointer :: isDistDim(:)
     integer :: i, j, k, arbDim, deCount
@@ -3379,7 +3379,7 @@ end subroutine ESMF_GridConvertIndex
     dimCount = size(indexArray,2)
     
     !! find out undistDimCount and distDimCount
-    call ESMF_DistGridGet(distgrid, dimCount=dimCount1, patchCount=patchCount, &
+    call ESMF_DistGridGet(distgrid, dimCount=dimCount1, tileCount=tileCount, &
     	rc=localrc)
     !! dimCount1 should be equal or less than dimCount
     if (dimCount1 .gt. dimCount) then
@@ -3388,9 +3388,9 @@ end subroutine ESMF_GridConvertIndex
                           ESMF_CONTEXT, rc) 
         return 
      endif
-    if (patchCount .ne. 1) then
+    if (tileCount .ne. 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- distgrid patch count has to be 1", & 
+                   "- distgrid tile count has to be 1", & 
                           ESMF_CONTEXT, rc) 
         return 
     endif
@@ -3519,10 +3519,10 @@ end subroutine ESMF_GridConvertIndex
     endif
 
     if (undistDimCount .ne. 0) then
-      allocate(minIndexPPatch(dimCount1,1))
-      allocate(maxIndexPPatch(dimCount1,1))
-      call ESMF_DistGridGet(distgrid, minIndexPDimPPatch=minIndexPPatch, &
-	  maxIndexPDimPPatch=maxIndexPPatch, rc=localrc)
+      allocate(minIndexPTile(dimCount1,1))
+      allocate(maxIndexPTile(dimCount1,1))
+      call ESMF_DistGridGet(distgrid, minIndexPDimPTile=minIndexPTile, &
+	  maxIndexPDimPTile=maxIndexPTile, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3540,8 +3540,8 @@ end subroutine ESMF_GridConvertIndex
       k = 1
       do i=1,dimCount1
         if (arbDim .ne. i) then
-          if ((undistMinIndex(k) .ne. minIndexPPatch(i,1)) .or. &
-            (undistMaxIndex(k) .ne. maxIndexPPatch(i,1))) then
+          if ((undistMinIndex(k) .ne. minIndexPTile(i,1)) .or. &
+            (undistMaxIndex(k) .ne. maxIndexPTile(i,1))) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- Grid min/max index does not match with DistGrid min/max index", & 
                ESMF_CONTEXT, rc) 
@@ -3603,8 +3603,8 @@ end subroutine ESMF_GridConvertIndex
     deallocate(local1DIndices)
     deallocate(localArbIndex)
     if (undistDimCount .ne. 0) then
-      deallocate(minIndexPPatch)
-      deallocate(maxIndexPPatch)
+      deallocate(minIndexPTile)
+      deallocate(maxIndexPTile)
       deallocate(undistMinIndex)
       deallocate(undistMaxIndex)
     endif
@@ -3918,8 +3918,8 @@ end subroutine ESMF_GridConvertIndex
            ESMF_CONTEXT, rc)) return
 
     ! get dimension from distgrid
-    call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPDimPPatch=minInd,&
-		         maxIndexPDimPPatch=maxInd, rc=localrc)
+    call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPDimPTile=minInd,&
+		         maxIndexPDimPTile=maxInd, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rc)) return
 
@@ -4304,7 +4304,7 @@ end subroutine convert_corner_arrays_to_1D
 !      Each entry is the number of decounts for that dimension.
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
-!      patch is to be divided between the DEs. The default setting
+!      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
@@ -4501,7 +4501,7 @@ end subroutine convert_corner_arrays_to_1D
     if (PetNo == 0) then
        allocate(coord2D(dims(1),dims(2)))
        coord2D = RESHAPE(coordX,(/dims(1), dims(2)/))
-       !call ESMF_ArrayGet(array,minIndexPDimPPatch=lbnd,maxIndexPDimPPatch=ubnd,rc=localrc)
+       !call ESMF_ArrayGet(array,minIndexPDimPTile=lbnd,maxIndexPDimPTile=ubnd,rc=localrc)
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5514,7 +5514,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
    
-   ! Setup Connections between patch sides ----------------------------------------
+   ! Setup Connections between tile sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
@@ -5730,7 +5730,7 @@ end function ESMF_GridCreateFrmScripReg
 !      If not specified, the default decomposition will be petCountx1x1..x1. 
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
-!      patch is to be divided between the DEs. The default setting
+!      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
@@ -6398,7 +6398,7 @@ end function ESMF_GridCreateFrmScripReg
      distgridToGridMap(i)=i
    enddo    
 
-   ! Setup Connections between patch sides ----------------------------------------
+   ! Setup Connections between tile sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
@@ -6991,7 +6991,7 @@ end function ESMF_GridCreateFrmScripReg
        return 
     endif
 
-   ! Setup Connections between patch sides ----------------------------------------
+   ! Setup Connections between tile sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
@@ -14887,7 +14887,7 @@ endif
 
 
    
-   ! Setup Connections between patch sides ----------------------------------------
+   ! Setup Connections between tile sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
@@ -15120,7 +15120,7 @@ endif
 !      If not specified, the default decomposition will be petCountx1x1..x1. 
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
-!      patch is to be divided between the DEs. The default setting
+!      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
@@ -15773,7 +15773,7 @@ endif
    enddo    
 
 
-   ! Setup Connections between patch sides ----------------------------------------
+   ! Setup Connections between tile sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 
@@ -16363,7 +16363,7 @@ endif
        return 
     endif
 
-   ! Setup Connections between patch sides ----------------------------------------
+   ! Setup Connections between tile sides ----------------------------------------
 
    ! CONNECTIONS DON'T WORK YET SO NOT IMPLEMENTED
 

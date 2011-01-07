@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.34 2011/01/05 20:05:42 svasquez Exp $
+// $Id: ESMCI_DistGrid.h,v 1.35 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,14 +55,14 @@ namespace ESMCI {
 
    private:
     int dimCount;                 // rank of DistGrid
-    int patchCount;               // number of patches in DistGrid
-    int *minIndexPDimPPatch;      // lower corner indices [dimCount*patchCount]
-    int *maxIndexPDimPPatch;      // upper corner indices [dimCount*patchCount]
-    int *elementCountPPatch;      // number of elements [patchCount]
+    int tileCount;               // number of tilees in DistGrid
+    int *minIndexPDimPTile;      // lower corner indices [dimCount*tileCount]
+    int *maxIndexPDimPTile;      // upper corner indices [dimCount*tileCount]
+    int *elementCountPTile;      // number of elements [tileCount]
     int *minIndexPDimPDe;         // lower corner indices [dimCount*deCount]
     int *maxIndexPDimPDe;         // upper corner indices [dimCount*deCount]
     int *elementCountPDe;         // number of elements [deCount]
-    int *patchListPDe;            // patch indices [deCount]
+    int *tileListPDe;            // tile indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
     int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
     int **indexListPDimPLocalDe;  // local DEs' indices [dimCount*localDeCount]
@@ -96,7 +96,7 @@ namespace ESMCI {
     
    private:
     // construct() and destruct()
-    int construct(int dimCount, int patchCount, int *dePatchList,
+    int construct(int dimCount, int tileCount, int *deTileList,
       int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
       int *regDecompArg, InterfaceInt *connectionList,
@@ -139,20 +139,20 @@ namespace ESMCI {
     bool isLocalDeOnEdgeU(int localDe, int dim, int *rc) const;
     // get() and set()
     int getDimCount()                   const {return dimCount;}
-    int getPatchCount()                 const {return patchCount;}
+    int getTileCount()                 const {return tileCount;}
     int getDiffCollocationCount()   const {return diffCollocationCount;}
-    const int *getMinIndexPDimPPatch()  const {return minIndexPDimPPatch;}
-    const int *getMinIndexPDimPPatch(int patch, int *rc) const;
-    const int *getMaxIndexPDimPPatch()  const {return maxIndexPDimPPatch;}
-    const int *getMaxIndexPDimPPatch(int patch, int *rc) const;
-    const int *getElementCountPPatch()  const {return elementCountPPatch;}
+    const int *getMinIndexPDimPTile()  const {return minIndexPDimPTile;}
+    const int *getMinIndexPDimPTile(int tile, int *rc) const;
+    const int *getMaxIndexPDimPTile()  const {return maxIndexPDimPTile;}
+    const int *getMaxIndexPDimPTile(int tile, int *rc) const;
+    const int *getElementCountPTile()  const {return elementCountPTile;}
     const int *getMinIndexPDimPDe()     const {return minIndexPDimPDe;}
     const int *getMinIndexPDimPDe(int de, int *rc) const;
     const int *getMaxIndexPDimPDe()     const {return maxIndexPDimPDe;}
     const int *getMaxIndexPDimPDe(int de, int *rc) const;
     const int *getElementCountPDe()      const {return elementCountPDe;}
     int getElementCountPDe(int de, int *rc) const;
-    const int *getPatchListPDe()        const {return patchListPDe;}
+    const int *getTileListPDe()        const {return tileListPDe;}
     const int *getContigFlagPDimPDe()   const {return contigFlagPDimPDe;}
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;
     const int *getIndexCountPDimPDe()   const {return indexCountPDimPDe;}
@@ -164,9 +164,9 @@ namespace ESMCI {
     const int *getRegDecomp()       const {return regDecomp;}
     int getSequenceIndexLocalDe(int localDe, const int *index, int depth=0,
       int *rc=NULL) const;
-    int getSequenceIndexPatchRelative(int patch, const int *index, int depth,
+    int getSequenceIndexTileRelative(int tile, const int *index, int depth,
       int *rc=NULL)const;
-    int getSequenceIndexPatch(int patch, const int *index, int depth,
+    int getSequenceIndexTile(int tile, const int *index, int depth,
       int *rc=NULL)const;
     int *const*getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
@@ -190,8 +190,8 @@ namespace ESMCI {
       const;
     static DistGrid *deserialize(char *buffer, int *offset);
     // connections
-    static int connection(InterfaceInt *connection, int patchIndexA, 
-      int patchIndexB, InterfaceInt *positionVector,
+    static int connection(InterfaceInt *connection, int tileIndexA, 
+      int tileIndexB, InterfaceInt *positionVector,
       InterfaceInt *orientationVector);
   };  // class DistGrid
 

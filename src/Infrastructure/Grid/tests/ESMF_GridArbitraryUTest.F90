@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.15 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.16 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.15 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.16 2011/01/07 18:32:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -259,9 +259,9 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   allocate(minIndex(distDimCount,1), maxIndex(distDimCount,1))
   call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, &
-	minIndexPDimPPatch=minIndex, &
-	maxIndexPDimPPatch=maxIndex, &
-	elementCountPPatch=localCount2, rc=localrc)
+	minIndexPDimPTile=minIndex, &
+	maxIndexPDimPTile=maxIndex, &
+	elementCountPTile=localCount2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_DELayoutGet(delayout, deCount=deCount, localdeList=deList, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -699,9 +699,9 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   allocate(minIndex(distDimCount,1), maxIndex(distDimCount,1))
   call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, &
-	minIndexPDimPPatch=minIndex, &
-	maxIndexPDimPPatch=maxIndex, &
-	elementCountPPatch=localCount2, rc=localrc)
+	minIndexPDimPTile=minIndex, &
+	maxIndexPDimPTile=maxIndex, &
+	elementCountPTile=localCount2, rc=localrc)
 
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutGet(delayout, deCount=deCount, localdeList=deList, rc=localrc)

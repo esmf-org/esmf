@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.10 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.11 2011/01/07 18:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,13 +75,13 @@ program ESMF_GridCreateEx
 !EOC
       
 !BOE    
-! Construct a single patch tripole domain. 
+! Construct a single tile tripole domain. 
 ! Specifiy that the first dimension is periodic: \\
 !
 ! \begin{itemize}
-! \item Setting patchIndexA=patchIndexB indicates that the connection 
-!      is within the patch.
-! \item The position vector is set to span the width of the patch's 
+! \item Setting tileIndexA=tileIndexB indicates that the connection 
+!      is within the tile.
+! \item The position vector is set to span the width of the tile's 
 !      first dimension.
 ! \item The repetitionVector indicates that the connection repeats along
 !           the dimension. This takes care of both sides of the connection.
@@ -93,7 +93,7 @@ program ESMF_GridCreateEx
       allocate( connectionList(2*gridRank,3) )
       call ESMF_ConnectionElementConstruct(                          &
                  connectionElement=connectionList(:,1),     &
-                 patchIndexA=1, patchIndexB=1,              &
+                 tileIndexA=1, tileIndexB=1,              &
                  positionVector = (/gridSize(1),0/),        &
                  repetitionVector= (/1,0/), rc=rc)
 !EOC
@@ -102,14 +102,14 @@ program ESMF_GridCreateEx
 ! Specifiy the northern bipolar fold: \\
 !
 !  The position and orientation vectors indicate that each element 
-!  along the top edge of the patch is attached to the corresponding
+!  along the top edge of the tile is attached to the corresponding
 !  element across the fold. 
 !EOE
 
 !BOC
        call ESMF_ConnectionElementConstruct(
                   connectionElement = connectionList(:,2), &
-                  patchIndexA = 1, patchIndexB = 1, &
+                  tileIndexA = 1, tileIndexB = 1, &
                   positionVector = (/gridSize(1)+1, 2*gridSize(2)/), &
                   orientationVector = (/-1, -2/), &
                   rc=rc)
@@ -119,13 +119,13 @@ program ESMF_GridCreateEx
 ! Specifiy the south pole: \\
 !
 !  The position and orientation vectors indicate that each element along
-!   the bottom edge of the patch is attached to the element directly across the pole. 
+!   the bottom edge of the tile is attached to the element directly across the pole. 
 !EOE
 
 !BOC
        call ESMF_ConnectionElementConstruct( 
                  connectionElement = connectionList(:,3), &
-                 patchIndexA = 1, patchIndexB = 1, &
+                 tileIndexA = 1, tileIndexB = 1, &
                  positionVector = (/gridSize(1)/2, 0/), &
                  orientationVector = (/1, -2/), &
                  repetitionVector = (/1, 0/), &

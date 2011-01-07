@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.51 2011/01/05 20:05:42 svasquez Exp $
+// $Id: ESMCI_DistGrid.C,v 1.52 2011/01/07 18:32:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.51 2011/01/05 20:05:42 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.52 2011/01/07 18:32:16 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -119,19 +119,19 @@ DistGrid *DistGrid::create(
           "(2*dimCount+2)", rc);
         return ESMC_NULL_POINTER;
       }
-      // check patchA & patchB entries
+      // check tileA & tileB entries
       for (int i=0; i<connectionList->extent[1]; i++){
         if (connectionList->array[elementSize*i] < 1 || 
-          connectionList->array[elementSize*i] > dg->patchCount){
+          connectionList->array[elementSize*i] > dg->tileCount){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- patchA in connectionList element lies outside [1,patchCount]",
+            "- tileA in connectionList element lies outside [1,tileCount]",
             rc);
           return ESMC_NULL_POINTER;
         }
         if (connectionList->array[elementSize*i+1] < 1 ||
-          connectionList->array[elementSize*i+1] > dg->patchCount){
+          connectionList->array[elementSize*i+1] > dg->tileCount){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- patchB in connectionList element lies outside [1,patchCount]",
+            "- tileB in connectionList element lies outside [1,tileCount]",
             rc);
           return ESMC_NULL_POINTER;
         }
@@ -154,17 +154,17 @@ DistGrid *DistGrid::create(
           memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
             sizeof(int)*elementSize);
         }
-        connectionList = new InterfaceInt(dg->maxIndexPDimPPatch,
+        connectionList = new InterfaceInt(dg->maxIndexPDimPTile,
           dimInterfaceInt, dimCountInterfaceInt);
       }
     }
-    // prepare for single- vs. multi-patch case
-    dimInterfaceInt = 1;  // default single-patch
-    if (dg->patchCount > 1)
-      dimInterfaceInt = 2;  // multi-patch
+    // prepare for single- vs. multi-tile case
+    dimInterfaceInt = 1;  // default single-tile
+    if (dg->tileCount > 1)
+      dimInterfaceInt = 2;  // multi-tile
     dimCountInterfaceInt[0] = dg->dimCount;
     if (dimInterfaceInt==2)
-      dimCountInterfaceInt[1] = dg->patchCount;
+      dimCountInterfaceInt[1] = dg->tileCount;
     else
       dimCountInterfaceInt[1] = 1;
     int totalCountInterfaceInt = dimCountInterfaceInt[0]
@@ -173,7 +173,7 @@ DistGrid *DistGrid::create(
     if (firstExtra){
       if (firstExtra->dimCount != dimInterfaceInt){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- distgrid and firstExtra arguments differ single/multi patch", rc);
+          "- distgrid and firstExtra arguments differ single/multi tile", rc);
         return ESMC_NULL_POINTER;
       }
       if (firstExtra->extent[0] != dg->dimCount){
@@ -182,9 +182,9 @@ DistGrid *DistGrid::create(
         return ESMC_NULL_POINTER;
       }
       if (dimInterfaceInt==2){
-        if (firstExtra->extent[1] != dg->patchCount){
+        if (firstExtra->extent[1] != dg->tileCount){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- distgrid and firstExtra arguments assume different patchCount",
+            "- distgrid and firstExtra arguments assume different tileCount",
             rc);
           return ESMC_NULL_POINTER;
         }
@@ -194,7 +194,7 @@ DistGrid *DistGrid::create(
     if (lastExtra){
       if (lastExtra->dimCount != dimInterfaceInt){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- distgrid and lastExtra arguments differ single/multi patch", rc);
+          "- distgrid and lastExtra arguments differ single/multi tile", rc);
         return ESMC_NULL_POINTER;
       }
       if (lastExtra->extent[0] != dg->dimCount){
@@ -203,9 +203,9 @@ DistGrid *DistGrid::create(
         return ESMC_NULL_POINTER;
       }
       if (dimInterfaceInt==2){
-        if (lastExtra->extent[1] != dg->patchCount){
+        if (lastExtra->extent[1] != dg->tileCount){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- distgrid and lastExtra arguments assume different patchCount",
+            "- distgrid and lastExtra arguments assume different tileCount",
             rc);
           return ESMC_NULL_POINTER;
         }
@@ -218,20 +218,20 @@ DistGrid *DistGrid::create(
       int connectionCount = connectionList->extent[1];
       for (int i=0; i<connectionCount; i++){
         int *element = connectionList->array + i*elementSize;
-        int patchA = element[0];
-        int patchB = element[1];
+        int tileA = element[0];
+        int tileB = element[1];
         int *positionVector = element + 2;
         if (firstExtra){
           // there are possible modifications on the lower edge
           for (int j=0; j<dg->dimCount; j++){
             if (positionVector[j] < 0){
-              if (firstExtra->array[dg->dimCount*(patchA-1)+j] != 0){
+              if (firstExtra->array[dg->dimCount*(tileA-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
               }
             }else{
-              if (firstExtra->array[dg->dimCount*(patchB-1)+j] != 0){
+              if (firstExtra->array[dg->dimCount*(tileB-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
@@ -243,13 +243,13 @@ DistGrid *DistGrid::create(
           // there are possible modifications on the lower edge
           for (int j=0; j<dg->dimCount; j++){
             if (positionVector[j] < 0){
-              if (lastExtra->array[dg->dimCount*(patchB-1)+j] != 0){
+              if (lastExtra->array[dg->dimCount*(tileB-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
               }
             }else{
-              if (lastExtra->array[dg->dimCount*(patchA-1)+j] != 0){
+              if (lastExtra->array[dg->dimCount*(tileA-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
@@ -263,20 +263,20 @@ DistGrid *DistGrid::create(
     int *minIndexAlloc = new int[totalCountInterfaceInt];
     if (firstExtra)
       for (int i=0; i<totalCountInterfaceInt; i++)
-        minIndexAlloc[i] = dg->minIndexPDimPPatch[i]
+        minIndexAlloc[i] = dg->minIndexPDimPTile[i]
           - firstExtra->array[i];
     else
-      memcpy(minIndexAlloc, dg->minIndexPDimPPatch,
+      memcpy(minIndexAlloc, dg->minIndexPDimPTile,
         sizeof(int)*totalCountInterfaceInt);
     InterfaceInt *minIndex = new InterfaceInt(minIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
     int *maxIndexAlloc = new int[totalCountInterfaceInt];
     if (lastExtra)
       for (int i=0; i<totalCountInterfaceInt; i++)
-        maxIndexAlloc[i] = dg->maxIndexPDimPPatch[i]
+        maxIndexAlloc[i] = dg->maxIndexPDimPTile[i]
           + lastExtra->array[i];
     else
-      memcpy(maxIndexAlloc, dg->maxIndexPDimPPatch,
+      memcpy(maxIndexAlloc, dg->maxIndexPDimPTile,
         sizeof(int)*totalCountInterfaceInt);
     InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
@@ -289,15 +289,15 @@ DistGrid *DistGrid::create(
       // prepare regDecomp
       InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
         dimInterfaceInt, dimCountInterfaceInt);
-      if (dg->patchCount==1){
-        // single patch
+      if (dg->tileCount==1){
+        // single tile
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
           firstExtra, lastExtra, NULL, indexflag,
           connectionList, dg->delayout, dg->vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
       }else{
-        // multi patch
+        // multi tile
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
           firstExtra, lastExtra, NULL, indexflag,
           connectionList, dg->delayout, dg->vm, &localrc);
@@ -307,8 +307,8 @@ DistGrid *DistGrid::create(
       delete regDecomp;
     }else{
       // this is a deBlockList
-      if (dg->patchCount==1){
-        // single patch
+      if (dg->tileCount==1){
+        // single tile
         // prepare deBlockList
         int deCount = dg->delayout->getDeCount();
         int dimCount = dg->dimCount;
@@ -327,8 +327,8 @@ DistGrid *DistGrid::create(
               dg->minIndexPDimPDe[i*dimCount+k];
             if (firstExtra){
               if (deBlockListAlloc[i*2*dimCount+k]
-                == dg->minIndexPDimPPatch[k]){
-                // found edge DE on single patch DistGrid
+                == dg->minIndexPDimPTile[k]){
+                // found edge DE on single tile DistGrid
                 deBlockListAlloc[i*2*dimCount+k] -=
                   firstExtra->array[k];
               }
@@ -337,8 +337,8 @@ DistGrid *DistGrid::create(
               dg->maxIndexPDimPDe[i*dimCount+k];
             if (firstExtra){
               if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
-                dg->maxIndexPDimPPatch[k]){
-                // found edge DE on single patch DistGrid
+                dg->maxIndexPDimPTile[k]){
+                // found edge DE on single tile DistGrid
                 deBlockListAlloc[i*2*dimCount+dimCount+k] +=
                   lastExtra->array[k];
               }
@@ -353,8 +353,8 @@ DistGrid *DistGrid::create(
         delete deBlockList;
         delete [] deBlockListAlloc;
       }else{
-        // multi patch
-        //TODO: activate this branch once deBlockList multi-patch is implemented
+        // multi tile
+        //TODO: activate this branch once deBlockList multi-tile is implemented
       }
     }
     // garbage collection
@@ -373,18 +373,18 @@ DistGrid *DistGrid::create(
     // simple deep copy of the incoming DistGrid
     distgrid = new DistGrid();
     int dimCount = distgrid->dimCount = dg->dimCount;
-    int patchCount = distgrid->patchCount = dg->patchCount;
+    int tileCount = distgrid->tileCount = dg->tileCount;
     int deCount = dg->delayout->getDeCount();
     int localDeCount = dg->delayout->getLocalDeCount();
-    distgrid->minIndexPDimPPatch = new int[dimCount*patchCount];
-    memcpy(distgrid->minIndexPDimPPatch, dg->minIndexPDimPPatch,
-      sizeof(int)*dimCount*patchCount);
-    distgrid->maxIndexPDimPPatch = new int[dimCount*patchCount];
-    memcpy(distgrid->maxIndexPDimPPatch, dg->maxIndexPDimPPatch,
-      sizeof(int)*dimCount*patchCount);
-    distgrid->elementCountPPatch = new int[patchCount];
-    memcpy(distgrid->elementCountPPatch, dg->elementCountPPatch,
-      sizeof(int)*patchCount);
+    distgrid->minIndexPDimPTile = new int[dimCount*tileCount];
+    memcpy(distgrid->minIndexPDimPTile, dg->minIndexPDimPTile,
+      sizeof(int)*dimCount*tileCount);
+    distgrid->maxIndexPDimPTile = new int[dimCount*tileCount];
+    memcpy(distgrid->maxIndexPDimPTile, dg->maxIndexPDimPTile,
+      sizeof(int)*dimCount*tileCount);
+    distgrid->elementCountPTile = new int[tileCount];
+    memcpy(distgrid->elementCountPTile, dg->elementCountPTile,
+      sizeof(int)*tileCount);
     distgrid->minIndexPDimPDe = new int[dimCount*deCount];
     memcpy(distgrid->minIndexPDimPDe, dg->minIndexPDimPDe,
       sizeof(int)*dimCount*deCount);
@@ -394,8 +394,8 @@ DistGrid *DistGrid::create(
     distgrid->elementCountPDe = new int[deCount];
     memcpy(distgrid->elementCountPDe, dg->elementCountPDe,
       sizeof(int)*deCount);
-    distgrid->patchListPDe = new int[deCount];
-    memcpy(distgrid->patchListPDe, dg->patchListPDe,
+    distgrid->tileListPDe = new int[deCount];
+    memcpy(distgrid->tileListPDe, dg->tileListPDe,
       sizeof(int)*deCount);
     distgrid->contigFlagPDimPDe = new int[dimCount*deCount];
     memcpy(distgrid->contigFlagPDimPDe, dg->contigFlagPDimPDe,
@@ -874,13 +874,13 @@ DistGrid *DistGrid::create(
     }
     deDivider *= regDecomp->array[i];
   }
-  // set up patchListPDe
-  int *patchListPDe = new int[deCount];
+  // set up tileListPDe
+  int *tileListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
-    patchListPDe[i] = 1;
+    tileListPDe[i] = 1;
   
   // call into construct()
-  localrc = distgrid->construct(dimCount, 1, patchListPDe,
+  localrc = distgrid->construct(dimCount, 1, tileListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, delayout, delayoutCreator, vm);
@@ -916,7 +916,7 @@ DistGrid *DistGrid::create(
     delete [] regDecompLastExtra->array;
     delete regDecompLastExtra;
   }
-  delete [] patchListPDe;
+  delete [] tileListPDe;
     
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1144,14 +1144,14 @@ DistGrid *DistGrid::create(
       contigFlagPDimPDe[extentIndex] = 1;
     }
   }
-  // set up patchListPDe
-  int *patchListPDe = new int[deCount];
+  // set up tileListPDe
+  int *tileListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
-    patchListPDe[i] = 1;
+    tileListPDe[i] = 1;
 
   // todo: check for overlapping deBlocks!!
   // call into construct()
-  localrc = distgrid->construct(dimCount, 1, patchListPDe, 
+  localrc = distgrid->construct(dimCount, 1, tileListPDe, 
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
     connectionList, delayout, delayoutCreator, vm);
@@ -1172,7 +1172,7 @@ DistGrid *DistGrid::create(
     delete [] deLabelList->array;
     delete deLabelList;
   }
-  delete [] patchListPDe;
+  delete [] tileListPDe;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1320,10 +1320,10 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  int patchCount = minIndex->extent[1];
-  if (maxIndex->extent[1] != patchCount){
+  int tileCount = minIndex->extent[1];
+  if (maxIndex->extent[1] != tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- minIndex and maxIndex array mismatch in patchCount", rc);
+      "- minIndex and maxIndex array mismatch in tileCount", rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
@@ -1337,7 +1337,7 @@ DistGrid *DistGrid::create(
   }
   int petCount = vm->getNpets();
   int deCount=0;  // reset
-  int *deCountPPatch;
+  int *deCountPTile;
   if (regDecomp != ESMC_NULL_POINTER){
     if (regDecomp->dimCount != 2){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -1351,27 +1351,27 @@ DistGrid *DistGrid::create(
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
-    if (regDecomp->extent[1] != patchCount){
+    if (regDecomp->extent[1] != tileCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- 2nd dimension of regDecomp array must be of size patchCount", rc);
+        "- 2nd dimension of regDecomp array must be of size tileCount", rc);
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
     // regDecomp was provided -> determine number of DEs according to regDecomp
-    deCountPPatch = new int[patchCount];
-    for (int i=0; i<patchCount; i++){
+    deCountPTile = new int[tileCount];
+    for (int i=0; i<tileCount; i++){
       int localProduct = 1; // reset
       for (int j=0; j<dimCount; j++)
         localProduct *= regDecomp->array[i*dimCount+j];
-      deCountPPatch[i] = localProduct;
+      deCountPTile[i] = localProduct;
       deCount += localProduct;
     }
   }else{
-    // regDecomp was not provided -> set deCount = patchCount for default
-    deCountPPatch = new int[patchCount];
-    for (int i=0; i<patchCount; i++)
-      deCountPPatch[i] = 1;
-    deCount = patchCount;
+    // regDecomp was not provided -> set deCount = tileCount for default
+    deCountPTile = new int[tileCount];
+    for (int i=0; i<tileCount; i++)
+      deCountPTile[i] = 1;
+    deCount = tileCount;
   }
   bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
@@ -1391,12 +1391,12 @@ DistGrid *DistGrid::create(
   if (regDecomp == ESMC_NULL_POINTER){
     // regDecomp was not provided -> create a temporary default regDecomp
     regDecompDeleteFlag = true;  // set
-    dummy = new int[dimCount*patchCount];
+    dummy = new int[dimCount*tileCount];
     // set default decomposition
-    for (int i=0; i<dimCount*patchCount; i++)
+    for (int i=0; i<dimCount*tileCount; i++)
       dummy[i] = 1;
     dummyLen[0] = dimCount;
-    dummyLen[1] = patchCount;
+    dummyLen[1] = tileCount;
     regDecomp = new InterfaceInt(dummy, 2, dummyLen);
   }
   if (regDecomp->dimCount != 2){
@@ -1410,9 +1410,9 @@ DistGrid *DistGrid::create(
     // decompflag was not provided -> set up default decompflag
     decompflagDeleteFlag = true; // set
     decompflagCount1 = dimCount;
-    decompflagCount2 = patchCount;
-    decompflag = new DecompFlag[dimCount*patchCount];
-    for (int i=0; i<dimCount*patchCount; i++)
+    decompflagCount2 = tileCount;
+    decompflag = new DecompFlag[dimCount*tileCount];
+    for (int i=0; i<dimCount*tileCount; i++)
       decompflag[i] = DECOMP_DEFAULT;
   }
   if (decompflagCount1 != dimCount){
@@ -1421,7 +1421,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (decompflagCount2 != patchCount){
+  if (decompflagCount2 != tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "- decompflag array mismatches minIndex and maxIndex arrays", rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1461,12 +1461,12 @@ DistGrid *DistGrid::create(
   if (regDecompFirstExtra == ESMC_NULL_POINTER){
     // regDecompFirstExtra was not provided -> create a temporary default
     regDecompFirstExtraDeleteFlag = true;  // set
-    dummy = new int[dimCount*patchCount];
+    dummy = new int[dimCount*tileCount];
     // set default
-    for (int i=0; i<dimCount*patchCount; i++)
+    for (int i=0; i<dimCount*tileCount; i++)
       dummy[i] = 0;
     dummyLen[0] = dimCount;
-    dummyLen[1] = patchCount;
+    dummyLen[1] = tileCount;
     regDecompFirstExtra = new InterfaceInt(dummy, 2, dummyLen);
   }
   if (regDecompFirstExtra->dimCount != 2){
@@ -1481,9 +1481,9 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (regDecompFirstExtra->extent[1] != patchCount){
+  if (regDecompFirstExtra->extent[1] != tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- 2nd dim of regDecompFirstExtra array must be of size patchCount", rc);
+      "- 2nd dim of regDecompFirstExtra array must be of size tileCount", rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
@@ -1491,12 +1491,12 @@ DistGrid *DistGrid::create(
   if (regDecompLastExtra == ESMC_NULL_POINTER){
     // regDecompLastExtra was not provided -> create a temporary default
     regDecompLastExtraDeleteFlag = true;  // set
-    dummy = new int[dimCount*patchCount];
+    dummy = new int[dimCount*tileCount];
     // set default
-    for (int i=0; i<dimCount*patchCount; i++)
+    for (int i=0; i<dimCount*tileCount; i++)
       dummy[i] = 0;
     dummyLen[0] = dimCount;
-    dummyLen[1] = patchCount;
+    dummyLen[1] = tileCount;
     regDecompLastExtra = new InterfaceInt(dummy, 2, dummyLen);
   }
   if (regDecompLastExtra->dimCount != 2){
@@ -1511,9 +1511,9 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (regDecompLastExtra->extent[1] != patchCount){
+  if (regDecompLastExtra->extent[1] != tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- 2nd dim of regDecompLastExtra array must be of size patchCount", rc);
+      "- 2nd dim of regDecompLastExtra array must be of size tileCount", rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
@@ -1528,15 +1528,15 @@ DistGrid *DistGrid::create(
   int *minIndexPDimPDe = new int[dimCount*deCount];
   int *maxIndexPDimPDe = new int[dimCount*deCount];
   
-  // the following differs from the single patch case in that there is an
-  // extra outer loop over patches. The indexCountPDimPDe and
-  // indexListPDimPLocalDe arrays are on DE basis, independent of patches.
+  // the following differs from the single tile case in that there is an
+  // extra outer loop over tilees. The indexCountPDimPDe and
+  // indexListPDimPLocalDe arrays are on DE basis, independent of tilees.
 
-  int dePatchStart = 0;  // reset  
-  for (int patch=0; patch<patchCount; patch++){
+  int deTileStart = 0;  // reset  
+  for (int tile=0; tile<tileCount; tile++){
     int deDivider = 1;  // reset
     for (int ii=0; ii<dimCount; ii++){
-      const int i = patch*dimCount + ii;  // work in the current patch
+      const int i = tile*dimCount + ii;  // work in the current tile
       const int firstExtra = regDecompFirstExtra->array[i];
       const int lastExtra = regDecompLastExtra->array[i];
       const int dimLength = maxIndex->array[i] - minIndex->array[i] + 1
@@ -1553,8 +1553,8 @@ DistGrid *DistGrid::create(
       switch (decompflag[i]){
         case DECOMP_DEFAULT:
         case DECOMP_HOMOGEN:
-          for (int jj=0; jj<deCountPPatch[patch]; jj++){
-            int j = dePatchStart + jj;
+          for (int jj=0; jj<deCountPTile[tile]; jj++){
+            int j = deTileStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
             indexCountPDimPDe[extentIndex] = chunkLength;
@@ -1590,8 +1590,8 @@ DistGrid *DistGrid::create(
           }
           break;
         case DECOMP_RESTLAST:
-          for (int jj=0; jj<deCountPPatch[patch]; jj++){
-            int j = dePatchStart + jj;
+          for (int jj=0; jj<deCountPTile[tile]; jj++){
+            int j = deTileStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
             indexCountPDimPDe[extentIndex] = chunkLength;
@@ -1625,8 +1625,8 @@ DistGrid *DistGrid::create(
           }
           break;
         case DECOMP_RESTFIRST:
-          for (int jj=0; jj<deCountPPatch[patch]; jj++){
-            int j = dePatchStart + jj;
+          for (int jj=0; jj<deCountPTile[tile]; jj++){
+            int j = deTileStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
             indexCountPDimPDe[extentIndex] = chunkLength;
@@ -1667,8 +1667,8 @@ DistGrid *DistGrid::create(
             distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
             return ESMC_NULL_POINTER;
           }
-          for (int jj=0; jj<deCountPPatch[patch]; jj++){
-            int j = dePatchStart + jj;
+          for (int jj=0; jj<deCountPTile[tile]; jj++){
+            int j = deTileStart + jj;
             de = deLabelList->array[j];
             extentIndex = de*dimCount+ii;  // index into temp. arrays
             indexCountPDimPDe[extentIndex] = chunkLength;
@@ -1706,22 +1706,22 @@ DistGrid *DistGrid::create(
       }
       deDivider *= regDecomp->array[i];
     } // i-loop
-    dePatchStart += deCountPPatch[patch];
-  } // patch-loop
-  // set up patchListPDe
-  dePatchStart = 0;  // reset  
-  int *patchListPDe = new int[deCount];
-  for (int patch=0; patch<patchCount; patch++){
-    for (int jj=0; jj<deCountPPatch[patch]; jj++){
-      int j = dePatchStart + jj;
+    deTileStart += deCountPTile[tile];
+  } // tile-loop
+  // set up tileListPDe
+  deTileStart = 0;  // reset  
+  int *tileListPDe = new int[deCount];
+  for (int tile=0; tile<tileCount; tile++){
+    for (int jj=0; jj<deCountPTile[tile]; jj++){
+      int j = deTileStart + jj;
       int de = deLabelList->array[j];
-      patchListPDe[de] = patch + 1;  // patch ids are basis 1
+      tileListPDe[de] = tile + 1;  // tile ids are basis 1
     }
-    dePatchStart += deCountPPatch[patch];
+    deTileStart += deCountPTile[tile];
   }
 
   // call into construct()
-  localrc = distgrid->construct(dimCount, patchCount, patchListPDe,
+  localrc = distgrid->construct(dimCount, tileCount, tileListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, delayout, delayoutCreator, vm);
@@ -1734,7 +1734,7 @@ DistGrid *DistGrid::create(
   delete [] contigFlagPDimPDe;
   delete [] minIndexPDimPDe;
   delete [] maxIndexPDimPDe;
-  delete [] deCountPPatch;
+  delete [] deCountPTile;
   delete [] indexCountPDimPDe;
   for (int i=0; i<dimCount*localDeCount; i++)
     delete [] indexListPDimPLocalDe[i];
@@ -1758,7 +1758,7 @@ DistGrid *DistGrid::create(
     delete [] regDecompLastExtra->array;
     delete regDecompLastExtra;
   }
-  delete [] patchListPDe;
+  delete [] tileListPDe;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1834,8 +1834,8 @@ int DistGrid::construct(
 // !ARGUMENTS:
 //
   int dimCountArg,                      // (in)
-  int patchCountArg,                    // (in)
-  int *patchListPDeArg,                 // (in)
+  int tileCountArg,                    // (in)
+  int *tileListPDeArg,                 // (in)
   int *minIndexArg,                     // (in)
   int *maxIndexArg,                     // (in)
   int *minIndexPDimPDeArg,              // (in)
@@ -1861,7 +1861,7 @@ int DistGrid::construct(
 
   // fill in the DistGrid object
   dimCount = dimCountArg;
-  patchCount = patchCountArg;
+  tileCount = tileCountArg;
   if (connectionListArg != NULL){
     // connectionList was provided
     int elementSize = 2*dimCount+2;
@@ -1876,22 +1876,22 @@ int DistGrid::construct(
         "(2*dimCount+2)", &rc);
       return rc;
     }
-    // fill in the connectionList member and check patchA & patchB entries
+    // fill in the connectionList member and check tileA & tileB entries
     connectionCount = connectionListArg->extent[1];
     connectionList = new int*[connectionCount];
     for (int i=0; i<connectionCount; i++){
       connectionList[i] = new int[elementSize];
       memcpy(connectionList[i],
         &(connectionListArg->array[elementSize*i]), sizeof(int)*elementSize);
-      if (connectionList[i][0] < 1 || connectionList[i][0] > patchCount){
+      if (connectionList[i][0] < 1 || connectionList[i][0] > tileCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- patchA in connectionList element lies outside [1,patchCount]",
+          "- tileA in connectionList element lies outside [1,tileCount]",
           &rc);
         return rc;
       }
-      if (connectionList[i][1] < 1 || connectionList[i][1] > patchCount){
+      if (connectionList[i][1] < 1 || connectionList[i][1] > tileCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- patchB in connectionList element lies outside [1,patchCount]",
+          "- tileB in connectionList element lies outside [1,tileCount]",
           &rc);
         return rc;
       }
@@ -1905,10 +1905,10 @@ int DistGrid::construct(
   delayoutCreator = delayoutCreatorArg;
   vm = vmArg;
   // fill in the rest
-  minIndexPDimPPatch = new int[dimCount*patchCount];
-  memcpy(minIndexPDimPPatch, minIndexArg, sizeof(int)*dimCount*patchCount);
-  maxIndexPDimPPatch = new int[dimCount*patchCount];
-  memcpy(maxIndexPDimPPatch, maxIndexArg, sizeof(int)*dimCount*patchCount);
+  minIndexPDimPTile = new int[dimCount*tileCount];
+  memcpy(minIndexPDimPTile, minIndexArg, sizeof(int)*dimCount*tileCount);
+  maxIndexPDimPTile = new int[dimCount*tileCount];
+  memcpy(maxIndexPDimPTile, maxIndexArg, sizeof(int)*dimCount*tileCount);
   int deCount = delayout->getDeCount();
   minIndexPDimPDe = new int[dimCount*deCount];
   memcpy(minIndexPDimPDe, minIndexPDimPDeArg, sizeof(int)*dimCount*deCount);
@@ -1931,23 +1931,23 @@ int DistGrid::construct(
         sizeof(int)*indexCountPDimPDe[de*dimCount+k]);
     }
   }
-  // determine the elementCountPPatch
-  elementCountPPatch = new int[patchCount];
-  for (int i=0; i<patchCount; i++){
-    elementCountPPatch[i] = 1;  // reset
+  // determine the elementCountPTile
+  elementCountPTile = new int[tileCount];
+  for (int i=0; i<tileCount; i++){
+    elementCountPTile[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
-      elementCountPPatch[i] *=
-        maxIndexPDimPPatch[i*dimCount+j] - minIndexPDimPPatch[i*dimCount+j] + 1;
+      elementCountPTile[i] *=
+        maxIndexPDimPTile[i*dimCount+j] - minIndexPDimPTile[i*dimCount+j] + 1;
   }
-  patchListPDe = new int[deCount];
-  memcpy(patchListPDe, patchListPDeArg, sizeof(int)*deCount);
+  tileListPDe = new int[deCount];
+  memcpy(tileListPDe, tileListPDeArg, sizeof(int)*deCount);
   elementCountPDe = new int[deCount];
   for (int i=0; i<deCount; i++){
     elementCountPDe[i] = 1;  // reset
     for (int j=0; j<dimCount; j++)
       elementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
-    // mark in patchListPDe DEs that have no elements as not being on any patch
-    if (elementCountPDe[i]==0) patchListPDe[i]=0;
+    // mark in tileListPDe DEs that have no elements as not being on any tile
+    if (elementCountPDe[i]==0) tileListPDe[i]=0;
   }
   // complete sequence index collocation by default
   diffCollocationCount = 1; // collocate all dimensions
@@ -2014,12 +2014,12 @@ int DistGrid::destruct(bool followCreator){
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
     delete [] indexCountPDimPDe;
-    delete [] minIndexPDimPPatch;
-    delete [] maxIndexPDimPPatch;
+    delete [] minIndexPDimPTile;
+    delete [] maxIndexPDimPTile;
     delete [] minIndexPDimPDe;
     delete [] maxIndexPDimPDe;
-    delete [] elementCountPPatch;
-    delete [] patchListPDe;
+    delete [] elementCountPTile;
+    delete [] tileListPDe;
     delete [] elementCountPDe;
     delete [] contigFlagPDimPDe;
     
@@ -2403,9 +2403,9 @@ bool DistGrid::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  int patchCount1 = distgrid1->patchCount;
-  int patchCount2 = distgrid2->patchCount;
-  if (patchCount1 != patchCount2){
+  int tileCount1 = distgrid1->tileCount;
+  int tileCount2 = distgrid2->tileCount;
+  if (tileCount1 != tileCount2){
     matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
@@ -2417,27 +2417,27 @@ bool DistGrid::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  int *int1 = distgrid1->minIndexPDimPPatch;
-  int *int2 = distgrid2->minIndexPDimPPatch;
-  for (int i=0; i<dimCount1*patchCount1; i++){
+  int *int1 = distgrid1->minIndexPDimPTile;
+  int *int2 = distgrid2->minIndexPDimPTile;
+  for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
       matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
   }
-  int1 = distgrid1->maxIndexPDimPPatch;
-  int2 = distgrid2->maxIndexPDimPPatch;
-  for (int i=0; i<dimCount1*patchCount1; i++){
+  int1 = distgrid1->maxIndexPDimPTile;
+  int2 = distgrid2->maxIndexPDimPTile;
+  for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
       matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
   }
-  int1 = distgrid1->elementCountPPatch;
-  int2 = distgrid2->elementCountPPatch;
-  for (int i=0; i<patchCount1; i++){
+  int1 = distgrid1->elementCountPTile;
+  int2 = distgrid2->elementCountPTile;
+  for (int i=0; i<tileCount1; i++){
     if (int1[i] != int2[i]){
       matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
@@ -2471,8 +2471,8 @@ bool DistGrid::match(
       return matchResult;
     }
   }
-  int1 = distgrid1->patchListPDe;
-  int2 = distgrid2->patchListPDe;
+  int1 = distgrid1->tileListPDe;
+  int2 = distgrid2->tileListPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
       matchResult = false;
@@ -2530,16 +2530,16 @@ int DistGrid::print()const{
   // print info about the DistGrid object
   printf("--- ESMCI::DistGrid::print start ---\n");
   printf("dimCount = %d\n", dimCount);
-  printf("patchCount = %d\n", patchCount);
-  printf("elementCountPPatch: ");
-  for (int i=0; i<patchCount; i++)
-    printf("%d ", elementCountPPatch[i]);
+  printf("tileCount = %d\n", tileCount);
+  printf("elementCountPTile: ");
+  for (int i=0; i<tileCount; i++)
+    printf("%d ", elementCountPTile[i]);
   printf("\n");
   printf("regDecomp = %s\n", (regDecomp)?"YES":"NO");
-  printf("patchListPDe: ");
+  printf("tileListPDe: ");
   int deCount = delayout->getDeCount();
   for (int i=0; i<deCount; i++)
-    printf("%d ", patchListPDe[i]);
+    printf("%d ", tileListPDe[i]);
   printf("\n");
   printf("elementCountPDe: ");
   for (int i=0; i<deCount; i++)
@@ -2614,47 +2614,47 @@ int DistGrid::print()const{
   int depth=4;
   int seqIndex;
   indexTuple[0] = 0; indexTuple[1] = 0;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 0; indexTuple[1] = 1;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 1;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 0;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 11; indexTuple[1] = 1;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 5;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 1; indexTuple[1] = 6;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 4; indexTuple[1] = 6;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 10; indexTuple[1] = 5;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 10; indexTuple[1] = 6;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   indexTuple[0] = 21; indexTuple[1] = 5;
-  seqIndex = getSequenceIndexPatch(1, indexTuple, depth, &lrc);
+  seqIndex = getSequenceIndexTile(1, indexTuple, depth, &lrc);
   printf("indexTuple = (%d, %d), sequenceIndex = %d, lrc = %d\n",
     indexTuple[0], indexTuple[1], seqIndex, lrc);
   printf("--- ESMCI::DistGrid::print - Topology test end ---\n");
@@ -2750,7 +2750,7 @@ bool DistGrid::isLocalDeOnEdgeL(
     return false;
   }
   
-  // determine which patch localDe is located on
+  // determine which tile localDe is located on
   int de = delayout->getLocalDeList()[localDe];
   bool onEdge = true;            // assume local De is on edge
   if (elementCountPDe[de]){
@@ -2833,7 +2833,7 @@ bool DistGrid::isLocalDeOnEdgeU(
     return false;
   }
   
-  // determine which patch localDe is located on
+  // determine which tile localDe is located on
   int de = delayout->getLocalDeList()[localDe];
   bool onEdge = true;            // assume local De is on edge
   if (elementCountPDe[de]){
@@ -3046,27 +3046,27 @@ int DistGrid::getSequenceIndexLocalDe(
     }
     seqindex = arbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex];
   }else{
-    // determine the sequentialized index by construction of default patch rule
+    // determine the sequentialized index by construction of default tile rule
     const int *localDeList = delayout->getLocalDeList();
-    int patch = patchListPDe[localDeList[localDe]];  // patches are basis 1 !!!!
-    if (patch == 0){
-      // means that the localDe does not have any elements thus not on patch
+    int tile = tileListPDe[localDeList[localDe]];  // tilees are basis 1 !!!!
+    if (tile == 0){
+      // means that the localDe does not have any elements thus not on tile
       seqindex = -1;  // indicate no seqIndex
     }else{
-      // prepare patch relative index tuple
-      int *patchIndexTuple = new int[dimCount];
+      // prepare tile relative index tuple
+      int *tileIndexTuple = new int[dimCount];
       for (int i=0; i<dimCount; i++){
         if (contigFlagPDimPDe[de*dimCount+i])
-          patchIndexTuple[i] = minIndexPDimPDe[de*dimCount+i] + index[i];
+          tileIndexTuple[i] = minIndexPDimPDe[de*dimCount+i] + index[i];
         else
-          patchIndexTuple[i] =
+          tileIndexTuple[i] =
             indexListPDimPLocalDe[localDe*dimCount+i][index[i]];
       }
-      // get sequence index providing patch relative index tuple
-      seqindex = getSequenceIndexPatch(patch, patchIndexTuple, depth, &localrc);
+      // get sequence index providing tile relative index tuple
+      seqindex = getSequenceIndexTile(tile, tileIndexTuple, depth, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
         return -1;  //  bail out with invalid seqindex
-      delete [] patchIndexTuple;
+      delete [] tileIndexTuple;
     }
   }
   // return successfully
@@ -3078,34 +3078,34 @@ int DistGrid::getSequenceIndexLocalDe(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexPatchRelative()"
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexTileRelative()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexPatchRelative
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexTileRelative
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndexPatchRelative(
+int DistGrid::getSequenceIndexTileRelative(
 //
 // !RETURN VALUE:
 //    int sequence index
 //
 // !ARGUMENTS:
 //
-  int patch,                        // in  - patch = {1, ..., patchCount}
-  const int *index,                 // in  - patch relative index tuple, base 0
+  int tile,                        // in  - tile = {1, ..., tileCount}
+  const int *index,                 // in  - tile relative index tuple, base 0
   int depth,                        // in  - depth of recursive search
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
-//    Get sequential index provided the patch relative index tuple.
+//    Get sequential index provided the tile relative index tuple.
 //
 //    A value of -1 is returned by this function if the specified index tuple
 //    cannot be mapped to a sequence index in DistGrid. If at the same time
 //    the code returned in rc does not indicate an error a return value of -1
 //    indicates that the index tuple lies outside of the DistGrid index space.
 //
-//    Same as getSequenceIndexPatch(), but allows index tuple to be passed in
-//    patch relative, base 0, which is more conveninet in many cases.
+//    Same as getSequenceIndexTile(), but allows index tuple to be passed in
+//    tile relative, base 0, which is more conveninet in many cases.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3114,22 +3114,22 @@ int DistGrid::getSequenceIndexPatchRelative(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // check input
-  if (patch < 1 || patch > patchCount){
+  if (tile < 1 || tile > tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Specified patch out of bounds", rc);
+      "- Specified tile out of bounds", rc);
     return -1;
   }
 
-  int *indexPatchSpecific = new int[dimCount];
+  int *indexTileSpecific = new int[dimCount];
   for (int i=0; i<dimCount; i++)
-    indexPatchSpecific[i] = index[i] + minIndexPDimPPatch[(patch-1)*dimCount+i];
+    indexTileSpecific[i] = index[i] + minIndexPDimPTile[(tile-1)*dimCount+i];
   
-  int seqindex = getSequenceIndexPatch(patch, indexPatchSpecific, depth,
+  int seqindex = getSequenceIndexTile(tile, indexTileSpecific, depth,
     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
     rc)) return seqindex;  // bail out
   
-  delete [] indexPatchSpecific;
+  delete [] indexTileSpecific;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3139,26 +3139,26 @@ int DistGrid::getSequenceIndexPatchRelative(
   
   //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexPatch()"
+#define ESMC_METHOD "ESMCI::DistGrid::getSequenceIndexTile()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexPatch
+// !IROUTINE:  ESMCI::DistGrid::getSequenceIndexTile
 //
 // !INTERFACE:
-int DistGrid::getSequenceIndexPatch(
+int DistGrid::getSequenceIndexTile(
 //
 // !RETURN VALUE:
 //    int sequence index
 //
 // !ARGUMENTS:
 //
-  int patch,                        // in  - patch = {1, ..., patchCount}
-  const int *index,                 // in  - patch-specific absolute index tuple
+  int tile,                        // in  - tile = {1, ..., tileCount}
+  const int *index,                 // in  - tile-specific absolute index tuple
   int depth,                        // in  - depth of recursive search
   int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
-//    Get sequential index provided the patch relative index tuple.
+//    Get sequential index provided the tile relative index tuple.
 //
 //    A value of -1 is returned by this function if the specified index tuple
 //    cannot be mapped to a sequence index in DistGrid. If at the same time
@@ -3166,11 +3166,11 @@ int DistGrid::getSequenceIndexPatch(
 //    indicates that the index tuple lies outside of the DistGrid index space.
 //
 //    The way this recursive algorithm is written, it requires that the 
-//    provided index tuple be expressed in a "patch-specific absolute" sense.
+//    provided index tuple be expressed in a "tile-specific absolute" sense.
 //    It is "absolute" in that the (0,0,...) tuple is not 'defined' to
-//    equal the origin of the patch. Instead the origin of the patch would
-//    be indicated by an index tuple that is equal to the "patch-specific"
-//    vector slice of minIndexPDimPPatch[].
+//    equal the origin of the tile. Instead the origin of the tile would
+//    be indicated by an index tuple that is equal to the "tile-specific"
+//    vector slice of minIndexPDimPTile[].
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3178,12 +3178,12 @@ int DistGrid::getSequenceIndexPatch(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-//printf("gjt - getSequenceIndexPatch depth: %d\n", depth);
+//printf("gjt - getSequenceIndexTile depth: %d\n", depth);
 
   // check input
-  if (patch < 1 || patch > patchCount){
+  if (tile < 1 || tile > tileCount){
     char message[80];
-    sprintf(message, "- Specified patch %d is out of bounds", patch);
+    sprintf(message, "- Specified tile %d is out of bounds", tile);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, message, rc);
     return -1;
   }
@@ -3191,34 +3191,34 @@ int DistGrid::getSequenceIndexPatch(
   // adjust recursion depth
   --depth;
 
-  bool onPatch = true;  // start assuming that index tuple can be found on patch
-  // add up elements from patch
+  bool onTile = true;  // start assuming that index tuple can be found on tile
+  // add up elements from tile
   int seqindex = 0; // initialize
   for (int i=dimCount-1; i>=0; i--){
     // first time multiply with zero intentionally:
-    seqindex *= maxIndexPDimPPatch[(patch-1)*dimCount+i] 
-      - minIndexPDimPPatch[(patch-1)*dimCount+i] + 1;
-    if ((index[i] < minIndexPDimPPatch[(patch-1)*dimCount+i])
-      || (index[i] > maxIndexPDimPPatch[(patch-1)*dimCount+i])){
-      // index is outside of patch bounds -> break out of onPatch code
-      onPatch = false;
+    seqindex *= maxIndexPDimPTile[(tile-1)*dimCount+i] 
+      - minIndexPDimPTile[(tile-1)*dimCount+i] + 1;
+    if ((index[i] < minIndexPDimPTile[(tile-1)*dimCount+i])
+      || (index[i] > maxIndexPDimPTile[(tile-1)*dimCount+i])){
+      // index is outside of tile bounds -> break out of onTile code
+      onTile = false;
       seqindex = -1;  // indicate not valid sequence index
       break;
     }
     seqindex += index[i]
-      - minIndexPDimPPatch[(patch-1)*dimCount+i];
+      - minIndexPDimPTile[(tile-1)*dimCount+i];
   }
-  if (onPatch){
-    // add all the elements of previous patches
-    for (int i=0; i<patch-2; i++)
-      seqindex += elementCountPPatch[i];
+  if (onTile){
+    // add all the elements of previous tilees
+    for (int i=0; i<tile-2; i++)
+      seqindex += elementCountPTile[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
   }else if (depth >= 0){
     for (int i=0; i<connectionCount; i++){
-      int patchA = connectionList[i][0];
-      int patchB = connectionList[i][1];
-      if (patchA == patch){
-        // found connection for this patch -> need to transform index
+      int tileA = connectionList[i][0];
+      int tileB = connectionList[i][1];
+      if (tileA == tile){
+        // found connection for this tile -> need to transform index
         int *indexB = new int[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
@@ -3233,15 +3233,15 @@ int DistGrid::getSequenceIndexPatch(
             indexB[j] = index[orientationIndex] - positionOffset;
           }
         }
-        seqindex = getSequenceIndexPatch(patchB, indexB, depth, &localrc);
+        seqindex = getSequenceIndexTile(tileB, indexB, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return seqindex;  // bail out
         delete [] indexB;
         if (seqindex > -1)
           break;  // break out of loop over connections
       }
-      if (patchB == patch){
-        // found connection for this patch -> need to transform index
+      if (tileB == tile){
+        // found connection for this tile -> need to transform index
         int *indexA = new int[dimCount];
         int positionIndexOffset = 2;
         int orientationIndexOffset = 2+dimCount;
@@ -3256,7 +3256,7 @@ int DistGrid::getSequenceIndexPatch(
             indexA[orientationIndex] = index[j] + positionOffset;
           }
         }
-        seqindex = getSequenceIndexPatch(patchA, indexA, depth, &localrc);
+        seqindex = getSequenceIndexTile(tileA, indexA, depth, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
           rc)) return seqindex;  // bail out
         delete [] indexA;
@@ -3275,19 +3275,19 @@ int DistGrid::getSequenceIndexPatch(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getMinIndexPDimPPatch()"
+#define ESMC_METHOD "ESMCI::DistGrid::getMinIndexPDimPTile()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getMinIndexPDimPPatch
+// !IROUTINE:  ESMCI::DistGrid::getMinIndexPDimPTile
 //
 // !INTERFACE:
-const int *DistGrid::getMinIndexPDimPPatch(
+const int *DistGrid::getMinIndexPDimPTile(
 //
 // !RETURN VALUE:
-//    int *minIndex for patch
+//    int *minIndex for tile
 //
 // !ARGUMENTS:
 //
-  int patch,                            // in  - patch   = {1, ..., patchCount}
+  int tile,                            // in  - tile   = {1, ..., tileCount}
   int *rc                               // out - return code
   )const{
 //
@@ -3300,34 +3300,34 @@ const int *DistGrid::getMinIndexPDimPPatch(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check input
-  if (patch < 1 || patch > patchCount){
+  if (tile < 1 || tile > tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Specified patch out of bounds", rc);
+      "- Specified tile out of bounds", rc);
     return NULL;
   }
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return &minIndexPDimPPatch[(patch-1)*dimCount];
+  return &minIndexPDimPTile[(tile-1)*dimCount];
 }
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DistGrid::getMaxIndexPDimPPatch()"
+#define ESMC_METHOD "ESMCI::DistGrid::getMaxIndexPDimPTile()"
 //BOPI
-// !IROUTINE:  ESMCI::DistGrid::getMaxIndexPDimPPatch
+// !IROUTINE:  ESMCI::DistGrid::getMaxIndexPDimPTile
 //
 // !INTERFACE:
-const int *DistGrid::getMaxIndexPDimPPatch(
+const int *DistGrid::getMaxIndexPDimPTile(
 //
 // !RETURN VALUE:
-//    int *maxIndex for patch
+//    int *maxIndex for tile
 //
 // !ARGUMENTS:
 //
-  int patch,                            // in  - patch   = {1, ..., patchCount}
+  int tile,                            // in  - tile   = {1, ..., tileCount}
   int *rc                               // out - return code
   )const{
 //
@@ -3340,15 +3340,15 @@ const int *DistGrid::getMaxIndexPDimPPatch(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // check input
-  if (patch < 1 || patch > patchCount){
+  if (tile < 1 || tile > tileCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- Specified patch out of bounds", rc);
+      "- Specified tile out of bounds", rc);
     return NULL;
   }
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return &maxIndexPDimPPatch[(patch-1)*dimCount];
+  return &maxIndexPDimPTile[(tile-1)*dimCount];
 }
 //-----------------------------------------------------------------------------
 
@@ -3598,15 +3598,15 @@ int DistGrid::serialize(
   ip = (int *)(buffer + *offset);
   if (inquireflag != ESMF_INQUIREONLY) {
     *ip++ = dimCount;
-    *ip++ = patchCount;
-    for (int i=0; i<dimCount*patchCount; i++){
-      *ip++ = minIndexPDimPPatch[i];
-      *ip++ = maxIndexPDimPPatch[i];
+    *ip++ = tileCount;
+    for (int i=0; i<dimCount*tileCount; i++){
+      *ip++ = minIndexPDimPTile[i];
+      *ip++ = maxIndexPDimPTile[i];
     }
-    for (int i=0; i<patchCount; i++)
-      *ip++ = elementCountPPatch[i];
+    for (int i=0; i<tileCount; i++)
+      *ip++ = elementCountPTile[i];
   } else
-    ip += 2 + 2*dimCount*patchCount + patchCount;
+    ip += 2 + 2*dimCount*tileCount + tileCount;
 
   int deCount = delayout->getDeCount();
   if (inquireflag != ESMF_INQUIREONLY) {
@@ -3618,7 +3618,7 @@ int DistGrid::serialize(
     }
     for (int i=0; i<deCount; i++){
       *ip++ = elementCountPDe[i];
-      *ip++ = patchListPDe[i];
+      *ip++ = tileListPDe[i];
     }
     *ip++ = diffCollocationCount;
     for (int i=0; i<dimCount; i++){
@@ -3702,16 +3702,16 @@ DistGrid *DistGrid::deserialize(
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   a->dimCount = *ip++;
-  a->patchCount = *ip++;
-  a->minIndexPDimPPatch = new int[a->dimCount*a->patchCount];
-  a->maxIndexPDimPPatch = new int[a->dimCount*a->patchCount];
-  for (int i=0; i<a->dimCount*a->patchCount; i++){
-    a->minIndexPDimPPatch[i] = *ip++;
-    a->maxIndexPDimPPatch[i] = *ip++;
+  a->tileCount = *ip++;
+  a->minIndexPDimPTile = new int[a->dimCount*a->tileCount];
+  a->maxIndexPDimPTile = new int[a->dimCount*a->tileCount];
+  for (int i=0; i<a->dimCount*a->tileCount; i++){
+    a->minIndexPDimPTile[i] = *ip++;
+    a->maxIndexPDimPTile[i] = *ip++;
   }
-  a->elementCountPPatch = new int[a->patchCount];
-  for (int i=0; i<a->patchCount; i++)
-    a->elementCountPPatch[i] = *ip++;
+  a->elementCountPTile = new int[a->tileCount];
+  for (int i=0; i<a->tileCount; i++)
+    a->elementCountPTile[i] = *ip++;
   int deCount = a->delayout->getDeCount();
   a->minIndexPDimPDe = new int[a->dimCount*deCount];
   a->maxIndexPDimPDe = new int[a->dimCount*deCount];
@@ -3724,10 +3724,10 @@ DistGrid *DistGrid::deserialize(
     a->indexCountPDimPDe[i] = *ip++;
   }
   a->elementCountPDe = new int[deCount];
-  a->patchListPDe = new int[deCount];
+  a->tileListPDe = new int[deCount];
   for (int i=0; i<deCount; i++){
     a->elementCountPDe[i] = *ip++;
-    a->patchListPDe[i] = *ip++;
+    a->tileListPDe[i] = *ip++;
   }
   a->diffCollocationCount = *ip++;
   a->collocationPDim = new int[a->dimCount];
@@ -3790,8 +3790,8 @@ int DistGrid::connection(
 // !ARGUMENTS:
 //
   InterfaceInt *connection,         // out -
-  int patchIndexA,                  // in  -
-  int patchIndexB,                  // in  -
+  int tileIndexA,                  // in  -
+  int tileIndexB,                  // in  -
   InterfaceInt *positionVector,     // in -
   InterfaceInt *orientationVector   // in -
   ){    
@@ -3824,9 +3824,9 @@ int DistGrid::connection(
     return rc;
   }
   
-  // fill in the patch indices
-  connection->array[0] = patchIndexA;
-  connection->array[1] = patchIndexB;
+  // fill in the tile indices
+  connection->array[0] = tileIndexA;
+  connection->array[1] = tileIndexB;
   
   // check positionVector argument
   if (positionVector == NULL){

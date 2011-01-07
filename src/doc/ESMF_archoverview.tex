@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.20 2010/10/19 15:45:44 rokuingh Exp $
+% $Id: ESMF_archoverview.tex,v 1.21 2011/01/07 18:32:17 rokuingh Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -249,9 +249,9 @@ and assist in managing overall system complexity.
 \caption{Schematic showing the coupling of components that use different discrete 
 Grids and different time-stepping.  In this example, Component {\it NCAR Atmosphere} 
 might use a spectral Grid based on spherical harmonics, Component
-{\it GFDL Ocean} might use a latitude-longitude Grid but with a patched decomposition 
+{\it GFDL Ocean} might use a latitude-longitude Grid but with a tileed decomposition 
 that does not include land masses, and Component {\it NSIPP Land} might use a m
-osaic-based Grid for representing vegetation patchiness and a catchment area based 
+osaic-based Grid for representing vegetation tileiness and a catchment area based 
 Grid for river routings. The ESMF infrastructure layer contains tools to help develop 
 software for coupling between Components on different Grids, mapping between Components 
 with different distributions in a multi-processor compute environment and synchronizing 

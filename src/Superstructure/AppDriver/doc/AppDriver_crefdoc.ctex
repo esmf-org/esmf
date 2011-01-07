@@ -1,4 +1,4 @@
-% $Id: AppDriver_crefdoc.ctex,v 1.5 2011/01/05 20:05:46 svasquez Exp $
+% $Id: AppDriver_crefdoc.ctex,v 1.6 2011/01/07 18:32:17 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{AppDriver Reference Manual}
 \newcommand{\myauthors}{Nancy Collins}
-% these are temporary patches until something more
+% these are temporary tilees until something more
 % permanent is done to the protex script.
 \newlength{\oldparskip}
 \newlength{\oldparindent}
