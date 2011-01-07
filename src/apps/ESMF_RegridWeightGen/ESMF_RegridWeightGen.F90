@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.17 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.18 2011/01/07 20:43:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -822,7 +822,7 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
       return
   endif
 
-  call ESMF_DistGridGet(distgrid, elementCountPPatch=elementCount, rc=rc)
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
   total = size(indices,1)
   allocate(buffer(total/4))
   j=1
