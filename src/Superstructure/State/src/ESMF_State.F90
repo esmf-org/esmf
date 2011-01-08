@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.233 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.234 2011/01/08 06:10:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateMod
       public ESMF_StateAdd
       public ESMF_StateGet
       public ESMF_StateIsReconcileNeeded
-!      public ESMF_StateRemove
+      public ESMF_StateRemove
       public ESMF_StateReplace
 
 #define ESMF_ENABLESTATENEEDED
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.233 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.234 2011/01/08 06:10:45 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3779,6 +3779,7 @@ contains
        integer :: localrc                    ! local error status
        logical :: localnestedflag            ! Print nested states flag
        logical :: longflag                   ! Extended output
+       logical :: debugflag                  ! Debug level output
        
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -3799,12 +3800,16 @@ contains
            localopts = adjustl (options)
        end if
 
-       longflag = .false.
+       debugflag = .false.
+       longflag  = .false.
        call ESMF_StringLowerCase (localopts)
        select case (localopts)
        case ("brief")
+       case ("debug")
+           debugflag = .true.
+           longflag  = .true.
        case ("long")
-           longflag = .true.
+           longflag  = .true.
        case default
            write (ESMF_IOstderr,*) "ESMF_StatePrint: Illegal options arg: ", &
                trim (localopts)
@@ -3922,17 +3927,23 @@ contains
              outbuf = trim (outbuf) // " (bad type value)"
          end select
 
-         if (longflag) &
-           outbuf = trim (outbuf) // ", proxy flag: " // merge ("yes", "no ", dp%proxyFlag)
+         if (longflag) then
+           outbuf = trim (outbuf) // ", proxy flag: "   // merge ("yes", "no ", dp%proxyFlag)
 
 #if defined (ESMF_ENABLESTATENEEDED)
-         select case (dp%needed%needed)
-           case (ESMF_NEEDED%needed)
-             outbuf = trim(outbuf) //  ", needed."
-           case (ESMF_NOTNEEDED%needed)
-             outbuf = trim(outbuf) //  ", marked as NOT needed."
-         end select
+           select case (dp%needed%needed)
+             case (ESMF_NEEDED%needed)
+               outbuf = trim(outbuf) //  ", needed flag: needed"
+             case (ESMF_NOTNEEDED%needed)
+               outbuf = trim(outbuf) //  ", needed flag: not needed"
+           end select
 #endif
+         end if
+
+         if (debugflag) then
+           outbuf = trim (outbuf) // ", removed flag: " // merge ("yes", "no ", dp%removedFlag)
+         end if
+
 
          write (ESMF_IOstdout,*) nestr, trim(outbuf)
 
@@ -4017,7 +4028,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateRemove"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_StateRemove - Remove an item from a State
 !
 ! !INTERFACE:
@@ -4052,10 +4063,11 @@ contains
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
 
-    type(ESMF_StateItem), pointer :: dataitem
+    type(ESMF_StateItem),  pointer :: dataitem
+    type(ESMF_StateClass), pointer :: localstatep
     logical :: exists
     integer :: localrc
     character(len=ESMF_MAXSTR) :: errmsg
@@ -4070,6 +4082,7 @@ contains
     exists = ESMF_StateClassFindData (state%statep,  &
                                        dataname=itemName, expected=.true., &
                                        dataitem=dataitem,  &
+                                       dataState=localstatep,  &
                                        rc=localrc)
     if (.not. exists) then
         write(errmsg, *) "can not find " // trim (itemname) // " for removal"
@@ -4077,7 +4090,15 @@ contains
                                     ESMF_CONTEXT, rc)) return
     end if
 
-    ! Implementation will go here.
+    dataitem%removedflag = .true.
+
+    ! TODO: In the case of FieldBundles, do we need to remove individual
+    ! Fields as well?  If so, FindData needs to return the containing,
+    ! potentially nested, State as well.
+
+    call ESMF_StateClassCompressList (state%statep, rc=localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+                                  ESMF_CONTEXT, rc)) return
 
     if (present(rc)) rc = localrc
 
@@ -5178,6 +5199,8 @@ contains
 
             nextitem%datap%rp = routehandles(i)
 
+            nextitem%removedFlag = .false.
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -5416,6 +5439,8 @@ contains
 
             nextitem%datap%ap = arrays(i)
  
+            nextitem%removedFlag = .false.
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -5653,6 +5678,8 @@ contains
 
             nextitem%datap%abp = arraybundles(i)
  
+            nextitem%removedFlag = .false.
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -5890,6 +5917,8 @@ contains
 
             nextitem%datap%fp = fields(i)
  
+            nextitem%removedFlag = .false.
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -6194,6 +6223,8 @@ contains
 
            nextitem%datap%fbp = fieldbundles(i)
 
+           nextitem%removedFlag = .false.
+
            nextitem%needed = stypep%needed_default
            nextitem%ready = stypep%ready_default
            nextitem%valid = stypep%stvalid_default
@@ -6246,6 +6277,8 @@ contains
             else
                 nextitem%indirect_index = bindex
             endif
+
+            nextitem%removedFlag = .false.
 
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
@@ -6540,6 +6573,8 @@ contains
             nextitem%datap%spp => states(i)%statep
             nextitem%datap%spp%reconcileneededFlag = .false.
  
+            nextitem%removedFlag = .false.
+
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
@@ -6573,8 +6608,8 @@ contains
 ! !IROUTINE: ESMF_StateClassFindData - internal routine to find data item by name
 !
 ! !INTERFACE:
-      function ESMF_StateClassFindData(stypep, dataname, expected,  &
-                                       nestedFlag, dataitem, dataindex, rc)
+      function ESMF_StateClassFindData(stypep, dataname, expected, nestedFlag, &
+                                      dataitem, dataState, dataindex, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateClassFindData
@@ -6585,6 +6620,7 @@ contains
       logical,               intent(in)            :: expected
       logical,               intent(in),  optional :: nestedFlag
       type(ESMF_StateItem),  pointer,     optional :: dataitem
+      type(ESMF_StateClass), pointer,     optional :: dataState
       integer,               intent(out), optional :: dataindex
       integer,               intent(out), optional :: rc             
 
@@ -6612,6 +6648,9 @@ contains
 !      \item[{[dataitem]}]
 !       Pointer to the corresponding {\tt ESMF\_StateItem} item if one is
 !       found with the right name.
+!      \item[{[dataState]}]
+!       Pointer to the corresponding containing, potentially nested,
+!       State of {\tt dataitem}
 !      \item[{[dataindex]}]
 !       Index number in datalist where this name was found.  When nested
 !       States are being searched, this index refers to the State where
@@ -6654,13 +6693,21 @@ contains
                                  ESMF_ERR_PASSTHRU,  &
                                  ESMF_CONTEXT, rc)) return
       end if
+
+      if (present (dataitem)) then
+        dataitem => null ()
+      end if
+      if (present (datastate)) then
+        datastate => null ()
+      end if
   
       ! This function is only called internally, so we do not need to check
       ! the validity of the state - it has been checked before we get here.
 
       if (.not. usenested_lookup) then
          call find_pathed_item_worker (stypep, lpath=dataname,  &
-             lfound=itemfound, lindex=itemindex, litem=dataitem)
+             lfound=itemfound, lindex=itemindex, litem=dataitem, &
+             lstate=dataState)
       else
 #if defined (ESMF_ENABLENAMEMAP)
         call ESMF_UtilMapNameLookup (stypep%nameMap, name=dataname,  &
@@ -6673,7 +6720,8 @@ contains
         dcount0 = stypep%datacount
         do, i0=1, dcount0
           nextitem0 => stypep%datalist(i0)
-          if (nextitem0%namep == dataname) then
+          if (nextitem0%namep == dataname  &
+              .and. .not. nextitem0%removedFlag) then
             itemindex = i0
             exit
           end if
@@ -6682,10 +6730,12 @@ contains
 #endif
 
         if (itemfound) then
-          if (present(dataitem)) dataitem => stypep%datalist(itemindex)
+          if (present (dataitem))  dataitem  => stypep%datalist(itemindex)
+          if (present (dataState)) dataState => stypep
         else
            call find_nested_item_worker (stypep,  &
-               lfound=itemfound, lindex=itemindex, litem=dataitem)
+               lfound=itemfound, lindex=itemindex, litem=dataitem, &
+               lstate=dataState)
         end if
       end if
 
@@ -6706,11 +6756,16 @@ contains
 
       contains
 
-        recursive subroutine find_nested_item_worker (sp, lfound, lindex, litem)
+        recursive subroutine find_nested_item_worker (sp,  &
+            lfound, lindex, litem, lstate)
           type(ESMF_StateClass), pointer  :: sp
           logical,            intent(out) :: lfound
           integer,            intent(out) :: lindex
-          type(ESMF_StateItem), pointer, optional   :: litem
+          type(ESMF_StateItem),  pointer, optional :: litem
+          type(ESMF_StateClass), pointer, optional :: lstate
+
+          ! Given a simple non-qualified name, search all nested
+          ! states for the the name.
 
           type(ESMF_StateClass), pointer  :: sp_local
           integer       :: i1
@@ -6722,7 +6777,7 @@ contains
 
 !          print *, 'find_nested_item_worker: entered'
 
-        ! Scan this levels list for States
+          ! Scan this levels list of names
 
           lfound = .false.
 
@@ -6734,31 +6789,30 @@ contains
                                      ESMF_ERR_PASSTHRU,  &
                                      ESMF_CONTEXT, rc)) return
 #else
-          dcount1 = sp%datacount
-          do, i1=1, dcount1
+          do, i1=1, sp%datacount
             nextitem1 => sp%datalist(i1)
-            if (nextitem1%namep == dataname) then
+            if (nextitem1%namep == dataname  &
+                .and. .not. nextitem1%removedFlag) then
               lindex = i1
               exit
             end if
           end do
           lfound = i1 <= dcount1
 #endif
-          if (.not. lfound) then
+
+          if (lfound) then
+            if (present (litem))  litem  => sp%datalist(itemindex)
+            if (present (lState)) lState => sp
+          else
+            ! Search this level for nested States and recurse on them
             do, i1=1, sp%datacount
-              if (sp%datalist(i1)%otype == ESMF_STATEITEM_STATE) then
+              if (sp%datalist(i1)%otype == ESMF_STATEITEM_STATE .and.  &
+                  .not. sp%datalist(i1)%removedFlag) then
                 sp_local => sp%datalist(i1)%datap%spp
-                call find_nested_item_worker (sp_local, lfound, lindex, litem)
+                call find_nested_item_worker (sp_local, lfound, lindex, litem, lstate)
                 if (lfound) exit
               end if
             end do
-            if (present (litem)) then
-              if (lfound) then
-                litem => sp_local%datalist(lindex)
-              else
-                litem => null ()
-              end if
-            end if
           end if
 
 !          print *, 'find_nested_item_worker: exiting.  Found flag =', lfound
@@ -6766,12 +6820,14 @@ contains
 
         end subroutine find_nested_item_worker
 
-        recursive subroutine find_pathed_item_worker (sp, lpath, lfound, lindex, litem)
+        recursive subroutine find_pathed_item_worker (sp, lpath,  &
+            lfound, lindex, litem, lstate)
           type(ESMF_StateClass), pointer  :: sp
           character(*), intent(in)  :: lpath
           logical,      intent(out) :: lfound
           integer,      intent(out) :: lindex
-          type(ESMF_StateItem), pointer, optional   :: litem
+          type(ESMF_StateItem),  pointer, optional :: litem
+          type(ESMF_StateClass), pointer, optional :: lstate
 
           type(ESMF_StateClass), pointer  :: sp_local
           character(len (lpath)) :: itempath_local
@@ -6815,7 +6871,8 @@ contains
             dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
-              if (nextitem1%namep == itempath_local(:slashpos-1)) then
+              if (nextitem1%namep == itempath_local(:slashpos-1)  &
+                  .and. .not. nextitem1%removedFlag) then
                 lindex = i1
                 exit
               end if
@@ -6823,18 +6880,13 @@ contains
             lfound = i1 <= dcount1
 #endif
             if (lfound) then
-              if (sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE) then
+              if (sp%datalist(lindex)%otype == ESMF_STATEITEM_STATE  &
+                  .and. .not. sp%datalist(lindex)%removedFlag) then
                 sp_local => sp%datalist(lindex)%datap%spp
                 call find_pathed_item_worker (sp_local, itempath_local(slashpos+1:),  &
-                                              lfound, lindex, litem)
+                                              lfound, lindex, litem, lstate)
               else
                 lfound = .false.
-              end if
-            end if
-
-            if (.not. lfound) then
-              if (present (litem)) then
-                litem => null ()
               end if
             end if
 
@@ -6851,19 +6903,17 @@ contains
             dcount1 = sp%datacount
             do, i1=1, dcount1
               nextitem1 => sp%datalist(i1)
-              if (nextitem1%namep == itempath_local) then
+              if (nextitem1%namep == itempath_local  &
+                  .and. .not. nextitem1%removedFlag) then
                 lindex = i1
                 exit
               end if
             end do
             lfound = i1 <= dcount1
 #endif
-            if (present (litem)) then
-              if (lfound) then
-                litem => sp%datalist(lindex)
-              else
-                litem => null ()
-              end if
+            if (lfound) then
+              if (present (litem))  litem  => sp%datalist(itemindex)
+              if (present (lState)) lState => sp
             end if
           end if
 
@@ -7062,6 +7112,98 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateClassCompressList"
+!BOPI
+! !IROUTINE: ESMF_StateClassCompressList - internal routine
+!
+! !INTERFACE:
+    subroutine ESMF_StateClassCompressList(stypep, newlist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateClass), pointer :: stypep
+      type(ESMF_StateItem),  pointer, optional :: newlist(:)
+      integer, intent(out) :: rc
+!     
+! !DESCRIPTION:
+!      Eliminate items marked as removed.  Then compress the remaining
+!      items to the front of the list.  This is an internal-only routine;
+!      {\tt rc} is NOT optional.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[stypep]
+!       Pointer to {\tt ESMF\_StateClass}.
+!     \item[([newlist])]
+!       New list to compress data into.  (Default is in-place.)
+!     \item[rc]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      type(ESMF_StateItem),  pointer :: locallist(:)
+
+      ! Assume failure until success assured.  rc is not optional here.
+      rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+
+      if (stypep%datacount == 0) then
+        rc = ESMF_SUCCESS
+        return
+      end if
+
+      if (present (newlist)) then
+        locallist => newlist
+      else
+        locallist => stypep%datalist
+      end if
+
+      call compress_list_worker (stypep)
+
+      rc = ESMF_SUCCESS
+
+    contains
+
+      recursive subroutine compress_list_worker (sp1)
+
+        type(ESMF_StateClass), pointer :: sp1
+
+      ! Compress entries.  At this point in time, don't bother with
+      ! reallocating the array to a smaller size.
+
+        integer :: i1, inew1
+        logical :: iscompressed
+
+	inew1 = 0
+	iscompressed = .false.
+	do, i1=1, sp1%datacount
+          if (sp1%datalist(i1)%removedflag) then
+            iscompressed = .true.
+          else
+            inew1 = inew1 + 1
+            locallist(inew1) = sp1%datalist(i1)
+          end if
+	end do
+	sp1%datacount = inew1
+
+#if defined (ESMF_ENABLENAMEMAP)
+	! TODO: If using the NAMEMAP lookup technique, the entries
+	! need to be updated with the new position numbers.
+	if (iscompressed) then
+          if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
+                              "compression of namemap entries not supported yet", &
+                              ESMF_CONTEXT, rc)) return
+	end if
+#endif
+
+      end subroutine compress_list_worker
+
+    end subroutine ESMF_StateClassCompressList
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateClassExtendList"
 !BOPI
 ! !IROUTINE: ESMF_StateClassExtendList - internal routine
@@ -7131,10 +7273,11 @@ contains
                                          ESMF_CONTEXT, rc)) return
   
           ! Preserve old contents
+
           do i = 1, stypep%datacount
             temp_list(i) = stypep%datalist(i)
-          enddo
-  
+          end do
+
           ! Delete old list
           deallocate(stypep%datalist, stat=memstat)
           if (ESMF_LogFoundDeallocError(memstat, "datalist dealloc", &
