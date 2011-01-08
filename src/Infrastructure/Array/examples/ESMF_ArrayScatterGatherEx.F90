@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.16 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.17 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -144,8 +144,8 @@ program ESMF_ArrayScatterGatherEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-    distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), undistUBound=(/14,22/), &
-    rc=rc)
+    distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), &
+    undistUBound=(/14,22/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE

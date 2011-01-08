@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.23 2011/01/06 23:59:29 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.24 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@ program ESMF_ArrayLarrayEx
 !BOC
   ! local variables
   real(ESMF_KIND_R8), pointer :: farrayP(:,:)   ! Fortran array pointer
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:) ! matching Fortran array pointer 
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:) ! matching Fortran array ptr 
   type(ESMF_LocalArray)       :: larray         ! ESMF_LocalArray object
   type(ESMF_LocalArray)       :: larrayRef      ! ESMF_LocalArray object
   type(ESMF_DistGrid)         :: distgrid       ! DistGrid object
@@ -51,7 +51,7 @@ program ESMF_ArrayLarrayEx
   integer                     :: rc, i, j, de
   real                        :: localSum
   type(ESMF_LocalArray), allocatable :: larrayList(:) ! LocalArray object list
-  type(ESMF_LocalArray), allocatable :: larrayRefList(:) ! LocalArray object list
+  type(ESMF_LocalArray), allocatable :: larrayRefList(:)!LocalArray object list
   
   type(ESMF_VM):: vm
   integer:: localPet, petCount

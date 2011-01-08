@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.82 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.83 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -201,6 +201,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 !BOE
 !
+! \begin{sloppypar}
 ! The {\tt petMap} parameter may be used to specify on to which specific PETs 
 ! the DEs in the Grid are assigned. Note that this parameter is only available for the 
 ! regular and irregular distribution types. The {\tt petMap} 
@@ -214,13 +215,20 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! an irregular Grid the size is equal to the number of items in
 ! the corresponding {\tt countsPerDEDim} variable (i.e. 
 ! {\tt size(petMap,d)=size(countsPerDEDimd)} for all dimensions {\tt d} in the Grid).
+! \end{sloppypar}
 ! 
+! \begin{sloppypar}
+! The {\tt petMap} parameter may be used to specify on to which specific PETs 
 ! Each entry in {\tt petMap} specifies to which PET the corresponding
 ! DE should be assigned. For example, {\tt petMap(3,2)=4} tells the Grid
 ! create call to put the DE located at column 3 row 2 on PET 4.
+! \end{sloppypar}
 !
+! \begin{sloppypar}
+! The {\tt petMap} parameter may be used to specify on to which specific PETs 
 ! The following example demonstrates how to specify the PET to DE association 
 ! for an {\tt ESMF\_GridCreateShapeTile()} call.
+! \end{sloppypar}
 !EOE
 
 ! Skip if not right number of procs.
@@ -291,7 +299,8 @@ endif
 !BOC
    ! Create a 3D Grid with the 1st and 3rd dimension arbitrarily distributed
    grid3D=ESMF_GridCreateShapeTile(maxIndex=(/5,6,5/), & 
-         localArbIndex=localArbIndex, localArbIndexCount=5, distDim=(/1,3/), rc=rc)   
+         localArbIndex=localArbIndex, localArbIndexCount=5, &
+         distDim=(/1,3/), rc=rc)   
 !EOC
 
    !-------------------------------------------------------------------
@@ -444,7 +453,8 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -459,7 +469,8 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -542,7 +553,8 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -557,7 +569,8 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -632,7 +645,8 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordX2D, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=coordX2D, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -649,7 +663,8 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
-          computationalLBound=lbnd, computationalUBound=ubnd, fptr=coordY2D, rc=rc)
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          fptr=coordY2D, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -685,11 +700,12 @@ endif
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object.  The
    ! Grid is defined to be 180 Grid cells in the first dimension
-   ! (e.g. longitude), 90 Grid cells in the second dimension (e.g. latitude), and
-   ! 40 Grid cells in the third dimension (e.g. height).  The first dimension is
-   ! decomposed over 4 DEs, the second over 3 DEs, and the third is 
-   ! not distributed.  The connectivities in each dimension default 
-   ! to aperiodic since they are not yet implemented. In this call 
+   ! (e.g. longitude), 90 Grid cells in the second dimension 
+   ! (e.g. latitude), and 40 Grid cells in the third dimension 
+   ! (e.g. height).  The first dimension is decomposed over 4 DEs, 
+   ! the second over 3 DEs, and the third is not distributed.  
+   ! The connectivities in each dimension default to aperiodic 
+   ! since they are not yet implemented. In this call 
    ! the minIndex hasn't been set, so it defaults to (1,1,...). 
    !-------------------------------------------------------------------
    grid3D=ESMF_GridCreateShapeTile( &
@@ -852,10 +868,12 @@ endif
 !                a non-distributed vertical dimension}
 ! \label{example:ArbGridWithUndistDim}
 !
+! \begin{sloppypar}
 ! There are more restrictions in defining an arbitrarily distributed grid.  
 ! First, there is always one DE per PET.  Secondly, only local index ({\tt ESMF\_INDEX\_LOCAL})
 ! is supported. Third, only one stagger location, i.e. {\tt ESMF\_STAGGERLOC\_CENTER} is allowed
 ! and last there is no extra paddings on the edge of the grid.  
+! \end{sloppypar}
 !
 ! This example demonstrates how a user can build a 3D grid with its rectilinear 
 ! horizontal Grid distributed arbitrarily and a non-distributed vertical dimension.
@@ -865,12 +883,12 @@ endif
 !BOC
    !-------------------------------------------------------------------
    ! Set up the local index array:  Assuming the grid is 360x180x10.  First
-   ! calculate the localArbIndexCount and localArbIndex array for each PET based on
-   ! the total number of PETS. The cells are evenly distributed in all the
-   ! PETs. If the total number of cells are not divisible by the total PETs, 
-   ! the remaining cells are assigned to the last PET.  The cells are card 
-   ! dealed to each PET in y dimension first, i.e. (1,1) -> PET 0, (1,2)->
-   ! PET 1, (1,3)-> PET 2, and so forth.  
+   ! calculate the localArbIndexCount and localArbIndex array for each PET 
+   ! based on the total number of PETS. The cells are evenly distributed in 
+   ! all the PETs. If the total number of cells are not divisible by the 
+   ! total PETs, the remaining cells are assigned to the last PET.  The 
+   ! cells are card dealed to each PET in y dimension first, 
+   ! i.e. (1,1) -> PET 0, (1,2)->  PET 1, (1,3)-> PET 2, and so forth.  
    !-------------------------------------------------------------------
    xdim = 360
    ydim = 180
@@ -980,6 +998,7 @@ endif
 !\subsubsection{Create a curvilinear Grid using the coordinates defined 
 ! in a SCRIP file}\label{sec:example:2DLogRecFromScrip}
 !
+! \begin{sloppypar}
 ! ESMF supports the creation of a 2D curvilinear Grid using the coordinates 
 ! defined in a SCRIP format Grid file~\cite{ref:SCRIP}. The grid contained in the 
 ! file must be a 2D logically rectangular grid with {\tt grid\_rank} in the file set
@@ -989,6 +1008,7 @@ endif
 ! the variables {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} in the file
 ! are used to set the ESMF\_STAGGERLOC\_CORNER coordinates, otherwise they are ignored.
 ! The values in the {\tt grid\_imask} variable in the file are used to set the ESMF\_GRIDITEM\_MASK in the Grid.
+! \end{sloppypar}
 ! 
 ! The following example code shows you how to create a 2D Grid with both center and corner coordinates
 ! using a SCRIP file and a row only regular distribution:
@@ -996,8 +1016,8 @@ endif
 
 #ifdef ESMF_NETCDF
 !BOC
-   grid2D = ESMF_GridCreate(filename="data/T42_grid.nc", regDecomp=(/PetCount,1/), &
-              addCornerStagger=.true., rc=rc)
+   grid2D = ESMF_GridCreate(filename="data/T42_grid.nc", &
+              regDecomp=(/PetCount,1/), addCornerStagger=.true., rc=rc)
 !EOC
 #endif
 
@@ -1016,6 +1036,7 @@ endif
 !\subsubsection{Create an empty Grid in a parent Component 
 ! for completion in a child Component}\label{sec:usage:setcommit}
 !
+! \begin{sloppypar}
 ! ESMF Grids can be created incrementally. To do this,
 ! the user first calls {\tt ESMF\_GridCreateEmpty()} to allocate the shell of
 ! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
@@ -1033,6 +1054,7 @@ endif
 ! still be "empty" and not usable. The following example uses the
 ! incremental technique to create a rectangular 10x20 Grid with coordinates at
 ! the center and corner stagger locations. 
+! \end{sloppypar}
 !EOE
 
 !BOC
@@ -1482,11 +1504,13 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !BOE
 !\subsubsection{Access items}
 !\label{sec:usage:items:accessing}
+! \begin{sloppypar}
 ! Once an item has been added to a Grid, the user has several options to access
 ! the data. The first of these, {\tt ESMF\_GridSetItem()}, 
 ! enables the user to use ESMF Arrays to set data for one stagger location across the whole Grid. 
 ! For example, the following sets the mask item in the corner stagger location to 
 ! those in the ESMF Array {\tt arrayMask}.
+! \end{sloppypar}
 !EOE
 
 !!!!!!!!!!!!!!!!!!!!!!!
@@ -1608,11 +1632,13 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !\subsubsection{Grid regions and bounds}
 !\label{sec:grid:usage:bounds}
 !
+! \begin{sloppypar}
 ! Like an Array or a Field, the index space of each 
 ! stagger location in the Grid contains an exclusive region, a 
 ! computational region and a total region. Please 
 ! see Section~\ref{Array_regions_and_default_bounds}
 ! for an in depth description of these regions. 
+! \end{sloppypar}
 !
 ! The exclusive region is the index space defined by the 
 ! distgrid of each stagger location of the Grid. This region 
@@ -1867,11 +1893,13 @@ endif
 ! localDE. One of the uses of this information is to create
 ! an ESMF Array to hold data for a stagger location. 
 !
+! \begin{sloppypar}
 ! The information currently available from a stagger
 ! location is the {\tt staggerDistgrid}  and
 ! {\tt minIndex} and {\tt maxIndex}. The {\tt staggerDistgrid} gives the 
 ! distgrid which describes the size and distribution of the elements in the stagger location.
 ! The {\tt minIndex} and {\tt maxIndex} describe the lower and upper bounds of the stagger location.
+! \end{sloppypar}
 !
 ! The following is an example of retrieving information for localDE 0
 ! from the corner stagger location. 
@@ -2324,7 +2352,8 @@ endif
 
 !BOC 
    ! Create DistGrid
-   distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), rc=rc)  
+   distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), &
+           rc=rc)  
 
    ! Create Grid
    grid3D=ESMF_GridCreate(distGrid=distgrid2D, rc=rc)

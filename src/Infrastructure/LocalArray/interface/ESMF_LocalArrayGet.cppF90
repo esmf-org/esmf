@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.19 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.20 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,7 +34,8 @@ module ESMF_LocalArrayGetMod
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayGet() @\
-! subroutine ESMF_LocalArrayGetData<rank><type><kind>(larray, fptr, docopy, rc) @\
+! subroutine ESMF_LocalArrayGetData<rank><type><kind>(larray, fptr, & @\
+!               docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_LocalArray) :: larray @\
@@ -203,7 +204,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.19 2011/01/05 20:05:44 svasquez Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.20 2011/01/08 16:22:39 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:

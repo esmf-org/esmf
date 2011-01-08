@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.188 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.189 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.188 2011/01/07 18:32:17 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.189 2011/01/08 16:22:39 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -879,15 +879,15 @@ contains
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)              :: grid 
-      type (ESMF_StaggerLoc), intent(in),optional     :: staggerloc
-      integer,                intent(in),optional     :: staggerEdgeLWidth(:)
-      integer,                intent(in),optional     :: staggerEdgeUWidth(:)
-      integer,                intent(in),optional     :: staggerAlign(:)
-      integer,                intent(in),optional     :: staggerMemLBound(:)      
-      integer,                intent(in), optional    :: totalLWidth(:)    ! N. IMP
-      integer,                intent(in), optional    :: totalUWidth(:)    ! N. IMP
-      integer,                intent(out),optional    :: rc
+      type(ESMF_Grid),        intent(in)            :: grid 
+      type (ESMF_StaggerLoc), intent(in),optional   :: staggerloc
+      integer,                intent(in),optional   :: staggerEdgeLWidth(:)
+      integer,                intent(in),optional   :: staggerEdgeUWidth(:)
+      integer,                intent(in),optional   :: staggerAlign(:)
+      integer,                intent(in),optional   :: staggerMemLBound(:)      
+      integer,                intent(in), optional  :: totalLWidth(:) ! N. IMP
+      integer,                intent(in), optional  :: totalUWidth(:) ! N. IMP
+      integer,                intent(out),optional  :: rc
 !
 ! !DESCRIPTION:
 ! 
@@ -1212,22 +1212,22 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddItem()
-     subroutine ESMF_GridAddItemNoValues(grid, staggerloc, item, itemTypeKind, &
-                staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign,  &
-                staggerMemLBound,  totalLWidth, totalUWidth,rc)
+     subroutine ESMF_GridAddItemNoValues(grid, staggerloc, item, &
+                itemTypeKind, staggerEdgeLWidth, staggerEdgeUWidth, &
+                staggerAlign, staggerMemLBound,  totalLWidth, totalUWidth,rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)              :: grid 
-      type (ESMF_StaggerLoc), intent(in),optional     :: staggerloc
-      type (ESMF_GridItem),   intent(in)              :: item
-      type (ESMF_TypeKind),   intent(in),optional     :: itemTypeKind
-      integer,                intent(in),optional     :: staggerEdgeLWidth(:)
-      integer,                intent(in),optional     :: staggerEdgeUWidth(:)
-      integer,                intent(in),optional     :: staggerAlign(:)
-      integer,                intent(in),optional     :: staggerMemLBound(:)      
-      integer,                intent(in), optional    :: totalLWidth(:)         ! N. IMP
-      integer,                intent(in), optional    :: totalUWidth(:)         ! N. IMP
-      integer,                intent(out),optional    :: rc
+      type(ESMF_Grid),        intent(in)           :: grid 
+      type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
+      type (ESMF_GridItem),   intent(in)           :: item
+      type (ESMF_TypeKind),   intent(in),optional  :: itemTypeKind
+      integer,                intent(in),optional  :: staggerEdgeLWidth(:)
+      integer,                intent(in),optional  :: staggerEdgeUWidth(:)
+      integer,                intent(in),optional  :: staggerAlign(:)
+      integer,                intent(in),optional  :: staggerMemLBound(:)      
+      integer,                intent(in), optional :: totalLWidth(:) ! N. IMP
+      integer,                intent(in), optional :: totalUWidth(:) ! N. IMP
+      integer,                intent(out),optional :: rc
 !
 ! !DESCRIPTION:
 ! 
@@ -3001,27 +3001,28 @@ end subroutine ESMF_GridConvertIndex
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFrmDistGrid(name,coordTypeKind,distgrid, &
                          distgridToGridMap, coordDimCount, coordDimMap, &
-                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound, &
-                         indexflag, destroyDistGrid, destroyDELayout, rc)
+                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+                         gridMemLBound, indexflag, destroyDistGrid, &
+                         destroyDELayout, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGrid
 !
 ! !ARGUMENTS:
        character (len=*), intent(in), optional :: name
-       type(ESMF_TypeKind),  intent(in),   optional  :: coordTypeKind
+       type(ESMF_TypeKind),  intent(in), optional  :: coordTypeKind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
-       integer,               intent(in),   optional  :: distgridToGridMap(:)
-       integer,               intent(in),   optional  :: coordDimCount(:)
-       integer,               intent(in),   optional  :: coordDimMap(:,:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       logical,               intent(in),   optional  :: destroyDistGrid
-       logical,               intent(in),   optional  :: destroyDELayout
-       integer,               intent(out),  optional  :: rc
+       integer,               intent(in), optional  :: distgridToGridMap(:)
+       integer,               intent(in), optional  :: coordDimCount(:)
+       integer,               intent(in), optional  :: coordDimMap(:,:)
+       integer,               intent(in), optional  :: gridEdgeLWidth(:)
+       integer,               intent(in), optional  :: gridEdgeUWidth(:)
+       integer,               intent(in), optional  :: gridAlign(:)
+       integer,               intent(in), optional  :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in), optional  :: indexflag
+       logical,               intent(in), optional  :: destroyDistGrid
+       logical,               intent(in), optional  :: destroyDELayout
+       integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 ! This is the most general form of creation for an {\tt ESMF\_Grid}
@@ -4268,8 +4269,8 @@ end subroutine convert_corner_arrays_to_1D
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, isSphere, &
-             addCornerStagger, rc)
+  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, &
+             isSphere, addCornerStagger, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScripReg
@@ -4671,30 +4672,30 @@ end function ESMF_GridCreateFrmScripReg
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in)              :: countsPerDEDim1(:)
-       integer,               intent(in)              :: countsPerDEDim2(:)
-       integer,               intent(in),   optional  :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: petMap(:,:,:)
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_TypeKind),  intent(in),  optional :: coordTypeKind
+       integer,               intent(in), optional :: minIndex(:)
+       integer,               intent(in)           :: countsPerDEDim1(:)
+       integer,               intent(in)           :: countsPerDEDim2(:)
+       integer,               intent(in), optional :: countsPerDEDim3(:)
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)! N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2)     ! N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2)     ! N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2)     ! N. IMP.
+       integer,               intent(in), optional :: coordDep1(:)
+       integer,               intent(in), optional :: coordDep2(:)
+       integer,               intent(in), optional :: coordDep3(:)
+       integer,               intent(in), optional :: gridEdgeLWidth(:)
+       integer,               intent(in), optional :: gridEdgeUWidth(:)
+       integer,               intent(in), optional :: gridAlign(:)
+       integer,               intent(in), optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
+       integer,               intent(in), optional :: petMap(:,:,:)
+       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -4856,10 +4857,12 @@ end function ESMF_GridCreateFrmScripReg
 !      Section~\ref{opt:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
+!       \begin{sloppypar}
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
 !       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
 !       the last dimension is of size 1.   
+!       \end{sloppypar}
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -5682,31 +5685,31 @@ end function ESMF_GridCreateFrmScripReg
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileReg
 !
 ! !ARGUMENTS:
-       character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in)              :: maxIndex(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: petMap(:,:,:)
-       integer,               intent(out),  optional  :: rc
+       character (len=*),     intent(in), optional :: name 
+       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       integer,               intent(in), optional :: regDecomp(:)
+       type(ESMF_DecompFlag), intent(in), optional :: decompflag(:)
+       integer,               intent(in), optional :: minIndex(:)
+       integer,               intent(in)           :: maxIndex(:)
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)! N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2)     ! N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2)     ! N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2)     ! N. IMP.
+       integer,               intent(in), optional :: coordDep1(:)
+       integer,               intent(in), optional :: coordDep2(:)
+       integer,               intent(in), optional :: coordDep3(:)
+       integer,               intent(in), optional :: gridEdgeLWidth(:)
+       integer,               intent(in), optional :: gridEdgeUWidth(:)
+       integer,               intent(in), optional :: gridAlign(:)
+       integer,               intent(in), optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
+       integer,               intent(in), optional :: petMap(:,:,:)
+       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -6572,26 +6575,26 @@ end function ESMF_GridCreateFrmScripReg
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileArb
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in)              :: maxIndex(:)
-       integer,               intent(in)              :: localArbIndex(:,:)
-       integer,               intent(in)   	      :: localArbIndexCount
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       integer,               intent(in),   optional  :: distDim(:)
-       integer,               intent(out),  optional  :: rc
+      character (len=*),      intent(in), optional :: name 
+       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       integer,               intent(in), optional :: minIndex(:)
+       integer,               intent(in)           :: maxIndex(:)
+       integer,               intent(in)           :: localArbIndex(:,:)
+       integer,               intent(in)   	   :: localArbIndexCount
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)! N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2)     ! N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2)     ! N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2)     ! N. IMP.
+       integer,               intent(in), optional :: coordDep1(:)
+       integer,               intent(in), optional :: coordDep2(:)
+       integer,               intent(in), optional :: coordDep3(:)
+       integer,               intent(in), optional :: distDim(:)
+       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -7707,16 +7710,20 @@ end subroutine ESMF_GridGetDefault
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[computationalUBound]}]
+!     \begin{sloppypar}
 !     Upon return this holds the upper bounds of the computational region.
 !     {\tt computationalUBound} must be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
+!     \end{sloppypar}
 !\item[{[computationalCount]}]
+!     \begin{sloppypar}
 !     Upon return this holds the number of items in the computational region per dimension.
 !     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount} must
 !      be allocated to be of size equal to the Grid dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
+!     \end{sloppypar}
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -8023,11 +8030,13 @@ end subroutine ESMF_GridGetDefault
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
+!          \begin{sloppypar}
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
+!          \end{sloppypar}
 !     \item[{fptr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
@@ -8048,10 +8057,10 @@ end subroutine ESMF_GridGetDefault
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord1DR4(grid, localDE, coordDim, staggerloc, & 
-          exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
-          computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,                             &
+      subroutine ESMF_GridGetCoord1DR4(grid, localDE, coordDim,     &
+          staggerloc, exclusiveLBound, exclusiveUBound,             &
+          exclusiveCount, computationalLBound, computationalUBound, &
+          computationalCount, totalLBound, totalUBound, totalCount, &
           fptr, doCopy, rc)
 !
 ! !ARGUMENTS:
@@ -8134,6 +8143,7 @@ end subroutine ESMF_GridGetDefault
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
+!          \begin{sloppypar}
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !          be allocated to be of size equal to the coord dimCount.
@@ -10046,11 +10056,13 @@ endif
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[totalCount]}]
+!     \begin{sloppypar}
 !     Upon return this holds the number of items in the total region per dimension
 !     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !      be allocated to be of size equal to the coord dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
+!     \end{sloppypar}
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -10163,8 +10175,8 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, array, &
-                            docopy, rc)
+      subroutine ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, &
+                            array, docopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -10196,6 +10208,7 @@ endif
 !          {\tt array} will contain a reference to the Grid coordinate Arrays.
 !           Please see Section~\ref{opt:copyflag} for
 !          further description and a list of valid values. 
+!          \newline
 !          [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -10259,7 +10272,8 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordR4(grid, localDE, staggerloc, index, coord, rc)
+      subroutine ESMF_GridGetCoordR4(grid, localDE, staggerloc, &
+         index, coord, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in)                 :: grid
@@ -10339,7 +10353,8 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordR8(grid, localDE, staggerloc, index, coord, rc)
+      subroutine ESMF_GridGetCoordR8(grid, localDE, staggerloc, &
+         index, coord, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in)                 :: grid
@@ -10485,11 +10500,13 @@ endif
 !          Upon return this holds the upper bounds of the exclusive region.
 !          {\tt exclusiveUBound} must be allocated to be of size equal to the grid dimCount.
 !     \item[{[exclusiveCount]}]
+!          \begin{sloppypar}
 !          Upon return this holds the number of items in the exclusive region per dimension
 !          (i.e. {\tt exclusiveUBound-exclusiveLBound+1}). {\tt exclusiveCount} must
 !          be allocated to be of size equal to the grid dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
+!          \end{sloppypar}
 !     \item[{[computationalLBound]}]
 !          Upon return this holds the lower bounds of the stagger region.
 !          {\tt computationalLBound} must be allocated to be of size equal to the grid dimCount.
@@ -10517,11 +10534,13 @@ endif
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !     \item[{[totalCount]}]
+!          \begin{sloppypar}
 !          Upon return this holds the number of items in the total region per dimension
 !          (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !          be allocated to be of size equal to the grid dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
+!          \end{sloppypar}
 !     \item[{fptr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
@@ -13131,8 +13150,8 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItemBounds(grid, localDE, staggerloc, item, &
-          exclusiveLBound, exclusiveUBound, exclusiveCount,                   &
-          computationalLBound, computationalUBound, computationalCount,       &
+          exclusiveLBound, exclusiveUBound, exclusiveCount,              &
+          computationalLBound, computationalUBound, computationalCount,  &
           totalLBound, totalUBound, totalCount, rc)
 
 !
@@ -13219,11 +13238,13 @@ endif
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 !\item[{[totalCount]}]
+!     \begin{sloppypar}
 !     Upon return this holds the number of items in the total region per dimension
 !     (i.e. {\tt totalUBound-totalLBound+1}). {\tt totalCount} must
 !      be allocated to be of size equal to the item dimCount.
 !     Please see Section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
+!     \end{sloppypar}
 !\item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -13956,12 +13977,12 @@ endif
                             array, doCopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
-      integer,                intent(in)            :: coordDim
-      type(ESMF_Array),       intent(in)            :: array
-      type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
-      integer,                intent(out), optional :: rc
+      type(ESMF_Grid),      intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
+      integer,              intent(in)            :: coordDim
+      type(ESMF_Array),     intent(in)            :: array
+      type(ESMF_CopyFlag),  intent(in), optional  :: docopy !NOT IMPLEMENTED
+      integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the coordinate data
@@ -13984,6 +14005,7 @@ endif
 !    coordinate Array will be set to a reference to {\tt array}. Please see 
 !    Section~\ref{opt:copyflag} for further description and a list of
 !    valid values. 
+!    \newline
 !    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14040,43 +14062,43 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCommitShapeTile()
-     subroutine ESMF_GridSetCmmitShapeTileIrreg(grid, name,coordTypeKind, minIndex,  &
-                        countsPerDEDim1, countsPerDeDim2, countsPerDEDim3, &
-                        connDim1, connDim2, connDim3, &
+     subroutine ESMF_GridSetCmmitShapeTileIrreg(grid, name,coordTypeKind,  &
+                        minIndex, countsPerDEDim1, countsPerDeDim2,        &
+                        countsPerDEDim3, connDim1, connDim2, connDim3,     &
                         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound, &
-                        indexflag, petMap, rc)
+                        bipolePos1, bipolePos2, bipolePos3,                &
+                        coordDep1, coordDep2, coordDep3,                   &
+                        gridEdgeLWidth, gridEdgeUWidth, gridAlign,         &
+                        gridMemLBound, indexflag, petMap, rc)
 
 !
 ! !ARGUMENTS:
 	type (ESMF_Grid) :: grid
       character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),    optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in)              :: countsPerDEDim1(:)
-       integer,               intent(in)              :: countsPerDEDim2(:)
-       integer,               intent(in),   optional  :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: petMap(:,:,:)
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       integer,               intent(in), optional :: minIndex(:)
+       integer,               intent(in)           :: countsPerDEDim1(:)
+       integer,               intent(in)           :: countsPerDEDim2(:)
+       integer,               intent(in), optional :: countsPerDEDim3(:)
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)        ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2) ! N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2)      ! N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2)      ! N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2)      ! N. IMP.
+       integer,               intent(in), optional :: coordDep1(:)
+       integer,               intent(in), optional :: coordDep2(:)
+       integer,               intent(in), optional :: coordDep3(:)
+       integer,               intent(in), optional :: gridEdgeLWidth(:)
+       integer,               intent(in), optional :: gridEdgeUWidth(:)
+       integer,               intent(in), optional :: gridAlign(:)
+       integer,               intent(in), optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
+       integer,               intent(in), optional :: petMap(:,:,:)
+       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -14254,10 +14276,12 @@ endif
 !      Section~\ref{opt:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
+!       \begin{sloppypar}
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size size(countsPerDEDim1) x size(countsPerDEDim2) x
 !       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
 !       the last dimension is of size 1.   
+!       \end{sloppypar}
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -15061,32 +15085,32 @@ endif
 
 !
 ! !ARGUMENTS:
-       type(ESMF_Grid),       intent(inout)              :: grid
-       character (len=*),     intent(in),   optional  :: name 
-       type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in)              :: maxIndex(:)
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
-       integer,               intent(in),   optional  :: petMap(:,:,:)
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_Grid),       intent(inout)        :: grid
+       character (len=*),     intent(in), optional :: name 
+       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       integer,               intent(in), optional :: regDecomp(:)
+       type(ESMF_DecompFlag), intent(in), optional :: decompflag(:)
+       integer,               intent(in), optional :: minIndex(:)
+       integer,               intent(in)           :: maxIndex(:)
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)        ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2) ! N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2)      ! N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2)      ! N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2)      ! N. IMP.
+       integer,               intent(in), optional :: coordDep1(:)
+       integer,               intent(in), optional :: coordDep2(:)
+       integer,               intent(in), optional :: coordDep3(:)
+       integer,               intent(in), optional :: gridEdgeLWidth(:)
+       integer,               intent(in), optional :: gridEdgeUWidth(:)
+       integer,               intent(in), optional :: gridAlign(:)
+       integer,               intent(in), optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
+       integer,               intent(in), optional :: petMap(:,:,:)
+       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -15950,27 +15974,27 @@ endif
 !
 ! !ARGUMENTS:
 
-       type(ESMF_Grid),       intent(inout)           :: grid
-       character (len=*),     intent(in),   optional  :: name 
-       type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in)              :: maxIndex(:)
-       integer,               intent(in)              :: localArbIndex(:,:)
-       integer,               intent(in)   	      :: localArbIndexCount
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim1(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim2(:)        ! N. IMP.
-       type(ESMF_GridConn),   intent(in),   optional  :: connDim3(:)        ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc1(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc2(2) ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),   optional  :: poleStaggerLoc3(2) ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos1(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos2(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: bipolePos3(2)      ! N. IMP.
-       integer,               intent(in),   optional  :: coordDep1(:)
-       integer,               intent(in),   optional  :: coordDep2(:)
-       integer,               intent(in),   optional  :: coordDep3(:)
-       integer,               intent(in),   optional  :: distDim(:)
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_Grid),       intent(inout)        :: grid
+       character (len=*),     intent(in), optional :: name 
+       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       integer,               intent(in), optional :: minIndex(:)
+       integer,               intent(in)           :: maxIndex(:)
+       integer,               intent(in)           :: localArbIndex(:,:)
+       integer,               intent(in)   	   :: localArbIndexCount
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)        ! N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)        ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2) ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2) ! N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2)      ! N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2)      ! N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2)      ! N. IMP.
+       integer,               intent(in), optional :: coordDep1(:)
+       integer,               intent(in), optional :: coordDep2(:)
+       integer,               intent(in), optional :: coordDep3(:)
+       integer,               intent(in), optional :: distDim(:)
+       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -16548,12 +16572,12 @@ endif
                             array, doCopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
+      type(ESMF_Grid),     intent(in)           :: grid
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc 
-      type (ESMF_GridItem),   intent(in)            :: item
-      type(ESMF_Array),       intent(in)            :: array
-      type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
-      integer,                intent(out), optional :: rc
+      type (ESMF_GridItem), intent(in)          :: item
+      type(ESMF_Array),    intent(in)           :: array
+      type(ESMF_CopyFlag), intent(in), optional :: docopy ! NOT IMPLEMENTED
+      integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the item data

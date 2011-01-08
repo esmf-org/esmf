@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.52 2011/01/07 21:09:50 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.53 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.52 2011/01/07 21:09:50 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.53 2011/01/08 16:22:38 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -218,21 +218,29 @@ contains
 !     to be of size {\tt rank}. An entry of zero indicates that the respective
 !     Array dimension is not decomposed, rendering it a tensor dimension.
 !   \item[{[undistLBound]}]
+!     \begin{sloppypar}
 !     Upon return this array holds the lower bounds of the undistributed
 !     dimensions of the Array. {\tt UndistLBound} must be allocated to be
 !     of size {\tt rank-dimCount}. 
+!     \end{sloppypar}
 !   \item[{[undistUBound]}]
+!     \begin{sloppypar}
 !     Upon return this array holds the upper bounds of the undistributed
 !     dimensions of the Array. {\tt UndistUBound} must be allocated to be
 !     of size {\tt rank-dimCount}. 
+!     \end{sloppypar}
 !   \item[{[exclusiveLBound]}]
+!     \begin{sloppypar}
 !     Upon return this holds the lower bounds of the exclusive regions for
 !     all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
+!     \end{sloppypar}
 !   \item[{[exclusiveUBound]}]
+!     \begin{sloppypar}
 !     Upon return this holds the upper bounds of the exclusive regions for
 !     all PET-local DEs. {\tt exclusiveUBound} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
+!     \end{sloppypar}
 !   \item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the computational regions for
 !     all PET-local DEs. {\tt computationalLBound} must be allocated to be
@@ -258,13 +266,17 @@ contains
 !     all PET-local DEs. {\tt computationalUWidth} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
 !   \item[{[totalLWidth]}]
+!     \begin{sloppypar}
 !     Upon return this holds the lower width of the total memory regions for
 !     all PET-local DEs. {\tt totalLWidth} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
+!     \end{sloppypar}
 !   \item[{[totalUWidth]}]
+!     \begin{sloppypar}
 !     Upon return this holds the upper width of the total memory regions for
 !     all PET-local DEs. {\tt totalUWidth} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
+!     \end{sloppypar}
 !   \item [{[name]}]
 !     Name of the Array object.
 !   \item[{[distgrid]}]
@@ -283,8 +295,10 @@ contains
 !     List of tile id numbers, one for each DE, with
 !     {\tt size(tileListPDe) == (/deCount/)}
 !   \item[{[indexCountPDimPDe]}]
+!     \begin{sloppypar}
 !     Array of extents per {\tt dim}, per {\tt de}, with
 !     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
+!     \end{sloppypar}
 !   \item[{[delayout]}]
 !     Upon return this holds the associated {\tt ESMF\_DELayout} object.
 !   \item[{[deCount]}]
@@ -657,7 +671,8 @@ contains
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
-! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, localDe, farrayPtr, rc) @\
+! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, localDe, & @\
+!                farrayPtr, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(in)              :: array @\

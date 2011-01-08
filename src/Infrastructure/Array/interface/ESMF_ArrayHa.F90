@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.19 2011/01/07 21:09:50 rokuingh Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.20 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.19 2011/01/07 21:09:50 rokuingh Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.20 2011/01/08 16:22:38 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -159,6 +159,7 @@ contains
 !     resulting in a blocking operation.
 !     See section \ref{opt:commflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
+!     \begin{sloppypar}
 !     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
@@ -166,6 +167,7 @@ contains
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!     \end{sloppypar}
 !   \item [{[cancelledflag]}]
 !     A value of {\tt .true.} indicates that were cancelled communication
 !     operations. In this case the data in the {\tt dstArray} must be considered
@@ -288,7 +290,8 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)                :: array
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    type(ESMF_HaloStartRegionFlag), intent(in), &
+                            optional :: halostartregionflag
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -339,11 +342,13 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [{[halostartregionflag]}]
+!     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
 !     See section \ref{opt:halostartregionflag} for a complete list of
 !     valid settings.
+!     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
 !     This vector specifies the lower corner of the effective halo
 !     region with respect to the lower corner of {\tt halostartregionflag}.
@@ -503,8 +508,10 @@ contains
 !   \item[{[timeslice]}]
 !    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
+!    \begin{sloppypar}
 !    The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!    \end{sloppypar}
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -757,6 +764,7 @@ contains
 !     resulting in a blocking operation.
 !     See section \ref{opt:commflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
+!     \begin{sloppypar}
 !     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
@@ -764,6 +772,7 @@ contains
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!     \end{sloppypar}
 !   \item [{[cancelledflag]}]
 !     A value of {\tt .true.} indicates that were cancelled communication
 !     operations. In this case the data in the {\tt dstArray} must be considered
@@ -896,16 +905,16 @@ contains
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayRedistStore()
-! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, routehandle, &
-!   factor, srcToDstTransposeMap, rc)
+! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, &
+!   routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),           intent(in)              :: srcArray
-!   type(ESMF_Array),           intent(inout)           :: dstArray
-!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>),   intent(in)              :: factor
-!   integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-!   integer,                    intent(out),  optional  :: rc
+!   type(ESMF_Array),       intent(in)            :: srcArray
+!   type(ESMF_Array),       intent(inout)         :: dstArray
+!   type(ESMF_RouteHandle), intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)          :: factor
+!   integer,               intent(in),  optional  :: srcToDstTransposeMap(:)
+!   integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 ! \label{ArrayRedistStoreTK}
@@ -1246,11 +1255,11 @@ contains
     srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
-    type(ESMF_Array),           intent(inout)           :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                    intent(out),  optional  :: rc
+    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: dstArray
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 ! \label{ArrayRedistStoreNF}

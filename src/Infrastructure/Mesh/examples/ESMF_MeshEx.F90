@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.36 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.37 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -103,12 +103,14 @@ program ESMF_MeshEx
 ! that PET. Please see Section~\ref{sec:field:usage:create_mesh_arrayspec} in Field for further explanation and examples of this
 ! issue and others in working with Fields on Meshes. 
 !
+! \begin{sloppypar}
 ! For each node in the Mesh we set three properties: the global id of the node ({\tt nodeIds}), node coordinates 
 ! ({\tt nodeCoords}), and which PET owns the node ({\tt nodeOwners}). The node id is a unique (across all PETs) integer 
 ! attached to the particular node. It is used to indicate which nodes are the same when connecting together pieces of the 
 ! Mesh on different processors. The node coordinates indicate the location of a node in space and are used in the
 ! {\tt ESMF\_FieldRegrid()} functionality when interpolating. The node owner indicates which PET is in charge of the node. This
 ! is used when creating a Field on the Mesh to indicate which PET should contain a Field location for the data.  
+! \end{sloppypar}
 ! 
 ! For each element in the Mesh we set three properties: the global id of the element ({\tt elementIds}), the topology type of
 ! the element ({\tt elementTypes}), and which nodes are connected together to form the element ({\tt elementConn}). The element id is
@@ -123,10 +125,12 @@ program ESMF_MeshEx
 ! connectivity list of an element is important. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating the correct order of
 ! nodes in an element. 
 !
+! \begin{sloppypar}
 ! Mesh creation may either be performed as a one step process using the full {\tt ESMF\_MeshCreate()} call, or may be done in three steps. The
 ! three step process starts with a more minimal {\tt ESMF\_MeshCreate()} call. It is then followed by the {\tt ESMF\_MeshAddNodes()} to 
 ! specify nodes, and then the {\tt ESMF\_MeshAddElements()} call to specify elements. This three step sequence is useful to conserve memory
 ! because the node arrays being used for the {\tt ESMF\_MeshAddNodes()} call can be deallocated before creating the arrays to be used in the {\tt ESMF\_MeshAddElements()} call.
+! \end{sloppypar}
 !
 !EOE
 
@@ -764,7 +768,7 @@ program ESMF_MeshEx
 !	double 	nodeCoords(numNode, coordDim);
 !		nodeCoords:units = "degrees,degrees" ;
 !	int elementConn(numElement, maxNodePElement) ;
-!		elementConn:long_name = "Node Indices that define  the element connectivity" ;
+!		elementConn:long_name = "Node Indices that define the element connectivity";
 !		elementConn:_FillValue = -1 ;	
 !	byte numElementConn(numElement) ;
 !		numElementConn:long_name = "Number of nodes per element" ;

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.20 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.21 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,30 +75,30 @@ program ESMF_ArrayFarrayEx
 !EOE
 !BOC
   ! local variables
-  real(ESMF_KIND_R8)          :: farrayE(10,10)     ! explicit shape Fortran array
+  real(ESMF_KIND_R8)       :: farrayE(10,10)  ! explicit shape Fortran array
 !EOC
 !BOE
 ! Then an allocatable array {\tt farrayA} is declared which will be used
 ! to show user-controlled dynamic memory allocation.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), allocatable :: farrayA(:,:)   ! allocatable Fortran array
+  real(ESMF_KIND_R8), allocatable :: farrayA(:,:) ! allocatable Fortran array
 !EOC
 !BOE
 ! Finally an array with pointer attribute {\tt farrayP} is declared, also used
 ! for user-controlled dynamic memory allocation.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), pointer :: farrayP(:,:)       ! Fortran array pointer 
+  real(ESMF_KIND_R8), pointer :: farrayP(:,:)   ! Fortran array pointer 
 !EOC
 !BOE
 ! A matching array pointer must also be available to gain access to the arrays
 ! held by an Array object.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)     ! matching Fortran array pointer 
-  type(ESMF_DistGrid)         :: distgrid           ! DistGrid object
-  type(ESMF_Array)            :: array              ! Array object
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)  ! matching Fortran array pointer 
+  type(ESMF_DistGrid)         :: distgrid        ! DistGrid object
+  type(ESMF_Array)            :: array           ! Array object
   integer                     :: rc
   
 !EOC

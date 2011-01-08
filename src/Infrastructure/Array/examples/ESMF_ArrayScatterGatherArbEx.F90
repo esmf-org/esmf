@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.9 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.10 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -170,8 +170,9 @@ program ESMF_ArrayScatterGatherArbEx
 !EOE
   
 !BOC  
-  distgridAux = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/petCount,10/), &
-    regDecomp=(/1,1/), rc=rc)  ! DistGrid with only 1 DE
+  distgridAux = ESMF_DistGridCreate(minIndex=(/1,1/), &
+    maxIndex=(/petCount,10/), &
+    regDecomp=(/1,1/), rc=rc) ! DistGrid with only 1 DE
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.140 2011/01/07 21:09:50 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.141 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.140 2011/01/07 21:09:50 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.141 2011/01/08 16:22:38 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -391,15 +391,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[name]}]
 !       The Array name.
 !     \item[{[computationalLWidth]}] 
+!       \begin{sloppypar}
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
 !       {\tt computationalLWidth} specifies the lower corner of the
 !       computational region with respect to the lower corner of the exclusive
 !       region for all local DEs.
+!       \end{sloppypar}
 !     \item[{[computationalUWidth]}] 
+!       \begin{sloppypar}
 !       This argument must have of size {\tt (dimCount, localDeCount)}.
 !       {\tt computationalUWidth} specifies the upper corner of the
 !       computational region with respect to the upper corner of the exclusive
 !       region for all local DEs.
+!       \end{sloppypar}
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -532,10 +536,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Execute a precomputed Array sparse matrix multiplication from {\tt srcArray}
 !   to {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be weakly
 !   congruent and typekind conform to the respective Arrays used during 
 !   {\tt ESMF\_ArraySMMStore()}.
+!   \end{sloppypar}
 !   Congruent Arrays possess matching DistGrids, and the shape of the local
 !   array tiles matches between the Arrays for every DE. For weakly congruent
 !   Arrays the size of the undistributed dimensions, that vary faster with
@@ -565,6 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     resulting in a blocking operation.
 !     See section \ref{opt:commflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
+!     \begin{sloppypar}
 !     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
@@ -572,6 +579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
 !     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
+!     \end{sloppypar}
 !   \item [{[cancelledflag]}]
 !     A value of {\tt .true.} indicates that were cancelled communication
 !     operations. In this case the data in the {\tt dstArray} must be considered
@@ -580,6 +588,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     cancelled. The data in {\tt dstArray} is valid if {\tt finishedflag} 
 !     returns equal {\tt .true.}.
 !   \item [{[zeroflag]}]
+!     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstArray} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
@@ -590,6 +599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destination Array that will be updated by the sparse matrix
 !     multiplication. See section \ref{opt:regionflag} for a complete list of
 !     valid settings.
+!     \end{sloppypar}
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -723,12 +733,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   routehandle, factorList, factorIndexList, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),           intent(in)              :: srcArray
-!   type(ESMF_Array),           intent(inout)           :: dstArray
-!   type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+!   type(ESMF_Array),       intent(in)              :: srcArray
+!   type(ESMF_Array),       intent(inout)           :: dstArray
+!   type(ESMF_RouteHandle), intent(inout)           :: routehandle
 !   <type>(ESMF_KIND_<kind>), target, intent(in)        :: factorList(:)
-!   integer,                    intent(in)              :: factorIndexList(:,:)
-!   integer,                    intent(out),  optional  :: rc
+!   integer,                intent(in)              :: factorIndexList(:,:)
+!   integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 ! \label{ArraySMMStoreTK}
@@ -741,6 +751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! through the separate entry points shown in \ref{ArraySMMStoreTK} and
 ! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
 !
+!   \begin{sloppypar}
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -750,6 +761,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   PET does not provide matrix elements. Alternatively, PETs that do not 
 !   provide matrix elements may also call into the overloaded interface
 !   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+!   \end{sloppypar}
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
@@ -795,9 +807,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [factorIndexList]
 !     Pairs of sequence indices for the factors stored in {\tt factorList}.
 !
+!     \begin{sloppypar}
 !     The second dimension of {\tt factorIndexList} steps through the list of
 !     pairs, i.e. {\tt size(factorIndexList,2) == size(factorList)}. The first
 !     dimension of {\tt factorIndexList} is either of size 2 or size 4.
+!     \end{sloppypar}
 !
 !     In the {\em size 2 format} {\tt factorIndexList(1,:)} specifies the
 !     sequence index of the source element in the {\tt srcArray} while
@@ -808,6 +822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Under this condition an identiy matrix can be applied within the space of
 !     tensor elements for each sparse matrix factor.
 !
+!     \begin{sloppypar}
 !     The {\em size 4 format} is more general and does not require a matching
 !     tensor element count. Here the {\tt factorIndexList(1,:)} specifies the
 !     sequence index while {\tt factorIndexList(2,:)} specifies the tensor
@@ -815,6 +830,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt factorIndexList(3,:)} specifies the sequence index and
 !     {\tt factorIndexList(4,:)} specifies the tensor sequence index of the 
 !     destination element in the {\tt dstArray}.
+!     \end{sloppypar}
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Array {\em sequence indices} and {\em tensor sequence indices}.
@@ -1117,6 +1133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! through the separate entry points shown in \ref{ArraySMMStoreTK} and
 ! \ref{ArraySMMStoreNF}, is described in the following paragraphs as a whole.
 !
+!   \begin{sloppypar}
 !   Store an Array sparse matrix multiplication operation from {\tt srcArray}
 !   to {\tt dstArray}. PETs that specify non-zero matrix coefficients must use
 !   the <type><kind> overloaded interface and provide the {\tt factorList} and
@@ -1126,6 +1143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   PET does not provide matrix elements. Alternatively, PETs that do not 
 !   provide matrix elements may also call into the overloaded interface
 !   {\em without} {\tt factorList} and {\tt factorIndexList} arguments.
+!   \end{sloppypar}
 !
 !   Both {\tt srcArray} and {\tt dstArray} are interpreted as sequentialized
 !   vectors. The sequence is defined by the order of DistGrid dimensions and 
@@ -1253,7 +1271,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayWrite}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, file, variableName, append, timeslice, iofmt, rc)
+  subroutine ESMF_ArrayWrite(array, file, variableName, append, &
+     timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
@@ -1299,8 +1318,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    time. By default, i.e. by omitting the {\tt timeslice} argument, no
 !    provisions for time slicing are made in the output file.
 !   \item[{[iofmt]}]
+!    \begin{sloppypar}
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
 !    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!    \end{sloppypar}
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}

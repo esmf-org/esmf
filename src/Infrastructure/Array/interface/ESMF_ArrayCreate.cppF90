@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.64 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.65 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.64 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.65 2011/01/08 16:22:38 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1043,6 +1043,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_Array) :: ESMF_ArrayCreateLocalArray
 !
 ! !DESCRIPTION:
+! \begin{sloppypar}
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
 ! objects according to distgrid. Besides {\tt larrayList} each PET must issue
 ! this call with identical arguments in order to create a consistent Array 
@@ -1051,6 +1052,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! in the distgrid argument. Bounds for array dimensions that are not distributed
 ! can be chosen freely using the {\tt undistLBound} and {\tt undistUBound}
 ! arguments.
+! \end{sloppypar}
 !
 ! This interface is able to handle multiple DEs per PET.
 !

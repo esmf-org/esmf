@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.37 2011/01/07 21:09:50 rokuingh Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.38 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -157,8 +157,8 @@ program ESMF_DistGridEx
 !EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-    regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_DEFAULT,ESMF_DECOMP_RESTLAST/),&
-    rc=rc)
+    regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_DEFAULT, &
+    ESMF_DECOMP_RESTLAST/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
@@ -204,12 +204,13 @@ program ESMF_DistGridEx
   do localDe=0, localDeCount-1
     de = localDeList(localDe)
     do dim=1, 2
-      allocate(localIndexList(dimExtent(dim, de))) ! allocate list to hold indices
+      allocate(localIndexList(dimExtent(dim, de))) ! allocate list 
+                                                   ! to hold indices
       call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
         indexList=localIndexList, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-      print *, "local DE ", localDe," - DE ",de," localIndexList along dim=", &
-        dim," :: ", localIndexList
+      print *, "local DE ", localDe," - DE ",de, &
+        " localIndexList along dim=", dim," :: ", localIndexList
       deallocate(localIndexList)
     enddo
   enddo
@@ -229,8 +230,8 @@ program ESMF_DistGridEx
 
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-    regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_CYCLIC,ESMF_DECOMP_RESTLAST/),&
-    rc=rc)
+    regDecomp=(/2,3/), &
+    decompflag=(/ESMF_DECOMP_CYCLIC,ESMF_DECOMP_RESTLAST/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !  call ESMF_DistGridPrint(distgrid, rc=rc)
@@ -811,7 +812,8 @@ program ESMF_DistGridEx
   allocate(arbSeqIndexList(10))   ! each PET will have 10 elements
   
   do i=1, 10
-    arbSeqIndexList(i) = (i-1)*petCount + localPet  ! initialize unique seq. indices
+    arbSeqIndexList(i) = (i-1)*petCount + localPet ! initialize unique 
+                                                   ! seq. indices
   enddo
 !EOC
   
@@ -865,7 +867,8 @@ program ESMF_DistGridEx
   allocate(arbSeqIndexList(10))   ! each PET will have 10 elements
   
   do i=1, 10
-    arbSeqIndexList(i) = (i-1)*petCount + localPet  ! initialize unique seq. indices
+    arbSeqIndexList(i) = (i-1)*petCount + localPet  ! initialize unique 
+                                                    ! seq. indices
   enddo
 !EOC
 

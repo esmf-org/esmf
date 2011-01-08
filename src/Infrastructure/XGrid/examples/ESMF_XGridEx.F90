@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.21 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.22 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -247,8 +247,8 @@
 ! Set up the mapping weights from side A to the XGrid:
 !EOE
 !BOC
-    ! Note that the weights are dest area weighted, they are ratio of areas with
-    ! destination area as the denominator.
+    ! Note that the weights are dest area weighted, they are ratio 
+    ! of areas with destination area as the denominator.
     ! Set up mapping weights from A1 -> X
     sparseMatA2X(1)%factorList(:)=1.
 
@@ -330,8 +330,9 @@
 ! Create an XGrid based on the user supplied regridding parameters:
 !EOE
 !BOC
-    xgrid = ESMF_XGridCreate(sideA, sideB, area=xgrid_area, centroid=centroid, &
-        sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
+    xgrid = ESMF_XGridCreate(sideA, sideB, area=xgrid_area, &
+        centroid=centroid, sparseMatA2X=sparseMatA2X, &
+        sparseMatX2B=sparseMatX2B, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
@@ -362,8 +363,8 @@
 !EOE
 !BOC
     do i = 1, 2
-        srcField(i) = ESMF_FieldCreate(sideA(i), typekind=ESMF_TYPEKIND_R8, &
-		rank=2, rc=localrc)
+        srcField(i) = ESMF_FieldCreate(sideA(i), &
+                typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
@@ -372,8 +373,8 @@
         fptr = i
     enddo
     do i = 1, 1
-        dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, &
-		rank=2, rc=localrc)
+        dstField(i) = ESMF_FieldCreate(sideB(i), &
+                typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
@@ -396,7 +397,8 @@
 ! 
 !EOE
 !BOC
-    ! Compute regrid routehandles. The routehandles can be used repeatedly afterwards.
+    ! Compute regrid routehandles. The routehandles can be used 
+    ! repeatedly afterwards.
     ! From A -> X
     do i = 1, 2
         call ESMF_FieldRegridStore(xgrid, srcField(i), field, &
@@ -435,9 +437,9 @@
 !BOC
     ! Execute regrid from A -> X
     do i = 1, 2
-        call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
-            zeroflag=ESMF_REGION_SELECT, &
-            rc = localrc)
+        call ESMF_FieldRegrid(srcField(i), field, &
+            routehandle=rh_src2xgrid(i), &
+            zeroflag=ESMF_REGION_SELECT, rc = localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
     enddo
@@ -493,8 +495,8 @@
         centroid=l_centroid, &  ! list of centroid of XGrid
         distgridA=l_sideAdg, &  ! list of Distgrids on side A
         distgridM = distgrid, & ! balanced distgrid
-        sparseMatA2X=l_sparseMatA2X, &  ! sparse matrix matmul parameters from A to X
-        sparseMatX2B=l_sparseMatX2B, &  ! sparse matrix matmul parameters from X to B
+        sparseMatA2X=l_sparseMatA2X, &  ! sparse matrix matmul parameters  A to X
+        sparseMatX2B=l_sparseMatX2B, &  ! sparse matrix matmul parameters  X to B
         rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &

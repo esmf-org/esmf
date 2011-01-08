@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.42 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_LocStream.F90,v 1.43 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.42 2011/01/05 20:05:44 svasquez Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.43 2011/01/08 16:22:39 svasquez Exp $'
 
 !==============================================================================
 !
@@ -546,8 +546,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray, destroyKey, &
-               keyUnits, keyLongName, rc)
+  subroutine ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray, &
+               destroyKey, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)             :: locstream
@@ -699,8 +699,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-!  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, copyflag, &
-!               keyUnits, keyLongName, rc)
+!  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, &
+!               copyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_Locstream), intent(in) :: locstream
@@ -847,8 +847,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyR4(locstream, keyName, farray, copyflag, &
-               keyUnits, keyLongName, rc)
+  subroutine ESMF_LocStreamAddKeyR4(locstream, keyName, farray, &
+               copyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)                   :: locstream
@@ -1027,8 +1027,9 @@ contains
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateByBkgGrid(locstream, name, coordKeyNames, &
-                 background, maskValues, unmappedAction, rc)
+      function ESMF_LocStreamCreateByBkgGrid(locstream, name, &
+                 coordKeyNames, background, maskValues, &
+                 unmappedAction, rc)
 
 !
 ! !RETURN VALUE:
@@ -1155,8 +1156,8 @@ contains
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateByBkgMesh(locstream, name, coordKeyNames, &
-                 background, unmappedAction, rc)
+      function ESMF_LocStreamCreateByBkgMesh(locstream, name, &
+                 coordKeyNames, background, unmappedAction, rc)
 
 !
 ! !RETURN VALUE:
@@ -1323,11 +1324,11 @@ contains
 
 !
 ! !ARGUMENTS:
-      character (len=*),        intent(in), optional     :: name
-      type(ESMF_DistGrid),   intent(in)                  :: distgrid
-      logical,                        intent(in),   optional :: destroyDistgrid
-      type(ESMF_IndexFlag), intent(in),   optional :: indexflag    
-      integer,                       intent(out), optional :: rc
+      character (len=*),     intent(in),  optional :: name
+      type(ESMF_DistGrid),   intent(in)            :: distgrid
+      logical,               intent(in), optional  :: destroyDistgrid
+      type(ESMF_IndexFlag),  intent(in), optional  :: indexflag    
+      integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_LocStream} object, constructs its
@@ -1450,7 +1451,8 @@ contains
 
 ! !INTERFACE:
       ! Private name: call using ESMF_LocStreamCreate()
-      function ESMF_LocStreamCreateIrreg(name, minIndex, countsPerDE, indexflag, rc)
+      function ESMF_LocStreamCreateIrreg(name, minIndex, countsPerDE, &
+                  indexflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocStream) :: ESMF_LocStreamCreateIrreg
@@ -1740,10 +1742,12 @@ contains
 !          Specify into how many chunks to divide the locations. 
 !          If not specified, defaults to the number of PETs.
 !     \item[{[decompFlag]}]
+!          \begin{sloppypar}
 !          Specify what to do with leftover locations after division.
 !          If not specified, defaults to {\tt ESMF\_DECOMP\_HOMOGEN}. Please
 !          see Section~\ref{opt:decompflag} for a full description of the 
 !          possible options. 
+!          \end{sloppypar}
 !     \item{[[minIndex]}]
 !          The minimum index across all PETs. If not set defaults to 1. 
 !     \item[maxIndex]
@@ -2301,8 +2305,8 @@ end subroutine ESMF_LocStreamGetKeyBounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keyUnits, keyLongName, &
-		typekind, rc)
+  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keyUnits, &
+                keyLongName, typekind, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)              :: locstream
@@ -2390,10 +2394,10 @@ end subroutine ESMF_LocStreamGetKeyBounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-!      subroutine ESMF_LocStreamGetKeyI4(locstream, localDE, keyName, &
-!          exclusiveLBound, exclusiveUBound, exclusiveCount,     &
-!          computationalLBound, computationalUBound, computationalCount,     &
-!          totalLBound, totalUBound, totalCount,     &
+!      subroutine ESMF_LocStreamGetKeyI4(locstream, localDE, keyName,    &
+!          exclusiveLBound, exclusiveUBound, exclusiveCount,             &
+!          computationalLBound, computationalUBound, computationalCount, &
+!          totalLBound, totalUBound, totalCount,                         &
 !          farray, doCopy, rc)
 !
 ! !ARGUMENTS:

@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.52 2011/01/05 20:05:43 svasquez Exp $
+% $Id: Grid_desc.tex,v 1.53 2011/01/08 16:22:39 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,6 +101,7 @@ and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
 
 \subsubsection{Grid Topologies and Periodicity}
 \label{sec:ShapeShortcut}
+\begin{sloppypar}
 ESMF has shortcuts for the creation of standard Grid topologies 
 or {\bf shapes} up to 3D.  In many cases, these enable the user to
 bypass the step of creating a DistGrid before creating the Grid.  The basic call is 
@@ -110,6 +111,7 @@ is a pole, or it is a bipole.  The assumed connectivities for poles and
 bipoles are described in section \ref{sec:opt:gridconn}.  Connectivities
 are specified using the ESMF\_GridConn parameter, which has values
 such as ESMF\_GRIDCONN\_PERIODIC.
+\end{sloppypar}
 
 The table below shows the ESMF\_GridConn settings used to create 
 standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
@@ -204,7 +206,7 @@ into this shape and coordinate taxonomy.  Note that any
 of the grids in the table can have a regular or arbitrary distribution.
 
 \medskip
-\begin{tabular}{|p{.9in}|p{1.7in}|p{1.7in}|p{1.7in}|}
+\begin{tabular}{|p{.8in}|p{1.6in}|p{1.6in}|p{1.6in}|}
 \hline
  & {\bf Uniform} & {\bf Rectilinear} & {\bf Curvilinear} \\ 
 \hline
@@ -269,11 +271,14 @@ These stages are:
 
 \begin{enumerate}
 
-\item Create the Grid topology or shape.  At the completion of this
+\item 
+\begin{sloppypar}
+Create the Grid topology or shape.  At the completion of this
 stage, the Grid has a specific topology and distribution, but
 empty coordinate arrays.  The Grid can be used as the basis for
 allocating a Field. Its {\tt ESMF\_GridStatus} parameter has 
 a value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}.  
+\end{sloppypar}
 
 The options for specifying the Grid shape are:
 \begin{itemize}
@@ -303,6 +308,7 @@ grid and sets the appropriate flag to indicate that
 its usable (the status equals {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}
 after the commit). The Grid is implicitly in a valid state after being committed. 
 
+\begin{sloppypar}
 For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
 call must occur on the same or a subset of the PETs as the
 {\tt ESMF\_GridCreateEmpty()} call. The 
@@ -313,6 +319,7 @@ no information about the VM in which it was run.  If the
 in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
 executed, the Grid is created only in that subset. The grid objects outside the subset will
 still be "empty" and not usable. 
+\end{sloppypar}
 
 The following table summarizes possible call sequences
 for building Grids.

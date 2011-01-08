@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.16 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_XGridGet.F90,v 1.17 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.16 2011/01/05 20:05:46 svasquez Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.17 2011/01/08 16:22:39 svasquez Exp $'
 
 !==============================================================================
 !
@@ -517,9 +517,11 @@ integer, intent(out), optional               :: rc
 !       Distgrid whose sequence index list is an overlap between gridIndex-th Grid
 !       on xgridSide and the xgrid object.
 !     \item [{[xgridSide]}] 
+!       \begin{sloppypar}
 !       Which side of the XGrid to retrieve the distgrid from (either ESMF\_XGRID\_SIDEA,
 !       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
 !       defaults to ESMF\_XGRID\_BALANCED.
+!       \end{sloppypar}
 !     \item [{[xgridIndex]}] 
 !       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index 
 !       selects the Distgrid associated with the Grid on

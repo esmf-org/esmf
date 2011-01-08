@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.68 2011/01/07 21:09:50 rokuingh Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.69 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -534,8 +534,10 @@ program ESMF_ArrayEx
   allocate(totalLBound(2, localDeCount))          ! dimCount=2
   allocate(totalUBound(2, localDeCount))          ! dimCount=2
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
-    exclusiveUBound=exclusiveUBound, computationalLBound=computationalLBound, &
-    computationalUBound=computationalUBound, totalLBound=totalLBound, &
+    exclusiveUBound=exclusiveUBound, &
+    computationalLBound=computationalLBound, &
+    computationalUBound=computationalUBound, &
+    totalLBound=totalLBound, &
     totalUBound=totalUBound, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -561,24 +563,24 @@ program ESMF_ArrayEx
     ! initialize the DE-local array
     myFarray = 0.1d0 * localDeList(de)
     ! first time through the total region of array    
-!    print *, "myFarray bounds for DE=", localDeList(de), lbound(myFarray), &
-!      ubound(myFarray)
+!    print *, "myFarray bounds for DE=", localDeList(de), &
+!      lbound(myFarray),  ubound(myFarray)
     do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
-!        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myFarray(i,j)
+!        print *, "Excl region DE=", localDeList(de), &
+!        ": array(",i,",",j,")=",  myFarray(i,j)
       enddo
     enddo
     do j=computationalLBound(2, de), computationalUBound(2, de)
       do i=computationalLBound(1, de), computationalUBound(1, de)
-!        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myFarray(i,j)
+!        print *, "Excl region DE=", localDeList(de), &
+!        ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
     do j=totalLBound(2, de), totalUBound(2, de)
       do i=totalLBound(1, de), totalUBound(1, de)
-!        print *, "Total region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myFarray(i,j)
+!        print *, "Total region DE=", localDeList(de), &
+!        ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
 
@@ -587,8 +589,8 @@ program ESMF_ArrayEx
       exclusiveUBound(2, de)+totalUWidth(2, de)
       do i=exclusiveLBound(1, de)-totalLWidth(1, de), &
         exclusiveUBound(1, de)+totalUWidth(1, de)
-!        print *, "Excl region DE=", localDeList(de), ": array(",i,",",j,")=", &
-!          myFarray(i,j)
+!        print *, "Excl region DE=", localDeList(de), &
+!        ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
   enddo
@@ -946,8 +948,8 @@ program ESMF_ArrayEx
 ! and an appropriate 3D DistGrid object must be created
 !EOE
 !BOC
-  distgrid3D = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/16,16,16/), &
-    regDecomp=(/4,4,4/), rc=rc)
+  distgrid3D = ESMF_DistGridCreate(minIndex=(/1,1,1/), &
+    maxIndex=(/16,16,16/), regDecomp=(/4,4,4/), rc=rc)
 !EOC
 !BOE
 ! before an Array object can be created.
@@ -976,8 +978,8 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayDestroy(array3D, rc=rc)
   call ESMF_DistGridDestroy(distgrid3D, rc=rc)
-  distgrid3D = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/16,16,16/), &
-    regDecomp=(/1,4,4/), rc=rc)
+  distgrid3D = ESMF_DistGridCreate(minIndex=(/1,1,1/), &
+    maxIndex=(/16,16,16/), regDecomp=(/1,4,4/), rc=rc)
   array3D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid3D, rc=rc)
 !EOC
 !BOE
@@ -1221,9 +1223,9 @@ program ESMF_ArrayEx
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myFarray3D, ESMF_DATA_REF, rc=rc)
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
-      1, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 10.5 ! dummy assignment
+      1, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 10.5 !dummy assignment
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
-      2, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 23.3 ! dummy assignment
+      2, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 23.3 !dummy assignment
   enddo
   deallocate(exclusiveLBound, exclusiveUBound)
   deallocate(arrayToDistGridMap)

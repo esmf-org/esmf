@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.69 2011/01/07 21:09:50 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.70 2011/01/08 16:22:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.69 2011/01/07 21:09:50 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.70 2011/01/08 16:22:38 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -398,8 +398,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDG(distgrid, firstExtra, lastExtra, indexflag, &
-    connectionList, rc)
+  function ESMF_DistGridCreateDG(distgrid, firstExtra, lastExtra, &
+    indexflag, connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),          intent(in)            :: distgrid
@@ -646,18 +646,18 @@ contains
     indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minIndex(:)
-    integer,                      intent(in)            :: maxIndex(:)
-    integer, target,              intent(in), optional  :: regDecomp(:)
+    integer,                intent(in)            :: minIndex(:)
+    integer,                intent(in)            :: maxIndex(:)
+    integer, target,        intent(in), optional  :: regDecomp(:)
     type(ESMF_DecompFlag), target,intent(in), optional  :: decompflag(:)
-    integer, target,              intent(in), optional  :: regDecompFirstExtra(:)
-    integer, target,              intent(in), optional  :: regDecompLastExtra(:)
-    integer, target,              intent(in), optional  :: deLabelList(:)
-    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
-    integer, target,              intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in), optional  :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer, target,        intent(in), optional  :: regDecompFirstExtra(:)
+    integer, target,        intent(in), optional  :: regDecompLastExtra(:)
+    integer, target,        intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),   intent(in), optional  :: indexflag
+    integer, target,        intent(in), optional  :: connectionList(:,:)
+    type(ESMF_DELayout),    intent(in), optional  :: delayout
+    type(ESMF_VM),          intent(in), optional  :: vm
+    integer,                intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
@@ -847,22 +847,24 @@ contains
     deLabelList, indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minIndex(:)
-    integer,                      intent(in)            :: maxIndex(:)
-    integer,                      intent(in)            :: deBlockList(:,:,:)
-    integer,                      intent(in), optional  :: deLabelList(:)
-    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in), optional  :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer,                      intent(in)           :: minIndex(:)
+    integer,                      intent(in)           :: maxIndex(:)
+    integer,                      intent(in)           :: deBlockList(:,:,:)
+    integer,                      intent(in), optional :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in), optional :: indexflag
+    integer,                      intent(in), optional :: connectionList(:,:)
+    type(ESMF_DELayout),          intent(in), optional :: delayout
+    type(ESMF_VM),                intent(in), optional :: vm
+    integer,                      intent(out),optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
 !     tile with decomposition specified by {\tt deBlockList}.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1370,18 +1372,18 @@ contains
     indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minIndex(:,:)
-    integer,                      intent(in)            :: maxIndex(:,:)
-    integer,                      intent(in), optional  :: regDecomp(:,:)
+    integer,              intent(in)            :: minIndex(:,:)
+    integer,              intent(in)            :: maxIndex(:,:)
+    integer,              intent(in), optional  :: regDecomp(:,:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
-    integer, target,              intent(in), optional  :: regDecompFirstExtra(:,:)
-    integer, target,              intent(in), optional  :: regDecompLastExtra(:,:)
-    integer,                      intent(in), optional  :: deLabelList(:)
-    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in), optional  :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer, target,      intent(in), optional  :: regDecompFirstExtra(:,:)
+    integer, target,      intent(in), optional  :: regDecompLastExtra(:,:)
+    integer,              intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag), intent(in), optional  :: indexflag
+    integer,              intent(in), optional  :: connectionList(:,:)
+    type(ESMF_DELayout),  intent(in), optional  :: delayout
+    type(ESMF_VM),        intent(in), optional  :: vm
+    integer,              intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
@@ -2412,8 +2414,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetDefault(distgrid, delayout, dimCount, tileCount, &
-    minIndexPDimPTile, maxIndexPDimPTile, elementCountPTile, &
+  subroutine ESMF_DistGridGetDefault(distgrid, delayout, dimCount, &
+    tileCount, minIndexPDimPTile, maxIndexPDimPTile, elementCountPTile, &
     minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, tileListPDe, &
     indexCountPDimPDe, collocationPDim, regDecompFlag, rc)
 !
@@ -2458,20 +2460,28 @@ contains
 !     Number of elements in exclusive region per tile, with
 !     {\tt size(elementCountPTile) == (/tileCount/)}
 !   \item[{[minIndexPDimPDe]}]
+!     \begin{sloppypar}
 !     Lower index space corner per {\tt dim}, per {\tt De}, with
 !     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
+!     \end{sloppypar}
 !   \item[{[maxIndexPDimPDe]}]
+!     \begin{sloppypar}
 !     Upper index space corner per {\tt dim}, per {\tt de}, with
 !     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
+!     \end{sloppypar}
 !   \item[{[elementCountPDe]}]
+!     \begin{sloppypar}
 !     Number of elements in exclusive region per DE, with
 !     {\tt size(elementCountPDe) == (/deCount/)}
+!     \end{sloppypar}
 !   \item[{[tileListPDe]}]
 !     List of tile id numbers, one for each DE, with
 !     {\tt size(tileListPDe) == (/deCount/)}
 !   \item[{[indexCountPDimPDe]}]
+!     \begin{sloppypar}
 !     Array of extents per {\tt dim}, per {\tt de}, with
 !     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
+!     \end{sloppypar}
 !   \item[{[collocationPDim]}]
 !     List of collocation id numbers, one for each dim, with
 !     {\tt size(collocationPDim) == (/dimCount/)}
@@ -2747,7 +2757,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
-  subroutine ESMF_DistGridGetPLocalDePDim(distgrid, localDe, dim, indexList, rc)
+  subroutine ESMF_DistGridGetPLocalDePDim(distgrid, localDe, dim, &
+           indexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid

@@ -1,8 +1,9 @@
-% $Id: Grid_options.tex,v 1.32 2010/10/15 05:06:18 oehmke Exp $
+% $Id: Grid_options.tex,v 1.33 2011/01/08 16:22:39 svasquez Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
 {\sf DESCRIPTION:\\}
+\begin{sloppypar}
 The {\tt ESMF\_GridCreateShapeTile} command has three specific arguments
 {\tt connDim1}, {\tt connDim2}, and {\tt connDim3}. These can be used
 to setup different types of connections at the ends of each dimension
@@ -11,6 +12,7 @@ element is the connection type at the minimum end of the dimension
 and the second is the connection type at the maximum end. The default
 value for all the connections is ESMF\_GRIDCONN\_NONE, specifying no
 connection.
+\begin{sloppypar}
 
 \medskip
 \begin{description}

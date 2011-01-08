@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.52 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_Mesh.F90,v 1.53 2011/01/08 16:22:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.52 2011/01/05 20:05:44 svasquez Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.53 2011/01/08 16:22:39 svasquez Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -194,7 +194,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.52 2011/01/05 20:05:44 svasquez Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.53 2011/01/08 16:22:39 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -286,7 +286,8 @@ module ESMF_MeshMod
 ! !IROUTINE: ESMF_MeshAddElements - Add elements to a Mesh \label{sec:mesh:api:meshaddelements}
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, elementConn, rc)
+    subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, &
+                 elementConn, rc)
 
 !
 ! !ARGUMENTS:
@@ -792,7 +793,8 @@ module ESMF_MeshMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, filetype, convert3D, convertToDual, rc)
+    function ESMF_MeshCreateFromFile(filename, filetype, convert3D, &
+                 convertToDual, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1497,21 +1499,22 @@ end function ESMF_MeshCreateFromScrip
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
                    nodalDistgrid, elementDistgrid, &
-                   numOwnedNodes, ownedNodeCoords, numOwnedElements, isMemFreed, rc)
+                   numOwnedNodes, ownedNodeCoords, &
+                   numOwnedElements, isMemFreed, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                           :: mesh
-    integer,             intent(out), optional               :: parametricDim
-    integer,             intent(out), optional               :: spatialDim
-    type(ESMF_DistGrid), intent(out), optional               :: nodalDistgrid
-    type(ESMF_DistGrid), intent(out), optional               :: elementDistgrid
-    integer,             intent(out), optional               :: numOwnedNodes
-    real(ESMF_KIND_R8), dimension(:), intent(out), optional  :: ownedNodeCoords
-    integer,             intent(out), optional               :: numOwnedElements
-    logical,             intent(out), optional               :: isMemFreed
-    integer,             intent(out), optional               :: rc
+    type(ESMF_Mesh), intent(inout)                          :: mesh
+    integer,             intent(out), optional              :: parametricDim
+    integer,             intent(out), optional              :: spatialDim
+    type(ESMF_DistGrid), intent(out), optional              :: nodalDistgrid
+    type(ESMF_DistGrid), intent(out), optional              :: elementDistgrid
+    integer,             intent(out), optional              :: numOwnedNodes
+    real(ESMF_KIND_R8), dimension(:), intent(out), optional :: ownedNodeCoords
+    integer,             intent(out), optional              :: numOwnedElements
+    logical,             intent(out), optional              :: isMemFreed
+    integer,             intent(out), optional              :: rc
 !
 ! !DESCRIPTION:
 !   Get various information from a mesh.

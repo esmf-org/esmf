@@ -303,7 +303,7 @@ program ESMF_LocStreamEx
    ! use indexflag=ESMF_INDEX_GLOBAL for the Grid creation. At this time 
    ! this is required for a Grid to be usable as a background Grid.
    !-------------------------------------------------------------------
-   grid=ESMF_GridCreateShapeTile(maxIndex=(/GridLonSize,GridLatSize/),          &
+   grid=ESMF_GridCreateShapeTile(maxIndex=(/GridLonSize,GridLatSize/), &
                                  indexflag=ESMF_INDEX_GLOBAL, &
                                  rc=rc)
 
@@ -320,14 +320,15 @@ program ESMF_LocStreamEx
    ! coordinate information and then set the coordinates to be uniformly 
    ! distributed around the globe. 
    !-------------------------------------------------------------------
-   call ESMF_GridGetCoord(grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER,   &
-                          coordDim=1,                                           &
-                          computationalLBound=clbnd, computationalUBound=cubnd, & 
+   call ESMF_GridGetCoord(grid, localDE=0,                       &
+                          staggerLoc=ESMF_STAGGERLOC_CORNER,     &
+                          coordDim=1, computationalLBound=clbnd, &
+                          computationalUBound=cubnd,             & 
                           fptr=fptrLonC, rc=rc)
 
-   call ESMF_GridGetCoord(grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-                          coordDim=2,                                         &
-                          fptr=fptrLatC, rc=rc)
+   call ESMF_GridGetCoord(grid, localDE=0,                       &
+                         staggerLoc=ESMF_STAGGERLOC_CORNER,      &
+                          coordDim=2, fptr=fptrLatC, rc=rc)
 
    do i1=clbnd(1),cubnd(1)
    do i2=clbnd(2),cubnd(2)
