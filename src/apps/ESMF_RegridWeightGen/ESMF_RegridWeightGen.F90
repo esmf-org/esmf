@@ -1,8 +1,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.18 2011/01/07 20:43:10 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.19 2011/01/10 17:57:36 peggyli Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -534,11 +534,16 @@ program ESMF_RegridWeightGen
          endif
       endif
 
+
       ! Computer fraction if bilinear
       ! src fraction is always 0
       ! destination fraction depends on the src mask, dst mask, and the weight
-      if (method .eq. 'bilinear' .and. srcIsReg .and. dstIsReg) then
-	call computeFracGrid(dstGrid, vm, indicies, dstFrac, rc)
+      if (method .eq. 'bilinear' .or. method .eq. 'patch') then
+	if (dstIsReg) then
+	   call computeFracGrid(dstGrid, vm, indicies, dstFrac, rc)
+        else
+	   call computeFracMesh(dstMesh, vm, indicies, dstFrac, rc)
+        endif
       else if (method .eq. 'conserve') then
          if (srcIsReg) then
             call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=rc)
@@ -558,7 +563,7 @@ program ESMF_RegridWeightGen
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          endif
       endif
-
+	 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
          if (isConserve) then
@@ -567,17 +572,12 @@ program ESMF_RegridWeightGen
 	           dstIsScrip=dstIsScrip, method = methodStr, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-         else if (method .eq. 'bilinear') then
+          else
             call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodStr, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-	 else
-            call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
-	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	           dstIsScrip=dstIsScrip, method = methodStr, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-         endif
+	  endif
       else 
 	 call ESMF_OutputScripWeightFile(wgtfile, weights, indicies, rc=rc)
          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -807,10 +807,11 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   type (ESMF_DistGrid) :: distgrid
   integer (ESMF_KIND_I4) :: localCount(1), elementCount(1)
   integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
-  integer (ESMF_KIND_I4),pointer :: buffer(:), buffer1(:)
+  integer (ESMF_KIND_I4),pointer :: buffer(:),buffer1(:)
   integer :: totalCount
   integer :: i, j, total 
   integer :: petNo,petCnt
+  integer :: saved, count
 
   call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
 
@@ -824,15 +825,132 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
 
   call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
   total = size(indices,1)
-  allocate(buffer(total/4))
+  ! find unique indices in the destination column: indices(:,2)
+  count = 0
+  saved = 0
+  do i=1,total
+    if (indices(i,2) /= saved) then
+	count = count+1
+        saved = indices(i,2)
+    endif
+  enddo
+  allocate(buffer(count))
+  saved = 0
   j=1
-  do i=1,total,4
-    buffer(j)=indices(i,2)
-    j=j+1
+  do i=1,total
+   if (indices(i,2) /= saved) then
+     buffer(j)=indices(i,2)
+     j=j+1
+     saved = indices(i,2)
+   endif
+  enddo
+
+  ! Get List of counts
+  localCount(1)=count
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=rc)
+  if (rc /=ESMF_SUCCESS) then
+      return
+  endif
+ 
+! Calculate Displacements
+  allocate(globalDispl(petCnt))
+  if (petNo==0) then
+     globalDispl(1)=0
+     do i=2,petCnt
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+     enddo
+  else
+    globalDispl=0
+  endif
+
+  ! Sum size
+  if (petNo==0) then
+    totalCount=0
+    do i=1,petCnt
+       totalCount=totalCount+globalCount(i)
+    enddo
+  else 
+    totalCount=1 ! Because I'm not sure what happens
+                 ! if array is not allocated in VM
+  endif
+
+
+  ! Allocate final area list
+  allocate(buffer1(totalCount))
+
+  ! Gather all areas
+  call ESMF_VMGatherV(vm,sendData=buffer, sendCount=localCount(1),&
+         recvData=buffer1,recvCounts=globalCount,recvOffsets=globalDispl,&
+         root=0, rc=rc)
+  if (rc /=ESMF_SUCCESS) then
+      return
+  endif  
+
+  if (PetNo==0) then
+    allocate(frac(elementCount(1)))
+    frac = 0
+    do i=1,totalCount
+       frac(buffer1(i))=1
+    enddo
+  endif
+
+  ! Get rid of helper variables
+  deallocate(buffer, buffer1) 
+  deallocate(globalCount)
+  deallocate(globalDispl)
+
+end subroutine computeFracGrid
+
+subroutine computeFracMesh(mesh, vm, indices, frac, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: vm
+  integer :: indices(:,:)
+  real(ESMF_KIND_R8), pointer :: frac(:)
+  integer :: rc
+
+  type (ESMF_DistGrid) :: distgrid
+  integer (ESMF_KIND_I4) :: localCount(1), elementCount(1)
+  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+  integer (ESMF_KIND_I4),pointer :: buffer(:), buffer1(:)
+  integer :: totalCount
+  integer :: i, j, total 
+  integer :: petNo,petCnt
+  integer :: count, saved
+
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+
+  ! Allocate List of counts
+  allocate(globalCount(petCnt))
+
+  call ESMF_MeshGet(mesh, nodalDistgrid=distgrid, rc=rc)
+  if (rc /=ESMF_SUCCESS) then
+      return
+  endif
+
+  call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
+  total = size(indices,1)
+  ! find unique indices in the destination column: indices(:,2)
+  count = 0
+  saved = 0
+  do i=1,total
+    if (indices(i,2) /= saved) then
+	count = count+1
+        saved = indices(i,2)
+    endif
+  enddo
+  allocate(buffer(count))
+  saved = 0
+  j=1
+  do i=1,total
+   if (indices(i,2) /= saved) then
+     buffer(j)=indices(i,2)
+     j=j+1
+     saved = indices(i,2)
+   endif
   enddo
   
   ! Get List of counts
-  localCount(1)=total/4
+  localCount(1)=count
   call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=rc)
   if (rc /=ESMF_SUCCESS) then
       return
@@ -886,8 +1004,7 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   deallocate(globalCount)
   deallocate(globalDispl)
 
-end subroutine computeFracGrid
-
+end subroutine computeFracMesh
 
 subroutine gatherFracFieldGrid(grid, fracField, petNo, frac, rc)
   type(ESMF_Grid) :: grid
