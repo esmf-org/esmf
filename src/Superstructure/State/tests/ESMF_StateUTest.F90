@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.83 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.84 2011/01/12 04:03:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.83 2011/01/05 20:05:48 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.84 2011/01/12 04:03:59 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -1175,6 +1175,26 @@
       write (failmsg, *) "Replacing a pre-existing nested State in a State"
       write (name, *) "Replace a State which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateRemove
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test removing an item
+      call ESMF_StateRemove (state10, itemName="temperatures", rc=rc)
+      write (failmsg, *) "Removing an existing State item"
+      write (name, *) "Remove an item which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test removing an item which shouldn't exist
+      call ESMF_StateRemove (state10, itemName="temperatures", rc=rc)
+      write (failmsg, *) "Removing an non-existing State item"
+      write (name, *) "Remove a non-existing item test"
+      call ESMF_Test (rc == ESMF_RC_NOT_FOUND, name, failMsg,  &
         result, ESMF_SRCLINE)
 
 #if 0
