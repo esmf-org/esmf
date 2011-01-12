@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.10 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.11 2011/01/12 21:08:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -50,7 +50,6 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!-------------------------------------------------------------------------
 !  The following line of code will read all Array data contained in a NetCDF
 !  file, place them in {\tt ESMF\_Arrays} and add them to an {\tt ESMF\_State}.
 !  Only PET 0 reads the file; the States in the other PETs remain empty.
