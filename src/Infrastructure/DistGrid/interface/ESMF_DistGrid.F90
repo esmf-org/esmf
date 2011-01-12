@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.70 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.71 2011/01/12 23:28:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.70 2011/01/08 16:22:38 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.71 2011/01/12 23:28:43 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -530,16 +530,16 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDGP(distgrid, firstExtra, lastExtra, indexflag, &
-    connectionList, rc)
+  function ESMF_DistGridCreateDGP(distgrid, firstExtra, lastExtra, &
+    indexflag, connectionList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),          intent(in)            :: distgrid
-    integer, target,              intent(in)            :: firstExtra(:,:)
-    integer, target,              intent(in)            :: lastExtra(:,:)
-    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
-    integer, target,              intent(in), optional  :: connectionList(:,:)
-    integer,                      intent(out),optional  :: rc
+    type(ESMF_DistGrid),   intent(in)            :: distgrid
+    integer, target,       intent(in)            :: firstExtra(:,:)
+    integer, target,       intent(in)            :: lastExtra(:,:)
+    type(ESMF_IndexFlag),  intent(in), optional  :: indexflag
+    integer, target,       intent(in), optional  :: connectionList(:,:)
+    integer,               intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGP
@@ -2483,8 +2483,10 @@ contains
 !     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
 !     \end{sloppypar}
 !   \item[{[collocationPDim]}]
+!     \begin{sloppypar}
 !     List of collocation id numbers, one for each dim, with
 !     {\tt size(collocationPDim) == (/dimCount/)}
+!     \end{sloppypar}
 !   \item[{[regDecompFlag]}]
 !     Flag equal to {\tt ESMF\_TRUE} for regular decompositions
 !     and equal to {\tt ESMF\_FALSE} otherwise.
@@ -2700,8 +2702,10 @@ contains
 !     Indicates whether collocation is associated with arbitrary sequence
 !     indices.
 !   \item[{[seqIndexList]}]
+!     \begin{sloppypar}
 !     List of DistGrid tile-local sequence indices for {\tt localDe}, with
 !     {\tt size(seqIndexList) == (/elementCountPDe(localDe)/)}.
+!     \end{sloppypar}
 !   \item[{[elementCount]}]
 !     Number of elements in the localDe, i.e. identical to
 !     elementCountPDe(localDe).

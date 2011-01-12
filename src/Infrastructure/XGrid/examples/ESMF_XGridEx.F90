@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.22 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.23 2011/01/12 23:28:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,26 +129,31 @@
     ! SideA first grid
     centroidA1X=(/0.5, 1.5/)
     centroidA1Y=(/0.5, 1.5/)
-    call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+    call ESMF_GridGetCoord(sideA(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+        fptr=coordX, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
     coordX = centroidA1X
-    call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
-    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+    call ESMF_GridGetCoord(sideA(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+        fptr=coordY, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+         terminationflag=ESMF_ABORT)
     coordY = centroidA1Y
 
     ! SideA second grid
     centroidA2X=(/0.5, 1.5/)
     centroidA2Y=(/2.5/)
-    call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+    call ESMF_GridGetCoord(sideA(2), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+        fptr=coordX, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		terminationflag=ESMF_ABORT)
+        terminationflag=ESMF_ABORT)
     coordX = centroidA2X
-    call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+    call ESMF_GridGetCoord(sideA(2), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+        fptr=coordY, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
     coordY = centroidA2Y
@@ -341,7 +346,8 @@
 ! Create an {\tt ESMF\_Field} on the XGrid:
 !EOE
 !BOC
-    field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
+    field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, &
+                rank=1, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
@@ -463,8 +469,8 @@
 !BOC
     ! Execute the regrid store
     do i = 1, 1
-        call ESMF_FieldRegrid(field, dstField(i), routehandle=rh_xgrid2dst(i), &
-            rc = localrc)
+        call ESMF_FieldRegrid(field, dstField(i), &
+            routehandle=rh_xgrid2dst(i), rc = localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
     enddo
@@ -495,8 +501,8 @@
         centroid=l_centroid, &  ! list of centroid of XGrid
         distgridA=l_sideAdg, &  ! list of Distgrids on side A
         distgridM = distgrid, & ! balanced distgrid
-        sparseMatA2X=l_sparseMatA2X, &  ! sparse matrix matmul parameters  A to X
-        sparseMatX2B=l_sparseMatX2B, &  ! sparse matrix matmul parameters  X to B
+        sparseMatA2X=l_sparseMatA2X, & !sparse matrix matmul parameters A to X
+        sparseMatX2B=l_sparseMatX2B, & !sparse matrix matmul parameters X to B
         rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
@@ -537,7 +543,8 @@
 ! Clean up the resources by destroy the XGrid and other objects:
 !EOE
 !BOC
-    ! After the regridding is successful. Clean up all the allocated resources:
+    ! After the regridding is successful. 
+    ! Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)

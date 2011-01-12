@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.53 2011/01/08 16:22:39 svasquez Exp $
+% $Id: Grid_desc.tex,v 1.54 2011/01/12 23:28:43 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -113,11 +113,13 @@ are specified using the ESMF\_GridConn parameter, which has values
 such as ESMF\_GRIDCONN\_PERIODIC.
 \end{sloppypar}
 
+\begin{sloppypar}
 The table below shows the ESMF\_GridConn settings used to create 
 standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
 are specified for each dimension, one for the low end and one for 
 the high end of the dimension's index values.  Note that connectivities
 have not been implemented as of v5.1.0 and default to aperiodic bounds.
+\end{sloppypar}
 
 \medskip
 \begin{tabular}{|l|c|c||c|c||}

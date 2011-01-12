@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.21 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.22 2011/01/12 23:28:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -96,9 +96,9 @@ program ESMF_ArrayFarrayEx
 ! held by an Array object.
 !EOE
 !BOC
-  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)  ! matching Fortran array pointer 
-  type(ESMF_DistGrid)         :: distgrid        ! DistGrid object
-  type(ESMF_Array)            :: array           ! Array object
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:) ! matching Fortran array ptr 
+  type(ESMF_DistGrid)         :: distgrid       ! DistGrid object
+  type(ESMF_Array)            :: array          ! Array object
   integer                     :: rc
   
 !EOC

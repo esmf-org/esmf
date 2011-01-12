@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.83 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.84 2011/01/12 23:28:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1640,6 +1640,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! for an in depth description of these regions. 
 ! \end{sloppypar}
 !
+! \begin{sloppypar}
 ! The exclusive region is the index space defined by the 
 ! distgrid of each stagger location of the Grid. This region 
 ! is the region which is owned by the DE and is the region 
@@ -1648,6 +1649,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! exclusive region defined by the DistGrid used to create the Grid.
 ! The size of the stagger exclusive region is the index space for the 
 ! Grid cells, plus the stagger padding. 
+! \end{sloppypar}
 !
 ! The default stagger padding depends on the topology of the Grid. 
 ! For an unconnected dimension the stagger padding is a width
@@ -2369,6 +2371,7 @@ endif
 
 
 !BOE
+! \begin{sloppypar}
 ! To alter which dimensions are distributed, the {\tt distgridToGridMap} 
 ! argument can be used. The {\tt distgridToGridMap} is used to set
 ! which dimensions of the Grid are mapped to the dimensions
@@ -2378,14 +2381,17 @@ endif
 ! DistGrid dimension should be mapped. 
 ! The following example illustrates the creation of a Grid where the largest
 ! dimension is first. To accomplish this the two dimensions are swapped. 
+! \end{sloppypar}
 !EOE
 
 !BOC 
    ! Create DistGrid
-   distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), rc=rc)  
+   distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), &
+        rc=rc)  
 
    ! Create Grid
-   grid2D=ESMF_GridCreate(distGrid=distgrid2D, distgridToGridMap=(/2,1/), rc=rc)
+   grid2D=ESMF_GridCreate(distGrid=distgrid2D, distgridToGridMap=(/2,1/), &
+        rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -2839,10 +2845,11 @@ endif
 !EOE
 
 !BOC
-   ! Read an XML file containing user-filled-in values for a GridSpec Attribute
-   ! package and use it to create a grid.  The file is validated against an
-   ! internal, ESMF-supplied XSD file defining the standard GridSpec Attribute
-   ! package (see file pathnames above).
+   ! Read an XML file containing user-filled-in values for a GridSpec 
+   ! Attribute package and use it to create a grid.  The file is 
+   ! validated against an internal, ESMF-supplied XSD file defining 
+   ! the standard GridSpec Attribute package (see file pathnames above).
+
    grid2D=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=rc)
 !EOC
    if (rc == ESMF_RC_LIB_NOT_PRESENT) goto 10  ! exit if Xerces not present

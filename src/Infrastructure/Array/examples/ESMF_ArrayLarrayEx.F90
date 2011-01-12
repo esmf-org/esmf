@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.24 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.25 2011/01/12 23:28:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ program ESMF_ArrayLarrayEx
   integer                     :: rc, i, j, de
   real                        :: localSum
   type(ESMF_LocalArray), allocatable :: larrayList(:) ! LocalArray object list
-  type(ESMF_LocalArray), allocatable :: larrayRefList(:)!LocalArray object list
+  type(ESMF_LocalArray), allocatable :: larrayRefList(:)!LocalArray obj. list
   
   type(ESMF_VM):: vm
   integer:: localPet, petCount

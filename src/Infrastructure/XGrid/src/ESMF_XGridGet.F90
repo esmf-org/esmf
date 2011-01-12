@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.17 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_XGridGet.F90,v 1.18 2011/01/12 23:28:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.17 2011/01/08 16:22:39 svasquez Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.18 2011/01/12 23:28:43 svasquez Exp $'
 
 !==============================================================================
 !
@@ -120,20 +120,20 @@ subroutine ESMF_XGridGetDefault(xgrid, &
 
 !
 ! !ARGUMENTS:
-type(ESMF_XGrid), intent(in)                 :: xgrid
-type(ESMF_Grid), intent(out), optional       :: sideA(:), sideB(:)
-integer, intent(out), optional               :: ngridA, ngridB
-real*8, intent(out), optional                :: area(:)
-real*8, intent(out), optional                :: centroid(:,:)
-type(ESMF_DistGrid), intent(out), optional   :: distgridA(:)
-type(ESMF_DistGrid), intent(out), optional   :: distgridB(:)
-type(ESMF_DistGrid), intent(out), optional   :: distgridM
-integer, intent(out), optional               :: dimCount
-integer, intent(out), optional               :: localDECount
-type(ESMF_XGridSpec), intent(out), optional  :: sparseMatA2X(:), sparseMatX2A(:)
-type(ESMF_XGridSpec), intent(out), optional  :: sparseMatB2X(:), sparseMatX2B(:)
-character (len=*), intent(out), optional     :: name
-integer, intent(out), optional               :: rc 
+type(ESMF_XGrid), intent(in)                :: xgrid
+type(ESMF_Grid), intent(out), optional      :: sideA(:), sideB(:)
+integer, intent(out), optional              :: ngridA, ngridB
+real*8, intent(out), optional               :: area(:)
+real*8, intent(out), optional               :: centroid(:,:)
+type(ESMF_DistGrid), intent(out), optional  :: distgridA(:)
+type(ESMF_DistGrid), intent(out), optional  :: distgridB(:)
+type(ESMF_DistGrid), intent(out), optional  :: distgridM
+integer, intent(out), optional              :: dimCount
+integer, intent(out), optional              :: localDECount
+type(ESMF_XGridSpec), intent(out), optional :: sparseMatA2X(:), sparseMatX2A(:)
+type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:), sparseMatX2B(:)
+character (len=*), intent(out), optional    :: name
+integer, intent(out), optional              :: rc 
 !
 ! !DESCRIPTION:
 !      Get information about XGrid
