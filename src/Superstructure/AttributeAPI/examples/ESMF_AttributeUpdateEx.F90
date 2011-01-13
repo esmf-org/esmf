@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.24 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.25 2011/01/13 23:20:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -144,7 +144,8 @@ implicit none
 !BOC
       convESMF = 'ESMF'
       purpGen = 'General'
-    call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
+      rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'Agency', 'NASA', &
       convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'Author', 'Max Suarez', &
@@ -159,8 +160,8 @@ implicit none
     call ESMF_AttributeSet(gridcomp1, 'ModelComponentFramework', &
       'ESMF', &
       convention=convESMF, purpose=purpGen, rc=rc)
-    call ESMF_AttributeSet(gridcomp1, 'ComponentShortName', 'GEOS-5 FV dynamical core', &
-      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'ComponentShortName', &
+      'GEOS-5 FV dynamical core', convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'PhysicalDomain', &
       'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'Version', &

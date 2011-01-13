@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.21 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.22 2011/01/13 23:20:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,7 +61,8 @@ program ESMF_AttributePackageEx
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, defaultlogfilename="AttributePackageEx.Log", &
+      call ESMF_Initialize(vm=vm, &
+                    defaultlogfilename="AttributePackageEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
       
       ! get the vm
@@ -125,54 +126,74 @@ program ESMF_AttributePackageEx
       attrList(2) = 'Mask'
 
       ! DPEDT
-      call ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(DPEDT, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(DPEDT, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,  &
+        rc=rc)
 
       ! DTDT
-      call ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(DTDT, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(DTDT, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+        rc=rc)
 
       ! DUDT
-      call ESMF_AttributeAdd(DUDT, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(DUDT, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DUDT, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(DUDT, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+        rc=rc)
 
       ! DVDT
-      call ESMF_AttributeAdd(DVDT, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(DVDT, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(DVDT, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(DVDT, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+        rc=rc)
 
       ! PHIS
-      call ESMF_AttributeAdd(PHIS, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(PHIS, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(PHIS, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(PHIS, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+        rc=rc)
 
       ! QTR
-      call ESMF_AttributeAdd(QTR, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(QTR, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(QTR, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(QTR, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+        rc=rc)
 
       ! CNV
-      call ESMF_AttributeAdd(CNV, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(CNV, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CNV, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(CNV, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+        rc=rc)
 
       ! CONVCPT
-      call ESMF_AttributeAdd(CONVCPT, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(CONVCPT, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CONVCPT, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(CONVCPT, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,    &
+        rc=rc)
 
       ! CONVKE
-      call ESMF_AttributeAdd(CONVKE, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(CONVKE, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CONVKE, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(CONVKE, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,   &
+        rc=rc)
 
       ! CONVPHI
-      call ESMF_AttributeAdd(CONVPHI, convention=convESMF, purpose=purpGen, rc=rc)
-      call ESMF_AttributeAdd(CONVPHI, convention=convCC, purpose=purpGen, &
-        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+      call ESMF_AttributeAdd(CONVPHI, convention=convESMF, purpose=purpGen, &
+        rc=rc)
+      call ESMF_AttributeAdd(CONVPHI, convention=convCC, purpose=purpGen,   &
+        attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,    &
+        rc=rc)
       
       call ESMF_AttributeAdd(gridcomp, convention=convESMF, &
         purpose=purpGen, rc=rc)

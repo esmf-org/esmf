@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.14 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.15 2011/01/13 23:20:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -101,7 +101,8 @@ program ESMF_AttReadGridCompEx
       ! The file is validated against an internal, ESMF-supplied XSD file
       ! defining the standard ESG Component Attribute package (see file
       ! pathnames above).
-      call ESMF_AttributeRead(comp=gridcomp, fileName="esmf_gridcomp.xml", rc=rc)
+      call ESMF_AttributeRead(comp=gridcomp, fileName="esmf_gridcomp.xml", &
+          rc=rc)
 !EOC
       if (rc==ESMF_RC_LIB_NOT_PRESENT) then
         xercesPresent = .false.
@@ -194,8 +195,9 @@ program ESMF_AttReadGridCompEx
 
 !BOC
       ! Get ESG "PhysicalDomain" Attribute from a GridComp
-      call ESMF_AttributeGet(gridcomp, name='PhysicalDomain', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+      call ESMF_AttributeGet(gridcomp, name='PhysicalDomain', &
+                             value=attrValue, convention='ESG', &
+                             purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Earth System') &
@@ -205,8 +207,9 @@ program ESMF_AttReadGridCompEx
 
 !BOC
       ! Get ESG "CodingLanguage" Attribute from a GridComp Test
-      call ESMF_AttributeGet(gridcomp, name='CodingLanguage', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+      call ESMF_AttributeGet(gridcomp, name='CodingLanguage', &
+                             value=attrValue,  convention='ESG', &
+                             purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Fortran 90') &

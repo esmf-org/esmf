@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.19 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.20 2011/01/13 23:20:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,10 +95,14 @@ program ESMF_AttributeCIMEx
           petList=(/0/), rc=rc)
 
       ! Create States
-      exportState1 = ESMF_StateCreate("exportState1", ESMF_STATE_EXPORT, rc=rc)
-      exportState2 = ESMF_StateCreate("exportState2", ESMF_STATE_EXPORT, rc=rc)
-      exportState3 = ESMF_StateCreate("exportState3", ESMF_STATE_EXPORT, rc=rc)
-      exportState4 = ESMF_StateCreate("exportState4", ESMF_STATE_EXPORT, rc=rc)
+      exportState1 = ESMF_StateCreate("exportState1", ESMF_STATE_EXPORT, &
+          rc=rc)
+      exportState2 = ESMF_StateCreate("exportState2", ESMF_STATE_EXPORT, &
+          rc=rc)
+      exportState3 = ESMF_StateCreate("exportState3", ESMF_STATE_EXPORT, &
+          rc=rc)
+      exportState4 = ESMF_StateCreate("exportState4", ESMF_STATE_EXPORT, &
+          rc=rc)
         
       ! Create Field Bundles
       fbundle1 = ESMF_FieldBundleCreate(name="fbundle1", rc=rc)
@@ -145,12 +149,14 @@ program ESMF_AttributeCIMEx
       ! Add CIM Attribute package to Fields
       !   convention = 'CIM 1.0'
       !   purpose    = 'Inputs Description'
-      call ESMF_AttributeAdd(DMS_emi, convention=convCIM, purpose=purpField, &
-           rc=rc)
-      call ESMF_AttributeAdd(UM, convention=convCIM, purpose=purpField,rc=rc)
+      call ESMF_AttributeAdd(DMS_emi, convention=convCIM, &
+           purpose=purpField, rc=rc)
+      call ESMF_AttributeAdd(UM, convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeAdd(OH, convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeAdd(Ozone, convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField, &
+            rc=rc)
+      call ESMF_AttributeAdd(Ozone, convention=convCIM, purpose=purpField, &
+            rc=rc)
       call ESMF_AttributeAdd(SST, convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeAdd(SO2, convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeAdd(NOx, convention=convCIM, purpose=purpField, rc=rc)
@@ -196,7 +202,7 @@ program ESMF_AttributeCIMEx
         'Earth System Modeling Framework Earth System Model 1.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationRationale', &
-       'ESMF ESM1 simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
+'ESMF ESM1 simulation run in repsect to CMIP5 core experiment 1.1 ()', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationStartDate', &
        '1960-01-01T00:00:00Z', &
@@ -210,15 +216,15 @@ program ESMF_AttributeCIMEx
        'HadGEM1 Atmosphere', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'PreviousVersionDescription', &
-        'Horizontal resolution increased to 1.25 x 0.83 degrees;&#13; ' // &
-        'Timestep reduced from 30 minutes to 20 minutes;&#13; ' // &
-        'Magnitude of polar filtering in the advection scheme reduced;&#13; ' // &
-        'Vertical velocity threshold at which targeted moisture diffusion ' // &
-        'is triggered was increased from 0.1m/s to 0.4m/s;&#13; ' // &
-        'Snow-free sea-ice albedo reduced from 0.61 to 0.57;&#13; ' // &
-        'Total ocean current included in the calculation of surface ' // &
-        'fluxes of heat, moisture, and momentum.', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+'Horizontal resolution increased to 1.25 x 0.83 degrees;&#13; ' // &
+'Timestep reduced from 30 minutes to 20 minutes;&#13; ' // &
+'Magnitude of polar filtering in the advection scheme reduced;&#13; ' // &
+'Vertical velocity threshold at which targeted moisture diffusion ' // &
+'is triggered was increased from 0.1m/s to 0.4m/s;&#13; ' // &
+'Snow-free sea-ice albedo reduced from 0.61 to 0.57;&#13; ' // &
+'Total ocean current included in the calculation of surface ' // &
+'fluxes of heat, moisture, and momentum.', &
+convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Platform description attributes
       call ESMF_AttributeSet(cplcomp, 'CompilerName', &
@@ -231,10 +237,10 @@ program ESMF_AttributeCIMEx
        'HECToR', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineDescription', &
-        'HECToR (Phase 2a) is currently an integrated system known ' // &
-        'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
-        'system known as BlackWidow, and storage systems.', &
-        convention=convCIM, purpose=purpPlatform, rc=rc)
+'HECToR (Phase 2a) is currently an integrated system known ' // &
+'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
+'system known as BlackWidow, and storage systems.', &
+convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineSystem', &
        'Parallel', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
@@ -262,8 +268,8 @@ program ESMF_AttributeCIMEx
        'Gerard Devine', &
         convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'PhysicalAddress', &
-       'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
-        convention=convISO, purpose=purpRP, rc=rc)
+'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
+convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'EmailAddress', &
        'g.m.devine@reading.ac.uk', &
         convention=convISO, purpose=purpRP, rc=rc)
@@ -279,22 +285,22 @@ program ESMF_AttributeCIMEx
        'Shaffrey_2009', &
         convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'LongTitle', &
-       'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
-       'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
-       'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
-       'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
-       'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
-       'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
-       'The New U.K. High Resolution Global Environment Model - Model ' // &
-       'description and basic evaluation. Journal of Climate, 22 (8). ' // &
-       '1861-1896.', &
-        convention=convISO, purpose=purpCitation, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'Date', &
-       '2009-03-05', &
-        convention=convISO, purpose=purpCitation, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'PresentationForm', &
-       'Online Refereed', &
-        convention=convISO, purpose=purpCitation, rc=rc)
+'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
+'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
+'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
+'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
+'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
+'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
+'The New U.K. High Resolution Global Environment Model - Model ' // &
+'description and basic evaluation. Journal of Climate, 22 (8). ' // &
+'1861-1896.', &
+convention=convISO, purpose=purpCitation, rc=rc)
+call ESMF_AttributeSet(cplcomp, 'Date', &
+'2009-03-05', &
+convention=convISO, purpose=purpCitation, rc=rc)
+call ESMF_AttributeSet(cplcomp, 'PresentationForm', &
+'Online Refereed', &
+convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'DOI', &
        'doi:10.1175/2008JCLI2508.1', &
         convention=convISO, purpose=purpCitation, rc=rc)

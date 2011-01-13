@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.6 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.7 2011/01/13 23:20:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -110,7 +110,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! Get custom "MyAttribute1" from CplComp
-      call ESMF_AttributeGet(cplcomp, name='MyAttribute1', value=attrValue, rc=rc)
+      call ESMF_AttributeGet(cplcomp, name='MyAttribute1', value=attrValue, &
+           rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='My Coupler') &
@@ -120,7 +121,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! Get custom "MyAttribute2" from CplComp
-      call ESMF_AttributeGet(cplcomp, name='MyAttribute2', value=attrValue, rc=rc)
+      call ESMF_AttributeGet(cplcomp, name='MyAttribute2', value=attrValue, &
+           rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='My Earth System Model') &
@@ -130,7 +132,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! Get custom "MyAttribute3" from CplComp
-      call ESMF_AttributeGet(cplcomp, name='MyAttribute3', value=attrValue, rc=rc)
+      call ESMF_AttributeGet(cplcomp, name='MyAttribute3', value=attrValue, &
+           rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Atmosphere') &

@@ -1,4 +1,4 @@
-% $Id: ESMF_inframethodoverview.tex,v 1.32 2010/10/15 21:42:29 oehmke Exp $
+% $Id: ESMF_inframethodoverview.tex,v 1.33 2011/01/13 23:20:40 svasquez Exp $
 
 \section{Overview of Distributed Data Methods}
 
@@ -94,12 +94,14 @@ see Section \ref{sec:routeimpl}.)
 
 \item
 
+\begin{sloppypar}
 There is an internal {\tt ESMC\_Route} class which supports the 
 distributed communication methods.  There are 4 additional internal-only
 classes which support {\tt ESMC\_Route}: {\tt ESMC\_AxisIndex}, 
 {\tt ESMC\_XPacket}, {\tt ESMC\_CommTable}, and {\tt ESMC\_RTable};
 and a public {\tt ESMF\_RouteHandle} class which is what the user 
 sets and gets.  The implementation is in C++, with interfaces in Fortran 90.
+\end{sloppypar}
 
 The general communication strategy is that each
 DE computes its own communication information independently,

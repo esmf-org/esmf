@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.16 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.17 2011/01/13 23:20:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -64,7 +64,8 @@ program ESMF_AttReadGridEx
 
 !BOC
       ! initialize ESMF
-      call ESMF_Initialize(vm=vm, defaultlogfilename="AttReadGridEx.Log", &
+      call ESMF_Initialize(vm=vm, &
+                    defaultlogfilename="AttReadGridEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
@@ -116,8 +117,9 @@ program ESMF_AttReadGridEx
 
 !BOC
       ! Get GridSpec "NumberOfGridTiles" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='NumberOfGridTiles', value=attrValue, &
-                             convention='GridSpec', purpose='General', rc=rc)
+      call ESMF_AttributeGet(grid, name='NumberOfGridTiles', &
+                             value=attrValue, convention='GridSpec', &
+                             purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='1') &
@@ -239,8 +241,9 @@ program ESMF_AttReadGridEx
 
 !BOC
       ! Get GridSpec "HorizontalResolution" Attribute from a Grid
-      call ESMF_AttributeGet(grid, name='HorizontalResolution', value=attrValue, &
-                             convention='GridSpec', purpose='General', rc=rc)
+      call ESMF_AttributeGet(grid, name='HorizontalResolution', &
+                             value=attrValue, convention='GridSpec', &
+                             purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='C48') &
