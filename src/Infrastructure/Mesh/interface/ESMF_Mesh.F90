@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.54 2011/01/13 17:01:21 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.55 2011/01/13 18:30:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.54 2011/01/13 17:01:21 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.55 2011/01/13 18:30:33 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -197,7 +197,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.54 2011/01/13 17:01:21 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.55 2011/01/13 18:30:33 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -331,9 +331,9 @@ module ESMF_MeshMod
 !
 !
 ! !DESCRIPTION:
-!   Test whether array1 and array2 are valid aliases to the same ESMF
+!   Test whether mesh1 and mesh2 are valid aliases to the same ESMF
 !   Mesh object in memory. For a more general comparison of two ESMF Meshes,
-!   going beyond the simple alias test, the ESMF_MeshMatch() function (not yet
+!   going beyond the simple alias test, the ESMF\_MeshMatch() function (not yet
 !   implemented) must be used.
 !
 !   The arguments are:
@@ -371,9 +371,9 @@ module ESMF_MeshMod
 !
 !
 ! !DESCRIPTION:
-!   Test whether array1 and array2 are {\it not} valid aliases to the
+!   Test whether mesh1 and mesh2 are {\it not} valid aliases to the
 !   same ESMF Mesh object in memory. For a more general comparison of two ESMF
-!   Meshes, going beyond the simple alias test, the ESMF_MeshMatch() function
+!   Meshes, going beyond the simple alias test, the ESMF\_MeshMatch() function
 !   (not yet implemented) must be used.
 !
 !   The arguments are:
