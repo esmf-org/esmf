@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.36 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.37 2011/01/13 16:34:32 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.36 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.37 2011/01/13 16:34:32 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -258,7 +258,7 @@ contains
     type (File_desc_t)  :: FileObj @\
     type(var_desc_t) :: vard @\
     type (IO_desc_t)    :: IOdesc @\
-    integer :: mode, num_aggregator @\
+    integer :: num_aggregator @\
     integer :: stride, base, num_iotasks, rearr_type @\
     integer(kind=PIO_OFFSET) :: one @\
     integer :: basepiotype, fmtiotype @\
@@ -391,7 +391,6 @@ contains
     Inquire (file=trim(file), exist=isfilepresent) @\
     call ESMF_VMBarrier(vm_opt, rc=localrc) @\
     ! @\
-    mode = pio_64bit_offset @\
     if (appd_internal .and. piofmt.ne.'bin') then @\
       ! For bundle append @\
       pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,trim(file),mode=PIO_write) @\
@@ -568,7 +567,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     type (File_desc_t)  :: FileObj @\
     type(var_desc_t) :: vard @\
     type (IO_desc_t)    :: IOdesc @\
-    integer :: mode, num_aggregator @\
+    integer :: num_aggregator @\
     integer :: stride, base, num_iotasks, rearr_type @\
     integer(kind=PIO_OFFSET) :: frame @\
     integer :: basepiotype, fmtiotype @\
@@ -690,7 +689,6 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     !-------------------------------- @\
     ! Open a file and check data @\
     !-------------------------------- @\
-    mode = pio_64bit_offset @\
     pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,file) @\
     call check_pioerr(pioerr,localPet,  & @\
       __FILE__,  & @\
