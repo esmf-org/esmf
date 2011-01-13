@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.31 2011/01/13 17:32:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.31 2011/01/13 17:32:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -114,10 +114,14 @@ program ESMF_AttributeStateUTest
       fbfs = ESMF_FieldBundleCreate(name="fieldbundleforstate", rc=rc)
       
       ! states
-      state = ESMF_StateCreate("original state", ESMF_STATE_IMPORT, rc=rc)
-      sfs = ESMF_StateCreate("stateforstatelink", ESMF_STATE_EXPORT, rc=rc)
-      stateValue = ESMF_StateCreate("stateforvaluecopy", ESMF_STATE_EXPORT, rc=rc)
-      stateHybrid = ESMF_StateCreate("stateforhybridcopy", ESMF_STATE_EXPORT, rc=rc)
+      state = ESMF_StateCreate(stateName="original state",  &
+                               stateType=ESMF_STATE_IMPORT, rc=rc)
+      sfs   = ESMF_StateCreate(stateName="stateforstatelink", &
+                               stateType=ESMF_STATE_EXPORT, rc=rc)
+      stateValue = ESMF_StateCreate(stateName="stateforvaluecopy",  &
+                               stateType=ESMF_STATE_EXPORT, rc=rc)
+      stateHybrid = ESMF_StateCreate(stateName="stateforhybridcopy",  &
+                               stateType=ESMF_STATE_EXPORT, rc=rc)
 
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.31 2011/01/13 17:32:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.31 2011/01/13 17:32:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -111,7 +111,8 @@ program ESMF_AttributeCplCompUTest
       !------------------------------------------------------------------------
       ! preparations
       ! states
-      sfc = ESMF_StateCreate("stateforcplcomp", ESMF_STATE_EXPORT, rc=rc)
+      sfc = ESMF_StateCreate(stateName="stateforcplcomp",  &
+                             stateType=ESMF_STATE_EXPORT, rc=rc)
       
       ! coupler components
       cplcomp = ESMF_CplCompCreate(name="cplcomp", petList=(/0/), rc=rc)
