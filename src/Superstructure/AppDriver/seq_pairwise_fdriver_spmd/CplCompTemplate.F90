@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.8 2010/11/03 22:48:45 theurich Exp $
+! $Id: CplCompTemplate.F90,v 1.9 2011/01/13 15:06:43 theurich Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -27,7 +27,7 @@
 
     subroutine UserCpl_SetServices(ccomp, rc)
        type(ESMF_CplComp) :: ccomp
-       integer :: rc
+       integer, intent(out) :: rc
 
        call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETINIT, my_init, rc=rc)
        call ESMF_CplCompSetEntryPoint(ccomp, ESMF_SETRUN, my_run, rc=rc)
@@ -40,7 +40,7 @@
       type(ESMF_CplComp) :: ccomp
       type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       type(ESMF_State) :: state1, state2
 
@@ -59,7 +59,7 @@
       type(ESMF_CplComp) :: ccomp
       type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       call ESMF_LogWrite("Coupler Run routine called", ESMF_LOG_INFO)
 
@@ -73,7 +73,7 @@
       type(ESMF_CplComp) :: ccomp
       type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       call ESMF_LogWrite("Coupler Finalize routine called", ESMF_LOG_INFO)
 

@@ -1,4 +1,4 @@
-! $Id: GridComp1Template.F90,v 1.6 2010/11/03 22:48:45 theurich Exp $
+! $Id: GridComp1Template.F90,v 1.7 2011/01/13 15:06:43 theurich Exp $
 !
 ! Template code for a child Grid Component, which has no subcomponents
 !  below it.  This is where the bulk of the computation is expected to be
@@ -35,7 +35,7 @@
 
     subroutine UserGrid_SetServices(gcomp, rc)
        type(ESMF_GridComp) :: gcomp
-       integer :: rc
+       integer, intent(out) :: rc
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
@@ -49,7 +49,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       call ESMF_LogWrite("User initialize routine called", ESMF_LOG_INFO)
       rc = ESMF_SUCCESS
@@ -62,7 +62,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       call ESMF_LogWrite("User run routine called", ESMF_LOG_INFO)
       rc = ESMF_SUCCESS
@@ -75,7 +75,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       call ESMF_LogWrite("User finalize routine called", ESMF_LOG_INFO)
       rc = ESMF_SUCCESS

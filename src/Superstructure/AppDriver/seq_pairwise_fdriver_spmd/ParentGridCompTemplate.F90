@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.11 2010/11/03 22:48:45 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.12 2011/01/13 15:06:43 theurich Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -44,7 +44,7 @@
 
     subroutine UserPComp_SetServices(gcomp, rc)
        type(ESMF_GridComp) :: gcomp
-       integer :: rc
+       integer, intent(out) :: rc
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
@@ -58,7 +58,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: parentclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       type(ESMF_Grid) :: parentgrid
 
@@ -123,7 +123,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: parentclock
-      integer :: rc
+      integer, intent(out) :: rc
 
      
       call ESMF_LogWrite("Parent Gridded Component Run routine called", ESMF_LOG_INFO)
@@ -145,7 +145,7 @@
       type(ESMF_State) :: importState
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: parentclock
-      integer :: rc
+      integer, intent(out) :: rc
      
       call ESMF_LogWrite("Parent Gridded Component Finalize routine called", ESMF_LOG_INFO)
 
