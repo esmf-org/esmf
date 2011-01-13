@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.234 2011/01/08 06:10:45 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.235 2011/01/13 21:34:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.234 2011/01/08 06:10:45 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.235 2011/01/13 21:34:39 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -212,7 +212,7 @@ module ESMF_StateMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_StateAssignment(=) - State assignment operator
+! !IROUTINE: ESMF_StateAssignment(=) - State assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -224,10 +224,9 @@ module ESMF_StateMod
 !
 !
 ! !DESCRIPTION:
-!   The default Fortran assignment, setting {\tt state1} as an alias to
-!   the same ESMF State as {\tt state2}. If {\tt state2} is an invalid 
-!   State object then {\tt state1} will be equally invalid after the
-!   assignment.
+!   Assign state1 as an alias to the same ESMF State object in memory
+!   as state2. If state2 is invalid, then state1 will be equally invalid after
+!   the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -259,11 +258,10 @@ module ESMF_StateMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt state1} and {\tt state2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF State object.
+!   Test whether state1 and state2 are valid aliases to the same ESMF
+!   State object in memory. For a more general comparison of two ESMF States,
+!   going beyond the simple alias test, the ESMF\_StateMatch() function (not yet
+!   implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -272,7 +270,7 @@ module ESMF_StateMod
 !     operation.
 !   \item[state2]
 !     The {\tt ESMF\_State} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -300,11 +298,10 @@ module ESMF_StateMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt state1} and {\tt state2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF State object.
+!   Test whether state1 and state2 are {\it not} valid aliases to the
+!   same ESMF State object in memory. For a more general comparison of two ESMF
+!   States, going beyond the simple alias test, the ESMF\_StateMatch() function
+!   (not yet implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -313,7 +310,7 @@ module ESMF_StateMod
 !     operation.
 !   \item[state2]
 !     The {\tt ESMF\_State} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -376,10 +373,7 @@ contains
       sinit2 .eq. ESMF_INIT_CREATED) then
       ESMF_StateEQ = associated(state1%statep,state2%statep)
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(sinit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(sinit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_StateEQ = (localrc1.eq.localrc2) .and. associated(state1%statep,state2%statep)
+      ESMF_StateEQ = ESMF_FALSE
     endif
 
   end function ESMF_StateEQ
