@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteUTest.F90,v 1.6 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_StateReadWriteUTest.F90,v 1.7 2011/01/13 06:21:33 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateReadWriteUTest.F90,v 1.6 2011/01/05 20:05:48 svasquez Exp $'
+      '$Id: ESMF_StateReadWriteUTest.F90,v 1.7 2011/01/13 06:21:33 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -69,7 +69,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Creation of an empty export State 
-      state = ESMF_StateCreate("Ocean Export", ESMF_STATE_EXPORT, rc=rc)  
+      state = ESMF_StateCreate(stateName="Ocean Export", stateType=ESMF_STATE_EXPORT, rc=rc)  
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating an empty export State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
