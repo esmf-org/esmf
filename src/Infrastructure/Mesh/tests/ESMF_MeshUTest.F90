@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.25 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.26 2011/01/13 17:01:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.25 2011/01/05 20:05:45 svasquez Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.26 2011/01/13 17:01:21 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@ program ESMF_MeshUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  type(ESMF_Mesh) :: mesh,mesh2
+  type(ESMF_Mesh) :: mesh, mesh2, meshAlias
   type(ESMF_VM) :: vm
   type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid
   logical :: correct
@@ -71,6 +71,8 @@ program ESMF_MeshUTest
   real(ESMF_KIND_R8), pointer :: pntList(:)
   integer, pointer :: petList(:)
   integer :: spatialDim, parametricDim
+  logical:: meshBool
+
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -193,14 +195,123 @@ program ESMF_MeshUTest
   ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! Get rid of Mesh
-  call ESMF_MeshDestroy(mesh, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_MeshDestroy(mesh, rc=rc)
 
   ! endif for skip for >1 proc
   endif 
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+
+  ! init success flag
+  meshBool = .false.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  write(name, *) "Mesh equality before assignment Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  meshBool = (meshAlias.eq.mesh)
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(.not.meshBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_MeshAssignment(=)()
+
+  ! init success flag
+  meshBool=.true.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+  write(name, *) "Mesh assignment and equality Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  meshAlias = mesh
+  meshBool = (meshAlias.eq.mesh)
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  write(name, *) "MeshDestroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_MeshDestroy(mesh, rc=rc)
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_MeshOperator(==)()
+
+  ! init success flag
+  meshBool = .false.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  write(name, *) "Mesh equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  meshBool = (meshAlias==mesh)
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(.not.meshBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Testing ESMF_MeshOperator(/=)()
+
+  ! init success flag
+  meshBool=.true.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  write(name, *) "Mesh non-equality after destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  meshBool = (meshAlias/=mesh)
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  write(name, *) "Double MeshDestroy through alias Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_MeshDestroy(meshAlias, rc=rc)
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest

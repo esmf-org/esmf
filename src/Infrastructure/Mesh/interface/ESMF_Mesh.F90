@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.53 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_Mesh.F90,v 1.54 2011/01/13 17:01:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.53 2011/01/08 16:22:39 svasquez Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.54 2011/01/13 17:01:21 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -166,6 +166,9 @@ module ESMF_MeshMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_MeshCreate           
   public ESMF_MeshWrite
   public ESMF_MeshAddNodes
@@ -194,7 +197,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.53 2011/01/08 16:22:39 svasquez Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.54 2011/01/13 17:01:21 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -276,10 +279,218 @@ module ESMF_MeshMod
 
 !------------------------------------------------------------------------------
 
-      contains
+!===============================================================================
+! MeshOperator() interfaces
+!===============================================================================
 
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_MeshAssignment(=) - Mesh assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   mesh1 = mesh2
+!
+! !ARGUMENTS:
+!   type(ESMF_Mesh) :: mesh1
+!   type(ESMF_Mesh) :: mesh2
+!
+!
+! !DESCRIPTION:
+!   Assign mesh1 as an alias to the same ESMF Mesh object in memory
+!   as mesh2. If mesh2 is invalid, then mesh1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[mesh1]
+!     The {\tt ESMF\_Mesh} object on the left hand side of the assignment.
+!   \item[mesh2]
+!     The {\tt ESMF\_Mesh} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_MeshOperator(==) - Mesh equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (mesh1 == mesh2) then ... endif
+!             OR
+!   result = (mesh1 == mesh2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Mesh), intent(in) :: mesh1
+!   type(ESMF_Mesh), intent(in) :: mesh2
+!
+!
+! !DESCRIPTION:
+!   Test whether array1 and array2 are valid aliases to the same ESMF
+!   Mesh object in memory. For a more general comparison of two ESMF Meshes,
+!   going beyond the simple alias test, the ESMF_MeshMatch() function (not yet
+!   implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[mesh1]
+!     The {\tt ESMF\_Mesh} object on the left hand side of the equality
+!     operation.
+!   \item[mesh2]
+!     The {\tt ESMF\_Mesh} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_MeshEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_MeshOperator(/=) - Mesh not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (mesh1 == mesh2) then ... endif
+!             OR
+!   result = (mesh1 == mesh2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_Mesh), intent(in) :: mesh1
+!   type(ESMF_Mesh), intent(in) :: mesh2
+!
+!
+! !DESCRIPTION:
+!   Test whether array1 and array2 are {\it not} valid aliases to the
+!   same ESMF Mesh object in memory. For a more general comparison of two ESMF
+!   Meshes, going beyond the simple alias test, the ESMF_MeshMatch() function
+!   (not yet implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[mesh1]
+!     The {\tt ESMF\_Mesh} object on the left hand side of the non-equality
+!     operation.
+!   \item[mesh2]
+!     The {\tt ESMF\_Mesh} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_MeshNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshEQ()"
+!BOPI
+! !IROUTINE:  ESMF_MeshEQ - Compare two Meshes for equality
+!
+! !INTERFACE:
+  function ESMF_MeshEQ(mesh1, mesh2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_MeshEQ
+
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in) :: mesh1
+    type(ESMF_Mesh), intent(in) :: mesh2
+
+! !DESCRIPTION:
+!   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE minit1, minit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    minit1 = ESMF_MeshGetInit(mesh1)
+    minit2 = ESMF_MeshGetInit(mesh2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (minit1 .eq. ESMF_INIT_CREATED .and. &
+      minit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_MeshEQ = mesh1%this .eq. mesh2%this
+    else
+      ESMF_MeshEQ = ESMF_FALSE
+    endif
+
+  end function ESMF_MeshEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshNE()"
+!BOPI
+! !IROUTINE:  ESMF_MeshNE - Compare two Meshes for non-equality
+!
+! !INTERFACE:
+  function ESMF_MeshNE(mesh1, mesh2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_MeshNE
+
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in) :: mesh1
+    type(ESMF_Mesh), intent(in) :: mesh2
+
+! !DESCRIPTION:
+!   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE minit1, minit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_MeshNE = .not.ESMF_MeshEQ(mesh1, mesh2)
+
+  end function ESMF_MeshNE
+!-------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshAddElements()"
 !BOP
@@ -1662,7 +1873,7 @@ end function ESMF_MeshCreateFromScrip
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh1, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh2, rc)
     
-    ! If meshs have not been fully created
+    ! If meshes have not been fully created
     if (.not. mesh1%isFullyCreated) then
        call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
                  "- the mesh has not been fully created", & 

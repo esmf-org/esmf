@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.59 2010/11/12 06:58:00 eschwab Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.60 2011/01/13 17:01:32 rokuingh Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -31,9 +31,10 @@
     integer :: rc 
     integer :: i, ni
     integer :: counts(ESMF_MAXDIM), lb(1), ub(1)
-    type(ESMF_LocalArray) :: array1, arrayCpy
+    type(ESMF_LocalArray) :: array1, arrayCpy, localarrayAlias
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr
     integer(ESMF_KIND_I4), dimension(:), pointer :: intptr
+    logical:: localarrayBool
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -80,8 +81,61 @@
     call ESMF_LocalArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!------------------------------------------------------------------------------
- 
+    !------------------------------------------------------------------------------
+     
+    !--------------------------------------------------------------------------
+    !NEX_UTest
+    ! Allocate and set initial data values, using a lower bound != 1
+    ni = 515 
+    allocate(intptr(5:ni+5))
+    do i=5,ni+5
+       intptr(i) = 11*i
+    enddo
+    print *, "first 10 intptr data = ", intptr(5:15)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Local Array with Integer 1D Data Test"
+    array1 = ESMF_LocalArrayCreate(intptr, ESMF_DATA_REF, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "LocalArray equality before assignment Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    localarrayBool = (localarrayAlias.eq.array1)
+    call ESMF_Test(.not.localarrayBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_LocalArrayAssignment(=)()
+    write(name, *) "LocalArray assignment and equality Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    localarrayAlias = array1
+    localarrayBool = (localarrayAlias.eq.array1)
+    call ESMF_Test(localarrayBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "LocalArrayDestroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    call ESMF_LocalArrayDestroy(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_LocalArrayOperator(==)()
+    write(name, *) "LocalArray equality after destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    localarrayBool = (localarrayAlias==array1)
+    call ESMF_Test(.not.localarrayBool, name, failMsg, result, ESMF_SRCLINE)
+    
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Testing ESMF_LocalArrayOperator(/=)()
+    write(name, *) "LocalArray non-equality after destroy Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    localarrayBool = (localarrayAlias/=array1)
+    call ESMF_Test(localarrayBool, name, failMsg, result, ESMF_SRCLINE)
+    
     !--------------------------------------------------------------------------
     !NEX_UTest
     write(name, *) "Creating a LocalArray from TKR without counts, lbounds, ubounds"

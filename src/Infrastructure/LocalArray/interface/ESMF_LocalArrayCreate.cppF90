@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.30 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.31 2011/01/13 17:01:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,6 +115,9 @@ module ESMF_LocalArrayCreateMod
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
+  public operator(==)
+  public operator(/=)
+
   public ESMF_LocalArrayCreate
   public ESMF_LocalArrayDestroy
 
@@ -136,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.30 2011/01/08 16:22:39 svasquez Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.31 2011/01/13 17:01:32 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -218,6 +221,120 @@ interface operator (.ne.)
 end interface
 
 
+!===============================================================================
+! LocalArrayOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LocalArrayAssignment(=) - LocalArray assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   localarray1 = localarray2
+!
+! !ARGUMENTS:
+!   type(ESMF_LocalArray) :: localarray1
+!   type(ESMF_LocalArray) :: localarray2
+!
+!
+! !DESCRIPTION:
+!   Assign localarray1 as an alias to the same ESMF LocalArray object in memory
+!   as localarray2. If localarray2 is invalid, then localarray1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[localarray1]
+!     The {\tt ESMF\_LocalArray} object on the left hand side of the assignment.
+!   \item[localarray2]
+!     The {\tt ESMF\_LocalArray} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LocalArrayOperator(==) - LocalArray equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (localarray1 == localarray2) then ... endif
+!             OR
+!   result = (localarray1 == localarray2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_LocalArray), intent(in) :: localarray1
+!   type(ESMF_LocalArray), intent(in) :: localarray2
+!
+!
+! !DESCRIPTION:
+!   Test whether array1 and array2 are valid aliases to the same ESMF
+!   LocalArray object in memory. For a more general comparison of two ESMF LocalArrays,
+!   going beyond the simple alias test, the ESMF_LocalArrayMatch() function (not yet
+!   implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[localarray1]
+!     The {\tt ESMF\_LocalArray} object on the left hand side of the equality
+!     operation.
+!   \item[localarray2]
+!     The {\tt ESMF\_LocalArray} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_LocalArrayEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LocalArrayOperator(/=) - LocalArray not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (localarray1 == localarray2) then ... endif
+!             OR
+!   result = (localarray1 == localarray2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_LocalArray), intent(in) :: localarray1
+!   type(ESMF_LocalArray), intent(in) :: localarray2
+!
+!
+! !DESCRIPTION:
+!   Test whether array1 and array2 are {\it not} valid aliases to the
+!   same ESMF LocalArray object in memory. For a more general comparison of two ESMF
+!   LocalArrays, going beyond the simple alias test, the ESMF_LocalArrayMatch() function
+!   (not yet implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[localarray1]
+!     The {\tt ESMF\_LocalArray} object on the left hand side of the non-equality
+!     operation.
+!   \item[localarray2]
+!     The {\tt ESMF\_LocalArray} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_LocalArrayNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -226,6 +343,93 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+!-------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayEQ()"
+!BOPI
+! !IROUTINE:  ESMF_LocalArrayEQ - Compare two LocalArrays for equality
+!
+! !INTERFACE:
+  function ESMF_LocalArrayEQ(localarray1, localarray2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_LocalArrayEQ
+
+! !ARGUMENTS:
+    type(ESMF_LocalArray), intent(in) :: localarray1
+    type(ESMF_LocalArray), intent(in) :: localarray2
+
+! !DESCRIPTION:
+!   Test if both {\tt localarray1} and {\tt localarray2} alias the same ESMF LocalArray 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE lainit1, lainit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    lainit1 = ESMF_LocalArrayGetInit(localarray1)
+    lainit2 = ESMF_LocalArrayGetInit(localarray2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (lainit1 .eq. ESMF_INIT_CREATED .and. &
+      lainit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_LocalArrayEQ = localarray1%this .eq. localarray2%this
+    else
+      ESMF_LocalArrayEQ = ESMF_FALSE
+    endif
+
+  end function ESMF_LocalArrayEQ
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_LocalArrayNE()"
+!BOPI
+! !IROUTINE:  ESMF_LocalArrayNE - Compare two LocalArrays for non-equality
+!
+! !INTERFACE:
+  function ESMF_LocalArrayNE(localarray1, localarray2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_LocalArrayNE
+
+! !ARGUMENTS:
+    type(ESMF_LocalArray), intent(in) :: localarray1
+    type(ESMF_LocalArray), intent(in) :: localarray2
+
+! !DESCRIPTION:
+!   Test if both {\tt localarray1} and {\tt localarray2} alias the same ESMF LocalArray 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE lainit1, lainit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_LocalArrayNE = .not.ESMF_LocalArrayEQ(localarray1, localarray2)
+
+  end function ESMF_LocalArrayNE
+!-------------------------------------------------------------------------------
 
 ! functions to compare two ESMF_CopyFlags to see if they are the same or not
 
