@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.150 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.151 2011/01/13 21:29:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.150 2011/01/05 20:05:47 svasquez Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.151 2011/01/13 21:29:39 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -120,7 +120,7 @@ module ESMF_GridCompMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompAssignment(=) - GridComp assignment operator
+! !IROUTINE: ESMF_GridCompAssignment(=) - GridComp assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -132,10 +132,9 @@ module ESMF_GridCompMod
 !
 !
 ! !DESCRIPTION:
-!   The default Fortran assignment, setting {\tt gridcomp1} as an alias to
-!   the same ESMF GridComp as {\tt gridcomp2}. If {\tt gridcomp2} is an invalid 
-!   GridComp object then {\tt gridcomp1} will be equally invalid after the
-!   assignment.
+!   Assign gridcomp1 as an alias to the same ESMF GridComp object in memory
+!   as gridcomp2. If gridcomp2 is invalid, then gridcomp1 will be equally invalid after
+!   the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -167,11 +166,10 @@ module ESMF_GridCompMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt gridcomp1} and {\tt gridcomp2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF GridComp object.
+!   Test whether gridcomp1 and gridcomp2 are valid aliases to the same ESMF
+!   GridComp object in memory. For a more general comparison of two ESMF GridComps,
+!   going beyond the simple alias test, the ESMF\_GridCompMatch() function (not yet
+!   implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -180,7 +178,7 @@ module ESMF_GridCompMod
 !     operation.
 !   \item[gridcomp2]
 !     The {\tt ESMF\_GridComp} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -208,11 +206,10 @@ module ESMF_GridCompMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt gridcomp1} and {\tt gridcomp2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF GridComp object.
+!   Test whether gridcomp1 and gridcomp2 are {\it not} valid aliases to the
+!   same ESMF GridComp object in memory. For a more general comparison of two ESMF
+!   GridComps, going beyond the simple alias test, the ESMF\_GridCompMatch() function
+!   (not yet implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -221,7 +218,7 @@ module ESMF_GridCompMod
 !     operation.
 !   \item[gridcomp2]
 !     The {\tt ESMF\_GridComp} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -284,10 +281,7 @@ contains
       gcinit2 .eq. ESMF_INIT_CREATED) then
       ESMF_GridCompEQ = associated(gridcomp1%compp,gridcomp2%compp)
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(gcinit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(gcinit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_GridCompEQ = (localrc1.eq.localrc2) .and. associated(gridcomp1%compp,gridcomp2%compp)
+      ESMF_GridCompEQ = ESMF_FALSE
     endif
 
   end function ESMF_GridCompEQ
