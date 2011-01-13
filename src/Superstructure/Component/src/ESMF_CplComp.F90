@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.131 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_CplComp.F90,v 1.132 2011/01/13 18:31:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.131 2011/01/05 20:05:47 svasquez Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.132 2011/01/13 18:31:11 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -118,7 +118,7 @@ module ESMF_CplCompMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompAssignment(=) - CplComp assignment operator
+! !IROUTINE: ESMF_CplCompAssignment(=) - CplComp assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -130,10 +130,9 @@ module ESMF_CplCompMod
 !
 !
 ! !DESCRIPTION:
-!   The default Fortran assignment, setting {\tt cplcomp1} as an alias to
-!   the same ESMF CplComp as {\tt cplcomp2}. If {\tt cplcomp2} is an invalid 
-!   CplComp object then {\tt cplcomp1} will be equally invalid after the
-!   assignment.
+!   Assign cplcomp1 as an alias to the same ESMF CplComp object in memory
+!   as cplcomp2. If cplcomp2 is invalid, then cplcomp1 will be equally invalid after
+!   the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -165,11 +164,10 @@ module ESMF_CplCompMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt cplcomp1} and {\tt cplcomp2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF CplComp object.
+!   Test whether cplcomp1 and cplcomp2 are valid aliases to the same ESMF
+!   CplComp object in memory. For a more general comparison of two ESMF CplComps,
+!   going beyond the simple alias test, the ESMF\_CplCompMatch() function (not yet
+!   implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -178,7 +176,7 @@ module ESMF_CplCompMod
 !     operation.
 !   \item[cplcomp2]
 !     The {\tt ESMF\_CplComp} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -206,11 +204,10 @@ module ESMF_CplCompMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt cplcomp1} and {\tt cplcomp2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF CplComp object.
+!   Test whether cplcomp1 and cplcomp2 are {\it not} valid aliases to the
+!   same ESMF CplComp object in memory. For a more general comparison of two ESMF
+!   CplComps, going beyond the simple alias test, the ESMF\_CplCompMatch() function
+!   (not yet implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -219,7 +216,7 @@ module ESMF_CplCompMod
 !     operation.
 !   \item[cplcomp2]
 !     The {\tt ESMF\_CplComp} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -282,10 +279,7 @@ contains
       ccinit2 .eq. ESMF_INIT_CREATED) then
       ESMF_CplCompEQ = associated(cplcomp1%compp,cplcomp2%compp)
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(ccinit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(ccinit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_CplCompEQ = (localrc1.eq.localrc2) .and. associated(cplcomp1%compp,cplcomp2%compp)
+      ESMF_CplCompEQ = ESMF_FALSE
     endif
 
   end function ESMF_CplCompEQ
