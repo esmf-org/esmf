@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.48 2011/01/07 20:52:26 rokuingh Exp $
+// $Id: ESMCI_FTable.C,v 1.49 2011/01/13 20:53:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.48 2011/01/07 20:52:26 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.49 2011/01/13 20:53:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -597,6 +597,14 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // local variables
   int localrc;              // local return code
   char *name;               // trimmed type string
+  
+  // check to make sure VM has really been started up for this Component
+  if (*vm_info == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL, 
+      "No VM was started for this Component - missing SetServices() call?",
+      rc);
+    return; // bail out
+  }
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
