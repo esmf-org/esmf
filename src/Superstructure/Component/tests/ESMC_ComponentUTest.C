@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.13 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.14 2011/01/13 21:07:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -274,6 +274,15 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridCompPrint(gcomp, "");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "ESMC_GridCompInitialize() before calling"     
+    "ESMC_GridCompSetServices()");
+  strcpy(failMsg, "Did return ESMF_SUCCESS");
+  rc = ESMC_GridCompInitialize(gcomp, importState, exportState, clock, 1, NULL);
+  ESMC_Test((rc!=ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------

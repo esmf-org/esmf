@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.23 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.24 2011/01/13 21:07:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -94,6 +94,39 @@
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+
+!-------------------------------------------------------------------------
+!   !
+    !NEX_UTest
+!   !  Call initialize before SetServices
+
+    call ESMF_GridCompInitialize(comp1, rc=rc)
+
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Calling Component Initialize before SetServices"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !NEX_UTest
+!   !  Call run before SetServices
+
+    call ESMF_GridCompRun(comp1, rc=rc)
+
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Calling Component Run before SetServices"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !NEX_UTest
+!   !  Call finalize before SetServices
+
+    call ESMF_GridCompFinalize(comp1, rc=rc)
+
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Calling Component Finalize before SetServices"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
