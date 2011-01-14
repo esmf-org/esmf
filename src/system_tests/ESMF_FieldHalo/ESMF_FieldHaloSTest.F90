@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.59 2010/11/03 22:48:52 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.60 2011/01/14 17:49:01 w6ws Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -21,9 +21,9 @@
     ! ESMF Framework module
     use ESMF_Mod
     use ESMF_TestMod
-    
+
     implicit none
-    
+
     ! Subroutine to set entry points.
     external setserv
 
@@ -87,7 +87,8 @@
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate("igridded comp import", ESMF_STATE_IMPORT, rc=rc)
+    import = ESMF_StateCreate(stateName="igridded comp import",  &
+                              stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -116,11 +117,11 @@
 !
 !-------------------------------------------------------------------------
 !     Destroy section
-! 
+!
 
     call ESMF_GridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_StateDestroy(import, rc)
+    call ESMF_StateDestroy(import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
@@ -145,17 +146,17 @@
       write(0, *) ""
 
     endif
-    
+
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
     ! into the Log file that the scripts grep for.
     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
     __FILE__, &
     __LINE__)
 
-    call ESMF_Finalize(rc=rc)  
-    
+    call ESMF_Finalize(rc=rc)
+
     end program FieldHalo
-    
+
 
 ! module global data
 
@@ -168,7 +169,7 @@
       ! route handle
       type(ESMF_RouteHandle), save, public :: routehandle
     end module shared
-        
+
 ! end global data
 !
 !-------------------------------------------------------------------------
@@ -183,14 +184,14 @@
       integer :: rc
 
       external myinit, myrun, myfinal
-       
+
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
-  
+
       rc = ESMF_SUCCESS
 
     end subroutine setserv
@@ -212,7 +213,7 @@
       ! Local variables
       integer :: i, j
       type(ESMF_VM) :: vm
-      type(ESMF_DELayout) :: delayout1 
+      type(ESMF_DELayout) :: delayout1
       type(ESMF_IGrid) :: igrid1
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
@@ -226,14 +227,14 @@
 
       print *, "Entering Initialization routine"
 
-      ! Query the component for how many pets we have, and make a layout 
+      ! Query the component for how many pets we have, and make a layout
       ! based on that.
       call ESMF_GridCompGet(comp, vm=vm, rc=rc)
 
       ! Make sure we were given enough pets for what we expected.
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-   
+
       if (npets .ne. 4) then
          print *, "This component needs to run 4-way"
          rc = ESMF_FAILURE
@@ -271,7 +272,7 @@
       call ESMF_DELayoutGetDeprecated(delayout1, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! Create an arrayspec for a 2-D array 
+      ! Create an arrayspec for a 2-D array
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
                              typekind=ESMF_TYPEKIND_I4)
 
@@ -287,9 +288,9 @@
       print *, "Field Create returned"
 
       ! Add the field to the import state.
-      call ESMF_StateAddField(importState, field1, rc)
+      call ESMF_StateAddField(importState, field1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StatePrint(importState, "", rc)
+      call ESMF_StatePrint(importState, options="", rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get pointer to the actual data
@@ -444,7 +445,7 @@
       xpos = myDE(1)
       ypos = myDE(2)
       write(*,*) 'xpos, ypos = ', xpos, ypos
-   
+
       mismatch = 0
 
       ! check interior points
@@ -464,7 +465,7 @@
       if (ypos .eq. 1) then
         target = -1
       else
-        target = de_id - nx 
+        target = de_id - nx
       endif
       pattern(2, 1) = target
       do j=1,halo_width
@@ -478,7 +479,7 @@
       if (ypos .eq. ny) then
         target = -1
       else
-        target = de_id + nx 
+        target = de_id + nx
       endif
       pattern(2, 3) = target
       do j=nj-halo_width+1,nj
@@ -591,7 +592,7 @@
  10     format(20(1x,i2))
       enddo
       print *, "------------------------------------------------------"
-    
+
       ! if any numbers are not what we expected, error out
       if (mismatch .gt. 0) then
         print *, "FAILURE: found ", mismatch, "mismatching values, returning error code"
@@ -609,4 +610,4 @@
     end subroutine myfinal
 
 !\end{verbatim}
-    
+

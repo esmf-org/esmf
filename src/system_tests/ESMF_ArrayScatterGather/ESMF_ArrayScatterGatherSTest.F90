@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.14 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.15 2011/01/14 17:49:01 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -7,10 +7,10 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test ArrayScatterGather.  
+! System test ArrayScatterGather.
 !    Two gridded components and one coupler component, two-way coupling
 !
-!    The first gridded component runs on 3 PETs (0,1,3) and defines two 2D 
+!    The first gridded component runs on 3 PETs (0,1,3) and defines two 2D
 !    Arrays: srcArray1 and dstArray1. Both Arrays have a total index space of
 !    100x150 elements and use the default DELayout. However, srcArray1
 !    decomposes into (petCount x 1) = (3 x 1) DEs while dstArray1 decomposes
@@ -20,7 +20,7 @@
 !    an initialized Fortran array and then added to the coupler's importState.
 !    The dstArray1 is left uninitialized and added to the coupler's exportState.
 !
-!    The second gridded component runs on 2 PETs (4,5) and defines two 2D 
+!    The second gridded component runs on 2 PETs (4,5) and defines two 2D
 !    Arrays: srcArray2 and dstArray2. Both Arrays have a total index space of
 !    100x150 elements and use the default DELayout. However, srcArray2
 !    decomposes into (petCount x 1) = (2 x 1) DEs while dstArray2 decomposes
@@ -30,19 +30,19 @@
 !    The coupler component runs on 6 PETs (0,1,2,3,4,5,6). Notice that PET 2
 !    is neither part of gridded component 1 nor gridded component 2.
 !
-!    During the coupler's Initialize() the import and export states are 
+!    During the coupler's Initialize() the import and export states are
 !    reconciled. Further ESMF_ArrayGather() is used to gather srcArray1 data
 !    in a Fortran array on coupler PET 5, which corresponds to a PET where
 !    srcArray1 only exists as a proxy object. Finally the gathered data is
 !    scattered via ESMF_ArrayScatter() into srcArray2.
 !
 !    The Run() method of the second gridded component uses ESMF_ArrayGather()
-!    on srcArray2 in order to gather the data into a Fortran array on 
+!    on srcArray2 in order to gather the data into a Fortran array on
 !    localPet 0 which corresponds to global PET 4. There a constant integer
 !    value is added to all array elements before the data is scattered into
 !    dstArray2.
 !
-!    The coupler during its Run() method gathers the dstArray2 data via 
+!    The coupler during its Run() method gathers the dstArray2 data via
 !    ESMF_ArrayGather() on coupler PET 2 where dstArray2 is represented as
 !    proxy object. The data is then scattered using ESMF_ArrayScatter() into
 !    dstArray1 which also exists as proxy object on PET 2.
@@ -67,7 +67,7 @@ program ESMF_ArrayScatterGatherSTest
   use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -191,15 +191,17 @@ program ESMF_ArrayScatterGatherSTest
 
   ! the terms import and export are used from the coupler's perspecitve,
   ! model component 1 and 2 add Arrays to both import and export states
-  importState = ESMF_StateCreate("import", ESMF_STATE_IMPORT, rc=localrc)
+  importState = ESMF_StateCreate(stateName="import",  &
+                                 stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  exportState = ESMF_StateCreate("export", ESMF_STATE_EXPORT, rc=localrc)
+  exportState = ESMF_StateCreate(stateName="export",  &
+                                 stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   ! comp1's sense of import/export is reverse to coupler's
   call ESMF_GridCompInitialize(comp1, importState=exportState, &
     exportState=importState, rc=localrc)
@@ -207,7 +209,7 @@ program ESMF_ArrayScatterGatherSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   ! comp2 uses the coupler's export state for import and export
   call ESMF_GridCompInitialize(comp2, importState=exportState, &
     exportState=exportState, rc=localrc)
@@ -215,7 +217,7 @@ program ESMF_ArrayScatterGatherSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   ! coupler's import/export states are as defined
   call ESMF_CplCompInitialize(cpl, importState=importState, &
     exportState=exportState, rc=localrc)
@@ -223,7 +225,7 @@ program ESMF_ArrayScatterGatherSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -236,7 +238,7 @@ program ESMF_ArrayScatterGatherSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   call ESMF_CplCompRun(cpl, importState=importState, &
     exportState=exportState, rc=localrc)
   print *, "Coupler Run returned, rc =", localrc
@@ -324,7 +326,7 @@ program ESMF_ArrayScatterGatherSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
@@ -338,5 +340,5 @@ program ESMF_ArrayScatterGatherSTest
   call ESMF_Finalize()
 
 end program ESMF_ArrayScatterGatherSTest
-    
+
 !\end{verbatim}

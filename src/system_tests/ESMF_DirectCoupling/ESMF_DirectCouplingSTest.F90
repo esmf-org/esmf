@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.12 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.13 2011/01/14 17:49:01 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -7,7 +7,7 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test DirectCoupling.  
+! System test DirectCoupling.
 !
 !     Component hierarchy:
 !
@@ -22,35 +22,35 @@
 !                                modelAComp (PET 1,4)     modelBComp (PET 2,3,5)
 !
 !
-!     Direct coupling stucture: 
+!     Direct coupling stucture:
 !                               ioComp
-!                                /  ^ 
+!                                /  ^
 !                               /    \
 !                              v      \
 !                     modelAComp ---> modelBComp
 !
 !
 !     The ioComp runs on a single PET and during Initialize() creates a 2D
-!     source Array "ioComp.arraySrc" as well as a destination array 
+!     source Array "ioComp.arraySrc" as well as a destination array
 !     "ioComp.arrayDst" on a 100x150 DistGrid with a single DE. The modelAComp
 !     creates a 100x150 Array "modelA.array" with 2 DEs across its 2 PETs during
-!     Initialize(). Finally modelBComp also creates a 100x150 Array 
+!     Initialize(). Finally modelBComp also creates a 100x150 Array
 !     "modelB.array" with 3 DEs across the PETs it is defined on.
 !
 !     The cplComp has a 2 phase Initialize(). During the first phase an
 !     ArrayRegrid() between "ioComp.arraySrc" and "modelA.array" is precomputed.
-!     In the second phase an ArrayRegrid() between "modelB.array" and 
+!     In the second phase an ArrayRegrid() between "modelB.array" and
 !     "ioComp.arrayDst" is precomputed. The associated RouteHandles are added
 !     to the respective States and thus become accessible to ioComp, modelAComp
 !     and modelBComp.
 !
-!     For setting up of the coupling between modelAComp and modelBComp no extra 
+!     For setting up of the coupling between modelAComp and modelBComp no extra
 !     coupler component is used, instead the ArrayRedist() between
-!     "modelA.array" and "modelB.array" is precomputed during modelComp 
+!     "modelA.array" and "modelB.array" is precomputed during modelComp
 !     Initialize(). Again the RouteHandle is added to the appropriate States.
 !
 !     After all Initialize() methods have executed the ioComp, modelAComp and
-!     modelBComp are set up for direct coupling. The Run() section on the 
+!     modelBComp are set up for direct coupling. The Run() section on the
 !     main driver level starts up ioComp and modelComp concurrently. The
 !     modelComp Run() branches out into concurrent exection of modelAComp and
 !     modelBComp. Once running, ioComp, modelAComp and modelBComp do not return
@@ -67,11 +67,11 @@
 !
 !     During each iteration a full coupling cycle is completed:
 !     * ioComp sends "ioComp.arraySrc" data to modelAComp via ArrayRedist()
-!     * modelAComp receives data from ioComp via ArrayRedist() into 
+!     * modelAComp receives data from ioComp via ArrayRedist() into
 !       "modelA.array"
 !     * modelAComp sends "modelA.array" data to modelBComp via ArrayRedist(),
 !       which was precomputed with factor = -2
-!     * modelBComp receives modelAComp data via ArrayRedist() into 
+!     * modelBComp receives modelAComp data via ArrayRedist() into
 !       "modelB.array" which is -2 x "modelA.array" data
 !     * modelBComp sends "modelB.array" data to ioComp via ArrayRedist()
 !     * ioComp receives modelBComp data into "ioComp.arrayDst" via ArrayRedist()
@@ -80,17 +80,17 @@
 !
 !     The above cycle is repeated for 3 iterations. The final result in
 !     "ioComp.arrayDst" is then -8 x the initial value of "ioComp.arraySrc".
-!     The ioComp Run() method validates the results before returning to the 
+!     The ioComp Run() method validates the results before returning to the
 !     main driver.
 !
 !     As an added feature the Arrays in ioComp are of type/kind R4 while
 !     modelAComp and modelBComp Arrays are of type/kind R8. The ArrayRedist()
 !     method automatically handles typecasting of the exchanged data.
 !
-!     The Finalize() methods are responsible for destroying all of the 
+!     The Finalize() methods are responsible for destroying all of the
 !     explicitly created objects in the Component context. RouteHandles must
 !     be released in the Component that precomputed them. All of the
-!     objects created by ESMF_StateReconcile() will be automatically destroyed 
+!     objects created by ESMF_StateReconcile() will be automatically destroyed
 !     when the State is destroyed.
 !
 !-------------------------------------------------------------------------
@@ -111,7 +111,7 @@ program ESMF_DirectCouplingSTest
   use cplCompMod,    only : cplCompSetVM, cplCompReg
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
   type(ESMF_VM):: vm
@@ -220,13 +220,15 @@ program ESMF_DirectCouplingSTest
 ! Create States and initialize Components
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
+
   ! ioComp
-  ioImp = ESMF_StateCreate("ioComp import", ESMF_STATE_IMPORT, rc=localrc)
+  ioImp = ESMF_StateCreate(stateName="ioComp import",  &
+                           stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  ioExp = ESMF_StateCreate("ioComp export", ESMF_STATE_EXPORT, rc=localrc)
+  ioExp = ESMF_StateCreate(stateName="ioComp export",  &
+                           stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -235,13 +237,15 @@ program ESMF_DirectCouplingSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   ! modelComp
-  modelImp = ESMF_StateCreate("modelComp import", ESMF_STATE_IMPORT, rc=localrc)
+  modelImp = ESMF_StateCreate(stateName="modelComp import",  &
+                              stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  modelExp = ESMF_StateCreate("modelComp export", ESMF_STATE_EXPORT, rc=localrc)
+  modelExp = ESMF_StateCreate(stateName="modelComp export",  &
+                              stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -250,7 +254,7 @@ program ESMF_DirectCouplingSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   ! ioComp->modelComp coupling
   call ESMF_CplCompInitialize(cplComp, importState=ioExp, &
     exportState=modelImp, phase=1, rc=localrc)
@@ -264,7 +268,7 @@ program ESMF_DirectCouplingSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run io and model Components concurrently -> direct coupling between Components
@@ -284,7 +288,7 @@ program ESMF_DirectCouplingSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize Components
@@ -344,22 +348,22 @@ program ESMF_DirectCouplingSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    
+
   call ESMF_StateDestroy(ioImp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    
+
   call ESMF_StateDestroy(modelExp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    
+
   call ESMF_StateDestroy(modelImp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -377,7 +381,7 @@ program ESMF_DirectCouplingSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
@@ -392,5 +396,5 @@ program ESMF_DirectCouplingSTest
   call ESMF_Finalize()
 
 end program ESMF_DirectCouplingSTest
-    
+
 !\end{verbatim}

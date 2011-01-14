@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.8 2010/12/03 05:58:12 theurich Exp $
+! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.9 2011/01/14 17:49:02 w6ws Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -10,7 +10,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldRegrid.  
+! System test FieldRegrid.
 !   Regrid test.  2 components and 1 coupler, one-way coupling.
 !                 The first component has a uniform rectilinear grid.  It has
 !                 a Field whose data is set to a given geometric function,
@@ -18,7 +18,7 @@
 !                 10.0 + 5.0*sin((X/Xmax)*pi) + 2.0*sin((Y/Ymax)*pi)
 !
 !                 and then regridded to the second component, which builds upon
-!                 a uniform rectilinear grid with higher resolution with same boundary.  
+!                 a uniform rectilinear grid with higher resolution with same boundary.
 !                 The regridded data is then compared
 !                 to the function's solution for a measurement of the
 !                 accuracy of the Regrid.  Those values are output for
@@ -40,7 +40,7 @@
     use user_coupler, only : usercpl_register
 
     implicit none
-    
+
     ! Local variables
     integer :: pet_id, npets, rc, localrc, userrc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -67,8 +67,8 @@
 
     ! set rc = ESMF_SUCCESS
     rc = ESMF_SUCCESS
-        
-        
+
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -194,8 +194,9 @@
 !  Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
+
+    c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                             stateType=ESMF_STATE_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -208,8 +209,9 @@
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
-    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
+
+    c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+                             stateType=ESMF_STATE_IMPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -222,7 +224,7 @@
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
@@ -233,7 +235,7 @@
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Run section
@@ -279,7 +281,7 @@
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     enddo
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
@@ -336,8 +338,8 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-    call ESMF_StateDestroy(c1exp, rc)
-    call ESMF_StateDestroy(c2imp, rc)
+    call ESMF_StateDestroy(c1exp, rc=rc)
+    call ESMF_StateDestroy(c2imp, rc=rc)
 
     call ESMF_ClockDestroy(clock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
@@ -374,10 +376,10 @@
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-  
-    call ESMF_Finalize(rc=rc) 
+
+    call ESMF_Finalize(rc=rc)
 
     end program ESMF_FieldRegridSTest
-    
+
 !\end{verbatim}
-    
+

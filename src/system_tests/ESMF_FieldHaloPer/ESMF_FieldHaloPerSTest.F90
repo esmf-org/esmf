@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.55 2010/11/03 22:48:52 theurich Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.56 2011/01/14 17:49:01 w6ws Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -22,7 +22,7 @@
 
       ! set to true to get more output
       logical :: verbose = .false.
-   
+
       ! which type of periodic boundaries
       type(ESMF_Logical) :: periodic(2)
 
@@ -45,9 +45,9 @@
     use ESMF_Mod
     use ESMF_TestMod
     use global_data
-    
+
     implicit none
-    
+
     ! Subroutine to set entry points.
     external setserv
 
@@ -59,7 +59,7 @@
     type(ESMF_State) :: import
     integer :: rc
 
-        
+
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
 
@@ -100,7 +100,8 @@
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate("igridded comp import", ESMF_STATE_IMPORT, rc=rc)
+    import = ESMF_StateCreate(stateName="igridded comp import",  &
+                              stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -135,11 +136,11 @@
 !
 !-------------------------------------------------------------------------
 !     Destroy section
-! 
+!
 
     call ESMF_GridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_StateDestroy(import, rc)
+    call ESMF_StateDestroy(import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if (verbose) print *, "All Destroy routines done"
 
@@ -148,7 +149,7 @@
 10  print *, "System Test FieldHaloPeriodic complete."
 
     call ESMF_VMGet(vm, localPet=pe_id, rc=rc)
-    
+
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test FieldHaloPeriodic: Field Halo Test"
 
@@ -164,9 +165,9 @@
       write(0, *) trim(testname)
       write(0, *) trim(finalMsg)
       write(0, *) ""
-  
+
     endif
-    
+
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
     ! into the Log file that the scripts grep for.
     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
@@ -176,7 +177,7 @@
     call ESMF_Finalize(rc=rc)
 
     end program FieldHaloPeriodic
-    
+
 
 !
 !-------------------------------------------------------------------------
@@ -192,14 +193,14 @@
       integer :: rc
 
       external myinit, myrun, myfinal
-       
+
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
-  
+
       rc = ESMF_SUCCESS
 
     end subroutine setserv
@@ -243,7 +244,7 @@
 
       call ESMF_VMGet(vm, petCount=npets, localPet=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-  
+
       ! Create a DELayout for the Component, basing the shape on
       ! the number of PETs we are given.
       select case (npets)
@@ -275,7 +276,7 @@
 
       layout1 = ESMF_DELayoutCreate(vm, shape, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-  
+
       ! print out shape of DELayout
       print *, ""
       print *, "DE ID numbers:"
@@ -284,7 +285,7 @@
    5   format(25(1x,i2))
       enddo
       print *, ""
-  
+
       ! The user creates a simple horizontal IGrid internally by passing all
       ! necessary information through the CreateInternal argument list.
 
@@ -372,7 +373,7 @@
       call ESMF_DELayoutGetDeprecated(layout1, localDe=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! Create an arrayspec for a 2-D array 
+      ! Create an arrayspec for a 2-D array
       call ESMF_ArraySpecSet(arrayspec, rank=2, &
                              typekind=ESMF_TYPEKIND_I4)
 
@@ -414,23 +415,23 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Add the fields to the import state.
-      call ESMF_StateAddField(importState, field(1), rc)
+      call ESMF_StateAddField(importState, field(1), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddField(importState, field(2), rc)
+      call ESMF_StateAddField(importState, field(2), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddField(importState, field(3), rc)
+      call ESMF_StateAddField(importState, field(3), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddField(importState, field(4), rc)
+      call ESMF_StateAddField(importState, field(4), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      if (verbose) call ESMF_StatePrint(importState, "", rc)
+      if (verbose) call ESMF_StatePrint(importState, options="", rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       do k=1, 4
 
           ! Get pointer to the actual data
           call ESMF_FieldGetDataPointer(field(k), ldata, ESMF_DATA_REF, rc=rc)
-    
+
           ! Set initial data values over whole field to -1
           lowerindex = lbound(ldata)
           upperindex = ubound(ldata)
@@ -439,7 +440,7 @@
               ldata(i,j) = -1
             enddo
           enddo
-    
+
           ! Set initial data values over computational domain to the pet num
           do j=lowerindex(2)+halo_width,upperindex(2)-halo_width
             do i=lowerindex(1)+halo_width,upperindex(1)-halo_width
@@ -557,7 +558,7 @@
       ! Local variables
       type(ESMF_Field) :: field1
       integer :: localrc, finalrc, i
-  
+
 
       if (verbose) print *, "Entering Finalize routine"
 
@@ -569,34 +570,34 @@
 
       ! Get Fields from import state
       call ESMF_StateGetField(importState, "Periodic in X", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) then 
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
       endif
       call verifyhalo(field1, localrc)
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    
+
 
       call ESMF_StateGetField(importState, "Periodic in Y", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) then 
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
       endif
       call verifyhalo(field1, localrc)
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    
+
 
       call ESMF_StateGetField(importState, "Periodic in both X and Y", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) then 
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
       endif
       call verifyhalo(field1, localrc)
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    
+
 
       call ESMF_StateGetField(importState, "Not Periodic", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) then 
+      if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30
       endif
@@ -677,7 +678,7 @@
       xpos = pos(1)
       ypos = pos(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
-     
+
       ! for the calculations below we need the first xpos=0, not 1
       xpos = xpos - 1
       ypos = ypos - 1
@@ -707,7 +708,7 @@
       ! bottom middle
       if (ypos .eq. 0) then
         if (pflags(2) .eq. ESMF_TRUE) then
-          target = (ny-1)*nx + xpos 
+          target = (ny-1)*nx + xpos
         else
           target = -1
         endif
@@ -717,13 +718,13 @@
       ! top middle
       if (ypos .eq. ny-1) then
         if (pflags(2) .eq. ESMF_TRUE) then
-          target = xpos 
+          target = xpos
         else
           target = -1
         endif
         pattern(2, 3) = target
       endif
-      
+
       ! left side middle
       if (xpos .eq. 0) then
         if (pflags(1) .eq. ESMF_TRUE) then
@@ -733,7 +734,7 @@
         endif
         pattern(1, 2) = target
       endif
-      
+
       ! right side middle
       if (xpos .eq. nx-1) then
         if (pflags(1) .eq. ESMF_TRUE) then
@@ -772,7 +773,7 @@
         endif
         pattern(1, 1) = target
       endif
-      
+
       ! lower right
       if ((xpos .eq. nx-1) .and. (ypos .eq. 0)) then
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
@@ -799,7 +800,7 @@
         endif
         pattern(3, 1) = target
       endif
-      
+
       ! upper left
       if ((xpos .eq. 0) .and. (ypos .eq. ny-1)) then
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
@@ -826,7 +827,7 @@
         endif
         pattern(1, 3) = target
       endif
-      
+
       ! upper right
       if ((xpos .eq. nx-1) .and. (ypos .eq. ny-1)) then
         if ((pflags(1) .eq. ESMF_TRUE) .and. &
@@ -937,7 +938,7 @@
       enddo
 
       ! upper left
-      target = pattern(1, 3) 
+      target = pattern(1, 3)
       do j=nj-halo_width+1,nj
         do i=1, halo_width
           if (ldata(i,j) .ne. target) then
@@ -947,7 +948,7 @@
       enddo
 
       ! upper right
-      target = pattern(3, 3) 
+      target = pattern(3, 3)
       do j=nj-halo_width+1,nj
         do i=ni-halo_width+1,ni
           if (ldata(i,j) .ne. target) then
@@ -973,7 +974,7 @@
  10     format(25(1x,i2))
       enddo
       print *, '------------------------------------------------------'
-    
+
       ! if any numbers are not what we expected, error out
       if (mismatch .gt. 0) then
         print *, "FAILURE: found ", mismatch, "mismatching values, returning error code"
@@ -991,4 +992,4 @@
     end subroutine verifyhalo
 
 !\end{verbatim}
-    
+

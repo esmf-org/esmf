@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.17 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_FortranComponent.F90,v 1.18 2011/01/14 17:49:01 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -121,7 +121,7 @@ module user_FortranComponent
 
     call ESMF_GridCompPrint(comp, "", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StatePrint(exportState, "", rc=rc)
+    call ESMF_StatePrint(exportState, options="", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)

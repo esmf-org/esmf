@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.9 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.10 2011/01/14 17:49:01 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -7,7 +7,7 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test ArrayRedistOpenMP.  
+! System test ArrayRedistOpenMP.
 !    Two gridded components and one coupler component, one-way coupling.
 !
 !    First gridded component receives 8 PETs from the driver. However, using
@@ -15,11 +15,11 @@
 !    to each of its PETs. If this request can be accommodated the component will
 !    execute on 4 PETs with 2PEs each. If the request cannot be accommodated the
 !    component will execute with 8PETs. In either case it defines a 2D source
-!    Array 100x1500. Second gridded component defines a destination Array also 
-!    100x1500 but runs on only 2 PETs. Both gridded components use DELayouts 
-!    with 1 DE per PET. The decomposition of the source Array is defined as 
+!    Array 100x1500. Second gridded component defines a destination Array also
+!    100x1500 but runs on only 2 PETs. Both gridded components use DELayouts
+!    with 1 DE per PET. The decomposition of the source Array is defined as
 !    (petCount x 1) = (4 x 1) or (8 x 1), depending on whether each PET received
-!    2PEs or not. The destination Array is decomposed as (1 x petCount) = 
+!    2PEs or not. The destination Array is decomposed as (1 x petCount) =
 !    (1 x 2).
 !
 !    Using OpenMP directives for loop-parallelization the first component
@@ -28,10 +28,10 @@
 !       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
 !    The coupler component runs on all 8 PETs and reconciles import and export
-!    states which contain source and destination Array, respectively. The 
+!    states which contain source and destination Array, respectively. The
 !    coupler component then calls ArrayRedist() to redistribute the source
 !    Array data onto the destination Array.
-!    
+!
 !    Finally the second gridded component compares the data stored in the
 !    destination Array to the exact solution of the above function as a measure
 !    of the accuracy of the ArrayRedist() method.
@@ -53,7 +53,7 @@ program ESMF_ArrayRedistOpenMPSTest
   use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS, userrc
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -206,8 +206,9 @@ program ESMF_ArrayRedistOpenMPSTest
 ! Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-  c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
+
+  c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                           stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -220,8 +221,9 @@ program ESMF_ArrayRedistOpenMPSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
-  c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
+
+  c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+                           stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -234,7 +236,7 @@ program ESMF_ArrayRedistOpenMPSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
   ! note that the coupler's import is comp1's export state
   ! and coupler's export is comp2's import state
   call ESMF_CplCompInitialize(cpl, c1exp, c2imp, rc=localrc, userRc=userrc)
@@ -245,7 +247,7 @@ program ESMF_ArrayRedistOpenMPSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -278,7 +280,7 @@ program ESMF_ArrayRedistOpenMPSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section
@@ -360,7 +362,7 @@ program ESMF_ArrayRedistOpenMPSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
@@ -369,9 +371,9 @@ program ESMF_ArrayRedistOpenMPSTest
 
   ! Print final PASS/FAIL and add # of procs message to log file.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-  
+
   call ESMF_Finalize()
 
 end program ESMF_ArrayRedistOpenMPSTest
-    
+
 !\end{verbatim}

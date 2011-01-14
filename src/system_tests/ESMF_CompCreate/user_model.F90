@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.29 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_model.F90,v 1.30 2011/01/14 17:49:01 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -158,7 +158,7 @@
 
         call ESMF_GridCompPrint(comp, "", rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_StatePrint(exportState, "", rc=rc)
+        call ESMF_StatePrint(exportState, options="", rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
 
         print *, "init, ready to call get data ptr"

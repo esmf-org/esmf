@@ -5,8 +5,8 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test Attribute.  
-!     
+! System test Attribute.
+!
 !\begin{verbatim}
 
 program ESMF_AttributeSTest
@@ -24,7 +24,7 @@ program ESMF_AttributeSTest
   use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
-      
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc, userrc
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -34,7 +34,7 @@ program ESMF_AttributeSTest
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
   character(ESMF_MAXSTR) :: conv,purp
-    
+
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
 
@@ -56,7 +56,7 @@ program ESMF_AttributeSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-  
+
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeSTest.Log", &
                         defaultlogtype=ESMF_LOG_MULTI, rc=rc)
@@ -118,7 +118,7 @@ program ESMF_AttributeSTest
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   endif
 
 !-------------------------------------------------------------------------
@@ -183,15 +183,17 @@ program ESMF_AttributeSTest
 ! Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
+
 ! print *, '-------------------------------Initialize----------------------------------'
- 
+
   ! create two states for comp1
-  c1imp = ESMF_StateCreate("Comp1 importState", ESMF_STATE_IMPORT, rc=rc)
+  c1imp = ESMF_StateCreate(stateName="Comp1 importState",  &
+                           stateType=ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  c1exp = ESMF_StateCreate("Comp1 exportState", ESMF_STATE_EXPORT, rc=rc)
+  c1exp = ESMF_StateCreate(stateName="Comp1 exportState",  &
+                           stateType=ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -205,11 +207,13 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! create two states for comp2
-  c2imp = ESMF_StateCreate("Comp2 importState", ESMF_STATE_IMPORT, rc=rc)
+  c2imp = ESMF_StateCreate(stateName="Comp2 importState",  &
+                           stateType=ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  c2exp = ESMF_StateCreate("Comp2 exportState", ESMF_STATE_EXPORT, rc=rc)
+  c2exp = ESMF_StateCreate(stateName="Comp2 exportState",  &
+                           stateType=ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -231,30 +235,30 @@ program ESMF_AttributeSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    
+
   ! link the Component Attribute hierarchy to State
 !  call ESMF_AttributeLink(comp1, c1exp, rc=rc)
 !  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   ! now call AttributeUpdate to get a VM wide view of the
   ! metadata set on comp1 in comp1initialize
 !  call ESMF_AttributeUpdate(comp1, vm, rootList=(/0,1,2/), rc=rc)
 !  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    
+
   ! now call AttributeCopy to get info from comp1 to comp2
   ! careful, though, this data only exists on PETs 0,1,2
-  ! you must call AttributeUpdate to make this data 
+  ! you must call AttributeUpdate to make this data
   ! available VM wide (above)
 !  call ESMF_AttributeCopy(comp1, comp2, &
 !      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
 !  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -303,7 +307,7 @@ program ESMF_AttributeSTest
 !    call ESMF_AttributeWrite(comp2,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
+      call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   endif
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -362,7 +366,7 @@ program ESMF_AttributeSTest
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   ! destroy states
   call ESMF_StateDestroy(c1imp, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -383,7 +387,7 @@ program ESMF_AttributeSTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-  
+
   ! Normal ESMF Test output
   if (localPet .eq. 0) then
       print *, "--------------------------------------- "
@@ -400,7 +404,7 @@ program ESMF_AttributeSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
 !  print *, "------------------------------------------------------------"
 !  print *, "------------------------------------------------------------"
 !  print *, "Test finished, localPet = ", localPet
@@ -411,9 +415,9 @@ program ESMF_AttributeSTest
   ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
-  call ESMF_Finalize() 
+  call ESMF_Finalize()
 
 end program ESMF_AttributeSTest
-    
+
 !\end{verbatim}
-    
+

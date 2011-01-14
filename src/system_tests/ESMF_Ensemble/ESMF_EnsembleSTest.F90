@@ -1,4 +1,4 @@
-! $Id: ESMF_EnsembleSTest.F90,v 1.7 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_EnsembleSTest.F90,v 1.8 2011/01/14 17:49:01 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_DISABLED_SYSTEM_TEST        String used by test script to count system tests.
@@ -7,23 +7,23 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test Ensemble.  
-!    The purpose of this system test is to demonstrate how to build 
-!    ensemble components (either sequential or concurrent) in ESMF using different 
-!    components or the same component with different initial 
+! System test Ensemble.
+!    The purpose of this system test is to demonstrate how to build
+!    ensemble components (either sequential or concurrent) in ESMF using different
+!    components or the same component with different initial
 !    conditions.
 !
 !    In this test, we have two different ensemble components, compA and compB; each one
 !    creates a 2D array of size 100x150 but with different decomposition: CompA decomposes
-!    the array in columns and compB decomposes the array in rows.   We create two 
+!    the array in columns and compB decomposes the array in rows.   We create two
 !    instances of each component and that makes up a total of four ensemble components.
 !    The ensemble components are named A-1, A-2, B-1, B-2.  The initial values to the
-!    array are perturbated by a small value passed in using ESMF_Attribute when the 
+!    array are perturbated by a small value passed in using ESMF_Attribute when the
 !    components were created.  This allows each component to set different initial
 !    values to the array.  A third gridded component, CompC is used as the composite component
 !    to composite the output from the four ensemble components.
 !    A couple component, Cpl, is also provided to couple the ensemble components with
-!    the composite component.  
+!    the composite component.
 !
 !    This test is run in two different scenerios:
 !    1.  If the total PET count is 8, the ensemble components will run as concurrent
@@ -31,9 +31,9 @@
 !    2.  If the total PET is less than 8, the ensemble components will run as sequential
 !        components, i.e., on all the PETs.
 !    In either case, the composite component and the coupler component run on all the PETs.
-! 
+!
 !    Two techniques are used to implement the ensemble components that are instantiated from
-!    the same component definition.  
+!    the same component definition.
 !    1.  Using Attributes to set different initial condition.  Since the ensemble components
 !        share the same code, we will need to pass information to the component so that it
 !        can be used to set different initial conditions.  Several ways can be used in ESMF
@@ -45,21 +45,21 @@
 !        the module's global variables.  When the ensemble components are run in sequential mode,
 !        i.e., there are multiple instances of the same component module  running at the same PETs,
 !        we can no longer use module variables to share the private data.  Alternatively, ESMF provides
-!        Component Internal State to serve the function.  In this example, we set different offset for 
+!        Component Internal State to serve the function.  In this example, we set different offset for
 !        different ensemble components at the init function and pass the offset to the run routine using
 !        the Internal State as a demonstration.  Note that you have to define a data wrapper that
 !        contains a single pointer to point to a data block containing all the data to be shared
 !        in between functions.
-! 
+!
 !    Each ensemble component exports the array using its ExportState.  Those ExportStates are added
 !    into the ImportState of the Coupler.  The Coupler then creates four arrays each of size 100x150
 !    but distributed across all the PETs in a block decomposition (i.e. 2x(n/2), if totalPET=n). These
-!    four arrays are then added into the Coupler's ExportState. The Couple's ExportState is then 
+!    four arrays are then added into the Coupler's ExportState. The Couple's ExportState is then
 !    passed to the Composite component as its ImportState.
 !
-!    In Coupler's Init routine, it runs StateReconcile to each ensemble components array passed in 
+!    In Coupler's Init routine, it runs StateReconcile to each ensemble components array passed in
 !    via the ImportState to populate the array information to all the PETs.  Then the Coupler
-!    run an ArrayRedistStore to calculate the redistribution of the ensemble's array to the 
+!    run an ArrayRedistStore to calculate the redistribution of the ensemble's array to the
 !    corresponding destination array to be passed to the composite component.  In Coupler's run
 !    routine, the couple will run ArrayRedist to redistribute the arrays.
 !
@@ -68,10 +68,10 @@
 !    The destination array is then exported via its ExportState.  The composite component also
 !    checks the averaged values and reports the errors if any.
 !
-!    In each run cylce, the four ensemble components will run either concurrently or sequentially 
+!    In each run cylce, the four ensemble components will run either concurrently or sequentially
 !    depending on the total number of PETs allocated, followed by the coupler, that performs the
 !    array redistributions for all the four incoming arrays at once, and the composite component.
-!    We run the run cycles 5 times. 
+!    We run the run cycles 5 times.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -91,7 +91,7 @@ program ESMF_EnsembleSTest
   use user_coupler, only :usercpl_register
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cnameA1, cnameA2, cnameB1, cnameB2, cnameC, cplname
@@ -317,9 +317,10 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 ! Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
+
   ! Create export state for each of the ensemble components and init
-  cA1exp = ESMF_StateCreate("compA1 export", ESMF_STATE_EXPORT, rc=localrc)
+  cA1exp = ESMF_StateCreate(stateName="compA1 export",  &
+                            stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -327,8 +328,9 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
-  cA2exp = ESMF_StateCreate("compA2 export", ESMF_STATE_EXPORT, rc=localrc)
+
+  cA2exp = ESMF_StateCreate(stateName="compA2 export",  &
+                            stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -337,7 +339,8 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  cB1exp = ESMF_StateCreate("compB1 export", ESMF_STATE_EXPORT, rc=localrc)
+  cB1exp = ESMF_StateCreate(stateName="compB1 export",  &
+                            stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -345,8 +348,9 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
-  cB2exp = ESMF_StateCreate("compB2 export", ESMF_STATE_EXPORT, rc=localrc)
+
+  cB2exp = ESMF_StateCreate(stateName="compB2 export",  &
+                            stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -357,29 +361,31 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 
   ! Create the import state for the coupler and add the four export states
   ! from the four ensemble components to the coupler's import state
-  cplimp = ESMF_StateCreate("coupler import", ESMF_STATE_IMPORT, rc=localrc)
+  cplimp = ESMF_StateCreate(stateName="coupler import",  &
+                            stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_StateAdd(cplimp, cA1exp, rc=localrc) 
+  call ESMF_StateAdd(cplimp, cA1exp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_StateAdd(cplimp, cA2exp, rc=localrc) 
+  call ESMF_StateAdd(cplimp, cA2exp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_StateAdd(cplimp, cB1exp, rc=localrc) 
+  call ESMF_StateAdd(cplimp, cB1exp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_StateAdd(cplimp, cB2exp, rc=localrc) 
+  call ESMF_StateAdd(cplimp, cB2exp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! Create the export state for the coupler
-  cplexp = ESMF_StateCreate("coupler export", ESMF_STATE_EXPORT, rc=localrc)
+  cplexp = ESMF_StateCreate(stateName="coupler export",  &
+                            stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -390,7 +396,8 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 
   ! create the export state for the composite component compC and init
   ! the import state of compC is the export state of the coupler
-  compCexp = ESMF_StateCreate("comp C export", ESMF_STATE_EXPORT, rc=localrc)
+  compCexp = ESMF_StateCreate(stateName="comp C export",  &
+                              stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -399,9 +406,9 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   if (localPet == 0) print *, "Comp Initialize finished, rc =", localrc
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -444,7 +451,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
         ! Advance the time
         call ESMF_ClockAdvance(clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
@@ -457,7 +464,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (localPet==0) call ESMF_ClockPrint(clock, "currtime string", rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section
@@ -593,5 +600,5 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   call ESMF_Finalize()
 
 end program ESMF_EnsembleSTest
-    
+
 !\end{verbatim}

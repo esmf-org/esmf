@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.12 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.13 2011/01/14 17:49:01 w6ws Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -11,12 +11,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test ConcurrentComponent.  
-!   Concurrent, Concurrent Component test.  
+! System test ConcurrentComponent.
+!   Concurrent, Concurrent Component test.
 !   This system test demonstrates the use of ESMF coupling framework
 ! to couple 2 gridded components with 1 coupler component. The coupler
 ! component runs on the union of the PETs that are exclusively allocated
-! to each individual gridded component. 
+! to each individual gridded component.
 !
 ! Component 1 exports data to the coupler which then redistributes the
 ! data to component 2. Component 1 and 2 runs concurrently because they
@@ -27,14 +27,14 @@
 !
 ! It's possible to reschedule the component execution by introducing wait
 ! and block semantic. Components on exclusive sets
-! of PETs can be rescheduled to execute sequentially. 
+! of PETs can be rescheduled to execute sequentially.
 !
 ! This system test exercises the ESMF coupling framework to perform
-! quick sort that can be useful in search engine, gnome sequencing, etc. 
+! quick sort that can be useful in search engine, gnome sequencing, etc.
 ! The sorting result of component 1 is redistributed to component 2. Component
 ! 2 verifies the sorting result.
 !
-! This system test also captures the design of a typical hierarchical 
+! This system test also captures the design of a typical hierarchical
 ! climate model with a coupler component that couples individual gridded components
 ! (e.g. atmosphere, land, and ocean).
 !
@@ -55,7 +55,7 @@
     use user_coupler, only : usercpl_setvm, usercpl_register
 
     implicit none
-    
+
     ! Local variables
     integer :: pet_id, npets, rc, localrc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -81,7 +81,7 @@
     ! individual test failure message, and final status msg
     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
-        
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -115,7 +115,7 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     endif
-   
+
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     comp1 = ESMF_GridCompCreate(name=cname1, petList=(/ 6,2,4,0 /), rc=localrc)
@@ -222,8 +222,9 @@
 !  Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
+
+    c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                             stateType=ESMF_STATE_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -232,8 +233,9 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 1 Initialize finished, rc =", rc
- 
-    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
+
+    c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+                             stateType=ESMF_STATE_IMPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -242,7 +244,7 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 2 Initialize finished, rc =", rc
- 
+
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -257,7 +259,7 @@
 !-------------------------------------------------------------------------
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc=localrc))
-    
+
       !print *, "PET ", pet_id, " starting time step..."
 
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
@@ -269,10 +271,10 @@
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
       !  call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
-    
+
       ! Run the first component:
-      ! After the first time thru the loop this will be running concurrently 
-      ! with the second component since comp1 and comp2 are defined on 
+      ! After the first time thru the loop this will be running concurrently
+      ! with the second component since comp1 and comp2 are defined on
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=localrc)
@@ -282,9 +284,9 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
-      ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls 
-      ! will block all PETs until comp1 and comp2 have returned. Consequently 
-      ! the coupler component will not be run until comp1 and comp2 have 
+      ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls
+      ! will block all PETs until comp1 and comp2 have returned. Consequently
+      ! the coupler component will not be run until comp1 and comp2 have
       ! returned.
       !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", localrc
@@ -298,7 +300,7 @@
       !  call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
       ! Run the coupler:
-      ! The coupler will run in "per-PET sequential" mode because it runs on 
+      ! The coupler will run in "per-PET sequential" mode because it runs on
       ! the union of all PETs. Depending on the per-PET runtime of comp1 and
       ! comp2 some PETs may start/finish executing the coupler at different
       ! times. There is no intrinsic inter PET synchronization in calling
@@ -338,11 +340,11 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
       !call ESMF_ClockPrint(clock, rc=localrc)
-      
+
       !print *, "... time step finished on PET ", pet_id, "."
 
     enddo
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
@@ -440,12 +442,12 @@
     __FILE__, &
     __LINE__)
 
-    call ESMF_Finalize(rc=localrc) 
+    call ESMF_Finalize(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     end program FieldConcurrentComponent
-    
+
 !\end{verbatim}
-    
+

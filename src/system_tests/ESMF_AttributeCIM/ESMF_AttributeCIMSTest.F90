@@ -6,7 +6,7 @@
 !
 ! !DESCRIPTION:
 ! System test AttributeCIM.
-!     
+!
 !\begin{verbatim}
 
 program ESMF_AttributeCIMSTest
@@ -23,7 +23,7 @@ program ESMF_AttributeCIMSTest
   use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
-      
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc, userrc
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -33,7 +33,7 @@ program ESMF_AttributeCIMSTest
   type(ESMF_GridComp) :: comp2
   type(ESMF_CplComp) :: cplcomp
   character(ESMF_MAXSTR) :: conv, purp, attrVal
-    
+
   ! Cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
 
@@ -55,7 +55,7 @@ program ESMF_AttributeCIMSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-  
+
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeCIMSTest.Log", &
                         defaultlogtype=ESMF_LOG_MULTI, rc=rc)
@@ -120,7 +120,7 @@ program ESMF_AttributeCIMSTest
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   endif
 
 !-------------------------------------------------------------------------
@@ -191,16 +191,18 @@ program ESMF_AttributeCIMSTest
 ! Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
+
 ! print *, '-------------------------------Initialize----------------------------------'
- 
+
   ! Gridded Component 1 initialize
-  c1imp = ESMF_StateCreate("Comp1 importState", ESMF_STATE_IMPORT, rc=rc)
+  c1imp = ESMF_StateCreate(stateName="Comp1 importState",  &
+                           stateType=ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  c1exp = ESMF_StateCreate("Comp1 exportState", ESMF_STATE_EXPORT, rc=rc)
+  c1exp = ESMF_StateCreate(stateName="Comp1 exportState",  &
+                           stateType=ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -215,12 +217,14 @@ program ESMF_AttributeCIMSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Gridded Component 2 initialize
-  c2imp = ESMF_StateCreate("Comp2 importState", ESMF_STATE_IMPORT, rc=rc)
+  c2imp = ESMF_StateCreate(stateName="Comp2 importState",  &
+                           stateType=ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  c2exp = ESMF_StateCreate("Comp2 exportState", ESMF_STATE_EXPORT, rc=rc)
+  c2exp = ESMF_StateCreate(stateName="Comp2 exportState",  &
+                           stateType=ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -243,7 +247,7 @@ program ESMF_AttributeCIMSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    
+
   ! reconcile comp2's export State to get comp2's Field Attributes onto
   ! PETs 0,1,2, from PETs 3,4,5, since Coupler is setup one way,
   ! comp1 -> comp2, rather than vice versa, comp2 -> comp1. So cannot put in
@@ -279,7 +283,7 @@ program ESMF_AttributeCIMSTest
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   if (petCount .eq. 6) then
     ! call AttributeUpdate to get a VM wide view of the
     ! metadata set on comp1 in comp1initialize
@@ -309,7 +313,7 @@ program ESMF_AttributeCIMSTest
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) then
       if (rc .ne. ESMF_RC_LIB_NOT_PRESENT) then
-        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)  
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
       endif
     endif
   endif
@@ -429,7 +433,7 @@ program ESMF_AttributeCIMSTest
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  
+
   ! destroy states
   call ESMF_StateDestroy(c1imp, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
@@ -453,7 +457,7 @@ program ESMF_AttributeCIMSTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-  
+
   ! Normal ESMF Test output
   if (localPet .eq. 0) then
       print *, "--------------------------------------- "
@@ -469,7 +473,7 @@ program ESMF_AttributeCIMSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
 !  print *, "------------------------------------------------------------"
 !  print *, "------------------------------------------------------------"
 !  print *, "Test finished, localPet = ", localPet
@@ -483,8 +487,8 @@ program ESMF_AttributeCIMSTest
   __FILE__, &
   __LINE__)
 
-  call ESMF_Finalize() 
+  call ESMF_Finalize()
 
 end program ESMF_AttributeCIMSTest
-    
+
 !\end{verbatim}

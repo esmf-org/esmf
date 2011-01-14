@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.24 2010/11/03 22:48:52 theurich Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.25 2011/01/14 17:49:01 w6ws Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -37,7 +37,7 @@
     use user_coupler, only : usercpl_register
 
     implicit none
-    
+
     ! Local variables
     integer :: pet_id, npets, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -62,7 +62,7 @@
     ! individual test failure message, and final status msg
     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
-        
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -161,24 +161,26 @@
 !  Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
+
+    c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                             stateType=ESMF_STATE_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1 Initialize finished, rc =", rc
- 
-    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
+
+    c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+                             stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 2 Initialize finished, rc =", rc
- 
+
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Coupler Initialize finished, rc =", rc
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Run section
@@ -204,7 +206,7 @@
       !call ESMF_ClockPrint(clock, rc=rc)
 
     enddo
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
@@ -241,8 +243,8 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-    call ESMF_StateDestroy(c1exp, rc)
-    call ESMF_StateDestroy(c2imp, rc)
+    call ESMF_StateDestroy(c1exp, rc=rc)
+    call ESMF_StateDestroy(c2imp, rc=rc)
 
     call ESMF_ClockDestroy(clock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
@@ -262,7 +264,7 @@
     write(failMsg, *) "System Test failure"
     write(testname, *) "System Test FieldRegridOrder: Field Regrid w/ different IGrid Orders"
 
-    ! Only on PET 0 or any PET with an error. 
+    ! Only on PET 0 or any PET with an error.
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
@@ -276,16 +278,16 @@
       write(0, *) ""
 
     endif
-  
+
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
     ! into the Log file that the scripts grep for.
     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
     __FILE__, &
     __LINE__)
 
-    call ESMF_Finalize(rc=rc) 
+    call ESMF_Finalize(rc=rc)
 
     end program FieldRegridOrder
-    
+
 !\end{verbatim}
-    
+

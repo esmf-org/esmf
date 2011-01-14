@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.9 2010/12/03 05:58:12 theurich Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.10 2011/01/14 17:49:01 w6ws Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -10,7 +10,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldLSSMM.  
+! System test FieldLSSMM.
 !   Field SMM test.  2 components and 1 coupler, one-way coupling.
 !                 The first component has a location stream with
 !                 a Field whose data is set to constant value 1
@@ -35,7 +35,7 @@
     use user_coupler, only : usercpl_register
 
     implicit none
-    
+
     ! Local variables
     integer :: pet_id, npets, rc, localrc, userrc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -62,8 +62,8 @@
 
     ! set rc = ESMF_SUCCESS
     rc = ESMF_SUCCESS
-        
-        
+
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -189,8 +189,9 @@
 !  Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
+
+    c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                             stateType=ESMF_STATE_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -203,8 +204,9 @@
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
-    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
+
+    c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+                             stateType=ESMF_STATE_IMPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -217,7 +219,7 @@
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
@@ -228,7 +230,7 @@
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Run section
@@ -274,7 +276,7 @@
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     enddo
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
@@ -331,8 +333,8 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-    call ESMF_StateDestroy(c1exp, rc)
-    call ESMF_StateDestroy(c2imp, rc)
+    call ESMF_StateDestroy(c1exp, rc=rc)
+    call ESMF_StateDestroy(c2imp, rc=rc)
 
     call ESMF_ClockDestroy(clock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
@@ -369,10 +371,10 @@
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-  
-    call ESMF_Finalize(rc=rc) 
+
+    call ESMF_Finalize(rc=rc)
 
     end program ESMF_FieldLSSMMSTest
-    
+
 !\end{verbatim}
-    
+

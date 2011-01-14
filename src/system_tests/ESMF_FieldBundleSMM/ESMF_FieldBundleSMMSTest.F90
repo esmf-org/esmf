@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.12 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.13 2011/01/14 17:49:01 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -10,11 +10,11 @@
 ! System test FieldBundleSMM.
 !    Two gridded components and one coupler component, one-way coupling.
 !
-!    First gridded component runs on 4 PETs and defines a 2D source FieldBundle 
-!    100x150. Second gridded component defines a destination FieldBundle also 
-!    100x150 but runs on only 2 PETs. Both gridded components use DELayouts 
-!    with 1 DE per PET. The decomposition of the source FieldBundle is defined as 
-!    (petCount x 1) = (4 x 1) while the destination FieldBundle is decomposed as 
+!    First gridded component runs on 4 PETs and defines a 2D source FieldBundle
+!    100x150. Second gridded component defines a destination FieldBundle also
+!    100x150 but runs on only 2 PETs. Both gridded components use DELayouts
+!    with 1 DE per PET. The decomposition of the source FieldBundle is defined as
+!    (petCount x 1) = (4 x 1) while the destination FieldBundle is decomposed as
 !    (1 x petCount) = (1 x 2).
 !
 !    The first component initializes the source FieldBundle to a geometric function:
@@ -22,11 +22,11 @@
 !       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
 !    The coupler component runs on all 6 PETs and reconciles import and export
-!    States which contain source and destination FieldBundle, respectively. The 
+!    States which contain source and destination FieldBundle, respectively. The
 !    coupler component then calls FieldBundleSMM() using the identity matrix.
-!    This amounts to a redistribution of the source FieldBundle data onto the 
+!    This amounts to a redistribution of the source FieldBundle data onto the
 !    destination FieldBundle.
-!    
+!
 !    Finally the second gridded component compares the data stored in the
 !    destination FieldBundle to the exact solution of the above function as a measure
 !    of the accuracy of the FieldBundleSMM() method.
@@ -48,7 +48,7 @@ program ESMF_FieldBundleSMMSTest
   use user_coupler, only : usercpl_setvm, usercpl_register
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, urc, localrc, rc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
@@ -169,8 +169,9 @@ program ESMF_FieldBundleSMMSTest
 ! Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-  c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=localrc)
+
+  c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                           stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -179,8 +180,9 @@ program ESMF_FieldBundleSMMSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
-  c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=localrc)
+
+  c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+                           stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -190,7 +192,7 @@ program ESMF_FieldBundleSMMSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-#if 1 
+#if 1
   ! note that the coupler's import is comp1's export state
   ! and coupler's export is comp2's import state
   call ESMF_CplCompInitialize(cpl, c1exp, c2imp, userRc=urc, rc=localrc)
@@ -198,7 +200,7 @@ program ESMF_FieldBundleSMMSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -222,7 +224,7 @@ program ESMF_FieldBundleSMMSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section
@@ -295,7 +297,7 @@ program ESMF_FieldBundleSMMSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
@@ -309,5 +311,5 @@ program ESMF_FieldBundleSMMSTest
   call ESMF_Finalize()
 
 end program ESMF_FieldBundleSMMSTest
-    
+
 !\end{verbatim}

@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.22 2010/11/03 22:48:53 theurich Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.23 2011/01/14 17:49:02 w6ws Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -9,7 +9,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test MergeCoupling.  
+! System test MergeCoupling.
 ! 3 components and 1 coupler, two-way coupling.
 !
 !
@@ -20,14 +20,14 @@
     ! ESMF Framework module
     use ESMF_Mod
     use ESMF_TestMod
-    
+
     use user_model1, only : userm1_register
     use user_model2, only : userm2_register
     use user_model3, only : userm3_register
     use user_coupler, only : usercpl_register
 
     implicit none
-    
+
     ! Local variables
     integer :: pet_id, npets, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cplname
@@ -53,7 +53,7 @@
     ! individual test failure message, final output summary line
     character(ESMF_MAXSTR) :: failMsg, finalMsg
 
-        
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -156,39 +156,43 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !  Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
+
+      c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+                               stateType=ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
- 
-      c2exp = ESMF_StateCreate("comp2 export", ESMF_STATE_EXPORT, rc=rc)
+
+      c2exp = ESMF_StateCreate(stateName="comp2 export",  &
+                               stateType=ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp2, exportState=c2exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
- 
-      c3imp = ESMF_StateCreate("comp3 import", ESMF_STATE_IMPORT, rc=rc)
+
+      c3imp = ESMF_StateCreate(stateName="comp3 import",  &
+                               stateType=ESMF_STATE_IMPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp3, importState=c3imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1a Initialize finished, rc =", rc
 
-      bothexp = ESMF_StateCreate("coupler import", ESMF_STATE_IMPORT, rc=rc)
+      bothexp = ESMF_StateCreate(stateName="coupler import",  &
+                                 stateType=ESMF_STATE_IMPORT, rc=rc)
       call ESMF_StateAddState(bothexp, c1exp, rc=rc)
       call ESMF_StateAddState(bothexp, c2exp, rc=rc)
 
       call ESMF_CplCompInitialize(cpl, bothexp, c3imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Initialize finished, rc =", rc
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Run section
@@ -200,15 +204,15 @@
         call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 1 Run returned, rc =", rc
-  
+
         call ESMF_GridCompRun(comp2, exportState=c2exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 2 Run returned, rc =", rc
-  
+
         call ESMF_CplCompRun(cpl, bothexp, c3imp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Coupler Run returned, rc =", rc
-  
+
         call ESMF_GridCompRun(comp3, importState=c3imp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 2 Run returned, rc =", rc
@@ -218,7 +222,7 @@
         !call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
@@ -264,13 +268,13 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(c1exp, rc)
+      call ESMF_StateDestroy(c1exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(c2exp, rc)
+      call ESMF_StateDestroy(c2exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(c3imp, rc)
+      call ESMF_StateDestroy(c3imp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_StateDestroy(bothexp, rc)
+      call ESMF_StateDestroy(bothexp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockDestroy(clock, rc)
@@ -297,7 +301,7 @@
         ! Standard ESMF Test output to log file
         write(failMsg, *)  "Component Coupling"
         write(testname, *) "System Test MergeCoupling: Merge Component Coupling"
-  
+
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS: Merge Component Coupling complete."
@@ -308,18 +312,18 @@
         write(0, *) trim(testname)
         write(0, *) trim(finalMsg)
         write(0, *) ""
-  
+
       endif
-    
+
       ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors
       ! into the Log file that the scripts grep for.
       call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, &
       __FILE__, &
       __LINE__)
 
-      call ESMF_Finalize(rc=rc) 
+      call ESMF_Finalize(rc=rc)
 
       end program MergeCoupling
-    
+
 !\end{verbatim}
-    
+

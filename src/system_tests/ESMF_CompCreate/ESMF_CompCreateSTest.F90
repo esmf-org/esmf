@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.32 2010/11/03 22:48:49 theurich Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.33 2011/01/14 17:49:01 w6ws Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -20,18 +20,18 @@
     ! ESMF Framework module
     use ESMF_Mod
     use ESMF_TestMod
-    
+
     use user_model, only : user_setvm, user_register
 
     implicit none
-    
+
 !   Local variables
     integer :: my_pet, rc
     type(ESMF_VM):: vm
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
     character(len=ESMF_MAXSTR) :: cname
-        
+
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
 
@@ -90,20 +90,22 @@
 !  Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-      imp = ESMF_StateCreate("igrid import state", ESMF_STATE_IMPORT, rc=rc)
+
+      imp = ESMF_StateCreate(stateName="igrid import state",  &
+                             stateType=ESMF_STATE_IMPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      exp = ESMF_StateCreate("igrid export state", ESMF_STATE_EXPORT, rc=rc)
+      exp = ESMF_StateCreate(stateName="igrid export state",  &
+                             stateType=ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompInitialize(comp1, imp, exp, phase=1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 1 finished"
- 
+
       call ESMF_GridCompInitialize(comp1, imp, exp, phase=2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 2 finished"
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Run section
@@ -117,7 +119,7 @@
       call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned second time"
- 
+
       call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned third time"
@@ -159,13 +161,13 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
+
  10   print *, "System Test CompCreate complete"
 
       ! Standard ESMF Test output to log file
       write(failMsg, *) "System Test failure"
       write(testname, *) "System Test CompCreate: Component Create Test"
-  
+
       if (rc .ne. ESMF_SUCCESS) then
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
@@ -189,6 +191,6 @@
       call ESMF_Finalize(rc=rc)
 
       end program CompCreate
-    
+
 !\end{verbatim}
-    
+

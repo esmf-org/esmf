@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.24 2010/11/03 22:48:53 theurich Exp $
+! $Id: user_model2.F90,v 1.25 2011/01/14 17:49:02 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -150,7 +150,7 @@
         ! Set initial data values over exclusive domain to the de identifier
         idata = de_id
 
-        call ESMF_StateAddField(exportState, humidity, rc)
+        call ESMF_StateAddField(exportState, humidity, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_StatePrint(exportState, rc=rc)
         if (status .ne. ESMF_SUCCESS) goto 10

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.11 2010/12/03 05:58:12 theurich Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.12 2011/01/14 17:49:02 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_diable_SYSTEM_TEST        String used by test script to count system tests.
@@ -7,7 +7,7 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test XGridSerial.  
+! System test XGridSerial.
 !    Three gridded components and one coupler component, one-way coupling,
 !    all components are executed in serial mode. The three gridded components
 !    are idealized atmosphere, land, and ocean component with ocean and land on
@@ -15,11 +15,11 @@
 !    Exchange grid is created inside the coupler component.
 !
 !    Atmosphere component runs on all PETs and defines a 2D souserrce Field
-!    2x2. Land gridded component defines another 2D souserrce Field 
+!    2x2. Land gridded component defines another 2D souserrce Field
 !    1x2 but runs on all PETs. Ocean component again runs on all PETs and defines
 !    a 2D souserrce Field 2x2.
 !
-!    Both ocean and land initialize source Fields to a constant function: 
+!    Both ocean and land initialize source Fields to a constant function:
 !    1.0. The coupler runs on all PETs and has access to atmosphere, land,
 !    and ocean temperature Fields. The coupler uses the exchange grid to do a
 !    SMM from source Fields to destination Field.
@@ -46,7 +46,7 @@ program ESMF_XGridSerialSTest
   use coupler_comp, only : usercpl_setvm, usercpl_register
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS, userrc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cplname
@@ -211,9 +211,10 @@ program ESMF_XGridSerialSTest
 ! Init section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
+
   ! land export state
-  land_export = ESMF_StateCreate("land export", ESMF_STATE_EXPORT, rc=localrc)
+  land_export = ESMF_StateCreate(stateName="land export",  &
+                                 stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -225,9 +226,10 @@ program ESMF_XGridSerialSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   ! ocean export state
-  ocean_export = ESMF_StateCreate("ocean export", ESMF_STATE_EXPORT, rc=localrc)
+  ocean_export = ESMF_StateCreate(stateName="ocean export",  &
+                                  stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -241,7 +243,8 @@ program ESMF_XGridSerialSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! nestted state with land and ocean attached inside
-  landocn_export = ESMF_StateCreate("landocn export", ESMF_STATE_EXPORT, rc=localrc)
+  landocn_export = ESMF_StateCreate(stateName="landocn export",  &
+                                    stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -250,14 +253,15 @@ program ESMF_XGridSerialSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   call ESMF_StateAdd(landocn_export, ocean_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! atmosphere import state
-  atmos_import = ESMF_StateCreate("atmos import", ESMF_STATE_IMPORT, rc=localrc)
+  atmos_import = ESMF_StateCreate(stateName="atmos import",  &
+                                  stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -269,7 +273,7 @@ program ESMF_XGridSerialSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
   ! note that the coupler's import is atmos's export state
   ! and coupler's export is land's import state
   call ESMF_CplCompInitialize(cpl, landocn_export, atmos_import, userRc=userrc, rc=localrc)
@@ -280,7 +284,7 @@ program ESMF_XGridSerialSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section
@@ -326,7 +330,7 @@ program ESMF_XGridSerialSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section
@@ -427,7 +431,7 @@ program ESMF_XGridSerialSTest
     write(0, *) trim(finalMsg)
     write(0, *) ""
   endif
-  
+
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
@@ -441,5 +445,5 @@ program ESMF_XGridSerialSTest
   call ESMF_Finalize()
 
 end program ESMF_XGridSerialSTest
-    
+
 !\end{verbatim}

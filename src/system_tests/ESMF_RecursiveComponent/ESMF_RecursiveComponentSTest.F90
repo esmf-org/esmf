@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.11 2010/12/03 05:58:12 theurich Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.12 2011/01/14 17:49:02 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -7,12 +7,12 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test RecursiveComponent.  
+! System test RecursiveComponent.
 !
-!   A single component is created by the driver code and its SetServices() 
-!   routine is invoked. Consequently the component's Initialize(), Run(), 
+!   A single component is created by the driver code and its SetServices()
+!   routine is invoked. Consequently the component's Initialize(), Run(),
 !   Finalize() methods are called in sequence. The component Initialize()
-!   method creates two recursive subcomponents by invoking its own 
+!   method creates two recursive subcomponents by invoking its own
 !   SetServices() routine on two exclusive sets of PETs. It then calls the
 !   Initialize() routine for these two subcomponents which results in two more
 !   recursive subcomponents for each call. The recursion stops at a recursion
@@ -50,13 +50,13 @@ program ESMF_RecursiveComponentSTest
   use componentMod,  only : componentSetVM, componentReg
 
   implicit none
-    
+
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
   type(ESMF_VM):: vm
   type(ESMF_GridComp) :: component
   type(ESMF_State) :: import, export
-  
+
 
   ! Test variables
   integer :: result = 0     ! all pass
@@ -127,12 +127,14 @@ program ESMF_RecursiveComponentSTest
 ! Create States and initialize Component
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
- 
-  import = ESMF_StateCreate("import", ESMF_STATE_IMPORT, rc=localrc)
+
+  import = ESMF_StateCreate(stateName="import",  &
+                            stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  export = ESMF_StateCreate("export", ESMF_STATE_EXPORT, rc=localrc)
+  export = ESMF_StateCreate(stateName="export",  &
+                            stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -141,7 +143,7 @@ program ESMF_RecursiveComponentSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
- 
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run component
@@ -181,7 +183,7 @@ program ESMF_RecursiveComponentSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    
+
   call ESMF_StateDestroy(export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -208,7 +210,7 @@ program ESMF_RecursiveComponentSTest
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-  
+
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
   print *, "Test finished, localPet = ", localPet
@@ -218,5 +220,5 @@ program ESMF_RecursiveComponentSTest
   call ESMF_Finalize()
 
 end program ESMF_RecursiveComponentSTest
-    
+
 !\end{verbatim}
