@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.32 2011/01/13 18:30:25 rokuingh Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.33 2011/01/14 15:49:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,12 +134,11 @@ module ESMF_LocalArrayCreateMod
   public ESMF_LocalArraySetInitCreated
   public ESMF_LocalArrayGetThis
   public ESMF_LocalArraySetThis
-  public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.32 2011/01/13 18:30:25 rokuingh Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.33 2011/01/14 15:49:36 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -210,16 +209,7 @@ module ESMF_LocalArrayCreateMod
 !  
 !EOPI
 end interface
-
-
 !------------------------------------------------------------------------------
-interface operator (.eq.)
- module procedure ESMF_cfeq
-end interface
-interface operator (.ne.)
- module procedure ESMF_cfne
-end interface
-
 
 !===============================================================================
 ! LocalArrayOperator() interfaces
@@ -290,6 +280,8 @@ end interface
 !
 !EOP
     module procedure ESMF_LocalArrayEQ
+    
+    module procedure ESMF_cfeq
 
   end interface
 !------------------------------------------------------------------------------
@@ -331,6 +323,8 @@ end interface
 !EOP
     module procedure ESMF_LocalArrayNE
 
+    module procedure ESMF_cfne
+    
   end interface
 !------------------------------------------------------------------------------
 
