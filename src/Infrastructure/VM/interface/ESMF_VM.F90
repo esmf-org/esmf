@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.128 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.129 2011/01/14 01:10:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -119,6 +119,9 @@ module ESMF_VMMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_VMAllFullReduce
   public ESMF_VMAllGather
   public ESMF_VMAllGatherV
@@ -184,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.128 2011/01/05 20:05:46 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.129 2011/01/14 01:10:36 rokuingh Exp $"
 
 !==============================================================================
 
@@ -480,7 +483,216 @@ module ESMF_VMMod
 !==============================================================================
       
 
-  contains
+!===============================================================================
+! VMOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_VMAssignment(=) - VM assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   vm1 = vm2
+!
+! !ARGUMENTS:
+!   type(ESMF_VM) :: vm1
+!   type(ESMF_VM) :: vm2
+!
+!
+! !DESCRIPTION:
+!   Assign vm1 as an alias to the same ESMF VM object in memory
+!   as vm2. If vm2 is invalid, then vm1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm1]
+!     The {\tt ESMF\_VM} object on the left hand side of the assignment.
+!   \item[vm2]
+!     The {\tt ESMF\_VM} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_VMOperator(==) - VM equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (vm1 == vm2) then ... endif
+!             OR
+!   result = (vm1 == vm2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_VM), intent(in) :: vm1
+!   type(ESMF_VM), intent(in) :: vm2
+!
+!
+! !DESCRIPTION:
+!   Test whether vm1 and vm2 are valid aliases to the same ESMF
+!   VM object in memory. For a more general comparison of two ESMF VMs,
+!   going beyond the simple alias test, the ESMF\_VMMatch() function (not yet
+!   implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm1]
+!     The {\tt ESMF\_VM} object on the left hand side of the equality
+!     operation.
+!   \item[vm2]
+!     The {\tt ESMF\_VM} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_VMEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_VMOperator(/=) - VM not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (vm1 == vm2) then ... endif
+!             OR
+!   result = (vm1 == vm2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_VM), intent(in) :: vm1
+!   type(ESMF_VM), intent(in) :: vm2
+!
+!
+! !DESCRIPTION:
+!   Test whether vm1 and vm2 are {\it not} valid aliases to the
+!   same ESMF VM object in memory. For a more general comparison of two ESMF
+!   VMs, going beyond the simple alias test, the ESMF\_VMMatch() function
+!   (not yet implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm1]
+!     The {\tt ESMF\_VM} object on the left hand side of the non-equality
+!     operation.
+!   \item[vm2]
+!     The {\tt ESMF\_VM} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_VMNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMEQ()"
+!BOPI
+! !IROUTINE:  ESMF_VMEQ - Compare two VMs for equality
+!
+! !INTERFACE:
+  function ESMF_VMEQ(vm1, vm2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_VMEQ
+
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in) :: vm1
+    type(ESMF_VM), intent(in) :: vm2
+
+! !DESCRIPTION:
+!   Test if both {\tt vm1} and {\tt vm2} alias the same ESMF VM 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE xginit1, xginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    xginit1 = ESMF_VMGetInit(vm1)
+    xginit2 = ESMF_VMGetInit(vm2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (xginit1 .eq. ESMF_INIT_CREATED .and. &
+      xginit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_VMEQ = vm1%this == vm2%this
+    else
+      ESMF_VMEQ = ESMF_FALSE
+    endif
+
+  end function ESMF_VMEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMNE()"
+!BOPI
+! !IROUTINE:  ESMF_VMNE - Compare two VMs for non-equality
+!
+! !INTERFACE:
+  function ESMF_VMNE(vm1, vm2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_VMNE
+
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in) :: vm1
+    type(ESMF_VM), intent(in) :: vm2
+
+! !DESCRIPTION:
+!   Test if both {\tt vm1} and {\tt vm2} alias the same ESMF VM 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE xginit1, xginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_VMNE = .not.ESMF_VMEQ(vm1, vm2)
+
+  end function ESMF_VMNE
+!-------------------------------------------------------------------------------
       
         
 ! -------------------------- ESMF-public method -------------------------------

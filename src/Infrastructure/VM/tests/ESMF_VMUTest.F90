@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.37 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.38 2011/01/14 01:10:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !Module global variables
-      type(ESMF_VM),save :: vm, test_vm
+      type(ESMF_VM),save :: vm, test_vm, vmAlias
       integer:: localPet, npets, rootPet, time_values(8)
       integer:: test_localPet, test_npets
       integer:: init_sec, end_sec, delay_time
@@ -40,6 +40,8 @@
       integer:: nsize, i, j
       integer:: isum, clock_count
       real:: fsum
+      logical:: vmBool
+
       real(ESMF_KIND_R8)::  vm_prec
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray4(:), farray5(:)
       real(ESMF_KIND_R8), allocatable:: farray3(:) , farray3_soln(:)
@@ -81,6 +83,44 @@
 
       end subroutine test_vm_current
 
+      subroutine test_vm_operators
+
+      call ESMF_VMGetCurrent(vm, rc=rc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "VM equality before assignment Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      vmBool = (vmAlias.eq.vm)
+      call ESMF_Test(.not.vmBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_VMAssignment(=)()
+      write(name, *) "VM assignment and equality Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      vmAlias = vm
+      vmBool = (vmAlias.eq.vm)
+      call ESMF_Test(vmBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_VMOperator(==)()
+      write(name, *) "VM equality Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      vmBool = (vmAlias==vm)
+      call ESMF_Test(vmBool, name, failMsg, result, ESMF_SRCLINE)
+  
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_VMOperator(/=)()
+      write(name, *) "VM non-equality after destroy Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      vmBool = (vmAlias/=vm)
+      call ESMF_Test(.not.vmBool, name, failMsg, result, ESMF_SRCLINE)
+ 
+      end subroutine test_vm_operators
+ 
 !----------------------------------------------------------------------------
 
       subroutine test_vm_time
@@ -1018,7 +1058,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.37 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.38 2011/01/14 01:10:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -1129,6 +1169,7 @@
       rootPet = 0
 
       call test_vm_current
+      call test_vm_operators
       call test_vm_time
       
       call test_Reduce_sum

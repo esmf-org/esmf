@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.79 2011/01/05 22:26:05 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.80 2011/01/14 01:09:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -344,7 +344,7 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldBundleAssignment(=) - FieldBundle assignment operator
+! !IROUTINE: ESMF_FieldBundleAssignment(=) - FieldBundle assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -357,10 +357,9 @@ end interface
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   The default Fortran assignment, setting {\tt fieldbundle1} as an alias to
-!   the same ESMF FieldBundle as {\tt fieldbundle2}. If {\tt fieldbundle2} is an invalid 
-!   FieldBundle object then {\tt fieldbundle1} will be equally invalid after the
-!   assignment.
+!   Assign fieldbundle1 as an alias to the same ESMF FieldBundle object in memory
+!   as fieldbundle2. If fieldbundle2 is invalid, then fieldbundle1 will be equally invalid after
+!   the assignment.
 !   \end{sloppypar}
 !
 !   The arguments are:
@@ -393,11 +392,10 @@ end interface
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt fieldbundle1} and {\tt fieldbundle2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF FieldBundle object.
+!   Test whether fieldbundle1 and fieldbundle2 are valid aliases to the same ESMF
+!   FieldBundle object in memory. For a more general comparison of two ESMF FieldBundles,
+!   going beyond the simple alias test, the ESMF\_FieldBundleMatch() function (not yet
+!   implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -406,7 +404,7 @@ end interface
 !     operation.
 !   \item[fieldbundle2]
 !     The {\tt ESMF\_FieldBundle} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -434,11 +432,10 @@ end interface
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt fieldbundle1} and {\tt fieldbundle2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF FieldBundle object.
+!   Test whether fieldbundle1 and fieldbundle2 are {\it not} valid aliases to the
+!   same ESMF FieldBundle object in memory. For a more general comparison of two ESMF
+!   FieldBundles, going beyond the simple alias test, the ESMF\_FieldBundleMatch() function
+!   (not yet implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -447,7 +444,7 @@ end interface
 !     operation.
 !   \item[fieldbundle2]
 !     The {\tt ESMF\_FieldBundle} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -527,10 +524,7 @@ end function
       fbinit2 .eq. ESMF_INIT_CREATED) then
       ESMF_FieldBundleEQ = associated(fieldbundle1%btypep,fieldbundle2%btypep)
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(fbinit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(fbinit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_FieldBundleEQ = (localrc1.eq.localrc2) .and. associated(fieldbundle1%btypep,fieldbundle2%btypep)
+      ESMF_FieldBundleEQ = ESMF_FALSE
     endif
 
   end function ESMF_FieldBundleEQ

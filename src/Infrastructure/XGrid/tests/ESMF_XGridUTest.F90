@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.19 2011/01/11 16:28:13 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.20 2011/01/14 01:10:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -63,6 +63,11 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
+    ! XGrid operators
+    print *, 'Starting test1.5'
+    call test1andahalf(rc)
+
+    !------------------------------------------------------------------------
     !NEX_UTest
     ! Create an empty XGrid with area/centroid
     print *, 'Starting test2'
@@ -84,55 +89,140 @@
   
 contains 
 #define ESMF_METHOD "ESMF_TESTS"
-    subroutine test1(rc)
-        integer, intent(out)                :: rc
-        integer                             :: localrc, i
-        type(ESMF_XGrid)                    :: xgrid
-        type(ESMF_Grid)                     :: sideA(2), sideB(1)
-        type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1)
+subroutine test1(rc)
+    integer, intent(out)                :: rc
+    integer                             :: localrc, i
+    type(ESMF_XGrid)                    :: xgrid
+    type(ESMF_Grid)                     :: sideA(2), sideB(1)
+    type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1)
 
-        rc = ESMF_SUCCESS
-        localrc = ESMF_SUCCESS
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
 
-        sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/4,3/), rc=localrc)
+    sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/4,3/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/3,2/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    do i = 1, 2
+        sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-
-        sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
+    enddo
+    do i = 1, 1
+        sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+    enddo
 
-        sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/3,2/), rc=localrc)
+    xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    call ESMF_XGridDestroy(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+end subroutine test1
+
+subroutine test1andahalf(rc)
+    integer, intent(out)                :: rc
+    integer                             :: localrc, i
+    type(ESMF_XGrid)                    :: xgrid, xgridAlias
+    type(ESMF_Grid)                     :: sideA(2), sideB(1)
+    type(ESMF_DistGrid)                 :: sideAdg(2), sideBdg(1)
+    logical:: xgridBool
+
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    sideAdg(1) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/4,3/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    sideAdg(2) = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    sideBdg = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/3,2/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
+
+    do i = 1, 2
+        sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-
-        do i = 1, 2
-            sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-        enddo
-        do i = 1, 1
-            sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
-        enddo
-
-        xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
+    enddo
+    do i = 1, 1
+        sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
+    enddo
 
-        call ESMF_XGridDestroy(xgrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+    xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rc)) return
 
-    end subroutine test1
+	    !------------------------------------------------------------------------
+	    !NEX_UTest
+	    write(name, *) "XGrid equality before assignment Test"
+	    write(failMsg, *) "Did not return ESMF_SUCCESS"
+	    xgridBool = (xgridAlias.eq.xgrid)
+	    call ESMF_Test(.not.xgridBool, name, failMsg, result, ESMF_SRCLINE)
+
+	    !------------------------------------------------------------------------
+	    !NEX_UTest
+	    ! Testing ESMF_XGridAssignment(=)()
+	    write(name, *) "XGrid assignment and equality Test"
+	    write(failMsg, *) "Did not return ESMF_SUCCESS"
+	    xgridAlias = xgrid
+	    xgridBool = (xgridAlias.eq.xgrid)
+	    call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
+
+	    !------------------------------------------------------------------------
+	    !NEX_UTest
+	    write(name, *) "XGridDestroy Test"
+	    write(failMsg, *) "Did not return ESMF_SUCCESS"
+	    call ESMF_XGridDestroy(xgrid, rc=rc)
+	    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+	    !------------------------------------------------------------------------
+	    !NEX_UTest
+	    ! Testing ESMF_XGridOperator(==)()
+	    write(name, *) "XGrid equality after destroy Test"
+	    write(failMsg, *) "Did not return ESMF_SUCCESS"
+	    xgridBool = (xgridAlias==xgrid)
+	    call ESMF_Test(.not.xgridBool, name, failMsg, result, ESMF_SRCLINE)
+
+	    !------------------------------------------------------------------------
+	    !NEX_UTest
+	    ! Testing ESMF_XGridOperator(/=)()
+	    write(name, *) "XGrid non-equality after destroy Test"
+	    write(failMsg, *) "Did not return ESMF_SUCCESS"
+	    xgridBool = (xgridAlias/=xgrid)
+	    call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
+
+end subroutine test1andahalf
 
 !------------------------------------------------------------------------
     subroutine test2(rc)

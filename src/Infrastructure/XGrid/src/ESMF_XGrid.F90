@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_XGrid.F90,v 1.16 2011/01/14 01:10:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -124,7 +124,8 @@ module ESMF_XGridMod
    public ESMF_XGridMatch              ! Check if two XGrids match
 
    public assignment(=)
-   public operator(.eq.), operator(.ne.) 
+   public operator(==)
+   public operator(/=) 
 
 ! - ESMF-internal methods:
    public ESMF_XGridGetInit            ! For Standardized Initialization
@@ -139,7 +140,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.16 2011/01/14 01:10:27 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -154,7 +155,6 @@ module ESMF_XGridMod
       interface assignment (=)
    
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_XGridAssign
       module procedure ESMF_XGridSpecAssign
       module procedure ESMF_XGridSideAssign
 
@@ -170,7 +170,7 @@ module ESMF_XGridMod
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_XGridSideEqual
@@ -186,7 +186,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_XGridSideNotEqual
@@ -198,6 +198,120 @@ module ESMF_XGridMod
 !
 !EOPI
       end interface
+
+
+!===============================================================================
+! XGridOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_XGridAssignment(=) - XGrid assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   xgrid1 = xgrid2
+!
+! !ARGUMENTS:
+!   type(ESMF_XGrid) :: xgrid1
+!   type(ESMF_XGrid) :: xgrid2
+!
+!
+! !DESCRIPTION:
+!   Assign xgrid1 as an alias to the same ESMF XGrid object in memory
+!   as xgrid2. If xgrid2 is invalid, then xgrid1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[xgrid1]
+!     The {\tt ESMF\_XGrid} object on the left hand side of the assignment.
+!   \item[xgrid2]
+!     The {\tt ESMF\_XGrid} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_XGridOperator(==) - XGrid equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (xgrid1 == xgrid2) then ... endif
+!             OR
+!   result = (xgrid1 == xgrid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_XGrid), intent(in) :: xgrid1
+!   type(ESMF_XGrid), intent(in) :: xgrid2
+!
+!
+! !DESCRIPTION:
+!   Test whether xgrid1 and xgrid2 are valid aliases to the same ESMF
+!   XGrid object in memory. For a more general comparison of two ESMF XGrids,
+!   going beyond the simple alias test, the ESMF\_XGridMatch() function (not yet
+!   implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[xgrid1]
+!     The {\tt ESMF\_XGrid} object on the left hand side of the equality
+!     operation.
+!   \item[xgrid2]
+!     The {\tt ESMF\_XGrid} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_XGridEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_XGridOperator(/=) - XGrid not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (xgrid1 == xgrid2) then ... endif
+!             OR
+!   result = (xgrid1 == xgrid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_XGrid), intent(in) :: xgrid1
+!   type(ESMF_XGrid), intent(in) :: xgrid2
+!
+!
+! !DESCRIPTION:
+!   Test whether xgrid1 and xgrid2 are {\it not} valid aliases to the
+!   same ESMF XGrid object in memory. For a more general comparison of two ESMF
+!   XGrids, going beyond the simple alias test, the ESMF\_XGridMatch() function
+!   (not yet implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[xgrid1]
+!     The {\tt ESMF\_XGrid} object on the left hand side of the non-equality
+!     operation.
+!   \item[xgrid2]
+!     The {\tt ESMF\_XGrid} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_XGridNE
+
+  end interface
+!------------------------------------------------------------------------------
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -215,43 +329,103 @@ module ESMF_XGridMod
 #define XG_S_SMMB2X     9
 #define XG_S_SMMX2B     10
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridAssign()"
+#define ESMF_METHOD "ESMF_XGridEQ()"
 !BOPI
-! !IROUTINE:  ESMF_XGridAssign - set one xgrid struct equal to another
-
+! !IROUTINE:  ESMF_XGridEQ - Compare two XGrids for equality
+!
 ! !INTERFACE:
+  function ESMF_XGridEQ(xgrid1, xgrid2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_XGridEQ
 
-   subroutine ESMF_XGridAssign(dval, sval)
-!
 ! !ARGUMENTS:
- type(ESMF_XGrid), intent(out) :: dval
- type(ESMF_XGrid), intent(in) :: sval
-!
+    type(ESMF_XGrid), intent(in) :: xgrid1
+    type(ESMF_XGrid), intent(in) :: xgrid2
+
 ! !DESCRIPTION:
-!      Set one xgrid structure equal to another
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [dval]
-!           destination structure
-!     \item [dval]
-!           source structure
-!     \end{description}
+!   Test if both {\tt xgrid1} and {\tt xgrid2} alias the same ESMF XGrid 
+!   object.
 !
 !EOPI
+!-------------------------------------------------------------------------------
 
- dval%xgtypep => sval%xgtypep
+    ESMF_INIT_TYPE xginit1, xginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
 
- ESMF_INIT_COPY(dval,sval)
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
 
- end subroutine
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    xginit1 = ESMF_XGridGetInit(xgrid1)
+    xginit2 = ESMF_XGridGetInit(xgrid2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (xginit1 .eq. ESMF_INIT_CREATED .and. &
+      xginit2 .eq. ESMF_INIT_CREATED) then
+      ESMF_XGridEQ = associated(xgrid1%xgtypep,xgrid2%xgtypep)
+    else
+      ESMF_XGridEQ = ESMF_FALSE
+    endif
+
+  end function ESMF_XGridEQ
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridNE()"
+!BOPI
+! !IROUTINE:  ESMF_XGridNE - Compare two XGrids for non-equality
+!
+! !INTERFACE:
+  function ESMF_XGridNE(xgrid1, xgrid2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_XGridNE
+
+! !ARGUMENTS:
+    type(ESMF_XGrid), intent(in) :: xgrid1
+    type(ESMF_XGrid), intent(in) :: xgrid2
+
+! !DESCRIPTION:
+!   Test if both {\tt xgrid1} and {\tt xgrid2} alias the same ESMF XGrid 
+!   object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE xginit1, xginit2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+    
+    ESMF_XGridNE = .not.ESMF_XGridEQ(xgrid1, xgrid2)
+
+  end function ESMF_XGridNE
+!-------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

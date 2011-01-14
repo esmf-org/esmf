@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.40 2011/01/06 00:10:53 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.41 2011/01/14 01:09:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.40 2011/01/06 00:10:53 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.41 2011/01/14 01:09:24 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -157,7 +157,7 @@ module ESMF_ArrayBundleMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayBundleAssignment(=) - ArrayBundle assignment operator
+! !IROUTINE: ESMF_ArrayBundleAssignment(=) - ArrayBundle assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -169,12 +169,9 @@ module ESMF_ArrayBundleMod
 !
 !
 ! !DESCRIPTION:
-!   \begin{sloppypar}
-!   The default Fortran assignment, setting {\tt arraybundle1} as an alias to
-!   the same ESMF ArrayBundle as {\tt arraybundle2}. If {\tt arraybundle2} is an invalid 
-!   ArrayBundle object then {\tt arraybundle1} will be equally invalid after the
-!   assignment.
-!   \end{sloppypar}
+!   Assign arraybundle1 as an alias to the same ESMF ArrayBundle object in memory
+!   as arraybundle2. If arraybundle2 is invalid, then arraybundle1 will be equally invalid after
+!   the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -206,11 +203,10 @@ module ESMF_ArrayBundleMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt arraybundle1} and {\tt arraybundle2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF ArrayBundle object.
+!   Test whether arraybundle1 and arraybundle2 are valid aliases to the same ESMF
+!   ArrayBundle object in memory. For a more general comparison of two ESMF ArrayBundles,
+!   going beyond the simple alias test, the ESMF\_ArrayBundleMatch() function (not yet
+!   implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -219,7 +215,7 @@ module ESMF_ArrayBundleMod
 !     operation.
 !   \item[arraybundle2]
 !     The {\tt ESMF\_ArrayBundle} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -247,11 +243,10 @@ module ESMF_ArrayBundleMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt arraybundle1} and {\tt arraybundle2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF ArrayBundle object.
+!   Test whether arraybundle1 and arraybundle2 are {\it not} valid aliases to the
+!   same ESMF ArrayBundle object in memory. For a more general comparison of two ESMF
+!   ArrayBundles, going beyond the simple alias test, the ESMF\_ArrayBundleMatch() function
+!   (not yet implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -260,7 +255,7 @@ module ESMF_ArrayBundleMod
 !     operation.
 !   \item[arraybundle2]
 !     The {\tt ESMF\_ArrayBundle} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -323,11 +318,7 @@ contains
       abinit2 .eq. ESMF_INIT_CREATED) then
       ESMF_ArrayBundleEQ = arraybundle1%this .eq. arraybundle2%this
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(abinit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(abinit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_ArrayBundleEQ = (localrc1.eq.localrc2) .and. &
-        arraybundle1%this .eq. arraybundle2%this
+      ESMF_ArrayBundleEQ = ESMF_FALSE
     endif
 
   end function ESMF_ArrayBundleEQ

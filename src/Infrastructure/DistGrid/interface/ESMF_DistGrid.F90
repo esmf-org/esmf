@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.71 2011/01/12 23:28:43 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.72 2011/01/14 01:10:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.71 2011/01/12 23:28:43 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.72 2011/01/14 01:10:11 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -179,7 +179,7 @@ module ESMF_DistGridMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_DistGridAssignment(=) - DistGrid assignment operator
+! !IROUTINE: ESMF_DistGridAssignment(=) - DistGrid assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -191,10 +191,9 @@ module ESMF_DistGridMod
 !
 !
 ! !DESCRIPTION:
-!   The default Fortran assignment, setting {\tt distgrid1} as an alias to
-!   the same ESMF DistGrid as {\tt distgrid2}. If {\tt distgrid2} is an invalid 
-!   DistGrid object then {\tt distgrid1} will be equally invalid after the
-!   assignment.
+!   Assign distgrid1 as an alias to the same ESMF DistGrid object in memory
+!   as distgrid2. If distgrid2 is invalid, then distgrid1 will be equally invalid after
+!   the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -226,11 +225,10 @@ module ESMF_DistGridMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt distgrid1} and {\tt distgrid2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF DistGrid object.
+!   Test whether distgrid1 and distgrid2 are valid aliases to the same ESMF
+!   DistGrid object in memory. For a more general comparison of two ESMF DistGrids,
+!   going beyond the simple alias test, the ESMF\_DistGridMatch() function (not yet
+!   fully implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -239,7 +237,7 @@ module ESMF_DistGridMod
 !     operation.
 !   \item[distgrid2]
 !     The {\tt ESMF\_DistGrid} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -267,11 +265,10 @@ module ESMF_DistGridMod
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt distgrid1} and {\tt distgrid2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF DistGrid object.
+!   Test whether distgrid1 and distgrid2 are {\it not} valid aliases to the
+!   same ESMF DistGrid object in memory. For a more general comparison of two ESMF
+!   DistGrids, going beyond the simple alias test, the ESMF\_DistGridMatch() function
+!   (not yet fully implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -280,7 +277,7 @@ module ESMF_DistGridMod
 !     operation.
 !   \item[distgrid2]
 !     The {\tt ESMF\_DistGrid} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -343,10 +340,7 @@ contains
       dginit2 .eq. ESMF_INIT_CREATED) then
       ESMF_DistGridEQ = distgrid1%this .eq. distgrid2%this
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(dginit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(dginit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_DistGridEQ = (localrc1.eq.localrc2) .and. (distgrid1%this .eq. distgrid2%this)
+      ESMF_DistGridEQ = ESMF_FALSE
     endif
 
   end function ESMF_DistGridEQ

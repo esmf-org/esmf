@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.43 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_LocStream.F90,v 1.44 2011/01/14 01:09:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.43 2011/01/08 16:22:39 svasquez Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.44 2011/01/14 01:09:57 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -232,7 +232,7 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_LocStreamAssignment(=) - LocStream assignment operator
+! !IROUTINE: ESMF_LocStreamAssignment(=) - LocStream assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -244,10 +244,9 @@ end interface
 !
 !
 ! !DESCRIPTION:
-!   The default Fortran assignment, setting {\tt locstream1} as an alias to
-!   the same ESMF LocStream as {\tt locstream2}. If {\tt locstream2} is an invalid 
-!   LocStream object then {\tt locstream1} will be equally invalid after the
-!   assignment.
+!   Assign locstream1 as an alias to the same ESMF LocStream object in memory
+!   as locstream2. If locstream2 is invalid, then locstream1 will be equally invalid after
+!   the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -279,11 +278,10 @@ end interface
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt locstream1} and {\tt locstream2} for equality. If either side of the
-!   equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .true.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF LocStream object.
+!   Test whether locstream1 and locstream2 are valid aliases to the same ESMF
+!   LocStream object in memory. For a more general comparison of two ESMF LocStreams,
+!   going beyond the simple alias test, the ESMF\_LocStreamMatch() function (not yet
+!   implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -292,7 +290,7 @@ end interface
 !     operation.
 !   \item[locstream2]
 !     The {\tt ESMF\_LocStream} object on the right hand side of the equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -320,11 +318,10 @@ end interface
 !
 !
 ! !DESCRIPTION:
-!   Test {\tt locstream1} and {\tt locstream2} for non-equality. If either side of the
-!   non-equality test is not in the {\tt CREATED} status an error will be
-!   logged. However, this does not affect the return value, which is 
-!   {\tt .false.} as long as both sides are in the {\em same} status and
-!   alias the same ESMF LocStream object.
+!   Test whether locstream1 and locstream2 are {\it not} valid aliases to the
+!   same ESMF LocStream object in memory. For a more general comparison of two ESMF
+!   LocStreams, going beyond the simple alias test, the ESMF\_LocStreamMatch() function
+!   (not yet implemented) must be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -333,7 +330,7 @@ end interface
 !     operation.
 !   \item[locstream2]
 !     The {\tt ESMF\_LocStream} object on the right hand side of the non-equality
-!     operation..
+!     operation.
 !   \end{description}
 !
 !EOP
@@ -396,10 +393,7 @@ contains
       lsinit2 .eq. ESMF_INIT_CREATED) then
       ESMF_LocStreamEQ = associated(locstream1%lstypep,locstream2%lstypep)
     else
-      ! log error, convert to return code, and compare
-      lval1 = ESMF_IMErr(lsinit1, ESMF_CONTEXT, rc=localrc1)
-      lval2 = ESMF_IMErr(lsinit2, ESMF_CONTEXT, rc=localrc2)
-      ESMF_LocStreamEQ = (localrc1.eq.localrc2) .and. associated(locstream1%lstypep,locstream2%lstypep)
+      ESMF_LocStreamEQ = ESMF_FALSE
     endif
 
   end function ESMF_LocStreamEQ
