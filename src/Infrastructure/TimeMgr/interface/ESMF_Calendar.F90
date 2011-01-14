@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.121 2011/01/14 19:35:14 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.122 2011/01/14 22:39:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.121 2011/01/14 19:35:14 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.122 2011/01/14 22:39:30 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -323,7 +323,8 @@
 !     Test whether {\tt calendar1} and {\tt calendar2} are {\it not} valid 
 !     aliases to the same {\tt ESMF\_Calendar} object in memory. For a more 
 !     general comparison of two {\tt ESMF\_Calendar}s, going beyond the simple 
-!     alias test, the {\tt ESMF\_CalendarMatch()} function (not yet implemented)!     must be used.
+!     alias test, the {\tt ESMF\_CalendarMatch()} function (not yet 
+!     implemented) must be used.
 !
 !     The arguments are:
 !     \begin{description}   
