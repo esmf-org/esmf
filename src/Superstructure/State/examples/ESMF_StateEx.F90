@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.38 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.39 2011/01/14 19:21:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,8 @@
 
     ! This will probably be called from inside the Component Init code
     statename = "Atmosphere"
-    state1 = ESMF_StateCreate(statename, statetype=ESMF_STATE_IMPORT, rc=rc)  
+    state1 = ESMF_StateCreate(stateName=statename,   &
+                              statetype=ESMF_STATE_IMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(statename)
 
     ! Data would be added here and the State reused inside the run
@@ -69,7 +70,8 @@
 
 !BOC
     statename = "Ocean"
-    state2 = ESMF_StateCreate(statename, statetype=ESMF_STATE_EXPORT, rc=rc)  
+    state2 = ESMF_StateCreate(stateName=statename,  &
+                              statetype=ESMF_STATE_EXPORT, rc=rc)  
 !EOC
 
     print *, "State Create returned, name = ", trim(statename)
@@ -81,7 +83,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_StateAdd(state2, bundle1, rc)
+    call ESMF_StateAdd(state2, bundle1, rc=rc)
     print *, "StateAdd returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -89,7 +91,7 @@
     ! Loop here, updating FieldBundle contents each time step
 
 !BOC
-    call ESMF_StateDestroy(state2, rc)
+    call ESMF_StateDestroy(state2, rc=rc)
 !EOC
     print *, "State Destroy returned", rc
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -117,19 +119,20 @@
     ! The producing Component creates the menu of data items available.
 !BOC
     statename = "Ocean"
-    state3 = ESMF_StateCreate(statename, statetype=ESMF_STATE_EXPORT, rc=rc)  
+    state3 = ESMF_StateCreate(stateName=statename,  &
+                              statetype=ESMF_STATE_EXPORT, rc=rc)  
 !EOC
     print *, "State Create returned", rc, " name = ", trim(statename)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     dataname = "Downward wind"
-    call ESMF_StateAdd(state3, dataname, rc)
+    call ESMF_StateAdd(state3, dataname, rc=rc)
 !EOC
     print *, "StateAdd returned", rc, " name = ", trim(dataname)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     dataname = "Humidity"
-    call ESMF_StateAdd(state3, dataname, rc)
+    call ESMF_StateAdd(state3, dataname, rc=rc)
 !EOC
     print *, "StateAdd returned", rc, " name = ", trim(dataname)
 
@@ -153,7 +156,7 @@
 
 !BOC
     dataname = "Downward wind"
-    call ESMF_StateSetNeeded(state3, dataname, ESMF_NEEDED, rc)
+    call ESMF_StateSetNeeded(state3, dataname, ESMF_NEEDED, rc=rc)
 !EOC
     print *, "StateSetNeeded returned", rc
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -178,7 +181,7 @@
 
 !BOC
     dataname = "Downward wind"
-    if (ESMF_StateIsNeeded(state3, dataname, rc)) then
+    if (ESMF_StateIsNeeded(state3, dataname, rc=rc)) then
 !EOC
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -188,7 +191,7 @@
         print *, "FieldBundle Create returned", rc, "name = ", trim(bundlename)
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-        call ESMF_StateAdd(state3, bundle2, rc)
+        call ESMF_StateAdd(state3, bundle2, rc=rc)
 !EOC
         print *, "StateAdd returned", rc
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -199,7 +202,7 @@
 !EOC
     print *, "State Example 5 finished"
 #endif
-    call ESMF_StateDestroy(state3, rc)
+    call ESMF_StateDestroy(state3, rc=rc)
     print *, "State Destroy returned", rc
 
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.32 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.33 2011/01/14 19:21:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@ end module ESMF_StateReconcileEx_Mod
     print *, "GridComp Create returned, name = ", trim(comp2name)
 
     statename = "Ocn2Atm"
-    state1 = ESMF_StateCreate(statename, rc=rc)  
+    state1 = ESMF_StateCreate(stateName=statename, rc=rc)  
 !EOC
     print *, "State Create returned, name = ", trim(statename)
 
