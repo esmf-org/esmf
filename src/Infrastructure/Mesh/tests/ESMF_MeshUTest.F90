@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.26 2011/01/13 17:01:21 rokuingh Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.27 2011/01/14 18:38:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.26 2011/01/13 17:01:21 rokuingh Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.27 2011/01/14 18:38:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -195,7 +195,7 @@ program ESMF_MeshUTest
   ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
   !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_MeshDestroy(mesh, rc=rc)
+!  call ESMF_MeshDestroy(mesh, rc=rc)
 
   ! endif for skip for >1 proc
   endif 
@@ -238,7 +238,7 @@ program ESMF_MeshUTest
   endif 
 
   call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
 
@@ -256,7 +256,7 @@ program ESMF_MeshUTest
   endif 
 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+
   !------------------------------------------------------------------------
   !NEX_UTest
   ! Testing ESMF_MeshOperator(==)()
@@ -295,24 +295,6 @@ program ESMF_MeshUTest
 
   call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
   
-  !------------------------------------------------------------------------
-  !NEX_UTest
-
-  ! init success flag
-  rc=ESMF_SUCCESS
-
-  ! Only do this if we have 1 processor
-  if (petCount .eq. 1) then
-
-  write(name, *) "Double MeshDestroy through alias Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_MeshDestroy(meshAlias, rc=rc)
-
-  ! endif for skip for >1 proc
-  endif 
-
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a small 2x2 2D QUAD Mesh in 1 step on 4 procs and MeshGet"
