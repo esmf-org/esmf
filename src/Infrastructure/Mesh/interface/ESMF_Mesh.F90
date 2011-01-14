@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.55 2011/01/13 18:30:33 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.56 2011/01/14 15:56:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.55 2011/01/13 18:30:33 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.56 2011/01/14 15:56:47 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -189,15 +189,13 @@ module ESMF_MeshMod
   public ESMF_MeshMergeSplitSrcInd
   public ESMF_MeshMergeSplitDstInd
 
-  public operator(.eq.), operator(.ne.) 
-
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.55 2011/01/13 18:30:33 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.56 2011/01/14 15:56:47 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -215,7 +213,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_FileFormatTypeEqual
@@ -231,7 +229,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_FileFormatTypeNotEqual
@@ -248,7 +246,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_MeshLocEqual
@@ -264,7 +262,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_MeshLocNotEqual
