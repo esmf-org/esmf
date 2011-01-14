@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.66 2011/01/14 01:09:31 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.67 2011/01/14 23:15:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.66 2011/01/14 01:09:31 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.67 2011/01/14 23:15:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2026,7 +2026,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayCreateAllocateASArb()"
 !BOP
-! !IROUTINE: ESMF_ArrayCreate - Create Array object from rank and typekind (allocate memory) w/ arbitrary seqIndices for halo
+! !IROUTINE: ESMF_ArrayCreate - Create Array object from ArraySpec (allocate memory) w/ arbitrary seqIndices for halo
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
