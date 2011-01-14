@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.103 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_Clock.F90,v 1.104 2011/01/14 19:35:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.103 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_Clock.F90,v 1.104 2011/01/14 19:35:14 eschwab Exp $'
 
 !==============================================================================
 !
@@ -123,17 +123,18 @@
 !     type(ESMF_Clock) :: clock2
 ! 
 ! !DESCRIPTION:
-!     Set {\tt clock1} equal to {\tt clock2}.  This is the default Fortran
-!     assignment, which creates an alias to the original {\tt ESMF\_Clock}.
-!     If {\tt clock2} is an invalid {\tt ESMF\_Clock} object then
-!     {\tt clock1} will be equally invalid after the assignment.
+!     Assign {\tt clock1} as an alias to the same {\tt ESMF\_Clock} object in 
+!     memory as {\tt clock2}. If {\tt clock2} is invalid, then {\tt clock1} 
+!     will be equally invalid after the assignment.
 !
 !     The arguments are:
 !     \begin{description} 
 !     \item[clock1] 
-!          The {\tt ESMF\_Clock} to be set.
+!          The {\tt ESMF\_Clock} object on the left hand side of the 
+!          assignment.
 !     \item[clock2] 
-!          The {\tt ESMF\_Clock} to be copied.
+!          The {\tt ESMF\_Clock} object on the right hand side of the 
+!          assignment.
 !     \end{description}
 !
 !EOP
@@ -164,22 +165,19 @@
 !     type(ESMF_Clock), intent(in) :: clock2
 !
 ! !DESCRIPTION:
-!     Overloads the (==) operator for the {\tt ESMF\_Clock} class.
-!     Compare two clocks for equality; return {\tt .true.} if equal,
-!     {\tt .false.} otherwise.  Comparison is based on IDs, which are distinct
-!     for newly created clocks and identical for clocks created as copies.
-!
-!     If either side of the equality test is not in the 
-!     {\tt ESMF\_INIT\_CREATED} status an error will be logged.  However, this 
-!     does not affect the return value, which is {\tt .true.} when both 
-!     sides are in the {\em same} status.
-!
+!     Test whether {\tt clock1} and {\tt clock2} are valid aliases to the same
+!     {\tt ESMF\_Clock} object in memory. For a more general comparison of two 
+!     {\tt ESMF\_Clock}s, going beyond the simple alias test, the 
+!     {\tt ESMF\_ClockMatch()} function (not yet implemented) must be used.
+
 !     The arguments are:
 !     \begin{description}
 !     \item[clock1]
-!          The first {\tt ESMF\_Clock} in comparison.
+!          The {\tt ESMF\_Clock} object on the left hand side of the equality
+!          operation.
 !     \item[clock2]
-!          The second {\tt ESMF\_Clock} in comparison.
+!          The {\tt ESMF\_Clock} object on the right hand side of the equality
+!          operation.
 !     \end{description}
 !
 !EOP
@@ -209,22 +207,19 @@
 !     type(ESMF_Clock), intent(in) :: clock2
 !
 ! !DESCRIPTION:
-!     Overloads the (/=) operator for the {\tt ESMF\_Clock} class.
-!     Compare two clocks for inequality; return {\tt .true.} if not equal,
-!     {\tt .false.} otherwise.  Comparison is based on IDs, which are distinct
-!     for newly created clocks and identical for clocks created as copies.
-!
-!     If either side of the equality test is not in the 
-!     {\tt ESMF\_INIT\_CREATED} status an error will be logged.  However, this 
-!     does not affect the return value, which is {\tt .true.} when both sides
-!     are {\em not} in the {\em same} status.
+!     Test whether {\tt clock1} and {\tt clock2} are {\it not} valid aliases
+!     to the same {\tt ESMF\_Clock} object in memory. For a more general 
+!     comparison of two {\tt ESMF\_Clock}s, going beyond the simple alias test,
+!     the {\tt ESMF\_ClockMatch()} function (not yet implemented) must be used.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[clock1]
-!          The first {\tt ESMF\_Clock} in comparison.
+!          The {\tt ESMF\_Clock} object on the left hand side of the 
+!          non-equality operation.
 !     \item[clock2]
-!          The second {\tt ESMF\_Clock} in comparison.
+!          The {\tt ESMF\_Clock} object on the right hand side of the 
+!          non-equality operation.
 !     \end{description}
 !
 !EOP
