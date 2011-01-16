@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.20 2011/01/13 23:20:40 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.21 2011/01/16 20:26:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -675,7 +675,8 @@ convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeLink(gridcomp3, exportState3, rc=rc)
       call ESMF_AttributeLink(gridcomp4, exportState4, rc=rc)
 
-      ! Gridded Component 1 and gridded Component 2 are children of the coupler
+      ! Gridded Component 1 and gridded Component 2 are children 
+      ! of the coupler
       call ESMF_AttributeLink(cplcomp, gridcomp1, rc=rc)
       call ESMF_AttributeLink(cplcomp, gridcomp2, rc=rc)
       ! Gridded Component 3 is a child of gridded Component 1 (grandchild of 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.38 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.39 2011/01/16 20:26:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -621,12 +621,14 @@ program ESMF_DistGridEx
 
 
 !BOE
+! \begin{sloppypar}
 ! The {\tt tileIndexA} and {\tt tileIndexB} arguments specify that this is a
 ! connection within tile 1. The {\tt positionVector} indicates that there is no
 ! offset between tileB and tileA along the second dimension, but there is
 ! an offset of 5 along the first dimension (which in this case is the length of
 ! dimension 1). This aligns tileB (which is tile 1) right next to tileA
 ! (which is also tile 1).
+! \end{sloppypar}
 !
 ! The {\tt orientationVector} fixes the orientation of the tileB index space to
 ! be the same as the orientation of tileA (it maps index 1 of tileA to index 1

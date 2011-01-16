@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.25 2011/01/13 23:20:40 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.26 2011/01/16 20:26:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,7 +75,8 @@ implicit none
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeUpdateEx.Log", &
+      call ESMF_Initialize(vm=vm, &
+                    defaultlogfilename="AttributeUpdateEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
       
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
@@ -155,7 +156,7 @@ implicit none
     call ESMF_AttributeSet(gridcomp1, 'Discipline', &
       'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'ComponentLongName', &
-      'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
+   'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
     call ESMF_AttributeSet(gridcomp1, 'ModelComponentFramework', &
       'ESMF', &

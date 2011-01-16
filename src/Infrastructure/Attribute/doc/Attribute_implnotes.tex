@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.26 2011/01/05 20:05:40 svasquez Exp $
+% $Id: Attribute_implnotes.tex,v 1.27 2011/01/16 20:26:04 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,7 +20,9 @@ The decision to remove either an Attribute or an Attribute package is made by ca
 
 The behavior of the {\tt ESMF\_AttributeGet()} routine, when retrieving an Attribute containing a value list, follows a slightly different convention than other similar ESMF routines.  This routine requires the input of a Fortran array as a place to store the retrieved values of the Attribute list.  If the array that is given is longer that the list of Attribute values, the first part of the array will be filled, leaving the extra space untouched.  If, however, the array passed in is shorter than the number of Attribute values, the routine will exit with a return code which is not equal to {\bf ESMF\_SUCCESS}.  It is suggested that if it is required by the user to use a Fortran array that is longer than the number of Attribute values returned, only the indices of the array which the user desires to be filled with retrieved Attribute values should be passed into the routine.  
   
+\begin{sloppypar}
 Similar behavior is exhibited with the {\tt defaultvalueList} argument in the {\tt ESMF\_AttributeGet()} routine.  The difference here is that if the {\tt valueList} is shorter than the {\tt defaultvalueList} only the appropriate values will be filed in, and the routine will exit without error.  Likewise, if the {\tt valueList} is longer than the {\tt defaultvalueList} then the entire {\tt valueList} will be populated with the beginning section of the {\tt defaultvalueList} that is given.  
+\end{sloppypar}
 
 \subsubsection{Using Attribute package nesting capabilites}
 
@@ -51,16 +53,20 @@ The {\tt ESMF\_AttributeWrite()} interface is in limited form at the present tim
 
 The ability to copy an Attribute hierarchy is limited at this time.  The {\tt ESMF\_AttributeCopy()} routine can be used to {\it locally} copy an Attribute hierarchy between States.  It is important to note that this is a local copy, and no inter-PET communication is carried out.  Another thing to note is that when this functionality is based on a reference copy any further changes made to some portions of the original Attribute hierarchy will also affect the new Attribute hierarchy.
 
+\begin{sloppypar}
 There are two flags in the {\tt ESMF\_AttributeCopy()} routine which specify which type of copy is desired.  At this point there are only two different varieties of Attribute hierarchy copies available.  One of the requires the {\tt ESMF\_AttCopyFlag} to be set to {\tt ESMF\_ATTCOPY\_VALUE} and the {\tt ESMF\_AttTreeFlag} to be set to {\tt ESMF\_ATTTREE\_OFF}.  This does a copy of only the first level of an Attribute hierarchy, by value.
+\end{sloppypar}
 
 The second available copy can be applied by setting the {\tt ESMF\_AttCopyFlag} to {\tt ESMF\_ATTCOPY\_HYBRID} and the {\tt ESMF\_AttTreeFlag} to {\tt ESMF\_ATTTREE\_ON}.  This copy is more of a hybrid approach of reference and value copies.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full (by value), while the Attributes which are linked to the object being copied are referenced by a pointer (by reference).  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B with this approach, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
 
 \subsubsection{Reading and writing Attributes from XML files}
 \label{Att:Xerces}
 
+\begin{sloppypar}
 The Xerces C++ library, v3.1.0 or better, is used to read and write XML files.  
 More specifically, the SAX2 API is currently used, although future releases may 
 also use the DOM API.  The Xerces C++ website is 
 http://xerces.apache.org/xerces-c/.  For more details, see the 
 "ESMF Users Guide", "Building and Installing the ESMF, Third Party Libraries,
 Xerces".  Also please see the section on Attribute I/O,~\ref{io:attributeio}.
+\end{sloppypar}

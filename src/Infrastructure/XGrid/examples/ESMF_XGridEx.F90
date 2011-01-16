@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.23 2011/01/12 23:28:43 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.24 2011/01/16 20:26:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -179,13 +179,15 @@
     ! SideB grid
     centroidBX=(/0.75, 1.75/)
     centroidBY=(/0.75, 2.25/)
-    call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+    call ESMF_GridGetCoord(sideB(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, fptr=coordX, &
+                rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
     coordX = centroidBX
-    call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+    call ESMF_GridGetCoord(sideB(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, fptr=coordY, &
+                rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
     coordY = centroidBY

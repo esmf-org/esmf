@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.27 2010/12/15 23:47:19 svasquez Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.28 2011/01/16 20:26:04 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -189,15 +189,15 @@ module ESMF_AttributeUpdateMod
 !EOE
 
 !BOC
-    type(ESMF_VM)               :: vm
-    integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
-                                   value3,value4,convESMF,purpGen,convCC
-    type(ESMF_ArraySpec)        :: arrayspec
-    type(ESMF_Grid)             :: grid
-    type(ESMF_Field)            :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT, &
-                                   CONVKE,CONVPHI
-    type(ESMF_FieldBundle)      :: fieldbundle
+    type(ESMF_VM)            :: vm
+    integer                  :: petCount, status, myPet
+    character(ESMF_MAXSTR)   :: name1,name2,name3,name4,value1,value2, &
+                                value3,value4,convESMF,purpGen,convCC
+    type(ESMF_ArraySpec)     :: arrayspec
+    type(ESMF_Grid)          :: grid
+    type(ESMF_Field)         :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT, &
+                                CONVKE,CONVPHI
+    type(ESMF_FieldBundle)   :: fieldbundle
     character(ESMF_MAXSTR),dimension(2)   :: attrList         
     
     rc = ESMF_SUCCESS
@@ -207,7 +207,8 @@ module ESMF_AttributeUpdateMod
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-    call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
+           rc=rc)
     if (rc/=ESMF_SUCCESS) return
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), &
@@ -433,33 +434,37 @@ module ESMF_AttributeUpdateMod
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
-    call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=convESMF, &
-			purpose=purpGen, rc=status)    
-    call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=convESMF, &
-			purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=convESMF, &
-			purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=convESMF, &
-			purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DiscretizationType','Logically Rectangular', &
-			convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=convESMF, &
-			purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=convESMF, &
-			purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=convESMF, &
-			purpose=purpGen, rc=status)
+    call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, &
+                        rc=status)
+    call ESMF_AttributeSet(grid,'GridType','Cubed sphere', &
+                        convention=convESMF, purpose=purpGen, rc=status)    
+    call ESMF_AttributeSet(grid,'CongruentTiles',.true., &
+                        convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NumberOfGridTiles','1', &
+                        convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DimensionOrder','YX', &
+                        convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'DiscretizationType', &
+                        'Logically Rectangular', convention=convESMF, &
+                         purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'GeometryType','Sphere', &
+                         convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'IsConformal',.false., &
+                         convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'IsRegular',.false., &
+                         convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=convESMF, &
-			purpose=purpGen, rc=status)
+			 purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0', &
-			convention=convESMF, purpose=purpGen, rc=status)
+			 convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=convESMF, &
-			purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=convESMF, &
-			purpose=purpGen, rc=status)
+			  purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, &
+                          purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, &
+                          purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'HorizontalResolution','C48', &
+                          convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
 !EOC
@@ -556,9 +561,11 @@ module ESMF_AttributeUpdateMod
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(importState, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(importState, vm, &
+               attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(exportState, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(exportState, vm, &
+               attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 !EOC
    
@@ -641,7 +648,8 @@ module ESMF_AttributeUpdateMod
           purpose=purpGen, rc=status)
         if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
-          attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+          attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
+          rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
           convention=convESMF, purpose=purp2, rc=rc)
         call ESMF_AttributeSet(field, name='Mask', value='Yes', &

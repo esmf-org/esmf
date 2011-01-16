@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.33 2010/11/10 23:31:26 theurich Exp $
+% $Id: IO_background.tex,v 1.34 2011/01/16 20:26:04 svasquez Exp $
 
 %\subsection{Background}
 
@@ -94,6 +94,7 @@ In the current release, the following methods support Attribute XML I/O using Xe
 \subsection{Data I/O}
 \label{io:dataio}
 
+\begin{sloppypar}
 ESMF provides interfaces for high performance, parallel I/O using ESMF data
 objects such as Arrays and Fields.  Currently ESMF supports I/O of binary and
 NetCDF files.  The current ESMF implementation relies on the 
@@ -106,6 +107,7 @@ non-operable (no-op) stubs that simply return with a return code of
 ESMF\_RC\_LIB\_NOT\_PRESENT.  Details about the environment variables can be 
 found in ESMF User Guide, "Building and Installing the ESMF", 
 "Third Party Libraries".
+\end{sloppypar}
 
 In the current release, the following methods support parallel data I/O using PIO:
 

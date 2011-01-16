@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.7 2011/01/13 23:20:40 svasquez Exp $
+! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.8 2011/01/16 20:26:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -62,7 +62,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! initialize ESMF
-      call ESMF_Initialize(vm=vm, defaultlogfilename="AttReadCustCplCompEx.Log", &
+      call ESMF_Initialize(vm=vm, &
+                    defaultlogfilename="AttReadCustCplCompEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
@@ -143,7 +144,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! Get custom "MyAttribute4" from CplComp
-      call ESMF_AttributeGet(cplcomp, name='MyAttribute4', value=attrValue, rc=rc)
+      call ESMF_AttributeGet(cplcomp, name='MyAttribute4', value=attrValue, &
+           rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Land') &
@@ -153,7 +155,8 @@ program ESMF_AttReadCustCplCompEx
 
 !BOC
       ! Get custom "MyAttribute5" from CplComp
-      call ESMF_AttributeGet(cplcomp, name='MyAttribute5', value=attrValue, rc=rc)
+      call ESMF_AttributeGet(cplcomp, name='MyAttribute5', value=attrValue, &
+           rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Version 1') &
