@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.19 2011/01/14 19:08:21 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.20 2011/01/17 19:05:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1259,6 +1259,7 @@ contains
 
     type(ESMF_Grid) :: grid_atm, grid_ocn
     type(ESMF_Field) :: f_atm, f_ocn
+    type(ESMF_XGrid) :: xgrid
     real(ESMF_KIND_R8) :: atm_dx, atm_dy, ocn_dx, ocn_dy, startx, starty
     real(ESMF_KIND_R8) :: atm_sx, atm_sy, ocn_sx, ocn_sy
     integer             :: atm_nx, atm_ny, ocn_nx, ocn_ny
@@ -1483,9 +1484,9 @@ contains
 
     sideA(1) = grid_ocn
     sideB(1) = grid_atm
-    A2X%factorIndexList = indicies
-    A2X%factorList = weights
-    xgrid = ESMF_XGridCreate(sideA, sideB, A2X, rc=localrc)
+    A2X(1)%factorIndexList = indicies
+    A2X(1)%factorList = weights
+    xgrid = ESMF_XGridCreate(sideA, sideB, sparseMatA2X=A2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
