@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.21 2011/01/16 20:26:04 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.22 2011/01/17 19:01:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,14 +95,18 @@ program ESMF_AttributeCIMEx
           petList=(/0/), rc=rc)
 
       ! Create States
-      exportState1 = ESMF_StateCreate("exportState1", ESMF_STATE_EXPORT, &
-          rc=rc)
-      exportState2 = ESMF_StateCreate("exportState2", ESMF_STATE_EXPORT, &
-          rc=rc)
-      exportState3 = ESMF_StateCreate("exportState3", ESMF_STATE_EXPORT, &
-          rc=rc)
-      exportState4 = ESMF_StateCreate("exportState4", ESMF_STATE_EXPORT, &
-          rc=rc)
+      exportState1 = ESMF_StateCreate(stateName="exportState1",  &
+                                      stateType=ESMF_STATE_EXPORT, &
+                                      rc=rc)
+      exportState2 = ESMF_StateCreate(stateName="exportState2",  &
+                                      stateType=ESMF_STATE_EXPORT, &
+                                      rc=rc)
+      exportState3 = ESMF_StateCreate(stateName="exportState3",  &
+                                      stateType=ESMF_STATE_EXPORT, &
+                                      rc=rc)
+      exportState4 = ESMF_StateCreate(stateName="exportState4",  &
+                                      stateType=ESMF_STATE_EXPORT, &
+                                      rc=rc)
         
       ! Create Field Bundles
       fbundle1 = ESMF_FieldBundleCreate(name="fbundle1", rc=rc)

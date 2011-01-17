@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.22 2011/01/13 23:20:40 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.23 2011/01/17 19:01:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -90,8 +90,10 @@ program ESMF_AttributePackageEx
         gridcomp = ESMF_GridCompCreate(name="gridded_component", &
           petList=(/0,1,2,3/), rc=rc)
       endif
-      importState = ESMF_StateCreate("importState", ESMF_STATE_IMPORT, rc=rc)
-      exportState = ESMF_StateCreate("exportState", ESMF_STATE_EXPORT, rc=rc)
+      importState = ESMF_StateCreate(stateName="importState",  &
+                                     stateType=ESMF_STATE_IMPORT, rc=rc)
+      exportState = ESMF_StateCreate(stateName="exportState",  &
+                                     stateType=ESMF_STATE_EXPORT, rc=rc)
         
       DPEDT = ESMF_FieldCreateEmpty(name='DPEDT', rc=rc)
       DTDT = ESMF_FieldCreateEmpty(name='DTDT', rc=rc)
