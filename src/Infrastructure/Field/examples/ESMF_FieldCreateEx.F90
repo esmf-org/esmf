@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.104 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.105 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -521,7 +521,7 @@
     locs = ESMF_LocStreamCreate(minIndex=1, maxIndex=16, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field = ESMF_FieldCreate(locs, typekind=ESMF_TYPEKIND_I4, rank=1, &
+    field = ESMF_FieldCreate(locs, typekind=ESMF_TYPEKIND_I4, &
         rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -766,7 +766,7 @@
 
       ! Field is created on the 1 dimensinonal nodal distgrid. On
       ! each PET, Field is created on the locally owned nodes.
-      field = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_I4, rank=1, rc=rc)
+      field = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_I4, rc=rc)
       if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 

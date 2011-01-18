@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.62 2011/01/05 22:26:05 svasquez Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.63 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.62 2011/01/05 22:26:05 svasquez Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.63 2011/01/18 18:24:09 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -112,7 +112,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, &
-	grid, mesh, locstream, xgrid, array, typekind, dimCount, memDimCount, &
+	grid, mesh, locstream, xgrid, array, typekind, dimCount, rank, &
     	staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, &
 	ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
 	localDeCount, name, rc) 
@@ -129,7 +129,7 @@ contains
     type(ESMF_Array), intent(out), optional :: array     
     type(ESMF_TypeKind), intent(out), optional :: typekind
     integer, intent(out), optional :: dimCount
-    integer, intent(out), optional :: memDimCount
+    integer, intent(out), optional :: rank
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
     type(ESMF_MeshLoc), intent(out), optional :: meshLocation 
     type(ESMF_XGridSide), intent(out), optional :: xgridSide 
@@ -180,7 +180,7 @@ contains
 !       For an detailed discussion of this parameter, please see 
 !       Section \ref{sec:field:usage:createArbGrid} and
 !       Section \ref{sec:field:usage:createArbGridRep}. 
-! \item [{[memDimCount]}]
+! \item [{[rank]}]
 !       Number of dimensions in the physical memory of the {\tt field} data. It is 
 !       identical to dimCount when the corresponding grid is a non-arbitrary grid.
 !       It is less than dimCount when the grid is arbitrarily distributed.
@@ -466,14 +466,14 @@ contains
                                   ESMF_CONTEXT, rc)) return
     endif
 
-    if (present(memDimCount)) then
+    if (present(rank)) then
         if (ftype%datastatus .ne. ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-             "Cannot return dimCount because no data attached to Field", &
+             "Cannot return rank because no data attached to Field", &
                              ESMF_CONTEXT, rc)) return
         endif
         call ESMF_ArrayGet(ftype%array, &
-                           rank=memDimCount, rc=localrc)
+                           rank=rank, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

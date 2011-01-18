@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.14 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.15 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
     real, dimension(:,:), pointer   :: fptr2d
     real, dimension(:,:,:), pointer   :: fptr3d
     logical :: correct
-    integer :: memDimCount, dimCount
+    integer :: rank, dimCount
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
@@ -153,12 +153,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -171,12 +171,12 @@
   field1 = ESMF_FieldCreate(grid2d, array1d, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -192,12 +192,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -211,12 +211,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -232,12 +232,12 @@
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -251,12 +251,12 @@
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -330,12 +330,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -350,12 +350,12 @@
         gridToFieldMap=(/1,2,0/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -371,12 +371,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -390,12 +390,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -411,12 +411,12 @@
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -430,12 +430,12 @@
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -506,12 +506,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -524,12 +524,12 @@
   field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -545,12 +545,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -564,12 +564,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -585,12 +585,12 @@
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -604,12 +604,12 @@
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -680,12 +680,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 3) correct = .false.
+  if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -700,12 +700,12 @@
     ungriddedUBound=(/10/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 3) correct = .false.
+  if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -722,12 +722,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 3) correct = .false.
+  if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -742,12 +742,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 3) correct = .false.
+  if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -799,12 +799,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -819,12 +819,12 @@
     ungriddedUBound=(/10/), gridToFieldMap=(/1,2,0/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -842,12 +842,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -863,12 +863,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -919,12 +919,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -938,12 +938,12 @@
   field1 = ESMF_FieldCreate(grid3d, array1d, copyflag=ESMF_DATA_COPY, gridToFieldMap=(/0,0,1/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -960,12 +960,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -980,12 +980,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1002,12 +1002,12 @@
     copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field3, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1022,12 +1022,12 @@
     copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field5, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1095,12 +1095,12 @@
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1115,12 +1115,12 @@
           ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field1, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1138,12 +1138,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1159,12 +1159,12 @@
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field4, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 2) correct = .false.
+  if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1240,12 +1240,12 @@
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_FieldGet(field2, memDimCount=memDimCount, dimCount=dimCount, rc=localrc)
-  if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', memDimCount, dimCount
+  call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
+  if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) correct = .false.
 
-  if (memDimCount .ne. 1) correct = .false.
+  if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)

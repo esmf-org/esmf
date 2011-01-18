@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.24 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.25 2011/01/18 18:26:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.24 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.25 2011/01/18 18:26:09 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -315,7 +315,7 @@
       rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+    dstField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R4, &
       indexflag=ESMF_INDEX_GLOBAL, &
       rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

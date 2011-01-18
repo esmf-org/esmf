@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.155 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.156 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.155 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.156 2011/01/18 18:24:09 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -171,7 +171,7 @@
       !EX_UTest_Multi_Proc_Only
       ! Testing creating a field on a locstream
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Creating a Field on a LocStream from typekind and rank"
+      write(name, *) "Creating a Field on a LocStream from typekind"
       ! initialize 
       rc=ESMF_SUCCESS
       correct=.true.
@@ -181,7 +181,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
 
       ! Create Field
-      fls=ESMF_FieldCreate(locstream, typekind=ESMF_TYPEKIND_R4, rank=2, &
+      fls=ESMF_FieldCreate(locstream, typekind=ESMF_TYPEKIND_R4, &
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
@@ -545,7 +545,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      f2 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+      f2 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
             indexflag=ESMF_INDEX_DELOCAL, staggerloc=ESMF_STAGGERLOC_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"

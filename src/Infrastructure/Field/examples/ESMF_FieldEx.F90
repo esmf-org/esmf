@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.29 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.30 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -235,7 +235,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field from the Grid and arrayspec
-    field1 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+    field1 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
         indexflag=ESMF_INDEX_DELOCAL, &
         staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

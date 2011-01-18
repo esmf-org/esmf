@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.15 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.16 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
     integer                 :: finalrc, rc
     type(ESMF_Field)        :: field
     logical :: correct
-    integer :: memDimCount, dimCount
+    integer :: rank, dimCount
 
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
@@ -122,13 +122,13 @@
 !  With the introduction of Field on arbitrarily distributed Grid, Field has two kinds of dimension
 !  count: one associated geometrical (or physical) dimensionality, the other one associated with its
 !  memory index space representation. Field and Grid dimCount reflect the physical index 
-!  space of the objects. A new type of dimCount  memDimCount should be added to both of these entities. 
-!  memDimCount gives the number of dimensions of the memory index space of the objects.
+!  space of the objects. A new type of dimCount  rank should be added to both of these entities. 
+!  rank gives the number of dimensions of the memory index space of the objects.
 !  This would be the dimension of the pointer pulled out of Field and the
 !  size of the bounds vector, for example. 
 !
-!  For non-arbitrary Grids memDimCount=dimCount, but for grids and fields with
-!  arbitrary dimensions memDimCount = dimCount - (number of Arb dims) + 1
+!  For non-arbitrary Grids rank=dimCount, but for grids and fields with
+!  arbitrary dimensions rank = dimCount - (number of Arb dims) + 1
 !  (Internally Field can use the Arb info from the grid to create the mapping
 !  from the Field Array to the DistGrid)
 !
@@ -167,14 +167,14 @@
     field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, &
+    call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, &
                        rc=rc)
-    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', &
-                                memDimCount, dimCount
+    if (myPet .eq. 0) print *, 'Field rank, dimCount', &
+                                rank, dimCount
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
     ! verify that the dimension counts are correct
-    if (memDimCount .ne. 2) correct = .false.
+    if (rank .ne. 2) correct = .false.
     if (dimCount .ne. 3) correct = .false.  
 !EOC
     call ESMF_FieldDestroy(field, rc=rc)
@@ -206,13 +206,13 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-    call ESMF_FieldGet(field, memDimCount=memDimCount, dimCount=dimCount, &
+    call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, &
                        rc=rc)
-    if (myPet .eq. 0) print *, 'Field memDimCount, dimCount', &
-                                memDimCount, dimCount
+    if (myPet .eq. 0) print *, 'Field rank, dimCount', &
+                                rank, dimCount
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-    if (memDimCount .ne. 2) correct = .false.
+    if (rank .ne. 2) correct = .false.
     if (dimCount .ne. 2) correct = .false.  
 !EOC
     print *, "Field with replicated dimension returned"

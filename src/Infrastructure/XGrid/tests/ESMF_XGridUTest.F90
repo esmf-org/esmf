@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.20 2011/01/14 01:10:27 rokuingh Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.21 2011/01/18 18:26:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -506,7 +506,7 @@ end subroutine test1andahalf
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rank=1, rc=localrc)
+        field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return

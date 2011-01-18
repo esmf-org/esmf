@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.85 2011/01/14 01:09:12 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.86 2011/01/18 18:24:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.85 2011/01/14 01:09:12 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.86 2011/01/18 18:24:08 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1955,11 +1955,11 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridTKR"
 !BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and typekind/rank
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and typekind
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateGridTKR(grid, typekind, rank, indexflag, &
+  function ESMF_FieldCreateGridTKR(grid, typekind, indexflag, &
     staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, name, rc)
 !
@@ -1969,7 +1969,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 ! !ARGUMENTS:
     type(ESMF_Grid) :: grid               
     type(ESMF_TypeKind), intent(in)             :: typekind
-    integer, intent(in)                         :: rank
     type(ESMF_IndexFlag),  intent(in), optional :: indexflag
     type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
     integer, intent(in), optional :: gridToFieldMap(:)    
@@ -1992,8 +1991,6 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !       {\tt ESMF\_Grid} object. 
 ! \item[typekind]
 !      The typekind of the Field.
-! \item[rank]
-!      The rank of the Field.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE|s
 !      exclusive region is placed to start at the local index space origin,
@@ -2076,12 +2073,40 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
+    integer :: memDimCount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Compute rank
+    ungridded_dimcount = 0
+    if(present(ungriddedLBound)) then
+      ungridded_ldimcount = size(ungriddedLBound)
+      ungridded_dimcount = ungridded_ldimcount
+    endif
+    if(present(ungriddedUBound)) then
+      ungridded_udimcount = size(ungriddedUBound)
+      ungridded_dimcount = ungridded_udimcount
+    endif
+
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+          "- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rc) 
+        return
+      endif
+    endif
+
+    call ESMF_GridGet(grid, memDimCount=memDimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rank = ungridded_dimcount + memDimCount
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
@@ -2951,11 +2976,11 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateLSTKR"
 !BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a Field from LocStream and typekind/rank
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from LocStream and typekind
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateLSTKR(locstream, typekind, rank, &
+  function ESMF_FieldCreateLSTKR(locstream, typekind, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -2965,7 +2990,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ! !ARGUMENTS:
     type(ESMF_LocStream) :: locstream
     type(ESMF_TypeKind), intent(in)             :: typekind
-    integer, intent(in)                         :: rank
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
@@ -2984,8 +3008,6 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 !       {\tt ESMF\_LocStream} object. 
 ! \item[typekind]
 !      The typekind of the Field.
-! \item[rank]
-!      The rank of the Field.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -3033,12 +3055,36 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
+    integer :: memDimCount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Compute rank
+    ungridded_dimcount = 0
+    if(present(ungriddedLBound)) then
+      ungridded_ldimcount = size(ungriddedLBound)
+      ungridded_dimcount = ungridded_ldimcount
+    endif
+    if(present(ungriddedUBound)) then
+      ungridded_udimcount = size(ungriddedUBound)
+      ungridded_dimcount = ungridded_udimcount
+    endif
+
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+          "- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rc) 
+        return
+      endif
+    endif
+
+    rank = ungridded_dimcount + 1
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
@@ -3587,11 +3633,11 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateMeshTKR"
 !BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a Field from Mesh and typekind/rank
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from Mesh and typekind
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshTKR(mesh, typekind, rank, location, &
+  function ESMF_FieldCreateMeshTKR(mesh, typekind, location, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -3601,7 +3647,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! !ARGUMENTS:
     type(ESMF_Mesh) :: mesh               
     type(ESMF_TypeKind), intent(in)             :: typekind
-    integer, intent(in)                         :: rank
     type(ESMF_MeshLoc), intent(in), optional    :: location
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
@@ -3621,8 +3666,6 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 !       {\tt ESMF\_Mesh} object. 
 ! \item [typekind]
 !       The typekind of the Field.
-! \item [rank]
-!       The rank of the Field.
 ! \item [{[location]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
@@ -3676,12 +3719,36 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
+    integer :: memDimCount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Compute rank
+    ungridded_dimcount = 0
+    if(present(ungriddedLBound)) then
+      ungridded_ldimcount = size(ungriddedLBound)
+      ungridded_dimcount = ungridded_ldimcount
+    endif
+    if(present(ungriddedUBound)) then
+      ungridded_udimcount = size(ungriddedUBound)
+      ungridded_dimcount = ungridded_udimcount
+    endif
+
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+          "- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rc) 
+        return
+      endif
+    endif
+
+    rank = ungridded_dimcount + 1
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
@@ -4257,11 +4324,11 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateXGTKR"
 !BOP
-! !IROUTINE:   ESMF_FieldCreate - Create a Field from XGrid and typekind/rank
+! !IROUTINE:   ESMF_FieldCreate - Create a Field from XGrid and typekind
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGTKR(xgrid, xgridSide, gridIndex, typekind, rank, &
+  function ESMF_FieldCreateXGTKR(xgrid, xgridSide, gridIndex, typekind, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -4273,7 +4340,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
     type(ESMF_XGridSide), intent(in), optional  :: xgridSide
     integer, intent(in), optional               :: gridIndex
     type(ESMF_TypeKind), intent(in)             :: typekind
-    integer, intent(in)                         :: rank
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
@@ -4299,8 +4365,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 !       that side to create the Field on. If not provided, defaults to 1. 
 ! \item[typekind]
 !      The typekind of the Field.
-! \item[rank]
-!      The rank of the Field.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -4348,12 +4412,36 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
+    integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
+    integer :: memDimCount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Compute rank
+    ungridded_dimcount = 0
+    if(present(ungriddedLBound)) then
+      ungridded_ldimcount = size(ungriddedLBound)
+      ungridded_dimcount = ungridded_ldimcount
+    endif
+    if(present(ungriddedUBound)) then
+      ungridded_udimcount = size(ungriddedUBound)
+      ungridded_dimcount = ungridded_udimcount
+    endif
+
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+          "- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rc) 
+        return
+      endif
+    endif
+
+    rank = ungridded_dimcount + 1
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)

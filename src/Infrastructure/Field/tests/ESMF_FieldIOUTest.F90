@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.22 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.23 2011/01/18 18:24:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -459,7 +459,7 @@ program ESMF_FieldIOUTest
   grid = ESMF_GridCreateShapeTile(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
     rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc
-  field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, rank=2, &
+  field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
     staggerLoc=ESMF_STAGGERLOC_EDGE1, &
     totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc

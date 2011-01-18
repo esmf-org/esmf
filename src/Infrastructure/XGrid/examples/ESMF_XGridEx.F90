@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.24 2011/01/16 20:26:04 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.25 2011/01/18 18:26:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -349,7 +349,7 @@
 !EOE
 !BOC
     field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, &
-                rank=1, rc=localrc)
+                rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
@@ -372,7 +372,7 @@
 !BOC
     do i = 1, 2
         srcField(i) = ESMF_FieldCreate(sideA(i), &
-                typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
+                typekind=ESMF_TYPEKIND_R8, rc=localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
@@ -382,7 +382,7 @@
     enddo
     do i = 1, 1
         dstField(i) = ESMF_FieldCreate(sideB(i), &
-                typekind=ESMF_TYPEKIND_R8, rank=2, rc=localrc)
+                typekind=ESMF_TYPEKIND_R8, rc=localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		terminationflag=ESMF_ABORT)
         call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
