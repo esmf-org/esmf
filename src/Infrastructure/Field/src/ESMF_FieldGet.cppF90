@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.63 2011/01/18 18:24:09 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.64 2011/01/18 21:46:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.63 2011/01/18 18:24:09 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.64 2011/01/18 21:46:41 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -245,7 +245,6 @@ contains
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
-!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
@@ -256,7 +255,6 @@ contains
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
 !       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
-!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[localDeCount]}]
 !       Upon return this holds the number of PET-local DEs defined in
 !       the DELayout associated with the Field object.
@@ -1207,7 +1205,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
-!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of dimensions in the {\tt grid}.  However, ordering of the elements
@@ -1218,7 +1215,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
 !       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
-!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalLBound]}]
 !       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
@@ -1761,7 +1757,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
-!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
@@ -1772,7 +1767,6 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
 !       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
-!       HALO OPERATION NOT IMPLEMENTED
 ! \item [{[totalLBound]}]
 !       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used

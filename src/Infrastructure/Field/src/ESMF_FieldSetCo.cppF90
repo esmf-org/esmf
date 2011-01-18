@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.28 2011/01/05 23:26:30 svasquez Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.29 2011/01/18 21:46:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.28 2011/01/05 23:26:30 svasquez Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.29 2011/01/18 21:46:41 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -212,7 +212,6 @@ contains
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
-!       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
@@ -222,8 +221,7 @@ contains
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
 !       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method.  @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       in preparation for the implementation of the halo method. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -405,7 +403,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
-!       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
@@ -415,8 +412,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
 !       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method.  @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       in preparation for the implementation of the halo method. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1435,7 +1431,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
-!       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
@@ -1445,8 +1440,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
 !       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method.  @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       in preparation for the implementation of the halo method. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -1966,7 +1960,6 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
 !       in preparation for the implementation of the halo method. @\
-!       HALO OPERATION NOT IMPLEMENTED @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements @\
@@ -1976,8 +1969,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
 !       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method.  @\
-!       HALO OPERATION NOT IMPLEMENTED @\
+!       in preparation for the implementation of the halo method. @\
 ! \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\

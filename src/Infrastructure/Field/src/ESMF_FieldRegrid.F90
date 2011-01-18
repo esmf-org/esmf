@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.53 2011/01/05 23:26:30 svasquez Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.54 2011/01/18 21:46:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.53 2011/01/05 23:26:30 svasquez Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.54 2011/01/18 21:46:41 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -126,13 +126,13 @@ contains
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)                 :: srcField
       type(ESMF_Field), intent(inout)                 :: dstField
-      type(ESMF_RouteHandle), intent(inout)           :: routeHandle
+      type(ESMF_RouteHandle), intent(inout)           :: routehandle
       type(ESMF_RegionFlag),  intent(in),    optional :: zeroflag
       logical,                intent(in),    optional :: checkflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!   Execute the precomputed regrid operation stored in {\tt routeHandle} to 
+!   Execute the precomputed regrid operation stored in {\tt routehandle} to 
 !   interpolate from {\tt srcField} to {\tt dstField}.  See {\tt ESMF\_FieldRegridStore()} on how to 
 !   precompute the {\tt routehandle}. 
 !  
@@ -140,7 +140,7 @@ contains
 !   Both {\tt srcField} and {\tt dstField} must be
 !   congruent with the respective Fields used during 
 !   {\tt ESMF\_FieldRegridStore()}. In the case of the Regrid operation congruent 
-!   Fields are built upon the same stagger location and on the same Grid. The routeHandle represents
+!   Fields are built upon the same stagger location and on the same Grid. The routehandle represents
 !   the interpolation between the Grids as they were during the {\tt ESMF\_FieldRegridStore()} call.  
 !   So if the coordinates at the stagger location in the Grids change, a new call to {\tt ESMF\_FieldRegridStore()} 
 !   is necessary to compute the interpolation between that new set of coordinates.
@@ -200,7 +200,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-                   routehandle=routeHandle, zeroflag=zeroflag, &
+                   routehandle=routehandle, zeroflag=zeroflag, &
                    checkflag=checkflag, rc=localrc)
 
         if (ESMF_LogFoundError(localrc, &
@@ -210,7 +210,7 @@ contains
         ! Once the compilation order is sorted out, 
         ! Should be able to call into Field SMM directly.
         !call ESMF_FieldSMM(srcField=srcField, dstField=dstField, &
-        !           routehandle=routeHandle, zeroflag=zeroflag, &
+        !           routehandle=routehandle, zeroflag=zeroflag, &
         !           checkflag=checkflag, rc=localrc)
 
         !if (ESMF_LogFoundError(localrc, &
@@ -228,10 +228,10 @@ contains
 ! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by a regridding operation
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldRegridRelease(routeHandle, rc)
+      subroutine ESMF_FieldRegridRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout)  :: routeHandle
+      type(ESMF_RouteHandle), intent(inout)  :: routehandle
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -239,7 +239,7 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [routeHandle]
+!     \item [routehandle]
 !           Handle carrying the sparse matrix
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -248,7 +248,7 @@ contains
 !EOP
         integer :: localrc
 
-        call ESMF_RouteHandleRelease(routehandle=routeHandle, rc=localrc)
+        call ESMF_RouteHandleRelease(routehandle=routehandle, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -267,7 +267,7 @@ contains
       subroutine ESMF_FieldRegridStoreNX(srcField, srcMaskValues,       &
                                        dstField, dstMaskValues,         &
                                        unmappedDstAction,               &
-                                       routeHandle, indicies, weights,  & 
+                                       routehandle, indicies, weights,  & 
                                        srcFracField, dstFracField,      &
                                        regridMethod,                    &
                                        regridPoleType, regridPoleNPnts, & 
@@ -281,7 +281,7 @@ contains
       type(ESMF_Field), intent(inout)                 :: dstField
       integer(ESMF_KIND_I4), intent(in), optional     :: dstMaskValues(:)
       type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
-      type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
+      type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
       real(ESMF_KIND_R8), pointer, optional           :: weights(:)
       type(ESMF_Field), intent(inout),optional          :: srcFracField
@@ -294,19 +294,19 @@ contains
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
-!       Creates a sparse matrix operation (stored in {\tt routeHandle}) that contains the calculations and 
-!       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. The routeHandle can then be used in the call
+!       Creates a sparse matrix operation (stored in {\tt routehandle}) that contains the calculations and 
+!       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. The routehandle can then be used in the call
 !       {\tt ESMF\_FieldRegrid()} to interpolate between the Fields. The user may also get the
 !       interpolation matrix in sparse matrix form via the optional arguments {\tt indices} and {\tt weights}. 
 !       \end{sloppypar}
 !       
-!       The routeHandle generated by this call is based just on the coordinates at the 
+!       The routehandle generated by this call is based just on the coordinates at the 
 !       Fields' stagger locations in the Grids contained in the Fields.  
 !       If those coordinates don't change the routehandle can be used repeatedly to interpolate from the source Field to the destination Field. 
-!       This is true even if the data in the Fields changes. The routeHandle may also be used to interpolate between any source and 
+!       This is true even if the data in the Fields changes. The routehandle may also be used to interpolate between any source and 
 !       destination Field which are created on the same stagger location and Grid as the original Fields.        
 !
-!       When it's no longer needed the routeHandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
+!       When it's no longer needed the routehandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -326,7 +326,7 @@ contains
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!     \item [{[routeHandle]}]
+!     \item [{[routehandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
 !     \item [{[indices]}] 
@@ -669,7 +669,7 @@ contains
               lregridMethod, &
               localRegridPoleType, localRegridPoleNPnts, &
               lregridScheme, &
-              unmappedDstAction, routeHandle, &
+              unmappedDstAction, routehandle, &
               indicies, weights, localrc)
         if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -799,7 +799,7 @@ contains
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField,     &
-                                       routeHandle,                    &
+                                       routehandle,                    &
                                        rc)
 !
 ! !RETURN VALUE:
@@ -808,24 +808,24 @@ contains
       type(ESMF_XGrid), intent(inout)                 :: xgrid
       type(ESMF_Field), intent(inout)                 :: srcField
       type(ESMF_Field), intent(inout)                 :: dstField
-      type(ESMF_RouteHandle), intent(inout), optional :: routeHandle
+      type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       integer, intent(out), optional                  :: rc 
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
-!       Creates a sparse matrix operation (stored in {\tt routeHandle}) that contains the calculations and 
-!       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. The routeHandle can then be used in the call
+!       Creates a sparse matrix operation (stored in {\tt routehandle}) that contains the calculations and 
+!       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. The routehandle can then be used in the call
 !       {\tt ESMF\_FieldRegrid()} to interpolate between the Fields. Informaton such as
 !       index mapping and weights are obtained from the XGrid by matching the Field Grids in the XGrid. It's important the Grids in the {\tt srcField} and {\tt dstField} donot match, i.e.
 !       they are different in either tological or geometric characteristic.
 !       \end{sloppypar}
 !       
-!       The routeHandle generated by this call is subsequently computed based on these information.
+!       The routehandle generated by this call is subsequently computed based on these information.
 !       If those information don't change the routehandle can be used repeatedly to interpolate from the source Field to the destination Field. 
-!       This is true even if the data in the Fields changes. The routeHandle may also be used to interpolate between any source and 
+!       This is true even if the data in the Fields changes. The routehandle may also be used to interpolate between any source and 
 !       destination Field which are created on the same stagger location and Grid as the original Fields.        
 !
-!       When it's no longer needed the routeHandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
+!       When it's no longer needed the routehandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -835,7 +835,7 @@ contains
 !           Source Field.
 !     \item [dstField]
 !           Destination Field.
-!     \item [{[routeHandle]}]
+!     \item [{[routehandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
 !     \item [{[rc]}]
@@ -1040,13 +1040,13 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_ArraySMMStore(srcArray, dstArray, routeHandle, &
+        call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, &
             sparseMat%factorList, sparseMat%factorIndexList, &
             localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        !call ESMF_FieldSMMStore(srcField, dstField, routeHandle, &
+        !call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
         !    sparseMat%factorList, sparseMat%factorIndexList, &
         !    localrc)
         !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
