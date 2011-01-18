@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.235 2011/01/13 21:34:39 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.236 2011/01/18 19:30:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.235 2011/01/13 21:34:39 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.236 2011/01/18 19:30:40 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -482,11 +482,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddOneArray(state, array, rc)
+  subroutine ESMF_StateAddOneArray(state, array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Array), intent(in)             :: array
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -623,11 +624,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddOneArrayBundle(state, arraybundle, rc)
+  subroutine ESMF_StateAddOneArrayBundle(state, arraybundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -764,11 +766,12 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneField(state, field, rc)
+      subroutine ESMF_StateAddOneField(state, field, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)         :: state
       type(ESMF_Field), intent(in)            :: field
+      type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use keywords for the below
       integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -907,11 +910,12 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneFieldBundle(state, fieldbundle, rc)
+      subroutine ESMF_StateAddOneFieldBundle(state, fieldbundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(inout)         :: state
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
       integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1051,11 +1055,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneName(state, name, rc)
+      subroutine ESMF_StateAddOneName(state, name,  &
+                                      keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),  intent(inout)         :: state
       character (len=*), intent(in)            :: name
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
       integer,           intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1097,7 +1103,7 @@ contains
 
       temp_list(1) = name
 
-      call ESMF_StateAddNameList(state, temp_list, 1, rc=localrc)      
+      call ESMF_StateAddNameList(state, temp_list, rc=localrc)      
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1112,11 +1118,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneRouteHandle(state, routehandle, rc)
+      subroutine ESMF_StateAddOneRouteHandle(state, routehandle,  &
+                                             keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(inout)         :: state
       type(ESMF_RouteHandle), intent(in)            :: routehandle
+      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
       integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1177,11 +1185,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneState(state, nestedState, rc)
+      subroutine ESMF_StateAddOneState(state, nestedState,  &
+                                       keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)         :: state
       type(ESMF_State), intent(in)            :: nestedState
+      type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use keywords for the below
       integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1370,11 +1380,13 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddArrayList(state, arrayList, count, rc)
+  subroutine ESMF_StateAddArrayList(state, arrayList,  &
+                                    keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state 
     type(ESMF_Array), intent(in)             :: arrayList(:)
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
     integer,          intent(in),   optional :: count
     integer,          intent(out),  optional :: rc     
 !
@@ -1485,12 +1497,13 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateAdd()   
-  subroutine ESMF_StateAddArrayBundleList(state, arraybundleList, &
-    count, rc)
+  subroutine ESMF_StateAddArrayBundleList(state, arraybundleList,  &
+                                          keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state 
     type(ESMF_ArrayBundle), intent(in)             :: arraybundleList(:)
+    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
     integer,                intent(in),   optional :: count
     integer,                intent(out),  optional :: rc     
 !
@@ -1601,13 +1614,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddFieldList(state, fieldList, count, rc)
+      subroutine ESMF_StateAddFieldList(state, fieldList,  &
+                                        keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       type(ESMF_Field), dimension(:), intent(inout) :: fieldList
-      integer, intent(in),  optional :: count
-      integer, intent(out), optional :: rc     
+    type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer, intent(in),      optional :: count
+      integer, intent(out),     optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple {\tt ESMF\_Field}s to an {\tt ESMF\_State}.
@@ -1713,13 +1728,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddFieldBundleList(state, fieldbundleList, count, rc)
+      subroutine ESMF_StateAddFieldBundleList(state, fieldbundleList,  &
+                                              keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state 
       type(ESMF_FieldBundle), dimension(:), intent(inout) :: fieldbundleList
-      integer, intent(in),  optional :: count
-      integer, intent(out), optional :: rc     
+    type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer, intent(in),      optional :: count
+      integer, intent(out),     optional :: rc     
 !
 ! !DESCRIPTION:
 !      Add multiple {\tt ESMF\_FieldBundle}s to an {\tt ESMF\_State}.
@@ -1826,13 +1843,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddNameList(state, nameList, count, rc)
+      subroutine ESMF_StateAddNameList(state, nameList,  &
+                                       keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      character (len=*), intent(in) :: nameList(:)
-      integer, intent(in), optional :: count
-      integer, intent(out), optional :: rc
+      type(ESMF_State),  intent(inout)     :: state
+      character (len=*), intent(in)        :: nameList(:)
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer, intent(in),        optional :: count
+      integer, intent(out),       optional :: rc
 !     
 ! !DESCRIPTION:
 !      Add a list of names to an existing {\tt state}.
@@ -1909,14 +1928,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddRouteHandleList(state, &
-        routehandleList, count, rc)
+      subroutine ESMF_StateAddRouteHandleList(state, routehandleList,  &
+                                              keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
+      type(ESMF_State), intent(inout)      :: state 
       type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
-      integer, intent(in),  optional :: count
-      integer, intent(out), optional :: rc     
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer,       intent(in),  optional :: count
+      integer,       intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !     Add multiple {\tt ESMF\_RouteHandle}s to an {\tt ESMF\_State}.
@@ -1995,13 +2015,15 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddStateList(state, nestedStateList, count, rc)
+      subroutine ESMF_StateAddStateList(state, nestedStateList,  &
+                                        keywordEnforcer, count, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
+      type(ESMF_State),      intent(inout) :: state 
       type(ESMF_State), dimension(:), intent(in) :: nestedStateList
-      integer, intent(in),  optional :: count
-      integer, intent(out), optional :: rc     
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer,       intent(in),  optional :: count
+      integer,       intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !     Add multiple nested {\tt ESMF\_State}s to a container {\tt ESMF\_State}.
@@ -2110,7 +2132,7 @@ contains
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
 ! !INTERFACE:
-      function ESMF_StateCreate(stateName, statetype, &
+      function ESMF_StateCreate(keywordEnforcer, stateName, statetype, &
                    fieldbundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, neededflag, readyflag, validflag, &
                    reqforrestartflag, rc)
@@ -2119,20 +2141,23 @@ contains
       type(ESMF_State) :: ESMF_StateCreate
 !
 ! !ARGUMENTS:
-      character(len=*), intent(in), optional :: stateName 
+      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use keywords for the below
+      character(len=*),     intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_FieldBundle), dimension(:), intent(inout), &
-                              optional :: fieldbundleList
+                                        optional :: fieldbundleList
       type(ESMF_Field), dimension(:), intent(inout), optional :: fieldList
       type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
       type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
       character(len=*), dimension(:), intent(in), optional :: nameList
-      integer, intent(in), optional :: itemCount
-      type(ESMF_NeededFlag), optional :: neededflag
-      type(ESMF_ReadyFlag), optional :: readyflag
-      type(ESMF_ValidFlag), optional :: validflag
-      type(ESMF_ReqForRestartFlag), optional :: reqforrestartflag
-      integer, intent(out), optional :: rc 
+      integer,               intent(in),  optional :: itemCount
+#if defined (ESMF_ENABLESTATENEEDED)
+      type(ESMF_NeededFlag), intent(in),  optional :: neededflag
+#endif
+      type(ESMF_ReadyFlag),  intent(in),  optional :: readyflag
+      type(ESMF_ValidFlag),  intent(in),  optional :: validflag
+      type(ESMF_ReqForRestartFlag), intent(in), optional :: reqforrestartflag
+      integer,               intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_State}, set default characteristics for
@@ -2277,10 +2302,11 @@ contains
 ! !IROUTINE: ESMF_StateDestroy - Release resources for a State
 !
 ! !INTERFACE:
-      recursive subroutine ESMF_StateDestroy(state, rc)
+      recursive subroutine ESMF_StateDestroy(state, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)          :: state
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
       integer,          intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -2345,11 +2371,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetInfo(state, itemSearch, nestedFlag, name, &
+      subroutine ESMF_StateGetInfo(state,  &
+            keywordEnforcer, itemSearch, nestedFlag, name, &
             statetype, itemCount, itemNameList, stateitemtypeList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in) :: state
+      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use keywords for the below
       character (len=*),     intent(in),  optional :: itemSearch
       logical,               intent(in),  optional :: nestedFlag
       character (len=*),     intent(out), optional :: name
@@ -2644,12 +2672,13 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetArray(state, itemName, array,  &
-          nestedStateName, rc)
+          keywordEnforcer, nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),  intent(in)	       :: state
       character (len=*), intent(in)	       :: itemName
       type(ESMF_Array),  intent(out)	       :: array
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
       character (len=*), intent(in),  optional :: nestedStateName
       integer,           intent(out), optional :: rc		 
 
@@ -2776,13 +2805,14 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetArrayBundle(state, itemName, arraybundle, &
-        nestedStateName, rc)
+      subroutine ESMF_StateGetArrayBundle(state, itemName, arraybundle,  &
+                                         keywordEnforcer, nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_ArrayBundle), intent(out)           :: arraybundle
+      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
       character (len=*),      intent(in),  optional :: nestedStateName
       integer,                intent(out), optional :: rc             
 
@@ -2909,13 +2939,14 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetField(state, itemName, field, &
-                                    nestedStateName, rc)
+      subroutine ESMF_StateGetField(state, itemName, field,  &
+                                    keywordEnforcer, nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in)            :: state
       character (len=*),     intent(in)            :: itemName
       type(ESMF_Field),      intent(out)           :: field
+      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use keywords for the below
       character (len=*),     intent(in),  optional :: nestedStateName
       integer,               intent(out), optional :: rc             
 
@@ -3048,12 +3079,13 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetFieldBundle(state, itemName, fieldbundle, &
-                                     nestedStateName, rc)
+                                     keywordEnforcer, nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_FieldBundle), intent(out)           :: fieldbundle
+      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
       character (len=*),      intent(in),  optional :: nestedStateName
       integer,                intent(out), optional :: rc             
 
@@ -3179,13 +3211,14 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetItemInfo(state, name, stateitemtype, rc)
+      subroutine ESMF_StateGetItemInfo(state, name, stateitemtype, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
+      type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: name
-      type(ESMF_StateItemType), intent(out) :: stateitemtype
-      integer, intent(out), optional :: rc             
+      type(ESMF_StateItemType),    intent(out) :: stateitemtype
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      integer,           intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -3263,13 +3296,14 @@ contains
 ! !IROUTINE: ESMF_StateGetNeeded - Query whether a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetNeeded(state, itemName, neededflag, rc)
+      subroutine ESMF_StateGetNeeded(state, itemName, neededflag, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
+      type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
-      type(ESMF_NeededFlag), intent(out) :: neededflag
-      integer, intent(out), optional :: rc             
+      type(ESMF_NeededFlag),       intent(out) :: neededflag
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      integer,           intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -3328,13 +3362,14 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetRouteHandle(state, itemName, routehandle, &
-                                     nestedStateName, rc)
+      subroutine ESMF_StateGetRouteHandle(state, itemName, routehandle,  &
+                                         keywordEnforcer, nestedStateName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_RouteHandle), intent(out)           :: routehandle
+      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
       character (len=*),      intent(in),  optional :: nestedStateName
       integer,                intent(out), optional :: rc             
 
@@ -3461,12 +3496,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetState(state, itemName, nestedState, rc)
+      subroutine ESMF_StateGetState(state, itemName, nestedState, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in)            :: state
       character (len=*),     intent(in)            :: itemName
       type(ESMF_State),      intent(out)           :: nestedState
+      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use keywords for the below
       integer,               intent(out), optional :: rc             
 
 !
@@ -3549,15 +3585,16 @@ contains
 ! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if data item needed
 !
 ! !INTERFACE:
-      function ESMF_StateIsNeeded(state, itemName, rc)
+      function ESMF_StateIsNeeded(state, itemName, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateIsNeeded
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
+      type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
-      integer, intent(out), optional :: rc             
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      integer,           intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -3622,13 +3659,14 @@ contains
 ! !IROUTINE: ESMF_StateIsReconcileNeeded -- Return logical true if reconciliation needed
 !
 ! !INTERFACE:
-  function ESMF_StateIsReconcileNeeded(state, collectiveflag, vm, rc)
+  function ESMF_StateIsReconcileNeeded(state, keywordEnforcer, collectiveflag, vm, rc)
 !
 ! !RETURN VALUE:
     logical :: ESMF_StateIsReconcileNeeded
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
+    type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use keywords for the below
     logical,          intent(in),  optional :: collectiveflag
     type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
@@ -3729,10 +3767,11 @@ contains
 ! !IROUTINE: ESMF_StatePrint - Print the internal data for a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StatePrint(state, options, nestedFlag, rc)
+      subroutine ESMF_StatePrint(state, keywordEnforcer, options, nestedFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
+      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use keywords for the below
       character (len = *),  intent(in), optional :: options
       logical, intent(in),  optional :: nestedFlag
       integer, intent(out), optional :: rc 
@@ -3957,11 +3996,12 @@ contains
 ! !IROUTINE: ESMF_StateRead -- Read data items from a file into a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateRead(state, fileName, rc)
+      subroutine ESMF_StateRead(state, fileName, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
+      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use keywords for the below
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4026,11 +4066,12 @@ contains
 ! !IROUTINE: ESMF_StateRemove - Remove an item from a State
 !
 ! !INTERFACE:
-  subroutine ESMF_StateRemove (state, itemName, rc)
+  recursive subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     character(*),     intent(in)             :: itemName
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4084,11 +4125,16 @@ contains
                                     ESMF_CONTEXT, rc)) return
     end if
 
-    dataitem%removedflag = .true.
-
+    if (dataitem%otype == ESMF_STATEITEM_FIELDBUNDLE) then
     ! TODO: In the case of FieldBundles, do we need to remove individual
     ! Fields as well?  If so, FindData needs to return the containing,
     ! potentially nested, State as well.
+
+      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, "FieldBundle remove not supported",  &
+                               ESMF_CONTEXT, rc)) return
+    end if
+
+    dataitem%removedflag = .true.
 
     call ESMF_StateClassCompressList (state%statep, rc=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
@@ -4152,11 +4198,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateReplace()   
-  subroutine ESMF_StateRepOneArray(state, array, rc)
+  subroutine ESMF_StateRepOneArray(state, array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Array), intent(in)             :: array
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4197,11 +4244,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateReplace()   
-  subroutine ESMF_StateRepOneArrayBundle(state, arraybundle, rc)
+  subroutine ESMF_StateRepOneArrayBundle(state, arraybundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4242,11 +4290,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateReplace()   
-  subroutine ESMF_StateRepOneField(state, Field, rc)
+  subroutine ESMF_StateRepOneField(state, Field, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Field), intent(in)             :: Field
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4287,11 +4336,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateReplace()   
-  subroutine ESMF_StateRepOneFieldBundle(state, Fieldbundle, rc)
+  subroutine ESMF_StateRepOneFieldBundle(state, Fieldbundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_FieldBundle), intent(in)             :: Fieldbundle
+    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4332,11 +4382,12 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_StateReplace()   
-  subroutine ESMF_StateRepOneState(state, nestedState, rc)
+  subroutine ESMF_StateRepOneState(state, nestedState, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_State), intent(in)             :: nestedState
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4376,7 +4427,7 @@ contains
 ! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
 ! !INTERFACE:
-      function ESMF_StateReadRestart(name, rc)
+      function ESMF_StateReadRestart(name, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateReadRestart
@@ -4384,7 +4435,8 @@ contains
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name              
-      integer, intent(out), optional :: rc               
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      integer,  intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
 !      Used to reinitialize all data associated with an
@@ -4472,11 +4524,12 @@ contains
 ! !IROUTINE: ESMF_StateWrite -- Write items from a State to file
 !
 ! !INTERFACE:
-      subroutine ESMF_StateWrite(state, fileName, rc)
+      subroutine ESMF_StateWrite(state, fileName, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
+      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use keywords for the below
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4538,11 +4591,12 @@ contains
 ! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateWriteRestart(state, rc)
+      subroutine ESMF_StateWriteRestart(state, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State):: state 
-      integer, intent(out), optional :: rc            
+      type(ESMF_State) :: state 
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer, intent(out),       optional :: rc            
 !
 ! !DESCRIPTION:
 !      Used to save all data to disk as quickly as possible.  
