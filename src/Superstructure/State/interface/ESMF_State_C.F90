@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.29 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_State_C.F90,v 1.30 2011/01/18 00:46:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.29 2011/01/05 20:05:47 svasquez Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.30 2011/01/18 00:46:15 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -197,7 +197,7 @@
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StateDestroy(state, rc)
+       call ESMF_StateDestroy(state, rc=rc)
     
    end subroutine f_esmf_statedestroy
 
