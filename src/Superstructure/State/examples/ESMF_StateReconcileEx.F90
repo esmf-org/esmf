@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.33 2011/01/14 19:21:02 w6ws Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.34 2011/01/19 17:44:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -212,7 +212,8 @@ end module ESMF_StateReconcileEx_Mod
     print *, "State before calling StateReconcile()"
     call ESMF_StatePrint(state1, rc=rc)
 
-    call ESMF_StateReconcile(state1, vm, ESMF_ATTRECONCILE_OFF, rc=rc)
+    call ESMF_StateReconcile(state1, vm,  &
+                             attreconflag=ESMF_ATTRECONCILE_OFF, rc=rc)
 
     print *, "State after calling StateReconcile()"
     call ESMF_StatePrint(state1, rc=rc)
