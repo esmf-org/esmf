@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.104 2011/01/14 19:35:14 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.105 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.104 2011/01/14 19:35:14 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.105 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 !
@@ -271,6 +271,7 @@
       integer,                        intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Advances the {\tt clock}'s current time by one time step:  either the
 !     {\tt clock}'s, or the passed-in {\tt timeStep} (see below).  When the
 !     {\tt clock} is in {\tt ESMF\_MODE\_FORWARD} (default), this method adds
@@ -280,6 +281,7 @@
 !     See the "direction" argument in method {\tt ESMF\_ClockSet()}.
 !     {\tt ESMF\_ClockAdvance()} optionally returns a list and number of ringing
 !     {\tt ESMF\_Alarm}s.  See also method {\tt ESMF\_ClockGetRingingAlarms()}.
+!     \end{sloppypar}
 !  
 !     The arguments are:
 !     \begin{description}
@@ -551,18 +553,22 @@
       integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Releases resources associated with this {\tt ESMF\_Clock}.  This releases
 !     the list of associated {\tt ESMF\_Alarm}s (pointers), but not the
 !     {\tt ESMF\_Alarm}s themselves; the user must explicitly call 
 !     {\tt ESMF\_AlarmDestroy()} on each {\tt ESMF\_Alarm} to release its
 !     resources.  {\tt ESMF\_ClockDestroy()} and corresponding 
 !     {\tt ESMF\_AlarmDestroy()}s can be called in either order.
+!     \end{sloppypar}
 !
+!     \begin{sloppypar}
 !     If {\tt ESMF\_ClockDestroy()} is called before {\tt ESMF\_AlarmDestroy()},
 !     any {\tt ESMF\_Alarm}s that were in the {\tt ESMF\_Clock}'s list will  
 !     no longer be associated with any {\tt ESMF\_Clock}.  If desired,
 !     these "orphaned" {\tt ESMF\_Alarm}s can be associated with a different
 !     {\tt ESMF\_Clock} via a call to {\tt ESMF\_AlarmSet(...clock=...)}.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -840,9 +846,11 @@
 !                single alarm.
 !
 !            {\tt ESMF\_ALARMLIST\_PREVRINGING} :
+!                \begin{sloppypar}
 !                Return only those alarms that were ringing on the previous
 !                {\tt ESMF\_Clock} time step.  See also method
 !                {\tt ESMF\_AlarmWasPrevRinging()} for checking a single alarm.
+!                \end{sloppypar}
 !
 !            {\tt ESMF\_ALARMLIST\_RINGING} :
 !                Returns only those {\tt clock} alarms that are currently
@@ -1316,8 +1324,10 @@
       integer,                 intent(out),   optional :: rc
     
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Sets/resets one or more of the properties of an {\tt ESMF\_Clock} that
 !     was previously initialized via {\tt ESMF\_ClockCreate()}.
+!     \end{sloppypar}
 !     
 !     The arguments are:
 !     \begin{description}

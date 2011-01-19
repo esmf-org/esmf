@@ -1,4 +1,4 @@
-% $Id: Alarm_rest.tex,v 1.6 2005/06/24 22:45:00 eschwab Exp $
+% $Id: Alarm_rest.tex,v 1.7 2011/01/19 02:13:18 svasquez Exp $
 
 \begin{enumerate}
 
@@ -14,11 +14,14 @@ direction.  This is due to the fact that the Time Manager cannot predict
 when user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
 will be logged when this limitation is not satisfied.
 
-\item {\bf Sticky alarm ring interval in reverse}  For repeating sticky alarms,
+\item {\bf Sticky alarm ring interval in reverse}  
+\begin{sloppypar}
+For repeating sticky alarms,
 it is currently assumed that the ringInterval is constant, so that only the
 time of the last call to {\tt ESMF\_AlarmRingerOff()} is saved.  In
 {\tt ESMF\_MODE\_REVERSE}, this information is used to turn sticky alarms
 back on.  In a future release, ringIntervals will be allowed to be variable,
 by saving alarm state at every timestep.
+\end{sloppypar}
 
 \end{enumerate}

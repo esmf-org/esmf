@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.26 2010/10/18 21:20:00 w6ws Exp $
+% $Id: LogErr_usage.tex,v 1.27 2011/01/19 02:13:18 svasquez Exp $
 
 %\subsection{Use and Examples}
 
@@ -76,10 +76,12 @@ The first entry shows date and time stamp.  The time is given in microsecond
 precision.  The next item shown is the type of message (INFO in this case).  
 Next, the PET number is added.  Lastly, the content is written.
 
+\begin{sloppypar}
 The second entry shows something slightly different.  In this case, we have
 an ERROR.  The method name (ESMF\_Field.F90) is automatically provided from 
 the cpp macros as well as the line number (812).  Then the content of the 
 message is written.
+\end{sloppypar}
  
 When done writing messages, the default Log is closed by calling 
 {\tt ESMF\_LogFinalize()}  or {\tt ESMF\_LogClose()} for user created Logs.  

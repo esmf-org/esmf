@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.82 2011/01/05 20:05:41 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.83 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.82 2011/01/05 20:05:41 svasquez Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.83 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -208,8 +208,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateDefault(deCount, deGrouping, dePinFlag, petList, &
-    vm, rc)
+  function ESMF_DELayoutCreateDefault(deCount, deGrouping, dePinFlag, &
+    petList, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in), optional  :: deCount
@@ -412,8 +412,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateHintWeights(deCount, compWeights, commWeights, &
-    deGrouping, dePinFlag, petList, vm, rc)
+  function ESMF_DELayoutCreateHintWeights(deCount, compWeights, &
+    commWeights, deGrouping, dePinFlag, petList, vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in), optional  :: deCount
@@ -763,20 +763,20 @@ contains
     localDeCount, localDeList, vasLocalDeCount, vasLocalDeList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),          intent(in)              :: delayout
-    type(ESMF_VM),                intent(out),  optional  :: vm
-    integer,                      intent(out),  optional  :: deCount
-    integer, target,              intent(out),  optional  :: petMap(:)
-    integer, target,              intent(out),  optional  :: vasMap(:)
-    integer, target,              intent(out),  optional  :: compCapacity(:)
-    integer, target,              intent(out),  optional  :: commCapacity(:,:)
-    logical,                      intent(out),  optional  :: oneToOneFlag
-    type(ESMF_DePinFlag),         intent(out),  optional  :: dePinFlag
-    integer,                      intent(out),  optional  :: localDeCount
-    integer, target,              intent(out),  optional  :: localDeList(:)
-    integer,                      intent(out),  optional  :: vasLocalDeCount
-    integer, target,              intent(out),  optional  :: vasLocalDeList(:)
-    integer,                      intent(out),  optional  :: rc  
+    type(ESMF_DELayout),      intent(in)              :: delayout
+    type(ESMF_VM),            intent(out),  optional  :: vm
+    integer,                  intent(out),  optional  :: deCount
+    integer, target,          intent(out),  optional  :: petMap(:)
+    integer, target,          intent(out),  optional  :: vasMap(:)
+    integer, target,          intent(out),  optional  :: compCapacity(:)
+    integer, target,          intent(out),  optional  :: commCapacity(:,:)
+    logical,                  intent(out),  optional  :: oneToOneFlag
+    type(ESMF_DePinFlag),     intent(out),  optional  :: dePinFlag
+    integer,                  intent(out),  optional  :: localDeCount
+    integer, target,          intent(out),  optional  :: localDeList(:)
+    integer,                  intent(out),  optional  :: vasLocalDeCount
+    integer, target,          intent(out),  optional  :: vasLocalDeList(:)
+    integer,                  intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -800,9 +800,11 @@ contains
 !        mapped. The {\tt vasMap} argument must at least be of size
 !        {\tt deCount}.
 !     \item[{[compCapacity]}]
+!        \begin{sloppypar}
 !        Upon return this holds a relative measure of the computational
 !        capacity for each DE. The {\tt compCapacity} argument must at least be
 !        of size {\tt deCount}.
+!        \end{sloppypar}
 !     \item[{[commCapacity]}]
 !        Upon return this holds a relative measure of the communication
 !        capacity for each pair of DEs. The {\tt commCapacity} argument is a
@@ -1420,6 +1422,7 @@ contains
     type(ESMF_DELayoutServiceReply) :: ESMF_DELayoutServiceOffer
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Offer service for a DE in the {\tt ESMF\_DELayout} object. This call
 !     together with {\tt ESMF\_DELayoutServiceComplete()} provides the
 !     synchronization primitives between the PETs of an ESMF multi-threaded VM
@@ -1432,6 +1435,7 @@ contains
 !     service offers issued for each DE by each PET and accepts only one PET's 
 !     offer for each offer increment. This requires that all PETs use
 !     {\tt ESMF\_DELayoutServiceOffer()} in unison.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}

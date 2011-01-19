@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.129 2011/01/14 01:10:36 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.130 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.129 2011/01/14 01:10:36 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.130 2011/01/19 02:13:18 svasquez Exp $"
 
 !==============================================================================
 
@@ -701,8 +701,8 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMAllFullReduce()
-!  subroutine ESMF_VMAllFullReduce<type><kind>(vm, sendData, recvData, count, &
-!    reduceflag,  blockingflag, commhandle, rc)
+!  subroutine ESMF_VMAllFullReduce<type><kind>(vm, sendData, recvData, &
+!    count, reduceflaV,  blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm
@@ -1300,8 +1300,8 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMAllGatherV()
-!  subroutine ESMF_VMAllGatherV<type><kind>(vm, sendData, sendCount, recvData, &
-!    recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!  subroutine ESMF_VMAllGatherV<type><kind>(vm, sendData, sendCount, &
+!    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm
@@ -1868,8 +1868,9 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMAllToAllV()
-!  subroutine ESMF_VMAllToAllV<type><kind>(vm, sendData, sendCounts, sendOffsets, &
-!    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!  subroutine ESMF_VMAllToAllV<type><kind>(vm, sendData, sendCounts, &
+!    sendOffsets, recvData, recvCounts, recvOffsets, blockingflag, &
+!    commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm
@@ -3388,10 +3389,12 @@ contains
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Get the global {\tt ESMF\_VM} object. This is the VM object
 !   that is created during {\tt ESMF\_Initialize()} and is the ultimate
 !   parent of all VM objects in an ESMF application. It is identical to the VM
 !   object returned by {\tt ESMF\_Initialize(..., vm=vm, ...)}.
+!   \end{sloppypar}
 !
 !   The {\tt ESMF\_VMGetGlobal()} call provides access to information about the
 !   global execution context via the global VM. This call is necessary because
@@ -3722,8 +3725,8 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMRecv()
-!  subroutine ESMF_VMRecv<type><kind>(vm, recvData, count, src, blockingflag, &
-!    commhandle, rc)
+!  subroutine ESMF_VMRecv<type><kind>(vm, recvData, count, src, &
+!    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm
@@ -4476,8 +4479,8 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMScatter()
-!  subroutine ESMF_VMScatter<type><kind>(vm, sendData, recvData, count, root, &
-!    blockingflag, commhandle, rc)
+!  subroutine ESMF_VMScatter<type><kind>(vm, sendData, recvData, count, &
+!    root, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm
@@ -4827,8 +4830,8 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMScatterV()
-!  subroutine ESMF_VMScatterV<type><kind>(vm, sendData, sendCounts, sendOffsets, &
-!    recvData, recvCount, root, rc)
+!  subroutine ESMF_VMScatterV<type><kind>(vm, sendData, sendCounts, &
+!    sendOffsets, recvData, recvCount, root, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm
@@ -5020,8 +5023,8 @@ contains
 !
 ! !INTERFACE:
 !  ! Private name; call using ESMF_VMSend()
-!  subroutine ESMF_VMSend<type><kind>(vm, sendData, count, dst, blockingflag, &
-!    commhandle, rc)
+!  subroutine ESMF_VMSend<type><kind>(vm, sendData, count, dst, &
+!    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),            intent(in)              :: vm

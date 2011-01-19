@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.69 2011/01/05 20:05:41 svasquez Exp $
+! $Id: ESMF_Config.F90,v 1.70 2011/01/19 02:13:18 svasquez Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1914,7 +1914,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(inout)       :: config    ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: config ! ESMF Configuration
       integer, intent(out)                   :: lineCount
       integer, intent(out)                   :: columnCount
 
@@ -2714,6 +2714,7 @@
 !   \item [config]
 !     {\tt ESMF\_Config} object to be validated.
 !   \item[{[options]}]
+!     \begin{sloppypar}
 !     If none specified:  simply check that the buffer is not full and the
 !       pointers are within range.
 !     "unusedAttributes" - Report to the default logfile all attributes not
@@ -2723,6 +2724,7 @@
 !       For an array-valued attribute, retrieving at least one value via
 !       {\tt ESMF\_ConfigGetAttribute()} or {\tt ESMF\_ConfigGetChar()}
 !       constitutes being "used."
+!     \end{sloppypar}
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     Equals {\tt ESMF\_RC\_ATTR\_UNUSED} if any unused attributes are found

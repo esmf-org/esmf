@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.236 2011/01/18 19:30:40 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.237 2011/01/19 02:13:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.236 2011/01/18 19:30:40 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.237 2011/01/19 02:13:19 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -2141,7 +2141,8 @@ contains
       type(ESMF_State) :: ESMF_StateCreate
 !
 ! !ARGUMENTS:
-      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use 
+                                                      ! keywords for the below
       character(len=*),     intent(in), optional :: stateName 
       type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_FieldBundle), dimension(:), intent(inout), &
@@ -2306,7 +2307,8 @@ contains
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)          :: state
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
+                                                    ! keywords for the below
       integer,          intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -2377,7 +2379,8 @@ contains
 !
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in) :: state
-      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use 
+                                                        ! keywords for the below
       character (len=*),     intent(in),  optional :: itemSearch
       logical,               intent(in),  optional :: nestedFlag
       character (len=*),     intent(out), optional :: name
@@ -3217,7 +3220,8 @@ contains
       type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: name
       type(ESMF_StateItemType),    intent(out) :: stateitemtype
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
+                                                    ! keywords for the below
       integer,           intent(out), optional :: rc             
 
 !
@@ -3302,7 +3306,8 @@ contains
       type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
       type(ESMF_NeededFlag),       intent(out) :: neededflag
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
+                                                    ! keywords for the below
       integer,           intent(out), optional :: rc             
 
 !
@@ -3593,7 +3598,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
+                                                    ! keywords for the below
       integer,           intent(out), optional :: rc             
 
 !
@@ -3666,7 +3672,8 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
-    type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use 
+                                                 ! keywords for the below
     logical,          intent(in),  optional :: collectiveflag
     type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
@@ -3771,7 +3778,8 @@ contains
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use 
+                                                      ! keywords for the below
       character (len = *),  intent(in), optional :: options
       logical, intent(in),  optional :: nestedFlag
       integer, intent(out), optional :: rc 
@@ -4001,7 +4009,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
-      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use 
+                                                           ! keywords for the below
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4071,7 +4080,8 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     character(*),     intent(in)             :: itemName
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
+                                                  ! keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4529,7 +4539,8 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
-      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use 
+                                                           ! keywords for the below
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.16 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.17 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -19,6 +19,7 @@
 !
 ! \subsubsection{Nesting ESMF inside a user MPI application}
 !
+! \begin{sloppypar}
 ! It is possible to nest an ESMF application inside a user application that 
 ! explicitly calls {\tt MPI\_Init()} and {\tt MPI\_Finalize()}. The
 ! {\tt ESMF\_Initialize()} call automatically checks whether MPI has already
@@ -26,6 +27,7 @@
 ! On the finalize side, {\tt ESMF\_Finalize()} can be instructed to {\em not}
 ! call {\tt MPI\_Finalize()}, making it the responsibility of the outer code
 ! to finalize MPI.
+! \end{sloppypar}
 !
 !EOE
 !------------------------------------------------------------------------------

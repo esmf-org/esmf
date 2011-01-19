@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.120 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_Time.F90,v 1.121 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.120 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_Time.F90,v 1.121 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 !
@@ -544,7 +544,7 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      integer,                 intent(out), optional :: timeZone ! not implemented
+      integer,                 intent(out), optional :: timeZone ! not imp
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: dayOfWeek
@@ -617,8 +617,10 @@
 !     Return as floating point value; fractional part represents the time of
 !     day.
 !
+!     \begin{sloppypar}
 !     For dayOfYear\_intvl, gets the day of the year the given {\tt ESMF\_Time}
 !     instant falls on.  Return as an {\tt ESMF\_TimeInterval}.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -682,10 +684,12 @@
 !          Associated timezone (hours offset from UCT, e.g. EST = -5).
 !          (Not implemented yet).
 !     \item[{[timeString]}]
+!          \begin{sloppypar}
 !          Convert time value to format string YYYY-MM-DDThh:mm:ss[:n/d],
 !          where n/d is numerator/denominator of any fractional seconds and
 !          all other units are in ISO 8601 format.  See ~\cite{ISO} and
 !          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimePrint()}.
+!          \end{sloppypar}
 !     \item[{[timeStringISOFrac]}]
 !          Convert time value to strict ISO 8601 format string
 !          YYYY-MM-DDThh:mm:ss[.f], where f is decimal form of any fractional
@@ -1045,7 +1049,7 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       type(ESMF_Calendar),     intent(in),  optional :: calendar
       type(ESMF_CalendarType), intent(in),  optional :: calendarType
-      integer,                 intent(in),  optional :: timeZone ! not implemented
+      integer,                 intent(in),  optional :: timeZone ! not imp
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1162,11 +1166,13 @@
 !                                                           (large, >= 64-bit).
 !          Default = 1
 !     \item[calendar]
+!          \begin{sloppypar}
 !          Associated {\tt Calendar}.  Defaults to calendar
 !          {\tt ESMF\_CAL\_NOCALENDAR} or default specified in
 !          {\tt ESMF\_Initialize()} or {\tt ESMF\_CalendarSetDefault()}.
 !          Alternate to, and mutually exclusive with, calendarType
 !          below.  Primarily for specifying a custom calendar type.
+!          \end{sloppypar}
 !     \item[{[calendarType]}]
 !          Alternate to, and mutually exclusive with, calendar above.  More
 !          convenient way of specifying a built-in calendar type.

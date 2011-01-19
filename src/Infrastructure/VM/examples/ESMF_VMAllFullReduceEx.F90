@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.13 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.14 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -70,17 +70,17 @@ program ESMF_VMAllFullReduceEx
 !BOC
   call ESMF_VMAllReduce(vm, sendData=array1, recvData=array2, count=nsize, &
     reduceflag=ESMF_SUM, rc=rc)
-  ! Both sendData and recvData must be 1-d arrays. Reduce distributed sendData
-  ! element by element into recvData and return in on all PETs.
+  ! Both sendData and recvData must be 1-d arrays. Reduce distributed 
+  ! sendData element by element into recvData and return in on all PETs.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
   ! global sum
 !BOC
-  call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=result, count=nsize, &
-    reduceflag=ESMF_SUM, rc=rc)
-  ! sendData must be 1-d array. Fully reduce the distributed sendData into a
-  ! single scalar and return it in recvData on all PETs.
+  call ESMF_VMAllFullReduce(vm, sendData=array1, recvData=result, &
+    count=nsize, reduceflag=ESMF_SUM, rc=rc)
+  ! sendData must be 1-d array. Fully reduce the distributed sendData 
+  ! into a single scalar and return it in recvData on all PETs.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   

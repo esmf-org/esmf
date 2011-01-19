@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.99 2011/01/14 19:35:14 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.100 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.99 2011/01/14 19:35:14 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.100 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 !
@@ -267,7 +267,8 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_AlarmCreate()
       function ESMF_AlarmCreateNew(name, clock, ringTime, ringInterval, &
-        stopTime, ringDuration, ringTimeStepCount, refTime, enabled, sticky, rc)
+        stopTime, ringDuration, ringTimeStepCount, refTime, enabled, &
+        sticky, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmCreateNew
@@ -458,10 +459,12 @@
       integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Releases resources associated with this {\tt ESMF\_Alarm}.  Also
 !     removes this {\tt ESMF\_Alarm} from its associated {\tt ESMF\_Clock}'s
 !     list of {\tt ESMF\_Alarm}s (removes the {\tt ESMF\_Alarm} pointer from
 !     the list).
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -655,8 +658,10 @@
 !          The current ringing state.
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
 !     \item[{[ringingOnPrevTimeStep]}]
+!          \begin{sloppypar}
 !          The ringing state upon the previous time step. Same as
 !          {\tt ESMF\_AlarmWasPrevRinging()}.
+!          \end{sloppypar}
 !     \item[{[enabled]}]
 !          The enabled state.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
@@ -874,7 +879,8 @@
 
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmNotSticky(alarm, ringDuration, ringTimeStepCount, rc)
+      subroutine ESMF_AlarmNotSticky(alarm, ringDuration, ringTimeStepCount, &
+                 rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
@@ -896,10 +902,12 @@
 !          description in method {\tt ESMF\_AlarmCreate()} or
 !          {\tt ESMF\_AlarmSet()}).
 !     \item[{[ringTimeStepCount]}]
+!          \begin{sloppypar}
 !          If not sticky, alarms rings for ringTimeStepCount, then turns
 !          itself off.  Mutually exclusive with ringDuration (see above and
 !          full description in method {\tt ESMF\_AlarmCreate()} or
 !          {\tt ESMF\_AlarmSet()}).
+!          \end{sloppypar}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1155,8 +1163,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_AlarmSet(alarm, name, clock, ringTime, ringInterval, &
-        stopTime, ringDuration, ringTimeStepCount, refTime, ringing, enabled, &
-        sticky, rc)
+        stopTime, ringDuration, ringTimeStepCount, refTime, ringing, &
+        enabled, sticky, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
@@ -1174,8 +1182,10 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Sets/resets one or more of the properties of an {\tt ESMF\_Alarm} that
 !     was previously initialized via {\tt ESMF\_AlarmCreate()}.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}

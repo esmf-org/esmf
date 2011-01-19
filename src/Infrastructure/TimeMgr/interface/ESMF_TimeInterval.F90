@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.109 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.110 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.109 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.110 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 !
@@ -141,11 +141,13 @@
 !     type(ESMF_TimeInterval) :: timeinterval2
 ! 
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Set {\tt timeinterval1} equal to {\tt timeinterval2}.  This is the default
 !     Fortran assignment, which creates a complete, independent copy of
 !     {\tt timeinterval2} as {\tt timeinterval1}.  If {\tt timeinterval2} is an
 !     invalid {\tt ESMF\_TimeInterval} object then {\tt timeinterval1} will be
 !     equally invalid after the assignment.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description} 
@@ -218,9 +220,11 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
 !     subtract {\tt timeinterval2} from {\tt timeinterval1} and return
 !     the difference as an {\tt ESMF\_TimeInterval}.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -286,9 +290,11 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
 !     return {\tt timeinterval1} divided by {\tt timeinterval2} as a
 !     double precision quotient.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1037,10 +1043,12 @@
 !     \item[{[calendarType]}]
 !          Associated {\tt CalendarType}, if any.
 !     \item[{[timeString]}]
+!          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
 !          all other units are in ISO 8601 format.  See ~\cite{ISO} and
 !          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          \end{sloppypar}
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
@@ -1166,7 +1174,7 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Time),         intent(inout)         :: startTimeIn    ! Input
+      type(ESMF_Time),         intent(inout)         :: startTimeIn ! Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1394,7 +1402,7 @@
       type(ESMF_Time),         intent(inout), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Calendar),     intent(in)            :: calendarIn     ! Input
+      type(ESMF_Calendar),     intent(in)            :: calendarIn ! Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1494,10 +1502,12 @@
 !          mutually exclusive with, calendarTypeIn below.  Primarily for
 !          specifying a custom calendar type.
 !     \item[[{timeString]}]
+!          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
 !          all other units are in ISO 8601 format.  See ~\cite{ISO} and
 !          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          \end{sloppypar}
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
@@ -1623,7 +1633,7 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_CalendarType), intent(in)            :: calendarTypeIn ! Input
+      type(ESMF_CalendarType), intent(in)            :: calendarTypeIn !Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1720,11 +1730,13 @@
 !          calendarIn above.  More convenient way of specifying a built-in
 !          calendar type.
 !     \item[[{timeString]}]
+!          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
 !          all other units are in ISO 8601 format.  See ~\cite{ISO} and
 !          ~\cite{ISOnotes}.  See also method
 !          {\tt ESMF\_TimeIntervalPrint()}.
+!          \end{sloppypar}
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional

@@ -1,4 +1,4 @@
-% $Id: Clock_rest.tex,v 1.9 2005/06/24 22:45:36 eschwab Exp $
+% $Id: Clock_rest.tex,v 1.10 2011/01/19 02:13:18 svasquez Exp $
 
 \begin{enumerate}
 
@@ -7,11 +7,14 @@ dynamically allocated automatically, 200 alarm references at a time.
 This constant is defined in both Fortran and C++ with a \#define for ease
 of modification.
 
-\item {\bf Clock variable timesteps in reverse} In order for a clock with
+\item {\bf Clock variable timesteps in reverse} 
+\begin{sloppypar}
+In order for a clock with
 variable timesteps to be run in {\tt ESMF\_MODE\_REVERSE}, the user must
 supply those timesteps to {\tt ESMF\_ClockAdvance()}.  Essentially, the user
 must save the timesteps while in forward mode.  In a future release, the
 Time Manager will assume this responsibility by saving the clock state
 (including the timeStep) at every timestep while in forward mode.
+\end{sloppypar}
 
 \end{enumerate}

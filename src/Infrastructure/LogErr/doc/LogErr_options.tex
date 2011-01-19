@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.18 2011/01/05 20:05:44 svasquez Exp $
+% $Id: LogErr_options.tex,v 1.19 2011/01/19 02:13:18 svasquez Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -29,10 +29,12 @@ Valid values are:
 
 \label{opt:msgtype}
 {\sf DESCRIPTION:\\}
+\begin{sloppypar}
 Specifies what message level --- e.g., informational, warning, 
 error --- will be written to log files.  This may be used both when
 writing the message with {\tt ESMF\_LogWrite()}, and when setting the msgAllow
 option with {\tt ESMF\_LogSet()}.
+\end{sloppypar}
 
 Valid values are:
 \begin{description}

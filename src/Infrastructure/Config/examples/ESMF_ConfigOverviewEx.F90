@@ -45,15 +45,15 @@
 !EOE
 
 !BOC
-      character(ESMF_MAXSTR) :: fname              ! config file name
-      character*20  :: fn1, fn2, fn3, input_file   ! strings to be read in
-      integer       :: rc                          ! error return code (0 is OK)
-      integer       :: i_n                         ! the first constant in the RF
-      real          :: param_1                     ! the second constant in the RF
-      real          :: radius                      ! radius of the earth
-      real          :: table(7,3)                  ! an array to hold the table in the RF
+      character(ESMF_MAXSTR) :: fname    ! config file name
+      character*20  :: fn1, fn2, fn3, input_file ! strings to be read in
+      integer       :: rc                ! error return code (0 is OK)
+      integer       :: i_n               ! the first constant in the RF
+      real          :: param_1           ! the second constant in the RF
+      real          :: radius            ! radius of the earth
+      real          :: table(7,3)        ! an array to hold the table in the RF
 
-      type(ESMF_Config)   :: cf                    ! the Config itself
+      type(ESMF_Config)   :: cf          ! the Config itself
 !EOC
 
 !--------------------------------------------------------
@@ -103,9 +103,9 @@
       endif
 
 !BOC
-      fname = "myResourceFile.rc"                   ! Name the Resource File
-      call ESMF_ConfigLoadFile(cf, fname, rc=rc)    ! Load the Resource File into the 
-                                                    ! empty Config
+      fname = "myResourceFile.rc"                ! Name the Resource File
+      call ESMF_ConfigLoadFile(cf, fname, rc=rc) ! Load the Resource File 
+                                                 ! into the empty Config
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -247,10 +247,12 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigGetAttribute(cf, param_1, rc=rc) ! Step b) read in the first 
-                                                       ! constant in the sequence
-      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)     ! Step c) read in the second 
-                                                       ! constant in the sequence
+      call ESMF_ConfigGetAttribute(cf, param_1, rc=rc) ! Step b) read in the 
+                                                       ! first constant in 
+                                                       ! the sequence
+      call ESMF_ConfigGetAttribute(cf, i_n, rc=rc)     ! Step c) read in the 
+                                                       ! second constant in 
+                                                       ! the sequence
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -275,7 +277,8 @@
 !EOE
 
 !BOC
-       call ESMF_ConfigFindLabel(cf, 'my_file_names:', rc=rc)  !Step a) find the label
+       call ESMF_ConfigFindLabel(cf, 'my_file_names:', &
+               rc=rc)                       ! Step a) find the label
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -284,9 +287,12 @@
       endif
 
 !BOC
-       call ESMF_ConfigGetAttribute(cf, fn1, rc=rc) !Step b) retrieve the first filename
-       call ESMF_ConfigGetAttribute(cf, fn2, rc=rc) !Step c) retrieve the second filename
-       call ESMF_ConfigGetAttribute(cf, fn3, rc=rc) !Step d) retrieve the third filename
+       call ESMF_ConfigGetAttribute(cf, fn1, &
+                 rc=rc)                    ! Step b) retrieve the 1st filename
+       call ESMF_ConfigGetAttribute(cf, fn2, &
+                 rc=rc)                    ! Step c) retrieve the 2nd filename
+       call ESMF_ConfigGetAttribute(cf, fn3, &
+                 rc=rc)                    ! Step d) retrieve the 3rd filename
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -318,10 +324,9 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc) ! Step a) Set the label 
-							      ! location to the 
-							      ! beginning of the 
-                                                              ! table
+      call ESMF_ConfigFindLabel(cf, 'my_table_name::', &
+               rc=rc)        ! Step a) Set the label location to the 
+                             ! beginning of the table
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -337,8 +342,8 @@
 
 !BOC
       do i = 1, 7
-        call ESMF_ConfigNextLine(cf, rc=rc)          ! Step b) Increment the rows
-        do j = 1, 3                                  ! Step c) Fill in the table 
+        call ESMF_ConfigNextLine(cf, rc=rc) ! Step b) Increment the rows
+        do j = 1, 3                         ! Step c) Fill in the table 
           call ESMF_ConfigGetAttribute(cf, table(i,j), rc=rc)
         enddo
       enddo

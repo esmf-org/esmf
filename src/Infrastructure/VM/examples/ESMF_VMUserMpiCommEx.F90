@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.14 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.15 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -19,12 +19,14 @@
 !
 ! \subsubsection{Nesting ESMF inside a user MPI application on a subset of MPI ranks}
 !
+! \begin{sloppypar}
 ! The previous example demonstrated that it is possible to nest an ESMF 
 ! application, i.e. {\tt ESMF\_Initialize()}...{\tt ESMF\_Finalize()} inside
 ! {\tt MPI\_Init()}...{\tt MPI\_Finalize()}. It is not necessary that all
 ! MPI ranks enter the ESMF application. The following example shows how the
 ! user code can pass an MPI communicator to {\tt ESMF\_Initialize()}, and
 ! enter the ESMF application on a subset of MPI ranks.
+! \end{sloppypar}
 !
 !EOE
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.37 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.38 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,7 +16,8 @@
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_TimeIntervalEx - Time Interval initialization and manipulation examples
+! !PROGRAM: ESMF_TimeIntervalEx - Time Interval initialization and 
+!                                 manipulation examples
 !
 ! !DESCRIPTION:
 !

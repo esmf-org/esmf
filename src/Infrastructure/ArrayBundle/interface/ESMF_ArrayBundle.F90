@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.41 2011/01/14 01:09:24 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.42 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.41 2011/01/14 01:09:24 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.42 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -203,10 +203,12 @@ module ESMF_ArrayBundleMod
 !
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Test whether arraybundle1 and arraybundle2 are valid aliases to the same ESMF
 !   ArrayBundle object in memory. For a more general comparison of two ESMF ArrayBundles,
 !   going beyond the simple alias test, the ESMF\_ArrayBundleMatch() function (not yet
 !   implemented) must be used.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -243,10 +245,12 @@ module ESMF_ArrayBundleMod
 !
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Test whether arraybundle1 and arraybundle2 are {\it not} valid aliases to the
 !   same ESMF ArrayBundle object in memory. For a more general comparison of two ESMF
 !   ArrayBundles, going beyond the simple alias test, the ESMF\_ArrayBundleMatch() function
 !   (not yet implemented) must be used.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -1218,12 +1222,12 @@ contains
 !   dstArrayBundle, routehandle, factor, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),   intent(in)            :: srcArrayBundle
-!   type(ESMF_ArrayBundle),   intent(inout)         :: dstArrayBundle
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
-!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out), optional :: rc
+!   type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle), intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)          :: factor
+!   integer,                intent(in),  optional :: srcToDstTransposeMap(:)
+!   integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from

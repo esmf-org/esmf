@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.24 2011/01/05 20:05:41 svasquez Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.25 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -294,8 +294,8 @@ endif
 ! mentioned conditions.
 !EOE
 !BOC
-  delayout = ESMF_DELayoutCreate(deCount=petCount+2, dePinFlag=ESMF_DE_PIN_VAS,&
-    rc=rc)
+  delayout = ESMF_DELayoutCreate(deCount=petCount+2, &
+    dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) goto 99
 !  call ESMF_DELayoutPrint(delayout, rc=rc)
@@ -307,7 +307,8 @@ endif
   if (rc /= ESMF_SUCCESS) finalrc=rc
   do i=1, localDeCount
     workDe = localDeList(i)
-    print *, "I am PET", localPET, " and I am offering service for DE ", workDe
+    print *, "I am PET", localPET, &
+             " and I am offering service for DE ", workDe
     reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
     if (rc /= ESMF_SUCCESS) finalrc=rc
     if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then

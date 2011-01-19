@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.122 2011/01/14 22:39:30 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.123 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.122 2011/01/14 22:39:30 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.123 2011/01/19 02:13:18 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -203,11 +203,13 @@
 !     type(ESMF_Calendar), intent(in) :: calendar2
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Test whether {\tt calendar1} and {\tt calendar2} are valid aliases to 
 !     the same {\tt ESMF\_Calendar} object in memory. For a more general 
 !     comparison of two {\tt ESMF\_Calendar}s, going beyond the simple alias 
 !     test, the {\tt ESMF\_CalendarMatch()} function (not yet implemented) 
 !     must be used.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}   
@@ -320,11 +322,13 @@
 !     type(ESMF_Calendar), intent(in) :: calendar2
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Test whether {\tt calendar1} and {\tt calendar2} are {\it not} valid 
 !     aliases to the same {\tt ESMF\_Calendar} object in memory. For a more 
 !     general comparison of two {\tt ESMF\_Calendar}s, going beyond the simple 
 !     alias test, the {\tt ESMF\_CalendarMatch()} function (not yet 
 !     implemented) must be used.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}   
@@ -598,10 +602,21 @@
 !          is a unique sequence number from 001 to 999.
 !     \item[calendartype]
 !          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
-!            {\tt ESMF\_CAL\_JULIAN}, {\tt ESMF\_CAL\_JULIANDAY},
-!            {\tt ESMF\_CAL\_MODJULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR},
+!            \newline
+!            {\tt ESMF\_CAL\_360DAY}, 
+!            \newline
+!            {\tt ESMF\_CAL\_GREGORIAN},
+!            \newline
+!            {\tt ESMF\_CAL\_JULIAN}, 
+!            \newline
+!            {\tt ESMF\_CAL\_JULIANDAY},
+!            \newline
+!            {\tt ESMF\_CAL\_MODJULIANDAY}, 
+!            \newline
+!            {\tt ESMF\_CAL\_NOCALENDAR},
+!            \newline
 !            and {\tt ESMF\_CAL\_NOLEAP}.
+!            \newline
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar type.
 !     \item[{[rc]}]
@@ -1073,8 +1088,11 @@
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Returns true if the given year is a leap year within the given calendar,
 !     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
+!     \end{sloppypar}
+!     Returns true if the given year is a leap year within the given calendar,
 !
 !     The arguments are:
 !     \begin{description}
@@ -1125,8 +1143,10 @@
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Returns true if the given year is a leap year within the given calendar,
 !     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
+!     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1300,10 +1320,21 @@
 !          The new name for this calendar.
 !     \item[calendartype]
 !          The built-in {\tt CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
-!            {\tt ESMF\_CAL\_JULIAN}, {\tt ESMF\_CAL\_JULIANDAY},
-!            {\tt ESMF\_CAL\_MODJULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR},
+!            \newline
+!            {\tt ESMF\_CAL\_360DAY}, 
+!            \newline
+!            {\tt ESMF\_CAL\_GREGORIAN},
+!            \newline
+!            {\tt ESMF\_CAL\_JULIAN}, 
+!            \newline
+!            {\tt ESMF\_CAL\_JULIANDAY},
+!            \newline
+!            {\tt ESMF\_CAL\_MODJULIANDAY}, 
+!            \newline
+!            {\tt ESMF\_CAL\_NOCALENDAR},
+!            \newline
 !            and {\tt ESMF\_CAL\_NOLEAP}.
+!            \newline
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar type.
 !     \item[{[rc]}]
@@ -1387,11 +1418,13 @@
 !          specify a days-per-year calendar for any planetary body.
 !          Default = 0.  (Not implemented yet).
 !     \item[{[daysPerYearDd]}]
+!          \begin{sloppypar}
 !          Integer denominator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear and daysPerYearDn (see above) to
 !          specify a days-per-year calendar for any planetary body.
 !          Default = 1.  (Not implemented yet).
+!          \end{sloppypar}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

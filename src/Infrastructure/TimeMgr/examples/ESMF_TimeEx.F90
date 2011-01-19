@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.44 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.45 2011/01/19 02:13:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -99,8 +99,8 @@
       time2 = time1 + timeinterval1
 
       call ESMF_TimeGet(time2, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
-      print *, "time2 = time1 + timeinterval1 = ", YY, "/", MM, "/", DD, " ", &
-               H, ":", M, ":", S
+      print *, "time2 = time1 + timeinterval1 = ", YY, "/", MM, "/", DD, &
+               " ",  H, ":", M, ":", S
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
