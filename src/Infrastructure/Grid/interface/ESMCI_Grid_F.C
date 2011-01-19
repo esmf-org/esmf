@@ -198,7 +198,7 @@ extern "C" {
 			   int *_localArbIndexCount,			
 			   ESMCI::InterfaceInt **_localArbIndex,
 			   int *_arbDim,
-			   int *_memDimCount,
+			   int *_rank,
 			   int *_arbDimCount,
 			   ESMCI::InterfaceInt **_coordDimMap,		  
 			   ESMCI::InterfaceInt **_gridEdgeLWidth, 	  
@@ -392,9 +392,9 @@ extern "C" {
       *_arbDim = grid->getArbDim();
     }
 
-    // get memDimCount -- same as distGrid dimCount
-    if (ESMC_NOT_PRESENT_FILTER(_memDimCount) != ESMC_NULL_POINTER) {
-      *_memDimCount = dimCount1;
+    // get rank -- same as distGrid dimCount
+    if (ESMC_NOT_PRESENT_FILTER(_rank) != ESMC_NULL_POINTER) {
+      *_rank = dimCount1;
     }
 
     // get arbDimCount 

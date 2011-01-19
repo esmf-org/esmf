@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.191 2011/01/14 01:09:47 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.192 2011/01/19 04:20:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.191 2011/01/14 01:09:47 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.192 2011/01/19 04:20:52 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -7221,7 +7221,7 @@ end function ESMF_GridCreateFrmScripReg
           dimCount, tileCount, staggerlocsCount, localDECount, distgrid, &
           distgridToGridMap, coordDimCount, coordDimMap, &
           localArbIndexCount, localArbIndex, arbDim, &
-          memDimCount, arbDimCount, &
+          rank, arbDimCount, &
           gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
           indexFlag, rc)
 !
@@ -7240,7 +7240,7 @@ end function ESMF_GridCreateFrmScripReg
       integer,               intent(out), optional :: localArbIndexCount
       integer,       target, intent(out), optional :: localArbIndex(:,:)
       integer,               intent(out), optional :: arbDim
-      integer,               intent(out), optional :: memDimCount
+      integer,               intent(out), optional :: rank
       integer,               intent(out), optional :: arbDimCount
       integer,       target, intent(out), optional :: gridEdgeLWidth(:)
       integer,       target, intent(out), optional :: gridEdgeUWidth(:)
@@ -7289,7 +7289,7 @@ end function ESMF_GridCreateFrmScripReg
 !   is localArbIndexCount * arbDimCount 
 ! \item[{[arbDim]}] 
 !   The distgrid dimension that is mapped by the arbitrarily distributed grid dimensions.
-! \item[{[memDimCount]}] 
+! \item[{[rank]}] 
 !   The count of the memory dimensions, it is the same as dimCount for a non-arbitrarily distributed grid,
 !   and equal or less for a arbitrarily distributed grid.
 ! \item[{[arbDimCount]}] 
@@ -7386,7 +7386,7 @@ end function ESMF_GridCreateFrmScripReg
       coordTypeKind, dimCount, tileCount, distgrid,  staggerlocsCount, &
       distgridToGridMapArg, coordDimCountArg, &
       localArbIndexCount, localArbIndexArg, arbDim, &
-      memDimCount, arbDimCount, coordDimMapArg, &
+      rank, arbDimCount, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
       indexflag, localDECount, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

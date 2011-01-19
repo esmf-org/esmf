@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.16 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.17 2011/01/19 04:20:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.16 2011/01/07 18:32:17 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.17 2011/01/19 04:20:53 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -69,14 +69,13 @@ program ESMF_GridArbitraryUTest
   integer :: distgridToGridMap(3), coordDimCount(3), distDim(2)
   integer :: distgridToArrayMap(2)
   real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
-  integer :: rank
   integer :: localCount2(1), deList(1), deCount
   integer, allocatable:: minIndex1(:), maxIndex1(:), localCount3(:)
   integer, allocatable:: minIndex(:,:), maxIndex(:,:)
   integer, allocatable:: indexArray(:,:)
   integer ::  index(2), index3(3)
   integer :: index1(2), index2(2)
-  integer :: memDimCount, arbDimCount
+  integer :: rank, arbDimCount
   integer :: cu(2),cl(2),i1,i2
   type(ESMF_GridDecompType) :: decompType
   REAL(ESMF_KIND_R8), pointer :: dimarray(:), fptr1D(:)
@@ -189,7 +188,7 @@ program ESMF_GridArbitraryUTest
          distgridToGridMap=distgridToGridMap, coordDimCount=coordDimCount, &
 	coordDimMap=coordDimMap, &
          indexflag=indexflag, localArbIndexCount=localCount1, &
-         memDimCount=memDimCount, arbDimCount=arbDimCount, &
+         rank=rank, arbDimCount=arbDimCount, &
          rc=localrc)
    !print *, "PE ", myPet, "localArbIndexCount=", localCount1, "coorddimCount=",coordDimCount(1), coordDimCount(2)
    !print *, "PE ", myPet, "distgridToGridMap=", distgridToGridMap, "coorddimMap=",coordDimMap
@@ -207,7 +206,7 @@ program ESMF_GridArbitraryUTest
   if (decompType .ne. ESMF_GRID_ARBITRARY) correct=.false.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
   if (dimCount .ne. 2) correct=.false.
-  if (memDimCount .ne. 1) correct=.false.
+  if (rank .ne. 1) correct=.false.
   if (arbDimCount .ne. 2) correct=.false.
   if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
   if (localCount .ne. localCount1) correct = .false.
@@ -619,7 +618,7 @@ program ESMF_GridArbitraryUTest
          distgridToGridMap=distgridToGridMap, coordDimCount=coordDimCount, &
 	 coordDimMap=coordDimMap, &
          indexflag=indexflag, localArbIndexCount=localCount1, &
-	 memDimCount=memDimCount, arbDimCount=arbDimCount, &
+	 rank=rank, arbDimCount=arbDimCount, &
          rc=localrc)
 
    !print *, "PE ", myPet, "localCount=", localCount1, "coorddimCount=",coordDimCount
@@ -641,7 +640,7 @@ program ESMF_GridArbitraryUTest
   if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
   if (localCount .ne. localCount1) correct = .false.
   if (distDimCount .ne. 2) correct = .false.
-  if (memDimCount .ne. 2) correct=.false.
+  if (rank .ne. 2) correct=.false.
   if (arbDimCount .ne. 2) correct=.false.
   if (elementCounts(myPet+1) .ne. localcount * zdim) then
 	correct = .false.
