@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.54 2011/01/18 21:46:41 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.55 2011/01/19 01:55:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.54 2011/01/18 21:46:41 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.55 2011/01/19 01:55:46 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -124,12 +124,12 @@ contains
                    routehandle, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout)                 :: srcField
-      type(ESMF_Field), intent(inout)                 :: dstField
+      type(ESMF_Field),       intent(inout)           :: srcField
+      type(ESMF_Field),       intent(inout)           :: dstField
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
       type(ESMF_RegionFlag),  intent(in),    optional :: zeroflag
       logical,                intent(in),    optional :: checkflag
-      integer, intent(out), optional :: rc 
+      integer,                intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !   Execute the precomputed regrid operation stored in {\tt routehandle} to 
