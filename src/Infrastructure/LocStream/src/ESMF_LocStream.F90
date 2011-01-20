@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.44 2011/01/14 01:09:57 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.45 2011/01/20 05:26:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.44 2011/01/14 01:09:57 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.45 2011/01/20 05:26:14 w6ws Exp $'
 
 !==============================================================================
 !
@@ -3240,7 +3240,7 @@ end subroutine ESMF_LocStreamGetBounds
 
         !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
         !TODO: Remove the following dummy test when dummy argument actually used
-        if (options==options) continue
+        if (present (options)) continue
 
         write(*,*) "LocStream Print Starts ====>"
 
