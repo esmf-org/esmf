@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.16 2011/01/20 20:55:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.16 2011/01/20 20:55:57 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -97,6 +97,119 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!===============================================================================
+! XGridOperator() interface documentation (must be before creates)
+!===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_XGridAssignment(=) - XGrid assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   xgrid1 = xgrid2
+!
+! !ARGUMENTS:
+!   type(ESMF_XGrid) :: xgrid1
+!   type(ESMF_XGrid) :: xgrid2
+!
+!
+! !DESCRIPTION:
+!   Assign xgrid1 as an alias to the same ESMF XGrid object in memory
+!   as xgrid2. If xgrid2 is invalid, then xgrid1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[xgrid1]
+!     The {\tt ESMF\_XGrid} object on the left hand side of the assignment.
+!   \item[xgrid2]
+!     The {\tt ESMF\_XGrid} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_XGridOperator(==) - XGrid equality operator
+!
+! !INTERFACE:
+!   interface operator(==)
+!   if (xgrid1 == xgrid2) then ... endif
+!             OR
+!   result = (xgrid1 == xgrid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_XGrid), intent(in) :: xgrid1
+!   type(ESMF_XGrid), intent(in) :: xgrid2
+!
+!
+! !DESCRIPTION:
+!   Test whether xgrid1 and xgrid2 are valid aliases to the same ESMF
+!   XGrid object in memory. For a more general comparison of two ESMF XGrids,
+!   going beyond the simple alias test, the ESMF\_XGridMatch() function (not yet
+!   implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[xgrid1]
+!     The {\tt ESMF\_XGrid} object on the left hand side of the equality
+!     operation.
+!   \item[xgrid2]
+!     The {\tt ESMF\_XGrid} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+!    module procedure ESMF_XGridEQ
+!
+!    end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_XGridOperator(/=) - XGrid not equal operator
+!
+! !INTERFACE:
+!   interface operator(/=)
+!   if (xgrid1 == xgrid2) then ... endif
+!             OR
+!   result = (xgrid1 == xgrid2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_XGrid), intent(in) :: xgrid1
+!   type(ESMF_XGrid), intent(in) :: xgrid2
+!
+!
+! !DESCRIPTION:
+!   Test whether xgrid1 and xgrid2 are {\it not} valid aliases to the
+!   same ESMF XGrid object in memory. For a more general comparison of two ESMF
+!   XGrids, going beyond the simple alias test, the ESMF\_XGridMatch() function
+!   (not yet implemented) must be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[xgrid1]
+!     The {\tt ESMF\_XGrid} object on the left hand side of the non-equality
+!     operation.
+!   \item[xgrid2]
+!     The {\tt ESMF\_XGrid} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+!    module procedure ESMF_XGridNE
+!
+!    end interface
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

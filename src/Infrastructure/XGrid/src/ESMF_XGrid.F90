@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.16 2011/01/14 01:10:27 rokuingh Exp $
+! $Id: ESMF_XGrid.F90,v 1.17 2011/01/20 20:55:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.16 2011/01/14 01:10:27 rokuingh Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.17 2011/01/20 20:55:57 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -205,7 +205,7 @@ module ESMF_XGridMod
 !===============================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XGridAssignment(=) - XGrid assignment
 !
 ! !INTERFACE:
@@ -230,12 +230,12 @@ module ESMF_XGridMod
 !     The {\tt ESMF\_XGrid} object on the right hand side of the assignment.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XGridOperator(==) - XGrid equality operator
 !
 ! !INTERFACE:
@@ -267,7 +267,7 @@ module ESMF_XGridMod
 !     operation.
 !   \end{description}
 !
-!EOP
+!EOPI
     module procedure ESMF_XGridEQ
 
   end interface
@@ -275,7 +275,7 @@ module ESMF_XGridMod
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_XGridOperator(/=) - XGrid not equal operator
 !
 ! !INTERFACE:
@@ -307,7 +307,7 @@ module ESMF_XGridMod
 !     operation.
 !   \end{description}
 !
-!EOP
+!EOPI
     module procedure ESMF_XGridNE
 
   end interface
