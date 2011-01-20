@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.13 2011/01/05 20:05:39 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.14 2011/01/20 22:35:15 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -14,22 +14,29 @@ Licensed under the University of Illinois-NCSA License.
 Define the proper way to flush Fortran units.  Typically this will
 be one of the following:
 
-  * Fortran-2003 FLUSH statement (preferred)
+  * Fortran-2003 FLUSH statement (preferred and default)
   * Two argument FLUSH call
   * One argument FLUSH call
 
+Use the following macro for pre-7.1 PGI compilers to enable
+the flush library call.
 #endif
-
-#define ESMF_IOFlushMacro(unit,status) call flush (unit)
 
 #if 0
-Define the proper way to read the command line.  Since PGI did not
-have the Fortran-2003 command line intrinsics until 10.0, nor
-does it have Posix calls, use use getarg for now.
-
+-#-define ESMF_IOFlushMacro(unit,status) call flush (unit)
 #endif
 
-#define ESMF_NEEDSGETARG
+#if 0
+Define the proper way to read the command line.
+
+By default, the F2003 command line instrinsics will be used.
+Use the following macro for pre-7.1 PGI compilers to enable
+'getarg' code.
+#endif
+
+#if 0
+-#-define ESMF_NEEDSGETARG
+#endif
 
 #if 0
 the PGI compiler is strict F90, which does not allow members of a type

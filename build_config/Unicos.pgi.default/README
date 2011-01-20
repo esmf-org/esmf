@@ -3,3 +3,6 @@ Settings for Unicos/lc on Cray XT, using the Portland Group PGI Fortran and C++ 
 Requires the following environment settings:
 
 ESMF_COMPILER pgi
+
+For pre-7.1 compilers, please see the ESMF_Conf.inc file for several
+macros that must be enabled for proper operation.
