@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.15 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.16 2011/01/21 23:58:21 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.15 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.16 2011/01/21 23:58:21 peggyli Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -253,6 +253,9 @@ contains
 !   This means that the same {\tt routehandle} can be applied to a large class
 !   of similar Fields that differ in the number of elements in the left most
 !   undistributed dimensions.
+!   Note {\tt ESMF\_FieldBundleRegridStore()} assumes the coordinates used in the Grids 
+!   upon which the FieldBundles are built are in degrees.  
+
 !  
 !   This call is {\em collective} across the current VM.  
 !
