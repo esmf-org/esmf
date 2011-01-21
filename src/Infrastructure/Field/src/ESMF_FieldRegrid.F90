@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.55 2011/01/19 01:55:46 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.56 2011/01/21 23:59:09 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.55 2011/01/19 01:55:46 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.56 2011/01/21 23:59:09 peggyli Exp $'
 
 !==============================================================================
 !
@@ -144,6 +144,8 @@ contains
 !   the interpolation between the Grids as they were during the {\tt ESMF\_FieldRegridStore()} call.  
 !   So if the coordinates at the stagger location in the Grids change, a new call to {\tt ESMF\_FieldRegridStore()} 
 !   is necessary to compute the interpolation between that new set of coordinates.
+!   Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in the Grids upon which the Fields are built are
+!   in degrees.  
 !   \end{sloppypar}
 !
 !   It is erroneous to specify the identical Field object for {\tt srcField} and
@@ -307,6 +309,8 @@ contains
 !       destination Field which are created on the same stagger location and Grid as the original Fields.        
 !
 !       When it's no longer needed the routehandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
+!       Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in the Grids upon which the Fields are built are
+!   in degrees.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -826,6 +830,8 @@ contains
 !       destination Field which are created on the same stagger location and Grid as the original Fields.        
 !
 !       When it's no longer needed the routehandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
+!       Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in the Grids upon which the Fields are built are
+!   in degrees.  
 !
 !     The arguments are:
 !     \begin{description}
