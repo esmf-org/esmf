@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.237 2011/01/19 02:13:19 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.238 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.237 2011/01/19 02:13:19 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.238 2011/01/21 00:11:47 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2132,7 +2132,7 @@ contains
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
 ! !INTERFACE:
-      function ESMF_StateCreate(keywordEnforcer, stateName, statetype, &
+      function ESMF_StateCreate(keywordEnforcer, name, statetype, &
                    fieldbundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, neededflag, readyflag, validflag, &
                    reqforrestartflag, rc)
@@ -2143,7 +2143,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use 
                                                       ! keywords for the below
-      character(len=*),     intent(in), optional :: stateName 
+      character(len=*),     intent(in), optional :: name 
       type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_FieldBundle), dimension(:), intent(inout), &
                                         optional :: fieldbundleList
@@ -2166,7 +2166,7 @@ contains
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[{[stateName]}]
+!   \item[{[name]}]
 !    Name of this {\tt ESMF\_State} object.   A default name will be generated
 !    if none is specified.
 !   \item[{[statetype]}]
@@ -2263,12 +2263,12 @@ contains
       !      work-around for Intel's ifort version 9.1.045 and 9.1.051
       !      on NAS' columbia.
         if (present(nameList)) then 
-          call ESMF_StateConstruct(stypep, stateName, statetype, &
+          call ESMF_StateConstruct(stypep, name, statetype, &
                    fieldbundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
                    neededflag, readyflag, validflag, reqforrestartflag, localrc)
         else
-          call ESMF_StateConstruct(stypep, stateName, statetype, &
+          call ESMF_StateConstruct(stypep, name, statetype, &
                    fieldbundleList, fieldList, arrayList, nestedStateList, &
                    itemcount=itemCount, &
                    neededflag=neededflag, readyflag=readyflag, &
@@ -3528,7 +3528,7 @@ contains
 !     \begin{description}     
 !     \item[state]
 !       The {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
-!       named {\tt stateName}.
+!       named {\tt name}.
 !     \item[itemName]
 !       Name of nested {\tt ESMF\_State} to return.  This name may be fully
 !       qualified in order to access nested State items.

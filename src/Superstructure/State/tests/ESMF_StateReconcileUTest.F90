@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.35 2011/01/13 06:21:33 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.36 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     call ESMF_StateAdd(istate, field1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    neststate = ESMF_StateCreate(stateName="Nested State", rc=rc)
+    neststate = ESMF_StateCreate(name="Nested State", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
     call ESMF_StateAdd(istate, neststate, rc=rc)
@@ -205,7 +205,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     statename = "Ocn2Atm"
-    state1 = ESMF_StateCreate(stateName=statename, rc=rc)  
+    state1 = ESMF_StateCreate(name=statename, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -457,7 +457,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     statename = "Ocn2Atm"
-    state1 = ESMF_StateCreate(stateName=statename, rc=rc)  
+    state1 = ESMF_StateCreate(name=statename, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -628,7 +628,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     statename = "Ocn2Atm"
-    state1 = ESMF_StateCreate(stateName=statename, rc=rc)  
+    state1 = ESMF_StateCreate(name=statename, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a State"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

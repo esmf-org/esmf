@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.17 2011/01/13 17:32:15 w6ws Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.18 2011/01/21 00:11:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.17 2011/01/13 17:32:15 w6ws Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.18 2011/01/21 00:11:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1354,7 +1354,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Construct an import state ESMF object that will contain a fieldbundle
-    importState = ESMF_StateCreate(stateName="importState",  &
+    importState = ESMF_StateCreate(name="importState",  &
                                    stateType=ESMF_STATE_IMPORT, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an import state test"

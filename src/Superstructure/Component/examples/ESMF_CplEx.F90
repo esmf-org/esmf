@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.46 2011/01/14 20:28:31 w6ws Exp $
+! $Id: ESMF_CplEx.F90,v 1.47 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -308,14 +308,14 @@
     ! Create the necessary import and export states used to pass data
     !  between components.
 
-    exportState = ESMF_StateCreate(stateName=cname,  &
+    exportState = ESMF_StateCreate(name=cname,  &
                                    stateType=ESMF_STATE_EXPORT, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if    
 
-    importState = ESMF_StateCreate(stateName=cname,  &
+    importState = ESMF_StateCreate(name=cname,  &
                                    stateType=ESMF_STATE_IMPORT, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then

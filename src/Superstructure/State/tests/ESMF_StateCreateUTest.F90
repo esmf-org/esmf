@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.33 2011/01/13 06:21:33 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.34 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.33 2011/01/13 06:21:33 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.34 2011/01/21 00:11:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -103,7 +103,7 @@ end module
       !NEX_UTest
       ! Create/Destroy an Empty State.
       sname = "Atmosphere Import"
-      state1 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
+      state1 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Creating an empty State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -159,7 +159,7 @@ end module
       !NEX_UTest   
       ! Create/Destroy an Empty State.
       sname = "Atmosphere Import"
-      state1 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
+      state1 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Creating an empty State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -260,7 +260,7 @@ end module
       !EX_UTest 
       ! Test Creation of an empty export State 
       sname = "Ocean Export"
-      state2 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_EXPORT, rc=rc)  
+      state2 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_EXPORT, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Creating an empty export State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -352,7 +352,7 @@ end module
       !EX_UTest      
       ! Creating a State
       sname = "Ocean Export"
-      state3 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_EXPORT, rc=rc)
+      state3 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_EXPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -429,7 +429,7 @@ end module
       !EX_UTest      
       ! Create a State which will contain other nested States
       sname = "Coupler Statelist"
-      state5 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_UNSPECIFIED, rc=rc)  
+      state5 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_UNSPECIFIED, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Creating a State for nested State test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -438,7 +438,7 @@ end module
       !EX_UTest      
       ! Create a State which will be put into the other
       sname = "Atmosphere Import"
-      state1 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
+      state1 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Creating a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -472,7 +472,7 @@ end module
       !EX_UTest      
       ! Create another State which will be put into a State
       sname = "Ocean Export"
-      state2 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_EXPORT, rc=rc)  
+      state2 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_EXPORT, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Creating a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -686,7 +686,7 @@ end module
       !EX_UTest      
       ! Create an empty State
       sname = "Atmosphere Import"
-      state1 = ESMF_StateCreate(stateName=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
+      state1 = ESMF_StateCreate(name=sname, statetype=ESMF_STATE_IMPORT, rc=rc)  
       write(failMsg, *) ""
       write(name, *) "Create a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &

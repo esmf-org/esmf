@@ -48,7 +48,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.21 2011/01/05 20:05:47 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.22 2011/01/21 00:11:47 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ static const char *const version = "$Id: ESMCI_State.C,v 1.21 2011/01/05 20:05:4
 //-----------------------------------------------------------------------------
 extern "C" {
 
-  void FTN(f_esmf_statecreate)(ESMCI::State* state, char* statename, int* rc,
+  void FTN(f_esmf_statecreate)(ESMCI::State* state, char* name, int* rc,
 				ESMCI_FortranStrLenArg nlen);
 
   void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 

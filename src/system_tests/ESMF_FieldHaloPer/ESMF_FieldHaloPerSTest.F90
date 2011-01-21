@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.56 2011/01/14 17:49:01 w6ws Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.57 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -100,7 +100,7 @@
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate(stateName="igridded comp import",  &
+    import = ESMF_StateCreate(name="igridded comp import",  &
                               stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)

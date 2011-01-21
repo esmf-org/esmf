@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.6 2011/01/14 17:49:02 w6ws Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.7 2011/01/21 00:11:47 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -213,7 +213,7 @@ program ESMF_XGridConcurrentSTest
 !-------------------------------------------------------------------------
 
   ! land export state
-  land_export = ESMF_StateCreate(stateName="land export",  &
+  land_export = ESMF_StateCreate(name="land export",  &
                                  stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -228,7 +228,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! ocean export state
-  ocean_export = ESMF_StateCreate(stateName="ocean export",  &
+  ocean_export = ESMF_StateCreate(name="ocean export",  &
                                   stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -243,7 +243,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! nestted state with land and ocean attached inside
-  landocn_export = ESMF_StateCreate(stateName="landocn export",  &
+  landocn_export = ESMF_StateCreate(name="landocn export",  &
                                     stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -260,7 +260,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! atmosphere import state
-  atmos_import = ESMF_StateCreate(stateName="atmos import",  &
+  atmos_import = ESMF_StateCreate(name="atmos import",  &
                                   stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

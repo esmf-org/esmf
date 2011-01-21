@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.6 2011/01/13 17:32:15 w6ws Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.7 2011/01/21 00:11:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.6 2011/01/13 17:32:15 w6ws Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.7 2011/01/21 00:11:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -588,10 +588,10 @@ program ESMF_AttributeUpdateUTest
       petList=(/0,1,2,3/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    c1exp = ESMF_StateCreate(stateName="Comp1 exportState", &
+    c1exp = ESMF_StateCreate(name="Comp1 exportState", &
                              stateType=ESMF_STATE_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    c2imp = ESMF_StateCreate(stateName="Comp2 importState", &
+    c2imp = ESMF_StateCreate(name="Comp2 importState", &
                              stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

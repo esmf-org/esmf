@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.15 2011/01/14 17:49:01 w6ws Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.16 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -223,7 +223,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    c1exp = ESMF_StateCreate(stateName="comp1 export",  &
+    c1exp = ESMF_StateCreate(name="comp1 export",  &
                              stateType=ESMF_STATE_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -234,7 +234,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 1 Initialize finished, rc =", rc
 
-    c2imp = ESMF_StateCreate(stateName="comp2 import",  &
+    c2imp = ESMF_StateCreate(name="comp2 import",  &
                              stateType=ESMF_STATE_IMPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &

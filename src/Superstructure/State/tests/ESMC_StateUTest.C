@@ -1,4 +1,4 @@
-// $Id: ESMC_StateUTest.C,v 1.16 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMC_StateUTest.C,v 1.17 2011/01/21 00:11:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ int main(void){
   // Create a state object -- cf
   strcpy(name, "StateCreate Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  myState = ESMC_StateCreate("stateName",&rc);
+  myState = ESMC_StateCreate("name",&rc);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
   

@@ -1,4 +1,4 @@
-! $Id: user_modelC.F90,v 1.3 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_modelC.F90,v 1.4 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -119,7 +119,7 @@ module user_modelC
     type(ESMF_Array)      :: srcArray, dstArray
     real(ESMF_KIND_R8), pointer :: ftrptr1(:,:), ftrptr2(:,:)   ! matching F90 array pointer
     integer               :: i, j, k, itemcount, count, l1, l2
-    character(len=ESMF_MAXSTR) :: stateName, stateItemNames(4)
+    character(len=ESMF_MAXSTR) :: name, stateItemNames(4)
     integer :: ubnd1(2,1), ubnd2(2,1), lbnd1(2,1), lbnd2(2,1)
     
     
@@ -130,7 +130,7 @@ module user_modelC
     ! destination array.  Do an average of the four array and set the export array values
     ! accordingly.  Also check the values of the input arrays for correctness
     ! Get import State information
-    call ESMF_StateGet(importState, name=stateName, itemNameList=stateItemNames, itemcount=itemcount, rc=rc)
+    call ESMF_StateGet(importState, name=name, itemNameList=stateItemNames, itemcount=itemcount, rc=rc)
 
     ! Get the destination Array from the import State
     call ESMF_StateGet(exportState, "array data", dstArray, rc=rc)

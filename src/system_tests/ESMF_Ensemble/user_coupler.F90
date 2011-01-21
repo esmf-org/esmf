@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_coupler.F90,v 1.4 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -64,7 +64,7 @@ module user_coupler
     ! Local variables
     integer :: i, itemcount
     integer :: petCount, xprocs, yprocs
-    character(len=ESMF_MAXSTR) :: stateName,stateItemNames(4)
+    character(len=ESMF_MAXSTR) :: name,stateItemNames(4)
     type(ESMF_Array) :: srcArray, dstArray
     type(ESMF_State) :: state
     type(ESMF_VM) :: vm
@@ -80,7 +80,7 @@ module user_coupler
     call ESMF_VMGet(vm, petCount = petCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_StateGet(importState, name=stateName, itemNameList=stateItemNames, itemcount=itemcount, rc=rc)
+    call ESMF_StateGet(importState, name=name, itemNameList=stateItemNames, itemcount=itemcount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! each item in the import state contains one export state from the ensemble, let's get them one by one

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.22 2011/01/17 19:01:59 w6ws Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.23 2011/01/21 00:11:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,16 +95,16 @@ program ESMF_AttributeCIMEx
           petList=(/0/), rc=rc)
 
       ! Create States
-      exportState1 = ESMF_StateCreate(stateName="exportState1",  &
+      exportState1 = ESMF_StateCreate(name="exportState1",  &
                                       stateType=ESMF_STATE_EXPORT, &
                                       rc=rc)
-      exportState2 = ESMF_StateCreate(stateName="exportState2",  &
+      exportState2 = ESMF_StateCreate(name="exportState2",  &
                                       stateType=ESMF_STATE_EXPORT, &
                                       rc=rc)
-      exportState3 = ESMF_StateCreate(stateName="exportState3",  &
+      exportState3 = ESMF_StateCreate(name="exportState3",  &
                                       stateType=ESMF_STATE_EXPORT, &
                                       rc=rc)
-      exportState4 = ESMF_StateCreate(stateName="exportState4",  &
+      exportState4 = ESMF_StateCreate(name="exportState4",  &
                                       stateType=ESMF_STATE_EXPORT, &
                                       rc=rc)
         

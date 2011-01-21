@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.39 2011/01/14 19:21:02 w6ws Exp $
+! $Id: ESMF_StateEx.F90,v 1.40 2011/01/21 00:11:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 
     ! This will probably be called from inside the Component Init code
     statename = "Atmosphere"
-    state1 = ESMF_StateCreate(stateName=statename,   &
+    state1 = ESMF_StateCreate(name=statename,   &
                               statetype=ESMF_STATE_IMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(statename)
 
@@ -70,7 +70,7 @@
 
 !BOC
     statename = "Ocean"
-    state2 = ESMF_StateCreate(stateName=statename,  &
+    state2 = ESMF_StateCreate(name=statename,  &
                               statetype=ESMF_STATE_EXPORT, rc=rc)  
 !EOC
 
@@ -119,7 +119,7 @@
     ! The producing Component creates the menu of data items available.
 !BOC
     statename = "Ocean"
-    state3 = ESMF_StateCreate(stateName=statename,  &
+    state3 = ESMF_StateCreate(name=statename,  &
                               statetype=ESMF_STATE_EXPORT, rc=rc)  
 !EOC
     print *, "State Create returned", rc, " name = ", trim(statename)

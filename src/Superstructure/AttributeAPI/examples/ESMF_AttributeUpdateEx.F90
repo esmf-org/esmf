@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.27 2011/01/17 19:01:59 w6ws Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.28 2011/01/21 00:11:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,9 +113,9 @@ implicit none
         cplcomp = ESMF_CplCompCreate(name="cplcomp", &
           petList=(/0,1,2,3/), rc=rc)
 
-      c1exp = ESMF_StateCreate(stateName="Comp1 exportState", &
+      c1exp = ESMF_StateCreate(name="Comp1 exportState", &
                                stateType=ESMF_STATE_EXPORT, rc=rc)
-      c2imp = ESMF_StateCreate(stateName="Comp2 importState", &
+      c2imp = ESMF_StateCreate(name="Comp2 importState", &
                                stateType=ESMF_STATE_IMPORT, rc=rc)
 !EOC      
 

@@ -187,12 +187,12 @@ program ESMF_AttributeSTest
 ! print *, '-------------------------------Initialize----------------------------------'
 
   ! create two states for comp1
-  c1imp = ESMF_StateCreate(stateName="Comp1 importState",  &
+  c1imp = ESMF_StateCreate(name="Comp1 importState",  &
                            stateType=ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  c1exp = ESMF_StateCreate(stateName="Comp1 exportState",  &
+  c1exp = ESMF_StateCreate(name="Comp1 exportState",  &
                            stateType=ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -207,12 +207,12 @@ program ESMF_AttributeSTest
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! create two states for comp2
-  c2imp = ESMF_StateCreate(stateName="Comp2 importState",  &
+  c2imp = ESMF_StateCreate(name="Comp2 importState",  &
                            stateType=ESMF_STATE_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  c2exp = ESMF_StateCreate(stateName="Comp2 exportState",  &
+  c2exp = ESMF_StateCreate(name="Comp2 exportState",  &
                            stateType=ESMF_STATE_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
