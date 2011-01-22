@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.20 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.21 2011/01/22 00:04:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.20 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.21 2011/01/22 00:04:28 peggyli Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -577,7 +577,7 @@ program ESMF_MeshEx
 ! Section~\ref{sec:mesh:usage:meshCreation} for examples of this. After creation Fields are constructed on the Meshes, 
 ! and then ESMF\_FieldRegridStore() is called to construct a RouteHandle implementing the regrid operation. Finally, ESMF\_FieldRegrid() is
 ! called with the Fields and the RouteHandle to do the interpolation between the source Field and 
-! destination Field.
+! destination Field.  Note the coordinates of the source and destination Mesh should be in degrees.
 ! 
 !EOE
 
