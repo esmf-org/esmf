@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.39 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.40 2011/01/22 00:06:47 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.39 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.40 2011/01/22 00:06:47 peggyli Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -247,8 +247,9 @@ program ESMF_FieldRegridEx
 ! is implemented as a sparse matrix multiply. The {\tt ESMF\_FieldRegridStore()} call generates the sparse matrix for
 ! the regrid operation. This matrix may be either retrieved in a factor and index raw form, or may be retrieved in the form
 ! of a routeHandle which contains an internal representation of the communication and mathermatical operations necessary to 
-! perform the regrid. The routeHandle can then be used in an {\tt ESMF\_FieldRegrid()} call to perform the interpolation
-! between the two Fields. Note that the routeHandle depends just on the coordinates in the Grids upon which the Fields are built, so 
+! perform the regrid. Note {\tt ESMF_\FieldRegridStore()} assumes the latitude and longitude coordinates of the grid
+! are in degrees.  The routeHandle can then be used in an {\tt ESMF\_FieldRegrid()} call to perform the interpolation
+! between the two Fields. The routeHandle depends only on the coordinates in the Grids where the Fields are built, so 
 ! as long as the coordinates stay the same, the operation can be performed multiple times using the same routeHandle. This is true
 ! even if the Field data changes. The same routeHandle may also be used to interpolate between any source and destination Field 
 ! which lie on the same stagger location and Grid as the original Fields. 
@@ -356,6 +357,8 @@ program ESMF_FieldRegridEx
 ! are then computed locally on each cell.  This matrix of weights is, finally,
 ! sent back to the destination grid's row decomposition and declared as a 
 ! sparse matrix.  This matrix is embedded in the routeHandle object.
+! Note the coordinates of the source and destination grids upon whilch the source and destination fields are 
+! defined should be in degrees.  
 !EOE
 
 !BOC
