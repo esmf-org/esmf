@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.27 2010/12/14 17:33:58 svasquez Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.28 2011/01/22 00:58:23 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -10,10 +10,21 @@ contains an exectuable for generating regridding weights. This tool reads in
 two grid files and outputs weights for interpolation
 between the two grids. The input and output files are all in netcdf format. The grid files are either in 
 the same format as is used as an input to SCRIP~\cite{ref:SCRIP}, or in the ESMF unstructured grid format~\ref{sec:example:UnstructFromFile}. The weight file is the same format as is output by SCRIP. The interpolation weights can be generated with
-the bilinear, patch, or first order conservative methods decribed below. This application assumes that the
-source and destination grids are spherical and that the coordinates given in the files are latitude and longitude
-values. This file based regrid weight generation application is fully parallel. This application is used in the 
+the bilinear, patch, or first order conservative methods decribed below. This application 
+can do regrid weight generation from a global source grid to a global destination grid, or from a 
+regional source grid to a regional desitination grid.
+It assumes that the source and destination grids are on a sphere and that the coordinates given in 
+the files are latitude and longitude values. This file based regrid weight generation application is fully parallel. This application is used in the 
 \htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}, so that can serve as an example of its use.
+
+This application requires NetCDF libary to run.  To compile ESMF with NetCDF, the following
+ESMF environment variables need to be set:  {\tt ESMF\_NETCDF}, {\tt ESMF\_NETCDF\_INCLUDE}
+and {\tt ESMF\_NETCDF\_LIBPATH}.  Please refer to \ref{sec:netcdf} for the proper values of
+these environment variables.  
+In addition, ESMF has to be compiled with LAPACK library to generate the patch regridding weights.  
+To compile ESMF with LAPACK, the following ESMF environment variables has to be set:
+{\tt ESMF\_LAPACK}, {\tt ESMF\_LAPACK\_LIBPATH}, and {\tt ESMF\_LAPACK_LIBS}. Please refer to
+ \ref{sec:lapack} for the proper values of these set of environment variables.
 
 Internally this application uses the ESMF public API to generate the interpolation weights.
 If a the source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
@@ -109,7 +120,7 @@ ESMF_RegridWeightGen  [--help]
                       --src_type [SCRIP|ESMF] 
                       --dst_type [SCRIP|ESMF]
                       -t [SCRIP|ESMF]
-
+		      -r
 where
   --help              - print the usage message 
   --source or -s      - a required argument specifying the source grid 
@@ -180,5 +191,10 @@ where
                         or --dst_type are given at the same time and they 
                         disagree with each other, an error message will be 
                         generated.
+
+    -r                - an optional argument specifying that the source and 
+                        destination grids are regional grids.  If the argument
+                        is not given, the grids are assumed to be global.
+
 \end{verbatim}
 
