@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.5 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.5 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -207,6 +207,32 @@ void  ESMCI_WebServComponentSvr::setPort(
 //-----------------------------------------------------------------------------
 {
 	thePort = port;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServComponentSvr::addOutputFilename()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServComponentSvr::addOutputFilename()
+//
+// !INTERFACE:
+void  ESMCI_WebServComponentSvr::addOutputFilename(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  string  filename    // the name of the output filename to add to the list
+  )
+//
+// !DESCRIPTION:
+//    Adds the specified filename to the list of output filenames.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	theOutputFiles.push_back(filename);
 }
 
 
@@ -1024,9 +1050,6 @@ int  ESMCI_WebServComponentSvr::processFiles(
 //    socket.  And finally, the component status is written to the socket 
 //    to complete the transaction.
 //
-//    KDS: This code is horribly hardcoded right now... the whole file import
-//         and export stuff needs to be re-thought.
-//
 //EOPI
 //-----------------------------------------------------------------------------
 {
@@ -1100,10 +1123,7 @@ int  ESMCI_WebServComponentSvr::processFiles(
 	//***
 	if (theCurrentStatus == NET_ESMF_STAT_FINAL_DONE)
 	{
-		//***
-		// KDS: All of this needs to change... I'm hardcoding this for now...
-		//***
-		numFiles = 1;
+		numFiles = theOutputFiles.size();
 		char	fileInfoBuf[1024];
 
 		unsigned int  netNumFiles = htonl(numFiles);
@@ -1117,30 +1137,35 @@ int  ESMCI_WebServComponentSvr::processFiles(
 			return localrc;
 		}
 
-		strcpy(fileInfoBuf, "export");
-		int	filenameSize = strlen(fileInfoBuf) + 1;
-
-		if (theSocket.write(filenameSize, fileInfoBuf) != filenameSize)
+		for (int i = 0; i < numFiles; ++i)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
-        		ESMC_RC_FILE_WRITE,
-        		"Unable to write filename to socket.",
-        		&localrc);
+      	// All of the files are export files
+			strcpy(fileInfoBuf, "export");
+			int	filenameSize = strlen(fileInfoBuf) + 1;
 
-			return localrc;
-		}
+			if (theSocket.write(filenameSize, fileInfoBuf) != filenameSize)
+			{
+     			ESMC_LogDefault.ESMC_LogMsgFoundError(
+        			ESMC_RC_FILE_WRITE,
+        			"Unable to write filename to socket.",
+        			&localrc);
 
-		strcpy(fileInfoBuf, "camrun.cam2.rh0.000-01-02-00000.nc");
-		filenameSize = strlen(fileInfoBuf) + 1;
+				return localrc;
+			}
 
-		if (theSocket.write(filenameSize, fileInfoBuf) != filenameSize)
-		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
-        		ESMC_RC_FILE_WRITE,
-        		"Unable to write filename to socket.",
-        		&localrc);
+			//strcpy(fileInfoBuf, "camrun.cam2.rh0.000-01-02-00000.nc");
+			strcpy(fileInfoBuf, theOutputFiles[i].c_str());
+			filenameSize = strlen(fileInfoBuf) + 1;
 
-			return localrc;
+			if (theSocket.write(filenameSize, fileInfoBuf) != filenameSize)
+			{
+     			ESMC_LogDefault.ESMC_LogMsgFoundError(
+        			ESMC_RC_FILE_WRITE,
+        			"Unable to write filename to socket.",
+        			&localrc);
+
+				return localrc;
+			}
 		}
 	}
 	else

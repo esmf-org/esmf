@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.5 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServ_F.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,13 +39,14 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.5 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #define VERBOSITY             (1)       // 0: off, 10: max
 //-----------------------------------------------------------------------------
 
+ESMCI::ESMCI_WebServComponentSvr*	theComponentServer = NULL;
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -84,14 +85,16 @@ void FTN(c_esmc_componentsvcloop)(
    // This loop should not return until either an "exit" message has been
    // received or an error has occurred.
    //***
-	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
+//	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
+	theComponentServer = new ESMCI::ESMCI_WebServComponentSvr(*portNum);
 
-	if (server.requestLoop(comp, 
-                          importState, 
-                          exportState, 
-                          clock, 
-                          *phase, 
-                          *blockingFlag) != ESMF_SUCCESS)
+//	if (server.requestLoop(comp, 
+	if (theComponentServer->requestLoop(comp, 
+                                       importState, 
+                                       exportState, 
+                                       clock, 
+                                       *phase, 
+                                       *blockingFlag) != ESMF_SUCCESS)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
@@ -367,6 +370,75 @@ void FTN(c_esmc_unregistercomponent)(
 
 	printf("Response: %s\n", response);
 	client.disconnect();
+
+   *rc = ESMF_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getportnum()"
+//BOPI
+// !ROUTINE:  c_esmc_getportnum()
+//
+// !INTERFACE:
+void FTN(c_esmc_getportnum)(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  int*               portNum,			// (out) the service port number
+  int*               rc			      // (out) the return code
+  )
+//
+// !DESCRIPTION:
+//    Determines a suitable, available port number for the service.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+
+   *portNum = 27061;
+
+   *rc = ESMF_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_addoutputfilename()"
+//BOPI
+// !ROUTINE:  c_esmc_addoutputfilename()
+//
+// !INTERFACE:
+void FTN(c_esmc_addoutputfilename)(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  char*                   filename,		// (in) the output filename
+  int*                    rc,			   // (out) the return code
+  ESMCI_FortranStrLenArg  filenameLen	// (in) the length of the filename
+  )
+//
+// !DESCRIPTION:
+//    Adds a filename to the list of output filenames.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+	char	filenameStr[ESMF_MAXSTR];
+
+   // TODO: everything
+   if (theComponentServer != NULL)
+	{
+		strncpy(filenameStr, filename, filenameLen);
+		theComponentServer->addOutputFilename(filenameStr);
+	}
 
    *rc = ESMF_SUCCESS;
 }

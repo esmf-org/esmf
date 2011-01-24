@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.h,v 1.5 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServComponentSvr.h,v 1.6 2011/01/24 17:04:56 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@
 #include "ESMCI_WebServNetEsmf.h"
 #include "ESMCI_WebServClientInfo.h"
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -79,6 +80,8 @@ namespace ESMCI
 	  void*  runRun(void);
 	  void*  runFinal(void);
 
+     // methods to access other data members
+     void  addOutputFilename(string  filename);
 
   private:
 
@@ -116,6 +119,8 @@ namespace ESMCI
      int		theCurrentClientId;	// the id of the client currently accessing
                                  // the component service
 	  int		theCurrentStatus;		// the current status of the service
+
+     vector<string>	theOutputFiles;	// the list of output files
 
 	  pthread_mutex_t	theStatusMutex;	// mutex lock for the current status
   };

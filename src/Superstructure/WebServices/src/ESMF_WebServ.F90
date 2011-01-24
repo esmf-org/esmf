@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.6 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_WebServ.F90,v 1.7 2011/01/24 17:04:56 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -50,6 +50,11 @@ module ESMF_WebServMod
   use ESMF_VMMod
     
   implicit none
+
+  private
+
+  public ESMF_WebServProcessRequest, ESMF_WebServWaitForRequest
+  public ESMF_WebServicesLoop
 
 contains
 
@@ -456,23 +461,60 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServGetPortNum()"
+!BOPI
+! !IROUTINE: ESMF_WebServSvcLoop 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServGetPortNum(portNum, rc)
+
+!
+! !ARGUMENTS:
+    integer,                 intent(out)             :: portNum
+    integer,                 intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Finds a suitable port number for the service.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[portNum]}]
+!   Number of the port on which the component service is listening.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer       :: localrc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call c_ESMC_GetPortNum(portNum, rc=localrc)
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_WebServicesLoop()"
 !BOPI
 ! !IROUTINE: ESMF_WebServicesLoop 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServicesLoop(comp, portNum, importState, exportState, &
-                                  clock, blockingFlag, phase, rc)
+  subroutine ESMF_WebServicesLoop(comp, portNum, rc)
 
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                              :: comp
-    integer                                          :: portNum
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
-    integer,                 intent(in),    optional :: phase
+    integer,                 intent(inout), optional :: portNum
     integer,                 intent(out),   optional :: rc
 !
 !
@@ -500,34 +542,119 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
 
-    integer       :: localrc
-    integer       :: localPet, petCount
-    type(ESMF_VM) :: vm
+    integer                 :: localrc
+    integer                 :: localPet, petCount
+    type(ESMF_VM)           :: vm
+    type(ESMF_State)        :: importState
+    type(ESMF_State)        :: exportState
+    type(ESMF_Clock)        :: clock
+    type(ESMF_BlockingFlag) :: blockingFlag
+    integer                 :: phase
 
 
     ! Initialize return code
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
+    call ESMF_VMGetGlobal(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
+
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
 
     if (localPet == 0)  then
 
-       call ESMF_WebServRegisterSvc(comp, 27060, rc=localrc)
+       ! create and initialize data members 
+       importState = ESMF_StateCreate(name="Import", &
+                                      statetype=ESMF_STATE_IMPORT, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) &
+          return
 
-       call ESMF_WebServSvcLoop(comp, 27060, importState=importState, &
-             exportState=exportState, clock=clock, blockingFlag=blockingFlag, &
-             phase=phase, rc=localrc)
+       exportState = ESMF_StateCreate(name="Export", &
+                                      statetype=ESMF_STATE_EXPORT, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) &
+          return
 
-       call ESMF_WebServUnregisterSvc(comp, 27060, rc=localrc)
+       ! Initialize clock in the ComponentInitialize function??  
+       ! Will creating the object be sufficient or do I need to initialize 
+       ! it with some values using ClockCreate?
+       !clock = ESMF_ClockCreate("App Clock", rc=localrc)
+
+       blockingFlag = ESMF_BLOCKING
+       phase = 1
+
+       if (portNum <= 0) then
+          call ESMF_WebServGetPortNum(portNum=portNum, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
+       endif
+
+       call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
+
+       call ESMF_WebServSvcLoop(comp, portNum=portNum, &
+             importState=importState, exportState=exportState, clock=clock, &
+             blockingFlag=blockingFlag, phase=phase, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
+
+       call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
 
     else
 
        call ESMF_WebServWaitForRequest(comp, importState=importState, &
              exportState=exportState, clock=clock, blockingFlag=blockingFlag, &
              phase=phase, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
 
     end if
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServAddOutputFilename()"
+!BOPI
+! !IROUTINE: ESMF_WebServSvcLoop 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServAddOutputFilename(filename, rc)
+
+!
+! !ARGUMENTS:
+    character(len=ESMF_MAXSTR), intent(in)              :: filename
+    integer,                    intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Adds a filename to the list of output filenames.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[filename]}]
+!   The name of the file to add to the list of output filenames.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer       :: localrc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call c_ESMC_AddOutputFilename(filename, rc=localrc)
 
     rc = localrc
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServ.h,v 1.4 2011/01/24 17:04:56 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -85,6 +85,12 @@ extern "C"
                                          ESMCI_FortranStrLenArg  compNameLen,
                                          ESMCI_FortranStrLenArg  hostNameLen);
 
+	void  FTN(c_esmc_getportnum)(int*  portNum,
+                                int*  rc);
+
+	void  FTN(c_esmc_addoutputfilename)(char*                   filename,
+                                       int*                    rc,
+                                       ESMCI_FortranStrLenArg  filenameLen);
 };
 
 
