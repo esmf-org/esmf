@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.40 2011/01/22 00:06:47 peggyli Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.41 2011/01/24 20:23:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.40 2011/01/22 00:06:47 peggyli Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.41 2011/01/24 20:23:40 svasquez Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -247,7 +247,7 @@ program ESMF_FieldRegridEx
 ! is implemented as a sparse matrix multiply. The {\tt ESMF\_FieldRegridStore()} call generates the sparse matrix for
 ! the regrid operation. This matrix may be either retrieved in a factor and index raw form, or may be retrieved in the form
 ! of a routeHandle which contains an internal representation of the communication and mathermatical operations necessary to 
-! perform the regrid. Note {\tt ESMF_\FieldRegridStore()} assumes the latitude and longitude coordinates of the grid
+! perform the regrid. Note {\tt ESMF\_FieldRegridStore()} assumes the latitude and longitude coordinates of the grid
 ! are in degrees.  The routeHandle can then be used in an {\tt ESMF\_FieldRegrid()} call to perform the interpolation
 ! between the two Fields. The routeHandle depends only on the coordinates in the Grids where the Fields are built, so 
 ! as long as the coordinates stay the same, the operation can be performed multiple times using the same routeHandle. This is true
