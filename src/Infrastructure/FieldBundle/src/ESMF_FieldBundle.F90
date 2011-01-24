@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.80 2011/01/14 01:09:03 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.81 2011/01/24 22:31:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -392,10 +392,12 @@ end interface
 !
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Test whether fieldbundle1 and fieldbundle2 are valid aliases to the same ESMF
 !   FieldBundle object in memory. For a more general comparison of two ESMF FieldBundles,
 !   going beyond the simple alias test, the ESMF\_FieldBundleMatch() function (not yet
 !   implemented) must be used.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -432,10 +434,12 @@ end interface
 !
 !
 ! !DESCRIPTION:
+!   \begin{sloppypar}
 !   Test whether fieldbundle1 and fieldbundle2 are {\it not} valid aliases to the
 !   same ESMF FieldBundle object in memory. For a more general comparison of two ESMF
 !   FieldBundles, going beyond the simple alias test, the ESMF\_FieldBundleMatch() function
 !   (not yet implemented) must be used.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}

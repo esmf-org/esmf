@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.74 2011/01/19 02:13:19 svasquez Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.75 2011/01/24 22:31:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.74 2011/01/19 02:13:19 svasquez Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.75 2011/01/24 22:31:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -786,7 +786,8 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy() 
-!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attcopyflag, atttreeflag, rc)
+!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attcopyflag, &
+!                 atttreeflag, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values  

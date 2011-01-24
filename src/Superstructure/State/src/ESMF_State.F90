@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.238 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.239 2011/01/24 22:31:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.238 2011/01/21 00:11:47 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.239 2011/01/24 22:31:17 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -4007,11 +4007,11 @@ contains
       subroutine ESMF_StateRead(state, fileName, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State)                                :: state 
-      character (len=*),        intent(in)            :: fileName
-      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use 
-                                                           ! keywords for the below
-      integer,                  intent(out), optional :: rc 
+      type(ESMF_State)                          :: state 
+      character (len=*),  intent(in)            :: fileName
+      type(ESMF_KeywordEnforcer),      optional :: keywordEnforcer ! must use 
+                                                   ! keywords for the below
+      integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !     Currently limited to read in all Arrays from a netCDF file and add them

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.123 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_Calendar.F90,v 1.124 2011/01/24 22:31:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.123 2011/01/19 02:13:18 svasquez Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.124 2011/01/24 22:31:17 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -718,9 +718,9 @@
       character (len=*),     intent(in),  optional :: name
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not implemented
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not imp
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -917,9 +917,9 @@
       integer,                 intent(out), optional :: monthsPerYear
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerDay
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerYear
-      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYear   ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDn ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDd ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYear   ! not imp
+      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDn ! not imp
+      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDd ! not imp
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1385,9 +1385,9 @@
       character (len=*),     intent(in),  optional :: name
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not implemented
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not imp
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
