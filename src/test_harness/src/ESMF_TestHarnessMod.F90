@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.57 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.58 2011/01/24 23:05:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1608,14 +1608,14 @@ logical                       :: checkpoint = .FALSE.
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordX2D, rc=localrc)
+                   farrayPtr=coordX2D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordY2D, rc=localrc)
+                   farrayPtr=coordY2D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
@@ -1665,21 +1665,21 @@ logical                       :: checkpoint = .FALSE.
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordX3D, rc=localrc)
+                   farrayPtr=coordX3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordY3D, rc=localrc)
+                   farrayPtr=coordY3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordZ3D, rc=localrc)
+                   farrayPtr=coordZ3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=3 coordinates",    &
                             rcToReturn=rc)) return
 
@@ -1844,14 +1844,14 @@ logical                       :: checkpoint = .FALSE.
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordX2D, rc=localrc)
+                   farrayPtr=coordX2D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordY2D, rc=localrc)
+                   farrayPtr=coordY2D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
@@ -1908,21 +1908,21 @@ logical                       :: checkpoint = .FALSE.
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordX3D, rc=localrc)
+                   farrayPtr=coordX3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordY3D, rc=localrc)
+                   farrayPtr=coordY3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordZ3D, rc=localrc)
+                   farrayPtr=coordZ3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=3 coordinates",    &
                             rcToReturn=rc)) return
 
@@ -2111,14 +2111,14 @@ logical                       :: checkpoint = .FALSE.
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordX2D, rc=localrc)
+                   farrayPtr=coordX2D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordY2D, rc=localrc)
+                   farrayPtr=coordY2D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
@@ -2195,21 +2195,21 @@ logical                       :: checkpoint = .FALSE.
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordX3D, rc=localrc)
+                   farrayPtr=coordX3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=1 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordY3D, rc=localrc)
+                   farrayPtr=coordY3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=2 coordinates",    &
                             rcToReturn=rc)) return
 
       call ESMF_GridGetCoord(Grid, localDE=lDE,                                &
                    staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=3,              &
                    computationalLBound=lbnd, computationalUBound=ubnd,         &
-                   fptr=coordZ3D, rc=localrc)
+                   farrayPtr=coordZ3D, rc=localrc)
       if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting grid=3 coordinates",    &
                             rcToReturn=rc)) return
 

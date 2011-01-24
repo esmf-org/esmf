@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.21 2011/01/18 18:24:09 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.22 2011/01/24 23:04:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@ contains
         integer                             :: eleCount, ngridA, ngridB
         integer                             :: elb, eub, ec, lpet
 
-        real(ESMF_KIND_R8), pointer         :: fptr(:,:), xfptr(:)
+        real(ESMF_KIND_R8), pointer         :: farrayPtr(:,:), xfarrayPtr(:)
         real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
         integer                             :: xlb(1), xub(1)
         type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
@@ -161,14 +161,14 @@ contains
         centroidA1X=(/0.5, 1.5/)
         centroidA1Y=(/0.5, 1.5/)
         call ESMF_GridGetCoord(sideA(1), localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, fptr=coordX, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, farrayPtr=coordX, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidA1X
         call ESMF_GridGetCoord(sideA(1), localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, fptr=coordY, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=coordY, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -179,14 +179,14 @@ contains
         centroidA2X=(/0.5, 1.5/)
         centroidA2Y=(/2.5/)
         call ESMF_GridGetCoord(sideA(2), localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, fptr=coordX, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, farrayPtr=coordX, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidA2X(lpet+1)
         call ESMF_GridGetCoord(sideA(2), localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, fptr=coordY, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=coordY, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -213,14 +213,14 @@ contains
         centroidBX=(/0.75, 1.75/)
         centroidBY=(/0.75, 2.25/)
         call ESMF_GridGetCoord(sideB(1), localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, fptr=coordX, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, farrayPtr=coordX, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidBX
         call ESMF_GridGetCoord(sideB(1), localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, fptr=coordY, &
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=coordY, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -434,13 +434,13 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_FieldGet(field, farrayPtr=xfptr, &
+        call ESMF_FieldGet(field, farrayPtr=xfarrayPtr, &
             exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        xfptr = 0.0
+        xfarrayPtr = 0.0
 
         call ESMF_FieldPrint(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -453,28 +453,28 @@ contains
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
+            call ESMF_FieldGet(srcField(i), farrayPtr=farrayPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            fptr = 1.
+            farrayPtr = 1.
         enddo
         do i = 1, 1
             dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
+            call ESMF_FieldGet(dstField(i), farrayPtr=farrayPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            fptr = 0.0
+            farrayPtr = 0.0
         enddo
 
         ! use field on Xgrid to do smm from src to dst transformation
         ! dst = W'*W*src
         !print *, '- before SMM from A -> X'
-        !print *, xlb, xub, xfptr
+        !print *, xlb, xub, xfarrayPtr
 
         ! from A -> X
         do i = 1, 2
@@ -491,21 +491,21 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             !print *, '- SMM from A -> X'
-            !print *, xfptr
+            !print *, xfarrayPtr
         enddo
 
-        ! xfptr should be all 1. at this point
+        ! xfarrayPtr should be all 1. at this point
         ! To get the surface integral of flux on XGrid, adjust by dst area
 
         !do i = xlb(1), xub(1)
-        !    xfptr(i) = xfptr(i) * xgrid_area(i) 
+        !    xfarrayPtr(i) = xfarrayPtr(i) * xgrid_area(i) 
         !enddo
 
         !print *, '- after SMM from A -> X'
-        !print *, xfptr ! should be xgrid_area
+        !print *, xfarrayPtr ! should be xgrid_area
 
         !print *, '- B before SMM from X -> B'
-        !print *, fptr ! should be 0.
+        !print *, farrayPtr ! should be 0.
 
         ! from X -> B
         do i = 1, 1
@@ -524,7 +524,7 @@ contains
         enddo
 
         !print *, '- B after SMM from X -> B'
-        !print *, fptr ! should be 1/B_area
+        !print *, farrayPtr ! should be 1/B_area
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -582,7 +582,7 @@ contains
         integer                             :: eleCount, ngridA, ngridB
         integer                             :: elb, eub, ec, lpet
 
-        real(ESMF_KIND_R8), pointer         :: fptr(:,:), xfptr(:)
+        real(ESMF_KIND_R8), pointer         :: farrayPtr(:,:), xfarrayPtr(:)
         real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
         integer                             :: xlb(1), xub(1)
         type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
@@ -637,13 +637,13 @@ contains
         centroidA1X=(/0.5, 1.5/)
         centroidA1Y=(/0.5, 1.5/)
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            coordDim=1, fptr=coordX, rc=localrc)
+            coordDim=1, farrayPtr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidA1X
         call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            coordDim=2, fptr=coordY, rc=localrc)
+            coordDim=2, farrayPtr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -653,13 +653,13 @@ contains
         centroidA2X=(/0.5, 1.5/)
         centroidA2Y=(/2.5/)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            coordDim=1, fptr=coordX, rc=localrc)
+            coordDim=1, farrayPtr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidA2X(lpet+1)
         call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            coordDim=2, fptr=coordY, rc=localrc)
+            coordDim=2, farrayPtr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -685,13 +685,13 @@ contains
         centroidBX=(/0.75, 1.75/)
         centroidBY=(/0.75, 2.25/)
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            coordDim=1, fptr=coordX, rc=localrc)
+            coordDim=1, farrayPtr=coordX, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
         coordX = centroidBX
         call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            coordDim=2, fptr=coordY, rc=localrc)
+            coordDim=2, farrayPtr=coordY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
@@ -904,13 +904,13 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
-        call ESMF_FieldGet(field, farrayPtr=xfptr, &
+        call ESMF_FieldGet(field, farrayPtr=xfarrayPtr, &
             exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) return
 
-        xfptr = 0.0
+        xfarrayPtr = 0.0
 
         call ESMF_FieldPrint(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -923,28 +923,28 @@ contains
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(srcField(i), farrayPtr=fptr, rc=localrc)
+            call ESMF_FieldGet(srcField(i), farrayPtr=farrayPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            fptr = i
+            farrayPtr = i
         enddo
         do i = 1, 1
             dstField(i) = ESMF_FieldCreate(sideB(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            call ESMF_FieldGet(dstField(i), farrayPtr=fptr, rc=localrc)
+            call ESMF_FieldGet(dstField(i), farrayPtr=farrayPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
-            fptr = 0.0
+            farrayPtr = 0.0
         enddo
 
         ! use field on Xgrid to do smm from src to dst transformation
         ! dst = W'*W*src
         print *, '- before SMM from A -> X'
-        print *, xlb, xub, xfptr
+        print *, xlb, xub, xfarrayPtr
 
         ! from A -> X
         do i = 1, 2
@@ -961,21 +961,21 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
             print *, '- SMM from A -> X'
-            print *, xfptr
+            print *, xfarrayPtr
         enddo
 
-        ! xfptr should be all 1. at this point
+        ! xfarrayPtr should be all 1. at this point
         ! To get the surface integral of flux on XGrid, adjust by dst area
 
         !do i = xlb(1), xub(1)
-        !    xfptr(i) = xfptr(i) * xgrid_area(i) 
+        !    xfarrayPtr(i) = xfarrayPtr(i) * xgrid_area(i) 
         !enddo
 
         print *, '- after SMM from A -> X'
-        print *, xfptr ! should be xgrid_area
+        print *, xfarrayPtr ! should be xgrid_area
 
         print *, '- B before SMM from X -> B'
-        print *, fptr ! should be 0.
+        print *, farrayPtr ! should be 0.
 
         ! from X -> B
         do i = 1, 1
@@ -994,7 +994,7 @@ contains
         enddo
 
         print *, '- B after SMM from X -> B'
-        print *, fptr ! should be 1/B_area
+        print *, farrayPtr ! should be 1/B_area
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -1102,7 +1102,7 @@ contains
     ! compute coord
     ! X center
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1111,7 +1111,7 @@ contains
     enddo
     ! X corner
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1121,7 +1121,7 @@ contains
     !print *, 'startx: ', startx, lbound(coordX, 1), 'coordX: ', coordX
     ! Y center
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1130,7 +1130,7 @@ contains
     enddo
     ! Y corner
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1169,7 +1169,7 @@ contains
     ! compute coord
     ! X center
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1178,7 +1178,7 @@ contains
     enddo
     ! X corner
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1187,7 +1187,7 @@ contains
     enddo
     ! Y center 
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1196,7 +1196,7 @@ contains
     enddo
     ! Y corner
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1336,13 +1336,13 @@ contains
     ! compute coord
     ! X center
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     ! Y center
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1355,13 +1355,13 @@ contains
     print *, 'startx: ', startx, lbound(coordX, 1), 'coordX: ', coordX(:,1), coordX(1,:)
     ! X corner
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     ! Y corner
     call ESMF_GridGetCoord(grid_atm, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1401,13 +1401,13 @@ contains
     ! compute coord
     ! X center
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     ! Y center
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1420,13 +1420,13 @@ contains
     print *, 'startx: ', startx, lbound(coordX, 1), 'coordX: ', coordX(:,1), coordX(1,:)
     ! X corner
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, fptr=coordX, rc=localrc)
+        coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
     ! Y corner
     call ESMF_GridGetCoord(grid_ocn, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, fptr=coordY, rc=localrc)
+        coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return

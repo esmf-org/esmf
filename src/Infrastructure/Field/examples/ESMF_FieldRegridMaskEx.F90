@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.14 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.15 2011/01/24 23:04:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.14 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.15 2011/01/24 23:04:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -56,9 +56,9 @@ program ESMF_FieldRegridEx
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
-  real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
   integer(ESMF_KIND_I4), pointer :: maskSrc(:,:), maskDst(:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
@@ -169,17 +169,17 @@ program ESMF_FieldRegridEx
  
      !! get coord 1
      call ESMF_GridGetCoord(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
      call ESMF_GridGetCoord(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
      call ESMF_GridGetItem(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            item=ESMF_GRIDITEM_MASK, fptr=maskSrc, rc=localrc)
+            item=ESMF_GRIDITEM_MASK, farrayPtr=maskSrc, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-      call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=fclbnd, &
+      call ESMF_FieldGet(srcField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
       if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -191,10 +191,10 @@ program ESMF_FieldRegridEx
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrXC(i1,i2) = REAL((i1-1)*src_dx)
-        fptrYC(i1,i2) = REAL((i2-1)*src_dx)
-        x = fptrXC(i1, i2)
-        y = fptrYC(i1,i2)
+        farrayPtrXC(i1,i2) = REAL((i1-1)*src_dx)
+        farrayPtrYC(i1,i2) = REAL((i2-1)*src_dx)
+        x = farrayPtrXC(i1, i2)
+        y = farrayPtrYC(i1,i2)
      
         ! Set src mask as a circle of radius 0.5 around origin
         if (sqrt(x*x+y*y) < 0.5) then
@@ -204,7 +204,7 @@ program ESMF_FieldRegridEx
         endif
 
        ! Function
-        fptr(i1, i2) = sin(x*10*3.145)+cos(y*4*3.145)
+        farrayPtr(i1, i2) = sin(x*10*3.145)+cos(y*4*3.145)
      enddo
      enddo
 
@@ -220,17 +220,17 @@ program ESMF_FieldRegridEx
  
      !! get coord 1
      call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
      call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
      call ESMF_GridGetItem(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            item=ESMF_GRIDITEM_MASK, fptr=maskDst, rc=localrc)
+            item=ESMF_GRIDITEM_MASK, farrayPtr=maskDst, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -249,8 +249,8 @@ program ESMF_FieldRegridEx
      do i2=clbnd(2),cubnd(2)
         x = REAL((i1-1)*dst_dx)
         y = REAL((i2-1)*dst_dy)
-        fptrXC(i1,i2) = x-0.25
-        fptrYC(i1,i2) = y-0.03*cos(y*3.145/0.5)*cos(x*2*3.145/0.5)-0.25
+        farrayPtrXC(i1,i2) = x-0.25
+        farrayPtrYC(i1,i2) = y-0.03*cos(y*3.145/0.5)*cos(x*2*3.145/0.5)-0.25
 
         !! Set dst mask as anything .25 from y-axis 
         if (abs(x) < 0.25) then
@@ -260,10 +260,10 @@ program ESMF_FieldRegridEx
         endif
 
         !! Now apply the transformation
-        xtmp = fptrXC(i1,i2)
-        fptrXC(i1,i2) = ctheta*fptrXC(i1,i2)-stheta*fptrYC(i1,i2)+0.5
-        fptrYC(i1,i2) = stheta*xtmp+ctheta*fptrYC(i1,i2)+0.5
-        fptr(i1,i2) = 0.    ! set destination field to zero
+        xtmp = farrayPtrXC(i1,i2)
+        farrayPtrXC(i1,i2) = ctheta*farrayPtrXC(i1,i2)-stheta*farrayPtrYC(i1,i2)+0.5
+        farrayPtrYC(i1,i2) = stheta*xtmp+ctheta*farrayPtrYC(i1,i2)+0.5
+        farrayPtr(i1,i2) = 0.    ! set destination field to zero
      enddo
      enddo
 

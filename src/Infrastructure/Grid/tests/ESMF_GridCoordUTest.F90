@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.46 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.47 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.46 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.47 2011/01/24 23:04:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,8 +54,8 @@ program ESMF_GridCoordUTest
   type(ESMF_Array) :: array, array2D, array2, array1D
   type(ESMF_ArraySpec) :: arrayspec2D,arrayspec1D
   type(ESMF_StaggerLoc) :: customStagger
-  real(ESMF_KIND_R8), pointer :: fptrX(:,:),fptrY(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr3D(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrX(:,:),farrayPtrY(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:), farrayPtr3D(:,:,:)
   real(kind=ESMF_KIND_R4), parameter :: var=1.0
   integer :: petMap2D(2,2,1)
   integer :: petMapReg2D(2,1,2)
@@ -70,7 +70,7 @@ program ESMF_GridCoordUTest
   INTEGER, PARAMETER :: globalYcount = 5 
   REAL(ESMF_KIND_R8) :: cornerX(globalXcount+1)
   REAL(ESMF_KIND_R8) :: cornerY(globalYcount+1)
-  REAL(ESMF_KIND_R8),pointer :: fptr1D(:)
+  REAL(ESMF_KIND_R8),pointer :: farrayPtr1D(:)
 
 
   !-----------------------------------------------------------------------------
@@ -135,19 +135,19 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrX, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
     ! get and fill second coord array
     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                           fptr=fptrY, rc=localrc)           
+                           farrayPtr=farrayPtrY, rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
-        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+        farrayPtrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        farrayPtrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
      enddo
      enddo
 
@@ -172,19 +172,19 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrX, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
     ! get and fill second coord array
     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                           fptr=fptrY, rc=localrc)           
+                           farrayPtr=farrayPtrY, rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
-        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+        farrayPtrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        farrayPtrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
      enddo
      enddo
 
@@ -236,19 +236,19 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrX, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
     ! get and fill second coord array
     call ESMF_GridGetCoord(gridA, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                           fptr=fptrY, rc=localrc)           
+                           farrayPtr=farrayPtrY, rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
-        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+        farrayPtrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        farrayPtrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
      enddo
      enddo
 
@@ -273,19 +273,19 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrX, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrX, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
     ! get and fill second coord array
     call ESMF_GridGetCoord(gridB, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                           fptr=fptrY, rc=localrc)           
+                           farrayPtr=farrayPtrY, rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrX(i1,i2)=REAL(i1,ESMF_KIND_R8)+1.0 ! Make coordinates for GridB different than GridA
-        fptrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+        farrayPtrX(i1,i2)=REAL(i1,ESMF_KIND_R8)+1.0 ! Make coordinates for GridB different than GridA
+        farrayPtrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
      enddo
      enddo
 
@@ -407,22 +407,22 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(grid2D, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr1D, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr1D, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i=clbnd(1),cubnd(1)
-        fptr1D(i)=0.5*(cornerX(i)+cornerX(i+1))
+        farrayPtr1D(i)=0.5*(cornerX(i)+cornerX(i+1))
      enddo
 
     ! get and fill second coord array
     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr1D, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr1D, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i=clbnd(1),cubnd(1)
-        fptr1D(i)=0.5*(cornerY(i)+cornerY(i+1))
+        farrayPtr1D(i)=0.5*(cornerY(i)+cornerY(i+1))
      enddo
   enddo
 
@@ -438,22 +438,22 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(grid2D, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_EDGE1, coordDim=1, &
-                           computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr1D, &
+                           computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr1D, &
                            rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i=clbnd(1),cubnd(1)
-        fptr1D(i)=cornerX(i)
+        farrayPtr1D(i)=cornerX(i)
      enddo
 
     ! get and fill second coord array
     call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_EDGE1, coordDim=2, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr1D, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr1D, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i=clbnd(1),cubnd(1)
-        fptr1D(i)=0.5*(cornerY(i)+cornerY(i+1))
+        farrayPtr1D(i)=0.5*(cornerY(i)+cornerY(i+1))
      enddo
   enddo
 
@@ -469,22 +469,22 @@ program ESMF_GridCoordUTest
 
      ! get and fill first coord array
      call ESMF_GridGetCoord(grid2D, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_EDGE2, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr1D, &
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr1D, &
                             rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i=clbnd(1),cubnd(1)
-        fptr1D(i)=0.5*(cornerX(i)+cornerX(i+1))
+        farrayPtr1D(i)=0.5*(cornerX(i)+cornerX(i+1))
      enddo
 
      ! get and fill second coord array
      call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_EDGE2, coordDim=2, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr1D, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr1D, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i=clbnd(1),cubnd(1)
-        fptr1D(i)=cornerY(i)
+        farrayPtr1D(i)=cornerY(i)
      enddo  
   enddo
 
@@ -598,16 +598,16 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! set pointer to null
-  nullify(fptr)
+  nullify(farrayPtr)
 
   ! Get Coord From Grid
   call ESMF_GridGetCoord(grid2D, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, fptr=fptr, rc=localrc)
+            staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, farrayPtr=farrayPtr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that output is as expected
   correct=.true.
-  if (.not. associated(fptr)) correct=.false.
+  if (.not. associated(farrayPtr)) correct=.false.
 
  ! Destroy Test Grid
   call ESMF_GridDestroy(grid2D, rc=localrc)
@@ -657,16 +657,16 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! set pointer to null
-  nullify(fptr)
+  nullify(farrayPtr)
 
   ! Get Coord From Grid
   call ESMF_GridGetCoord(grid2D, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_EDGE1, coordDim=2, fptr=fptr, rc=localrc)
+            staggerLoc=ESMF_STAGGERLOC_EDGE1, coordDim=2, farrayPtr=farrayPtr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that output is as expected
   correct=.true.
-  if (.not. associated(fptr)) correct=.false.
+  if (.not. associated(farrayPtr)) correct=.false.
 
  ! Destroy Test Grid
   call ESMF_GridDestroy(grid2D, rc=localrc)
@@ -2755,42 +2755,42 @@ program ESMF_GridCoordUTest
  
      !! get coord 1
      call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr3D, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr3D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
      !! set coord 1  
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
-        fptr3D(i1,i2,i3)=REAL(i1,ESMF_KIND_R8)
+        farrayPtr3D(i1,i2,i3)=REAL(i1,ESMF_KIND_R8)
      enddo
      enddo
      enddo
 
      !! get coord 2
      call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr3D, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr3D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
      !! set coord 2  
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
-        fptr3D(i1,i2,i3)=REAL(i2,ESMF_KIND_R8)
+        farrayPtr3D(i1,i2,i3)=REAL(i2,ESMF_KIND_R8)
      enddo
      enddo
      enddo
 
      !! get coord 3
      call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER_VCENTER, coordDim=3, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr3D, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr3D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
      ! set coord 3  
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
      do i3=clbnd(3),cubnd(3)
-        fptr3D(i1,i2,i3)=REAL(i3,ESMF_KIND_R8)
+        farrayPtr3D(i1,i2,i3)=REAL(i3,ESMF_KIND_R8)
      enddo
      enddo
      enddo
@@ -3318,16 +3318,16 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! set pointer to null
-  nullify(fptr3D)
+  nullify(farrayPtr3D)
 
   ! Get Coord From Grid
   call ESMF_GridGetCoord(grid3D, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, fptr=fptr3D, rc=localrc)
+            staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, farrayPtr=farrayPtr3D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that output is as expected
   correct=.true.
-  if (.not. associated(fptr3D)) correct=.false.
+  if (.not. associated(farrayPtr3D)) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
@@ -3372,7 +3372,7 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
   integer :: elbnd(2),eubnd(2),ecnt(2)
   integer :: clbnd(2),cubnd(2),ccnt(2)
   integer :: tlbnd(2),tubnd(2),tcnt(2)
-  real (ESMF_KIND_R8), pointer :: fptr(:,:)
+  real (ESMF_KIND_R8), pointer :: farrayPtr(:,:)
 
   ! Check if bounds are correct for each DE
   if (petCount .eq. 1) then
@@ -3390,17 +3390,17 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !    write(*,*) "0:",clbnd,",",cubnd,correct
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord Array From Grid
      call ESMF_GridGetCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !write(*,*) "H1", rc, correct
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if ((lbound(farrayPtr,1) .ne. tlbnd(1)) .or. (lbound(farrayPtr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(farrayPtr,1) .ne. tubnd(1)) .or. (ubound(farrayPtr,2) .ne. tubnd(2))) correct=.false.
 !write(*,*) "H2", rc, correct, elbnd(1), ielbnd0(1)-iloff0(1), ":", elbnd(2), ielbnd0(2)-iloff0(2)
      if (elbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
      if (elbnd(2) .ne. ielbnd0(2)-iloff0(2)) correct=.false.
@@ -3437,17 +3437,17 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !  write(*,*) "1:",clbnd,",",cubnd,correct
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=1, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if ((lbound(farrayPtr,1) .ne. tlbnd(1)) .or. (lbound(farrayPtr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(farrayPtr,1) .ne. tubnd(1)) .or. (ubound(farrayPtr,2) .ne. tubnd(2))) correct=.false.
 
 
      if (elbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
@@ -3480,17 +3480,17 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !  write(*,*) "2:",clbnd,",",cubnd,correct
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=2, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if ((lbound(farrayPtr,1) .ne. tlbnd(1)) .or. (lbound(farrayPtr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(farrayPtr,1) .ne. tubnd(1)) .or. (ubound(farrayPtr,2) .ne. tubnd(2))) correct=.false.
  
      if (elbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
      if (elbnd(2) .ne. ielbnd2(2)-iloff2(2)) correct=.false.
@@ -3522,17 +3522,17 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 !    write(*,*) "3:",clbnd,",",cubnd,correct
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=3, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if ((lbound(farrayPtr,1) .ne. tlbnd(1)) .or. (lbound(farrayPtr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(farrayPtr,1) .ne. tubnd(1)) .or. (ubound(farrayPtr,2) .ne. tubnd(2))) correct=.false.
 
      if (elbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
      if (elbnd(2) .ne. ielbnd3(2)-iloff3(2)) correct=.false.
@@ -3565,17 +3565,17 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       ! set pointer to null
-      nullify(fptr)
+      nullify(farrayPtr)
 
      ! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if ((lbound(fptr,1) .ne. tlbnd(1)) .or. (lbound(fptr,2) .ne. tlbnd(2))) correct=.false.
-     if ((ubound(fptr,1) .ne. tubnd(1)) .or. (ubound(fptr,2) .ne. tubnd(2))) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if ((lbound(farrayPtr,1) .ne. tlbnd(1)) .or. (lbound(farrayPtr,2) .ne. tlbnd(2))) correct=.false.
+     if ((ubound(farrayPtr,1) .ne. tubnd(1)) .or. (ubound(farrayPtr,2) .ne. tubnd(2))) correct=.false.
 
      if (localPet .eq. 0) then
 
@@ -3696,7 +3696,7 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
   integer :: elbnd(1),eubnd(1),ecnt(1)
   integer :: clbnd(1),cubnd(1),ccnt(1)
   integer :: tlbnd(1),tubnd(1),tcnt(1)
-  real (ESMF_KIND_R8), pointer :: fptr(:)
+  real (ESMF_KIND_R8), pointer :: farrayPtr(:)
 
 
   ! Check if bounds are correct for each DE
@@ -3716,17 +3716,17 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !    write(*,*) "0:",clbnd,",",cubnd,correct
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
  
      !! Get Coord Array From Grid
      call ESMF_GridGetCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if (lbound(fptr,1) .ne. tlbnd(1)) correct=.false.
-     if (ubound(fptr,1) .ne. tubnd(1)) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if (lbound(farrayPtr,1) .ne. tlbnd(1)) correct=.false.
+     if (ubound(farrayPtr,1) .ne. tubnd(1)) correct=.false.
 
      if (elbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
      if (eubnd(1) .ne. ieubnd0(1)+iuoff0(1)) correct=.false.
@@ -3752,17 +3752,17 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !    write(*,*) "1:",clbnd,",",cubnd,correct
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=1, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if (lbound(fptr,1) .ne. tlbnd(1)) correct=.false.
-     if (ubound(fptr,1) .ne. tubnd(1)) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if (lbound(farrayPtr,1) .ne. tlbnd(1)) correct=.false.
+     if (ubound(farrayPtr,1) .ne. tubnd(1)) correct=.false.
 
      if (elbnd(1) .ne. ielbnd1(1)-iloff1(1)) correct=.false.
      if (eubnd(1) .ne. ieubnd1(1)+iuoff1(1)) correct=.false.
@@ -3785,17 +3785,17 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
  !   write(*,*) "2:",clbnd,",",cubnd,correct
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=2, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if (lbound(fptr,1) .ne. tlbnd(1)) correct=.false.
-     if (ubound(fptr,1) .ne. tubnd(1)) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if (lbound(farrayPtr,1) .ne. tlbnd(1)) correct=.false.
+     if (ubound(farrayPtr,1) .ne. tubnd(1)) correct=.false.
  
 
      if (elbnd(1) .ne. ielbnd2(1)-iloff2(1)) correct=.false.
@@ -3820,17 +3820,17 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
  !    write(*,*) "3:",clbnd,",",cubnd,correct
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=3, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      !! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if (lbound(fptr,1) .ne. tlbnd(1)) correct=.false.
-     if (ubound(fptr,1) .ne. tubnd(1)) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if (lbound(farrayPtr,1) .ne. tlbnd(1)) correct=.false.
+     if (ubound(farrayPtr,1) .ne. tubnd(1)) correct=.false.
 
      if (elbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
      if (eubnd(1) .ne. ieubnd3(1)+iuoff3(1)) correct=.false.
@@ -3853,17 +3853,17 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       ! set pointer to null
-      nullify(fptr)
+      nullify(farrayPtr)
 
      ! Get Coord From Grid
      call ESMF_GridGetCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, rc=localrc)
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! Check that output is as expected
-     if (.not. associated(fptr)) correct=.false.
-     if (lbound(fptr,1) .ne. tlbnd(1)) correct=.false.
-     if (ubound(fptr,1) .ne. tubnd(1)) correct=.false.
+     if (.not. associated(farrayPtr)) correct=.false.
+     if (lbound(farrayPtr,1) .ne. tlbnd(1)) correct=.false.
+     if (ubound(farrayPtr,1) .ne. tubnd(1)) correct=.false.
 
      if (localPet .eq. 0) then
 
@@ -3943,7 +3943,7 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
   integer :: elbnd(3),eubnd(3),ecnt(3)
   integer :: clbnd(3),cubnd(3),ccnt(3)
   integer :: tlbnd(3),tubnd(3),tcnt(3)
-  real (ESMF_KIND_R8), pointer :: fptr(:,:,:)
+  real (ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
   logical :: locCheckPtr
 
 
@@ -3974,26 +3974,26 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !   write(*,*) "0: c=",clbnd,",",cubnd,",", ccnt," e=",elbnd,",",eubnd,",", ecnt, correct, rc
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
  
      !! Get Coord Array From Grid
      if (locCheckPtr) then
          call ESMF_GridGetCoord(grid, localDE=0, &
-                staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, totalLBound=tlbnd, totalUBound=tubnd, &
+                staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, totalLBound=tlbnd, totalUBound=tubnd, &
                 totalCount=tcnt,  rc=localrc)
          if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      endif
 
      !! Check that output is as expected
      if (locCheckPtr) then
-        if (.not. associated(fptr)) correct=.false.
-        if (lbound(fptr,1) .ne. tlbnd(1))  correct=.false.
-        if (lbound(fptr,2) .ne. tlbnd(2))  correct=.false.
-        if (lbound(fptr,3) .ne. tlbnd(3))  correct=.false.
+        if (.not. associated(farrayPtr)) correct=.false.
+        if (lbound(farrayPtr,1) .ne. tlbnd(1))  correct=.false.
+        if (lbound(farrayPtr,2) .ne. tlbnd(2))  correct=.false.
+        if (lbound(farrayPtr,3) .ne. tlbnd(3))  correct=.false.
 
-        if (ubound(fptr,1) .ne. tubnd(1))  correct=.false.
-        if (ubound(fptr,2) .ne. tubnd(2))  correct=.false.
-        if (ubound(fptr,3) .ne. tubnd(3))  correct=.false.
+        if (ubound(farrayPtr,1) .ne. tubnd(1))  correct=.false.
+        if (ubound(farrayPtr,2) .ne. tubnd(2))  correct=.false.
+        if (ubound(farrayPtr,3) .ne. tubnd(3))  correct=.false.
      endif
 
      if (elbnd(1) .ne. ielbnd0(1)-iloff0(1)) correct=.false.
@@ -4046,26 +4046,26 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !    write(*,*) "1:",clbnd,",",cubnd, rc,correct
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      if (locCheckPtr) then
         call ESMF_GridGetCoord(grid, localDE=1, &
-                 staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr,  totalLBound=tlbnd, totalUBound=tubnd, &
+                 staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr,  totalLBound=tlbnd, totalUBound=tubnd, &
                  totalCount=tcnt,rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      endif
 
      !! Check that output is as expected
      if (locCheckPtr) then
-        if (.not. associated(fptr)) correct=.false.
-        if (lbound(fptr,1) .ne. tlbnd(1))  correct=.false.
-        if (lbound(fptr,2) .ne. tlbnd(2))  correct=.false.
-        if (lbound(fptr,3) .ne. tlbnd(3))  correct=.false.
+        if (.not. associated(farrayPtr)) correct=.false.
+        if (lbound(farrayPtr,1) .ne. tlbnd(1))  correct=.false.
+        if (lbound(farrayPtr,2) .ne. tlbnd(2))  correct=.false.
+        if (lbound(farrayPtr,3) .ne. tlbnd(3))  correct=.false.
 
-        if (ubound(fptr,1) .ne. tubnd(1))  correct=.false.
-        if (ubound(fptr,2) .ne. tubnd(2))  correct=.false.
-        if (ubound(fptr,3) .ne. tubnd(3))  correct=.false.
+        if (ubound(farrayPtr,1) .ne. tubnd(1))  correct=.false.
+        if (ubound(farrayPtr,2) .ne. tubnd(2))  correct=.false.
+        if (ubound(farrayPtr,3) .ne. tubnd(3))  correct=.false.
      endif
 
 
@@ -4120,26 +4120,26 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !    write(*,*) "2:",clbnd,",",cubnd, correct
 
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      if (locCheckPtr) then
          call ESMF_GridGetCoord(grid, localDE=2, &
-                staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, totalLBound=tlbnd, totalUBound=tubnd, &
+                staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, totalLBound=tlbnd, totalUBound=tubnd, &
                totalCount=tcnt,  rc=localrc)
          if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      endif
 
      !! Check that output is as expected
      if (locCheckPtr) then
-        if (.not. associated(fptr)) correct=.false.
-        if (lbound(fptr,1) .ne. tlbnd(1))  correct=.false.
-        if (lbound(fptr,2) .ne. tlbnd(2))  correct=.false.
-        if (lbound(fptr,3) .ne. tlbnd(3))  correct=.false.
+        if (.not. associated(farrayPtr)) correct=.false.
+        if (lbound(farrayPtr,1) .ne. tlbnd(1))  correct=.false.
+        if (lbound(farrayPtr,2) .ne. tlbnd(2))  correct=.false.
+        if (lbound(farrayPtr,3) .ne. tlbnd(3))  correct=.false.
 
-        if (ubound(fptr,1) .ne. tubnd(1))  correct=.false.
-        if (ubound(fptr,2) .ne. tubnd(2))  correct=.false.
-        if (ubound(fptr,3) .ne. tubnd(3))  correct=.false.
+        if (ubound(farrayPtr,1) .ne. tubnd(1))  correct=.false.
+        if (ubound(farrayPtr,2) .ne. tubnd(2))  correct=.false.
+        if (ubound(farrayPtr,3) .ne. tubnd(3))  correct=.false.
      endif
 
 
@@ -4193,26 +4193,26 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 
 !    write(*,*) "3:",clbnd,",",cubnd, correct
      !! set pointer to null
-     nullify(fptr)
+     nullify(farrayPtr)
 
      !! Get Coord From Grid
      if (locCheckPtr) then
         call ESMF_GridGetCoord(grid, localDE=3, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr,  totalLBound=tlbnd, totalUBound=tubnd, &
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr,  totalLBound=tlbnd, totalUBound=tubnd, &
              totalCount=tcnt,  rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      endif
 
      !! Check that output is as expected
      if (locCheckPtr) then
-        if (.not. associated(fptr)) correct=.false.
-        if (lbound(fptr,1) .ne. tlbnd(1))  correct=.false.
-        if (lbound(fptr,2) .ne. tlbnd(2))  correct=.false.
-        if (lbound(fptr,3) .ne. tlbnd(3))  correct=.false.
+        if (.not. associated(farrayPtr)) correct=.false.
+        if (lbound(farrayPtr,1) .ne. tlbnd(1))  correct=.false.
+        if (lbound(farrayPtr,2) .ne. tlbnd(2))  correct=.false.
+        if (lbound(farrayPtr,3) .ne. tlbnd(3))  correct=.false.
 
-        if (ubound(fptr,1) .ne. tubnd(1))  correct=.false.
-        if (ubound(fptr,2) .ne. tubnd(2))  correct=.false.
-        if (ubound(fptr,3) .ne. tubnd(3))  correct=.false.
+        if (ubound(farrayPtr,1) .ne. tubnd(1))  correct=.false.
+        if (ubound(farrayPtr,2) .ne. tubnd(2))  correct=.false.
+        if (ubound(farrayPtr,3) .ne. tubnd(3))  correct=.false.
      endif
 
      if (elbnd(1) .ne. ielbnd3(1)-iloff3(1)) correct=.false.
@@ -4266,26 +4266,26 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 !    write(*,*) localPet,":",clbnd,",",cubnd, "rc=",rc, "correct=",correct
 
       ! set pointer to null
-      nullify(fptr)
+      nullify(farrayPtr)
 
      ! Get Coord From Grid
      if (locCheckPtr) then
         call ESMF_GridGetCoord(grid, localDE=0, &
-              staggerLoc=staggerloc, coordDim=coordDim, fptr=fptr, totalLBound=tlbnd, totalUBound=tubnd, &
+              staggerLoc=staggerloc, coordDim=coordDim, farrayPtr=farrayPtr, totalLBound=tlbnd, totalUBound=tubnd, &
              totalCount=tcnt, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
      endif
 
      ! Check that output is as expected
      if (locCheckPtr) then
-        if (.not. associated(fptr)) correct=.false.
-        if (lbound(fptr,1) .ne. tlbnd(1))  correct=.false.
-        if (lbound(fptr,2) .ne. tlbnd(2))  correct=.false.
-        if (lbound(fptr,3) .ne. tlbnd(3))  correct=.false.
+        if (.not. associated(farrayPtr)) correct=.false.
+        if (lbound(farrayPtr,1) .ne. tlbnd(1))  correct=.false.
+        if (lbound(farrayPtr,2) .ne. tlbnd(2))  correct=.false.
+        if (lbound(farrayPtr,3) .ne. tlbnd(3))  correct=.false.
 
-        if (ubound(fptr,1) .ne. tubnd(1))  correct=.false.
-        if (ubound(fptr,2) .ne. tubnd(2))  correct=.false.
-        if (ubound(fptr,3) .ne. tubnd(3))  correct=.false.
+        if (ubound(farrayPtr,1) .ne. tubnd(1))  correct=.false.
+        if (ubound(farrayPtr,2) .ne. tubnd(2))  correct=.false.
+        if (ubound(farrayPtr,3) .ne. tubnd(3))  correct=.false.
      endif
 
      if (localPet .eq. 0) then

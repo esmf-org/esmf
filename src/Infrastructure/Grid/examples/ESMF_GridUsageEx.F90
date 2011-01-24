@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.84 2011/01/12 23:28:43 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.85 2011/01/24 23:04:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -454,7 +454,7 @@ if (petCount .le. 6) then
    call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=coordX, rc=rc)
+          farrayPtr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -470,7 +470,7 @@ if (petCount .le. 6) then
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=coordY, rc=rc)
+          farrayPtr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -554,7 +554,7 @@ if (petCount .le. 6) then
    call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=coordX, rc=rc)
+          farrayPtr=coordX, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -570,7 +570,7 @@ if (petCount .le. 6) then
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=coordY, rc=rc)
+          farrayPtr=coordY, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -646,7 +646,7 @@ if (petCount .le. 6) then
    call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=coordX2D, rc=rc)
+          farrayPtr=coordX2D, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -664,7 +664,7 @@ if (petCount .le. 6) then
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=coordY2D, rc=rc)
+          farrayPtr=coordY2D, rc=rc)
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -756,7 +756,7 @@ endif
              staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,       &
              computationalLBound=lbnd_corner,                 &
              computationalUBound=ubnd_corner,                 &
-             fptr=cornerX, rc=rc)
+             farrayPtr=cornerX, rc=rc)
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the first dimension.
@@ -774,7 +774,7 @@ endif
              staggerLoc=ESMF_STAGGERLOC_CORNER_VCENTER,         &
              computationalLBound=lbnd_corner,                   &
              computationalUBound=ubnd_corner,                   &
-             fptr=cornerY, rc=rc)
+             farrayPtr=cornerY, rc=rc)
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the second dimension.
@@ -790,7 +790,7 @@ endif
       call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=lDE,   &
              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,         &
              computationalLBound=lbnd, computationalUBound=ubnd,&
-             fptr=cornerZ, rc=rc)
+             farrayPtr=cornerZ, rc=rc)
 
       !----------------------------------------------------------------
       ! Calculate and set the vertical coordinates
@@ -810,7 +810,7 @@ endif
       call ESMF_GridGetCoord(grid3D, coordDim=1, localDE=lDE,    &
              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,          &
              computationalLBound=lbnd, computationalUBound=ubnd, &
-             fptr=centerX, rc=rc)
+             farrayPtr=centerX, rc=rc)
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the first dimension.
@@ -826,7 +826,7 @@ endif
        call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=lDE,    &
               staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,          &
               computationalLBound=lbnd, computationalUBound=ubnd, &
-              fptr=centerY, rc=rc)
+              farrayPtr=centerY, rc=rc)
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the second dimension.
@@ -842,7 +842,7 @@ endif
       call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=lDE,   &
              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,         &
              computationalLBound=lbnd, computationalUBound=ubnd,&
-             fptr=centerZ, rc=rc)
+             farrayPtr=centerZ, rc=rc)
 
       !----------------------------------------------------------------
       ! Calculate and set the vertical coordinates
@@ -944,7 +944,7 @@ endif
           staggerLoc=ESMF_STAGGERLOC_CENTER,       &
           computationalLBound=lbnd,                 &
           computationalUBound=ubnd,                 &
-          fptr=centerX, rc=rc)
+          farrayPtr=centerX, rc=rc)
 
 
    !----------------------------------------------------------------
@@ -962,7 +962,7 @@ endif
    call ESMF_GridGetCoord(grid3D, coordDim=2, localDE=0,    &
           staggerloc=ESMF_STAGGERLOC_CENTER,                  &
           computationalLBound=lbnd, computationalUBound=ubnd, &
-          fptr=centerY, rc=rc)
+          farrayPtr=centerY, rc=rc)
 
    !----------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension.
@@ -978,7 +978,7 @@ endif
    call ESMF_GridGetCoord(grid3D, coordDim=3, localDE=0,   &
           staggerloc=ESMF_STAGGERLOC_CENTER,               &
           computationalLBound=lbnd, computationalUBound=ubnd,&
-          fptr=centerZ, rc=rc)
+          farrayPtr=centerZ, rc=rc)
 
    !----------------------------------------------------------------
    ! Calculate and set the vertical coordinates
@@ -1439,7 +1439,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (localDECount .gt. 0) then
 !BOC
    call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
-          staggerloc=ESMF_STAGGERLOC_CORNER, fptr=coordY2D, rc=rc)
+          staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=coordY2D, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
@@ -1613,7 +1613,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !BOC
    call ESMF_GridGetItem(grid2D, localDE=0,   &
           staggerloc=ESMF_STAGGERLOC_CORNER,  &
-          item=ESMF_GRIDITEM_MASK, fptr=mask2D, rc=rc)
+          item=ESMF_GRIDITEM_MASK, farrayPtr=mask2D, rc=rc)
 !EOC 
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   endif
@@ -2049,7 +2049,7 @@ endif
 ! a Fortran pointer. These methods only work with the local piece of the 
 ! Grid on the DE. {\tt ESMF\_GridSetCoord} enables the user
 ! to set data into the local piece of the coordinates residing on the DE.
-! The following call gets a pointer (fptr) to the Fortran array holding the 
+! The following call gets a pointer (farrayPtr) to the Fortran array holding the 
 ! first component (e.g. x) coordinates for the corner stagger
 ! for the piece of tile 2 which is on this PET. It
 ! defaults to the first DE because it isn't specified. 
@@ -2058,7 +2058,7 @@ endif
 !BOCI
    call ESMF_GridSetCoord(grid3D, tile=2,  &
           staggerLoc=ESMF_STAGGERLOC_CORNER,        &
-          coordDim=1, fptr, doCopy=ESMF_DATA_REF, rc=rc)
+          coordDim=1, farrayPtr, doCopy=ESMF_DATA_REF, rc=rc)
 !EOCI
 #endif
 
@@ -2200,7 +2200,7 @@ endif
 !
 ! This example illustrates the creation of a simple 2D Grid from coordinate data
 !  contained in 4 byte real fortan arrays.  The new Grid contains just the center stagger location.
-!  Each PET contains a pair of 10x10 Fortran arrays named fptrX and fptrY. 
+!  Each PET contains a pair of 10x10 Fortran arrays named farrayPtrX and farrayPtrY. 
 !  These arrays contain the coordinates for the piece of the global Grid held by each
 !  PET. The final global Grid will be 20x20 and the pieces of this Grid held
 !  by each PET are as follows:
@@ -2242,7 +2242,7 @@ endif
    integer:: myPet, npets, rootPet
    type(ESMF_VM):: vm
    type(ESMF_Grid) :: grid
-   real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
+   real(ESMF_KIND_R4), pointer :: farrayPtrX(:,:),farrayPtrY(:,:)
    integer :: petMap(2,2,1)
 !removeEOC         
 
@@ -2271,7 +2271,7 @@ endif
    ! Add a center stagger location and at the same time set {\tt grid} to 
    ! reference the coordinate arrays. 
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                  coord1=fptrX, coord2=fptrY, rc=rc)
+                  coord1=farrayPtrX, coord2=farrayPtrY, rc=rc)
  
 !removeEOC
 
@@ -2293,7 +2293,7 @@ endif
    integer:: myPet, npets, rootPet
    type(ESMF_VM):: vm
    type(ESMF_Grid) :: grid
-   real(ESMF_KIND_R4), pointer :: fptrX(:,:),fptrY(:,:)
+   real(ESMF_KIND_R4), pointer :: farrayPtrX(:,:),farrayPtrY(:,:)
    integer :: petMap(2,2,1)
 !removeEOC         
 
@@ -2326,7 +2326,7 @@ endif
   ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 
   ! reference the coordinate arrays. 
   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                  coord1=fptrX, coord2=fptrY, rc=rc)
+                  coord1=farrayPtrX, coord2=farrayPtrY, rc=rc)
 
 !removeEOC
 #endif

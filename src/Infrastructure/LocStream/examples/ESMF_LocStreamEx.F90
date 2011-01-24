@@ -41,8 +41,8 @@ program ESMF_LocStreamEx
       integer,parameter :: GridLatSize=20
       integer,parameter :: GridLonSize=20
       integer :: i1,i2
-      real(ESMF_KIND_R8), pointer :: fptrLonC(:,:)
-      real(ESMF_KIND_R8), pointer :: fptrLatC(:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtrLonC(:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtrLatC(:,:)
       integer :: clbnd(2),cubnd(2)
 
 
@@ -324,19 +324,19 @@ program ESMF_LocStreamEx
                           staggerLoc=ESMF_STAGGERLOC_CORNER,     &
                           coordDim=1, computationalLBound=clbnd, &
                           computationalUBound=cubnd,             & 
-                          fptr=fptrLonC, rc=rc)
+                          farrayPtr=farrayPtrLonC, rc=rc)
 
    call ESMF_GridGetCoord(grid, localDE=0,                       &
                          staggerLoc=ESMF_STAGGERLOC_CORNER,      &
-                          coordDim=2, fptr=fptrLatC, rc=rc)
+                          coordDim=2, farrayPtr=farrayPtrLatC, rc=rc)
 
    do i1=clbnd(1),cubnd(1)
    do i2=clbnd(2),cubnd(2)
       ! Set Grid longitude coordinates as 0 to 360
-      fptrLonC(i1,i2) = REAL(i1-1)*360.0/REAL(GridLonSize)
+      farrayPtrLonC(i1,i2) = REAL(i1-1)*360.0/REAL(GridLonSize)
 
       ! Set Grid latitude coordinates as -90 to 90
-      fptrLatC(i1,i2) = -90. + REAL(i2-1)*180.0/REAL(GridLatSize) + &
+      farrayPtrLatC(i1,i2) = -90. + REAL(i2-1)*180.0/REAL(GridLatSize) + &
                                       0.5*180.0/REAL(GridLatSize)
    enddo
    enddo

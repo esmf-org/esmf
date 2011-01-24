@@ -1,4 +1,4 @@
-! $Id: ESMF_GridToMeshUTest.F90,v 1.20 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_GridToMeshUTest.F90,v 1.21 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridToMeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridToMeshUTest.F90,v 1.20 2011/01/05 20:05:44 svasquez Exp $'
+    '$Id: ESMF_GridToMeshUTest.F90,v 1.21 2011/01/24 23:04:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,7 @@ program ESMF_GridToMeshUTest
   logical :: correct
   type(ESMF_Grid) :: grid2D
   type(ESMF_VM) :: vm
-  real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr2D(:,:)
   integer :: clbnd(2),cubnd(2)
   integer :: i1,i2
   integer :: lDE, localDECount
@@ -95,7 +95,7 @@ program ESMF_GridToMeshUTest
  
      !! get coord 1
      call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
     write(*,*) lDE," ::",clbnd,":",cubnd
@@ -103,19 +103,19 @@ program ESMF_GridToMeshUTest
      !! set coord 1  
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptr2D(i1,i2)=REAL(i1,ESMF_KIND_R8)
+        farrayPtr2D(i1,i2)=REAL(i1,ESMF_KIND_R8)
      enddo
      enddo
 
      !! get coord 2
      call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptr2D, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtr2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 
      !! set coord 2  
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
+        farrayPtr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
      enddo
      enddo
   enddo    

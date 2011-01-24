@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.13 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.13 2011/01/24 23:04:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,14 +53,14 @@ program ESMF_GridItemUTest
   type(ESMF_DistGrid) :: distgrid2D, tmpDistGrid
   type(ESMF_Array) :: array2D, array2
   type(ESMF_ArraySpec) :: arrayspec2D
-  integer(ESMF_KIND_I4), pointer :: fptr(:,:), fptr3D(:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptrR8(:,:,:)
-  real(ESMF_KIND_R4), pointer :: fptrR4(:,:)
+  integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:), farrayPtr3D(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrR8(:,:,:)
+  real(ESMF_KIND_R4), pointer :: farrayPtrR4(:,:)
   real(kind=ESMF_KIND_R4), parameter :: var=1.0
   integer :: petMap2D(2,2,1)
   integer :: rank, i1, i2, clbnd(2), cubnd(2)
   integer :: lDE, localDECount
-  integer(ESMF_KIND_I4), pointer :: fptrMask(:,:)
+  integer(ESMF_KIND_I4), pointer :: farrayPtrMask(:,:)
   INTEGER, PARAMETER :: globalXcount = 5 
   INTEGER, PARAMETER :: globalYcount = 5 
   integer :: distgridToArrayMap(2)
@@ -117,13 +117,13 @@ program ESMF_GridItemUTest
      ! get and fill first coord array
      call ESMF_GridGetItem(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
                          item=ESMF_GRIDITEM_MASK, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrMask, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrMask(i1,i2)=i1+i2
+        farrayPtrMask(i1,i2)=i1+i2
      enddo
      enddo
 
@@ -150,13 +150,13 @@ program ESMF_GridItemUTest
      ! get and fill first coord array
      call ESMF_GridGetItem(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
                          item=ESMF_GRIDITEM_MASK, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrMask, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrMask(i1,i2)=i1+i2
+        farrayPtrMask(i1,i2)=i1+i2
      enddo
      enddo
 
@@ -210,13 +210,13 @@ program ESMF_GridItemUTest
      ! get and fill first coord array
      call ESMF_GridGetItem(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
                          item=ESMF_GRIDITEM_MASK, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrMask, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrMask(i1,i2)=i1+i2
+        farrayPtrMask(i1,i2)=i1+i2
      enddo
      enddo
 
@@ -243,13 +243,13 @@ program ESMF_GridItemUTest
      ! get and fill first coord array
      call ESMF_GridGetItem(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
                          item=ESMF_GRIDITEM_MASK, &
-                         computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrMask, &
+                         computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrMask(i1,i2)=i1+i2+1 ! make different than the above
+        farrayPtrMask(i1,i2)=i1+i2+1 ! make different than the above
      enddo
      enddo
 
@@ -404,18 +404,18 @@ program ESMF_GridItemUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! set pointer to null
-  nullify(fptr)
+  nullify(farrayPtr)
 
   ! Get Coord From Grid
   call ESMF_GridGetItem(grid, localDE=0, &
             staggerLoc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
-            fptr=fptr, rc=localrc)
+            farrayPtr=farrayPtr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! Check that output is as expected
   correct=.true.
-  if (.not. associated(fptr)) correct=.false.
+  if (.not. associated(farrayPtr)) correct=.false.
 
  ! Destroy Test Grid
   call ESMF_GridDestroy(grid, rc=localrc)
@@ -575,15 +575,15 @@ program ESMF_GridItemUTest
   ! loop through localDEs
   do lDE=0,localDECount-1
      ! init pointer 
-     nullify(fptrR8) 
+     nullify(farrayPtrR8) 
 
      ! Get Item pointer
      call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
-                        localDE=lDE, fptr=fptrR8, rc=localrc)
+                        localDE=lDE, farrayPtr=farrayPtrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! check pointer
-     if (.not. associated(fptrR8)) correct=.false.
+     if (.not. associated(farrayPtrR8)) correct=.false.
   enddo
 
  ! Destroy Test Grid
@@ -635,15 +635,15 @@ program ESMF_GridItemUTest
   ! loop through localDEs
   do lDE=0,localDECount-1
      ! init pointer 
-     nullify(fptrR4) 
+     nullify(farrayPtrR4) 
 
      ! Get Item pointer
      call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
-                        localDE=lDE, fptr=fptrR4, rc=localrc)
+                        localDE=lDE, farrayPtr=farrayPtrR4, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! check pointer
-     if (.not. associated(fptrR4)) correct=.false.
+     if (.not. associated(farrayPtrR4)) correct=.false.
   enddo
 
  ! Destroy Test Grid
@@ -710,48 +710,48 @@ program ESMF_GridItemUTest
   do lDE=0,localDECount-1
 
      ! init pointer 
-     nullify(fptr3D) 
+     nullify(farrayPtr3D) 
 
      ! Get Item pointer
      call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
-                        localDE=lDE, fptr=fptr3D, rc=localrc)
+                        localDE=lDE, farrayPtr=farrayPtr3D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! check pointer
-     if (.not. associated(fptr3D)) correct=.false.
+     if (.not. associated(farrayPtr3D)) correct=.false.
 
      ! init pointer 
-     nullify(fptrR8) 
+     nullify(farrayPtrR8) 
 
      ! Get Item pointer
      call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
-                        localDE=lDE, fptr=fptrR8, rc=localrc)
+                        localDE=lDE, farrayPtr=farrayPtrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! check pointer
-     if (.not. associated(fptrR8)) correct=.false.
+     if (.not. associated(farrayPtrR8)) correct=.false.
 
      ! init pointer 
-     nullify(fptrR8) 
+     nullify(farrayPtrR8) 
 
      ! Get Item pointer
      call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREAM, &
-                        localDE=lDE, fptr=fptrR8, rc=localrc)
+                        localDE=lDE, farrayPtr=farrayPtrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! check pointer
-     if (.not. associated(fptrR8)) correct=.false.
+     if (.not. associated(farrayPtrR8)) correct=.false.
 
      ! init pointer 
-     nullify(fptrR8) 
+     nullify(farrayPtrR8) 
 
      ! Get Item pointer
      call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_FRAC, &
-                        localDE=lDE, fptr=fptrR8, rc=localrc)
+                        localDE=lDE, farrayPtr=farrayPtrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
      ! check pointer
-     if (.not. associated(fptrR8)) correct=.false.
+     if (.not. associated(farrayPtrR8)) correct=.false.
   enddo
 
  ! Destroy Test Grid

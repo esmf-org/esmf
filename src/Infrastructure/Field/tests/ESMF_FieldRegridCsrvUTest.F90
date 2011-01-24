@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.13 2011/01/24 23:04:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -138,9 +138,9 @@ contains
   type(ESMF_RouteHandle) :: routeHandle
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
-  real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:),xfptr(:,:),errorfptr(:,:),iwtsptr(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),xfarrayPtr(:,:),errorfarrayPtr(:,:),iwtsptr(:,:)
   real(ESMF_KIND_R8), pointer :: srcAreaptr(:,:), dstAreaptr(:,:)
   integer :: petMap2D(2,2,1)
   integer :: clbnd(2),cubnd(2)
@@ -353,14 +353,14 @@ contains
  
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -373,8 +373,8 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Set source coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Src_dx
-        fptrYC(i1,i2) = REAL(i2-1)*Src_dy - 90.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Src_dx
+        farrayPtrYC(i1,i2) = REAL(i2-1)*Src_dy - 90.0
 
      enddo
      enddo
@@ -384,14 +384,14 @@ contains
 
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -399,7 +399,7 @@ contains
 
 
      ! get src pointer
-     call ESMF_FieldGet(srcField, lDE, fptr,  rc=localrc)
+     call ESMF_FieldGet(srcField, lDE, farrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -414,20 +414,20 @@ contains
         yp1= REAL(i2-1+1)*Src_dy - 90.0
 
         ! Set source coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Src_dx + 0.5*Src_dx
-        fptrYC(i1,i2) = (y+yp1)/2.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Src_dx + 0.5*Src_dx
+        farrayPtrYC(i1,i2) = (y+yp1)/2.0
 
         ! set src data 
-        lon = fptrXC(i1,i2)
-        lat = fptrYC(i1,i2)
+        lon = farrayPtrXC(i1,i2)
+        lat = farrayPtrYC(i1,i2)
      
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
 
         ! set src data
-        !fptr(i1,i2) = 1.
-        fptr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+        !farrayPtr(i1,i2) = 1.
+        farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
 
      enddo
      enddo
@@ -445,14 +445,14 @@ contains
  
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -463,8 +463,8 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Set dest coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Dst_dx
-        fptrYC(i1,i2) = REAL(i2-1)*Dst_dy - 90.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Dst_dx
+        farrayPtrYC(i1,i2) = REAL(i2-1)*Dst_dy - 90.0
 
      enddo
      enddo
@@ -474,14 +474,14 @@ contains
 
      !! get coord 1
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -489,7 +489,7 @@ contains
 
 
      ! get dst pointer
-     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -497,7 +497,7 @@ contains
      endif
 
      ! get exact pointer
-     call ESMF_FieldGet(xdstField, lDE, xfptr, rc=localrc)
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -512,22 +512,22 @@ contains
         yp1= REAL(i2-1+1)*Dst_dy - 90.0
 
         ! Set source coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Dst_dx + 0.5*Dst_dx
-        fptrYC(i1,i2) = (y+yp1)/2.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Dst_dx + 0.5*Dst_dx
+        farrayPtrYC(i1,i2) = (y+yp1)/2.0
 
         ! init dst data
-        fptr(i1,i2) = 0.0
+        farrayPtr(i1,i2) = 0.0
 
         ! init exact answer
-        lon = fptrXC(i1,i2)
-        lat = fptrYC(i1,i2)
+        lon = farrayPtrXC(i1,i2)
+        lat = farrayPtrYC(i1,i2)
      
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
 
         ! set exact dst data
-        xfptr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+        xfarrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
 
      enddo
      enddo
@@ -580,7 +580,7 @@ contains
   do lDE=0,localDECount-1
 
      ! get src Field
-     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -588,14 +588,14 @@ contains
      endif
 
      ! get src destination Field
-     call ESMF_FieldGet(xdstField, lDE, xfptr,  rc=localrc)
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      ! get src Field
-     call ESMF_FieldGet(errorField, lDE, errorfptr,  rc=localrc)
+     call ESMF_FieldGet(errorField, lDE, errorfarrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -617,26 +617,26 @@ contains
      !! check relative error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        if (xfptr(i1,i2) .ne. 0.0) then
-           errorfptr(i1,i2)=ABS(fptr(i1,i2) - xfptr(i1,i2))/ABS(xfptr(i1,i2))
-           error = error + errorfptr(i1,i2)
-           if (errorfptr(i1,i2) > maxerror(1)) then
-             maxerror(1) = errorfptr(i1,i2)
+        if (xfarrayPtr(i1,i2) .ne. 0.0) then
+           errorfarrayPtr(i1,i2)=ABS(farrayPtr(i1,i2) - xfarrayPtr(i1,i2))/ABS(xfarrayPtr(i1,i2))
+           error = error + errorfarrayPtr(i1,i2)
+           if (errorfarrayPtr(i1,i2) > maxerror(1)) then
+             maxerror(1) = errorfarrayPtr(i1,i2)
            endif
-           if (errorfptr(i1,i2) < minerror(1)) then
-             minerror(1) = errorfptr(i1,i2)
+           if (errorfarrayPtr(i1,i2) < minerror(1)) then
+             minerror(1) = errorfarrayPtr(i1,i2)
            endif
         else
-           errorfptr(i1,i2)=ABS(fptr(i1,i2) - xfptr(i1,i2))
-           error = error + errorfptr(i1,i2)
-           if (errorfptr(i1,i2) > maxerror(1)) then
-             maxerror(1) = errorfptr(i1,i2)
+           errorfarrayPtr(i1,i2)=ABS(farrayPtr(i1,i2) - xfarrayPtr(i1,i2))
+           error = error + errorfarrayPtr(i1,i2)
+           if (errorfarrayPtr(i1,i2) > maxerror(1)) then
+             maxerror(1) = errorfarrayPtr(i1,i2)
            endif
-           if (errorfptr(i1,i2) < minerror(1)) then
-             minerror(1) = errorfptr(i1,i2)
+           if (errorfarrayPtr(i1,i2) < minerror(1)) then
+             minerror(1) = errorfarrayPtr(i1,i2)
            endif
         endif
-        dstmass = dstmass + dstAreaptr(i1,i2)*fptr(i1,i2)
+        dstmass = dstmass + dstAreaptr(i1,i2)*farrayPtr(i1,i2)
      enddo
      enddo
 
@@ -645,7 +645,7 @@ contains
   do lDE=0,localDECount-1
 
      ! get src pointer
-     call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -661,7 +661,7 @@ contains
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        srcmass(1) = srcmass(1) + srcAreaptr(i1,i2)*fptr(i1,i2)
+        srcmass(1) = srcmass(1) + srcAreaptr(i1,i2)*farrayPtr(i1,i2)
      enddo
      enddo
 
@@ -802,9 +802,9 @@ contains
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
   integer(ESMF_KIND_I4), pointer :: srcMask(:,:), dstMask(:,:)
-  real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:),xfptr(:,:),errorfptr(:,:),iwtsptr(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:),xfarrayPtr(:,:),errorfarrayPtr(:,:),iwtsptr(:,:)
   real(ESMF_KIND_R8), pointer :: srcAreaptr(:,:), dstAreaptr(:,:)
   real(ESMF_KIND_R8), pointer :: srcFracptr(:,:), dstFracptr(:,:)
   integer :: petMap2D(2,2,1)
@@ -1045,14 +1045,14 @@ contains
  
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1064,8 +1064,8 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Set source coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Src_dx
-        fptrYC(i1,i2) = REAL(i2-1)*Src_dy - 90.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Src_dx
+        farrayPtrYC(i1,i2) = REAL(i2-1)*Src_dy - 90.0
      enddo
      enddo
 
@@ -1074,14 +1074,14 @@ contains
 
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1089,7 +1089,7 @@ contains
 
 
      ! get src pointer
-     call ESMF_FieldGet(srcField, lDE, fptr,  rc=localrc)
+     call ESMF_FieldGet(srcField, lDE, farrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1097,7 +1097,7 @@ contains
 
 
      call ESMF_GridGetItem(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, fptr=srcMask, rc=localrc)
+                           item=ESMF_GRIDITEM_MASK, farrayPtr=srcMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1111,20 +1111,20 @@ contains
         yp1= REAL(i2-1+1)*Src_dy - 90.0
 
         ! Set source coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Src_dx + 0.5*Src_dx
-        fptrYC(i1,i2) = (y+yp1)/2.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Src_dx + 0.5*Src_dx
+        farrayPtrYC(i1,i2) = (y+yp1)/2.0
 
         ! set src data 
-        lon = fptrXC(i1,i2)
-        lat = fptrYC(i1,i2)
+        lon = farrayPtrXC(i1,i2)
+        lat = farrayPtrYC(i1,i2)
      
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
 
         ! set src data
-       ! fptr(i1,i2) = 1.
-       fptr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+       ! farrayPtr(i1,i2) = 1.
+       farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
 
         if ((lat>-45) .and. (lat<45)) then
            srcMask(i1,i2)=1
@@ -1147,14 +1147,14 @@ contains
  
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1165,8 +1165,8 @@ contains
      do i2=clbnd(2),cubnd(2)
 
         ! Set dest coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Dst_dx
-        fptrYC(i1,i2) = REAL(i2-1)*Dst_dy - 90.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Dst_dx
+        farrayPtrYC(i1,i2) = REAL(i2-1)*Dst_dy - 90.0
 
      enddo
      enddo
@@ -1176,14 +1176,14 @@ contains
 
      !! get coord 1
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
      endif
 
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1191,7 +1191,7 @@ contains
 
 
      call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, fptr=dstMask, rc=localrc)
+                           item=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1199,7 +1199,7 @@ contains
 
 
      ! get dst pointer
-     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -1207,7 +1207,7 @@ contains
      endif
 
      ! get exact pointer
-     call ESMF_FieldGet(xdstField, lDE, xfptr, rc=localrc)
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1223,23 +1223,23 @@ contains
         yp1= REAL(i2-1+1)*Dst_dy - 90.0
 
         ! Set source coordinates
-        fptrXC(i1,i2) = REAL(i1-1)*Dst_dx + 0.5*Dst_dx
-        fptrYC(i1,i2) = (y+yp1)/2.0
+        farrayPtrXC(i1,i2) = REAL(i1-1)*Dst_dx + 0.5*Dst_dx
+        farrayPtrYC(i1,i2) = (y+yp1)/2.0
 
         ! init dst data
-        fptr(i1,i2) = 0.0
+        farrayPtr(i1,i2) = 0.0
 
         ! init exact answer
-        lon = fptrXC(i1,i2)
-        lat = fptrYC(i1,i2)
+        lon = farrayPtrXC(i1,i2)
+        lat = farrayPtrYC(i1,i2)
      
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(lon)
         phi = DEG2RAD*(90.-lat)
 
         ! set exact dst data
-        xfptr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
-       ! xfptr(i1,i2) = 1.0
+        xfarrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+       ! xfarrayPtr(i1,i2) = 1.0
 
         if ((lon>-45) .and. (lon<45)) then
            dstMask(i1,i2)=1
@@ -1301,7 +1301,7 @@ contains
   do lDE=0,localDECount-1
 
      ! get dst Field
-     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -1309,7 +1309,7 @@ contains
      endif
 
      ! get exact destination Field
-     call ESMF_FieldGet(xdstField, lDE, xfptr,  rc=localrc)
+     call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1317,7 +1317,7 @@ contains
 
      ! Get destination mask field
      call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, fptr=dstMask, rc=localrc)
+                           item=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1325,7 +1325,7 @@ contains
 
 
      ! get error Field
-     call ESMF_FieldGet(errorField, lDE, errorfptr,  rc=localrc)
+     call ESMF_FieldGet(errorField, lDE, errorfarrayPtr,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1358,30 +1358,30 @@ contains
         ! skip if masked
         if (dstMask(i1,i2) .eq. 1) cycle
 
-!        dstmass = dstmass + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*fptr(i1,i2)
-        dstmass = dstmass + dstAreaptr(i1,i2)*fptr(i1,i2)
+!        dstmass = dstmass + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*farrayPtr(i1,i2)
+        dstmass = dstmass + dstAreaptr(i1,i2)*farrayPtr(i1,i2)
 
         ! If this destination cell isn't covered by a sig. amount of source, then compute error on it.
         ! (Note that this is what SCRIP does)
         if (dstFracptr(i1,i2) .lt. 0.999) cycle
 
-        if (xfptr(i1,i2) .ne. 0.0) then
-           errorfptr(i1,i2)=ABS(fptr(i1,i2) - xfptr(i1,i2))/ABS(xfptr(i1,i2))
-           error = error + errorfptr(i1,i2)
-           if (errorfptr(i1,i2) > maxerror(1)) then
-             maxerror(1) = errorfptr(i1,i2)
+        if (xfarrayPtr(i1,i2) .ne. 0.0) then
+           errorfarrayPtr(i1,i2)=ABS(farrayPtr(i1,i2) - xfarrayPtr(i1,i2))/ABS(xfarrayPtr(i1,i2))
+           error = error + errorfarrayPtr(i1,i2)
+           if (errorfarrayPtr(i1,i2) > maxerror(1)) then
+             maxerror(1) = errorfarrayPtr(i1,i2)
            endif
-           if (errorfptr(i1,i2) < minerror(1)) then
-             minerror(1) = errorfptr(i1,i2)
+           if (errorfarrayPtr(i1,i2) < minerror(1)) then
+             minerror(1) = errorfarrayPtr(i1,i2)
            endif
         else
-           errorfptr(i1,i2)=ABS(fptr(i1,i2) - xfptr(i1,i2))
-           error = error + errorfptr(i1,i2)
-           if (errorfptr(i1,i2) > maxerror(1)) then
-             maxerror(1) = errorfptr(i1,i2)
+           errorfarrayPtr(i1,i2)=ABS(farrayPtr(i1,i2) - xfarrayPtr(i1,i2))
+           error = error + errorfarrayPtr(i1,i2)
+           if (errorfarrayPtr(i1,i2) > maxerror(1)) then
+             maxerror(1) = errorfarrayPtr(i1,i2)
            endif
-           if (errorfptr(i1,i2) < minerror(1)) then
-             minerror(1) = errorfptr(i1,i2)
+           if (errorfarrayPtr(i1,i2) < minerror(1)) then
+             minerror(1) = errorfarrayPtr(i1,i2)
            endif
         endif
 
@@ -1395,7 +1395,7 @@ contains
   do lDE=0,localDECount-1
 
      ! get src pointer
-     call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=clbnd, &
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
@@ -1418,7 +1418,7 @@ contains
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        srcmass(1) = srcmass(1) + srcFracptr(i1,i2)*srcAreaptr(i1,i2)*fptr(i1,i2)
+        srcmass(1) = srcmass(1) + srcFracptr(i1,i2)*srcAreaptr(i1,i2)*farrayPtr(i1,i2)
      enddo
      enddo
 

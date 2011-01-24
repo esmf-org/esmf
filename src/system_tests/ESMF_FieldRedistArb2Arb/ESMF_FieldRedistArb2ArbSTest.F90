@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.21 2010/11/03 22:48:52 theurich Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.22 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -180,10 +180,10 @@
 
     ! get coordinate arrays available for setting the source data array
     call ESMF_GridGetCoord(grid1, localDE=0, coordDim=1, &
-      fptr=coordX, totalCount=localCounts, rc=status)
+      farrayPtr=coordX, totalCount=localCounts, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
     call ESMF_GridGetCoord(grid1, localDE=0, coordDim=2, &
-      fptr=coordY, rc=status)
+      farrayPtr=coordY, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     ! Get pointers to the data and set it up

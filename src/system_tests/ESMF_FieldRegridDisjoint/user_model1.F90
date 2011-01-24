@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.5 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: user_model1.F90,v 1.6 2011/01/24 23:05:00 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,10 +98,10 @@
         call ESMF_GridAddCoord(grid1, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
         call ESMF_GridGetCoord(grid1, localDE=0, coordDim=1, &
-                           fptr=coordX, computationalLBound=tlb, computationalUBound=tub, rc=rc)
+                           farrayPtr=coordX, computationalLBound=tlb, computationalUBound=tub, rc=rc)
         if(rc/=ESMF_SUCCESS) return
         call ESMF_GridGetCoord(grid1, localDE=0, coordDim=2, &
-                           fptr=coordY, rc=rc)
+                           farrayPtr=coordY, rc=rc)
         if(rc/=ESMF_SUCCESS) return
         do j   = tlb(2), tub(2)
           do i = tlb(1), tub(1)
@@ -178,10 +178,10 @@
         if (rc .ne. ESMF_SUCCESS) return
         haloWidth = haloUWidth(1)
         call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, &
-                           fptr=coordX, computationalLBound=tlb, computationalUBound=tub, rc=rc)
+                           farrayPtr=coordX, computationalLBound=tlb, computationalUBound=tub, rc=rc)
         if(rc/=ESMF_SUCCESS) return
         call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, &
-                           fptr=coordY, rc=rc)
+                           farrayPtr=coordY, rc=rc)
         if(rc/=ESMF_SUCCESS) return
 
         ! update field values here

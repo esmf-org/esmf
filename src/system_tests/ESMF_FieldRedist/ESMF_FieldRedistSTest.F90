@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.53 2010/12/09 05:33:06 rokuingh Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.54 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -175,14 +175,14 @@
     ! get coordinate arrays available for setting the source data array
     call ESMF_GridGetCoord(grid1, localDe=0, coordDim=1, &
         computationalLBound=gclbx, computationalUBound=gcubx, &
-        fptr=coordX, rc=localrc)
+        farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     call ESMF_GridGetCoord(grid1, localDe=0, coordDim=2, &
         computationalLBound=gclby, computationalUBound=gcuby, &
-        fptr=coordY, rc=localrc)
-        !fptr=coordY, totalCount=localCounts, rc=localrc)
+        farrayPtr=coordY, rc=localrc)
+        !farrayPtr=coordY, totalCount=localCounts, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)

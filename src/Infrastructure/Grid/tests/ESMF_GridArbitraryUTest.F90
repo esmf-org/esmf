@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.17 2011/01/19 04:20:53 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.18 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.17 2011/01/19 04:20:53 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.18 2011/01/24 23:04:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -68,7 +68,7 @@ program ESMF_GridArbitraryUTest
   type(ESMF_IndexFlag) :: indexflag
   integer :: distgridToGridMap(3), coordDimCount(3), distDim(2)
   integer :: distgridToArrayMap(2)
-  real(ESMF_KIND_R8), pointer :: fptr2D(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr2D(:,:)
   integer :: localCount2(1), deList(1), deCount
   integer, allocatable:: minIndex1(:), maxIndex1(:), localCount3(:)
   integer, allocatable:: minIndex(:,:), maxIndex(:,:)
@@ -78,7 +78,7 @@ program ESMF_GridArbitraryUTest
   integer :: rank, arbDimCount
   integer :: cu(2),cl(2),i1,i2
   type(ESMF_GridDecompType) :: decompType
-  REAL(ESMF_KIND_R8), pointer :: dimarray(:), fptr1D(:)
+  REAL(ESMF_KIND_R8), pointer :: dimarray(:), farrayPtr1D(:)
   type(ESMF_Array) :: myarray
   type(ESMF_LocalArray) :: larray
   REAL(ESMF_KIND_R8)  :: coord3(3)
@@ -395,27 +395,27 @@ program ESMF_GridArbitraryUTest
   ! allocate coordinate array
   call ESMF_GridAddCoord(grid, rc=localrc)
 
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, fptr=fptr1D, &
+  call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, farrayPtr=farrayPtr1D, &
 	computationalLBound=lowbound, computationalUBound=upbound, rc=localrc)
 
   do i=lowbound(1),upbound(1)
-    fptr1D(i) = (localIndices(i,1)-1)*(360/xdim)
+    farrayPtr1D(i) = (localIndices(i,1)-1)*(360/xdim)
   enddo
 
   call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, &
 	computationalLbound=lowbound, computationalUBound=upbound, rc=localrc)
 
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, fptr=fptr1D, rc=localrc)
+  call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, farrayPtr=farrayPtr1D, rc=localrc)
   do i=lowbound(1),upbound(1)
-    fptr1D(i) = (localIndices(i,2)-1)*(180/ydim)-90.0
+    farrayPtr1D(i) = (localIndices(i,2)-1)*(180/ydim)-90.0
   enddo
 
   call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, &
 	computationalLbound=lowbound, computationalUBound=upbound, rc=localrc)
 
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, fptr=fptr1D, rc=localrc)
+  call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, farrayPtr=farrayPtr1D, rc=localrc)
   do i=lowbound(1),upbound(1)
-    fptr1D(i) = i*100
+    farrayPtr1D(i) = i*100
   enddo
 
   ! Get Coord From Array
@@ -426,11 +426,11 @@ program ESMF_GridArbitraryUTest
    ! Get info to do a partial sanity check that the array is the same
   call ESMF_ArrayGet(array1, rank=rank, typekind=typekind, rc=localrc)
    !call ESMF_ArrayPrint(array1, rc=localrc)
-  call ESMF_ArrayGet(array1, localDe=0, farrayPtr=fptr1D, rc=localrc)
+  call ESMF_ArrayGet(array1, localDe=0, farrayPtr=farrayPtr1D, rc=localrc)
   ! fill the coordinate values
    do i=1,localcount
-    if (fptr1D(i) .ne. (localIndices(i,1)-1)*(360/xdim)) then
-	print *, "array content don't match", fptr1D(i)
+    if (farrayPtr1D(i) .ne. (localIndices(i,1)-1)*(360/xdim)) then
+	print *, "array content don't match", farrayPtr1D(i)
 	correct = .false.
     endif
   enddo
@@ -440,11 +440,11 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get info to do a partial sanity check that the array is the same
-  call ESMF_ArrayGet(array2, localDe=0, farrayPtr=fptr1D, rc=localrc)
+  call ESMF_ArrayGet(array2, localDe=0, farrayPtr=farrayPtr1D, rc=localrc)
   ! fill the coordinate values
    do i=lowbound(1),upbound(1)
-    if (fptr1D(i) .ne. 100*i) then
-	print *, "array content don't match", fptr1D(i)
+    if (farrayPtr1D(i) .ne. 100*i) then
+	print *, "array content don't match", farrayPtr1D(i)
 	correct = .false.
     endif
   enddo
@@ -737,7 +737,7 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get 1st dimension coordinate array and set its values
-  ! call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, fptr=dimarray, rc=localrc)
+  ! call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, farrayPtr=dimarray, rc=localrc)
   call ESMF_GridGetCoord(grid, coordDim=1, array=myarray, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
@@ -751,7 +751,7 @@ program ESMF_GridArbitraryUTest
 
 
   ! get 2nd coordinate array and set its values
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, fptr=dimarray, &
+  call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, farrayPtr=dimarray, &
 	rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
@@ -762,7 +762,7 @@ program ESMF_GridArbitraryUTest
 
 
   ! get 3rd coordinate array and set its values
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, fptr=fptr2D, &
+  call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, farrayPtr=farrayPtr2D, &
 	computationalLBound=cl,computationalUBound=cu, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
@@ -770,7 +770,7 @@ program ESMF_GridArbitraryUTest
   ! (All z coords are the same at the same z index)
   do i1=cl(1),cu(1)
      do i2=cl(2),cu(2)
-        fptr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
+        farrayPtr2D(i1,i2)=REAL(i2,ESMF_KIND_R8)
      enddo
   enddo
 
@@ -796,7 +796,7 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
 
   call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, &
-        fptr=fptr2D, &
+        farrayPtr=farrayPtr2D, &
 	computationalLBound=lowbound, computationalUBound=upbound, &
 	rc=localrc)
   !print *, 'A coorddim 3 bound', lowbound(1), lowbound(2), upbound(1), upbound(2)
@@ -811,7 +811,7 @@ program ESMF_GridArbitraryUTest
 	correct = .false.
   endif
 
-  if ((size(fptr2D,1) .ne. localcount) .and. (size(fptr2D,2) .ne. zdim)) then
+  if ((size(farrayPtr2D,1) .ne. localcount) .and. (size(farrayPtr2D,2) .ne. zdim)) then
 	write(failMsg, *) "coord array dimension is wrong"
 	correct = .false.
   endif
@@ -819,7 +819,7 @@ program ESMF_GridArbitraryUTest
   ! fill the coordinate values
   do i=1,localcount
     do j=1,zdim
-       fptr2D(i,j) = localIndices(i,1)+localIndices(i,2)+j
+       farrayPtr2D(i,j) = localIndices(i,1)+localIndices(i,2)+j
     enddo 
   enddo
 
@@ -998,12 +998,12 @@ program ESMF_GridArbitraryUTest
 
 
   ! set coordinate array for the undistributed dimension
-  call ESMF_ArrayGet(array1D, 0, farrayptr=fptr1D, rc=localrc)
+  call ESMF_ArrayGet(array1D, 0, farrayptr=farrayPtr1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! regular z levels
   do j=1,zdim
-      fptr1D(j)=j*100
+      farrayPtr1D(j)=j*100
   enddo 
 
 
@@ -1176,13 +1176,13 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! set coordinate array for the undistributed dimension
-  call ESMF_ArrayGet(array2D, 0, farrayptr=fptr2D, rc=localrc)
+  call ESMF_ArrayGet(array2D, 0, farrayptr=farrayPtr2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! regular z levels
   do i=lowbound(1),upbound(1)
     do j=lowbound(2),upbound(2)
-      fptr2D(i,j)=j*100
+      farrayPtr2D(i,j)=j*100
     enddo
   enddo 
  

@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.10 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.11 2011/01/24 23:04:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@ program ESMF_CubedSphereRegridEx
       integer, allocatable:: nodeIds(:)
       integer :: lbnd1(2), lbnd2(2), ubnd1(2), ubnd2(2)
       integer :: dims(2)
-      real(ESMF_KIND_R8), pointer :: fptr(:), fptr1(:,:), fptr2(:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:), farrayPtr1(:,:), farrayPtr2(:,:)
       real(ESMF_KIND_R8), pointer :: array3(:,:)
       real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
       real(ESMF_KIND_R8) :: val, error, deg2rad
@@ -211,7 +211,7 @@ program ESMF_CubedSphereRegridEx
 	computationalEdgeUWidth=(/0/), rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
-      call ESMF_ArrayGet(darray, farrayPtr=fptr, rc=status)
+      call ESMF_ArrayGet(darray, farrayPtr=farrayPtr, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
       ! fake the data array to use a linear function of its coordinates
@@ -220,8 +220,8 @@ program ESMF_CubedSphereRegridEx
       do i=1,count
 !         The below can give misleading bigger errors if dest points are closer to pole than src points 
 !         Do constant for basic sanity check, until develop something more complex
-!	fptr(i) = COS(deg2rad*VertexCoords(2,nodeIds(i)))
-	fptr(i) = 1.0
+!	farrayPtr(i) = COS(deg2rad*VertexCoords(2,nodeIds(i)))
+	farrayPtr(i) = 1.0
       enddo
      !!!!!!!
 
@@ -253,13 +253,13 @@ program ESMF_CubedSphereRegridEx
 
       call ESMF_GridGetCoord(dstgrid1, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	     computationalLBound=lbnd1, computationalUBound=ubnd1, &
-	     fptr = fptr1, rc=status)
+	     farrayPtr = farrayPtr1, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
       call ESMF_GridGetCoord(dstgrid1, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	     computationalLBound=lbnd2, computationalUBound=ubnd2, &
-	     fptr = fptr2, rc=status)
+	     farrayPtr = farrayPtr2, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-      ! print *, lbnd1(1), lbnd1(2), fptr1(lbnd1(1),lbnd1(2)), fptr2(lbnd2(1),lbnd2(2))
+      ! print *, lbnd1(1), lbnd1(2), farrayPtr1(lbnd1(1),lbnd1(2)), farrayPtr2(lbnd2(1),lbnd2(2))
 
       if (trim(regrid_type) .eq. 'bilinear') then
         if (trim(revflag) .ne. 'rev') then
@@ -341,13 +341,13 @@ program ESMF_CubedSphereRegridEx
       !! first get the coordinates from the grid
       call ESMF_GridGetCoord(dstgrid1, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	     computationalLBound=lbnd1, computationalUBound=ubnd1, &
-	     fptr = fptr1, rc=status)
+	     farrayPtr = farrayPtr1, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
       call ESMF_GridGetCoord(dstgrid1, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	     computationalLBound=lbnd2, computationalUBound=ubnd2, &
-	     fptr = fptr2, rc=status)
+	     farrayPtr = farrayPtr2, rc=status)
       if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
-      !   print *, lbnd1(1), lbnd1(2), fptr1(lbnd1(1),lbnd1(2)), fptr2(lbnd2(1),lbnd2(2))
+      !   print *, lbnd1(1), lbnd1(2), farrayPtr1(lbnd1(1),lbnd1(2)), farrayPtr2(lbnd2(1),lbnd2(2))
 #if 0
       !! write weight table into an ascii file, one file per PET
       if (PetNo < 10) then
@@ -369,7 +369,7 @@ program ESMF_CubedSphereRegridEx
 	  j=indicies(i,2)/xdim+1
           k = indicies(i,2)-((j-1)*xdim)
           write(10,'(2I7, 5F9.4)') indicies(i,1), indicies(i,2),  VertexCoords(1,indicies(i,1)), &
-		VertexCoords(2,indicies(i,1)), fptr1(k,j), fptr2(k,j), weights(i)
+		VertexCoords(2,indicies(i,1)), farrayPtr1(k,j), farrayPtr2(k,j), weights(i)
         enddo
       endif
       close(10)
@@ -377,7 +377,7 @@ program ESMF_CubedSphereRegridEx
 
       if (trim(revflag) .eq. 'rev') then     
         ! regrid from dstgrid to srcgrid
-        call ESMF_FieldGet(field1, localDe=0, farrayPtr=fptr, rc=status)
+        call ESMF_FieldGet(field1, localDe=0, farrayPtr=farrayPtr, rc=status)
         ! Get Mesh's node distgrid and its seqIndex 
         call ESMF_MeshGet(srcMesh, nodalDistgrid=NodeDG, numOwnedNodes=totalNodes, rc=status)
         if (CheckError (status, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
@@ -391,13 +391,13 @@ program ESMF_CubedSphereRegridEx
 !	  val = COS(deg2rad*VertexCoords(2,seqIndex(i)))
 	  val = 1.0
 	  if (val .ne. 0) then
-             error = abs((fptr(i)-val)/val)
+             error = abs((farrayPtr(i)-val)/val)
           else
-	     error = abs(fptr(i)-val)
+	     error = abs(farrayPtr(i)-val)
           endif
           if (error > 0.01) then
    	     write(*,'(I2,2I6,4F9.4)') PetNo, i,seqIndex(i), VertexCoords(1,seqIndex(i)), &
-		VertexCoords(2,seqIndex(i)),fptr(i),val
+		VertexCoords(2,seqIndex(i)),farrayPtr(i),val
 		 count = count+1
           endif
         enddo
@@ -410,7 +410,7 @@ program ESMF_CubedSphereRegridEx
           do j=lbnd1(2),ubnd1(2)
 !         The below can give bigger errors if dest points are closer to pole than src points 
 !         Do constant for basic sanity check, until develop something more complex
-!	      val = COS(deg2rad*fptr2(i,j))
+!	      val = COS(deg2rad*farrayPtr2(i,j))
               val=1.0
 	  if (val .ne. 0) then
              error = abs((array3(i,j)-val)/val)
@@ -418,7 +418,7 @@ program ESMF_CubedSphereRegridEx
 	     error = abs(array3(i,j)-val)
           endif
               if (error > 0.01) then
-  		 write(*,'(3I4,5F9.3)') PetNo, i,j,fptr1(i,j),fptr2(i,j),array3(i,j), val
+  		 write(*,'(3I4,5F9.3)') PetNo, i,j,farrayPtr1(i,j),farrayPtr2(i,j),array3(i,j), val
 		 count = count+1
               endif
           enddo
@@ -1038,7 +1038,7 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     type(ESMF_Array) :: array
     integer :: localrc
     integer :: ubnd(2,1), lbnd(2,1),lbnd1(2),ubnd1(2)
-    real(ESMF_KIND_R8), pointer :: fptr(:,:), fptr1(:,:)
+    real(ESMF_KIND_R8), pointer :: farrayPtr(:,:), farrayPtr1(:,:)
     rc = ESMF_SUCCESS
 
     bigFac = 1
@@ -1102,10 +1102,10 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     ! Assign the field values using its latitude values, get the latitude 
     call ESMF_GridGetCoord(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	     computationalLBound=lbnd1, computationalUBound=ubnd1, &
-	     fptr = fptr1, rc=status)
+	     farrayPtr = farrayPtr1, rc=status)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, rc=status)
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, rc=status)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -1114,8 +1114,8 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     deg2rad = 3.141592653589793238/180;
     do i=lbnd1(1),ubnd1(1)
        do j=lbnd1(2),ubnd1(2)
-!          fptr(i,j) = COS(deg2rad*fptr1(i,j))
-	   fptr(i,j) = 1.0
+!          farrayPtr(i,j) = COS(deg2rad*farrayPtr1(i,j))
+	   farrayPtr(i,j) = 1.0
        enddo
     enddo
       !!!!!!!

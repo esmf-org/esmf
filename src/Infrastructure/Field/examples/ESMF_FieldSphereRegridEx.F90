@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.28 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.29 2011/01/24 23:04:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.28 2011/01/05 20:05:42 svasquez Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.29 2011/01/24 23:04:58 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -69,9 +69,9 @@ program ESMF_FieldSphereRegridEx
   type(ESMF_RouteHandle) :: routeHandle1
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_VM) :: vm
-  real(ESMF_KIND_R8), pointer :: fptrXC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptrYC(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrXC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtrYC(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
   integer :: petMap2D(2,2,1)
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
@@ -189,14 +189,14 @@ program ESMF_FieldSphereRegridEx
  
      !! get coord 1
      call ESMF_GridGetCoord(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
      call ESMF_GridGetCoord(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-     call ESMF_FieldGet(srcField, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(srcField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -208,10 +208,10 @@ program ESMF_FieldSphereRegridEx
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-        fptrXC(i1,i2) = -180. + REAL((i1-1)*src_dx)
-        fptrYC(i1,i2) = -90. + REAL((i2-1)*src_dy + 0.5*src_dy)
-        x = fptrXC(i1, i2)
-        y = fptrYC(i1,i2)
+        farrayPtrXC(i1,i2) = -180. + REAL((i1-1)*src_dx)
+        farrayPtrYC(i1,i2) = -90. + REAL((i2-1)*src_dy + 0.5*src_dy)
+        x = farrayPtrXC(i1, i2)
+        y = farrayPtrYC(i1,i2)
      
        ! Set the source to be a sinusoidal function of x,y,z
 
@@ -221,7 +221,7 @@ program ESMF_FieldSphereRegridEx
         y = sin(theta)*sin(phi)
         z = cos(phi)
 
-        fptr(i1,i2) = sin(3*3.14*x) + cos(2*3.14*y) + z*z;
+        farrayPtr(i1,i2) = sin(3*3.14*x) + cos(2*3.14*y) + z*z;
 
 
      enddo
@@ -243,14 +243,14 @@ program ESMF_FieldSphereRegridEx
  
      !! get coord 1
      call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrXC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
      call ESMF_GridGetCoord(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-                            computationalLBound=clbnd, computationalUBound=cubnd, fptr=fptrYC, rc=localrc)
+                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-     call ESMF_FieldGet(dstField, lDE, fptr, computationalLBound=fclbnd, &
+     call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -280,10 +280,10 @@ program ESMF_FieldSphereRegridEx
         z = ztmp
 
         ! now back to lat lon
-        fptrXC(i1,i2) = atan2(y,x)*RAD2DEG
-        fptrYC(i1,i2) = asin(z)*RAD2DEG
+        farrayPtrXC(i1,i2) = atan2(y,x)*RAD2DEG
+        farrayPtrYC(i1,i2) = asin(z)*RAD2DEG
 
-        fptr(i1,i2) = 0.
+        farrayPtr(i1,i2) = 0.
      
      enddo
      enddo
