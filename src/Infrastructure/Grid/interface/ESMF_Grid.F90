@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.192 2011/01/19 04:20:52 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.193 2011/01/24 18:46:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.192 2011/01/19 04:20:52 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.193 2011/01/24 18:46:20 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2418,7 +2418,7 @@ end subroutine ESMF_GridConvertIndex
        type(ESMF_DistGrid):: dg
        type(ESMF_TypeKind):: tk
        integer:: atodMap(1), k
-       real(ESMF_KIND_R8), pointer:: fptr(:), fptr2d(:,:)
+       real(ESMF_KIND_R8), pointer:: farrayPtr(:), farrayPtr2d(:,:)
        integer:: rank, dimCount
        logical, allocatable:: srcRepl(:), dstRepl(:)
        
@@ -2541,22 +2541,22 @@ end subroutine ESMF_GridConvertIndex
               indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_ArrayGet(srcA(k), farrayPtr=fptr, rc=localrc)
+            call ESMF_ArrayGet(srcA(k), farrayPtr=farrayPtr, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_ArrayGet(srcA2D(k), farrayPtr=fptr2D, rc=localrc)
+            call ESMF_ArrayGet(srcA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (atodMap(1)==1) then
-              do j=lbound(fptr2D,2), ubound(fptr2D,2)
-                do i=lbound(fptr2D,1), ubound(fptr2D,1)
-                  fptr2D(i,j) = fptr(i)
+              do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                  farrayPtr2D(i,j) = farrayPtr(i)
                 enddo
               enddo
             else
-              do j=lbound(fptr2D,2), ubound(fptr2D,2)
-                do i=lbound(fptr2D,1), ubound(fptr2D,1)
-                  fptr2D(i,j) = fptr(j)
+              do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+                do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+                  farrayPtr2D(i,j) = farrayPtr(j)
                 enddo
               enddo
             endif
@@ -2636,19 +2636,19 @@ end subroutine ESMF_GridConvertIndex
           call ESMF_ArrayGet(dstA(k), arrayToDistGridMap=atodMap, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(dstA(k), farrayPtr=fptr, rc=localrc)
+          call ESMF_ArrayGet(dstA(k), farrayPtr=farrayPtr, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          call ESMF_ArrayGet(dstA2D(k), farrayPtr=fptr2D, rc=localrc)
+          call ESMF_ArrayGet(dstA2D(k), farrayPtr=farrayPtr2D, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (atodMap(1)==1) then
-            do i=lbound(fptr2D,1), ubound(fptr2D,1)
-              fptr(i) = fptr2D(i,lbound(fptr2D,2))
+            do i=lbound(farrayPtr2D,1), ubound(farrayPtr2D,1)
+              farrayPtr(i) = farrayPtr2D(i,lbound(farrayPtr2D,2))
             enddo
           else
-            do j=lbound(fptr2D,2), ubound(fptr2D,2)
-              fptr(j) = fptr2D(lbound(fptr2D,1),j)
+            do j=lbound(farrayPtr2D,2), ubound(farrayPtr2D,2)
+              farrayPtr(j) = farrayPtr2D(lbound(farrayPtr2D,1),j)
             enddo
           endif
         endif
@@ -7966,12 +7966,12 @@ end subroutine ESMF_GridGetDefault
 !
 !     Supported values for the <pointer argument> are: 
 !     \begin{description}
-!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:)
-!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:)     
-!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:,:)
-!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:)
-!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:)     
-!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:,:)
+!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:)
+!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:)     
+!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:,:)
+!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:)
+!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:,:)     
+!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:,:,:)
 !     \end{description}
 !
 !     The arguments are:
@@ -8033,11 +8033,11 @@ end subroutine ESMF_GridGetDefault
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -8057,7 +8057,7 @@ end subroutine ESMF_GridGetDefault
           staggerloc, exclusiveLBound, exclusiveUBound,             &
           exclusiveCount, computationalLBound, computationalUBound, &
           computationalCount, totalLBound, totalUBound, totalCount, &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -8073,7 +8073,7 @@ end subroutine ESMF_GridGetDefault
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer                   :: fptr(:)
+      real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -8145,11 +8145,11 @@ end subroutine ESMF_GridGetDefault
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -8281,7 +8281,7 @@ end subroutine ESMF_GridGetDefault
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -8371,7 +8371,7 @@ end subroutine ESMF_GridGetDefault
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -8387,7 +8387,7 @@ end subroutine ESMF_GridGetDefault
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: fptr(:,:)
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -8459,11 +8459,11 @@ end subroutine ESMF_GridGetDefault
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -8598,7 +8598,7 @@ end subroutine ESMF_GridGetDefault
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -8687,7 +8687,7 @@ end subroutine ESMF_GridGetDefault
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -8703,7 +8703,7 @@ end subroutine ESMF_GridGetDefault
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -8775,11 +8775,11 @@ end subroutine ESMF_GridGetDefault
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -8917,7 +8917,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -9013,7 +9013,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -9029,7 +9029,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: fptr(:)
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -9101,11 +9101,11 @@ endif
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -9241,7 +9241,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -9333,7 +9333,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -9349,7 +9349,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: fptr(:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -9421,11 +9421,11 @@ endif
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -9561,7 +9561,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -9651,7 +9651,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -9667,7 +9667,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -9739,11 +9739,11 @@ endif
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid coordinate arrays. 
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -9879,7 +9879,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -10465,15 +10465,15 @@ endif
 !
 !     Supported values for the <pointer argument> are: 
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), pointer :: fptr(:)
-!     \item integer(ESMF\_KIND\_I4), pointer :: fptr(:,:)     
-!     \item integer(ESMF\_KIND\_I4), pointer :: fptr(:,:,:)
-!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:)
-!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:)     
-!     \item real(ESMF\_KIND\_R4), pointer :: fptr(:,:,:)
-!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:)
-!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:)     
-!     \item real(ESMF\_KIND\_R8), pointer :: fptr(:,:,:)
+!     \item integer(ESMF\_KIND\_I4), pointer :: farrayPtr(:)
+!     \item integer(ESMF\_KIND\_I4), pointer :: farrayPtr(:,:)     
+!     \item integer(ESMF\_KIND\_I4), pointer :: farrayPtr(:,:,:)
+!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:)
+!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:)     
+!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:,:)
+!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:)
+!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:,:)     
+!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:,:,:)
 !     \end{description}
 !
 !     The arguments are:
@@ -10537,11 +10537,11 @@ endif
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -10561,7 +10561,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -10577,7 +10577,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      integer(ESMF_KIND_I4), pointer                   :: fptr(:)
+      integer(ESMF_KIND_I4), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -10648,11 +10648,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -10756,7 +10756,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -10845,7 +10845,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -10861,7 +10861,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      integer(ESMF_KIND_I4), pointer :: fptr(:,:)
+      integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -10933,11 +10933,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -11044,7 +11044,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -11133,7 +11133,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -11149,7 +11149,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      integer(ESMF_KIND_I4), pointer :: fptr(:,:,:)
+      integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -11221,11 +11221,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -11334,7 +11334,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -11423,7 +11423,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -11439,7 +11439,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer                   :: fptr(:)
+      real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -11510,11 +11510,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -11618,7 +11618,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -11707,7 +11707,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -11723,7 +11723,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: fptr(:,:)
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -11795,11 +11795,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -11906,7 +11906,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -11995,7 +11995,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12011,7 +12011,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: fptr(:,:,:)
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -12083,11 +12083,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -12196,7 +12196,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -12286,7 +12286,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -12302,7 +12302,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer                   :: fptr(:)
+      real(ESMF_KIND_R8), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -12373,11 +12373,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -12481,7 +12481,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -12570,7 +12570,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12586,7 +12586,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: fptr(:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -12658,11 +12658,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -12769,7 +12769,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
@@ -12858,7 +12858,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          fptr, doCopy, rc)
+          farrayPtr, doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12874,7 +12874,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: fptr(:,:,:)
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -12946,11 +12946,11 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{fptr}]
+!     \item[{farrayPtr}]
 !          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
-!          fptr is a reference to the data in the Grid item arrays. 
+!          farrayPtr is a reference to the data in the Grid item arrays. 
 !          Please see Section~\ref{opt:copyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
@@ -13059,7 +13059,7 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), fptr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(larrayList) 
