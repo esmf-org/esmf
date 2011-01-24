@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.77 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMC_Calendar.h,v 1.78 2011/01/24 23:36:14 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -91,10 +91,21 @@ ESMC_Calendar ESMC_CalendarCreate(
 //    is a unique sequence number from 001 to 999.
 //  \item[calendartype]
 //    The built-in {\tt ESMC\_CalendarType}.  Valid values are:
-//    {\tt ESMC\_CAL\_360DAY}, {\tt ESMC\_CAL\_GREGORIAN},
-//    {\tt ESMC\_CAL\_JULIAN}, {\tt ESMC\_CAL\_JULIANDAY},
-//    {\tt ESMC\_CAL\_MODJULIANDAY}, {\tt ESMC\_CAL\_NOCALENDAR},
+//    \newline
+//    {\tt ESMC\_CAL\_360DAY}, 
+//    \newline
+//    {\tt ESMC\_CAL\_GREGORIAN},
+//    \newline
+//    {\tt ESMC\_CAL\_JULIAN}, 
+//    \newline
+//    {\tt ESMC\_CAL\_JULIANDAY},
+//    \newline
+//    {\tt ESMC\_CAL\_MODJULIANDAY}, 
+//    \newline
+//    {\tt ESMC\_CAL\_NOCALENDAR},
+//    \newline
 //    and {\tt ESMC\_CAL\_NOLEAP}.
+//    \newline
 //    See Section ~\ref{subsec:Calendar_options} for a description of each
 //    calendar type.
 //  \item[{[rc]}]

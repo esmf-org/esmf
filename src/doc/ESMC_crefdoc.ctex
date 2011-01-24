@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.16 2010/12/08 06:45:01 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.17 2011/01/24 23:36:14 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -55,6 +55,7 @@
 
 \begin{document}
 
+\sloppy
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
