@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.109 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.110 2011/01/24 23:30:16 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -421,8 +421,10 @@
       end type
 
       type(ESMF_IOFmtFlag), parameter ::  &
-                             ESMF_IOFMT_BIN    = esmf_IOFmtFlag(0), &
-                             ESMF_IOFMT_NETCDF = ESMF_IOFmtFlag(1)
+                           ESMF_IOFMT_BIN      = esmf_IOFmtFlag(0), &
+                           ESMF_IOFMT_NETCDF   = ESMF_IOFmtFlag(1), &
+                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmtFlag(2), &
+                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmtFlag(3)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_IndexFlag
@@ -698,7 +700,8 @@
 
       public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
 
-      public ESMF_IOFmtFlag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF
+      public ESMF_IOFmtFlag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
+             ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C
 
       public ESMF_IndexFlag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
