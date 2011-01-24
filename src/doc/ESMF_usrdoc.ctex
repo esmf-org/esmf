@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.42 2010/12/08 06:45:01 theurich Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.43 2011/01/24 23:59:02 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -42,6 +42,8 @@
 \vbadness = 10000
 
 \begin{document}
+
+\sloppy
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
