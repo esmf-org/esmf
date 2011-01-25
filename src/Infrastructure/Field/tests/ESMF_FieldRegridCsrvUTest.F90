@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.14 2011/01/25 18:25:39 oehmke Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.15 2011/01/25 19:14:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1389,10 +1389,10 @@ contains
         if (dstMask(i1,i2) .eq. 1) cycle
 
         ! This is WRONG, shouldn't include Frac
-        ! dstmass = dstmass + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*fptr(i1,i2)
+        ! dstmass = dstmass + dstFracptr(i1,i2)*dstAreaptr(i1,i2)*farrayPtr(i1,i2)
 
         ! Instead do this
-        dstmass = dstmass + dstAreaptr(i1,i2)*fptr(i1,i2)
+        dstmass = dstmass + dstAreaptr(i1,i2)*farrayPtr(i1,i2)
 
         ! If this destination cell isn't covered by a sig. amount of source, then compute error on it.
         ! (Note that this is what SCRIP does)
