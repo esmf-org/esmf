@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.7 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_MathUtil.C,v 1.8 2011/01/25 18:20:25 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.7 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.8 2011/01/25 18:20:25 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -404,6 +404,61 @@ void remove_0len_edges3D(int *num_p, double *p) {
 	pntj[0]=pnti[0];
 	pntj[1]=pnti[1];
 	pntj[2]=pnti[2];
+
+	// move j
+	j++;
+
+	// reset the last pointer to the last non-repeating value
+	last_pnt=pntj;
+      }
+    }
+
+    // reset num_p to the new number of points
+    *num_p=j;
+  } else {
+    // Leave num_p as it is
+  }
+
+#undef EQUAL_TOL
+#undef PNTS_EQUAL
+}
+
+
+
+void remove_0len_edges2D(int *num_p, double *p) {
+
+#define EQUAL_TOL 1E-15
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
+                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL))
+    
+  // Get old value of num_p
+  int old_num_p=*num_p;
+
+  // See if there are any equal points
+  int j=-1;
+  double *last_pnt=p+2*(old_num_p-1);
+  for (int i=0; i<old_num_p; i++) {
+    double *pnti=p+2*i;
+    
+    if (PNTS_EQUAL(pnti,last_pnt)) {
+      j=i;
+      break;
+    }
+
+    // advance last point
+    last_pnt=pnti;
+  } 
+
+  // We found an equal point so start trimming them out
+  if (j>-1) {
+    for (int i=j; i<old_num_p; i++) {
+      double *pnti=p+2*i;
+      if (!PNTS_EQUAL(pnti,last_pnt)) {
+	double *pntj=p+2*j;
+
+	// copy the non-equal point to j
+	pntj[0]=pnti[0];
+	pntj[1]=pnti[1];
 
 	// move j
 	j++;

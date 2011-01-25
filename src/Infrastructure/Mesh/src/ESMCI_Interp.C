@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.30 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Interp.C,v 1.31 2011/01/25 18:20:25 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.30 2011/01/05 20:05:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.31 2011/01/25 18:20:25 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -628,7 +628,7 @@ Par::Out() << std::endl;
 }
 
 
-
+#if 0
 void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
@@ -697,8 +697,9 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchRes
 
 
 }
+#endif
 
-void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
+void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
   // Get src coord field
@@ -714,19 +715,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
 
-  // Calculate which nodes are on the bndry
-  std::vector<char> dst_node_on_bndry;
-  fill_node_is_on_bndry_list(dstmesh, &dst_node_on_bndry);
-
-#if 0
-    Mesh::iterator ni = dstmesh.node_begin(), ne = dstmesh.node_end();
-    for (; ni != ne; ++ni) {
-      MeshObj &node=*ni;      
-      printf(" %d on_bndry=%d \n",node.get_id(),dst_node_on_bndry[node.get_data_index()]);
-    }
-#endif
-
-
   // Loop through search results
   SearchResult::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
@@ -736,8 +724,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
 
     // If there are no associated dst elements then skip it
     if (sr.elems.size() == 0) continue;
-
-    //    printf("%d %d sid pet dids=",sr.elem->get_id(),Par::Rank());
 
     // If this source element is masked then skip it
     if (src_mask_field) {
@@ -764,7 +750,136 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
     areas.resize(sr.elems.size(),0.0);
 
     // Calculate weights
-    calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield,dst_node_on_bndry,
+    calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield,
+                                     &src_elem_area, &valid, &wgts, &areas);
+
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *msk=dst_mask_field->data(dst_elem);
+        if (*msk>0.5) {
+          valid[i]=0;
+        }
+      }
+    }
+
+    // Count number of valid weights
+    int num_valid=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) num_valid++;
+    }
+
+
+    // If none valid, then don't add weights
+    if (num_valid < 1) continue;
+
+    
+
+    // Temporary empty col with negatives so unset values
+    // can be detected if they sneak through
+    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+    // Insert fracs into src_frac
+    {
+      // Allocate column of empty entries
+      std::vector<IWeights::Entry> col;
+      col.resize(num_valid,col_empty);
+      
+      // Put weights into column
+      int j=0;
+      for (int i=0; i<sr.elems.size(); i++) {
+        if (valid[i]==1) {
+          col[j].id=sr.elems[i]->get_id();
+          col[j].value=areas[i]/src_elem_area;
+          j++;
+        }
+      }
+      
+      // Set row info
+      IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+      
+      // Put weights into weight matrix
+      src_frac.InsertRowMerge(row, col);       
+    }
+
+    
+    // Put weights into row column and then add
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) {
+
+	// Allocate column of empty entries
+	std::vector<IWeights::Entry> col;
+	col.resize(1,col_empty);
+
+	col[0].id=sr.elem->get_id();
+	col[0].value=wgts[i];
+
+	// Set row info
+	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+
+	// Put weights into weight matrix
+	iw.InsertRowMerge(row, col);       
+      }
+    }
+
+  } // for searchresult
+
+}
+
+
+void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+    
+  // Get src coord field
+  MEField<> *src_cfield = srcmesh.GetCoordField();
+
+  // Get dst coord field
+  MEField<> *dst_cfield = dstmesh.GetCoordField();
+
+  // Get dst mask field
+  MEField<> *dst_mask_field = dstmesh.GetField("elem_mask");
+
+  // Get src mask field
+  MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
+
+
+  // Loop through search results
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    
+    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    Search_result &sr = **sb;
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() == 0) continue;
+
+    // If this source element is masked then skip it
+    if (src_mask_field) {
+        const MeshObj &src_elem = *sr.elem;
+        double *msk=src_mask_field->data(src_elem);
+        if (*msk>0.5) {
+          continue; // if this is masked, then go to next search result
+          // TODO: put code in ESMCI_Search.C, so the masked source elements, don't get here
+        }
+    }
+
+    // Declare src_elem_area
+    double src_elem_area;
+
+    // Declare weight vector
+    // TODO: Move these out of the loop, to save the time of allocating them
+    std::vector<int> valid;
+    std::vector<double> wgts;
+    std::vector<double> areas;
+
+    // Allocate space for weight calc output arrays
+    valid.resize(sr.elems.size(),0);
+    wgts.resize(sr.elems.size(),0.0);
+    areas.resize(sr.elems.size(),0.0);
+
+    // Calculate weights
+    calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield,
                                      &src_elem_area, &valid, &wgts, &areas);
 
     // Invalidate masked destination elements
@@ -839,11 +954,9 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
 }
 
 
-
-
 void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
-    
+
   // both meshes have to have the same dimensions
   if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
     Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
@@ -860,7 +973,7 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, 
   // Get weights depending on dimension
   if (pdim==2) {
     if (sdim==2) {
-      calc_conserve_mat_serial_2D_2D_cart(srcmesh, dstmesh, sres, iw);
+      calc_conserve_mat_serial_2D_2D_cart(srcmesh, dstmesh, sres, iw, src_frac);
     } else if (sdim==3) {
       calc_conserve_mat_serial_2D_3D_sph(srcmesh, dstmesh, sres, iw, src_frac);
     }
@@ -1029,6 +1142,7 @@ srcmesh(src),
 dstmesh(dest)
 {
 
+
   // Different paths for parallel/serial
   UInt search_obj_type = grend.GetDstObjType();
   
@@ -1104,6 +1218,7 @@ void Interp::operator()() {
 void Interp::operator()(int fpair_num, IWeights &iw) {
   Trace __trace("Interp::operator()(int fpair_num, IWeights &iw)");
   
+
   ThrowRequire((UInt) fpair_num < fpairs.size());
 
   IWeights src_frac; // Use IW to get out source frac and to migrate it to the correct procs
