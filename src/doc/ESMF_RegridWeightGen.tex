@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.29 2011/01/24 20:15:45 svasquez Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.30 2011/01/25 23:12:03 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -17,14 +17,11 @@ It assumes that the source and destination grids are on a sphere and that the co
 the files are latitude and longitude values. This file based regrid weight generation application is fully parallel. This application is used in the 
 \htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}, so that can serve as an example of its use.
 
-This application requires NetCDF libary to run.  To compile ESMF with NetCDF, the following
-ESMF environment variables need to be set:  {\tt ESMF\_NETCDF}, {\tt ESMF\_NETCDF\_INCLUDE}
-and {\tt ESMF\_NETCDF\_LIBPATH}.  Please refer to \ref{sec:netcdf} for the proper values of
-these environment variables.  
-In addition, ESMF has to be compiled with LAPACK library to generate the patch regridding weights.  
-To compile ESMF with LAPACK, the following ESMF environment variables has to be set:
-{\tt ESMF\_LAPACK}, {\tt ESMF\_LAPACK\_LIBPATH}, and {\tt ESMF\_LAPACK\_LIBS}. Please refer to
- \ref{sec:lapack} for the proper values of these set of environment variables.
+This application requires the NetCDF libary to read the grid files and write
+out the weight files in NetCDF format.  
+In addition, it also requires the LAPACK library to generate the patch regridding weights.
+To compile ESMF with the NetCDF library and the LAPACK library, please refer to 
+\htmladdnormallink{ESMF User Guid: Third Party Libraries}{http://www.earthsystemmodeling.org/esmf_releases/last_built/ESMF_usrdoc/node9.html#SECTION00093000000000000000} for more information.
 
 Internally this application uses the ESMF public API to generate the interpolation weights.
 If a the source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
