@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.141 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_Array.F90,v 1.142 2011/01/25 00:40:03 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.141 2011/01/08 16:22:38 svasquez Exp $'
+    '$Id: ESMF_Array.F90,v 1.142 2011/01/25 00:40:03 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -1361,6 +1361,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
+        ESMF_CONTEXT, rc)
+      return
+#endif
+
+    else if (iofmt_internal == ESMF_IOFMT_NETCDF4P) then
+      ! NETCDF format selected
+#ifdef ESMF_NETCDF
+      piofmt = "nc4p"  ! parallel read/write of NETCDF4 (HDF5) files 
+#else
+      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+        "ESMF must be compiled with NETCDF support for this format choice", &
+        ESMF_CONTEXT, rc)
+      return
+#endif
+
+    else if (iofmt_internal == ESMF_IOFMT_NETCDF4C) then
+      ! NETCDF format selected
+#ifdef ESMF_NETCDF
+      piofmt = "nc4c"  ! parallel read/serial write of NetCDF4 (HDF5) 
+                       ! files with data compression
+#else
+      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+        "ESMF must be compiled with NETCDF support for this format choice", &
         ESMF_CONTEXT, rc)
       return
 #endif
