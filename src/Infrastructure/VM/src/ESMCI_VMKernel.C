@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.20 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_VMKernel.C,v 1.21 2011/01/25 04:36:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -346,6 +346,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sendChannel[0].comm_type = VM_COMM_TYPE_MPIUNI;
   sendChannel[0].shmp = new shared_mp;
   sync_reset(&(sendChannel[0].shmp->shms));
+  sendChannel[0].shmp->tcounter = 0;
   recvChannel[0] = sendChannel[0];
 #else
   if (npets==1){
@@ -353,6 +354,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
     sendChannel[0].comm_type = VM_COMM_TYPE_MPIUNI;
     sendChannel[0].shmp = new shared_mp;
     sync_reset(&(sendChannel[0].shmp->shms));
+    sendChannel[0].shmp->tcounter = 0;
     recvChannel[0] = sendChannel[0];
   }else{
     for (int i=0; i<npets; i++){
@@ -1533,6 +1535,7 @@ void *VMK::startup(class VMKPlan *vmp,
                 sync_reset(&(new_commarray[pet1Index][pet2Index].shmp->shms));
                 new_commarray[pet1Index][pet2Index].comm_type =
                   VM_COMM_TYPE_MPIUNI;
+                new_commarray[pet1Index][pet2Index].shmp->tcounter = 0;
 #else
                 if (pet1 != pet2){
                   // pet1 and pet2 are different PETs that run in mypet's VAS
@@ -1566,7 +1569,7 @@ void *VMK::startup(class VMKPlan *vmp,
                   }
                 }else{
                   new_commarray[pet1Index][pet2Index].comm_type =
-                      VM_COMM_TYPE_MPI1;  // default for selfcommunication
+                    VM_COMM_TYPE_MPI1;  // default for selfcommunication
                 }
 #endif               
                 ++pet2Index;
