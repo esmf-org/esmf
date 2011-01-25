@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.22 2011/01/24 23:04:58 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.23 2011/01/25 18:25:39 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,6 +51,7 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_TESTEXHAUSTIVE
+#if 0
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create an field test
@@ -74,14 +75,14 @@
         write(failMsg, *) ""
         write(name, *) "Regrid then create xgrid and regrid through xgrid, variable src flux"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
+#endif
         !------------------------------------------------------------------------
         !E-disable-X_UTest_Multi_Proc_Only
         ! Create an field test
-        !call test_regrid2xgSph(rc)
-        !write(failMsg, *) ""
-        !write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
-        !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call test_regrid2xgSph(rc)
+        write(failMsg, *) ""
+        write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
@@ -1294,7 +1295,7 @@ contains
     ! 1 degree atmosphere, 1 degree ocean
     atm_nx = 5
     atm_ny = 20
-    atm_dx = 2.
+    atm_dx = 1.
     atm_dy = 1.
     ocn_nx = 5
     ocn_ny = 20
@@ -1436,6 +1437,13 @@ contains
         coordY(i,j) = starty + (j-1)*ocn_dy
       enddo
     enddo
+
+
+    call ESMF_GridWriteVTK(grid_ocn,staggerloc=ESMF_STAGGERLOC_CORNER, isSphere=.false., &
+           isLatLonDeg=.true., filename="ocnGrid")
+
+    call ESMF_GridWriteVTK(grid_atm,staggerloc=ESMF_STAGGERLOC_CORNER, isSphere=.false., &
+           isLatLonDeg=.true., filename="atmGrid")
 
     ! build Fields on the Grids
     f_atm = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
