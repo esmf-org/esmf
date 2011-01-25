@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.193 2011/01/24 18:46:20 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.194 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.193 2011/01/24 18:46:20 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.194 2011/01/25 20:55:52 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -8163,7 +8163,7 @@ end subroutine ESMF_GridGetDefault
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -8275,16 +8275,16 @@ end subroutine ESMF_GridGetDefault
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -8478,7 +8478,7 @@ end subroutine ESMF_GridGetDefault
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -8592,16 +8592,16 @@ end subroutine ESMF_GridGetDefault
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -8794,7 +8794,7 @@ end subroutine ESMF_GridGetDefault
  integer :: localrc ! local error status 
  integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
- type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_LocalArray), allocatable :: localarrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -8911,16 +8911,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments
@@ -9120,7 +9120,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -9235,16 +9235,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments
@@ -9440,7 +9440,7 @@ endif
  integer :: localrc ! local error status 
  integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
- type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_LocalArray), allocatable :: localarrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -9555,16 +9555,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments
@@ -9758,7 +9758,7 @@ endif
  integer :: localrc ! local error status 
  integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
- type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_LocalArray), allocatable :: localarrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -9873,16 +9873,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments
@@ -10666,7 +10666,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -10750,16 +10750,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -10952,7 +10952,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -11038,16 +11038,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -11240,7 +11240,7 @@ endif
  integer :: localrc ! local error status 
  integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
- type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_LocalArray), allocatable :: localarrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -11328,16 +11328,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments
@@ -11528,7 +11528,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -11612,16 +11612,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -11814,7 +11814,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -11900,16 +11900,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -12102,7 +12102,7 @@ endif
  integer :: localrc ! local error status 
  integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
- type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_LocalArray), allocatable :: localarrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -12190,16 +12190,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments
@@ -12391,7 +12391,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -12475,16 +12475,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -12677,7 +12677,7 @@ endif
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
-    type(ESMF_LocalArray), allocatable :: larrayList(:) 
+    type(ESMF_LocalArray), allocatable :: localarrayList(:) 
     type(ESMF_CopyFlag) :: docopyInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -12763,16 +12763,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
     ! process optional arguments
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
@@ -12965,7 +12965,7 @@ endif
  integer :: localrc ! local error status 
  integer :: localDeCount, dimCount 
  type(ESMF_TypeKind) :: typekind 
- type(ESMF_LocalArray), allocatable :: larrayList(:) 
+ type(ESMF_LocalArray), allocatable :: localarrayList(:) 
  type(ESMF_CopyFlag) :: docopyInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
@@ -13053,16 +13053,16 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Obtain the native F90 array pointer via the LocalArray interface 
-    allocate(larrayList(localDeCount))
+    allocate(localarrayList(localDeCount))
  
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc) 
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(larrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
-    deallocate(larrayList) 
+    deallocate(localarrayList) 
 
 
     ! process optional arguments

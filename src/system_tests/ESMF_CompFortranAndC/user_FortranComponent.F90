@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.19 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: user_FortranComponent.F90,v 1.20 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -180,7 +180,7 @@ module user_FortranComponent
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! access Array data through farrayPtr
-    call ESMF_ArrayGet(array, 0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_ArrayGet(array, localDE=0, farrayPtr=farrayPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! values must be as set in "myInitInC"

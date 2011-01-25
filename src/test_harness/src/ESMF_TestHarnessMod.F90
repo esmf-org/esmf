@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.58 2011/01/24 23:05:00 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.59 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2395,7 +2395,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                      &
      " larrayList in populate_redist_array", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
@@ -2677,7 +2677,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                      &
      " larrayList in populate_array_value", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array, larrayList=larrayList, rc=localrc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
@@ -2965,7 +2965,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, "char variable"//              &
      " larrayList1 in compare redist array", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array1, larrayList=larrayList1, rc=localrc)
+  call ESMF_ArrayGet(array1, localarrayList=larrayList1, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 
@@ -3011,7 +3011,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, "char variable"//              &
      " larrayList2 in compare redist array", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array2, larrayList=larrayList2, rc=localrc)
+  call ESMF_ArrayGet(array2, localarrayList=larrayList2, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local array list",          &
           rcToReturn=rc)) return
 

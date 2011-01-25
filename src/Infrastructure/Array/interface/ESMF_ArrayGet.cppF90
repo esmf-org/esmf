@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.53 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.54 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.53 2011/01/08 16:22:38 svasquez Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.54 2011/01/25 20:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -95,7 +95,7 @@ module ESMF_ArrayGetMod
     module procedure ESMF_ArrayGetDefault
     module procedure ESMF_ArrayGetPLocalDePDim
     TypeKindRankInterfaceMacro(ArrayGetFPtr)
-    module procedure ESMF_ArrayGetLarray
+    module procedure ESMF_ArrayGetLocalArray
     module procedure ESMF_ArrayGetTotalElementMask1D
     module procedure ESMF_ArrayGetTotalElementMask2D
     module procedure ESMF_ArrayGetTotalElementMask3D
@@ -130,8 +130,8 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetDefault(array, arrayspec, typekind, rank, &
-    larrayList, indexflag, distgridToArrayMap, distgridToPackedArrayMap, &
+  subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
+    rank, localarrayList, indexflag, distgridToArrayMap, distgridToPackedArrayMap, &
     arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
     exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
     totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
@@ -141,10 +141,11 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),          intent(out), optional :: arrayspec
     type(ESMF_TypeKind),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
-    type(ESMF_LocalArray), target, intent(out), optional :: larrayList(:)
+    type(ESMF_LocalArray), target, intent(out), optional :: localarrayList(:)
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
     integer,               target, intent(out), optional :: distgridToArrayMap(:)
     integer,               target, intent(out), optional :: distgridToPackedArrayMap(:)
@@ -192,9 +193,9 @@ contains
 !     TypeKind of the Array object.
 !   \item[{[rank]}]
 !     Rank of the Array object.
-!   \item[{[larrayList]}]
+!   \item[{[localarrayList]}]
 !     Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
-!     objects. {\tt larrayList} must be allocated to be of size
+!     objects. {\tt localarrayList} must be allocated to be of size
 !     {\tt localDeCount}, i.e. the number of DEs associated with the calling
 !     PET.
 !   \item[{[indexflag]}]
@@ -320,8 +321,8 @@ contains
     integer                       :: localrc        ! local return code
     type(ESMF_TypeKind)           :: opt_typekind           ! helper variable
     integer                       :: opt_rank               ! helper variable
-    type(ESMF_Pointer), pointer   :: opt_larrayPtrList(:)   ! helper variable
-    integer                       :: len_larrayPtrList, i   ! helper variable
+    type(ESMF_Pointer), pointer   :: opt_localarrayPtrList(:)   ! helper variable
+    integer                       :: len_localarrayPtrList, i   ! helper variable
     type(ESMF_InterfaceInt)       :: distgridToArrayMapArg  ! helper variable
     type(ESMF_InterfaceInt)       :: distgridToPackedArrayMapArg ! helper var
     type(ESMF_InterfaceInt)       :: arrayToDistGridMapArg  ! helper variable
@@ -348,12 +349,12 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Deal with (optional) array arguments
-    if (present(larrayList)) then
-      len_larrayPtrList = size(larrayList)
-      allocate(opt_larrayPtrList(len_larrayPtrList))
+    if (present(localarrayList)) then
+      len_localarrayPtrList = size(localarrayList)
+      allocate(opt_localarrayPtrList(len_localarrayPtrList))
     else
-      len_larrayPtrList = 0
-      allocate(opt_larrayPtrList(1))
+      len_localarrayPtrList = 0
+      allocate(opt_localarrayPtrList(1))
     endif
     distgridToArrayMapArg = ESMF_InterfaceIntCreate(distgridToArrayMap, &
       rc=localrc)
@@ -411,8 +412,8 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_larrayPtrList, &
-      len_larrayPtrList, opt_distgrid, opt_delayout, indexflag, &
+    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_localarrayPtrList, &
+      len_localarrayPtrList, opt_distgrid, opt_delayout, indexflag, &
       distgridToArrayMapArg, distgridToPackedArrayMapArg, &
       arrayToDistGridMapArg, &
       undistLBoundArg, undistUBoundArg, &
@@ -437,20 +438,20 @@ contains
     if (present(distgrid)) then
       distgrid = opt_distgrid ! copy deep C++ pointer
     endif
-    if (present(larrayList)) then
-      do i=1, len_larrayPtrList
-        call ESMF_LocalArraySetThis(larrayList(i), opt_larrayPtrList(i), &
+    if (present(localarrayList)) then
+      do i=1, len_localarrayPtrList
+        call ESMF_LocalArraySetThis(localarrayList(i), opt_localarrayPtrList(i), &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_LocalArraySetInitCreated(larrayList(i), rc=localrc)
+        call ESMF_LocalArraySetInitCreated(localarrayList(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
     endif
     
     ! Garbage collection
-    deallocate(opt_larrayPtrList)
+    deallocate(opt_localarrayPtrList)
     call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -543,13 +544,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetPLocalDePDim(array, dim, localDe, indexCount, &
-    indexList, rc)
+  subroutine ESMF_ArrayGetPLocalDePDim(array, dim, localDe, keywordEnforcer, &
+    indexCount, indexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
     integer,                       intent(in)            :: dim
     integer,                       intent(in)            :: localDe
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: indexCount
     integer,                       intent(out), optional :: indexList(:)
     integer,                       intent(out), optional :: rc  
@@ -671,11 +673,12 @@ contains
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
-! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, localDe, & @\
+! subroutine ESMF_ArrayGetFPtr<rank><type><kind>(array, keywordEnforcer, localDe, & @\
 !                farrayPtr, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(in)              :: array @\
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,                    intent(in),  optional   :: localDe @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   integer,                    intent(out), optional   :: rc  @\
@@ -709,9 +712,11 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayGetFPtr" @\
-  subroutine ESMF_ArrayGetFPtr##mrank##D##mtypekind(array, localDe, farrayPtr, rc) @\
+  subroutine ESMF_ArrayGetFPtr##mrank##D##mtypekind(array, keywordEnforcer, & @\
+    localDe, farrayPtr, rc) @\
 @\
     type(ESMF_Array),           intent(in)                :: array @\
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     integer,                    intent(in),  optional     :: localDe @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     integer,                    intent(out), optional     :: rc @\
@@ -720,7 +725,7 @@ contains
     integer                             :: localrc     ! local return code @\
     integer                             :: rank @\
     type(ESMF_TypeKind)                 :: typekind @\
-    type(ESMF_LocalArray)               :: larray @\
+    type(ESMF_LocalArray)               :: localarray @\
 @\
     ! Initialize return code @\
     localrc = ESMF_RC_NOT_IMPL @\
@@ -749,10 +754,10 @@ contains
     endif @\
 @\
     ! Obtain the native Fortran array pointer via the LocalArray interface @\
-    call ESMF_ArrayGet(array, localDe=localDe, larray=larray, rc=localrc) @\
+    call ESMF_ArrayGet(array, localDe=localDe, localarray=localarray, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_LocalArrayGet(larray, farrayPtr, ESMF_DATA_REF, rc=localrc) @\
+    call ESMF_LocalArrayGet(localarray, farrayPtr, ESMF_DATA_REF, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -767,18 +772,19 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 
 ! -------------------------- ESMF-public method -------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_ArrayGetLarray()"
+^define ESMF_METHOD "ESMF_ArrayGetLocalArray()"
 !BOP
 ! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array tile via LocalArray object.
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetLarray(array, localDe, larray, rc)
+  subroutine ESMF_ArrayGetLocalArray(array, localDe, localarray, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     integer,                intent(in),  optional :: localDe
-    type(ESMF_LocalArray),  intent(inout)         :: larray
+    type(ESMF_LocalArray),  intent(inout)         :: localarray
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -794,8 +800,8 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 !       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
 !       For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
 !       in which case it will default to {\tt localDe=0}.
-!     \item[larray] 
-!        Upon return {\tt larray} refers to the DE-local data allocation of
+!     \item[localarray] 
+!        Upon return {\tt localarray} refers to the DE-local data allocation of
 !        {\tt array}.
 !     \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -807,7 +813,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
     type(ESMF_DELayout)                 :: delayout
     integer                             :: localDeCount
     integer                             :: localDeArg
-    type(ESMF_LocalArray), allocatable  :: larrayList(:)
+    type(ESMF_LocalArray), allocatable  :: localarrayList(:)
     
     ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL
@@ -849,17 +855,17 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
         ESMF_CONTEXT, rc)
       return
     endif
-    ! get localArray via larrayList
-    allocate(larrayList(localDeCount))  ! basis 1
-    call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+    ! get localArray via localarrayList
+    allocate(localarrayList(localDeCount))  ! basis 1
+    call ESMF_ArrayGet(array, localarrayList=localarrayList, rc=rc)
     ! copy the contents, i.e. the C pointer
-    larray = larrayList(localDeArg+1)      ! shift localDe index to basis 1
-    deallocate(larrayList)
+    localarray = localarrayList(localDeArg+1)      ! shift localDe index to basis 1
+    deallocate(localarrayList)
     
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
-  end subroutine ESMF_ArrayGetLarray
+  end subroutine ESMF_ArrayGetLocalArray
 !------------------------------------------------------------------------------
 
 

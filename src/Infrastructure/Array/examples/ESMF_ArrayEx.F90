@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.69 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.70 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -209,7 +209,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -491,7 +491,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   allocate(localDeList(localDeCount))
-  call ESMF_ArrayGet(array, larrayList=larrayList, localDeList=localDeList, &
+  call ESMF_ArrayGet(array, localarrayList=larrayList, localDeList=localDeList, &
     rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1006,9 +1006,9 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   allocate(larrayList1(localDeCount))
-  call ESMF_ArrayGet(array3D, larrayList=larrayList1, rc=rc)
+  call ESMF_ArrayGet(array3D, localarrayList=larrayList1, rc=rc)
   allocate(larrayList2(localDeCount))
-  call ESMF_ArrayGet(array2D, larrayList=larrayList2, rc=rc)
+  call ESMF_ArrayGet(array2D, localarrayList=larrayList2, rc=rc)
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList1(de), myFarray3D, ESMF_DATA_REF, &
       rc=rc)
@@ -1135,7 +1135,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
   allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
 !BOE
 ! The following loop shows how a Fortran pointer to the DE-local data chunks
 ! can be obtained and used to set data values in the exclusive regions. The
@@ -1219,7 +1219,7 @@ program ESMF_ArrayEx
   endif
   ! obtain larrayList for local DEs
   allocate(larrayList(localDeCount))
-  call ESMF_ArrayGet(array, larrayList=larrayList, rc=rc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myFarray3D, ESMF_DATA_REF, rc=rc)
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
@@ -1298,7 +1298,7 @@ program ESMF_ArrayEx
 !BOC
   allocate(larrayList(localDeCount))
   allocate(localDeList(localDeCount))
-  call ESMF_ArrayGet(array, larrayList=larrayList, localDeList=localDeList, &
+  call ESMF_ArrayGet(array, localarrayList=larrayList, localDeList=localDeList, &
     rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.239 2011/01/24 22:31:17 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.240 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.239 2011/01/24 22:31:17 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.240 2011/01/25 20:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2132,10 +2132,10 @@ contains
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
 ! !INTERFACE:
-      function ESMF_StateCreate(keywordEnforcer, name, statetype, &
+      function ESMF_StateCreate(keywordEnforcer, statetype, &
                    fieldbundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, neededflag, readyflag, validflag, &
-                   reqforrestartflag, rc)
+                   reqforrestartflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
@@ -2143,7 +2143,6 @@ contains
 ! !ARGUMENTS:
       type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use 
                                                       ! keywords for the below
-      character(len=*),     intent(in), optional :: name 
       type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_FieldBundle), dimension(:), intent(inout), &
                                         optional :: fieldbundleList
@@ -2158,6 +2157,7 @@ contains
       type(ESMF_ReadyFlag),  intent(in),  optional :: readyflag
       type(ESMF_ValidFlag),  intent(in),  optional :: validflag
       type(ESMF_ReqForRestartFlag), intent(in), optional :: reqforrestartflag
+      character(len=*),     intent(in), optional :: name 
       integer,               intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2166,9 +2166,6 @@ contains
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[{[name]}]
-!    Name of this {\tt ESMF\_State} object.   A default name will be generated
-!    if none is specified.
 !   \item[{[statetype]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are 
 !    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
@@ -2213,6 +2210,9 @@ contains
 !    Possible values are listed in Section~\ref{opt:reqforrestartflag}.    
 !    If not specified, the default 
 !    value is set to {\tt ESMF\_REQUIRED\_FOR\_RESTART}.
+!   \item[{[name]}]
+!    Name of this {\tt ESMF\_State} object.   A default name will be generated
+!    if none is specified.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

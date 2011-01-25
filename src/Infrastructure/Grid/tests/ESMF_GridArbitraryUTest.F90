@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.18 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.19 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.18 2011/01/24 23:04:59 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.19 2011/01/25 20:55:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -998,7 +998,7 @@ program ESMF_GridArbitraryUTest
 
 
   ! set coordinate array for the undistributed dimension
-  call ESMF_ArrayGet(array1D, 0, farrayptr=farrayPtr1D, rc=localrc)
+  call ESMF_ArrayGet(array1D, localDE=0, farrayptr=farrayPtr1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! regular z levels
@@ -1170,13 +1170,13 @@ program ESMF_GridArbitraryUTest
 	    rc=localrc)
 
   ! get the dimension of the array
-  call ESMF_ArrayGet(array2D, 0, larray=larray, rc=localrc)
+  call ESMF_ArrayGet(array2D, localDE=0, localarray=larray, rc=localrc)
   call ESMF_LocalArrayGet(larray, lbounds=lowbound, ubounds=upbound, &
 	    rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! set coordinate array for the undistributed dimension
-  call ESMF_ArrayGet(array2D, 0, farrayptr=farrayPtr2D, rc=localrc)
+  call ESMF_ArrayGet(array2D, localDE=0, farrayptr=farrayPtr2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! regular z levels

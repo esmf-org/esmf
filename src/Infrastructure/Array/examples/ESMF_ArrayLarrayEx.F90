@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.25 2011/01/12 23:28:42 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.26 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@ program ESMF_ArrayLarrayEx
 ! accommodate the requested regions.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(larrayList=(/larray/), distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(localarrayList=(/larray/), distgrid=distgrid, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -122,7 +122,7 @@ program ESMF_ArrayLarrayEx
 ! extracted using LocalArray methods.
 !EOE
 !BOC
-  call ESMF_ArrayGet(array, larray=larrayRef, rc=rc)
+  call ESMF_ArrayGet(array, localarray=larrayRef, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -232,7 +232,7 @@ program ESMF_ArrayLarrayEx
 ! LocalArray elements in {\tt larrayList}.
 !EOE
 !BOC
-  array = ESMF_ArrayCreate(larrayList=larrayList, distgrid=distgrid, rc=rc)
+  array = ESMF_ArrayCreate(localarrayList=larrayList, distgrid=distgrid, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -248,7 +248,7 @@ program ESMF_ArrayLarrayEx
 !EOE
 !BOC
   allocate(larrayRefList(2))
-  call ESMF_ArrayGet(array, larrayList=larrayRefList, rc=rc)
+  call ESMF_ArrayGet(array, localarrayList=larrayRefList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.45 2011/01/20 05:26:14 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.46 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.45 2011/01/20 05:26:14 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.46 2011/01/25 20:55:52 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -2610,7 +2610,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 
  
  ! Obtain the native array pointer via the LocalArray interface 
- call ESMF_ArrayGet(array, localDE=localDE, larray=larray, rc=localrc) 
+ call ESMF_ArrayGet(array, localDE=localDE, localarray=larray, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -2776,7 +2776,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 
  
  ! Obtain the native array pointer via the LocalArray interface 
- call ESMF_ArrayGet(array, localDE=localDE, larray=larray, rc=localrc) 
+ call ESMF_ArrayGet(array, localDE=localDE, localarray=larray, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -2942,7 +2942,7 @@ end subroutine ESMF_LocStreamGetKeyR4
                          ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! Obtain the native array pointer via the LocalArray interface 
- call ESMF_ArrayGet(array, localDE=localDE, larray=larray, rc=localrc) 
+ call ESMF_ArrayGet(array, localDE=localDE, localarray=larray, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  

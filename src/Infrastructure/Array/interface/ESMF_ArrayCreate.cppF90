@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.67 2011/01/14 23:15:31 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.68 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.67 2011/01/14 23:15:31 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.68 2011/01/25 20:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -371,7 +371,7 @@ contains
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -384,7 +384,7 @@ contains
 !   integer,               intent(out),  optional  :: rc @\
 ! @\
 ! !RETURN VALUE: @\
-!   type(ESMF_Array) :: ESMF_ArrayCreateFromPtr##mrank##D##mtypekind @\
+!   type(ESMF_Array) :: ESMF_ArrayCreateDataPtr<rank><type><kind> @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
@@ -506,7 +506,7 @@ contains
 @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -521,7 +521,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Local variables @\
     integer                             :: localrc  ! local return code @\
     type(ESMF_Array)                    :: array    ! new Array @\
-    type(ESMF_LocalArray), allocatable  :: larrayList(:)  ! helper variable @\
+    type(ESMF_LocalArray), allocatable  :: localarrayList(:)  ! helper variable @\
     type(ESMF_CopyFlag)                 :: copyflag_opt   ! helper variable @\
 @\
     ! Initialize return code; assume failure until success is certain @\
@@ -540,28 +540,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! Prepare the LocalArray list to be used in the ArrayCreate() call. @\
     ! Must pass the copyflag_opt flag into LocalArrayCreate() to ensure @\
-    ! that the LocalArray object contained in the larrayList, passed to @\
+    ! that the LocalArray object contained in the localarrayList, passed to @\
     ! ArrayCreate() below, is suitable to be placed inside of the Array @\
     ! object directly. ArrayCreate() does _not_ create LocalArray objects @\
     ! internally for ESMF_INDEX_USER. @\
-    allocate(larrayList(1)) @\
-    larrayList(1) = ESMF_LocalArrayCreate(farrayPtr, copyflag_opt, rc=localrc) @\
+    allocate(localarrayList(1)) @\
+    localarrayList(1) = ESMF_LocalArrayCreate(farrayPtr, copyflag_opt, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, ESMF_INDEX_USER, & @\
-      copyflag_opt, distgridToArrayMap, computationalEdgeLWidth, & @\
-      computationalEdgeUWidth, computationalLWidth, computationalUWidth, & @\
-      totalLWidth, totalUWidth, name=name, rc=localrc) @\
+    array = ESMF_ArrayCreate(localarrayList, distgrid, indexflag=ESMF_INDEX_USER, & @\
+      copyflag=copyflag_opt, distgridToArrayMap=distgridToArrayMap, & @\
+      computationalEdgeLWidth=computationalEdgeLWidth, & @\
+      computationalEdgeUWidth=computationalEdgeUWidth, & @\
+      computationalLWidth=computationalLWidth, & @\
+      computationalUWidth=computationalUWidth, & @\
+      totalLWidth=totalLWidth, totalUWidth=totalUWidth, & @\
+      name=name, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Garbage collection. The ArrayCreate() call will have placed the @\
     ! LocalArray object created above into the Array object. It will be @\
-    ! destroyed when the Array object is destroyed. Only the larrayList @\
+    ! destroyed when the Array object is destroyed. Only the localarrayList @\
     ! must be cleaned up here. @\
-    deallocate(larrayList) @\
+    deallocate(localarrayList) @\
 @\
     ! Set return value @\
     ESMF_ArrayCreateFromPtr##mrank##D##mtypekind = array @\
@@ -586,19 +590,21 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateFromPtrArb<rank><type><kind>(farrayPtr, & @\
-!   distgrid, haloSeqIndexList, copyflag, distgridToArrayMap, name, rc) @\
+!   distgrid, haloSeqIndexList, keywordEnforcer copyflag, distgridToArrayMap, & @\
+!   name, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
 !   integer,               intent(in)              :: haloSeqIndexList(:) @\
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   character (len=*),     intent(in),   optional  :: name @\
 !   integer,               intent(out),  optional  :: rc @\
 ! @\
 ! !RETURN VALUE: @\
-!   type(ESMF_Array) :: ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind @\
+!   type(ESMF_Array) :: ESMF_ArrayCreateDataPtrArb<rank><type><kind> @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
@@ -680,7 +686,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateFromPtrArb" @\
   function ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind(farrayPtr, & @\
-    distgrid, haloSeqIndexList, copyflag, distgridToArrayMap, & @\
+    distgrid, haloSeqIndexList, keywordEnforcer, copyflag, distgridToArrayMap, & @\
     name, rc) @\
 @\
     type(ESMF_Array) :: ESMF_ArrayCreateFromPtrArb##mrank##D##mtypekind @\
@@ -688,6 +694,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
     integer,               intent(in)              :: haloSeqIndexList(:) @\
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     character (len=*),     intent(in),   optional  :: name @\
@@ -766,7 +773,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateAssmdShape<rank><type><kind>(farray, & @\
-!   distgrid, indexflag, copyflag, distgridToArrayMap, & @\
+!   distgrid, indexflag, keywordEnforcer, copyflag, distgridToArrayMap, & @\
 !   computationalEdgeLWidth, computationalEdgeUWidth, computationalLWidth, & @\
 !   computationalUWidth, totalLWidth, & @\
 !   totalUWidth, undistLBound, undistUBound, name, rc) @\
@@ -775,6 +782,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
 !   type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
 !   integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -789,7 +797,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 !   integer,               intent(out),  optional  :: rc @\
 ! @\
 ! !RETURN VALUE: @\
-!   type(ESMF_Array) :: ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind @\
+!   type(ESMF_Array) :: ESMF_ArrayCreateDataAssmdShape<rank><type><kind> @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from an existing local native Fortran @\
@@ -909,7 +917,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayCreateAssmdShape" @\
   function ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind(farray, & @\
-    distgrid, indexflag, copyflag, distgridToArrayMap, & @\
+    distgrid, indexflag, keywordEnforcer, copyflag, distgridToArrayMap, & @\
     computationalEdgeLWidth, computationalEdgeUWidth, & @\
     computationalLWidth, computationalUWidth, totalLWidth, & @\
     totalUWidth, undistLBound, undistUBound, name, rc) @\
@@ -919,6 +927,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
     type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -935,7 +944,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
     ! Local variables @\
     integer                             :: localrc  ! local return code @\
     type(ESMF_Array)                    :: array    ! new Array @\
-    type(ESMF_LocalArray), allocatable  :: larrayList(:)  ! helper variable @\
+    type(ESMF_LocalArray), allocatable  :: localarrayList(:)  ! helper variable @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: fptr ! helper variable @\
     type(ESMF_CopyFlag)                 :: copyflag_opt   ! helper variable @\
 @\
@@ -966,27 +975,32 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
     ! unncessary data movements at this point. The ArrayCreate() below will @\
     ! create a new LocalArray internally (to be used inside of the Array @\
     ! object), and that is where the copyflag_opt will need to be considered. @\
-    allocate(larrayList(1)) @\
+    allocate(localarrayList(1)) @\
     fptr => farray @\
-    larrayList(1) = ESMF_LocalArrayCreate(fptr, rc=localrc) @\
+    localarrayList(1) = ESMF_LocalArrayCreate(fptr, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Create the Array object by calling into overloaded ArrayCreate() interf. @\
-    array = ESMF_ArrayCreate(larrayList, distgrid, indexflag, copyflag_opt, & @\
-      distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, & @\
-      computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, & @\
-      undistLBound, undistUBound, name, localrc) @\
+    array = ESMF_ArrayCreate(localarrayList, distgrid, indexflag=indexflag, & @\
+      copyflag=copyflag_opt, distgridToArrayMap=distgridToArrayMap, & @\
+      computationalEdgeLWidth=computationalEdgeLWidth, & @\
+      computationalEdgeUWidth=computationalEdgeUWidth, & @\
+      computationalLWidth=computationalLWidth, & @\
+      computationalUWidth=computationalUWidth, & @\
+      totalLWidth=totalLWidth, totalUWidth=totalUWidth, & @\
+      undistLBound=undistLBound, undistUBound=undistUBound, & @\
+      name=name, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     ! Garbage collection. The ArrayCreate() call will have created a new @\
     ! LocalArray object internally, so the temporary object created above @\
     ! must be deleted here. @\
-    call ESMF_LocalArrayDestroy(larrayList(1), rc=localrc) @\
+    call ESMF_LocalArrayDestroy(localarrayList(1), rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    deallocate(larrayList) @\
+    deallocate(localarrayList) @\
 @\
     ! Set return value @\
     ESMF_ArrayCreateAssmdShape##mrank##D##mtypekind = array @\
@@ -1011,14 +1025,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateLocalArray(larrayList, distgrid, indexflag, &
-    copyflag, distgridToArrayMap, computationalEdgeLWidth, &
+  function ESMF_ArrayCreateLocalArray(localarrayList, distgrid, keywordEnforcer, &
+    indexflag, copyflag, distgridToArrayMap, computationalEdgeLWidth, &
     computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
     totalLWidth, totalUWidth, undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_LocalArray), intent(in)              :: larrayList(:)
+       type(ESMF_LocalArray), intent(in)              :: localarrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
@@ -1039,7 +1054,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !DESCRIPTION:
 ! \begin{sloppypar}
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
-! objects according to distgrid. Besides {\tt larrayList} each PET must issue
+! objects according to distgrid. Besides {\tt localarrayList} each PET must issue
 ! this call with identical arguments in order to create a consistent Array 
 ! object. The local arrays provided must be dimensioned according to the 
 ! DE-local total region. Bounds of the exclusive regions are set as specified 
@@ -1061,12 +1076,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! The arguments are:
 ! \begin{description}
-! \item[larrayList] 
+! \item[localarrayList] 
 !      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be 
 !      associated with the actual arguments. The type/kind/rank information of 
-!      all {\tt larrayList} elements must be identical and will
+!      all {\tt localarrayList} elements must be identical and will
 !      be used to set {\tt Array}|s properties accordingly. The shape of each
-!      {\tt larrayList} element will be checked against the information 
+!      {\tt localarrayList} element will be checked against the information 
 !      contained in the {\tt distgrid}.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
@@ -1090,12 +1105,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
-!      the DistGrid object to a dimension in the {\tt larrayList} elements
+!      the DistGrid object to a dimension in the {\tt localarrayList} elements
 !      by specifying the appropriate Array dimension index. The default is
 !      to map all of {\tt distgrid}|s dimensions against the lower dimensions
-!      of the {\tt larrayList} elements in sequence, i.e.
+!      of the {\tt localarrayList} elements in sequence, i.e.
 !      {\tt distgridToArrayMap = (/1, 2, .../)}.
-!      Unmapped dimensions in the {\tt larrayList} elements are not
+!      Unmapped dimensions in the {\tt localarrayList} elements are not
 !      decomposed dimensions and form a tensor of 
 !      rank = Array.rank - DistGrid.dimCount.
 !      All {\tt distgridToArrayMap} entries must be greater than or equal
@@ -1138,14 +1153,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      region with respect to the upper corner of the exclusive region.
 !      The default is a vector that contains the remaining number of elements
 !      in each direction as to fit the union of exclusive and computational
-!      region into the memory region provided by the {\tt larrayList} argument.
+!      region into the memory region provided by the {\tt localarrayList} argument.
 ! \item[{[undistLBound]}]
 !      Lower bounds for the array dimensions that are not distributed.
 !      By default lbound is 1.
 ! \item[{[undistUBound]}]
 !      Upper bounds for the array dimensions that are not distributed.
 !      By default ubound is equal to the extent of the corresponding
-!      dimension in {\tt larrayList}.
+!      dimension in {\tt localarrayList}.
 ! \item[{[name]}]
 !      Name of the Array object.
 ! \item[{[rc]}]
@@ -1156,7 +1171,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
     type(ESMF_Array)        :: array      ! opaque pointer to new C++ Array
-    integer                 :: larrayCount, i         ! helper variable
+    integer                 :: localarrayCount, i         ! helper variable
     type(ESMF_InterfaceInt) :: distgridToArrayMapArg  ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeLWidthArg ! helper variable
     type(ESMF_InterfaceInt) :: computationalEdgeUWidthArg ! helper variable
@@ -1166,7 +1181,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_InterfaceInt) :: totalUWidthArg         ! helper variable
     type(ESMF_InterfaceInt) :: undistLBoundArg        ! helper variable
     type(ESMF_InterfaceInt) :: undistUBoundArg        ! helper variable
-    type(ESMF_Pointer), allocatable :: larrayPointerList(:) ! helper variable
+    type(ESMF_Pointer), allocatable :: localarrayPointerList(:) ! helper variable
     integer                 :: len_name               ! helper variable
     type(ESMF_CopyFlag)     :: copyflag_opt           ! helper variable
 
@@ -1175,20 +1190,20 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Determine the number of LocalArray elements in list
-    larrayCount = size(larrayList)
+    localarrayCount = size(localarrayList)
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    do i=1, larrayCount
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, larrayList(i), rc)
+    do i=1, localarrayCount
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, localarrayList(i), rc)
     enddo
     
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
     ! This is necessary in order to strip off the Fortran init check members
     ! when passing into C++
-    allocate(larrayPointerList(larrayCount))
-    do i=1, larrayCount
-      call ESMF_LocalArrayGetThis(larrayList(i), larrayPointerList(i), localrc)
+    allocate(localarrayPointerList(localarrayCount))
+    do i=1, localarrayCount
+      call ESMF_LocalArrayGetThis(localarrayList(i), localarrayPointerList(i), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
@@ -1249,7 +1264,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
       len_name = len(name)
-      call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
+      call c_ESMC_ArrayCreateLocalArray(array, localarrayPointerList, localarrayCount, &
         distgrid, copyflag_opt, distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
@@ -1259,7 +1274,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
-      call c_ESMC_ArrayCreateLocalArray(array, larrayPointerList, larrayCount, &
+      call c_ESMC_ArrayCreateLocalArray(array, localarrayPointerList, localarrayCount, &
         distgrid, copyflag_opt, distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
@@ -1270,7 +1285,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     endif    
       
     ! Garbage collection
-    deallocate(larrayPointerList)
+    deallocate(localarrayPointerList)
     call ESMF_InterfaceIntDestroy(distgridToArrayMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1320,14 +1335,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateLocalArrayArb(larrayList, distgrid, &
-    haloSeqIndexList, copyflag, distgridToArrayMap, undistLBound, &
+  function ESMF_ArrayCreateLocalArrayArb(localarrayList, distgrid, &
+    haloSeqIndexList, keywordEnforcer, copyflag, distgridToArrayMap, undistLBound, &
     undistUBound, name, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_LocalArray), intent(in)              :: larrayList(:)
+       type(ESMF_LocalArray), intent(in)              :: localarrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in)              :: haloSeqIndexList(:)
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CopyFlag),   intent(in),   optional  :: copyflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
@@ -1351,12 +1367,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 ! The arguments are:
 ! \begin{description}
-! \item[larrayList] 
+! \item[localarrayList] 
 !      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be 
 !      associated with the actual arguments. The type/kind/rank information of 
-!      all {\tt larrayList} elements must be identical and will
+!      all {\tt localarrayList} elements must be identical and will
 !      be used to set {\tt Array}|s properties accordingly. The shape of each
-!      {\tt larrayList} element will be checked against the information 
+!      {\tt localarrayList} element will be checked against the information 
 !      contained in the {\tt distgrid}.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
@@ -1377,12 +1393,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
-!      the DistGrid object to a dimension in the {\tt larrayList} elements
+!      the DistGrid object to a dimension in the {\tt localarrayList} elements
 !      by specifying the appropriate Array dimension index. The default is
 !      to map all of {\tt distgrid}|s dimensions against the lower dimensions
-!      of the {\tt larrayList} elements in sequence, i.e.
+!      of the {\tt localarrayList} elements in sequence, i.e.
 !      {\tt distgridToArrayMap = (/1, 2, .../)}.
-!      Unmapped dimensions in the {\tt larrayList} elements are not
+!      Unmapped dimensions in the {\tt localarrayList} elements are not
 !      decomposed dimensions and form a tensor of 
 !      rank = Array.rank - DistGrid.dimCount.
 !      All {\tt distgridToArrayMap} entries must be greater than or equal
@@ -1399,7 +1415,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[undistUBound]}]
 !      Upper bounds for the array dimensions that are not distributed.
 !      By default ubound is equal to the extent of the corresponding
-!      dimension in {\tt larrayList}.
+!      dimension in {\tt localarrayList}.
 ! \item[{[name]}]
 !      Name of the Array object.
 ! \item[{[rc]}]
@@ -1449,7 +1465,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     localHaloCount = size(haloSeqIndexList)
     
     ! Call into conventional interface to create the Array object
-    ESMF_ArrayCreateLocalArrayArb = ESMF_ArrayCreate(larrayList, distgrid, &
+    ESMF_ArrayCreateLocalArrayArb = ESMF_ArrayCreate(localarrayList, distgrid, &
       copyflag=copyflag, distgridToArrayMap=distgridToArrayMap, &
       totalUWidth=(/localHaloCount/), undistLBound=undistLBound, &
       undistUBound=undistUBound, name=name, rc=localrc)
@@ -1477,7 +1493,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocate(typekind, distgrid, indexflag, &
+  function ESMF_ArrayCreateAllocate(typekind, distgrid, keywordEnforcer, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     undistLBound, undistUBound, name, rc)
@@ -1485,6 +1501,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !ARGUMENTS:
        type(ESMF_TypeKind),   intent(in)              :: typekind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
@@ -1627,9 +1644,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocate = ESMF_ArrayCreate(arrayspec, distgrid, &
-      indexflag, distgridToArrayMap, computationalEdgeLWidth, &
-      computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
-      totalLWidth, totalUWidth, undistLBound, undistUBound, name, localrc)
+      indexflag=indexflag, distgridToArrayMap=distgridToArrayMap, &
+      computationalEdgeLWidth=computationalEdgeLWidth, &
+      computationalEdgeUWidth=computationalEdgeUWidth, &
+      computationalLWidth=computationalLWidth,  &
+      computationalUWidth=computationalUWidth, &
+      totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+      undistLBound=undistLBound, undistUBound=undistUBound, &
+      name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1649,13 +1671,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocateArb(typekind, distgrid, &
-    haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
-    name, rc)
+    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+    undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_TypeKind),   intent(in)              :: typekind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in)              :: haloSeqIndexList(:)
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
@@ -1756,8 +1779,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocateArb = ESMF_ArrayCreate(arrayspec, distgrid, &
-      haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
-      name, localrc)
+      haloSeqIndexList, distgridToArrayMap=distgridToArrayMap, &
+      undistLBound=undistLBound, undistUBound=undistUBound, &
+      name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1776,7 +1800,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocateAS(arrayspec, distgrid, indexflag, &
+  function ESMF_ArrayCreateAllocateAS(arrayspec, distgrid, keywordEnforcer, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     undistLBound, undistUBound, name, rc)
@@ -1784,6 +1808,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
@@ -2031,13 +2056,14 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocateASArb(arrayspec, distgrid, &
-    haloSeqIndexList, distgridToArrayMap, undistLBound, undistUBound, &
-    name, rc)
+    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+    undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in)              :: haloSeqIndexList(:)
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
@@ -2168,10 +2194,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateCopy(array, rc)
+  function ESMF_ArrayCreateCopy(array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
        type(ESMF_Array),  intent(in)              :: array
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,           intent(out),  optional  :: rc
 !     
 ! !RETURN VALUE:
@@ -2227,10 +2254,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !IROUTINE: ESMF_ArrayDestroy - Destroy Array object
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayDestroy(array, rc)
+  subroutine ESMF_ArrayDestroy(array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout)           :: array
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -2617,10 +2645,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateFromLA(larray, haloWidth, deCount, rootPET, rc)
+  function ESMF_ArrayCreateFromLA(localarray, haloWidth, deCount, rootPET, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray),  intent(in),   optional  :: larray
+    type(ESMF_LocalArray),  intent(in),   optional  :: localarray
     integer, target,        intent(in),   optional  :: haloWidth(:)
     integer,                intent(in),   optional  :: deCount
     integer,                intent(in)              :: rootPET
@@ -2635,12 +2663,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[larray]}] 
+!     \item[{[localarray]}] 
 !          The {\tt ESMF\_LocalArray} object that will be used to determine
 !          the index space of the {\tt ESMF\_Array}. The data in 
-!          {\tt rootPET}|s {\tt larray} will be scattered across the newly
+!          {\tt rootPET}|s {\tt localarray} will be scattered across the newly
 !          created {\tt ESMF\_Array} object before returning. Only 
-!         {\tt rootPET} must provide a (valid) {\tt larray} argument.
+!         {\tt rootPET} must provide a (valid) {\tt localarray} argument.
 !     \item[{[haloWidth]}]
 !          Array holding the halo width for each array dimension. Default is
 !          a halo width of 0 in all dimensions. A negative halo width indicates
@@ -2651,7 +2679,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !          deCount will equal petCount of the current VM context. Only 
 !          {\tt rootPET} must provide a (valid) {\tt deCount} argument.
 !     \item[rootPET] 
-!          PET that holds the valid data in {\tt larray}.
+!          PET that holds the valid data in {\tt localarray}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2673,7 +2701,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, larray, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, localarray, rc)
     
     ! Initialize the pointer to NULL
     array%this = ESMF_NULL_POINTER
@@ -2685,7 +2713,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       call ESMF_VMGetCurrent(vm, rc=localrc)
       call ESMF_VMGet(vm, localPET=localPET, rc=localrc)
       if (localPET==rootPET) then
-        call ESMF_LocalArrayGet(larray, rank=laRank, rc=localrc)
+        call ESMF_LocalArrayGet(localarray, rank=laRank, rc=localrc)
         if (len_haloWidth/=laRank) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
             "size of haloWidth array does not match rank of LocalArray", &
@@ -2704,7 +2732,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 
 
     ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_ArrayCreate(array, larray, opt_haloWidth, len_haloWidth, &
+!    call c_ESMC_ArrayCreate(array, localarray, opt_haloWidth, len_haloWidth, &
 !      deCount, rootPET, localrc)
 
     ! Use LogErr to handle return code

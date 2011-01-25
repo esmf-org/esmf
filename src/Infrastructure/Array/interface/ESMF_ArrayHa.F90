@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.20 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.21 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.20 2011/01/08 16:22:38 svasquez Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.21 2011/01/25 20:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -121,12 +121,13 @@ contains
 ! !IROUTINE: ESMF_ArrayHalo - Execute an Array halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayHalo(array, routehandle, commflag, &
-    finishedflag, cancelledflag, checkflag, rc)
+  subroutine ESMF_ArrayHalo(array, routehandle, keywordEnforcer, &
+    commflag, finishedflag, cancelledflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)           :: array
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
@@ -237,10 +238,11 @@ contains
 ! !IROUTINE: ESMF_ArrayHaloRelease - Release resources associated with Array halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayHaloRelease(routehandle, rc)
+  subroutine ESMF_ArrayHaloRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -284,14 +286,14 @@ contains
 ! !IROUTINE: ESMF_ArrayHaloStore - Precompute an Array halo operation
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayHaloStore(array, routehandle, halostartregionflag, &
-      haloLDepth, haloUDepth, rc)
+    subroutine ESMF_ArrayHaloStore(array, routehandle, keywordEnforcer, &
+      halostartregionflag, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)                :: array
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    type(ESMF_HaloStartRegionFlag), intent(in), &
-                            optional :: halostartregionflag
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -414,10 +416,11 @@ contains
 ! !IROUTINE: ESMF_ArrayPrint - Print Array internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayPrint(array, options, rc)
+  subroutine ESMF_ArrayPrint(array, keywordEnforcer, options, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)              :: array
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in),   optional  :: options
     integer,          intent(out),  optional  :: rc  
 !         
@@ -472,11 +475,13 @@ contains
 ! \label{api:ArrayRead}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRead(array, file, variableName, timeslice, iofmt, rc)
+  subroutine ESMF_ArrayRead(array, file, keywordEnforcer, variableName, &
+    timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
     character(*),         intent(in)             :: file
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),         intent(in),  optional  :: variableName
     integer,              intent(in),  optional  :: timeslice
     type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
@@ -718,13 +723,14 @@ contains
 ! !IROUTINE: ESMF_ArrayRedist - Execute an Array redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, commflag, &
-    finishedflag, cancelledflag, checkflag, rc)
+  subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, keywordEnforcer, &
+    commflag, finishedflag, cancelledflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
@@ -859,10 +865,11 @@ contains
 ! !IROUTINE: ESMF_ArrayRedistRelease - Release resources associated with Array redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayRedistRelease(routehandle, rc)
-!
+  subroutine ESMF_ArrayRedistRelease(routehandle, keywordEnforcer, rc)
+! 
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -906,13 +913,14 @@ contains
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayRedistStore()
 ! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, &
-!   routehandle, factor, srcToDstTransposeMap, rc)
+!   routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_Array),       intent(in)            :: srcArray
 !   type(ESMF_Array),       intent(inout)         :: dstArray
 !   type(ESMF_RouteHandle), intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)          :: factor
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,               intent(in),  optional  :: srcToDstTransposeMap(:)
 !   integer,               intent(out), optional  :: rc
 !
@@ -1252,12 +1260,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
-    srcToDstTransposeMap, rc)
+    keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)              :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.25 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.26 2011/01/25 20:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.25 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.26 2011/01/25 20:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -127,13 +127,14 @@ contains
 ! @\
 ! !INTERFACE: @\
 ! subroutine ESMF_ArrayScatter<rank><type><kind>(array, farray, tile, & @\
-!   rootPet, vm, rc) @\
+!   rootPet, keywordEnforcer, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(inout)           :: array @\
-!   mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
+!   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
 !   integer,                    intent(in),   optional  :: tile @\
 !   integer,                    intent(in)              :: rootPet @\
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_VM),              intent(in),   optional  :: vm @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
@@ -180,12 +181,13 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayScatter" @\
   subroutine ESMF_ArrayScatter##mrank##D##mtypekind(array, farray, tile, & @\
-    rootPet, vm, rc) @\
+    rootPet, keywordEnforcer, vm, rc) @\
 @\
     type(ESMF_Array),           intent(inout)           :: array @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     integer,                    intent(in),   optional  :: tile @\
     integer,                    intent(in)              :: rootPet @\
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_VM),              intent(in),   optional  :: vm @\
     integer,                    intent(out),  optional  :: rc @\
 @\
