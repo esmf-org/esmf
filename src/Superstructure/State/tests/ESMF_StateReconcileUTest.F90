@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.36 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.37 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -287,14 +287,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp2, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -397,14 +397,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompFinalize(comp1, state1, rc=rc)
+    call ESMF_GridCompFinalize(comp1, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompFinalize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompFinalize(comp2, state1, rc=rc)
+    call ESMF_GridCompFinalize(comp2, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompFinalize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -515,14 +515,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp2, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -565,14 +565,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompFinalize(comp1, state1, rc=rc)
+    call ESMF_GridCompFinalize(comp1, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompFinalize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompFinalize(comp2, state1, rc=rc)
+    call ESMF_GridCompFinalize(comp2, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompFinalize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -686,14 +686,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp2, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompInitialize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -736,14 +736,14 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompFinalize(comp1, state1, rc=rc)
+    call ESMF_GridCompFinalize(comp1, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompFinalize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompFinalize(comp2, state1, rc=rc)
+    call ESMF_GridCompFinalize(comp2, importState=state1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompFinalize"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

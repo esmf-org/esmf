@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.66 2011/01/05 20:05:47 svasquez Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.67 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.66 2011/01/05 20:05:47 svasquez Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.67 2011/01/25 15:34:54 rokuingh Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -375,7 +375,7 @@ subroutine f_esmf_gridcompdestroy(comp, rc)
   type(ESMF_GridComp) :: comp
   integer             :: rc              
 
-  call ESMF_GridCompDestroy(comp, rc)
+  call ESMF_GridCompDestroy(comp, rc=rc)
 end subroutine f_esmf_gridcompdestroy
 
 #undef  ESMF_METHOD
@@ -413,8 +413,9 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_GridCompInitialize(comp, importState, exportState, local_clock, &
-    blockingFlag, phase, userRc, rc)
+  call ESMF_GridCompInitialize(comp, importState=importState, &
+    exportState=exportState, clock=local_clock, &
+    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_gridcompinitialize
 
 #undef  ESMF_METHOD
@@ -452,8 +453,9 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_GridCompRun(comp, importState, exportState, local_clock, &
-    blockingFlag, phase, userRc, rc)
+  call ESMF_GridCompRun(comp, importState=importState, &
+    exportState=exportState, clock=local_clock, &
+    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_gridcomprun
 
 #undef  ESMF_METHOD
@@ -491,8 +493,9 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_GridCompFinalize(comp, importState, exportState, local_clock, &
-    blockingFlag, phase, userRc, rc)
+  call ESMF_GridCompFinalize(comp, importState=importState, &
+    exportState=exportState, clock=local_clock, &
+    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_gridcompfinalize
 
 #undef  ESMF_METHOD
@@ -555,7 +558,7 @@ subroutine f_esmf_gridcompvalidate(comp, options, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompValidate(comp, options, rc)
+  call ESMF_GridCompValidate(comp, options=options, rc=rc)
 end subroutine f_esmf_gridcompvalidate
 
 #undef  ESMF_METHOD
@@ -576,7 +579,7 @@ subroutine f_esmf_gridcompprint(comp, options, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompPrint(comp, options, rc)
+  call ESMF_GridCompPrint(comp, options=options, rc=rc)
 end subroutine f_esmf_gridcompprint
 
 
@@ -633,7 +636,7 @@ subroutine f_esmf_cplcompdestroy(comp, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CplCompDestroy(comp, rc)
+  call ESMF_CplCompDestroy(comp, rc=rc)
 end subroutine f_esmf_cplcompdestroy
 
 #undef  ESMF_METHOD
@@ -671,8 +674,9 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_CplCompInitialize(comp, importState, exportState, local_clock, &
-    blockingFlag, phase, userRc, rc)
+  call ESMF_CplCompInitialize(comp, importState=importState, &
+    exportState=exportState, clock=local_clock, &
+    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_cplcompinitialize
 
 #undef  ESMF_METHOD
@@ -710,8 +714,9 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_CplCompRun(comp, importState, exportState, local_clock, &
-    blockingFlag, phase, userRc, rc)
+  call ESMF_CplCompRun(comp, importState=importState, &
+    exportState=exportState, clock=local_clock, &
+    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_cplcomprun
 
 #undef  ESMF_METHOD
@@ -749,8 +754,9 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  call ESMF_CplCompFinalize(comp, importState, exportState, local_clock, &
-    blockingFlag, phase, userRc, rc)
+  call ESMF_CplCompFinalize(comp, importState=importState, &
+    exportState=exportState, clock=local_clock, &
+    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_cplcompfinalize
 
 #undef  ESMF_METHOD
@@ -809,7 +815,7 @@ subroutine f_esmf_cplcompvalidate(comp, options, rc)
   character(len=*)   :: options
   integer            :: rc     
 
-  call ESMF_CplCompValidate(comp, options, rc)
+  call ESMF_CplCompValidate(comp, options=options, rc=rc)
 end subroutine f_esmf_cplcompvalidate
 
 #undef  ESMF_METHOD
@@ -830,5 +836,5 @@ subroutine f_esmf_cplcompprint(comp, options, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CplCompPrint(comp, options, rc)
+  call ESMF_CplCompPrint(comp, options=options, rc=rc)
 end subroutine f_esmf_cplcompprint

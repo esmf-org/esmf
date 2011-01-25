@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.132 2011/01/13 18:31:11 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.133 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.132 2011/01/13 18:31:11 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.133 2011/01/25 15:34:54 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -330,19 +330,20 @@ contains
 ! !IROUTINE: ESMF_CplCompCreate - Create a CplComp
 !
 ! !INTERFACE:
-  recursive function ESMF_CplCompCreate(name, config, configFile, clock, &
-    petList, contextflag, rc)
+  recursive function ESMF_CplCompCreate(keywordEnforcer, config, configFile, &
+    clock, petList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_CplComp) :: ESMF_CplCompCreate
 !
 ! !ARGUMENTS:
-    character(len=*),       intent(in),     optional :: name
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Config),      intent(inout),  optional :: config
     character(len=*),       intent(in),     optional :: configFile
     type(ESMF_Clock),       intent(inout),  optional :: clock
     integer,                intent(in),     optional :: petList(:)
     type(ESMF_ContextFlag), intent(in),     optional :: contextflag
+    character(len=*),       intent(in),     optional :: name
     integer,                intent(out),    optional :: rc
 !
 ! !DESCRIPTION:
@@ -360,10 +361,6 @@ contains
 !    
 ! The arguments are:
 ! \begin{description}
-! \item[{[name]}]
-!   Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
-!   from within the {\tt ESMF\_CplComp} code once the initialization routine
-!   is called.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} configuration object 
 !   from which the new component
@@ -396,6 +393,10 @@ contains
 !   Specify the component's VM context. The default context is
 !   {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
 !   complete list of valid flags.
+! \item[{[name]}]
+!   Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
+!   from within the {\tt ESMF\_CplComp} code once the initialization routine
+!   is called.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -456,10 +457,11 @@ contains
 ! !IROUTINE: ESMF_CplCompDestroy - Release all resources associated with this CplComp
 
 ! !INTERFACE:
-  subroutine ESMF_CplCompDestroy(cplcomp, rc)
+  subroutine ESMF_CplCompDestroy(cplcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)          :: cplcomp
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -523,12 +525,13 @@ contains
 ! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
-    exportState, clock, blockingflag, phase, userRc, rc)
+  recursive subroutine ESMF_CplCompFinalize(cplcomp, keywordEnforcer, &
+    importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -662,11 +665,13 @@ contains
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompGet(cplcomp, name, config, configFile, clock, &
+  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, name, config, &
+    configFile, clock, &
     localPet, petCount, contextflag, currentMethod, currentPhase, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(inout)         :: cplcomp
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(out), optional :: name
     type(ESMF_Config),      intent(out), optional :: config
     character(len=*),       intent(out), optional :: configFile
@@ -806,12 +811,13 @@ contains
 ! !IROUTINE: ESMF_CplCompInitialize - Call the CplComp's initialize routine
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
-    exportState, clock, blockingflag, phase, userRc, rc)
+  recursive subroutine ESMF_CplCompInitialize(cplcomp, keywordEnforcer, &
+    importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                               :: cplcomp
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -944,13 +950,14 @@ contains
 ! !IROUTINE: ESMF_CplCompIsPetLocal - Inquire if this CplComp is to execute on the calling PET
 !
 ! !INTERFACE:
-  recursive function ESMF_CplCompIsPetLocal(cplcomp, rc)
+  recursive function ESMF_CplCompIsPetLocal(cplcomp, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
     logical :: ESMF_CplCompIsPetLocal
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)         :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1002,10 +1009,11 @@ contains
 ! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompPrint(cplcomp, options, rc)
+  subroutine ESMF_CplCompPrint(cplcomp, keywordEnforcer, options, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                        :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: options
     integer,            intent(out), optional :: rc
 !
@@ -1058,11 +1066,12 @@ contains
 ! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's read restart routine
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompReadRestart(cplcomp, importState, &
-    exportState, clock, blockingflag, phase, userRc, rc)
+  recursive subroutine ESMF_CplCompReadRestart(cplcomp, keywordEnforcer, &
+    importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                               :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -1148,11 +1157,12 @@ contains
 ! !IROUTINE: ESMF_CplCompRun - Call the CplComp's run routine
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
-    clock, blockingflag, phase, userRc, rc)
+  recursive subroutine ESMF_CplCompRun(cplcomp, keywordEnforcer, &
+    importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                               :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -1284,10 +1294,12 @@ contains
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSet(cplcomp, name, config, configFile, clock, rc)
+  subroutine ESMF_CplCompSet(cplcomp, keywordEnforcer, name, &
+    config, configFile, clock, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)           :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),   intent(in),    optional :: name
     type(ESMF_Config),  intent(inout), optional :: config
     character(len=*),   intent(in),    optional :: configFile
@@ -1356,7 +1368,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, userRoutine, &
-     phase, rc)
+     keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent (in) :: cplcomp
@@ -1374,6 +1386,7 @@ contains
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(in),  optional  :: phase
     integer, intent(out), optional  :: rc 
 !
@@ -1486,7 +1499,7 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompSetServices(cplcomp, userRoutine, &
-     userRc, rc)
+     keywordEnforcer, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)             :: cplcomp
@@ -1498,6 +1511,7 @@ contains
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: userRc
     integer, intent(out), optional :: rc
 !
@@ -1561,11 +1575,12 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetServices()
   recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, userRoutine, &
-    sharedObj, userRc, rc)
+    keywordEnforcer, sharedObj, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
     character(len=*),    intent(in)            :: userRoutine
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
@@ -1651,7 +1666,8 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVM - Call user routine to set CplComp VM properties
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompSetVM(cplcomp, userRoutine, userRc, rc)
+  recursive subroutine ESMF_CplCompSetVM(cplcomp, userRoutine, &
+    keywordEnforcer, userRc, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)             :: cplcomp
     interface
@@ -1662,6 +1678,7 @@ contains
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: userRc
     integer, intent(out), optional :: rc
 !
@@ -1722,11 +1739,12 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetVM()
   recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, &
-    sharedObj, userRc, rc)
+    keywordEnforcer, sharedObj, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
     character(len=*),    intent(in)            :: userRoutine
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
@@ -1809,11 +1827,12 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Set VM for CplComp to associate max PEs with PETs
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, keywordEnforcer, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1879,11 +1898,12 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Set VM for CplComp with multi-threaded PETs
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, keywordEnforcer, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1950,11 +1970,12 @@ contains
 ! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set VM for CplComp with reduced threading level
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, pref_intra_process, &
-    pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, keywordEnforcer, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -2019,10 +2040,11 @@ contains
 ! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompValidate(cplcomp, options, rc)
+  subroutine ESMF_CplCompValidate(cplcomp, keywordEnforcer, options, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                        :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len = *), intent(in),  optional :: options
     integer,            intent(out), optional :: rc
 !
@@ -2068,10 +2090,11 @@ contains
 ! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompWait(cplcomp, blockingflag, userRc, rc)
+  subroutine ESMF_CplCompWait(cplcomp, keywordEnforcer, blockingflag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(inout)         :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
@@ -2124,11 +2147,12 @@ contains
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's write restart routine
 
 ! !INTERFACE:
-  recursive subroutine ESMF_CplCompWriteRestart(cplcomp, importState, &
-    exportState, clock, blockingflag, phase, userRc, rc)
+  recursive subroutine ESMF_CplCompWriteRestart(cplcomp, keywordEnforcer, &
+    importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(inout)           :: cplcomp
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock

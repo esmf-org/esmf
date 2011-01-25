@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.34 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.35 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -98,11 +98,13 @@
                              stateType=ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompInitialize(comp1, imp, exp, phase=1, rc=rc)
+      call ESMF_GridCompInitialize(comp1, importState=imp, &
+        exportState=exp, phase=1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 1 finished"
 
-      call ESMF_GridCompInitialize(comp1, imp, exp, phase=2, rc=rc)
+      call ESMF_GridCompInitialize(comp1, importState=imp, &
+        exportState=exp, phase=2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 2 finished"
 
@@ -112,15 +114,18 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-      call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
+      call ESMF_GridCompRun(comp1, importState=imp, &
+        exportState=exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned first time"
 
-      call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
+      call ESMF_GridCompRun(comp1, importState=imp, &
+        exportState=exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned second time"
 
-      call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
+      call ESMF_GridCompRun(comp1, importState=imp, &
+        exportState=exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned third time"
 
@@ -131,7 +136,8 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, imp, exp, rc=rc)
+      call ESMF_GridCompFinalize(comp1, importState=imp, &
+        exportState=exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 

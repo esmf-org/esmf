@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.24 2011/01/13 21:07:28 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.25 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -133,7 +133,7 @@
     !NEX_UTest
 !   !  Set VM
 
-    call ESMF_GridCompSetVM(comp1, SetVM, rc)
+    call ESMF_GridCompSetVM(comp1, SetVM, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component VM"

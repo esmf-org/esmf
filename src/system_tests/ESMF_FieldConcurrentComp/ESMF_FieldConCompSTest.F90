@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.14 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.15 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -246,7 +246,8 @@
     !print *, "Comp 2 Initialize finished, rc =", rc
 
     ! note that the coupler's import is comp1's export
-    call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
+    call ESMF_CplCompInitialize(cpl, importState=c1exp, &
+      exportState=c2imp, clock=clock, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -308,7 +309,8 @@
       ! calls contained in the user written coupler methods will indirectly
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
-      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=localrc)
+      call ESMF_CplCompRun(cpl, importState=c1exp, &
+        exportState=c2imp, clock=clock, rc=localrc)
       !print *, "Coupler Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -364,7 +366,8 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     !print *, "Comp 2 Finalize finished, rc =", rc
 
-    call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=localrc)
+    call ESMF_CplCompFinalize(cpl, importState=c1exp, &
+      exportState=c2imp, clock=clock, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)

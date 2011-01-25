@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.30 2011/01/14 17:49:01 w6ws Exp $
+! $Id: user_model.F90,v 1.31 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -156,7 +156,7 @@
 
         ! This is where the model specific setup code goes.  
 
-        call ESMF_GridCompPrint(comp, "", rc=rc)
+        call ESMF_GridCompPrint(comp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
         call ESMF_StatePrint(exportState, options="", rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    

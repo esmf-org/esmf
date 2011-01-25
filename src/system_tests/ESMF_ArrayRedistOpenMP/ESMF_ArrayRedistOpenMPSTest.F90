@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.11 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.12 2011/01/25 15:34:54 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -239,7 +239,8 @@ program ESMF_ArrayRedistOpenMPSTest
 
   ! note that the coupler's import is comp1's export state
   ! and coupler's export is comp2's import state
-  call ESMF_CplCompInitialize(cpl, c1exp, c2imp, rc=localrc, userRc=userrc)
+  call ESMF_CplCompInitialize(cpl, importState=c1exp, &
+    exportState=c2imp, rc=localrc, userRc=userrc)
   print *, "Coupler Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -263,7 +264,8 @@ program ESMF_ArrayRedistOpenMPSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  call ESMF_CplCompRun(cpl, c1exp, c2imp, rc=localrc, userRc=userrc)
+  call ESMF_CplCompRun(cpl, importState=c1exp, &
+    exportState=c2imp, rc=localrc, userRc=userrc)
   print *, "Coupler Run returned, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -287,7 +289,8 @@ program ESMF_ArrayRedistOpenMPSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_CplCompFinalize(cpl, c1exp, c2imp, rc=localrc, userRc=userrc)
+  call ESMF_CplCompFinalize(cpl, importState=c1exp, &
+    exportState=c2imp, rc=localrc, userRc=userrc)
   print *, "Coupler Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.47 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_CplEx.F90,v 1.48 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -297,7 +297,7 @@
     end if    
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CplCompSetServices(cpl, CPL_SetServices, rc)
+    call ESMF_CplCompSetServices(cpl, CPL_SetServices, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
@@ -369,7 +369,7 @@
      
     ! Call the Init routine.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_CplCompInitialize(cpl, exportState, importState, tclock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, importState=exportState, exportState=importState, clock=tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
@@ -380,7 +380,7 @@
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-        call ESMF_CplCompRun(cpl, exportState, importState, tclock, rc=rc)
+        call ESMF_CplCompRun(cpl, importState=exportState, exportState=importState, clock=tclock, rc=rc)
 
         if (rc.NE.ESMF_SUCCESS) then
             finalrc = ESMF_FAILURE
@@ -393,7 +393,7 @@
     print *, "Comp Run complete"
 
     ! Give the component a chance to write out final results, clean up.
-    call ESMF_CplCompFinalize(cpl, exportState, importState, tclock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, importState=exportState, exportState=importState, clock=tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE

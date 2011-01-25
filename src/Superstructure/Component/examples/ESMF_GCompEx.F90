@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.53 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_GCompEx.F90,v 1.54 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -299,14 +299,14 @@
      end if
 
     ! Optional user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetVM(gcomp, GComp_SetVM, rc)
+    call ESMF_GridCompSetVM(gcomp, GComp_SetVM, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
      end if
      
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc)
+    call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -375,7 +375,8 @@
      
     ! Call the Init routine.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_GridCompInitialize(gcomp, importState, exportState, clock=tclock, rc=rc)
+    call ESMF_GridCompInitialize(gcomp, importState=importState, &
+      exportState=exportState, clock=tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -386,7 +387,8 @@
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-        call ESMF_GridCompRun(gcomp, importState, exportState, clock=tclock, rc=rc)
+        call ESMF_GridCompRun(gcomp, importState=importState, &
+          exportState=exportState, clock=tclock, rc=rc)
 
         if (rc.NE.ESMF_SUCCESS) then
            finalrc = ESMF_FAILURE
@@ -399,7 +401,8 @@
     print *, "Comp Run complete"
 
     ! Give the component a chance to write out final results, clean up.
-    call ESMF_GridCompFinalize(gcomp, importState, exportState, clock=tclock, rc=rc)
+    call ESMF_GridCompFinalize(gcomp, importState=importState, &
+      exportState=exportState, clock=tclock, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE

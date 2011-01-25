@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.43 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.44 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -284,7 +284,7 @@
     ! This single user-supplied subroutine must be a public entry point 
     !  and can renamed with the 'use localname => modulename' syntax if
     !  the name is not unique.
-    call ESMF_GridCompSetServices(gcomp1, PHYS_SetServices, rc)
+    call ESMF_GridCompSetServices(gcomp1, PHYS_SetServices, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -299,7 +299,7 @@
 !BOC
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc)
+    call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc=rc)
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
@@ -310,7 +310,7 @@
 !BOC
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CplCompSetServices(cpl, CPLR_SetServices, rc)
+    call ESMF_CplCompSetServices(cpl, CPLR_SetServices, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -333,7 +333,7 @@
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc)
+    gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -376,7 +376,8 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_CplCompInitialize(cpl, states(1), states(2), clock=tclock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, importState=states(1), &
+      exportState=states(2), clock=tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -415,7 +416,8 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_CplCompFinalize(cpl, states(1), states(2), clock=tclock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, importState=states(1), &
+      exportState=states(2), clock=tclock, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -476,10 +478,10 @@
     ! Each Component must supply a SetServices routine which makes the
     !  following types of calls:
     !
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_Init, 1, rc)
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_InitPhase2, 2, rc)
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETRUN, PHYS_Run, 0, rc)
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETFINAL, PHYS_Final, 0, rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_Init, 1, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_InitPhase2, 2, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETRUN, PHYS_Run, 0, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETFINAL, PHYS_Final, 0, rc=rc)
     !
     ! The arguments are: the component, the type of routine, 
     !  the name of the internal subroutine which contains the user code, 

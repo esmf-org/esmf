@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.7 2011/01/21 00:11:46 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.8 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.7 2011/01/21 00:11:46 rokuingh Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.8 2011/01/25 15:34:54 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -595,18 +595,18 @@ program ESMF_AttributeUpdateUTest
                              stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc)
+    call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc)
+    call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc)
+    call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc)
+    call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc)
+    call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc)
+    call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     call ESMF_GridCompInitialize(gridcomp1, exportState=c1exp, rc=rc)

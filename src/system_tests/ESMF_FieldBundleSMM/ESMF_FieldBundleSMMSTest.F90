@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.14 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.15 2011/01/25 15:34:54 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -195,7 +195,8 @@ program ESMF_FieldBundleSMMSTest
 #if 1
   ! note that the coupler's import is comp1's export state
   ! and coupler's export is comp2's import state
-  call ESMF_CplCompInitialize(cpl, c1exp, c2imp, userRc=urc, rc=localrc)
+  call ESMF_CplCompInitialize(cpl, importState=c1exp, &
+    exportState=c2imp, userRc=urc, rc=localrc)
   print *, "Coupler Initialize finished, rc =", urc, localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -213,7 +214,8 @@ program ESMF_FieldBundleSMMSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_CplCompRun(cpl, c1exp, c2imp, userRc=urc, rc=localrc)
+  call ESMF_CplCompRun(cpl, importState=c1exp, &
+    exportState=c2imp, userRc=urc, rc=localrc)
   print *, "Coupler Run returned, rc =", urc, localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -231,7 +233,8 @@ program ESMF_FieldBundleSMMSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_CplCompFinalize(cpl, c1exp, c2imp, userRc=urc, rc=localrc)
+  call ESMF_CplCompFinalize(cpl, importState=c1exp, &
+    exportState=c2imp, userRc=urc, rc=localrc)
   print *, "Coupler Finalize finished, rc =", urc, localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

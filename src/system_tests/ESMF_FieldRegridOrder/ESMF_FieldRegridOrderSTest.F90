@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.26 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.27 2011/01/25 15:34:55 rokuingh Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -177,7 +177,8 @@
     print *, "Comp 2 Initialize finished, rc =", rc
 
     ! note that the coupler's import is comp1's export
-    call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, importState=c1exp, &
+      exportState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Coupler Initialize finished, rc =", rc
 
@@ -193,7 +194,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Run returned, rc =", rc
 
-      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
+      call ESMF_CplCompRun(cpl, importState=c1exp, &
+        exportState=c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Run returned, rc =", rc
 
@@ -222,7 +224,8 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 2 Finalize finished, rc =", rc
 
-    call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, importState=c1exp, &
+      exportState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Coupler Finalize finished, rc =", rc
 
@@ -246,12 +249,12 @@
     call ESMF_StateDestroy(c1exp, rc=rc)
     call ESMF_StateDestroy(c2imp, rc=rc)
 
-    call ESMF_ClockDestroy(clock, rc)
-    call ESMF_CalendarDestroy(gregorianCalendar, rc)
+    call ESMF_ClockDestroy(clock, rc=rc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
 
-    call ESMF_GridCompDestroy(comp1, rc)
-    call ESMF_GridCompDestroy(comp2, rc)
-    call ESMF_CplCompDestroy(cpl, rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp2, rc=rc)
+    call ESMF_CplCompDestroy(cpl, rc=rc)
 
     print *, "All Destroy routines done"
 

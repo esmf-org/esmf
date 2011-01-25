@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.12 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.13 2011/01/25 15:34:55 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -368,7 +368,8 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-  call ESMF_GridCompInitialize(compC, cplexp, compCexp, userRc=localrc)
+  call ESMF_GridCompInitialize(compC, importState=cplexp, &
+    exportState=compCexp, userRc=localrc)
   print *, "Coupler Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -409,12 +410,14 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  	call ESMF_CplCompRun(cpl, cplimp, cplexp, clock=clock, userRc=localrc)
+  	call ESMF_CplCompRun(cpl, importState=cplimp, &
+      exportState=cplexp, clock=clock, userRc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  	call ESMF_GridCompRun(compC, cplexp, compCexp, clock=clock, userRc=localrc)
+  	call ESMF_GridCompRun(compC, importState=cplexp, &
+      exportState=compCexp, clock=clock, userRc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -458,12 +461,14 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompFinalize(compC, cplimp, compCexp, userRc=localrc)
+  call ESMF_GridCompFinalize(compC, importState=cplimp, &
+    exportState=compCexp, userRc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_CplCompFinalize(cpl, cplimp, cplexp, userRc=localrc)
+  call ESMF_CplCompFinalize(cpl, importState=cplimp, &
+    exportState=cplexp, userRc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

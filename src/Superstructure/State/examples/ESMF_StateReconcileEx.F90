@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.35 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.36 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -173,10 +173,10 @@ end module ESMF_StateReconcileEx_Mod
     ! but to make this example very short, they are called inline below.
     ! This is o.k. because the SetServices routine must execute from within
     ! the parent component VM.
-    call ESMF_GridCompSetVM(comp1, comp_dummy, rc)
-    call ESMF_GridCompSetVM(comp2, comp_dummy, rc)
-    call ESMF_GridCompSetServices(comp1, comp_dummy, rc)
-    call ESMF_GridCompSetServices(comp2, comp_dummy, rc)
+    call ESMF_GridCompSetVM(comp1, comp_dummy, rc=rc)
+    call ESMF_GridCompSetVM(comp2, comp_dummy, rc=rc)
+    call ESMF_GridCompSetServices(comp1, comp_dummy, rc=rc)
+    call ESMF_GridCompSetServices(comp2, comp_dummy, rc=rc)
 
     print *, "ready to set entry point 1"
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, comp1_init, rc=rc)
@@ -186,9 +186,9 @@ end module ESMF_StateReconcileEx_Mod
 
 
     print *, "ready to call init for comp 1"
-    call ESMF_GridCompInitialize(comp1, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp1, exportState=state1, rc=rc)
     print *, "ready to call init for comp 2"
-    call ESMF_GridCompInitialize(comp2, state1, rc=rc)
+    call ESMF_GridCompInitialize(comp2, exportState=state1, rc=rc)
 !EOC
 
     print *, "State Example 2 finished"

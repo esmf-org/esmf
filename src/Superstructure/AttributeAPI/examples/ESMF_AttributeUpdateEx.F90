@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.28 2011/01/21 00:11:46 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.29 2011/01/25 15:34:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -125,13 +125,13 @@ implicit none
 ! a random endif in the protex while investigating the uni failures in
 ! this example, which will not run UNI in the end anyway
                 
-      call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc)
-      call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc)
-      call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc)
+      call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc=rc)
+      call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc=rc)
+      call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc=rc)
 
-      call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc)
-      call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc)
-      call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc)
+      call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc=rc)
+      call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc=rc)
+      call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc=rc)
 
 !BOE
 ! Before the individual components are initialized, run, and finalized Attributes should be set at the
