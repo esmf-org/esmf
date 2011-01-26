@@ -1,4 +1,4 @@
-! $Id: ESMF_StateSet.F90,v 1.8 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StateSet.F90,v 1.9 2011/01/26 05:30:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateSet.F90,v 1.8 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_StateSet.F90,v 1.9 2011/01/26 05:30:29 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -84,13 +84,14 @@
 ! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
 !
 ! !INTERFACE:
-      subroutine ESMF_StateSetNeeded(state, itemName, neededflag, rc)
+      subroutine ESMF_StateSetNeeded(state, itemName, neededflag, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_NeededFlag), intent(in) :: neededflag
-      integer, intent(out), optional :: rc             
+      type(ESMF_State),  intent(inout)   :: state
+      character (len=*), intent(in)      :: itemName
+      type(ESMF_NeededFlag), intent(in)  :: neededflag
+    type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer,    intent(out),  optional :: rc             
 
 !
 ! !DESCRIPTION:

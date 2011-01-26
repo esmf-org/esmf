@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cppF90,v 1.10 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StateGet.cppF90,v 1.11 2011/01/26 05:30:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ module ESMF_StateGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateGet.cppF90,v 1.10 2011/01/05 20:05:47 svasquez Exp $'
+    '$Id: ESMF_StateGet.cppF90,v 1.11 2011/01/26 05:30:29 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -148,11 +148,13 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_StateGetDataPointer" @\
       subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind(state, & @\
-                     itemName, dataPointer, copyflag, nestedStateName, fieldName, rc) @\
+                     itemName, dataPointer, keywordEnforcer, copyflag, & @\
+                     nestedStateName, fieldName, rc) @\
  @\
       type(ESMF_State), intent(in) :: state @\
       character(len=*), intent(in) :: itemName @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
+      type(ESMF_KeywordEnforcer),      optional :: keywordEnforcer ! must use keywords for the below @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       character(len=*), intent(in), optional :: nestedStateName @\
       character(len=*), intent(in), optional :: fieldName @\
