@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.h,v 1.6 2011/01/24 17:04:56 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.h,v 1.7 2011/01/26 04:53:28 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -122,7 +122,9 @@ namespace ESMCI
 
      vector<string>	theOutputFiles;	// the list of output files
 
+#ifndef ESMF_NO_PTHREADS
 	  pthread_mutex_t	theStatusMutex;	// mutex lock for the current status
+#endif
   };
 
 } // end namespace

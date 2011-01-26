@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.7 2011/01/24 17:04:56 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.8 2011/01/26 04:53:28 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -623,7 +623,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_WebServAddOutputFilename()"
 !BOPI
-! !IROUTINE: ESMF_WebServSvcLoop 
+! !IROUTINE: ESMF_WebServAddOutputFilename 
 !
 ! !INTERFACE:
   subroutine ESMF_WebServAddOutputFilename(filename, rc)

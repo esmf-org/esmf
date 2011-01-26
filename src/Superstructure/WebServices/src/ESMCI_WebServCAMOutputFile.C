@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCAMOutputFile.C,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServCAMOutputFile.C,v 1.4 2011/01/26 04:53:28 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,11 +32,12 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <iostream>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCAMOutputFile.C,v 1.3 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServCAMOutputFile.C,v 1.4 2011/01/26 04:53:28 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -68,6 +69,7 @@ ESMCI_WebServCAMOutputFile::ESMCI_WebServCAMOutputFile(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+#ifdef ESMF_NETCDF
 	theNetCdfFile = new NcFile(filename.c_str(), NcFile::ReadOnly);
 
 	NcVar*	latVar = theNetCdfFile->get_var("lat");
@@ -118,6 +120,21 @@ ESMCI_WebServCAMOutputFile::ESMCI_WebServCAMOutputFile(
 	NcVar*	vbotVar = theNetCdfFile->get_var("VBOT");
 	theVBOTValues = new double[theNumLatValues * theNumLonValues];
 	vbotVar->get(theVBOTValues, theNumLatValues, theNumLonValues);
+#else
+   theNumLatValues = 0;
+	theLatValues = NULL;
+	theNumLonValues = 0;
+	theLonValues = NULL;
+	theNumTimeValues = 0;
+	theTimeValues = NULL;
+
+	thePRECTValues = NULL;
+	theTSValues = NULL;
+	theSOLINValues = NULL;
+	theRELHUMValues = NULL;
+	theUBOTValues = NULL;
+	theVBOTValues = NULL;
+#endif
 }
 
 
@@ -188,7 +205,8 @@ int  ESMCI_WebServCAMOutputFile::getTimeIndex(
 int  ESMCI_WebServCAMOutputFile::getLatIndex(
 //
 // !RETURN VALUE:
-//   int  index of specified lat value in array of lat values
+//   int  index of specified lat value in array of lat values; -1 if there's
+//        a problem.
 //
 // !ARGUMENTS:
 //
@@ -202,12 +220,23 @@ int  ESMCI_WebServCAMOutputFile::getLatIndex(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	//***
+	// Make sure that the lat values were loaded
+	//***
+	if (theNumLatValues == 0)
+	{
+		return -1;
+	}
+
+	//***
+	// Now, make sure the value to look for is valid
+	//***
 	int	latIndex = 0;
 
 	if ((latValue < -90)  ||  (latValue > 90))
 	{
 		// This is not a valid latitude
-		return 0;
+		return -1;
 	}
 
 	//***
@@ -249,7 +278,8 @@ int  ESMCI_WebServCAMOutputFile::getLatIndex(
 int  ESMCI_WebServCAMOutputFile::getLonIndex(
 //
 // !RETURN VALUE:
-//   int  index of specified lon value in array of lon values
+//   int  index of specified lon value in array of lon values; -1 if there's
+//        a problem.
 //
 // !ARGUMENTS:
 //
@@ -263,12 +293,23 @@ int  ESMCI_WebServCAMOutputFile::getLonIndex(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	//***
+	// Make sure that the lon values were loaded
+	//***
+	if (theNumLonValues == 0)
+	{
+		return -1;
+	}
+
+	//***
+	// Now, make sure the value to look for is valid
+	//***
 	int	lonIndex = 0;
 
 	if ((lonValue < 0)  ||  (lonValue > 360))
 	{
 		// This is not a valid latitude
-		return 0;
+		return -1;
 	}
 
 	//***
@@ -399,11 +440,24 @@ double  ESMCI_WebServCAMOutputFile::getAirTemp(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	double	retValue = 0.0;
+
+	//***
+	// Make sure the TS Values were loaded
+	//***
+	if (theTSValues == NULL)
+	{
+		return retValue;
+	}
+
 	int	latIdx = getLatIndex(latValue);
 	int	lonIdx = getLonIndex(lonValue);
 
-	double	tsValue = theTSValues[(latIdx * theNumLonValues) + lonIdx];
-	double	retValue = tsValue - 273.15;
+	if ((latIdx >= 0)  &&  (lonIdx >= 0))
+	{
+		double	tsValue = theTSValues[(latIdx * theNumLonValues) + lonIdx];
+		retValue = tsValue - 273.15;
+	}
 
 	return retValue;
 }
@@ -435,12 +489,25 @@ double  ESMCI_WebServCAMOutputFile::getWindSpeed(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	double	retValue = 0.0;
+
+	//***
+	// Make sure the UBOT and VBOT Values were loaded
+	//***
+	if ((theUBOTValues == NULL)  ||  (theVBOTValues == NULL))
+	{
+		return retValue;
+	}
+
 	int	latIdx = getLatIndex(latValue);
 	int	lonIdx = getLonIndex(lonValue);
 
-	double	ubotValue = theUBOTValues[(latIdx * theNumLonValues) + lonIdx];
-	double	vbotValue = theVBOTValues[(latIdx * theNumLonValues) + lonIdx];
-	double	retValue = sqrt(pow(ubotValue, 2) + pow(vbotValue, 2));
+	if ((latIdx >= 0)  &&  (lonIdx >= 0))
+	{
+		double	ubotValue = theUBOTValues[(latIdx * theNumLonValues) + lonIdx];
+		double	vbotValue = theVBOTValues[(latIdx * theNumLonValues) + lonIdx];
+		retValue = sqrt(pow(ubotValue, 2) + pow(vbotValue, 2));
+	}
 
 	return retValue;
 }
@@ -472,11 +539,24 @@ double  ESMCI_WebServCAMOutputFile::getPrecip(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	double	retValue = 0.0;
+
+	//***
+	// Make sure the PRECT Values were loaded
+	//***
+	if (thePRECTValues == NULL)
+	{
+		return retValue;
+	}
+
 	int	latIdx = getLatIndex(latValue);
 	int	lonIdx = getLonIndex(lonValue);
 
-	double	prectValue = thePRECTValues[(latIdx * theNumLonValues) + lonIdx];
-	double	retValue = prectValue * 86400 * 1000;
+	if ((latIdx >= 0)  &&  (lonIdx >= 0))
+	{
+		double	prectValue = thePRECTValues[(latIdx * theNumLonValues) + lonIdx];
+		retValue = prectValue * 86400 * 1000;
+	}
 
 	return retValue;
 }
@@ -508,11 +588,24 @@ double  ESMCI_WebServCAMOutputFile::getSolarRad(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	double	retValue = 0.0;
+
+	//***
+	// Make sure the SOLIN Values were loaded
+	//***
+	if (theSOLINValues == NULL)
+	{
+		return retValue;
+	}
+
 	int	latIdx = getLatIndex(latValue);
 	int	lonIdx = getLonIndex(lonValue);
 
-	double	solinValue = theSOLINValues[(latIdx * theNumLonValues) + lonIdx];
-	double	retValue = solinValue * 86400 * 10;
+	if ((latIdx >= 0)  &&  (lonIdx >= 0))
+	{
+		double	solinValue = theSOLINValues[(latIdx * theNumLonValues) + lonIdx];
+		retValue = solinValue * 86400 * 10;
+	}
 
 	return retValue;
 }
@@ -544,11 +637,25 @@ double  ESMCI_WebServCAMOutputFile::getRelHumid(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+	double	retValue = 0.0;
+
+	//***
+	// Make sure the RELHUM Values were loaded
+	//***
+	if (theRELHUMValues == NULL)
+	{
+		return retValue;
+	}
+
 	int	latIdx = getLatIndex(latValue);
 	int	lonIdx = getLonIndex(lonValue);
 
-	double	relHumValue = theRELHUMValues[(latIdx * theNumLonValues) + lonIdx];
-	double	retValue = relHumValue / 100;
+	if ((latIdx >= 0)  &&  (lonIdx >= 0))
+	{
+		double	relHumValue = 
+						theRELHUMValues[(latIdx * theNumLonValues) + lonIdx];
+		retValue = relHumValue / 100;
+	}
 
 	return retValue;
 }

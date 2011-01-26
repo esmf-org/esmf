@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.7 2011/01/26 04:53:28 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.7 2011/01/26 04:53:28 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -126,6 +126,7 @@ ESMCI_WebServComponentSvr::ESMCI_WebServComponentSvr(
 	//***
 	// Initialize the status mutex
 	//***
+#ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_init(&theStatusMutex, NULL) != 0)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -133,6 +134,7 @@ ESMCI_WebServComponentSvr::ESMCI_WebServComponentSvr(
          "Error while initializing mutex lock... behavior unknown.",
          &localrc);
 	}
+#endif
 
 	//***
 	// Set the data members
@@ -167,6 +169,7 @@ ESMCI_WebServComponentSvr::~ESMCI_WebServComponentSvr(
 
 	theSocket.disconnect();
 
+#ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_destroy(&theStatusMutex) != 0)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -174,6 +177,7 @@ ESMCI_WebServComponentSvr::~ESMCI_WebServComponentSvr(
          "Error while destroying mutex lock.",
          &localrc);
 	}
+#endif
 }
 
 
@@ -563,6 +567,7 @@ void  ESMCI_WebServComponentSvr::setStatus(
 {
 	int	localrc = 0;
 
+#ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_lock(&theStatusMutex) != 0)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -570,9 +575,11 @@ void  ESMCI_WebServComponentSvr::setStatus(
          "Error while locking current status mutex lock... behavior unknown.",
          &localrc);
 	}
+#endif
 
 	theCurrentStatus = status;
 
+#ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_unlock(&theStatusMutex) != 0)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -580,6 +587,7 @@ void  ESMCI_WebServComponentSvr::setStatus(
          "Error while unlocking current status mutex lock... behavior unknown.",
          &localrc);
 	}
+#endif
 }
 
 
@@ -710,6 +718,7 @@ int  ESMCI_WebServComponentSvr::processInit(
 		// will be responsible for updating the status when the initialize is
 		// done.
 		//***
+#ifndef ESMF_NO_PTHREADS
 		pthread_t	thread;
 		int			rc = 0;
 
@@ -722,6 +731,9 @@ int  ESMCI_WebServComponentSvr::processInit(
 
 			return localrc;
 		}
+#else
+		runInit();
+#endif
 	}
 
 	//***
@@ -821,6 +833,7 @@ int  ESMCI_WebServComponentSvr::processRun(
 		//***
 		setStatus(NET_ESMF_STAT_RUNNING);
 
+#ifndef ESMF_NO_PTHREADS
 		pthread_t	thread;
 		int			rc = 0;
 
@@ -833,6 +846,9 @@ int  ESMCI_WebServComponentSvr::processRun(
 
 			return localrc;
 		}
+#else
+		runRun();
+#endif
 	}
 
 	//***
@@ -931,6 +947,7 @@ int  ESMCI_WebServComponentSvr::processFinal(
 		//***
 		setStatus(NET_ESMF_STAT_FINALIZING);
 
+#ifndef ESMF_NO_PTHREADS
 		pthread_t	thread;
 		int			rc = 0;
 		if ((rc = pthread_create(&thread, NULL, finalThreadStartup, this)) != 0)
@@ -942,6 +959,9 @@ int  ESMCI_WebServComponentSvr::processFinal(
 
 			return localrc;
 		}
+#else
+		runFinal();
+#endif
 	}
 
 	//***

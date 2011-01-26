@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCAMOutputFile.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServCAMOutputFile.h,v 1.4 2011/01/26 04:53:28 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,7 +20,10 @@
 #define ESMCI_WebServCAMOutputFile_H
 
 #include <string>
+
+#ifdef ESMF_NETCDF
 #include <netcdfcpp.h>
+#endif
 
 using namespace std;
 
@@ -91,7 +94,9 @@ namespace ESMCI
      // print method for debug purposes
 	  void  printSourceValues();
 
+#ifdef ESMF_NETCDF
 	  NcFile*	theNetCdfFile;		// the CAM output file NetCDF pointer
+#endif
 
 	  int			theNumLatValues;	// the number of latitude values
 	  double*	theLatValues;		// array of latitude values
