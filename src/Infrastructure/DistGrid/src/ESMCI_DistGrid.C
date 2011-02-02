@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.53 2011/01/07 21:09:50 rokuingh Exp $
+// $Id: ESMCI_DistGrid.C,v 1.54 2011/02/02 23:08:48 gerhard.j.theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.53 2011/01/07 21:09:50 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.54 2011/02/02 23:08:48 gerhard.j.theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -154,7 +154,7 @@ DistGrid *DistGrid::create(
           memcpy(&(connectionListAlloc[elementSize*i]), dg->connectionList[i],
             sizeof(int)*elementSize);
         }
-        connectionList = new InterfaceInt(dg->maxIndexPDimPTile,
+        connectionList = new InterfaceInt(connectionListAlloc,
           dimInterfaceInt, dimCountInterfaceInt);
       }
     }
