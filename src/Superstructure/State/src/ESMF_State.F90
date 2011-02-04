@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.240 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.241 2011/02/04 22:23:21 ESRL\silverio.vasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.240 2011/01/25 20:55:52 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.241 2011/02/04 22:23:21 ESRL\silverio.vasquez Exp $'
 
 !==============================================================================
 ! 
@@ -3661,7 +3661,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateIsReconcileNeeded"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateIsReconcileNeeded -- Return logical true if reconciliation needed
 !
 ! !INTERFACE:
@@ -3701,7 +3701,7 @@ contains
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 
     logical :: localrecflag
     integer :: localrc
@@ -4075,7 +4075,7 @@ contains
 ! !IROUTINE: ESMF_StateRemove - Remove an item from a State
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, rc)
+  subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
@@ -4111,11 +4111,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 
-    type(ESMF_StateItem),  pointer :: dataitem
+    type(ESMF_StateItem),  pointer :: dataitem, fielditem
     type(ESMF_StateClass), pointer :: localstatep
+    character(len=ESMF_MAXSTR) :: fieldname
     logical :: exists
     integer :: localrc
     character(len=ESMF_MAXSTR) :: errmsg
+    type(ESMF_FieldBundle), pointer :: localfbundle
+    type(ESMF_Field) :: localfield
+    character(ESMF_MAXSTR), allocatable :: fnames(:)
+    integer :: fnamecount
+    integer :: i
+    integer :: memstat
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4130,23 +4137,70 @@ contains
                                        dataState=localstatep,  &
                                        rc=localrc)
     if (.not. exists) then
-        write(errmsg, *) "can not find " // trim (itemname) // " for removal"
+        errmsg = "can not find " // trim (itemname) // " for removal"
         if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                     ESMF_CONTEXT, rc)) return
     end if
 
-    if (dataitem%otype == ESMF_STATEITEM_FIELDBUNDLE) then
-    ! TODO: In the case of FieldBundles, do we need to remove individual
-    ! Fields as well?  If so, FindData needs to return the containing,
-    ! potentially nested, State as well.
+    select case (dataitem%otype%ot)
+    case (ESMF_STATEITEM_FIELDBUNDLE%ot)
 
-      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, "FieldBundle remove not supported",  &
-                               ESMF_CONTEXT, rc)) return
-    end if
+      ! Loop through all the indirect Fields contained within the FieldBundle,
+      ! and make sure they are also eliminated from the State.
+
+      localfbundle => dataitem%datap%fbp
+
+      call ESMF_FieldBundleGet(localfbundle, fieldCount=fnamecount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rc)) return
+
+      allocate (fnames(fnamecount), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rc)) return
+
+      call ESMF_FieldBundleGet (localfbundle,  &
+                nameList=fnames, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rc)) return
+
+      do, i=1, fnamecount
+        exists = ESMF_StateClassFindData (localstatep,  &
+                                          dataname=fnames(i), expected=.true., &
+                                          dataitem=fielditem,  &
+                                          rc=localrc)
+	if (exists .and. fielditem%otype == ESMF_STATEITEM_INDIRECT) then
+            fielditem%removedflag = .true.
+        else
+          ! A missing Field is currently just a warning, since it may have
+          ! also been part of a different FieldBundle that was previously
+          ! removed.  This may be a bug...
+          errmsg = "can not find indirect Field " // trim (fnames(i)) //  &
+                   " in FieldBundle " // trim (itemname) //  &
+                   " for removal from State item list"
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                	ESMF_CONTEXT, rc)) continue
+        end if
+
+      end do
+
+      deallocate (fnames, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rc)) return
+
+    case (ESMF_STATEITEM_INDIRECT%ot)
+      errmsg = "Indirect field " // trim (itemname) //  &
+               " must be removed by removing its field bundle"
+      if (ESMF_LogFoundError(ESMF_RC_NOT_VALID, errmsg, &
+                             ESMF_CONTEXT, rc)) return
+    end select
 
     dataitem%removedflag = .true.
 
-    call ESMF_StateClassCompressList (state%statep, rc=localrc)
+    call ESMF_StateClassCompressList (localstatep, rc=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
                                   ESMF_CONTEXT, rc)) return
 
@@ -4377,10 +4431,29 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
 
+    character(ESMF_MAXSTR) :: fbname
+    integer :: localrc
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldBundleGet (FieldBundle, name=fbname, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_StateRemove (state, itemName=fbname, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
+
     call ESMF_StateAdd (state, Fieldbundle,  &
                         proxyflag=.false.,   &
                         replaceflag=.true.,  &
-                        rc=rc)
+                        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_StateRepOneFieldBundle
 
@@ -6054,7 +6127,8 @@ contains
       integer, allocatable :: ftodo(:)
       integer :: bindex, findex 
       integer :: i, j
-      integer :: fcount, fruncount, newcount
+      integer :: fcounts(size (fieldbundles))
+      integer :: fruncount, newcount
       logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
@@ -6098,18 +6172,18 @@ contains
       !       if existing object - what?  replace it silently?
 
       ! get a count of all fields in all fieldbundles
-      fruncount = 0
+      fcounts = 0
       do i=1, bcount
         call ESMF_FieldBundleValidate(fieldbundles(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcount, rc=localrc)
+        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcounts(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        fruncount = fruncount + fcount
-      enddo
+      end do
+      fruncount = sum (fcounts)
 
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
@@ -6174,12 +6248,8 @@ contains
         endif
 
         ! and now the same for each field in the fieldbundle
-        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcount, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) goto 10
 
-        do j=1, fcount
+        do j=1, fcounts(i)
             ! get next field and query name
             call ESMF_FieldBundleGet(fieldbundles(i), j, field, localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -6297,19 +6367,16 @@ contains
         ! Whether it was found in pass 1 or just added above, we still
         !  have to go through each field and see if any of them need to
         !  be added or updated.
-        call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcount, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) goto 10
 
         ! Skip empty fieldbundles
-        if (fcount .le. 0) cycle
+        if (fcounts(i) <= 0) cycle
 
         ! for each field in the fieldbundle
-        do j=1, fcount
+        do j=1, fcounts(i)
 
-          ! If new field entry needs to be added
-          if (ftodo(fruncount) .eq. -1) then
+          select case (ftodo(fruncount))
+          case (-1)
+          ! A new field entry needs to be added
             stypep%datacount = stypep%datacount + 1
 
             nextitem => stypep%datalist(stypep%datacount)
@@ -6344,11 +6411,11 @@ contains
             nextitem%valid = stypep%stvalid_default
             nextitem%reqrestart = stypep%reqrestart_default
 
-          ! If the field entry already existed but needs fieldbundle index updated,
+          case (-2)
+          !  The field entry already existed but needs fieldbundle index updated,
           !  we do have to do a lookup on the field to see where it was
           !  found.  We just added the fieldbundle above, so bindex is the
           !  value to set.
-          else if (ftodo(fruncount) .eq. -2) then
             exists = ESMF_StateClassFindData(stypep, fname, .true.,  &
                                             dataitem=dataitem, dataindex=findex, &
                                             rc=localrc)
@@ -6361,7 +6428,8 @@ contains
               goto 10
             endif
             dataitem%indirect_index = bindex
-          endif
+
+          end select
   
           ! Update the running count.
           fruncount = fruncount+1

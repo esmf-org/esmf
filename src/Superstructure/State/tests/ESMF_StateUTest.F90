@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.87 2011/01/26 00:11:03 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.88 2011/02/04 22:27:49 ESRL\silverio.vasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.87 2011/01/26 00:11:03 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.88 2011/02/04 22:27:49 ESRL\silverio.vasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -66,6 +66,13 @@
 #if defined (ESMF_TESTEXHAUSTIVE)
       integer :: itemcount
       type(ESMF_FieldBundle) :: bundle2inner(1)
+
+      type(ESMF_LocStream)   :: lstream
+      type(ESMF_ArraySpec)   :: aspec
+      type(ESMF_Field)       :: fields(5)
+      type(ESMF_FieldBundle) :: fbundle
+
+      integer :: i
 #endif
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1196,6 +1203,98 @@
       write (name, *) "Remove a non-existing item test"
       call ESMF_Test (rc == ESMF_RC_NOT_FOUND, name, failMsg,  &
         result, ESMF_SRCLINE)
+
+      ! StateRemove of FieldBundles
+
+      !EX_UTest
+      ! Create a locstream
+      lstream = ESMF_LocStreamCreate (maxIndex=32, rc=rc)
+      write (failmsg, *) "Creating LocStream for FieldBundle remove test"
+      write (name, *) "Create LocStream for FieldBundle StateRemove test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Set ArraySpec
+      call ESMF_ArraySpecSet(aspec, rank=1, typekind=ESMF_TYPEKIND_R8, rc=rc)
+      write (failmsg, *) "Creating ArraySpec for FieldBundle remove test"
+      write (name, *) "Create ArraySpec for FieldBundle StateRemove test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Create a few Fields
+      do, i=1, size (fields)
+        write (fieldname,'(a,i1)') 'FB field ', i
+        fields(i) = ESMF_FieldCreate (name=fieldname,  &
+                    locstream=lstream, arrayspec=aspec, rc=rc)
+        if (rc /= ESMF_SUCCESS) exit
+      end do
+      write (failmsg, *) "Creating Fields for FieldBundle remove test"
+      write (name, *) "Create Field array for FieldBundle StateRemove test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Create a FieldBundle
+      fbundle = ESMF_FieldBundleCreate (name="testbundle",  &
+                  fieldCount=size (fields), fieldList=fields, rc=rc)
+      write (failmsg, *) "Creating FieldBundle for FieldBundle remove test"
+      write (name, *) "Create FieldBundle for FieldBundle StateRemove test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Insert FieldBundle into a State
+      call ESMF_StateAdd (state10, fbundle, rc=rc)
+      write (failmsg, *) "Adding FieldBundle into a State"
+      write (name, *) "Add FieldBundle into a State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Try removing an indirect Field
+      call ESMF_StateRemove (state10, itemName='FB field 2', rc=rc)
+      write (failmsg, *) "Did not fail when attempting to remove indirect Field"
+      write (name, *) "Try removing an indirect Field test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Remove the FieldBundle
+      call ESMF_StateRemove (state10, itemName='testbundle', rc=rc)
+      write (failmsg, *) "Removing an existing FieldBundle from the State"
+      write (name, *) "Remove a FieldBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Insert FieldBundle into the nested State
+      call ESMF_StateAdd (state12, fbundle, rc=rc)
+      write (failmsg, *) "Adding FieldBundle into a nested State"
+      write (name, *) "Add FieldBundle into a nested State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+! call ESMF_StatePrint (state10, options='debug', nestedFlag=.true.)
+
+      !EX_UTest
+      ! Try removing an indirect Field from nested State
+      call ESMF_StateRemove (state10, itemName='stateContainer2/FB field 2', rc=rc)
+      write (failmsg, *) "Did not fail when attempting to remove indirect Field"
+      write (name, *) "Try removing an indirect Field from nested State test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Remove the FieldBundle
+      call ESMF_StateRemove (state10, itemName='stateContainer2/testbundle', rc=rc)
+      write (failmsg, *) "Removing an existing FieldBundle from the State"
+      write (name, *) "Remove a nested State FieldBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+! call ESMF_StatePrint (state10, options='debug', nestedFlag=.true.)
 
 #if 0
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
