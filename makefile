@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.122 2010/12/03 17:44:30 theurich Exp $
+# $Id: makefile,v 1.123 2011/02/07 20:28:42 gerhard.j.theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -392,7 +392,7 @@ install_info_mk:
 # Relink apps during installation to ensure correct shared library location is encoded
 install_apps:
 	mkdir -p $(ESMF_INSTALL_BINDIR_ABSPATH)
-	$(MAKE) build_apps ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH) ESMF_INCDIR=$(ESMF_INSTALL_HEADERDIR_ABSPATH)
+	$(MAKE) build_apps ESMF_APPSDIR=$(ESMF_INSTALL_BINDIR_ABSPATH) ESMF_LDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_LIBDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) ESMF_MODDIR=$(ESMF_INSTALL_MODDIR_ABSPATH)
 
 # Ranlib on the libraries
 ranlib:
