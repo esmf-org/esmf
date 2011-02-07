@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.8 2011/01/26 04:53:28 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.9 2011/02/07 18:29:11 gerhard.j.theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -451,7 +451,7 @@ contains
     localrc = ESMF_SUCCESS
 
     call c_ESMC_ComponentSvcLoop(comp, importState, exportState, clock, &
-                                 blockingFlag, phase, 27060, rc=localrc)
+                                 blockingFlag, phase, 27060, localrc)
 
     rc = localrc
 
@@ -494,7 +494,7 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_GetPortNum(portNum, rc=localrc)
+    call c_ESMC_GetPortNum(portNum, localrc)
 
     rc = localrc
 
@@ -654,7 +654,7 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_AddOutputFilename(filename, rc=localrc)
+    call c_ESMC_AddOutputFilename(filename, localrc)
 
     rc = localrc
 
