@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.17 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_IOScrip.F90,v 1.18 2011/02/07 19:20:22 ESRL\silverio.vasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -90,56 +90,67 @@
     integer:: localrc, ncStatus
     integer :: DimId, VarId
     integer :: ncid, local_rank
+    character(len=256) :: errmsg
 
 #ifdef ESMF_NETCDF
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, &
+      trim(filename), &
       rc)) return
 
     ! get number of vertices
+    errmsg = "dimension grid_size in "//trim(filename)
     if (present(grid_size)) then
       ncStatus = nf90_inq_dimid (ncid, "grid_size", DimId)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=grid_size)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
     end if
 
     ! Get vertex dimension
     if (present(grid_corners)) then
       ncStatus = nf90_inq_dimid (ncid, "grid_corners", DimId)
+      errmsg = "dimension grid_corners in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=grid_corners)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg, &
         rc)) return
     end if
       
     ! Get vertex dimension
     if (present(grid_rank)) then
       ncStatus = nf90_inq_dimid (ncid, "grid_rank", DimId)
+      errmsg = "dimension grid_rank in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=local_rank)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
       grid_rank = local_rank
     end if
@@ -149,34 +160,41 @@
     if (present(grid_dims)) then
       if (.not. present(grid_rank)) then
         ncStatus = nf90_inq_dimid (ncid, "grid_rank", DimId)
+        errmsg = "dimension grid_rank in "//trim(filename)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+          errmsg,&
           rc)) return
 
         ncStatus = nf90_inquire_dimension (ncid, DimId, len=local_rank)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
-          rc)) return
+          errmsg,&
+        rc)) return
       end if   
       allocate(grid_dims(local_rank))
       ncStatus = nf90_inq_varid (ncid, "grid_dims", VarId)
+      errmsg = "dimension grid_dims in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
 
       ncStatus = nf90_get_var (ncid, VarId, grid_dims)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
     end if
     ncStatus = nf90_close(ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, &
+      trim(filename), &
       rc)) return
     if (present(rc)) rc=ESMF_SUCCESS
     return
@@ -208,29 +226,37 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
     integer:: localrc, ncStatus
     integer :: ncid, VarId, len
     character(len=80) :: buffer
+    character(len=256) :: errmsg
 
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD, &
-      ESMF_SRCLINE, rc)) return
+      ESMF_SRCLINE, &
+      trim(filename), &
+      rc)) return
 
     ncStatus = nf90_inq_varid (ncid, "grid_center_lat", VarId)
+    errmsg = "variable grid_center_lat in "//trim(filename)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
  
     ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+    errmsg = "attribute units for grid_center_lat in "//trim(filename)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
     ncStatus = nf90_get_att(ncid, VarId, "units", buffer)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
     units = buffer(1:len)
     if (present(rc)) rc=ESMF_SUCCESS
@@ -270,6 +296,7 @@ end subroutine ESMF_ScripInqUnits
     integer:: ncid, VarId
     integer:: len
     character(len=128) :: units
+    character(len=256) :: errmsg
     real(ESMF_KIND_R8) :: rad2deg
     logical :: convertToDegLocal
 
@@ -281,30 +308,37 @@ end subroutine ESMF_ScripInqUnits
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD, &
       ESMF_SRCLINE,&
+      trim(filename), &
       rc)) return
 
     ! Read in grid_center_lon and grid_center_lat
     if (present(grid_center_lon)) then
       ncStatus = nf90_inq_varid (ncid, "grid_center_lon", VarId)
+      errmsg = "variable grid_center_lon in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, grid_center_lon)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! get the attribute 'units'
       ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      errmsg = "Attribute units for grid_center_lon in "//trim(filename)
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+	  errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
@@ -317,25 +351,31 @@ end subroutine ESMF_ScripInqUnits
     endif
     if (present(grid_center_lat)) then
       ncStatus = nf90_inq_varid (ncid, "grid_center_lat", VarId)
+      errmsg = "variable grid_center_lat in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, grid_center_lat)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! get the attribute 'units'
       ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      errmsg = "Attribute units for grid_center_lat in "//trim(filename)
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+	  errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
@@ -348,39 +388,48 @@ end subroutine ESMF_ScripInqUnits
 
     if (present(grid_imask)) then
       ncStatus = nf90_inq_varid (ncid, "grid_imask", VarId)
+      errmsg = "variable grid_imask in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, grid_imask)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
     endif
 
     ! Read in grid_corner_lon and grid_corner_lat
     if (present(grid_corner_lon)) then
       ncStatus = nf90_inq_varid (ncid, "grid_corner_lon", VarId)
+      errmsg = "variable grid_corner_lon in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, grid_corner_lon)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! get the attribute 'units'
       ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      errmsg = "attribute units for grid_center_lon in "//trim(filename)
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+	  errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
@@ -393,25 +442,31 @@ end subroutine ESMF_ScripInqUnits
     endif
     if (present(grid_corner_lat)) then
       ncStatus = nf90_inq_varid (ncid, "grid_corner_lat", VarId)
+      errmsg = "variable grid_corner_lat in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, grid_corner_lat)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! get the attribute 'units'
       ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
+      errmsg = "Attribute units for grid_center_lon in "//trim(filename)
       if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+	  errmsg,&
           rc)) return
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
@@ -425,20 +480,24 @@ end subroutine ESMF_ScripInqUnits
     ! Read in grid_area and grid_corner_lat
     if (present(grid_area)) then
       ncStatus = nf90_inq_varid (ncid, "grid_area", VarId)
+      errmsg = "variable grid_area in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ncStatus = nf90_get_var (ncid, VarId, grid_area)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+	errmsg,&
         rc)) return
       ! get the attribute 'units'
       ncStatus = nf90_get_att(ncid, VarId, "units", units)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
+        errmsg,&
         rc)) return
     endif
 
@@ -446,6 +505,7 @@ end subroutine ESMF_ScripInqUnits
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD, &
       ESMF_SRCLINE,&
+      trim(filename),&
       rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -510,6 +570,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       logical :: srcIsScriplocal, dstIsScriplocal
       integer :: srcNodeDim, dstNodeDim, srcCoordDim, dstCoordDim
       integer, parameter :: nf90_noerror = 0
+      character(len=256) :: errmsg
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -565,6 +626,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   trim(wgtFile),&
            rc)) return
          
          ! global variables
@@ -582,57 +644,75 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          conventions = "NCAR-CSM"
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "title", trim(titlelocal))
+         errmsg = "Attribute title in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "normalization", trim(norm))
+         errmsg = "Attribute normalization in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "map_method", trim(map_method))
+         errmsg = "Attribute map_method in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "conventions", trim(conventions))
+         errmsg = "Attribute conventions in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
 	 ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "domain_a", trim(srcFile))
+         errmsg = "Attribute domain_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "domain_b", trim(dstFile))
+         errmsg = "Attribute domain_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "grid_file_src", trim(srcFile))
+         errmsg = "Attribute grid_file_src in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "grid_file_dst", trim(dstFile))
+         errmsg = "Attribute grid_file_dst in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "CVS_revision", ESMF_VERSION_STRING)
+         errmsg = "Attribute CVS_revision in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
  
         ! Get Source Grid dimension and variables
@@ -664,279 +744,352 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         endif
         ! define dimensions
          ncStatus = nf90_def_dim(ncid,"n_a",srcDim, naDimId)
+         errmsg = "Dimension n_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_def_dim(ncid,"n_b",dstDim, nbDimId)
+         errmsg = "Dimension n_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_def_dim(ncid,"n_s",total, nsDimId)
+         errmsg = "Dimension n_s in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! define max number of vertices
          ncStatus = nf90_def_dim(ncid,"nv_a",src_grid_corner, nvaDimId)
+         errmsg = "Dimension nv_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_def_dim(ncid,"nv_b",dst_grid_corner, nvbDimId)
+         errmsg = "Dimension nv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! define max number of vertices
          ncStatus = nf90_def_dim(ncid,"num_wgts",1, VarId)
+         errmsg = "Dimension num_wgts in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ! define grid ranks
          ncStatus = nf90_def_dim(ncid,"src_grid_rank",src_grid_rank, srankDimId)
+         errmsg = "Dimension src_grid_rank in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_def_dim(ncid,"dst_grid_rank",dst_grid_rank, drankDimId)
+         errmsg = "Dimension dst_grid_rank in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! define variables
          ! Grid Dims
          ncStatus = nf90_def_var(ncid,"src_grid_dims",NF90_INT, (/srankDimId/),  VarId)
+         errmsg = "Variable src_grid_dims in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus = nf90_def_var(ncid,"dst_grid_dims",NF90_INT, (/drankDimId/),  VarId)
+         errmsg = "Variable dst_grid_dims in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! yc_a: source vertex coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yc_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         errmsg = "Variable yc_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! yc_b: destination vertex coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yc_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         errmsg = "Variable yc_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! xc_a: source vertex coordinate (longitude)
          ncStatus = nf90_def_var(ncid,"xc_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         errmsg = "Variable xc_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! xc_b: dest. vertex coordinate (longitude)
          ncStatus = nf90_def_var(ncid,"xc_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         errmsg = "Variable xc_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! yv_a: source corner coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yv_a",NF90_DOUBLE, (/nvaDimId,naDimId/),  VarId)
+         errmsg = "Variable yv_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! xv_a: source corner coordinate (longitude)
          ncStatus = nf90_def_var(ncid,"xv_a",NF90_DOUBLE, (/nvaDimId,naDimId/),  VarId)
+         errmsg = "Variable xv_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(srcunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! yv_b: source corner coordinate (latitude)
          ncStatus = nf90_def_var(ncid,"yv_b",NF90_DOUBLE, (/nvbDimId,nbDimId/),  VarId)
+         errmsg = "Variable yv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! xv_b: source corner coordinate (longitude)
          ncStatus = nf90_def_var(ncid,"xv_b",NF90_DOUBLE, (/nvbDimId,nbDimId/),  VarId)
+         errmsg = "Variable xv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", trim(dstunits))
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! mask_a
          ncStatus = nf90_def_var(ncid,"mask_a",NF90_INT, (/naDimId/),  VarId)
+         errmsg = "Variable mask_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! mask_b
          ncStatus = nf90_def_var(ncid,"mask_b",NF90_INT, (/nbDimId/),  VarId)
+         errmsg = "Variable mask_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! area_a
          ncStatus = nf90_def_var(ncid,"area_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         errmsg = "Variable area_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", "square radians")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! area_b
          ncStatus = nf90_def_var(ncid,"area_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         errmsg = "Variable area_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", "square radians")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! frac_a
          ncStatus = nf90_def_var(ncid,"frac_a",NF90_DOUBLE, (/naDimId/),  VarId)
+         errmsg = "Variable frac_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! frac_b
          ncStatus = nf90_def_var(ncid,"frac_b",NF90_DOUBLE, (/nbDimId/),  VarId)
+         errmsg = "Variable frac_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
          ncStatus = nf90_put_att(ncid, VarId, "units", "unitless")
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
 
         ! col: sparse matrix weight table
          ncStatus = nf90_def_var(ncid,"col",NF90_INT, (/nsDimId/),  VarId)
+         errmsg = "Variable col in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! row: sparse matrix weight table
          ncStatus = nf90_def_var(ncid,"row",NF90_INT, (/nsDimId/),  VarId)
+         errmsg = "Variable row in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
         ! S: sparse matrix weight table
          ncStatus = nf90_def_var(ncid,"S",NF90_DOUBLE, (/nsDimId/),  VarId)
+         errmsg = "Variable S in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   errmsg,&
            rc)) return
 
          ncStatus=nf90_enddef(ncid) 
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
+	   trim(wgtFile),&
            rc)) return
        
         ! write src_grid_dims and dst_grid_dims
 	ncStatus=nf90_inq_varid(ncid,"src_grid_dims",VarId)
         ncStatus=nf90_put_var(ncid,VarId, src_grid_dims )          
+        errmsg = "Variable src_grid_dims in "//trim(wgtfile)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+	  errmsg,&
           rc)) return
 
 	ncStatus=nf90_inq_varid(ncid,"dst_grid_dims",VarId)
         ncStatus=nf90_put_var(ncid,VarId, dst_grid_dims)          
+        errmsg = "Variable dst_grid_dims in "//trim(wgtfile)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD, &
           ESMF_SRCLINE,&
+	  errmsg,&
           rc)) return
 
         if (SrcIsScriplocal) then
@@ -949,16 +1102,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
 	   ncStatus=nf90_inq_varid(ncid,"xc_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
+           errmsg = "Variable xc_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
+  	     errmsg,&
              rc)) return
 
            ncStatus=nf90_inq_varid(ncid,"yc_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
+           errmsg = "Variable yc_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
+  	     errmsg,&
              rc)) return
            deallocate(latBuffer, lonBuffer)
           ! Write xv_a, yv_a	
@@ -970,16 +1127,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
 	   ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
+           errmsg = "Variable xv_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
+  	     errmsg,&
              rc)) return
 
            ncStatus=nf90_inq_varid(ncid,"yv_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
+           errmsg = "Variable yv_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
+  	     errmsg,&
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
 
@@ -989,9 +1150,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         	ESMF_CONTEXT, rc)) return
            ncStatus=nf90_inq_varid(ncid,"mask_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, mask)          
+           errmsg = "Variable mask_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
+  	     errmsg,&
              rc)) return
            deallocate(mask)
         else 
@@ -999,6 +1162,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
+	     trim(srcFile),&
              rc)) return
 	   ! check if centerCoords exit
            ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
@@ -1008,9 +1172,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     allocate(latBuffer2(srcCoordDim, srcDim))
              allocate(latBuffer(srcDim), lonBuffer(srcDim))
              ncStatus=nf90_get_var(ncid1,VarId, latBuffer2)
+             errmsg = "Variable centerCoors in "//trim(srcFile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,&
+	       errmsg,&
                rc)) return
 	     do i=1,srcDim
 		lonBuffer(i)=latBuffer2(1,i)
@@ -1018,16 +1184,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              enddo
    	     ncStatus=nf90_inq_varid(ncid,"xc_a",VarId)
              ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
+             errmsg = "Variable xc_a in "//trim(wgtfile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,&
+	       errmsg,&
                rc)) return
 
              ncStatus=nf90_inq_varid(ncid,"yc_a",VarId)
              ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
+             errmsg = "Variable yc_a in "//trim(wgtfile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,&
+    	       errmsg,&
                rc)) return
              deallocate(latBuffer, lonBuffer, latBuffer2)
            endif
@@ -1036,23 +1206,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! elementConn and construct the the latitudes nd longitudes for
            ! all the corner vertices
            allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
-           call ESMF_EsmfGetVerts(ncid1, srcDim, src_grid_corner, srcNodeDim, &
+           call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
 		latBuffer2, lonBuffer2,status) 
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         	ESMF_CONTEXT, rc)) return
 
 	   ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
+           errmsg = "Variable xv_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE, errmsg, &
              rc)) return
 
            ncStatus=nf90_inq_varid(ncid,"yv_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
+           errmsg = "Variable yv_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
            allocate(mask(srcDim))         
@@ -1064,19 +1236,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              mask = 1
            else 
              ncStatus=nf90_get_var(ncid1,VarId, mask)
+             errmsg = "Variable elementMask in "//trim(srcFile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
            end if
            ncStatus=nf90_inq_varid(ncid,"mask_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, mask)          
+           errmsg = "Variable mask_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(mask)
            ncStatus=nf90_close(ncid1)
+           if (CDFCheckError (ncStatus, &
+             ESMF_METHOD, &
+             ESMF_SRCLINE,trim(srcFile),&
+             rc)) return
         endif 
 
         ! Read the dstGrid variables and write them out
@@ -1088,16 +1266,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         	ESMF_CONTEXT, rc)) return
 	 ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
+         errmsg = "Variable xc_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
 
          ncStatus=nf90_inq_varid(ncid,"yc_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
+         errmsg = "Variable yc_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
          deallocate(latBuffer, lonBuffer)
 
@@ -1109,16 +1289,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
 	 ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
+         errmsg = "Variable xv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
 
          ncStatus=nf90_inq_varid(ncid,"yv_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
+         errmsg = "Variable yv_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
          deallocate(latBuffer2, lonBuffer2)
          allocate(mask(dstDim))         
@@ -1127,16 +1309,17 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         	ESMF_CONTEXT, rc)) return
          ncStatus=nf90_inq_varid(ncid,"mask_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, mask)          
+         errmsg = "Variable mask_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
          deallocate(mask)
         else
            ncStatus=nf90_open(dstFile,NF90_NOWRITE,ncid1)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,errmsg,&
          rc)) return
 	   ! check if centerCoords exit
            ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
@@ -1146,9 +1329,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     allocate(latBuffer2(dstCoordDim, dstDim))
              allocate(latBuffer(dstDim), lonBuffer(dstDim))
              ncStatus=nf90_get_var(ncid1,VarId, latBuffer2)
+             errmsg = "Variable centerCoords in "//trim(dstFile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
 	     do i=1,dstDim
 		lonBuffer(i)=latBuffer2(1,i)
@@ -1156,16 +1340,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              enddo
    	     ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
              ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
+             errmsg = "Variable xc_b in "//trim(wgtfile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
 
              ncStatus=nf90_inq_varid(ncid,"yc_b",VarId)
              ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
+             errmsg = "Variable yc_b in "//trim(wgtfile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
              deallocate(latBuffer, lonBuffer, latBuffer2)
            endif
@@ -1174,23 +1360,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! elementConn and construct the the latitudes nd longitudes for
            ! all the corner vertices
            allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))         
-           call ESMF_EsmfGetVerts(ncid1, dstDim, dst_grid_corner, dstNodeDim, &
+           call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
 		latBuffer2, lonBuffer2, status) 
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         	ESMF_CONTEXT, rc)) return
 
 	   ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
+           errmsg = "Variable xv_b in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,errmsg,&
              rc)) return
 
            ncStatus=nf90_inq_varid(ncid,"yv_b",VarId)
            ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
+           errmsg = "Variable yv_b in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
            ! Write mask_b
@@ -1201,22 +1389,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              mask = 1
            else 
              ncStatus=nf90_get_var(ncid1,VarId, mask)
+             errmsg = "Variable elementMask in "//trim(dstFile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
            end if
            ncStatus=nf90_inq_varid(ncid,"mask_b",VarId)
            ncStatus=nf90_put_var(ncid,VarId, mask)          
+           errmsg = "Variable mask_b in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(mask)
            ncStatus=nf90_close(ncid1)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
-             ESMF_SRCLINE,&
+             ESMF_SRCLINE,trim(dstFile),&
              rc)) return
         endif
 
@@ -1225,18 +1415,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          ncStatus=nf90_inq_varid(ncid,"area_a",VarId)
          if (present(srcArea)) then
            ncStatus=nf90_put_var(ncid,VarId, srcArea)          
+           errmsg = "Variable area_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return 
          else
           ! Just set these to 0.0, because not provided
            allocate(area(srcDim))         
            area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)          
+           errmsg = "Variable area_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
            deallocate(area)
          endif
@@ -1245,18 +1437,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          ncStatus=nf90_inq_varid(ncid,"area_b",VarId)
          if (present(dstArea)) then
            ncStatus=nf90_put_var(ncid,VarId, dstArea)          
+           errmsg = "Variable area_b in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return 
          else
           ! Just set these to 0.0, because not provided
            allocate(area(dstDim))         
            area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)          
+           errmsg = "Variable area_a in "//trim(wgtfile)
            if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
-               ESMF_SRCLINE,&
+               ESMF_SRCLINE,errmsg,&
                rc)) return
            deallocate(area)
          endif
@@ -1271,9 +1465,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             ncStatus=nf90_put_var(ncid,VarId, frac)          
             deallocate(frac)
 	 endif
+         errmsg = "Variable frac_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
 
          ! Write frac_b
@@ -1286,9 +1481,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             ncStatus=nf90_put_var(ncid,VarId, frac)          
             deallocate(frac)
          endif
+         errmsg = "Variable frac_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
-           ESMF_SRCLINE,&
+           ESMF_SRCLINE,errmsg,&
            rc)) return
 
     end if
@@ -1318,9 +1514,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             next => factorIndexList(:,1)
             ncStatus=nf90_inq_varid(ncid,"col",VarId)
    	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
+            errmsg = "Variable col in "//trim(wgtfile)
             if (CDFCheckError (ncStatus, &
               ESMF_METHOD, &
-              ESMF_SRCLINE,&
+              ESMF_SRCLINE,errmsg,&
               rc)) return
             !do j=1,localCount(1)
             !  indexbuf(j) = factorIndexList(j,2)
@@ -1328,16 +1525,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             next => factorIndexList(:,2)
             ncStatus=nf90_inq_varid(ncid,"row",VarId)
    	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
+            errmsg = "Variable row in "//trim(wgtfile)
             if (CDFCheckError (ncStatus, &
               ESMF_METHOD, &
-              ESMF_SRCLINE,&
+              ESMF_SRCLINE,errmsg,&
               rc)) return
 
             ncStatus=nf90_inq_varid(ncid,"S",VarId)
             ncStatus=nf90_put_var(ncid,VarId, factorList, (/start/),localCount)
+            errmsg = "Variable S in "//trim(wgtfile)
             if (CDFCheckError (ncStatus, &
               ESMF_METHOD, &
-              ESMF_SRCLINE,&
+              ESMF_SRCLINE,errmsg,&
               rc)) return
 	  else 
             if (localCount(1) > 0) then
@@ -1351,23 +1550,26 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
               ncStatus=nf90_inq_varid(ncid,"col",VarId)
        	      ncStatus=nf90_put_var(ncid,VarId, indexbuf,(/start/),localCount)          
+              errmsg = "Variable col in "//trim(wgtfile)
               if (CDFCheckError (ncStatus, &
                 ESMF_METHOD, &
-                ESMF_SRCLINE,&
+                ESMF_SRCLINE,errmsg,&
                 rc)) return
               next => indexbuf(localCount(1)+1:localCount(1)*2)
               ncStatus=nf90_inq_varid(ncid,"row",VarId)
      	      ncStatus=nf90_put_var(ncid,VarId, next ,(/start/),localCount)          
+              errmsg = "Variable row in "//trim(wgtfile)
               if (CDFCheckError (ncStatus, &
                 ESMF_METHOD, &
-                ESMF_SRCLINE,&
+                ESMF_SRCLINE,errmsg,&
                 rc)) return
 
               ncStatus=nf90_inq_varid(ncid,"S",VarId)
               ncStatus=nf90_put_var(ncid,VarId, weightbuf, (/start/),localCount)
+              errmsg = "Variable S in "//trim(wgtfile)
               if (CDFCheckError (ncStatus, &
                 ESMF_METHOD, &
-                ESMF_SRCLINE,&
+                ESMF_SRCLINE,errmsg,&
                 rc)) return
             end if
           end if
@@ -1396,7 +1598,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
        ncStatus = nf90_close(ncid)                        
        if (CDFCheckError (ncStatus, &
          ESMF_METHOD, &
-         ESMF_SRCLINE,&
+         ESMF_SRCLINE, trim(wgtfile),&
          rc)) return
        deallocate(weightbuf)
     end if
@@ -1434,71 +1636,76 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     integer:: localrc, ncStatus
     integer :: DimId, VarId
     integer :: ncid, local_rank
+    character(len=256):: errmsg
 
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD, &
-      ESMF_SRCLINE, rc)) return
+      ESMF_SRCLINE, trim(filename), rc)) return
 
     ! get number of elements
     if (present(nodeCount)) then
       ncStatus = nf90_inq_dimid (ncid, "nodeCount", DimId)
+      errmsg = "Dimension nodeCount in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=nodeCount)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
     end if
 
     ! get number of elements
     if (present(elementCount)) then
-      ncStatus = nf90_inq_dimid (ncid, "elementCount", DimId)
+      ncStatus = nf90_inq_dimid (ncid, "elementCount", DimId) 
+      errmsg = "Dimension elementCount in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=elementCount)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
     end if
 
     ! get number of elements
     if (present(maxNodePElement)) then
       ncStatus = nf90_inq_dimid (ncid, "maxNodePElement", DimId)
+      errmsg = "Dimension maxNodePElement in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=maxNodePElement)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
     end if
 
     ! get number of elements
     if (present(coordDim)) then
       ncStatus = nf90_inq_dimid (ncid, "coordDim", DimId)
+      errmsg = "Dimension coordDim in "//trim(filename)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
 
       ncStatus = nf90_inquire_dimension (ncid, DimId, len=coordDim)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
     end if
     if (present(rc)) rc=ESMF_SUCCESS
@@ -1531,30 +1738,32 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
     integer:: localrc, ncStatus
     integer :: ncid, VarId, len
     character(len=80) :: buffer
+    character(len=256) :: errmsg
 
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD, &
-      ESMF_SRCLINE, rc)) return
+      ESMF_SRCLINE, trim(filename),rc)) return
 
     ncStatus = nf90_inq_varid (ncid, "vert_coords", VarId)
+    errmsg = "Variable vert_coords in "//trim(filename)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
 
     ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
 
     ncStatus = nf90_get_att(ncid, VarId, "units", buffer)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
-        ESMF_SRCLINE,&
+        ESMF_SRCLINE,errmsg,&
         rc)) return
     units = buffer(1:len)
     if (present(rc)) rc=ESMF_SUCCESS
@@ -1589,6 +1798,8 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     integer :: localCount, remain
 
     integer :: VarNo
+    character(len=256)::errmsg
+
 #ifdef ESMF_NETCDF
 
     call ESMF_VMGetGlobal(vm, rc=rc)
@@ -1600,33 +1811,35 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, trim(filename), &
       rc)) return
 
     ! get number of vertices
     ncStatus = nf90_inq_dimid (ncid, "nodeCount", DimId)
+    errmsg = "Dimension nodeCount in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_inquire_dimension (ncid, DimId, len=nodeCnt)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ! Get vertex dimension
     ncStatus = nf90_inq_dimid (ncid, "coordDim", DimId)
+    errmsg = "Dimension coordDim in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_inquire_dimension (ncid, DimId, len=NodeDim)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ! allocate memory for verticies
@@ -1637,41 +1850,45 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
 
     ! read vertex data
     ncStatus = nf90_inq_varid (ncid, "nodeCoords", VarNo)
+    errmsg = "Variable nodeCoords in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_get_var (ncid, VarNo, nodeCoords, start=(/1,1/), count=(/NodeDim, nodeCnt/))
+    errmsg = "Variable nodeCoords in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ! get number of elmts
     ncStatus = nf90_inq_dimid (ncid, "elementCount", DimId)
+    errmsg = "Dimension elementCount in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_inquire_dimension (ncid, DimId, len=ElmtCount)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ! Get max_verts_per_elmt
     ncStatus = nf90_inq_dimid (ncid, "maxNodePElement", DimId)
+    errmsg = "Dimension maxNodePElement in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_inquire_dimension (ncid, DimId, len=MaxNodePerElmt)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ! Decompose the elmt array evenly on all the PEs
@@ -1686,34 +1903,36 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
 
     ! read elmt_verts data
     ncStatus = nf90_inq_varid (ncid, "elementConn", VarNo)
+    errmsg = "Variable elementConn in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_get_var (ncid, VarNo, elementConn, start=(/1,startElmt/), count=(/MaxNodePerElmt, localcount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
     
     ! read num_elmt_verts
     ncStatus = nf90_inq_varid (ncid, "numElementConn", VarNo)
+    errmsg = "Variable numElementConn in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_get_var (ncid, VarNo, elmtNums, start=(/startElmt/), count=(/localcount/))
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ncStatus = nf90_close (ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
@@ -1731,10 +1950,11 @@ end subroutine ESMF_GetMeshFromFile
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "EsmfGetVerts"
-subroutine ESMF_EsmfGetVerts(ncid, numElements, numNodePElement, numNodes, &
+subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNodes, &
 		latBuffer, lonBuffer, rc) 
 
     integer, intent(in)  :: ncid
+    character(len=*), intent(in) :: filename
     integer, intent(in)  :: numElements
     integer, intent(in)  :: numNodePElement
     integer, intent(in)  :: numNodes
@@ -1748,6 +1968,7 @@ subroutine ESMF_EsmfGetVerts(ncid, numElements, numNodePElement, numNodes, &
     integer :: varId, fillValue
     integer, parameter :: fillValue1 = -9999
     integer :: i,j, index
+    character(len=256)::errmsg
 
 #ifdef ESMF_NETCDF
     allocate(nodeCoords(2, numNodes))
@@ -1755,32 +1976,35 @@ subroutine ESMF_EsmfGetVerts(ncid, numElements, numNodePElement, numNodes, &
 
     ! Get NodeCoords    
     ncStatus = nf90_inq_varid(ncid, "nodeCoords", varId)
+    errmsg = "Variable nodeCoords in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
     ncStatus = nf90_get_var(ncid, varId, nodeCoords)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
 
     ! Get elementConn table
     ncStatus = nf90_inq_varid(ncid, "elementConn", varId)
+    errmsg = "Variable elementConn in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
     ncStatus = nf90_get_var(ncid, varId, elementConn)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
     ! Get fill value
     ncStatus = nf90_get_att(ncid, varId, "_FillValue", fillValue)
+    errmsg = "Attribute _FillValue for elementConn in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
-      ESMF_SRCLINE, &
+      ESMF_SRCLINE, errmsg, &
       rc)) return
     ! Fill latBuffer and lonBuffer
     do i=1, numElements
@@ -1811,7 +2035,7 @@ end subroutine ESMF_EsmfGetVerts
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "CDFCheckError"
-function CDFCheckError (ncStatus, module, fileName, lineNo,rc)
+function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
     logical                       :: CDFCheckError
 
@@ -1819,6 +2043,7 @@ function CDFCheckError (ncStatus, module, fileName, lineNo,rc)
     character(len=*), intent(in)  :: module
     character(len=*), intent(in)  :: fileName
     integer,          intent(in)  :: lineNo
+    character(len=*), intent(in)  :: errmsg
     integer, intent(out),optional :: rc
 
     integer, parameter :: nf90_noerror = 0
@@ -1828,8 +2053,8 @@ function CDFCheckError (ncStatus, module, fileName, lineNo,rc)
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
         call ESMF_LogWrite ("netCDF Status Return Error", ESMF_LOG_ERROR, lineNo, fileName, module)
-        print '("NetCDF Error in ", A, " line ", I5, ", pet ", I5, ",(", A, "),error msg:", A)', &
-	module, lineNo, petNo, fileName, trim(nf90_strerror(ncStatus))
+        print '("NetCDF Error: ", A, " : ", A)', &
+	trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
  	CDFCheckError = .TRUE.
