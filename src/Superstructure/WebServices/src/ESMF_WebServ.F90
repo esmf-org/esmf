@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.9 2011/02/07 18:29:11 gerhard.j.theurich Exp $
+! $Id: ESMF_WebServ.F90,v 1.10 2011/02/07 18:45:17 gerhard.j.theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,13 +41,14 @@ module ESMF_WebServMod
 !
 !
 ! !USES:
-  use ESMF_Mod
   use ESMF_CompMod
   use ESMF_GridCompMod
+  use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_ClockMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
+  use ESMF_LogErrMod
     
   implicit none
 

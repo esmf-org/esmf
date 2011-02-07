@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServComponent_C.F90,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_WebServComponent_C.F90,v 1.5 2011/02/07 18:45:17 gerhard.j.theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,10 +39,12 @@
 !
 ! !INTERFACE:
   subroutine f_esmf_processinit(comp, impstate, expstate, clock, phase, rc)
-    use ESMF_Mod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_StateMod
+    use ESMF_ClockMod
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
     use ESMF_WebServMod
 
     implicit none
@@ -113,11 +115,12 @@
 !
 ! !INTERFACE:
   subroutine f_esmf_processrun(comp, impstate, expstate, clock, phase, rc)
-    use ESMF_Mod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_StateMod
     use ESMF_ClockMod
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
     use ESMF_WebServMod
 
     implicit none
@@ -188,11 +191,12 @@
 !
 ! !INTERFACE:
   subroutine f_esmf_processfinal(comp, impstate, expstate, clock, phase, rc)
-    use ESMF_Mod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_StateMod
     use ESMF_ClockMod
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
     use ESMF_WebServMod
 
     implicit none
