@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.20 2011/01/11 00:00:39 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.21 2011/02/07 19:14:45 ESRL\silverio.vasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,8 @@ program ESMF_RegridWeightGen
       integer            :: index
       type(ESMF_RegridPole) :: pole
       integer            :: poleptrs
-      integer, pointer   :: dims(:)
+      integer, pointer   :: srcdims(:), dstdims(:)
+      integer            :: srcrank, dstrank
       logical            :: convert3D
       logical            :: isConserve, isSphere
       logical            :: addCorners,convertToDual
@@ -46,9 +47,10 @@ program ESMF_RegridWeightGen
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
       character(len=256) :: commandbuf1(3)
-      integer            :: commandbuf2(8)
+      integer            :: commandbuf2(14)
       integer            :: regridScheme
-
+      integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
+      real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
@@ -159,20 +161,20 @@ program ESMF_RegridWeightGen
              dstIsScrip = .false.
              print *, 'Set src and dst grid file types to ESMF'
            else if (trim(flag) .ne. 'SCRIP') then
-	     print *, 'Unknown -src_type: must be either ESMF or SCRIP'
+	     print *, 'Unknown -t: must be either ESMF or SCRIP'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif 
            typeSetFlag = .true.
          endif
 
-         call ESMF_UtilGetArgIndex('-src_type',index,rc)
+         call ESMF_UtilGetArgIndex('--src_type',index,rc)
          if (index /= -1) then
            call ESMF_UtilGetArg(index+1,flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. srcIsScrip) .or.   &
 	        (trim(flag) .eq. 'SCRIP' .and. .not. srcIsScrip)) then
-	        print *, 'Source file type conflict: -src_type and -t' 
+	        print *, 'Source file type conflict: --src_type and -t' 
                 call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	        srcIsScrip = .false.
 	     end if
@@ -180,19 +182,19 @@ program ESMF_RegridWeightGen
            if (trim(flag) .eq. 'ESMF') then
 	     srcIsScrip = .false.
            else if (trim(flag) .ne. 'SCRIP') then
-	     print *, 'Unknown -src_type: must be either ESMF or SCRIP'
+	     print *, 'Unknown --src_type: must be either ESMF or SCRIP'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
 
-         call ESMF_UtilGetArgIndex('-dst_type',index,rc)
+         call ESMF_UtilGetArgIndex('--dst_type',index,rc)
          if (index /= -1) then
            call ESMF_UtilGetArg(index+1,flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. dstIsScrip) .or.   &
 	        (trim(flag) .eq. 'SCRIP' .and. .not. dstIsScrip)) then
-	        print *, 'Destination file type conflict: -dst_type and -t' 
+	        print *, 'Destination file type conflict: --dst_type and -t' 
                 call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	        dstIsScrip = .false.
 	     end if
@@ -200,7 +202,7 @@ program ESMF_RegridWeightGen
            if (trim(flag) .eq. 'ESMF') then
 	     dstIsScrip = .false.
            else if (trim(flag) .ne. 'SCRIP') then
-	     print *, 'Unknown -dst_type: must be either ESMF or SCRIP'
+	     print *, 'Unknown --dst_type: must be either ESMF or SCRIP'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
@@ -216,11 +218,13 @@ program ESMF_RegridWeightGen
 
         ! Should I have only PetNO=0 to open the file and find out the size?
          if (srcIsScrip) then
-	   call ESMF_ScripInq(srcfile, grid_dims=dims, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-           ! size(dims) == 1 is a unstructured grid
-           ! size(dims) == 2 is a regular grid
-           if (size(dims) == 2) then
+	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=rc)
+	   if (rc /= ESMF_SUCCESS) then 
+	     print *, 'Unable to get dimension information from ', srcfile
+             print *, 'Check the log file for the NetCDF error message' 
+	     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           endif
+           if (srcrank == 2) then
 	     srcIsReg = .true.
            else
              srcIsReg = .false.
@@ -229,24 +233,29 @@ program ESMF_RegridWeightGen
 	   srcIsReg = .false.
 	 endif
      	 if (dstIsScrip) then
-	   call ESMF_ScripInq(dstfile, grid_dims=dims, rc=rc)
-           if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-           ! size(dims) == 1 is a unstructured grid
-           ! size(dims) == 2 is a regular grid
-           if (size(dims) == 2) then
+	   call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=rc)
+           if (rc /= ESMF_SUCCESS) then
+	     print *, 'Unable to get dimension information from ', dstfile
+             print *, 'Check the log file for the NetCDF error message' 
+	     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           endif
+           if (dstrank == 2) then
 	     dstIsReg = .true.
            else
              dstIsReg = .false.
            endif
          else
-	   srcIsReg = .false.
+	   dstIsReg = .false.
 	 endif
 	print *, "Starting weight generation with these inputs: "
 	print *, "  Source File: ", trim(srcfile)
 	print *, "  Destination File: ", trim(dstfile)
   	print *, "  Weight File: ", trim(wgtfile)
-        if (srcIsScrip) print *, "  Source File is in SCRIP format"
-        if (dstIsScrip) print *, "  Destination File is in SCRIP format"
+        if (srcIsScrip) then 
+            print *, "  Source File is in SCRIP format"
+        else
+            print *, "  Source File is in ESMF format"
+        endif
         if (srcIsRegional) then
 	   print *, "  Source Grid is a regional grid"
         else 
@@ -257,6 +266,11 @@ program ESMF_RegridWeightGen
         else
 	   print *, "  Source Grid is an unstructured grid"
         endif
+        if (dstIsScrip) then 
+	    print *, "  Destination File is in SCRIP format"
+        else
+	    print *, "  Destination File is in ESMF format"
+	endif
         if (dstIsRegional) then
 	   print *, "  Destination Grid is a regional grid"
         else 
@@ -297,7 +311,27 @@ program ESMF_RegridWeightGen
         commandbuf2(6)=poleptrs
         if (srcIsRegional) commandbuf2(7)=1
         if (dstIsRegional) commandbuf2(8)=1
-        call ESMF_VMBroadcast(vm, commandbuf2, 8, 0, rc=rc)
+	if (srcIsScrip) then 
+           commandbuf2(9)=srcrank
+           if (srcrank == 1) then
+              commandbuf2(10) = srcdims(1)
+              commandbuf2(11) = -1
+           else 
+              commandbuf2(10) = srcdims(1)
+              commandbuf2(11) = srcdims(2)
+           endif
+        endif
+        if (dstIsScrip) then
+           commandbuf2(12)=dstrank
+           if (dstrank == 1) then
+              commandbuf2(13) = dstdims(1)
+              commandbuf2(14) = -1
+           else 
+              commandbuf2(13) = dstdims(1)
+              commandbuf2(14) = dstdims(2)
+           endif
+        endif
+        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
      else
         call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
@@ -306,7 +340,7 @@ program ESMF_RegridWeightGen
         dstfile = commandbuf1(2)
         wgtfile = commandbuf1(3)
 
-        call ESMF_VMBroadcast(vm, commandbuf2, 8, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
         if (commandbuf2(1)==1) then
            srcIsScrip = .true.
@@ -355,9 +389,19 @@ program ESMF_RegridWeightGen
         else
            dstIsRegional = .false.
         end if
+        allocate(srcdims(2), dstdims(2))
+        if (srcIsScrip) then
+           srcrank = commandbuf2(9)
+           srcdims(1)=commandbuf2(10)
+           srcdims(2)=commandbuf2(11)
+        endif
+        if (dstIsScrip) then
+           dstrank = commandbuf2(12)
+           dstdims(1)=commandbuf2(13)
+           dstdims(2)=commandbuf2(14)
+        endif
      endif
-
-
+        
      ! Set flag to say if we're conservative
      isConserve=.false.
      if (trim(method) .eq. 'conserve') then
@@ -382,12 +426,43 @@ program ESMF_RegridWeightGen
         regridScheme = ESMF_REGRID_SCHEME_FULL3D
         isSphere=.true.
      endif
-     
+
+     ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
+     ! otherwise, regrid will not work
+     bigFac = 1
+     do i=2, int(sqrt(float(PetCnt)))
+	if ((PetCnt/i)*i == PetCnt) then
+	  bigFac = i
+        endif
+     enddo
+     xpets = bigFac
+     ypets = PetCnt/xpets
+     if (srcIsReg) then
+	if ((srcdims(1) <= srcdims(2) .and. xpets <= ypets) .or. &
+	    (srcdims(1) > srcdims(2) .and. xpets > ypets)) then
+	    xpart = xpets
+	    ypart = ypets
+	else 
+	    xpart = ypets
+	    ypart = xpets
+	endif
+	xdim = srcdims(1)/xpart
+	ydim = srcdims(2)/ypart
+	do while (xdim <= 1)
+	  xpart = xpart-1
+   	  xdim = srcdims(1)/xpart
+        enddo
+	do while (ydim <= 1) 
+	  ypart = ypart-1
+   	  ydim = srcdims(2)/ypart
+        enddo
+     !   print *, 'src grid partition', srcdims, xpart, ypart
+     endif
      !Read in the srcfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh
      if (srcIsScrip) then
 	if(srcIsReg) then
-           srcGrid = ESMF_GridCreate(srcfile,(/PetCnt,1/), addCornerStagger=addCorners, &
+           srcGrid = ESMF_GridCreate(srcfile,(/xpart,ypart/), addCornerStagger=addCorners, &
                        isSphere=isSphere, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
@@ -414,9 +489,30 @@ program ESMF_RegridWeightGen
 
      !Read in the dstfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh)
+     if (dstIsReg) then
+	if ((dstdims(1) <= dstdims(2) .and. xpets <= ypets) .or. &
+	    (dstdims(1) > dstdims(2) .and. xpets > ypets)) then
+	    xpart = xpets
+	    ypart = ypets
+	else 
+	    xpart = ypets
+	    ypart = xpets
+	endif
+	xdim = dstdims(1)/xpart
+	ydim = dstdims(2)/ypart
+	do while (xdim <= 1)
+	  xpart = xpart-1
+   	  xdim = dstdims(1)/xpart
+        enddo
+	do while (ydim <= 1)
+	  ypart = ypart-1
+   	  ydim = dstdims(2)/ypart
+        enddo
+     !   print *, 'dst grid partition', dstdims, xpart, ypart
+     endif
      if (dstIsScrip) then
 	if(dstIsReg) then
-           dstGrid = ESMF_GridCreate(dstfile,(/PetCnt,1/), addCornerStagger=addCorners, &
+           dstGrid = ESMF_GridCreate(dstfile,(/xpart, ypart/), addCornerStagger=addCorners, &
                        isSphere=isSphere, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
@@ -470,6 +566,8 @@ program ESMF_RegridWeightGen
          endif
       endif
 
+      call ESMF_VMBarrier(vm)
+      call ESMF_VMWtime(starttime, rc=rc)
       maskvals(1) = 0
       if (poleptrs <= 0) poleptrs = 1
       if (trim(method) .eq. 'bilinear') then
@@ -583,6 +681,9 @@ program ESMF_RegridWeightGen
          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
+      call ESMF_VMBarrier(vm)
+      call ESMF_VMWtime(endtime, rc=rc)
+
       ! Get rid of conservative arrays
       if (isConserve) then
          if (PetNo == 0) then
@@ -594,7 +695,8 @@ program ESMF_RegridWeightGen
       ! Output success
       if (PetNo==0) then
          write(*,*)
-         write(*,*) "Completed weight generation successfully."
+!         write(*,*) "Completed weight generation successfully."
+         write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
       endif
 
       call ESMF_Finalize()
