@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCAMOutputFile.C,v 1.5 2011/02/07 22:32:18 kathleen.d.saint Exp $
+// $Id: ESMCI_WebServCAMOutputFile.C,v 1.6 2011/02/08 17:33:04 kathleen.d.saint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCAMOutputFile.C,v 1.5 2011/02/07 22:32:18 kathleen.d.saint Exp $";
+static const char *const version = "$Id: ESMCI_WebServCAMOutputFile.C,v 1.6 2011/02/08 17:33:04 kathleen.d.saint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -341,7 +341,8 @@ int  ESMCI_WebServCAMOutputFile::getLonIndex(
 		highValue = theLonValues[valueIdx];
 	}
 
-	if (abs(lonValue - lowValue) > abs(highValue - lonValue))
+	if (abs((long int)(lonValue - lowValue)) > 
+       abs((long int)(highValue - lonValue)))
 	{
 		if (valueIdx == theNumLonValues)
 		{
