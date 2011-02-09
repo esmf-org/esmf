@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.18 2011/01/21 00:11:46 rokuingh Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.19 2011/02/09 06:59:35 earl.r.schwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.18 2011/01/21 00:11:46 rokuingh Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.19 2011/02/09 06:59:35 earl.r.schwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -869,7 +869,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 4th <simulationRun> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationStartDate', &
-     '1960-1-1T00:00:00Z', &
+     '1960-01-01T00:00:00Z', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -881,7 +881,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 5th <simulationRun> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'SimulationDuration', '10.0 Years', &
+    call ESMF_AttributeSet(gridcomp3, 'SimulationDuration', 'P10Y', &
                            convention='CIM 1.0', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)

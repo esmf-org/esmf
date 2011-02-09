@@ -150,10 +150,10 @@ module user_coupler
       'ESMF ESM1 simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)',&
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationStartDate', &
-      '1960-1-1T00:00:00Z', &
+      '1960-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationDuration', &
-      '10.0 Years', &
+      'P10Y', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

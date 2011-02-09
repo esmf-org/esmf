@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.40 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.41 2011/02/09 06:59:35 earl.r.schwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.40 2011/01/05 20:05:41 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.41 2011/02/09 06:59:35 earl.r.schwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -547,6 +547,246 @@ extern "C" {
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacknest
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attpackcreatestdnest - Setup a standard nested attribute package
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackcreatestdnest)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackcreatestdnest()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      char *nestConvention,      // in - nest convention list
+      char *nestPurpose,         // in - nest purpose list
+      int  *nestConvLens,        // in - length of each nestConvention
+      int  *nestPurpLens,        // in - length of each nestPurpose
+      int *nestAttPackInstanceCountList, // in - number of desired instances
+                                         //   of each (conv,purp) attpack type
+      int  *nestCount,           // in - number of nested attpacks (child nodes)
+      char *nestAttPackInstanceNameList, // out - attpack instance name list
+      int *nestAttPackInstanceNameLens,  // out - length of each instance name
+      int *nestAttPackInstanceNameCount, // inout - number of attpack 
+                                         //   instance names
+      int  *rc,                  // in - return code
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nclen,// hidden/in - strlen count for nestConvention
+      ESMCI_FortranStrLenArg nplen,// hidden/in - strlen count for nestPurpose
+      ESMCI_FortranStrLenArg napinlen) { // hidden/in - strlen count for 
+                                         //   nestAttPackInstanceNameList
+// 
+// !DESCRIPTION:
+//     Create a standard nested attpack with a specified number of instances
+//     of each attpack type (convention,purpose).  Return a list of their names.
+//
+//EOP
+
+  int j, k, status;
+  int totalInstances;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!nestCount) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestCount", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!nestConvention) || (nclen <= 0) || (nestConvention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestConvention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!nestPurpose) || (nplen <= 0) || (nestPurpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestPurpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if (!nestConvLens) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestConvLens", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!nestPurpLens) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestPurpLens", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!nestAttPackInstanceCountList) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                        "bad attribute nestAttPackInstanceCountList,", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!nestAttPackInstanceNameList) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "no attribute nestAttPackInstanceNameList", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cpurp.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cobj.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // allocate space for vectors of strings and ints
+  vector<string> cnconv, cnpurp;
+  vector<int> cnapicountlist;
+  cnconv.reserve(*nestCount);
+  cnpurp.reserve(*nestCount);
+  cnapicountlist.reserve(*nestCount);
+
+  // loop through nestConvention, nestPurpose allocating space and copying
+  //   values to cnconv, cnpurp
+  j = 0;
+  k = 0;
+  totalInstances = 0;
+  for (unsigned int i=0; i<(*nestCount); i++) {
+    cnapicountlist.push_back(nestAttPackInstanceCountList[i]);
+    totalInstances += nestAttPackInstanceCountList[i];
+
+    if (!(nestConvention[j])) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestConvention", &status);
+      if (rc) *rc = status;
+      return;
+    }
+    if (!(nestPurpose[k])) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestPurpose", &status);
+      if (rc) *rc = status;
+      return;
+    }
+
+    // copy and convert F90 strings to null terminated ones
+    string tempc((&nestConvention[j]), nestConvLens[i]);
+    string tempp((&nestPurpose[k]), nestPurpLens[i]);
+    tempc.resize(tempc.find_last_not_of(" ")+1);
+    tempp.resize(tempp.find_last_not_of(" ")+1);
+    cnconv.push_back(tempc);
+    cnpurp.push_back(tempp);
+    j += nestConvLens[i];
+    k += nestPurpLens[i];
+  }
+
+  // local buffer for returned attpack instance names and count
+  vector<string> cnapinamelist;
+  cnapinamelist.reserve(totalInstances);
+  int cnapinamecount;
+
+  // Create the attribute package on the object
+  status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj,
+                                               cnconv, cnpurp, 
+                                               cnapicountlist,
+                                               *nestCount,
+                                               cnapinamelist,
+                                               cnapinamecount);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
+
+  // return number of attpack instance names
+  *nestAttPackInstanceNameCount = cnapinamecount;
+
+  // convert attpack instance names to F90
+  j = 0;
+  for (unsigned int i=0; i<cnapinamecount; i++) {
+    // TODO:  check if F90 buffer size is big enough:
+    //        nestAttPackInstanceNameCount >= cnapinamecount (before loop)
+    //        NameLens[i] >= [i].length()
+    nestAttPackInstanceNameLens[i] = cnapinamelist[i].length();
+    status = ESMC_CtoF90string(const_cast<char*>(cnapinamelist[i].c_str()), 
+                               &nestAttPackInstanceNameList[j], 
+                               nestAttPackInstanceNameLens[i]);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    j += nestAttPackInstanceNameLens[i];
+  }
+
+}  // end c_esmc_attpackcreatestdnest
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2558,7 +2798,8 @@ extern "C" {
       int *lens,                // in/out - length of strings
       char *valueList,          // out - character values
       int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for value
+      ESMCI_FortranStrLenArg nlen,   // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for valueList
 // 
 // !DESCRIPTION:
 //     Retrieve a (name,value) pair from any object type in the system.

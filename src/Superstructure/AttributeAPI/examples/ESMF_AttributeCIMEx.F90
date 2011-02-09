@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.23 2011/01/21 00:11:46 rokuingh Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.24 2011/02/09 06:59:35 earl.r.schwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ program ESMF_AttributeCIMEx
       implicit none
 
       ! Local variables  
-      integer                 :: rc, finalrc, petCount, localPet
+      integer                 :: rc, finalrc, petCount, localPet, nameCount
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: DMS_emi, UM, OH, Orog, Ozone, SST, SO2, NOx
       type(ESMF_FieldBundle)  :: fbundle1, fbundle2
@@ -56,6 +56,8 @@ program ESMF_AttributeCIMEx
       type(ESMF_GridComp)     :: gridcomp1, gridcomp2, gridcomp3, gridcomp4
       character(ESMF_MAXSTR)  :: convCIM, purpComp, purpField, purpPlatform
       character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
+      character(ESMF_MAXSTR), dimension(2)  :: nestConv, nestPurp
+      character(ESMF_MAXSTR), dimension(5)  :: nestAttPackName
       
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -130,17 +132,28 @@ program ESMF_AttributeCIMEx
 !BOC 
       convCIM = 'CIM 1.0'
       purpComp = 'Model Component Simulation Description'
+
       purpField = 'Inputs Description'
       purpPlatform = 'Platform Description'
+
       convISO = 'ISO 19115'
       purpRP = 'Responsible Party Description'
       purpCitation = 'Citation Description'
 
+      nestConv(1) = convISO
+      nestPurp(1) = purpRP
+      nestConv(2) = convISO
+      nestPurp(2) = purpCitation
+
       ! Add CIM Attribute package to Components
       !   convention = 'CIM 1.0'
       !   purpose    = 'Model Component Simulation Description'
+      nameCount = 0
       call ESMF_AttributeAdd(cplcomp, convention=convCIM, &
-        purpose=purpComp, rc=rc)
+        purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
+        nestAttPackInstanceCountList=(/2,1/), &
+        nestAttPackInstanceNameList=nestAttPackName, &
+        nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
       call ESMF_AttributeAdd(gridcomp1, convention=convCIM, &
         purpose=purpComp, rc=rc)
       call ESMF_AttributeAdd(gridcomp2, convention=convCIM, &
@@ -283,6 +296,28 @@ convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'URL', &
        'www.epcc.ed.ac.uk', &
         convention=convISO, purpose=purpRP, rc=rc)
+
+      ! Responsible party attributes (for Center)
+      call ESMF_AttributeSet(cplcomp, 'Name', &
+       'Department of Meteorology University of Reading', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'PhysicalAddress', &
+       'Reading, Berkshire, United Kingdom', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'EmailAddress', &
+       'info@reading.ac.uk', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'ResponsiblePartyRole', &
+       'Center', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'URL', &
+       'www.epcc.ed.ac.uk', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
 
       ! Citation attributes
       call ESMF_AttributeSet(cplcomp, 'ShortTitle', &

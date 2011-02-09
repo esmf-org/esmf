@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.41 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMCI_Attribute.h,v 1.42 2011/02/09 06:59:15 earl.r.schwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@ namespace ESMCI {
   class VM;
   class IO_XML;
 
-class Attribute 
+class Attribute
 {
  private:
     string attrName; // inline to reduce memory thrashing
@@ -96,6 +96,14 @@ class Attribute
     string                vcp;       // pointer to a NULL term character string, or
     vector<string>        vcpp;
 
+    int        id;         // unique identifier. used to generate unique 
+                                  // default names.
+                                  //    TODO: inherit from ESMC_Base class?
+                                  //      -- but circular dependency exists
+                                  //         with 'root' in ESMC_Base
+    static int count;      // number of attributes created in this address
+                           //   space. Thread-safe because int is atomic.
+                                  //    TODO: inherit from ESMC_Base class?
     // prevent accidental copying
     Attribute(const Attribute&);
 
@@ -107,10 +115,17 @@ class Attribute
     // attpack methods
     int AttPackAddAttribute(const string &name, const string &convention, 
       const string &purpose, const string &object);
+    int AttPackAddAttribute(const string &name);
     int AttPackCreateCustom(const string &convention, 
       const string &purpose, const string &object);
     int AttPackCreateStandard(const string &convention, 
       const string &purpose, const string &object);
+    int AttPackCreateStandard(const string &convention, const string &purpose,
+      const string &object, 
+      const vector<string> &nestConvention, const vector<string> &nestPurpose,
+      const vector<int> &nestAttPackInstanceCountList, int nestCount,
+      vector<string> &nestAttPackInstanceNameList,
+      int &nestAttPackInstanceNameCount);
     Attribute *AttPackGet(const string &convention, 
       const string &purpose, const string &object,
       const string &attPackInstanceName) const;
@@ -118,6 +133,8 @@ class Attribute
     int AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object,
       const string &attPackInstanceName, ESMC_Logical *present) const;
+    bool AttPackIsSet(const string &convention, const string &purpose,
+                      const string &object) const;
     int AttPackNest(const string &convention, const string &purpose,
       const string &object, 
       const string &nestConvention, const string &nestPurpose);
@@ -273,6 +290,7 @@ class Attribute
     int AttributeWriteCIMmodelComp(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMsimRun(IO_XML *io_xml) const;
     int AttributeWriteCIMplatform(IO_XML *io_xml) const;
+    int AttributeWriteCIMCP(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMRP(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcitation(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcomposition(IO_XML *io_xml) const;
@@ -323,6 +341,23 @@ extern "C" {
                                   ESMCI_FortranStrLenArg clen, 
                                   ESMCI_FortranStrLenArg plen, 
                                   ESMCI_FortranStrLenArg olen);
+  void FTN(c_esmc_attpackcreatestdnest)(ESMC_Base **base,
+                                  char *convention, char *purpose, 
+                                  char *object, 
+                                  char *nestConvention, char *nestPurpose, 
+                                  int *nestConvLens, int *nestPurpLens,
+                                  int *nestAttPackInstanceCountList,
+                                  int *nestCount,
+                                  char *nestAttPackInstanceNameList,
+                                  int *nestAttPackInstanceNameLens,
+                                  int *nestAttPackInstanceNameCount,
+                                  int *rc, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen, 
+                                  ESMCI_FortranStrLenArg nclen, 
+                                  ESMCI_FortranStrLenArg nplen,
+                                  ESMCI_FortranStrLenArg napinlen);
   void FTN(c_esmc_attpacknest)(ESMC_Base **base,
                                   char *convention, char *purpose, 
                                   char *object, int *nestCount,

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.11 2010/11/03 22:48:48 theurich Exp $
+! $Id: user_model2.F90,v 1.12 2011/02/09 06:59:35 earl.r.schwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -167,6 +167,8 @@ module user_model2
     ! OH CIM Attributes
     call ESMF_AttributeSet(OH, 'CouplingPurpose', 'boundaryCondition', &
         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'CouplingSource', 'HiGEM_OceanChem', &
+        convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'CouplingTarget', 'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
@@ -197,6 +199,8 @@ module user_model2
 
     ! Orog CIM Attributes
     call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'initialCondition', &
+        convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'CouplingSource', 'HiGEM_Ocean', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'CouplingTarget', 'HiGEM_Atmos', &
         convention=convCIM, purpose=purpField, rc=rc)

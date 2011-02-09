@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2010/11/03 22:48:48 theurich Exp $
+! $Id: user_model1.F90,v 1.10 2011/02/09 06:59:35 earl.r.schwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,6 +123,9 @@ module user_model1
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-02-02T02:03:04Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'ModelType', &
+      'Atmosphere', &
+        convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Principal Investigator)
@@ -167,6 +170,9 @@ module user_model1
     ! DMS_emi CIM Attributes
     call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', 'boundaryCondition', &
         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(DMS_emi, 'CouplingSource', &
+                                    'HiGEM_OceanChem', &
+        convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'CouplingTarget', &
                                     'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
@@ -192,6 +198,8 @@ module user_model1
 
     ! UM CIM Attributes
     call ESMF_AttributeSet(UM, 'CouplingPurpose', 'initialCondition', &
+        convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(UM, 'CouplingSource', 'HiGEM_OceanChem', &
         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(UM, 'CouplingTarget', 'HiGEM_AtmosChem', &
         convention=convCIM, purpose=purpField, rc=rc)
