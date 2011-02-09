@@ -1,8 +1,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.21 2011/02/07 19:14:45 ESRL\silverio.vasquez Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.22 2011/02/09 22:36:16 ESRL\robert.oehmke Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2010, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,7 +37,7 @@ program ESMF_RegridWeightGen
       integer, pointer   :: srcdims(:), dstdims(:)
       integer            :: srcrank, dstrank
       logical            :: convert3D
-      logical            :: isConserve, isSphere
+      logical            :: isConserve, srcIsSphere, dstIsSphere
       logical            :: addCorners,convertToDual
       type(ESMF_MeshLoc) :: meshLoc
       logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg
@@ -214,6 +214,19 @@ program ESMF_RegridWeightGen
            pole = ESMF_REGRIDPOLE_NONE
            poleptrs = 0
            print *, 'Set pole to None for regional grids'
+         end if
+
+         call ESMF_UtilGetArgIndex('--src_regional',index,rc)
+         if (index /= -1) then
+           srcIsRegional = .true.
+           pole = ESMF_REGRIDPOLE_NONE
+           poleptrs = 0
+           print *, 'Set pole to None for regional source grid'
+         end if
+
+         call ESMF_UtilGetArgIndex('--dst_regional',index,rc)
+         if (index /= -1) then
+           dstIsRegional = .true.
          end if
 
         ! Should I have only PetNO=0 to open the file and find out the size?
@@ -421,10 +434,20 @@ program ESMF_RegridWeightGen
 
      if (srcIsRegional .and. dstIsRegional) then
         regridScheme = ESMF_REGRID_SCHEME_REGION3D
-        isSphere=.false.
+        srcIsSphere=.false.
+        dstIsSphere=.false.
+     elseif (srcIsRegional) then
+        regridScheme = ESMF_REGRID_SCHEME_REGTOFULL3D
+        srcIsSphere=.false.
+        dstIsSphere=.true.
+     elseif (dstIsRegional) then  
+        regridScheme = ESMF_REGRID_SCHEME_FULLTOREG3D
+        srcIsSphere=.true.
+        dstIsSphere=.false.
      else
         regridScheme = ESMF_REGRID_SCHEME_FULL3D
-        isSphere=.true.
+        srcIsSphere=.true.
+        dstIsSphere=.true.
      endif
 
      ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
@@ -463,7 +486,7 @@ program ESMF_RegridWeightGen
      if (srcIsScrip) then
 	if(srcIsReg) then
            srcGrid = ESMF_GridCreate(srcfile,(/xpart,ypart/), addCornerStagger=addCorners, &
-                       isSphere=isSphere, rc=rc)
+                       isSphere=srcIsSphere, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -513,7 +536,7 @@ program ESMF_RegridWeightGen
      if (dstIsScrip) then
 	if(dstIsReg) then
            dstGrid = ESMF_GridCreate(dstfile,(/xpart, ypart/), addCornerStagger=addCorners, &
-                       isSphere=isSphere, rc=rc)
+                       isSphere=dstIsSphere, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1313,6 +1336,10 @@ subroutine PrintUsage()
      print *, "-r         - an optional argument specifying the source and destination grids"
      print *, "             are regional grids.  Without this argument, the grids are assumed"
      print *, "             to be global"
+     print *, "--src_regional   - an optional argument specifying the source grid is regional."
+     print *, "             Without this argument, the src grids is assumed to be global."
+     print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
+     print *, "             Without this argument, the dst grids is assumed to be global."
 end subroutine PrintUsage
 
 end program ESMF_RegridWeightGen
