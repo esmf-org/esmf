@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.10 2011/02/07 18:45:17 gerhard.j.theurich Exp $
+! $Id: ESMF_WebServ.F90,v 1.11 2011/02/09 05:58:13 gerhard.j.theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMC_FILENAME "ESMCI_WebServ.F90"
+#define ESMF_FILENAME "ESMF_WebServ.F90"
 !==============================================================================
 !
 ! ESMF Component module
@@ -558,23 +558,30 @@ contains
     localrc = ESMF_SUCCESS
 
     call ESMF_VMGetGlobal(vm=vm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rc)) return
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rc)) return
 
     if (localPet == 0)  then
 
        ! create and initialize data members 
        importState = ESMF_StateCreate(name="Import", &
                                       statetype=ESMF_STATE_IMPORT, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) &
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, &
+	 rc)) &
           return
 
        exportState = ESMF_StateCreate(name="Export", &
                                       statetype=ESMF_STATE_EXPORT, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc)) &
-          return
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rc)) &
+         return
 
        ! Initialize clock in the ComponentInitialize function??  
        ! Will creating the object be sufficient or do I need to initialize 

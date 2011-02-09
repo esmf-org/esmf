@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServComponent_C.F90,v 1.5 2011/02/07 18:45:17 gerhard.j.theurich Exp $
+! $Id: ESMF_WebServComponent_C.F90,v 1.6 2011/02/09 05:58:14 gerhard.j.theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-#define ESMC_FILENAME "ESMCI_WebServComponent_C.F90"
+#define ESMF_FILENAME "ESMF_WebServComponent_C.F90"
 !==============================================================================
 !
 ! ESMF Component module
