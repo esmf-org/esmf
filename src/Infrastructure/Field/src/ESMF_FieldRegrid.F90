@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.56 2011/01/21 23:59:09 peggyli Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.57 2011/02/09 22:35:46 ESRL\robert.oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.56 2011/01/21 23:59:09 peggyli Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.57 2011/02/09 22:35:46 ESRL\robert.oehmke Exp $'
 
 !==============================================================================
 !
@@ -371,7 +371,6 @@ contains
         integer :: localrc
         integer              :: lregridScheme
         type(ESMF_RegridMethod) :: lregridMethod
-        integer              :: isSphere
         type(ESMF_GeomType)  :: srcgeomtype
         type(ESMF_GeomType)  :: dstgeomtype
         type(ESMF_Grid)      :: srcGrid
@@ -389,7 +388,8 @@ contains
         integer              :: gridDimCount
         type(ESMF_RegridPole):: localRegridPoleType
         integer              :: localRegridPoleNPnts
-        logical              :: isLatLonDeg
+        logical              :: srcIsLatLonDeg, dstIsLatLonDeg
+        integer              :: srcIsSphere, dstIsSphere
         type(ESMF_RegridConserve) :: regridConserveG2M
         real(ESMF_KIND_R8), pointer :: fracFptr(:)
 
@@ -444,7 +444,8 @@ contains
 
 
         ! Handle optional pole argument
-        if (lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) then
+        if ((lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) .and. &
+            (lregridScheme .ne. ESMF_REGRID_SCHEME_FULLTOREG3D)) then           
            if (present(regridPoleType)) then
               if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
@@ -501,14 +502,30 @@ contains
 
         ! Set interpretation of grid based on regridScheme
         if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
-           isSphere = 1
-           isLatLonDeg=.true.
+           srcIsSphere = 1
+           srcIsLatLonDeg=.true.
+           dstIsSphere = 1
+           dstIsLatLonDeg=.true.
+        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULLTOREG3D) then
+           srcIsSphere = 1
+           srcIsLatLonDeg=.true.
+           dstIsSphere = 0
+           dstIsLatLonDeg=.true.
+        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGTOFULL3D) then
+           srcIsSphere = 0
+           srcIsLatLonDeg=.true.
+           dstIsSphere = 1
+           dstIsLatLonDeg=.true.
         else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
-           isSphere = 0
-           isLatLonDeg=.true.
+           srcIsSphere = 0
+           srcIsLatLonDeg=.true.
+           dstIsSphere = 0
+           dstIsLatLonDeg=.true.
         else  
-           isSphere = 0
-           isLatLonDeg=.false.
+           srcIsSphere = 0
+           srcIsLatLonDeg=.false.
+           dstIsSphere = 0
+           dstIsLatLonDeg=.false.
         endif
 
         ! Set conserve flag for GridToMesh
@@ -565,7 +582,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, isSphere, isLatLonDeg, &
+          srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
                       maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -638,7 +655,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, isSphere, isLatLonDeg, &
+          dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
                       maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1100,7 +1117,6 @@ contains
 !
 !EOPI
         integer :: localrc
-        integer              :: isSphere
         integer              :: lregridScheme
         type(ESMF_GeomType)  :: geomtype
 
@@ -1112,7 +1128,8 @@ contains
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
         integer :: gridDimCount, localDECount
 	type(ESMF_TypeKind) :: typekind
-        logical :: isLatLonDeg  
+        logical              :: isLatLonDeg
+        integer              :: isSphere
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.21 2010/10/05 22:26:51 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.22 2011/02/09 22:34:58 ESRL\robert.oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.21 2010/10/05 22:26:51 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.22 2011/02/09 22:34:58 ESRL\robert.oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -208,7 +208,8 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       dstmeshcpy.Commit();
       Integrate dig(dstmeshcpy);
       dig.clearWeights(dst_iwtscpy);
-      if (regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+      if ((regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+          (regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
         for (UInt i = 1; i <= 7; ++i)
           dig.AddPoleWeights(dstmeshcpy,i,dst_iwtscpy);
       }
@@ -282,7 +283,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     UInt constraint_id = srcmesh.DefineContext("pole_constraints");
 
     if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) { // No poles if conservative
-      if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+      if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+          (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
 	if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
 	  for (UInt i = 1; i <= 7; ++i)
 	    MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
@@ -341,7 +343,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
      interp(0, wts);
 
      // Factor out poles if they exist
-     if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+     if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+         (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
          wts.GatherToCol(pole_constraints);
          wts.AssimilateConstraints(pole_constraints);
@@ -373,13 +376,14 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     // Add weights to meshes before poles
     // so all the weights are on user data points
-    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
-        for (UInt i = 1; i <= 7; ++i) {
-       	  sig.AddPoleWeights(srcmesh,i,src_iwts);
-       	  dig.AddPoleWeights(dstmesh,i,dst_iwts);
-        }
+    if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
+      for (UInt i = 1; i <= 7; ++i) {
+        sig.AddPoleWeights(srcmesh,i,src_iwts);
+        dig.AddPoleWeights(dstmesh,i,dst_iwts);
+      }
     }
-
+    
     // Add in other none-pole weights
     // (and do cross processor sum)
     sig.intWeights(src_iwts);
@@ -410,8 +414,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // Pole constraints
     IWeights pole_constraints, stw;
     UInt constraint_id = dstmesh.DefineContext("pole_constraints");
-
-    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
+    if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
         for (UInt i = 1; i <= 7; ++i)
           MeshAddPole(dstmesh, i, constraint_id, pole_constraints);
@@ -475,17 +479,17 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
 
      // Factor out poles if they exist
-     if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
-       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-         stw.GatherToCol(pole_constraints);
-         stw.AssimilateConstraints(pole_constraints);
-       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-         stw.GatherToRowSrc(pole_constraints);
-         stw.AssimilateConstraintsNPnts(pole_constraints);
-       }
+    if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
+      if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+        stw.GatherToCol(pole_constraints);
+        stw.AssimilateConstraints(pole_constraints);
+      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+        stw.GatherToRowSrc(pole_constraints);
+        stw.AssimilateConstraintsNPnts(pole_constraints);
+      }
     }
-
-
+    
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
 
@@ -525,12 +529,12 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     // Add weights to meshes before poles
     // so all the weights are on user data points
-    if (*regridScheme == ESMC_REGRID_SCHEME_FULL3D) {
-        for (UInt i = 1; i <= 7; ++i)
-          ig.AddPoleWeights(mesh,i,iwts);
+    if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
+      for (UInt i = 1; i <= 7; ++i)
+        ig.AddPoleWeights(mesh,i,iwts);
     }
-
-
+    
     // Add in other none-pole weights
     // (and do cross processor sum)
     ig.intWeights(iwts);
