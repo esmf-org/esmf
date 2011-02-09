@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.18 2011/02/07 19:20:22 ESRL\silverio.vasquez Exp $
+! $Id: ESMF_IOScrip.F90,v 1.19 2011/02/09 22:53:14 ESRL\robert.oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -344,7 +344,7 @@ end subroutine ESMF_ScripInqUnits
       if (convertToDegLocal) then
          if (units(1:len) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
-            print *, 'Convert radians to degree ', rad2deg
+  !         print *, 'Convert radians to degree ', rad2deg
             grid_center_lon(:) = grid_center_lon(:)*rad2deg
          endif
       endif	   
@@ -435,7 +435,7 @@ end subroutine ESMF_ScripInqUnits
       if (convertToDegLocal) then
          if (units(1:len) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
-            print *, 'Convert radians to degree ', rad2deg
+!            print *, 'Convert radians to degree ', rad2deg
             grid_corner_lon(:,:) = grid_corner_lon(:,:)*rad2deg
          endif
       endif	   
