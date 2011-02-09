@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.22 2011/02/09 22:36:16 ESRL\robert.oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.23 2011/02/09 23:28:23 ESRL\robert.oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ program ESMF_RegridWeightGen
       integer            :: commandbuf2(14)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
-      real(ESMF_KIND_R8) :: starttime, endtime
+      !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
@@ -589,8 +589,8 @@ program ESMF_RegridWeightGen
          endif
       endif
 
-      call ESMF_VMBarrier(vm)
-      call ESMF_VMWtime(starttime, rc=rc)
+      !call ESMF_VMBarrier(vm)
+      !call ESMF_VMWtime(starttime, rc=rc)
       maskvals(1) = 0
       if (poleptrs <= 0) poleptrs = 1
       if (trim(method) .eq. 'bilinear') then
@@ -704,8 +704,8 @@ program ESMF_RegridWeightGen
          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
-      call ESMF_VMBarrier(vm)
-      call ESMF_VMWtime(endtime, rc=rc)
+      !call ESMF_VMBarrier(vm)
+      !call ESMF_VMWtime(endtime, rc=rc)
 
       ! Get rid of conservative arrays
       if (isConserve) then
@@ -718,8 +718,8 @@ program ESMF_RegridWeightGen
       ! Output success
       if (PetNo==0) then
          write(*,*)
-!         write(*,*) "Completed weight generation successfully."
-         write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
+         write(*,*) "Completed weight generation successfully."
+!         write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
       endif
 
       call ESMF_Finalize()
