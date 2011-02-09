@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.125 2011/01/24 23:04:57 rokuingh Exp $
+// $Id: ESMCI_Array.C,v 1.126 2011/02/09 23:56:52 gerhard.j.theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.125 2011/01/24 23:04:57 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.126 2011/02/09 23:56:52 gerhard.j.theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3324,8 +3324,6 @@ int Array::scatter(
       return rc;
   }
 
-printf("HERE!\n");
-
   // query the VM
   int localPet = vm->getLocalPet();
   
@@ -3666,8 +3664,6 @@ printf("HERE!\n");
     } // !contiguousFlag
   } // i -> de
 
-printf("DONE!\n");
- 
   // garbage collection
   delete [] recvBuffer;
   delete commh;
