@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.50 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMC_Comp.C,v 1.51 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.50 2011/01/05 20:05:47 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.51 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -289,7 +289,7 @@ int ESMC_GridCompSetInternalState(ESMC_GridComp comp, void *data){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompPrint()"
-int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
+int ESMC_GridCompPrint(ESMC_GridComp comp){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -299,7 +299,7 @@ int ESMC_GridCompPrint(ESMC_GridComp comp, const char *options){
   ESMCI::GridComp *compp = (ESMCI::GridComp *)comp;
 
   // call into ESMCI method  
-  localrc = compp->print(options);
+  localrc = compp->print();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
@@ -554,7 +554,7 @@ int ESMC_CplCompSetInternalState(ESMC_CplComp comp, void *data){
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_CplCompPrint()"
-int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options){
+int ESMC_CplCompPrint(ESMC_CplComp comp){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -564,7 +564,7 @@ int ESMC_CplCompPrint(ESMC_CplComp comp, const char *options){
   ESMCI::CplComp *compp = (ESMCI::CplComp *)comp;
 
   // call into ESMCI method  
-  localrc = compp->print(options);
+  localrc = compp->print();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     

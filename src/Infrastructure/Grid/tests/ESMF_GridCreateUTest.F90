@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.108 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.109 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.108 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.109 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1813,7 +1813,8 @@ program ESMF_GridCreateUTest
   call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridGet(grid2, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  call ESMF_GridGet(grid2, minIndex=minIndex, maxIndex=maxIndex, &
+    staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 print *, "localPet = ", localPet

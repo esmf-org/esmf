@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.11 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_GeomBase.F90,v 1.12 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,6 +129,9 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !
 ! - ESMF-public methods:
 
+  public operator(==)
+  public operator(/=)
+
   public ESMF_GeomBaseCreate
   public ESMF_GeomBaseDestroy
 
@@ -145,9 +148,6 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 
 !  public ESMF_GeomBaseGetMesh
 
-  public operator(.eq.), operator(.ne.)
-
-
 ! - ESMF-internal methods:
   public ESMF_GeomBaseGetInit  
 
@@ -156,7 +156,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.11 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.12 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -191,7 +191,7 @@ end interface
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GeomTypeEqual
@@ -207,7 +207,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GeomTypeNotEqual
@@ -332,14 +332,14 @@ end interface
 
            ! Distgrid
 	   if (present(distgrid)) then
-	    if (gbcp%meshloc .eq. ESMF_MESHLOC_NODE) then
+	    if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
                call ESMF_MeshGet(mesh=gbcp%mesh, &
                                  nodalDistgrid=distgrid, &
                                   rc=localrc)
                if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
-	    else if (gbcp%meshloc .eq. ESMF_MESHLOC_ELEMENT) then
+	    else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                call ESMF_MeshGet(mesh=gbcp%mesh, &
                                  elementDistgrid=distgrid, &
                                   rc=localrc)
@@ -951,14 +951,14 @@ end interface
             if (present(distgridToGridMap)) distgridToGridMap = 1
             ! Distgrid
  	    if (present(distgrid)) then
-	       if (gbcp%meshloc .eq. ESMF_MESHLOC_NODE) then
+	       if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     nodalDistgrid=distgrid, &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
-	       else if (gbcp%meshloc .eq. ESMF_MESHLOC_ELEMENT) then
+	       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                  elementDistgrid=distgrid, &
                                   rc=localrc)
@@ -1097,14 +1097,14 @@ end subroutine ESMF_GeomBaseGet
        case  (ESMF_GEOMTYPE_MESH%type) ! Mesh
           if (present(exclusiveLBound)) exclusiveLBound(1) = 1
           if (present(exclusiveUBound)) then
-	       if (gbcp%meshloc .eq. ESMF_MESHLOC_NODE) then
+	       if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedNodes=exclusiveUBound(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
-	       else if (gbcp%meshloc .eq. ESMF_MESHLOC_ELEMENT) then
+	       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedElements=exclusiveUBound(1), &
                                     rc=localrc)
@@ -1118,14 +1118,14 @@ end subroutine ESMF_GeomBaseGet
                endif
             endif
           if (present(exclusiveCount)) then
-	       if (gbcp%meshloc .eq. ESMF_MESHLOC_NODE) then
+	       if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedNodes=exclusiveCount(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
-	       else if (gbcp%meshloc .eq. ESMF_MESHLOC_ELEMENT) then
+	       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedElements=exclusiveCount(1), &
                                     rc=localrc)

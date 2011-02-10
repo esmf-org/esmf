@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.156 2011/01/18 18:24:09 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.156 2011/01/18 18:24:09 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -422,7 +422,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field can be created with a name
-      f2 = ESMF_FieldCreateEmpty("pressure", rc=rc)
+      f2 = ESMF_FieldCreateEmpty(name="pressure", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Field with name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -440,7 +440,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that recreating a Field is allowed.
-      f2 = ESMF_FieldCreateEmpty("temperature", rc=rc)
+      f2 = ESMF_FieldCreateEmpty(name="temperature", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreate a created Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -450,7 +450,7 @@
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field can be created after it has been destroyed
       call ESMF_FieldDestroy(f2)
-      f2 = ESMF_FieldCreateEmpty("precipitation", rc=rc)
+      f2 = ESMF_FieldCreateEmpty(name="precipitation", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreate a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

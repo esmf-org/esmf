@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.42 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.42 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 
@@ -165,10 +165,11 @@ module ESMF_ArraySpecMod
 ! !IROUTINE: ESMF_ArraySpecGet - Get values from an ArraySpec
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySpecGet(arrayspec, rank, typekind, rc)
+  subroutine ESMF_ArraySpecGet(arrayspec, keywordEnforcer, rank, typekind, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rank
     type(ESMF_TypeKind),  intent(out), optional :: typekind
     integer,              intent(out), optional :: rc
@@ -228,12 +229,13 @@ module ESMF_ArraySpecMod
 ! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySpecSet(arrayspec, rank, typekind, rc)
+  subroutine ESMF_ArraySpecSet(arrayspec, rank, typekind, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer,              intent(in)            :: rank
     type(ESMF_TypeKind),  intent(in)            :: typekind
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -302,10 +304,11 @@ module ESMF_ArraySpecMod
 ! !IROUTINE: ESMF_ArraySpecValidate - Validate ArraySpec internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArraySpecValidate(arrayspec, rc)
+  subroutine ESMF_ArraySpecValidate(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)              :: arrayspec
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -533,11 +536,12 @@ module ESMF_ArraySpecMod
 ! !IROUTINE: ESMF_ArraySpecPrint - Print information of ArraySpec
 
 ! !INTERFACE:
-  subroutine ESMF_ArraySpecPrint(arrayspec, rc)
+  subroutine ESMF_ArraySpecPrint(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(in)              :: arrayspec
-    integer, intent(out), optional                :: rc
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out), optional   :: rc
 !         
 !
 ! !DESCRIPTION:

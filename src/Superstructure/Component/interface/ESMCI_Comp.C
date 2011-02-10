@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.17 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMCI_Comp.C,v 1.18 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.17 2011/01/05 20:05:47 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.18 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -64,8 +64,7 @@ extern "C" {
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp,
-    char const *options, int *rc, ESMCI_FortranStrLenArg olen);
+  void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp, int *rc);
   
   void FTN(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char const *name, 
     char const *configFile, ESMCI::Clock **clock, 
@@ -83,8 +82,7 @@ extern "C" {
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp,
-    char const *options, int *rc, ESMCI_FortranStrLenArg olen);
+  void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp, int *rc);
 };
 //==============================================================================
 
@@ -606,7 +604,6 @@ int GridComp::print(
 //
 // !ARGUMENTS:
 //
-    char const *options
   )const{
 //
 // !DESCRIPTION:
@@ -624,7 +621,7 @@ int GridComp::print(
     return rc;
   }
   
-  FTN(f_esmf_gridcompprint)(this, options, &localrc, strlen(options));
+  FTN(f_esmf_gridcompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -901,7 +898,6 @@ int CplComp::print(
 //
 // !ARGUMENTS:
 //
-    char const *options
   )const{
 //
 // !DESCRIPTION:
@@ -919,7 +915,7 @@ int CplComp::print(
     return rc;
   }
   
-  FTN(f_esmf_cplcompprint)(this, options, &localrc, strlen(options));
+  FTN(f_esmf_cplcompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
     return rc;
   

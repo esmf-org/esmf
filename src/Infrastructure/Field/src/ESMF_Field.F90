@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.356 2011/01/18 21:46:40 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.357 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -127,7 +127,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.356 2011/01/18 21:46:40 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.357 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 !
@@ -151,10 +151,11 @@ contains
 ! !IROUTINE:  ESMF_FieldValidate - Check validity of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldValidate(field, rc)
+      subroutine ESMF_FieldValidate(field, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Field), intent(in)            :: field 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc   
 !
 ! !DESCRIPTION:

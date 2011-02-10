@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.46 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.47 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.46 2011/01/25 20:55:52 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.47 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 !
@@ -2614,7 +2614,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, doCopy, rc=localrc) 
+ call ESMF_LocalArrayGet(larray, farray, docopy=doCopy, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -2780,7 +2780,7 @@ end subroutine ESMF_LocStreamGetKeyI4
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, doCopy, rc=localrc) 
+ call ESMF_LocalArrayGet(larray, farray, docopy=doCopy, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -2946,7 +2946,7 @@ end subroutine ESMF_LocStreamGetKeyR4
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, doCopy, rc=localrc) 
+ call ESMF_LocalArrayGet(larray, farray, docopy=doCopy, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 

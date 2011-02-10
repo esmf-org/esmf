@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.10 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.11 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.10 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.11 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -74,11 +74,13 @@ contains
 ! !IROUTINE: ESMF_FieldBundleHalo - Execute a FieldBundle halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleHalo(fieldbundle, routehandle, checkflag, rc)
+  subroutine ESMF_FieldBundleHalo(fieldbundle, routehandle, keywordEnforcer, &
+    checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in)              :: fieldbundle
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
@@ -171,10 +173,11 @@ contains
 ! halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleHaloRelease(routehandle, rc)
+  subroutine ESMF_FieldBundleHaloRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -216,12 +219,14 @@ contains
 ! !IROUTINE: ESMF_FieldBundleHaloStore - Precompute a FieldBundle halo operation
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleHaloStore(fieldbundle, routehandle, rc)
+    subroutine ESMF_FieldBundleHaloStore(fieldbundle, routehandle, &
+      keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)                :: fieldbundle
-    type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    integer,                intent(out),        optional :: rc
+    type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. By 

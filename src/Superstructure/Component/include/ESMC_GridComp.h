@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.34 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMC_GridComp.h,v 1.35 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -267,8 +267,7 @@ int ESMC_GridCompInitialize(
 //
 // !INTERFACE:
 int ESMC_GridCompPrint(
-  ESMC_GridComp comp,     // in
-  const char *options     // in
+  ESMC_GridComp comp     // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -281,8 +280,6 @@ int ESMC_GridCompPrint(
 //  \begin{description}
 //  \item[comp]
 //    An {\tt ESMC\_GridComp} object.
-//  \item[{[options]}]
-//    Print options are not yet supported, pass NULL.
 // \end{description}
 //
 //EOP

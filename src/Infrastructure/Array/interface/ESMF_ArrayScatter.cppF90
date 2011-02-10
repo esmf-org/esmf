@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.26 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.27 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.26 2011/01/25 20:55:52 rokuingh Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.27 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -126,6 +126,7 @@ contains
 ! !IROUTINE: ESMF_ArrayScatter - Scatter a Fortran array across the ESMF_Array @\
 ! @\
 ! !INTERFACE: @\
+! Private name; call using ESMF_ArrayScatter() @\
 ! subroutine ESMF_ArrayScatter<rank><type><kind>(array, farray, tile, & @\
 !   rootPet, keywordEnforcer, vm, rc) @\
 ! @\
@@ -278,11 +279,12 @@ TypeKindRankDeclarationMacro(ArrayScatter)
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayScatter"
-  subroutine ESMF_ArrayScatterNotRoot(array, tile, rootPet, vm, rc)
+  subroutine ESMF_ArrayScatterNotRoot(array, tile, rootPet, keywordEnforcer, vm, rc)
 
     type(ESMF_Array),           intent(inout)           :: array
     integer,                    intent(in),   optional  :: tile
     integer,                    intent(in)              :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc
 

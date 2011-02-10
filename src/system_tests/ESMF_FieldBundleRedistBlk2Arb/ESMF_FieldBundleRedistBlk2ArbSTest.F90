@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.12 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.13 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -140,9 +140,10 @@ program Blk2ArbBunRedist
        j1 = j - counts(2)
      enddo
 
-     grid2 = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+     grid2 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices,localArbIndexCount=localCount,rc=status)
+       localArbIndex=myIndices,localArbIndexCount=localCount, &
+       name="arbgrid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
@@ -154,13 +155,13 @@ program Blk2ArbBunRedist
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create bundles
-     bundle1 = ESMF_FieldBundleCreate(grid1, 'FieldBundle1', rc=status)
+     bundle1 = ESMF_FieldBundleCreate(grid1, name='FieldBundle1', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     bundle2 = ESMF_FieldBundleCreate(grid2, 'FieldBundle2', rc=status)
+     bundle2 = ESMF_FieldBundleCreate(grid2, name='FieldBundle2', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     bundle3 = ESMF_FieldBundleCreate(grid1, 'FieldBundle3', rc=status)
+     bundle3 = ESMF_FieldBundleCreate(grid1, name='FieldBundle3', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create the field and have it create the array internally for each grid
@@ -297,25 +298,25 @@ program Blk2ArbBunRedist
 
     deallocate(myIndices)
 
-    call ESMF_FieldBundleRedistRelease(rh12, status)
+    call ESMF_FieldBundleRedistRelease(rh12, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldBundleRedistRelease(rh23, status)
+    call ESMF_FieldBundleRedistRelease(rh23, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldBundleDestroy(bundle1, status)
+    call ESMF_FieldBundleDestroy(bundle1, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldBundleDestroy(bundle2, status)
+    call ESMF_FieldBundleDestroy(bundle2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldBundleDestroy(bundle3, status)
+    call ESMF_FieldBundleDestroy(bundle3, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity1, status)
+    call ESMF_FieldDestroy(humidity1, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity2, status)
+    call ESMF_FieldDestroy(humidity2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity3, status)
+    call ESMF_FieldDestroy(humidity3, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid1, status)
+    call ESMF_GridDestroy(grid1, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid2, status)
+    call ESMF_GridDestroy(grid2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 

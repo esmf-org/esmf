@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.21 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.22 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -63,9 +63,9 @@
   public ESMF_StaggerLocString
   public ESMF_StaggerLocSet
   public ESMF_StaggerLocPrint
-  public operator(.eq.), operator(.ne.) 
-  public operator(.gt.), operator(.ge.) 
-  public operator(.lt.), operator(.le.) 
+  public operator(==), operator(/=) 
+  public operator(>), operator(>=) 
+  public operator(<), operator(<=) 
 
 !------------------------------------------------------------------------------
 !
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.21 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.22 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 
 !==============================================================================
@@ -116,7 +116,7 @@
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_StaggerLocEqual
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_StaggerLocNotEqual
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.gt.)
+      interface operator (>)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_StaggerLocGreater
@@ -162,7 +162,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.lt.)
+      interface operator (<)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_StaggerLocLess
@@ -177,7 +177,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ge.)
+      interface operator (>=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_StaggerLocGreaterEqual
@@ -192,7 +192,7 @@
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.le.)
+      interface operator (<=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_StaggerLocLessEqual
@@ -383,16 +383,16 @@ end interface
 
         ! translate staggerloc to string
         ! (Strings should be appropriate for 2D and 3D)
-        if (staggerloc .lt. ESMF_STAGGERLOC_CENTER) string="No String For This StaggerLoc" 
-        if (staggerloc .eq. ESMF_STAGGERLOC_CENTER) string="Center" 
-        if (staggerloc .eq. ESMF_STAGGERLOC_CORNER) string="Corner of Dim. 1 and Dim. 2" 
-        if (staggerloc .eq. ESMF_STAGGERLOC_EDGE1)  string="Middle of Face Offset in Dim. 1" 
-        if (staggerloc .eq. ESMF_STAGGERLOC_EDGE2)  string="Middle of Face Offset in Dim. 2" 
-        if (staggerloc .eq. ESMF_STAGGERLOC_CENTER_VFACE) string="Middle of Face Offset in Dim. 3"
-        if (staggerloc .eq. ESMF_STAGGERLOC_EDGE1_VFACE) string="Middle of Edge Offset in Dim. 1 and Dim. 3"
-        if (staggerloc .eq. ESMF_STAGGERLOC_EDGE2_VFACE) string="Middle of Edge Offset in Dim. 2 and Dim. 3"
-        if (staggerloc .eq. ESMF_STAGGERLOC_CORNER_VFACE) string="Corner of Dim. 1, Dim. 2, and Dim. 3"
-        if (staggerloc .gt. ESMF_STAGGERLOC_CORNER_VFACE) string="No String For This StaggerLoc" 
+        if (staggerloc < ESMF_STAGGERLOC_CENTER) string="No String For This StaggerLoc" 
+        if (staggerloc == ESMF_STAGGERLOC_CENTER) string="Center" 
+        if (staggerloc == ESMF_STAGGERLOC_CORNER) string="Corner of Dim. 1 and Dim. 2" 
+        if (staggerloc == ESMF_STAGGERLOC_EDGE1)  string="Middle of Face Offset in Dim. 1" 
+        if (staggerloc == ESMF_STAGGERLOC_EDGE2)  string="Middle of Face Offset in Dim. 2" 
+        if (staggerloc == ESMF_STAGGERLOC_CENTER_VFACE) string="Middle of Face Offset in Dim. 3"
+        if (staggerloc == ESMF_STAGGERLOC_EDGE1_VFACE) string="Middle of Edge Offset in Dim. 1 and Dim. 3"
+        if (staggerloc == ESMF_STAGGERLOC_EDGE2_VFACE) string="Middle of Edge Offset in Dim. 2 and Dim. 3"
+        if (staggerloc == ESMF_STAGGERLOC_CORNER_VFACE) string="Corner of Dim. 1, Dim. 2, and Dim. 3"
+        if (staggerloc > ESMF_STAGGERLOC_CORNER_VFACE) string="No String For This StaggerLoc" 
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -498,7 +498,7 @@ end interface
 !
 !EOPI
 
-      ESMF_StaggerLocGreater = (StaggerLoc1%staggerloc .gt. &
+      ESMF_StaggerLocGreater = (StaggerLoc1%staggerloc > &
                               StaggerLoc2%staggerloc)
 
       end function ESMF_StaggerLocGreater
@@ -532,7 +532,7 @@ end interface
 !
 !EOPI
 
-      ESMF_StaggerLocLess = (StaggerLoc1%staggerloc .lt. &
+      ESMF_StaggerLocLess = (StaggerLoc1%staggerloc < &
                                  StaggerLoc2%staggerloc)
 
       end function ESMF_StaggerLocLess
@@ -567,7 +567,7 @@ end interface
 !
 !EOPI
 
-      ESMF_StaggerLocGreaterEqual = (StaggerLoc1%staggerloc .ge. &
+      ESMF_StaggerLocGreaterEqual = (StaggerLoc1%staggerloc >= &
                               StaggerLoc2%staggerloc)
 
       end function ESMF_StaggerLocGreaterEqual
@@ -601,7 +601,7 @@ end interface
 !
 !EOPI
 
-      ESMF_StaggerLocLessEqual = (StaggerLoc1%staggerloc .le. &
+      ESMF_StaggerLocLessEqual = (StaggerLoc1%staggerloc <= &
                                  StaggerLoc2%staggerloc)
 
       end function ESMF_StaggerLocLessEqual

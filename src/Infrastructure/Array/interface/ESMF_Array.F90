@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.142 2011/01/25 00:40:03 samsoncheung Exp $
+! $Id: ESMF_Array.F90,v 1.143 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.142 2011/01/25 00:40:03 samsoncheung Exp $'
+    '$Id: ESMF_Array.F90,v 1.143 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -521,13 +521,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArraySMM - Execute an Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, commflag, &
-    finishedflag, cancelledflag, zeroflag, checkflag, rc)
+  subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
+    commflag, finishedflag, cancelledflag, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
@@ -683,10 +684,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArraySMMRelease - Release resources associated with Array sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArraySMMRelease(routehandle, rc)
+  subroutine ESMF_ArraySMMRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -730,14 +732,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArraySMMStore()
 ! subroutine ESMF_ArraySMMStore<type><kind>(srcArray, dstArray, &
-!   routehandle, factorList, factorIndexList, rc)
+!   routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
 !   type(ESMF_Array),       intent(in)              :: srcArray
 !   type(ESMF_Array),       intent(inout)           :: dstArray
 !   type(ESMF_RouteHandle), intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>), target, intent(in)        :: factorList(:)
+!   <type>(ESMF_KIND_<kind>), target, intent(in)    :: factorList(:)
 !   integer,                intent(in)              :: factorIndexList(:,:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -851,7 +854,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreI4(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, rc)
+    factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -859,6 +862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)           :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -917,7 +921,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreI8(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, rc)
+    factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -925,6 +929,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)           :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -983,7 +988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreR4(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, rc)
+    factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -991,6 +996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -1049,7 +1055,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreR8(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, rc)
+    factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
@@ -1057,6 +1063,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -1114,12 +1121,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
-  subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, rc)
+  subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1221,10 +1229,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayValidate - Validate Array internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayValidate(array, rc)
+  subroutine ESMF_ArrayValidate(array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)              :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -1271,12 +1280,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayWrite}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, file, variableName, append, &
-     timeslice, iofmt, rc)
+  subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
+     variableName, append, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
     character(*),         intent(in)             :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),         intent(in),  optional  :: variableName
     logical,              intent(in),  optional  :: append
     integer,              intent(in),  optional  :: timeslice

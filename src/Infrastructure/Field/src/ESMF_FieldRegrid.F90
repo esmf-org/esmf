@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.57 2011/02/09 22:35:46 ESRL\robert.oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.58 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -52,26 +52,17 @@ module ESMF_FieldRegridMod
 !
 ! - ESMF-public methods:
    public ESMF_FieldRegridStore        ! Store a regrid matrix
-   public ESMF_FieldRegridRun          ! apply a regrid operator
    public ESMF_FieldRegrid             ! apply a regrid operator
    public ESMF_FieldRegridRelease      ! apply a regrid operator
    public ESMF_FieldRegridGetIwts      ! get integration weights
    public ESMF_FieldRegridGetArea      ! get area
    private checkGrid                   ! small subroutine to check the grid
 
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldRegrid -- Generic interface
-
-! !INTERFACE:
-  interface ESMF_FieldRegrid
-
-! !PRIVATE MEMBER FUNCTIONS:
+!==============================================================================
 !
-    module procedure ESMF_FieldRegridRun
-!EOPI
-
-  end interface
+! INTERFACE BLOCKS
+!
+!==============================================================================
 
 !BOPI
 ! !IROUTINE: ESMF_FieldRegridStore -- Generic interface
@@ -88,19 +79,10 @@ module ESMF_FieldRegridMod
   end interface
 
 
-! -------------------------- ESMF-public method -------------------------------
-
-
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.57 2011/02/09 22:35:46 ESRL\robert.oehmke Exp $'
-
-!==============================================================================
-!
-! INTERFACE BLOCKS
-!
-!==============================================================================
+    '$Id: ESMF_FieldRegrid.F90,v 1.58 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -113,20 +95,21 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRegridRun"
+#define ESMF_METHOD "ESMF_FieldRegrid"
 
 !BOP
 ! !IROUTINE: ESMF_FieldRegrid - Compute a regridding operation
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegrid()
-      subroutine ESMF_FieldRegridRun(srcField, dstField, &
-                   routehandle, zeroflag, checkflag, rc)
+      subroutine ESMF_FieldRegrid(srcField, dstField, &
+                   routehandle, keywordEnforcer, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field),       intent(inout)           :: srcField
-      type(ESMF_Field),       intent(inout)           :: dstField
+      type(ESMF_Field),       intent(inout), optional :: srcField
+      type(ESMF_Field),       intent(inout), optional :: dstField
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegionFlag),  intent(in),    optional :: zeroflag
       logical,                intent(in),    optional :: checkflag
       integer,                intent(out),   optional :: rc 
@@ -192,18 +175,40 @@ contains
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! Now we go through the painful process of extracting the data members
-        ! that we need.
-        call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! that we need, if present.
+        if (present(srcField)) then
+          call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
 
-        call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (present(dstField)) then
+          call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
 
-        call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-                   routehandle=routehandle, zeroflag=zeroflag, &
-                   checkflag=checkflag, rc=localrc)
+        if (present(srcField) .and. present(dstField)) then
+          call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
+                 routehandle=routehandle, zeroflag=zeroflag, &
+                 checkflag=checkflag, rc=localrc)
+		else if (present(srcField) .and. .not. present(dstField)) then
+          call ESMF_ArraySMM(srcArray=srcArray, &
+                 routehandle=routehandle, zeroflag=zeroflag, &
+                 checkflag=checkflag, rc=localrc)
+		else if (.not. present(srcField) .and. present(dstField)) then
+          call ESMF_ArraySMM(dstArray=dstArray, &
+                 routehandle=routehandle, zeroflag=zeroflag, &
+                 checkflag=checkflag, rc=localrc)
+        else if (.not. present(srcField) .and. .not. present(dstField)) then
+          call ESMF_ArraySMM(routehandle=routehandle, zeroflag=zeroflag, &
+                 checkflag=checkflag, rc=localrc)
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            "Supplied combination of optional Fields not supported", &
+            ESMF_CONTEXT, rc)
+          return
+        endif
 
         if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -221,7 +226,7 @@ contains
 
         if(present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_FieldRegridRun
+    end subroutine ESMF_FieldRegrid
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridRelease"
@@ -230,11 +235,12 @@ contains
 ! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by a regridding operation
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldRegridRelease(routehandle, rc)
+      subroutine ESMF_FieldRegridRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(inout)  :: routehandle
-      integer, intent(out), optional :: rc 
+      type(ESMF_RouteHandle), intent(inout)         :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !     Free resources used by regrid objec
@@ -266,51 +272,57 @@ contains
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
-      subroutine ESMF_FieldRegridStoreNX(srcField, srcMaskValues,       &
-                                       dstField, dstMaskValues,         &
-                                       unmappedDstAction,               &
-                                       routehandle, indicies, weights,  & 
-                                       srcFracField, dstFracField,      &
-                                       regridMethod,                    &
+      subroutine ESMF_FieldRegridStoreNX(srcField, dstField, keywordEnforcer, &
+                                       srcMaskValues, dstMaskValues, &
+                                       regridMethod, &
                                        regridPoleType, regridPoleNPnts, & 
-                                       regridScheme, rc)
+                                       regridScheme,unmappedDstAction, &
+                                       routehandle, indicies, weights, & 
+                                       srcFracField, dstFracField, rc)
 !
 ! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout)                 :: srcField
-      integer(ESMF_KIND_I4), intent(in), optional     :: srcMaskValues(:)
-      type(ESMF_Field), intent(inout)                 :: dstField
-      integer(ESMF_KIND_I4), intent(in), optional     :: dstMaskValues(:)
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
-      type(ESMF_RouteHandle), intent(inout), optional :: routehandle
-      integer(ESMF_KIND_I4), pointer, optional        :: indicies(:,:)
-      real(ESMF_KIND_R8), pointer, optional           :: weights(:)
-      type(ESMF_Field), intent(inout),optional          :: srcFracField
-      type(ESMF_Field), intent(inout),optional          :: dstFracField
-      type(ESMF_RegridMethod), intent(in), optional   :: regridMethod
-      type(ESMF_RegridPole), intent(in), optional     :: regridPoleType
-      integer, intent(in),optional                    :: regridPoleNPnts
-      integer, intent(in), optional                   :: regridScheme
-      integer, intent(out), optional                  :: rc 
+      type(ESMF_Field),          intent(inout)           :: srcField
+      type(ESMF_Field),          intent(inout)           :: dstField
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
+      integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
+      type(ESMF_RegridMethod),   intent(in),    optional :: regridMethod
+      type(ESMF_RegridPole),     intent(in),    optional :: regridPoleType
+      integer,                   intent(in),    optional :: regridPoleNPnts
+      integer,                   intent(in),    optional :: regridScheme
+      type(ESMF_UnmappedAction), intent(in),    optional :: unmappedDstAction
+      type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
+      integer(ESMF_KIND_I4),     pointer,       optional :: indicies(:,:)
+      real(ESMF_KIND_R8),        pointer,       optional :: weights(:)
+      type(ESMF_Field),          intent(inout), optional :: srcFracField
+      type(ESMF_Field),          intent(inout), optional :: dstFracField
+      integer,                   intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
-!       Creates a sparse matrix operation (stored in {\tt routehandle}) that contains the calculations and 
-!       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. The routehandle can then be used in the call
-!       {\tt ESMF\_FieldRegrid()} to interpolate between the Fields. The user may also get the
-!       interpolation matrix in sparse matrix form via the optional arguments {\tt indices} and {\tt weights}. 
+!       Creates a sparse matrix operation (stored in {\tt routehandle}) that 
+!       contains the calculations and communications necessary to interpolate
+!       from {\tt srcField} to {\tt dstField}. The routehandle can then be 
+!       used in the call {\tt ESMF\_FieldRegrid()} to interpolate between the
+!       Fields. The user may also get the interpolation matrix in sparse 
+!       matrix form via the optional arguments {\tt indices} and {\tt weights}. 
 !       \end{sloppypar}
 !       
-!       The routehandle generated by this call is based just on the coordinates at the 
-!       Fields' stagger locations in the Grids contained in the Fields.  
-!       If those coordinates don't change the routehandle can be used repeatedly to interpolate from the source Field to the destination Field. 
-!       This is true even if the data in the Fields changes. The routehandle may also be used to interpolate between any source and 
-!       destination Field which are created on the same stagger location and Grid as the original Fields.        
+!       The routehandle generated by this call is based just on the 
+!       coordinates at the Fields' stagger locations in the Grids contained 
+!       in the Fields.  If those coordinates don't change the routehandle can
+!       be used repeatedly to interpolate from the source Field to the 
+!       destination Field.  This is true even if the data in the Fields 
+!       changes. The routehandle may also be used to interpolate between any
+!       source and destination Field which are created on the same stagger 
+!       location and Grid as the original Fields.        
 !
-!       When it's no longer needed the routehandle should be destroyed by using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
-!       Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in the Grids upon which the Fields are built are
-!   in degrees.  
+!       When it's no longer needed the routehandle should be destroyed by 
+!       using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
+!       Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in 
+!       the Grids upon which the Fields are built are in degrees.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -340,18 +352,23 @@ contains
 !     \item [{[srcFracField]}] 
 !           The fraction of each source cell participating in the regridding. Only 
 !           valid when regridMethod is {\tt ESMF\_REGRID\_METHOD\_CONSERVE}.
-!           This Field needs to be created on the same location (e.g staggerloc) as the srcField.
+!           This Field needs to be created on the same location (e.g staggerloc) 
+!           as the srcField.
 !     \item [{[dstFracField]}] 
 !           The fraction of each destination cell participating in the regridding. Only 
 !           valid when regridMethod is {\tt ESMF\_REGRID\_METHOD\_CONSERVE}.
-!           This Field needs to be created on the same location (e.g staggerloc) as the dstField.
+!           This Field needs to be created on the same location (e.g staggerloc) 
+!           as the dstField.
 !     \item [{[regridMethod]}]
-!           The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
-!           valid options. If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
+!           The type of interpolation. Please see Section~\ref{opt:regridmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
 !     \item [{[regridPoleType]}]
 !           Which type of artificial pole
-!           to construct on the source Grid for regridding. Only valid when {\tt regridScheme} is set to 
-!           {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see Section~\ref{opt:regridpole} for a list of
+!           to construct on the source Grid for regridding. Only valid when 
+!           {\tt regridScheme} is set to 
+!           {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see 
+!           Section~\ref{opt:regridpole} for a list of
 !           valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
 !     \item [{[regridPoleNPnts]}]
 !           If {\tt regridPoleType} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
@@ -819,18 +836,18 @@ contains
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
-      subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField,     &
-                                       routehandle,                    &
-                                       rc)
+      subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
+                                       keywordEnforcer, routehandle, rc)
 !
 ! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
-      type(ESMF_XGrid), intent(inout)                 :: xgrid
-      type(ESMF_Field), intent(inout)                 :: srcField
-      type(ESMF_Field), intent(inout)                 :: dstField
+      type(ESMF_XGrid),       intent(inout)           :: xgrid
+      type(ESMF_Field),       intent(inout)           :: srcField
+      type(ESMF_Field),       intent(inout)           :: dstField
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
-      integer, intent(out), optional                  :: rc 
+      integer,                intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
@@ -1065,7 +1082,7 @@ contains
 
         call ESMF_ArraySMMStore(srcArray, dstArray, routehandle, &
             sparseMat%factorList, sparseMat%factorIndexList, &
-            localrc)
+            rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 

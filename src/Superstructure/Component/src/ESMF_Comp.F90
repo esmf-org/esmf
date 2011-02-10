@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.204 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.205 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -229,7 +229,7 @@ module ESMF_CompMod
   public ESMF_CompClassSetInitCreated
   public ESMF_CompClassValidate
 
-  public operator(.eq.), operator(.ne.)
+  public operator(==), operator(/=)
 
   public ESMF_CompConstruct
   public ESMF_CompDestruct
@@ -251,7 +251,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.204 2011/01/05 20:05:47 svasquez Exp $'
+    '$Id: ESMF_Comp.F90,v 1.205 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -261,7 +261,7 @@ module ESMF_CompMod
 !==============================================================================
 
 !------------------------------------------------------------------------------
-  interface operator (.eq.)
+  interface operator (==)
     module procedure ESMF_meeq
     module procedure ESMF_cteq
     module procedure ESMF_mteq
@@ -269,7 +269,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-  interface operator (.ne.)
+  interface operator (/=)
     module procedure ESMF_mene
     module procedure ESMF_ctne
     module procedure ESMF_mtne
@@ -419,13 +419,13 @@ contains
   function ESMF_meeq(me1, me2)
     logical ESMF_meeq
     type(ESMF_Method), intent(in) :: me1, me2
-    ESMF_meeq = (me1%method .eq. me2%method)    
+    ESMF_meeq = (me1%method == me2%method)    
   end function
 
   function ESMF_mene(me1, me2)
     logical ESMF_mene
     type(ESMF_Method), intent(in) :: me1, me2
-    ESMF_mene = (me1%method .ne. me2%method)
+    ESMF_mene = (me1%method /= me2%method)
   end function
 !------------------------------------------------------------------------------
 
@@ -436,13 +436,13 @@ contains
   function ESMF_cteq(ct1, ct2)
     logical ESMF_cteq
     type(ESMF_CompType), intent(in) :: ct1, ct2
-    ESMF_cteq = (ct1%ctype .eq. ct2%ctype)    
+    ESMF_cteq = (ct1%ctype == ct2%ctype)    
   end function
 
   function ESMF_ctne(ct1, ct2)
     logical ESMF_ctne
     type(ESMF_CompType), intent(in) :: ct1, ct2
-    ESMF_ctne = (ct1%ctype .ne. ct2%ctype)
+    ESMF_ctne = (ct1%ctype /= ct2%ctype)
   end function
 !------------------------------------------------------------------------------
 
@@ -453,13 +453,13 @@ contains
   function ESMF_mteq(mt1, mt2)
     logical ESMF_mteq
     type(ESMF_GridCompType), intent(in) :: mt1, mt2
-    ESMF_mteq = (mt1%gridcomptype .eq. mt2%gridcomptype)
+    ESMF_mteq = (mt1%gridcomptype == mt2%gridcomptype)
   end function
 
   function ESMF_mtne(mt1, mt2)
     logical ESMF_mtne
     type(ESMF_GridCompType), intent(in) :: mt1, mt2
-    ESMF_mtne = (mt1%gridcomptype .ne. mt2%gridcomptype)
+    ESMF_mtne = (mt1%gridcomptype /= mt2%gridcomptype)
   end function
 !------------------------------------------------------------------------------
 
@@ -601,13 +601,13 @@ contains
       compp%configFile = configFile
       compp%config = ESMF_ConfigCreate(rc=localrc)
       call ESMF_ConfigLoadFile(compp%config, configFile, rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS) then
+      if (localrc /= ESMF_SUCCESS) then
         ! try again with the dirPath concatinated on front
         fullpath = trim(compp%dirPath) // '/' // trim(configFile)
         call ESMF_ConfigLoadFile(compp%config, fullpath, rc=localrc)
         ! TODO: construct a msg string and then call something here.
         ! if (ESMF_LogFoundError(status, msgstr, rc)) return
-        if (localrc .ne. ESMF_SUCCESS) then
+        if (localrc /= ESMF_SUCCESS) then
           write(msgbuf, *) &
             "ERROR: loading config file, unable to open either", &
             " name = ", trim(configFile), " or name = ", trim(fullpath)
@@ -791,7 +791,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .eq. ESMF_STATUS_READY) then
+    if (status == ESMF_STATUS_READY) then
     
       if (compp%vm_info /= ESMF_NULL_POINTER) then
         ! shut down this component's VM
@@ -820,7 +820,7 @@ contains
         ESMF_CONTEXT, rc)) return
 
       ! Release attributes on config
-      if(compp%configFile .ne. "uninitialized" ) then
+      if(compp%configFile /= "uninitialized" ) then
         call ESMF_ConfigDestroy(compp%config, localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -928,7 +928,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 
@@ -1096,7 +1096,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
@@ -1247,7 +1247,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
@@ -1270,12 +1270,11 @@ contains
 ! !IROUTINE:  ESMF_CompPrint -- Print the contents of a Component
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CompPrint(compp, options, rc)
+  recursive subroutine ESMF_CompPrint(compp, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
-    character(len = *),   intent(in),  optional :: options
     integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1300,11 +1299,6 @@ contains
 
     defaultopts = "brief"
 
-    ! Parse options and decide what to print
-    if(present(options)) then
-      ! TODO:  decide what to print
-    endif
-
     if (.not.associated(compp)) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
       !nsc                      ESMF_LOG_INFO)
@@ -1321,7 +1315,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
       !nsc                      ESMF_LOG_INFO)
       write (*,*)  "Invalid or uninitialized Component"
@@ -1398,7 +1392,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc)
@@ -1694,11 +1688,10 @@ contains
 ! !IROUTINE: ESMF_CompValidate -- Ensure the Component internal data is valid.
 !
 ! !INTERFACE:
-  recursive subroutine ESMF_CompValidate(compp, options, rc)
+  recursive subroutine ESMF_CompValidate(compp, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
-    character(len=*),     intent(in),  optional :: options
     integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1729,7 +1722,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "Unini/destroyed comp", &
         ESMF_CONTEXT, rc)
@@ -1805,7 +1798,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
         
-    if (status .ne. ESMF_STATUS_READY) then
+    if (status /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         "uninitialized or destroyed Component object", &
         ESMF_CONTEXT, rc) 

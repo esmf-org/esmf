@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.83 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.84 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -124,14 +124,14 @@ module ESMF_DELayoutMod
 
 !EOPI
   
-  public operator(.eq.), operator(.ne.)
+  public operator(==), operator(/=)
   
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.83 2011/01/19 02:13:18 svasquez Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.84 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -161,13 +161,13 @@ module ESMF_DELayoutMod
   end interface
 
 
-! overload .eq. & .ne. for derived types
+! overload == & /= for derived types
 
-  interface operator (.eq.)
+  interface operator (==)
     module procedure ESMF_sreq
   end interface
 
-  interface operator (.ne.)
+  interface operator (/=)
     module procedure ESMF_srne
   end interface
 
@@ -188,14 +188,14 @@ contains
     logical ESMF_sreq
     type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
 
-    ESMF_sreq = (sr1%value .eq. sr2%value)    
+    ESMF_sreq = (sr1%value == sr2%value)    
   end function
 
   function ESMF_srne(sr1, sr2)
     logical ESMF_srne
     type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
 
-    ESMF_srne = (sr1%value .ne. sr2%value)
+    ESMF_srne = (sr1%value /= sr2%value)
   end function
 !------------------------------------------------------------------------------
 

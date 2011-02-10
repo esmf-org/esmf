@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.40 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_StateEx.F90,v 1.41 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
     print *, "State Destroy returned", rc
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_FieldBundleDestroy(bundle1, rc)
+    call ESMF_FieldBundleDestroy(bundle1, rc=rc)
 !EOC
     print *, "FieldBundle Destroy returned", rc
     print *, "State Example 2 finished"

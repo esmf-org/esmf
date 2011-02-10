@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.22 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.23 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -30,7 +30,7 @@
      ! ESMF Framework module
      use ESMF_Mod
      use ESMF_TestMod
-    
+
      implicit none
 
      ! Local variables
@@ -120,9 +120,10 @@
        i1 = i - counts(1)
      enddo
 
-     grid1 = ESMF_GridCreateShapeTile("source grid", coordTypeKind=ESMF_TYPEKIND_R8, &
+     grid1 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices1,localArbIndexCount=localCount,rc=status)
+       localArbIndex=myIndices1,localArbIndexCount=localCount, &
+       name="source grid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
      call ESMF_GridAddCoord(grid1, rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
@@ -145,9 +146,10 @@
        j1 = j - counts(2)
      enddo
 
-     grid2 = ESMF_GridCreateShapeTile("dest grid", coordTypeKind=ESMF_TYPEKIND_R8, &
+     grid2 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices2,localArbIndexCount=localCount,rc=status)
+       localArbIndex=myIndices2,localArbIndexCount=localCount, &
+       name="dest grid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
@@ -283,19 +285,19 @@
 
     deallocate(myIndices1, myIndices2)
 
-    call ESMF_FieldRedistRelease(rh12, status)
+    call ESMF_FieldRedistRelease(rh12, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldRedistRelease(rh23, status)
+    call ESMF_FieldRedistRelease(rh23, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity1, status)
+    call ESMF_FieldDestroy(humidity1, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity2, status)
+    call ESMF_FieldDestroy(humidity2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity3, status)
+    call ESMF_FieldDestroy(humidity3, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid1, status)
+    call ESMF_GridDestroy(grid1, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid2, status)
+    call ESMF_GridDestroy(grid2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 

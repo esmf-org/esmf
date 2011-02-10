@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2011/01/14 17:49:01 w6ws Exp $
+! $Id: user_model2.F90,v 1.5 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -262,7 +262,7 @@
 
   
     ! Create dest field
-    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
     dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
                         name="dst", rc=localrc)

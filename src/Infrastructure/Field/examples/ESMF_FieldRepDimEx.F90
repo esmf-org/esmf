@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.14 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.15 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !EOE
 !BOC
     ! create field, 2nd and 4th dimensions of the Grid are replicated
-    field = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+    field = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
         gridToFieldMap=(/1,0,2,0/), &
         ungriddedLBound=(/1/), ungriddedUBound=(/4/), &
         totalLWidth=(/1,1/), totalUWidth=(/4,5/), &

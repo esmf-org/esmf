@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.23 2011/01/07 21:09:51 rokuingh Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.24 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.23 2011/01/07 21:09:51 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.24 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -84,14 +84,15 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, &
-         routehandle, checkflag, rc)
+    routehandle, keywordEnforcer, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout),optional  :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)           :: routehandle
-        logical,                intent(in),   optional  :: checkflag
-        integer,                intent(out),  optional  :: rc
+        type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        logical,                intent(in),    optional  :: checkflag
+        integer,                intent(out),   optional  :: rc
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -249,10 +250,11 @@ contains
 ! redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRedistRelease(routehandle, rc)
+  subroutine ESMF_FieldBundleRedistRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -295,15 +297,17 @@ contains
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleRedistStore() 
 ! subroutine ESMF_FieldBundleRedistStore<type><kind>(srcFieldBundle, &
-!        dstFieldBundle, & routehandle, factor, srcToDstTransposeMap, rc) 
+!   dstFieldBundle, & routehandle, factor, keywordEnforcer, &
+!   srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)        :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)     :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)     :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)        :: factor
-!   integer,               intent(in),  optional :: srcToDstTransposeMap(:)
-!   integer,               intent(out), optional :: rc 
+!   type(ESMF_FieldBundle),   intent(in)             :: srcFieldBundle  
+!   type(ESMF_FieldBundle),   intent(inout)          :: dstFieldBundle  
+!   type(ESMF_RouteHandle),   intent(inout)          :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)             :: factor
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                  intent(in),   optional :: srcToDstTransposeMap(:)
+!   integer,                  intent(out),  optional :: rc 
 ! 
 ! !DESCRIPTION: 
 ! 
@@ -382,13 +386,15 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
     subroutine ESMF_FieldBundleRedistStoreI4(srcFieldBundle, &
-        dstFieldBundle, routehandle, factor, srcToDstTransposeMap, rc) 
+      dstFieldBundle, routehandle, factor, keywordEnforcer, &
+      srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)       :: routehandle
         integer(ESMF_KIND_I4),  intent(in)          :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,              intent(in) , optional :: srcToDstTransposeMap(:)
         integer,              intent(out), optional :: rc 
 
@@ -412,7 +418,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -453,7 +459,7 @@ contains
         deallocate(dsta)
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
-            srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -480,13 +486,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
     subroutine ESMF_FieldBundleRedistStoreI8(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+      routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)         :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)      :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)      :: routehandle
         integer(ESMF_KIND_I8),  intent(in)         :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,             intent(in) , optional :: srcToDstTransposeMap(:)
         integer,             intent(out), optional :: rc 
 
@@ -510,7 +517,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -548,7 +555,7 @@ contains
         deallocate(dsta)
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
-            srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -575,13 +582,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
     subroutine ESMF_FieldBundleRedistStoreR4(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+      routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)          :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)       :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)       :: routehandle
         real(ESMF_KIND_R4),   intent(in)            :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,              intent(in) , optional :: srcToDstTransposeMap(:)
         integer,              intent(out), optional :: rc 
 
@@ -605,7 +613,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -643,7 +651,7 @@ contains
         deallocate(dsta)
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
-            srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -670,13 +678,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
     subroutine ESMF_FieldBundleRedistStoreR8(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R8),     intent(in)            :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(in) , optional :: srcToDstTransposeMap(:)
         integer,                intent(out), optional :: rc 
 
@@ -700,7 +709,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -738,7 +747,7 @@ contains
         deallocate(dsta)
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, factor, & 
-            srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 
@@ -763,14 +772,15 @@ contains
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleRedistStore() 
 ! subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, factor, srcToDstTransposeMap, rc) 
+!        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   integer,             intent(in) , optional :: srcToDstTransposeMap(:)
-!   integer,             intent(out), optional :: rc 
+!   type(ESMF_FieldBundle),  intent(in)             :: srcFieldBundle  
+!   type(ESMF_FieldBundle),  intent(inout)          :: dstFieldBundle  
+!   type(ESMF_RouteHandle),  intent(inout)          :: routehandle
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                 intent(in),   optional :: srcToDstTransposeMap(:)
+!   integer,                 intent(out),  optional :: rc 
 ! 
 ! !DESCRIPTION: 
 !
@@ -851,12 +861,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleRedistStore()
     subroutine ESMF_FieldBundleRedistStoreNF(srcFieldBundle, dstFieldBundle, & 
-        routehandle, srcToDstTransposeMap, rc) 
+      routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(in) , optional :: srcToDstTransposeMap(:)
         integer,                intent(out), optional :: rc 
 
@@ -880,7 +891,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -927,7 +938,7 @@ contains
         deallocate(dsta)
 
         call ESMF_ArrayBundleRedistStore(srcab, dstab, routehandle, & 
-            srcToDstTransposeMap, rc=localrc) 
+            srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rc)) return 

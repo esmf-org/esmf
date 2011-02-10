@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.110 2011/01/24 23:30:16 samsoncheung Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.111 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -783,16 +783,16 @@
 
       
 !  Overloaded = operator functions
-      public operator(.eq.), operator(.ne.), assignment(=)
+      public operator(==), operator(/=), assignment(=)
 !
 
 !------------------------------------------------------------------------------
 
-! overload .eq. & .ne. with additional derived types so you can compare 
+! overload == & /= with additional derived types so you can compare 
 !  them as if they were simple integers.
  
 
-interface operator (.eq.)
+interface operator (==)
   module procedure ESMF_sfeq
   module procedure ESMF_dkeq
   module procedure ESMF_pteq
@@ -809,7 +809,7 @@ interface operator (.eq.)
   module procedure ESMF_RegridPoleEq
 end interface
 
-interface operator (.ne.)
+interface operator (/=)
   module procedure ESMF_sfne
   module procedure ESMF_dkne
   module procedure ESMF_ptne
@@ -944,14 +944,14 @@ function ESMF_sfeq(sf1, sf2)
  logical ESMF_sfeq
  type(ESMF_Status), intent(in) :: sf1, sf2
 
- ESMF_sfeq = (sf1%status .eq. sf2%status)
+ ESMF_sfeq = (sf1%status == sf2%status)
 end function
 
 function ESMF_sfne(sf1, sf2)
  logical ESMF_sfne
  type(ESMF_Status), intent(in) :: sf1, sf2
 
- ESMF_sfne = (sf1%status .ne. sf2%status)
+ ESMF_sfne = (sf1%status /= sf2%status)
 end function
 
 !------------------------------------------------------------------------------
@@ -961,14 +961,14 @@ function ESMF_dkeq(dk1, dk2)
  logical ESMF_dkeq
  type(ESMF_TypeKind), intent(in) :: dk1, dk2
 
- ESMF_dkeq = (dk1%dkind .eq. dk2%dkind)
+ ESMF_dkeq = (dk1%dkind == dk2%dkind)
 end function
 
 function ESMF_dkne(dk1, dk2)
  logical ESMF_dkne
  type(ESMF_TypeKind), intent(in) :: dk1, dk2
 
- ESMF_dkne = (dk1%dkind .ne. dk2%dkind)
+ ESMF_dkne = (dk1%dkind /= dk2%dkind)
 end function
 
 subroutine ESMF_dkas(intval, dkval)
@@ -993,14 +993,14 @@ function ESMF_bfeq(bf1, bf2)
  logical ESMF_bfeq
  type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
 
- ESMF_bfeq = (bf1%value .eq. bf2%value)
+ ESMF_bfeq = (bf1%value == bf2%value)
 end function
 
 function ESMF_bfne(bf1, bf2)
  logical ESMF_bfne
  type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
 
- ESMF_bfne = (bf1%value .ne. bf2%value)
+ ESMF_bfne = (bf1%value /= bf2%value)
 end function
 
 !------------------------------------------------------------------------------
@@ -1010,14 +1010,14 @@ function ESMF_ctfeq(ctf1, ctf2)
  logical ESMF_ctfeq
  type(ESMF_ContextFlag), intent(in) :: ctf1, ctf2
 
- ESMF_ctfeq = (ctf1%value .eq. ctf2%value)
+ ESMF_ctfeq = (ctf1%value == ctf2%value)
 end function
 
 function ESMF_ctfne(ctf1, ctf2)
  logical ESMF_ctfne
  type(ESMF_ContextFlag), intent(in) :: ctf1, ctf2
 
- ESMF_ctfne = (ctf1%value .ne. ctf2%value)
+ ESMF_ctfne = (ctf1%value /= ctf2%value)
 end function
 
 !------------------------------------------------------------------------------
@@ -1027,14 +1027,14 @@ function ESMF_tnfeq(tnf1, tnf2)
  logical ESMF_tnfeq
  type(ESMF_TerminationFlag), intent(in) :: tnf1, tnf2
 
- ESMF_tnfeq = (tnf1%value .eq. tnf2%value)
+ ESMF_tnfeq = (tnf1%value == tnf2%value)
 end function
 
 function ESMF_tnfne(tnf1, tnf2)
  logical ESMF_tnfne
  type(ESMF_TerminationFlag), intent(in) :: tnf1, tnf2
 
- ESMF_tnfne = (tnf1%value .ne. tnf2%value)
+ ESMF_tnfne = (tnf1%value /= tnf2%value)
 end function
 
 !------------------------------------------------------------------------------
@@ -1044,14 +1044,14 @@ function ESMF_pteq(pt1, pt2)
  logical ESMF_pteq
  type(ESMF_Pointer), intent(in) :: pt1, pt2
 
- ESMF_pteq = (pt1%ptr .eq. pt2%ptr)
+ ESMF_pteq = (pt1%ptr == pt2%ptr)
 end function
 
 function ESMF_ptne(pt1, pt2)
  logical ESMF_ptne
  type(ESMF_Pointer), intent(in) :: pt1, pt2
 
- ESMF_ptne = (pt1%ptr .ne. pt2%ptr)
+ ESMF_ptne = (pt1%ptr /= pt2%ptr)
 end function
 
 subroutine ESMF_ptas(ptval, intval)
@@ -1076,28 +1076,28 @@ function ESMF_tfeq(tf1, tf2)
  logical ESMF_tfeq
  type(ESMF_Logical), intent(in) :: tf1, tf2
 
- ESMF_tfeq = (tf1%value .eq. tf2%value)
+ ESMF_tfeq = (tf1%value == tf2%value)
 end function
 
 function ESMF_tfne(tf1, tf2)
  logical ESMF_tfne
  type(ESMF_Logical), intent(in) :: tf1, tf2
 
- ESMF_tfne = (tf1%value .ne. tf2%value)
+ ESMF_tfne = (tf1%value /= tf2%value)
 end function
 
 subroutine ESMF_tfas(lval, tfval)
  logical, intent(out) :: lval
  type(ESMF_Logical), intent(in) :: tfval
 
- lval = (tfval%value .eq. 1)    ! this must match initializer
+ lval = (tfval%value == 1)    ! this must match initializer
 end subroutine
 
 subroutine ESMF_tfas_v(lval, tfval)
  logical, intent(out) :: lval(:)
  type(ESMF_Logical), intent(in) :: tfval(:)
 
- lval = (tfval%value .eq. 1)    ! this must match initializer
+ lval = (tfval%value == 1)    ! this must match initializer
 end subroutine
 
 subroutine ESMF_tfas2 (tfval, lval)
@@ -1121,14 +1121,14 @@ function ESMF_freq(fr1, fr2)
  logical ESMF_freq
  type(ESMF_Direction), intent(in) :: fr1, fr2
 
- ESMF_freq = (fr1%value .eq. fr2%value)
+ ESMF_freq = (fr1%value == fr2%value)
 end function
 
 function ESMF_frne(fr1, fr2)
  logical ESMF_frne
  type(ESMF_Direction), intent(in) :: fr1, fr2
 
- ESMF_frne = (fr1%value .ne. fr2%value)
+ ESMF_frne = (fr1%value /= fr2%value)
 end function
 
 !------------------------------------------------------------------------------
@@ -1145,7 +1145,7 @@ function ESMF_ioeq(io1, io2)
   logical ESMF_ioeq
   type(ESMF_IOFmtFlag), intent(in) :: io1, io2
 
-  ESMF_ioeq = (io1%io_type .eq. io2%io_type)
+  ESMF_ioeq = (io1%io_type == io2%io_type)
 end function
 
 !------------------------------------------------------------------------------
@@ -1155,7 +1155,7 @@ function ESMF_ifeq(if1, if2)
   logical ESMF_ifeq
   type(ESMF_IndexFlag), intent(in) :: if1, if2
 
-  ESMF_ifeq = (if1%i_type .eq. if2%i_type)
+  ESMF_ifeq = (if1%i_type == if2%i_type)
 end function
 
 !------------------------------------------------------------------------------
@@ -1175,7 +1175,7 @@ function ESMF_rfeq(rf1, rf2)
   logical ESMF_rfeq
   type(ESMF_RegionFlag), intent(in) :: rf1, rf2
 
-  ESMF_rfeq = (rf1%i_type .eq. rf2%i_type)
+  ESMF_rfeq = (rf1%i_type == rf2%i_type)
 end function
 
 
@@ -1196,14 +1196,14 @@ function ESMF_unmappedActioneq(uma1, uma2)
  logical ESMF_unmappedActioneq
  type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
 
- ESMF_unmappedActioneq = (uma1%unmappedaction .eq. uma2%unmappedaction)
+ ESMF_unmappedActioneq = (uma1%unmappedaction == uma2%unmappedaction)
 end function
 
 function ESMF_unmappedActionne(uma1, uma2)
  logical ESMF_unmappedActionne
  type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
 
- ESMF_unmappedActionne = (uma1%unmappedaction .ne. uma2%unmappedaction)
+ ESMF_unmappedActionne = (uma1%unmappedaction /= uma2%unmappedaction)
 end function
 
 
@@ -1214,14 +1214,14 @@ function ESMF_RegridPoleEq(rp1, rp2)
  logical ESMF_RegridPoleEq
  type(ESMF_RegridPole), intent(in) :: rp1, rp2
 
- ESMF_RegridPoleEq = (rp1%regridpole .eq. rp2%regridpole)
+ ESMF_RegridPoleEq = (rp1%regridpole == rp2%regridpole)
 end function
 
 function ESMF_RegridPoleNe(rp1, rp2)
  logical ESMF_RegridPoleNe
  type(ESMF_RegridPole), intent(in) :: rp1, rp2
 
- ESMF_RegridPoleNe = (rp1%regridpole .ne. rp2%regridpole)
+ ESMF_RegridPoleNe = (rp1%regridpole /= rp2%regridpole)
 end function
 
       end module ESMF_UtilTypesMod

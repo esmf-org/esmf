@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.29 2011/01/18 21:46:41 rokuingh Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.30 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.29 2011/01/18 21:46:41 rokuingh Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.30 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -115,21 +115,22 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGrid<rank><type><kind>(field, grid, & @\
-!   farray, indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
+!   farray, indexflag, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
+!   ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_Grid),       intent(in)           :: grid @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_Grid),       intent(in)            :: grid @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
-!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
-!   integer,               intent(in), optional :: totalLWidth(:) @\
-!   integer,               intent(in), optional :: totalUWidth(:) @\
+!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_STAGGERLOC), intent(in),  optional :: staggerloc @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,               intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,               intent(in),  optional :: ungriddedUBound(:) @\
+!   integer,               intent(in),  optional :: totalLWidth(:) @\
+!   integer,               intent(in),  optional :: totalUWidth(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -234,14 +235,15 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitGrid" @\
   subroutine ESMF_FieldSetCommitGrid##mrank##D##mtypekind(field, grid, farray, & @\
-    indexflag, copyflag, staggerloc, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, totalLWidth, totalUWidth, rc) @\
+    indexflag, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
+    ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_Grid) :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -329,18 +331,19 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitGridPtr<rank><type><kind>(field, grid, & @\
-!   farrayPtr, copyflag, staggerloc, gridToFieldMap, & @\
+!   farrayPtr, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_Grid),       intent(in)           :: grid @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_Grid),       intent(in)            :: grid @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: totalLWidth(:) @\
-!   integer,               intent(in), optional :: totalUWidth(:) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_STAGGERLOC), intent(in),  optional :: staggerloc @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,               intent(in),  optional :: totalLWidth(:) @\
+!   integer,               intent(in),  optional :: totalUWidth(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -425,13 +428,14 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitGridPtr" @\
   subroutine ESMF_FieldSetCommitGridPtr##mrank##D##mtypekind(field, grid, farrayPtr, & @\
-    copyflag, staggerloc, gridToFieldMap, & @\
+    keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_Grid) :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -518,18 +522,19 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitLS<rank><type><kind>(field, locstream, & @\
-!   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, rc) @\
+!   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+!   ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_LocStream),  intent(in)           :: locstream @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_LocStream),  intent(in)            :: locstream @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
-!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
+!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,               intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,               intent(in),  optional :: ungriddedUBound(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -608,7 +613,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitLS" @\
   subroutine ESMF_FieldSetCommitLS##mrank##D##mtypekind(field, locstream, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, keywordEnforcer, copyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
     ! input arguments @\
@@ -616,6 +621,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
     type(ESMF_LocStream) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -664,14 +670,15 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitLSPtr<rank><type><kind>(field, locstream, & @\
-!   farrayPtr, copyflag, gridToFieldMap, rc) @\
+!   farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_LocStream),  intent(in)           :: locstream @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_LocStream),  intent(in)            :: locstream @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -729,14 +736,14 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitLSPtr" @\
-  subroutine ESMF_FieldSetCommitLSPtr##mrank##D##mtypekind(field, locstream, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
-    rc) @\
+  subroutine ESMF_FieldSetCommitLSPtr##mrank##D##mtypekind(field, & @\
+    locstream, farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_LocStream) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
@@ -782,19 +789,20 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitMesh<rank><type><kind>(field, mesh, & @\
-!   farray, location, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, rc) @\
+!   farray, location, indexflag, keywordEnforcer, copyflag, & @\
+!   gridToFieldMap, ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_Mesh),       intent(in)           :: mesh @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_Mesh),       intent(in)            :: mesh @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
-!   type(ESMF_MeshLoc),    intent(in), optional :: location @\
-!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
+!   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
+!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,               intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,               intent(in),  optional :: ungriddedUBound(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -879,8 +887,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitMesh" @\
   subroutine ESMF_FieldSetCommitMesh##mrank##D##mtypekind(field, mesh, farray, & @\
-    location, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-    ungriddedUBound, rc) @\
+    location, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+    ungriddedLBound, ungriddedUBound, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -888,6 +896,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_MeshLoc), intent(in), optional    :: location @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -936,14 +945,16 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitMeshPtr<rank><type><kind>(field, mesh, & @\
-!   farrayPtr, indexflag, copyflag, gridToFieldMap, rc) @\
+!   farrayPtr, keywordEnforcer, location, copyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_Mesh),       intent(in)           :: mesh @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_Mesh),       intent(in)            :: mesh @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -968,6 +979,12 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
+! \item [{[location]}] @\
+!       \begin{sloppypar} @\
+!       Which part of the mesh to build the Field on. Can be set to either @\
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
+!       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       \end{sloppypar} @\
 ! \item [{[copyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{opt:copyflag}.  The default is @\
@@ -1002,12 +1019,13 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetCommitMeshPtr" @\
   subroutine ESMF_FieldSetCommitMeshPtr##mrank##D##mtypekind(field, mesh, & @\
-    farrayPtr, location, copyflag, gridToFieldMap, rc) @\
+    farrayPtr, keywordEnforcer, location, copyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_Mesh) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_MeshLoc), intent(in), optional   :: location @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -1054,20 +1072,21 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitXG<rank><type><kind>(field, xgrid, & @\
 !   xgridSide, gridIndex, & @\
-!   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
-!   ungriddedUBound, rc) @\
+!   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+!   ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_XGrid),       intent(in)          :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
-!   integer,              intent(in), optional  :: gridIndex @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_XGrid),      intent(in)            :: xgrid @\
+!   type(ESMF_XGridSide),  intent(in),  optional :: xgridSide @\
+!   integer,               intent(in),  optional :: gridIndex @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
-!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
-!   integer,               intent(in), optional :: ungriddedLBound(:) @\
-!   integer,               intent(in), optional :: ungriddedUBound(:) @\
+!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
+!   integer,               intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,               intent(in),  optional :: ungriddedUBound(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1154,7 +1173,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 ^define ESMF_METHOD "ESMF_FieldSetCommitXG" @\
   subroutine ESMF_FieldSetCommitXG##mrank##D##mtypekind(field, xgrid, & @\
     xgridSide, gridIndex, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, keywordEnforcer, copyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
     ! input arguments @\
@@ -1164,6 +1183,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
     integer,              intent(in), optional  :: gridIndex @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -1213,16 +1233,17 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 ! ! Private name; call using ESMF_FieldSetCommit() @\
 ! subroutine ESMF_FieldSetCommitXGPtr<rank><type><kind>(field, xgrid, & @\
 !   xgridSide, gridIndex, & @\
-!   farrayPtr, indexflag, copyflag, gridToFieldMap, rc) @\
+!   farrayPtr, indexflag, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),      intent(inout)        :: field @\
-!   type(ESMF_XGrid),       intent(in)          :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
-!   integer,              intent(in), optional  :: gridIndex @\
+!   type(ESMF_Field),      intent(inout)         :: field @\
+!   type(ESMF_XGrid),      intent(in)            :: xgrid @\
+!   type(ESMF_XGridSide),  intent(in),  optional :: xgridSide @\
+!   integer,               intent(in),  optional :: gridIndex @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
-!   integer,               intent(in), optional :: gridToFieldMap(:) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -1289,7 +1310,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 ^define ESMF_METHOD "ESMF_FieldSetCommitXGPtr" @\
   subroutine ESMF_FieldSetCommitXGPtr##mrank##D##mtypekind(field, xgrid, & @\
     xgridSide, gridIndex, & @\
-    farrayPtr, copyflag, gridToFieldMap, rc) @\
+    farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -1297,6 +1318,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
     type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
     integer,              intent(in), optional  :: gridIndex @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\

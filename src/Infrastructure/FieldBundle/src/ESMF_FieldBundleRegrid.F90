@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.16 2011/01/21 23:58:21 peggyli Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.17 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.16 2011/01/21 23:58:21 peggyli Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.17 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -79,15 +79,16 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, &
-         routehandle, zeroflag, checkflag, rc)
+         routehandle, keywordEnforcer, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout),optional  :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)           :: routehandle
-        type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
-        logical,                intent(in),   optional  :: checkflag
-        integer,                intent(out),  optional  :: rc
+        type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
+        logical,                intent(in),    optional  :: checkflag
+        integer,                intent(out),   optional  :: rc
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -172,10 +173,11 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRegridRelease - Release resources associated with a FieldBundle regrid operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleRegridRelease(routehandle, rc)
+  subroutine ESMF_FieldBundleRegridRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -217,25 +219,26 @@ contains
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, srcMaskValues, &
-                                       dstFieldBundle, dstMaskValues, &
-                                       unmappedDstAction,              &
-                                       regridMethod, &
-                                       regridPoleType, regridPoleNPnts, &
-                                       regridScheme, routehandle, rc)
+    subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
+                                           keywordEnforcer, &
+                                           srcMaskValues, dstMaskValues, &
+                                           regridMethod, regridPoleType, &
+                                           regridPoleNPnts, regridScheme, &
+                                           unmappedDstAction, routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)             :: srcFieldBundle
-    integer(ESMF_KIND_I4), intent(in), optional       :: srcMaskValues(:)
-    type(ESMF_FieldBundle), intent(inout)             :: dstFieldBundle
-    integer(ESMF_KIND_I4), intent(in), optional       :: dstMaskValues(:)
-    type(ESMF_UnmappedAction), intent(in), optional   :: unmappedDstAction
-    type(ESMF_RegridMethod), intent(in), optional     :: regridMethod
-      type(ESMF_RegridPole), intent(in), optional     :: regridPoleType
-      integer, intent(in),optional                    :: regridPoleNPnts
-    integer, intent(in), optional                     :: regridScheme
-    type(ESMF_RouteHandle), intent(inout)             :: routehandle
-    integer,                intent(out),     optional :: rc
+    type(ESMF_FieldBundle),    intent(inout)           :: srcFieldBundle
+    type(ESMF_FieldBundle),    intent(inout)           :: dstFieldBundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
+    integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
+    type(ESMF_RegridMethod),   intent(in),    optional :: regridMethod
+    type(ESMF_RegridPole),     intent(in),    optional :: regridPoleType
+    integer,                   intent(in),    optional :: regridPoleNPnts
+    integer,                   intent(in),    optional :: regridScheme
+    type(ESMF_UnmappedAction), intent(in),    optional :: unmappedDstAction
+    type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
+    integer,                   intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
@@ -292,7 +295,7 @@ contains
 !   \item [{[regridScheme]}]
 !     Whether to convert to spherical coordinates (ESMF\_REGRID\_SCHEME\_FULL3D), 
 !     or to leave in native coordinates (ESMF\_REGRID\_SCHEME\_NATIVE). 
-!   \item [routehandle]
+!   \item [{[routehandle]}]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -325,7 +328,7 @@ contains
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, srcFieldBundle, rc) 
         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, dstFieldBundle, rc) 
 
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of Fields", &
                 ESMF_CONTEXT, rc)
@@ -338,14 +341,16 @@ contains
 
         fieldCount = srcFieldBundle%btypep%field_count
 
-        routehandle = ESMF_RouteHandleCreate(rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        if (present(routehandle)) then
+          routehandle = ESMF_RouteHandleCreate(rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
-        call ESMF_RouteHandlePrepXXE(routehandle, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        
+          call ESMF_RouteHandlePrepXXE(routehandle, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif        
+
         ! 6) loop over all Fields in FieldBundles, call FieldRegridStore and append rh
         rraShift = 0          ! reset
         vectorLengthShift = 0 ! reset
@@ -417,14 +422,14 @@ contains
                 endif
 
                 ! Get routeHandle as well as matrix info
-                call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=srcMaskValues, &
-                     dstField=dstField, dstMaskValues=dstMaskValues, &
-                     unmappedDstAction=unmappedDstAction, &
-                     routehandle=rh, &
-                     indicies=tmp_indicies, weights=prev_weights, &
+                call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                     srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
                      regridMethod=regridMethod, &
                      regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
                      regridScheme=regridScheme, &
+                     unmappedDstAction=unmappedDstAction, &
+                     routehandle=rh, &
+                     indicies=tmp_indicies, weights=prev_weights, &
                      rc=localrc)
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -446,22 +451,24 @@ contains
                 prevDstGrid=currDstGrid 
              endif
           else ! If not a grid pair no optimization at this point         
-             call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=srcMaskValues, &
-                  dstField=dstField, dstMaskValues=dstMaskValues, &
-                  unmappedDstAction=unmappedDstAction, &
-                  routehandle=rh, regridMethod=regridMethod, &
+             call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+                  srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
+                  regridMethod=regridMethod, &
                   regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
                   regridScheme=regridScheme, &
-                  rc=localrc)
+                  unmappedDstAction=unmappedDstAction, &
+                  routehandle=rh,rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
            endif
 
           ! append rh to routehandle and clear rh
-          call ESMF_RouteHandleAppendClear(routehandle, appendRoutehandle=rh, &
-            rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (present(routehandle)) then
+            call ESMF_RouteHandleAppendClear(routehandle, appendRoutehandle=rh, &
+              rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
         
           ! adjust rraShift and vectorLengthShift
           call ESMF_FieldGet(srcField, localDeCount=localDeCount, rc=localrc)

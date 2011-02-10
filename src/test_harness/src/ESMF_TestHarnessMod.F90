@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.59 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.60 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ logical                       :: checkpoint = .FALSE.
   character(THARN_MAXSTR) :: liG, liD
 
   ! debug
-  ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
   ! integer ::de, localDeCount, dimCount 
   ! integer :: i1, i2
   ! integer, allocatable ::  localDeList(:)
@@ -397,7 +397,7 @@ logical                       :: checkpoint = .FALSE.
   character(THARN_MAXSTR) :: liG, liD
 
   ! debug
-  ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
   ! integer :: i1, i2, de, localDeCount, dimCount 
   ! integer, allocatable ::  localDeList(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
@@ -635,7 +635,7 @@ logical                       :: checkpoint = .FALSE.
           ! regrid run
           !---------------------------------------------------------------------
           !print*,'field regrid run'
-          call ESMF_FieldRegridRun(srcField, dstField, routeHandle, rc=localrc)
+          call ESMF_FieldRegrid(srcField, dstField, routeHandle=routeHandle, rc=localrc)
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Regrid run failed for " //  &
                   " forward failed ", rcToReturn=rc)) return
 
@@ -768,7 +768,7 @@ logical                       :: checkpoint = .FALSE.
   character(THARN_MAXSTR) :: liG, liD
 
   ! debug
-  ! real(ESMF_KIND_R8), pointer :: fptr2(:,:)
+  ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
   ! integer :: i1, i2, de, localDeCount, dimCount 
   ! integer, allocatable ::  localDeList(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
@@ -2365,12 +2365,12 @@ logical                       :: checkpoint = .FALSE.
   integer :: allocRcToTest
 
   ! local real variables
-  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1(:), farrayPtr2(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr4(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr5(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr7(:,:,:,:,:,:,:)
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -2435,13 +2435,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 1
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr1, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
-              fptr1(i1) = localDeList(de) + 1000.0d0*i1
+              farrayPtr1(i1) = localDeList(de) + 1000.0d0*i1
            enddo    !   i1
         enddo    ! de
      case(2)
@@ -2449,14 +2449,14 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 2
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr2, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
-                 fptr2(i1,i2) = localDeList(de) + 1000.0d0*i1 + 0.001d0*i2
+                 farrayPtr2(i1,i2) = localDeList(de) + 1000.0d0*i1 + 0.001d0*i2
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
@@ -2465,7 +2465,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 3
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr3, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2473,7 +2473,7 @@ logical                       :: checkpoint = .FALSE.
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
                  do i3=LBnd(3,de), UBnd(3,de)
-                    fptr3(i1,i2,i3) = localDeList(de) + 1.0d4*i1 + 10.0d2*i2 &
+                    farrayPtr3(i1,i2,i3) = localDeList(de) + 1.0d4*i1 + 10.0d2*i2 &
                           + 1.0d-2*i3
                  enddo   !   i3
               enddo   !   i2
@@ -2484,7 +2484,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 4
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr4, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2493,7 +2493,7 @@ logical                       :: checkpoint = .FALSE.
               do i2=LBnd(2,de), UBnd(2,de)
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
-                       fptr4(i1,i2,i3,i4) = localDeList(de) + 1.0d4*i1         &
+                       farrayPtr4(i1,i2,i3,i4) = localDeList(de) + 1.0d4*i1         &
                              + 1.0d2*i2 + 1.0d-2*i3 + 1.0d-4*i4 
                     enddo   !   i4
                  enddo   !   i3
@@ -2505,7 +2505,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 5
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr5, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2515,7 +2515,7 @@ logical                       :: checkpoint = .FALSE.
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
                        do i5=LBnd(5,de), UBnd(5,de)
-                          fptr5(i1,i2,i3,i4,i5) = localDeList(de) + 1.0d4*i1   &
+                          farrayPtr5(i1,i2,i3,i4,i5) = localDeList(de) + 1.0d4*i1   &
                              + 1.0d2*i2 + 1.0d0*i3 + 1.0d-2*i4  + 1.0d-4*i5
                        enddo   !   i5
                     enddo   !   i4
@@ -2528,7 +2528,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 6
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr6, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2539,7 +2539,7 @@ logical                       :: checkpoint = .FALSE.
                     do i4=LBnd(4,de), UBnd(4,de)
                        do i5=LBnd(5,de), UBnd(5,de)
                        do i6=LBnd(6,de), UBnd(6,de)
-                       fptr6(i1,i2,i3,i4,i5,i6) = localDeList(de) +            &
+                       farrayPtr6(i1,i2,i3,i4,i5,i6) = localDeList(de) +            &
                              1.0d5*i1 + 1.0d3*i2 + 1.0d1*i3 + 1.0d-1*i4        &
                              + 1.0d-3*i5 + 1.0d-5*i6
                        enddo   !   i6
@@ -2554,7 +2554,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 7
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr7, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2566,7 +2566,7 @@ logical                       :: checkpoint = .FALSE.
                        do i5=LBnd(5,de), UBnd(5,de)
                        do i6=LBnd(6,de), UBnd(6,de)
                        do i7=LBnd(7,de), UBnd(7,de)
-                          fptr7(i1,i2,i3,i4,i5,i6,i7) = localDeList(de) +      &
+                          farrayPtr7(i1,i2,i3,i4,i5,i6,i7) = localDeList(de) +      &
                              1.0d5*i1 + 1.0d3*i2 + 1.0d1*i3 + 1.0d-1*i4        &
                              + 1.0d-3*i5 + 1.0d-5*i6 + 1.0d0*i7
                        enddo   !   i7
@@ -2647,12 +2647,12 @@ logical                       :: checkpoint = .FALSE.
   integer :: allocRcToTest
 
   ! local real variables
-  real(ESMF_KIND_R8), pointer :: fptr1(:), fptr2(:,:)
-  real(ESMF_KIND_R8), pointer :: fptr3(:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr4(:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr5(:,:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr6(:,:,:,:,:,:)
-  real(ESMF_KIND_R8), pointer :: fptr7(:,:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr1(:), farrayPtr2(:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr3(:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr4(:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr5(:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr6(:,:,:,:,:,:)
+  real(ESMF_KIND_R8), pointer :: farrayPtr7(:,:,:,:,:,:,:)
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -2717,13 +2717,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 1
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr1, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr1, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
-              fptr1(i1) =  value
+              farrayPtr1(i1) =  value
            enddo    !   i1
         enddo    ! de
      case(2)
@@ -2731,14 +2731,14 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 2
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr2, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr2, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
-                 fptr2(i1,i2) = value
+                 farrayPtr2(i1,i2) = value
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
@@ -2747,7 +2747,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 3
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr3, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr3, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2755,7 +2755,7 @@ logical                       :: checkpoint = .FALSE.
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
                  do i3=LBnd(3,de), UBnd(3,de)
-                    fptr3(i1,i2,i3) = value
+                    farrayPtr3(i1,i2,i3) = value
                  enddo   !   i3
               enddo   !   i2
            enddo    !   i1
@@ -2765,7 +2765,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 4
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr4, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr4, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2774,7 +2774,7 @@ logical                       :: checkpoint = .FALSE.
               do i2=LBnd(2,de), UBnd(2,de)
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
-                       fptr4(i1,i2,i3,i4) = value
+                       farrayPtr4(i1,i2,i3,i4) = value
                     enddo   !   i4
                  enddo   !   i3
               enddo   !   i2
@@ -2785,7 +2785,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 5
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr5, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr5, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2795,7 +2795,7 @@ logical                       :: checkpoint = .FALSE.
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
                        do i5=LBnd(5,de), UBnd(5,de)
-                          fptr5(i1,i2,i3,i4,i5) =  value
+                          farrayPtr5(i1,i2,i3,i4,i5) =  value
                        enddo   !   i5
                     enddo   !   i4
                  enddo   !   i3
@@ -2807,7 +2807,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 6
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr6, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr6, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2818,7 +2818,7 @@ logical                       :: checkpoint = .FALSE.
                     do i4=LBnd(4,de), UBnd(4,de)
                        do i5=LBnd(5,de), UBnd(5,de)
                        do i6=LBnd(6,de), UBnd(6,de)
-                       fptr6(i1,i2,i3,i4,i5,i6) =  value
+                       farrayPtr6(i1,i2,i3,i4,i5,i6) =  value
                        enddo   !   i6
                        enddo   !   i5
                     enddo   !   i4
@@ -2831,7 +2831,7 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 7
      !--------------------------------------------------------------------------
         do de=1, localDeCount
-           call ESMF_LocalArrayGet(larrayList(de), fptr=fptr7, &
+           call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr7, &
                                    docopy=ESMF_DATA_REF, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
@@ -2843,7 +2843,7 @@ logical                       :: checkpoint = .FALSE.
                        do i5=LBnd(5,de), UBnd(5,de)
                        do i6=LBnd(6,de), UBnd(6,de)
                        do i7=LBnd(7,de), UBnd(7,de)
-                          fptr7(i1,i2,i3,i4,i5,i6,i7) = value
+                          farrayPtr7(i1,i2,i3,i4,i5,i6,i7) = value
                        enddo   !   i7
                        enddo   !   i6
                        enddo   !   i5
@@ -3099,13 +3099,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 1
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray1D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray1D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray1D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray1D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
@@ -3124,13 +3124,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 2
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray2D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray2D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray2D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray2D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
@@ -3151,13 +3151,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 3
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray3D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray3D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray3D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray3D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
@@ -3180,13 +3180,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 4
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray4D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray4D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray4D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray4D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
@@ -3211,13 +3211,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 5
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray5D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray5D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray5D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray5D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
@@ -3246,13 +3246,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 6
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray6D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray6D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray6D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray6D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
@@ -3283,13 +3283,13 @@ logical                       :: checkpoint = .FALSE.
      ! rank = 7
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
-           call ESMF_LocalArrayGet(larrayList1(de), fptr=farray7D,             &
+           call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray7D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
-           call ESMF_LocalArrayGet(larrayList2(de), fptr=rarray7D,             &
+           call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray7D,             &
                     docopy=ESMF_DATA_REF, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &

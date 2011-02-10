@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_model1.F90,v 1.4 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -156,7 +156,7 @@
       endif
 
       ! Create source field
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
       srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="src", rc=localrc)

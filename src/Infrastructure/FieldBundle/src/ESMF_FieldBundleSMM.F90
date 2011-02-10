@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.24 2011/01/07 21:09:51 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.25 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.24 2011/01/07 21:09:51 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.25 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -84,15 +84,16 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, &
-        routehandle, zeroflag, checkflag, rc)
+        routehandle, keywordEnforcer, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_FieldBundle), intent(in),   optional  :: srcFieldBundle
-        type(ESMF_FieldBundle), intent(inout),optional  :: dstFieldBundle
-        type(ESMF_RouteHandle), intent(inout)           :: routehandle
-        type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
-        logical,                intent(in),   optional  :: checkflag
-        integer,                intent(out),  optional  :: rc
+        type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
+        type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
+        type(ESMF_RouteHandle), intent(inout)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
+        logical,                intent(in),    optional  :: checkflag
+        integer,                intent(out),   optional  :: rc
 !
 ! !DESCRIPTION:
 !   Execute a precomputed FieldBundle sparse matrix multiplication from {\tt srcFieldBundle} to
@@ -264,10 +265,11 @@ contains
 ! sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldBundleSMMRelease(routehandle, rc)
+  subroutine ESMF_FieldBundleSMMRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -309,7 +311,8 @@ contains
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
 ! subroutine ESMF_FieldBundleSMMStore<type><kind>(srcFieldBundle, &
-!        dstFieldBundle,  routehandle, factorList, factorIndexList, rc) 
+!   dstFieldBundle,  routehandle, factorList, factorIndexList, &
+!   keywordEnforcer, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
@@ -317,6 +320,7 @@ contains
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
 !   integer,                  intent(in),           :: factorIndexList(:,:) 
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -425,7 +429,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI4(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factorList, factorIndexList, rc) 
+        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -433,6 +437,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -455,7 +460,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -519,7 +524,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreI8(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factorList, factorIndexList, rc) 
+      routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -527,6 +532,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -549,7 +555,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -613,7 +619,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR4(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factorList, factorIndexList, rc) 
+      routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -621,6 +627,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -643,7 +650,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -707,7 +714,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreR8(srcFieldBundle, dstFieldBundle, & 
-        routehandle, factorList, factorIndexList, rc) 
+      routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
@@ -715,6 +722,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -737,7 +745,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)
@@ -799,12 +807,13 @@ contains
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleSMMStore() 
 ! subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, & 
-!        routehandle, factorList, factorIndexList, rc) 
+!        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_FieldBundle),   intent(in)            :: srcFieldBundle  
 !   type(ESMF_FieldBundle),   intent(inout)         :: dstFieldBundle  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -881,12 +890,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldBundleSMMStore()
     subroutine ESMF_FieldBundleSMMStoreNF(srcFieldBundle, dstFieldBundle, & 
-        routehandle, rc) 
+        routehandle, keywordEnforcer, rc) 
 
         ! input arguments 
         type(ESMF_FieldBundle), intent(in)           :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -909,7 +919,7 @@ contains
         ! loop over source and destination fields. 
         ! verify src and dst FieldBundles can communicate
         ! field_count match
-        if(srcFieldBundle%btypep%field_count .ne. dstFieldBundle%btypep%field_count) then
+        if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
                "src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.29 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMC_CplComp.h,v 1.30 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -253,8 +253,7 @@ int ESMC_CplCompInitialize(
 //
 // !INTERFACE:
 int ESMC_CplCompPrint(
-  ESMC_CplComp comp,      // in
-  const char *options     // in
+  ESMC_CplComp comp      // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -267,8 +266,6 @@ int ESMC_CplCompPrint(
 //  \begin{description}
 //  \item[comp]
 //    An {\tt ESMC\_CplComp} object.
-//  \item[{[options]}]
-//    Print options are not yet supported, pass NULL.
 // \end{description}
 //
 //EOP

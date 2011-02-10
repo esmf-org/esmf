@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.241 2011/02/04 22:23:21 ESRL\silverio.vasquez Exp $
+! $Id: ESMF_State.F90,v 1.242 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.241 2011/02/04 22:23:21 ESRL\silverio.vasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.242 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -3214,11 +3214,11 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetItemInfo(state, name, stateitemtype, keywordEnforcer, rc)
+      subroutine ESMF_StateGetItemInfo(state, itemName, stateitemtype, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),  intent(in) :: state
-      character (len=*), intent(in) :: name
+      character (len=*), intent(in) :: itemName
       type(ESMF_StateItemType),    intent(out) :: stateitemtype
       type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
                                                     ! keywords for the below
@@ -3239,7 +3239,7 @@ contains
 !     \begin{description}     
 !     \item[state]
 !        {\tt ESMF\_State} to be queried.
-!      \item[name]
+!      \item[itemName]
 !        Name of the item to return information about.
 !      \item[stateitemtype]
 !        Returned item types for the item with the given name, including 
@@ -3282,7 +3282,7 @@ contains
       ! Find the object which matches this name
       do i=1, stypep%datacount
           nextitem => stypep%datalist(i)
-          if (trim(name) .eq. trim(nextitem%namep)) then
+          if (trim(itemName) .eq. trim(nextitem%namep)) then
               stateitemtype = nextitem%otype
               exit    ! jump out of the do loop here
           endif
@@ -6251,7 +6251,7 @@ contains
 
         do j=1, fcounts(i)
             ! get next field and query name
-            call ESMF_FieldBundleGet(fieldbundles(i), j, field, localrc)
+            call ESMF_FieldBundleGet(fieldbundles(i), j, field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
@@ -6385,7 +6385,7 @@ contains
             if (present(proxyflag)) nextitem%proxyFlag = proxyflag
     
             ! get next field and query name
-            call ESMF_FieldBundleGet(fieldbundles(i), j, field, localrc)
+            call ESMF_FieldBundleGet(fieldbundles(i), j, field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10

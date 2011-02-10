@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.40 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StateTypes.F90,v 1.41 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -286,17 +286,15 @@
       public ESMF_StateClassGetInit
       public ESMF_StateGetInit
 
-
-
+      public operator(==), operator(/=)
 
 !------------------------------------------------------------------------------
-      public operator(.eq.), operator(.ne.)
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.40 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.41 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -304,7 +302,7 @@
 !
 !==============================================================================
 
-interface operator (.eq.)
+interface operator (==)
  module procedure ESMF_oteq
  module procedure ESMF_imexeq
  module procedure ESMF_needeq
@@ -312,7 +310,7 @@ interface operator (.eq.)
  module procedure ESMF_valideq
 end interface
 
-interface operator (.ne.)
+interface operator (/=)
  module procedure ESMF_otne
  module procedure ESMF_imexne
  module procedure ESMF_needne
@@ -333,14 +331,14 @@ function ESMF_oteq(s1, s2)
  logical ESMF_oteq
  type(ESMF_StateItemType), intent(in) :: s1, s2
 
- ESMF_oteq = (s1%ot .eq. s2%ot)
+ ESMF_oteq = (s1%ot == s2%ot)
 end function
 
 function ESMF_otne(s1, s2)
  logical ESMF_otne
  type(ESMF_StateItemType), intent(in) :: s1, s2
 
- ESMF_otne = (s1%ot .ne. s2%ot)
+ ESMF_otne = (s1%ot /= s2%ot)
 end function
 
 
@@ -348,14 +346,14 @@ function ESMF_imexeq(s1, s2)
  logical ESMF_imexeq
  type(ESMF_StateType), intent(in) :: s1, s2
 
- ESMF_imexeq = (s1%state .eq. s2%state)
+ ESMF_imexeq = (s1%state == s2%state)
 end function
 
 function ESMF_imexne(s1, s2)
  logical ESMF_imexne
  type(ESMF_StateType), intent(in) :: s1, s2
 
- ESMF_imexne = (s1%state .ne. s2%state)
+ ESMF_imexne = (s1%state /= s2%state)
 end function
 
 
@@ -363,14 +361,14 @@ function ESMF_needeq(s1, s2)
  logical ESMF_needeq
  type(ESMF_NeededFlag), intent(in) :: s1, s2
 
- ESMF_needeq = (s1%needed .eq. s2%needed)
+ ESMF_needeq = (s1%needed == s2%needed)
 end function
 
 function ESMF_needne(s1, s2)
  logical ESMF_needne
  type(ESMF_NeededFlag), intent(in) :: s1, s2
 
- ESMF_needne = (s1%needed .ne. s2%needed)
+ ESMF_needne = (s1%needed /= s2%needed)
 end function
 
 
@@ -378,14 +376,14 @@ function ESMF_redyeq(s1, s2)
  logical ESMF_redyeq
  type(ESMF_ReadyFlag), intent(in) :: s1, s2
 
- ESMF_redyeq = (s1%ready .eq. s2%ready)
+ ESMF_redyeq = (s1%ready == s2%ready)
 end function
 
 function ESMF_redyne(s1, s2)
  logical ESMF_redyne
  type(ESMF_ReadyFlag), intent(in) :: s1, s2
 
- ESMF_redyne = (s1%ready .ne. s2%ready)
+ ESMF_redyne = (s1%ready /= s2%ready)
 end function
 
 
@@ -393,14 +391,14 @@ function ESMF_valideq(s1, s2)
  logical ESMF_valideq
  type(ESMF_ValidFlag), intent(in) :: s1, s2
 
- ESMF_valideq = (s1%valid .eq. s2%valid)
+ ESMF_valideq = (s1%valid == s2%valid)
 end function
 
 function ESMF_validne(s1, s2)
  logical ESMF_validne
  type(ESMF_ValidFlag), intent(in) :: s1, s2
 
- ESMF_validne = (s1%valid .ne. s2%valid)
+ ESMF_validne = (s1%valid /= s2%valid)
 end function
 
 

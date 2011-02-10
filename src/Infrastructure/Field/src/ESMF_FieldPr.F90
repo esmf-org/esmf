@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.37 2011/01/05 23:26:30 svasquez Exp $
+! $Id: ESMF_FieldPr.F90,v 1.38 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,12 +82,13 @@ contains
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldPrint(field, rc)
+      subroutine ESMF_FieldPrint(field, keywordEnforcer, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field 
-      integer, intent(out), optional :: rc
+      type(ESMF_Field), intent(inout)         :: field 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt field} to {\tt stdout}.
@@ -222,12 +223,14 @@ contains
 ! \label{api:FieldRead}
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRead(field, file, timeslice, iofmt, rc)
+      subroutine ESMF_FieldRead(field, file, keywordEnforcer, &
+        timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field),     intent(inout)          :: field 
       character(*),         intent(in)             :: file 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt 
       integer,              intent(out), optional  :: rc

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.19 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.20 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.19 2011/01/25 20:55:52 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.20 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -151,9 +151,10 @@ program ESMF_GridArbitraryUTest
   !----------------------------------------------------------------------------=
   ! Test Set 1:  2D Arbitrary Grid with both dimensions distributed
   !-----------------------------------------------------------------------------
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-	localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+	localArbIndex=localIndices,localArbIndexCount=localCount, &
+	name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	
   !-----------------------------------------------------------------------------
@@ -386,10 +387,10 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
   zdim = 4
 
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, ydim, zdim/), &
 	localArbIndex=localIndices,localArbIndexCount=localCount, &
-	rc=rc)
+	name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! allocate coordinate array
@@ -577,9 +578,10 @@ program ESMF_GridArbitraryUTest
   ! Second grid, the undistributed coord array is 2D
   !------------------------------------------------------------------------------
 
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-	localArbIndex=localIndices,localArbIndexCount=localCount, coordDep3=(/ESMF_GRID_ARBDIM,3/), rc=rc)
+	localArbIndex=localIndices,localArbIndexCount=localCount, &
+    coordDep3=(/ESMF_GRID_ARBDIM,3/), name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 	
@@ -884,10 +886,10 @@ program ESMF_GridArbitraryUTest
   zdim = 4
   
   ! switch ydim and zdim and set distDim to make xdim and ydim distributed
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	localArbIndex=localIndices,localArbIndexCount=localCount, distDim=(/1,3/), &
-	rc=rc)
+	name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 
@@ -918,10 +920,10 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
 
   ! switch ydim and zdim and set distDim to make xdim and ydim distributed
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	localArbIndex=localIndices,localArbIndexCount=localCount, distDim=(/1,3/), &
-	rc=rc)
+	name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! get info back from grid
@@ -973,10 +975,10 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
 
   ! switch ydim and zdim and set distDim to make xdim and ydim distributed
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	localArbIndex=localIndices,localArbIndexCount=localCount, distDim=(/1,3/), &
-	rc=rc)
+	name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! get info back from grid
@@ -1328,9 +1330,10 @@ program ESMF_GridArbitraryUTest
 	deallocate(localIndices)
 	allocate(localIndices(localCount,2))
   endif		
-  grid = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-	localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+	localArbIndex=localIndices,localArbIndexCount=localCount, &
+	name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !-----------------------------------------------------------------------------

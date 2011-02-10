@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_coupler.F90,v 1.4 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -163,7 +163,7 @@
       print *, "User Coupler Final starting"
    
       ! Release resources stored for the Regridding.
-      call ESMF_FieldRegridRelease(routehandle, rc)
+      call ESMF_FieldRegridRelease(routehandle, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
       print *, "User Coupler Final returning"

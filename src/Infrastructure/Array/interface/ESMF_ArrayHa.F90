@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.21 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.22 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.21 2011/01/25 20:55:52 rokuingh Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.22 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -416,12 +416,11 @@ contains
 ! !IROUTINE: ESMF_ArrayPrint - Print Array internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayPrint(array, keywordEnforcer, options, rc)
+  subroutine ESMF_ArrayPrint(array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)              :: array
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len=*), intent(in),   optional  :: options
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -438,8 +437,6 @@ contains
 !   \begin{description}
 !   \item[array] 
 !     {\tt ESMF\_Array} object.
-!   \item[{[options]}] 
-!     Print options are not yet supported.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1016,13 +1013,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI4(srcArray, dstArray, routehandle, &
-    factor, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I4),      intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
@@ -1077,13 +1075,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI8(srcArray, dstArray, routehandle, &
-    factor, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I8),      intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
@@ -1138,13 +1137,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR4(srcArray, dstArray, routehandle, &
-    factor, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4),         intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
@@ -1199,13 +1199,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR8(srcArray, dstArray, routehandle, &
-    factor, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)              :: srcArray
     type(ESMF_Array),           intent(inout)           :: dstArray
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8),         intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                    intent(out),  optional  :: rc
 !
@@ -1266,7 +1267,7 @@ contains
     type(ESMF_Array),       intent(in)              :: srcArray
     type(ESMF_Array),       intent(inout)           :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.64 2011/01/18 21:46:41 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.65 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.64 2011/01/18 21:46:41 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.65 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -111,37 +111,38 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetDefault(field, arrayspec, isCommitted, geomtype, &
-	grid, mesh, locstream, xgrid, array, typekind, dimCount, rank, &
-    	staggerloc, meshLocation, xgridSide, gridIndex, gridToFieldMap, &
-	ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
+  subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
+    isCommitted, geomtype, grid, mesh, locstream, xgrid, array, typekind, &
+    dimCount, rank, staggerloc, meshLocation, xgridSide, gridIndex, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
 	localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
-    type(ESMF_Field), intent(in)   :: field    
-    type(ESMF_ArraySpec), intent(out), optional :: arrayspec
-    logical, intent(out), optional :: isCommitted
-    type(ESMF_GeomType), intent(out), optional :: geomtype     
-    type(ESMF_Grid), intent(out), optional :: grid     
-    type(ESMF_Mesh), intent(out), optional :: mesh     
-    type(ESMF_LocStream), intent(out), optional :: locstream     
-    type(ESMF_XGrid), intent(out), optional :: xgrid     
-    type(ESMF_Array), intent(out), optional :: array     
-    type(ESMF_TypeKind), intent(out), optional :: typekind
-    integer, intent(out), optional :: dimCount
-    integer, intent(out), optional :: rank
+    type(ESMF_Field),      intent(in)            :: field    
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ArraySpec),  intent(out), optional :: arrayspec
+    logical,               intent(out), optional :: isCommitted
+    type(ESMF_GeomType),   intent(out), optional :: geomtype     
+    type(ESMF_Grid),       intent(out), optional :: grid     
+    type(ESMF_Mesh),       intent(out), optional :: mesh     
+    type(ESMF_LocStream),  intent(out), optional :: locstream     
+    type(ESMF_XGrid),      intent(out), optional :: xgrid     
+    type(ESMF_Array),      intent(out), optional :: array     
+    type(ESMF_TypeKind),   intent(out), optional :: typekind
+    integer,               intent(out), optional :: dimCount
+    integer,               intent(out), optional :: rank
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
-    type(ESMF_MeshLoc), intent(out), optional :: meshLocation 
-    type(ESMF_XGridSide), intent(out), optional :: xgridSide 
-    integer, intent(out), optional :: gridIndex
-    integer, intent(out), optional :: gridToFieldMap(:)    
-    integer, intent(out), optional :: ungriddedLBound(:)
-    integer, intent(out), optional :: ungriddedUBound(:)
-    integer, intent(out), optional :: totalLWidth(:)
-    integer, intent(out), optional :: totalUWidth(:)
-    integer, intent(out), optional :: localDeCount
-    character(len=*), intent(out), optional :: name
-    integer, intent(out), optional :: rc     
+    type(ESMF_MeshLoc),    intent(out), optional :: meshLocation 
+    type(ESMF_XGridSide),  intent(out), optional :: xgridSide 
+    integer,               intent(out), optional :: gridIndex
+    integer,               intent(out), optional :: gridToFieldMap(:)    
+    integer,               intent(out), optional :: ungriddedLBound(:)
+    integer,               intent(out), optional :: ungriddedUBound(:)
+    integer,               intent(out), optional :: totalLWidth(:)
+    integer,               intent(out), optional :: totalUWidth(:)
+    integer,               intent(out), optional :: localDeCount
+    character(len=*),      intent(out), optional :: name
+    integer,               intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 ! Query an {\tt ESMF\_Field} for various things.  All arguments after
@@ -522,11 +523,12 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-  subroutine ESMF_FieldGetLocalArray(field, localarray, rc)
+  subroutine ESMF_FieldGetLocalArray(field, localarray, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in) :: field
     type(ESMF_LocalArray), intent(out) :: localarray
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -581,14 +583,15 @@ contains
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldGet() @\
 ! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, & @\
-!   farrayPtr, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+!   farrayPtr, keywordEnforcer, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
 !   computationalLBound, computationalUBound, computationalCount, & @\
 !   totalLBound, totalUBound, totalCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
-!   integer,          intent(in), optional  :: localDe @\
+!   integer,          intent(in),  optional :: localDe @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
 !   integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -687,7 +690,8 @@ contains
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldGetDataPtr" @\
-  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, localDe, farrayPtr, & @\
+  subroutine ESMF_FieldGetDataPtr##mrank##D##mtypekind(field, & @\
+    localDe, farrayPtr, keywordEnforcer, & @\
     exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
     computationalLBound, computationalUBound, computationalCount, & @\
     totalLBound, totalUBound, totalCount, rc) @\
@@ -696,6 +700,7 @@ contains
     type(ESMF_Field), intent(in)            :: field @\
     integer,          intent(in), optional  :: localDe @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     integer,          intent(out), optional :: exclusiveLBound(:) @\
     integer,          intent(out), optional :: exclusiveUBound(:) @\
     integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -723,10 +728,14 @@ contains
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
 @\
-    call ESMF_FieldGetBounds(field, localDe, & @\
-        exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
-        computationalLBound, computationalUBound, computationalCount, & @\
-        totalLBound, totalUBound, totalCount, & @\
+    call ESMF_FieldGetBounds(field, localDe=localDe, & @\
+        exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, & @\
+        exclusiveCount=exclusiveCount, & @\
+        computationalLBound=computationalLBound, & @\
+        computationalUBound=computationalUBound, & @\
+        computationalCount=computationalCount, & @\
+        totalLBound=totalLBound, totalUBound=totalUBound, & @\
+        totalCount=totalCount, & @\
         rc = localrc) @\
 @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -749,24 +758,25 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGetBounds()
-  subroutine ESMF_FieldGetBounds(field, localDe, exclusiveLBound, &
-    exclusiveUBound, exclusiveCount, computationalLBound, &
+  subroutine ESMF_FieldGetBounds(field, keywordEnforcer, localDe, &
+    exclusiveLBound, exclusiveUBound, exclusiveCount, computationalLBound, &
     computationalUBound, computationalCount, totalLBound, &
     totalUBound, totalCount, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_Field),       intent(in) :: field
-    integer,                intent(in), optional :: localDe
-    integer,                intent(out), optional :: exclusiveLBound(:)
-    integer,                intent(out), optional :: exclusiveUBound(:)
-    integer,                intent(out), optional :: exclusiveCount(:)
-    integer,                intent(out), optional :: computationalLBound(:)
-    integer,                intent(out), optional :: computationalUBound(:)
-    integer,                intent(out), optional :: computationalCount(:)
-    integer,                intent(out), optional :: totalLBound(:)
-    integer,                intent(out), optional :: totalUBound(:)
-    integer,                intent(out), optional :: totalCount(:)
-    integer,                intent(out), optional :: rc
+    type(ESMF_Field), intent(in)            :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(in),  optional :: localDe
+    integer,          intent(out), optional :: exclusiveLBound(:)
+    integer,          intent(out), optional :: exclusiveUBound(:)
+    integer,          intent(out), optional :: exclusiveCount(:)
+    integer,          intent(out), optional :: computationalLBound(:)
+    integer,          intent(out), optional :: computationalUBound(:)
+    integer,          intent(out), optional :: computationalCount(:)
+    integer,          intent(out), optional :: totalLBound(:)
+    integer,          intent(out), optional :: totalUBound(:)
+    integer,          intent(out), optional :: totalCount(:)
+    integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
 ! This method returns the bounds information of a field that consists of a
@@ -1122,25 +1132,26 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetGridAllocBounds(grid, localDe, staggerloc, &
-        gridToFieldMap, &
+    subroutine ESMF_FieldGetGridAllocBounds(grid, keywordEnforcer, &
+        localDe, staggerloc, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLWidth, totalUWidth, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_Grid), intent(inout) :: grid     
-    integer, intent(in), optional  :: localDe
-    type(ESMF_StaggerLoc), intent(in), optional :: staggerloc 
-    integer, intent(in), optional :: gridToFieldMap(:)    
-    integer, intent(in), optional :: ungriddedLBound(:)
-    integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(in), optional :: totalLWidth(:)
-    integer, intent(in), optional :: totalUWidth(:)
-    integer, intent(out), optional :: totalLBound(:)
-    integer, intent(out), optional :: totalUBound(:)
-    integer, intent(out), optional :: totalCount(:)
-    integer, intent(out), optional :: rc     
+    type(ESMF_Grid),       intent(inout)         :: grid     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,               intent(in),  optional :: localDe
+    type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
+    integer,               intent(in),  optional :: gridToFieldMap(:)    
+    integer,               intent(in),  optional :: ungriddedLBound(:)
+    integer,               intent(in),  optional :: ungriddedUBound(:)
+    integer,               intent(in),  optional :: totalLWidth(:)
+    integer,               intent(in),  optional :: totalUWidth(:)
+    integer,               intent(out), optional :: totalLBound(:)
+    integer,               intent(out), optional :: totalUBound(:)
+    integer,               intent(out), optional :: totalCount(:)
+    integer,               intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -1263,10 +1274,12 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
-        ungriddedLBound, ungriddedUBound, &
-        totalLWidth, totalUWidth, &
-        totalLBound, totalUBound, totalCount, rc=localrc)
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+        totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+        totalLBound=totalLBound, totalUBound=totalUBound, &
+        totalCount=totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rc)) return
@@ -1288,21 +1301,22 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetLSAllocBounds(locstream, localDe, &
-        gridToFieldMap, &
+    subroutine ESMF_FieldGetLSAllocBounds(locstream, keywordEnforcer, &
+        localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_LocStream), intent(inout) :: locstream     
-    integer, intent(in), optional :: localDe
-    integer, intent(in), optional :: gridToFieldMap(:)    
-    integer, intent(in), optional :: ungriddedLBound(:)
-    integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(out), optional :: totalLBound(:)
-    integer, intent(out), optional :: totalUBound(:)
-    integer, intent(out), optional :: totalCount(:)
-    integer, intent(out), optional :: rc     
+    type(ESMF_LocStream), intent(inout)         :: locstream     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(in),  optional :: localDe
+    integer,              intent(in),  optional :: gridToFieldMap(:)    
+    integer,              intent(in),  optional :: ungriddedLBound(:)
+    integer,              intent(in),  optional :: ungriddedUBound(:)
+    integer,              intent(out), optional :: totalLBound(:)
+    integer,              intent(out), optional :: totalUBound(:)
+    integer,              intent(out), optional :: totalCount(:)
+    integer,              intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -1391,8 +1405,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
-        ungriddedLBound, ungriddedUBound, &
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
         totalCount=totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1417,21 +1432,22 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetMeshAllocBounds(mesh, localDe, &
+    subroutine ESMF_FieldGetMeshAllocBounds(mesh, keywordEnforcer, localDe, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout) :: mesh     
-    integer, intent(in), optional :: localDe
-    integer, intent(in), optional :: gridToFieldMap(:)    
-    integer, intent(in), optional :: ungriddedLBound(:)
-    integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(out), optional :: totalLBound(:)
-    integer, intent(out), optional :: totalUBound(:)
-    integer, intent(out), optional :: totalCount(:)
-    integer, intent(out), optional :: rc     
+    type(ESMF_Mesh), intent(inout)         :: mesh     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,         intent(in),  optional :: localDe
+    integer,         intent(in),  optional :: gridToFieldMap(:)    
+    integer,         intent(in),  optional :: ungriddedLBound(:)
+    integer,         intent(in),  optional :: ungriddedUBound(:)
+    integer,         intent(out), optional :: totalLBound(:)
+    integer,         intent(out), optional :: totalUBound(:)
+    integer,         intent(out), optional :: totalCount(:)
+    integer,         intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -1521,8 +1537,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
-        ungriddedLBound, ungriddedUBound, &
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
         totalCount=totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1546,23 +1563,24 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetXGAllocBounds(xgrid, xgridSide, gridIndex, &
-        localDe, gridToFieldMap, &
+    subroutine ESMF_FieldGetXGAllocBounds(xgrid, keywordEnforcer, &
+        xgridSide, gridIndex, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_XGrid) :: xgrid
-    type(ESMF_XGridSide), intent(in), optional :: xgridSide
-    integer, intent(in), optional :: gridIndex
-    integer, intent(in), optional :: localDe
-    integer, intent(in), optional :: gridToFieldMap(:)    
-    integer, intent(in), optional :: ungriddedLBound(:)
-    integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(out), optional :: totalLBound(:)
-    integer, intent(out), optional :: totalUBound(:)
-    integer, intent(out), optional :: totalCount(:)
-    integer, intent(out), optional :: rc     
+    type(ESMF_XGrid),     intent(inout)         :: xgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_XGridSide), intent(in),  optional :: xgridSide
+    integer,              intent(in),  optional :: gridIndex
+    integer,              intent(in),  optional :: localDe
+    integer,              intent(in),  optional :: gridToFieldMap(:)    
+    integer,              intent(in),  optional :: ungriddedLBound(:)
+    integer,              intent(in),  optional :: ungriddedUBound(:)
+    integer,              intent(out), optional :: totalLBound(:)
+    integer,              intent(out), optional :: totalUBound(:)
+    integer,              intent(out), optional :: totalCount(:)
+    integer,              intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:
@@ -1658,8 +1676,9 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
  
 
     ! call into generic alloc bound calculation subroutine
-    call ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
-        ungriddedLBound, ungriddedUBound, &
+    call ESMF_FieldGetGBAllocBounds(geombase, localDe=localDe, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         totalLBound=totalLBound, totalUBound=totalUBound, &
         totalCount=totalCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1683,23 +1702,24 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetGBAllocBounds(geombase, localDe, gridToFieldMap, &
+    subroutine ESMF_FieldGetGBAllocBounds(geombase, &
+        localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLWidth, totalUWidth, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_GeomBase), intent(inout) :: geombase     
-    integer, intent(in), optional :: localDe
-    integer, intent(in), optional :: gridToFieldMap(:)    
-    integer, intent(in), optional :: ungriddedLBound(:)
-    integer, intent(in), optional :: ungriddedUBound(:)
-    integer, intent(in), optional :: totalLWidth(:)
-    integer, intent(in), optional :: totalUWidth(:)
-    integer, intent(out), optional :: totalLBound(:)
-    integer, intent(out), optional :: totalUBound(:)
-    integer, intent(out), optional :: totalCount(:)
-    integer, intent(out), optional :: rc     
+    type(ESMF_GeomBase), intent(inout)         :: geombase     
+    integer,             intent(in),  optional :: localDe
+    integer,             intent(in),  optional :: gridToFieldMap(:)    
+    integer,             intent(in),  optional :: ungriddedLBound(:)
+    integer,             intent(in),  optional :: ungriddedUBound(:)
+    integer,             intent(in),  optional :: totalLWidth(:)
+    integer,             intent(in),  optional :: totalUWidth(:)
+    integer,             intent(out), optional :: totalLBound(:)
+    integer,             intent(out), optional :: totalUBound(:)
+    integer,             intent(out), optional :: totalCount(:)
+    integer,             intent(out), optional :: rc     
 
 !
 ! !DESCRIPTION:

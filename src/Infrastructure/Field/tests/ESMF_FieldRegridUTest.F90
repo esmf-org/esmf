@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.22 2011/01/24 23:04:58 rokuingh Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.23 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -380,7 +380,7 @@ contains
 
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcField360 = ESMF_FieldCreate(grid360, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -876,7 +876,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -1338,7 +1338,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -1759,7 +1759,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -2217,7 +2217,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -2675,7 +2675,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CORNER, name="source", rc=localrc)
@@ -3042,7 +3042,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_EDGE1, name="source", rc=localrc)
@@ -3635,7 +3635,7 @@ write(*,*) "LOCALRC=",localrc
    endif
 
   ! Create source field
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=localrc)
@@ -3692,7 +3692,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -3986,7 +3986,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -4313,7 +4313,7 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! Create dest field
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
    dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
                         name="source", rc=localrc)
@@ -4767,7 +4767,7 @@ write(*,*) "LOCALRC=",localrc
    endif
 
   ! Create source field
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=localrc)
@@ -5062,7 +5062,7 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! Create dest field
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
    dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
                         name="source", rc=localrc)
@@ -5555,7 +5555,7 @@ write(*,*) "LOCALRC=",localrc
    endif
 
   ! Create source field
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
    srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=localrc)
@@ -5614,7 +5614,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
 
    dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, name="dest", rc=localrc)
@@ -5939,7 +5939,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -6294,7 +6294,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -6655,7 +6655,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -7017,7 +7017,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
   ! Create source/destination fields
-  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+  call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
    srcFieldA = ESMF_FieldCreate(gridA, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)

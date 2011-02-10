@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.68 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.69 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.68 2011/01/25 20:55:52 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.69 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -545,7 +545,7 @@ contains
     ! object directly. ArrayCreate() does _not_ create LocalArray objects @\
     ! internally for ESMF_INDEX_USER. @\
     allocate(localarrayList(1)) @\
-    localarrayList(1) = ESMF_LocalArrayCreate(farrayPtr, copyflag_opt, rc=localrc) @\
+    localarrayList(1) = ESMF_LocalArrayCreate(farrayPtr, docopy=copyflag_opt, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\

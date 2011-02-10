@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.14 2011/01/13 21:07:28 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.15 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
 void myRegistrationInC(ESMC_GridComp gcomp, int *rc){
   // register Init(), Run(), Finalize()
   printf("I am in myRegistrationInC()\n");
-  ESMC_GridCompPrint(gcomp, "");
+  ESMC_GridCompPrint(gcomp);
   
   ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
   ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
@@ -148,7 +148,7 @@ void myCplFinalInC(ESMC_CplComp cplcomp, ESMC_State importState,
 void myCplRegistrationInC(ESMC_CplComp cplcomp, int *rc){
   // register Init(), Run(), Finalize()
   printf("I am in myCplRegistrationInC()\n");
-  ESMC_CplCompPrint(cplcomp, "");
+  ESMC_CplCompPrint(cplcomp);
   
   ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, myCplInitInC, 1);
   ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, myCplRunInC, 1);
@@ -272,7 +272,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Print ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompPrint(gcomp, "");
+  rc = ESMC_GridCompPrint(gcomp);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -389,7 +389,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Print ESMC_CplComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompPrint(cplcomp, "");
+  rc = ESMC_CplCompPrint(cplcomp);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   

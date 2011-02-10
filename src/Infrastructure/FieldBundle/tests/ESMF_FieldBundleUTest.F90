@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.26 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.27 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.26 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.27 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -1431,7 +1431,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Getting a third Field name from a deleted FieldBundle
-      call ESMF_FieldBundleGet(bundle2, 3, returnedfield3, rc)
+      call ESMF_FieldBundleGet(bundle2, 3, returnedfield3, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Getting a third Field by index from a deleted FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
@@ -1439,7 +1439,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Getting a third Field name from a non-created FieldBundle
-      call ESMF_FieldBundleGet(bundle1, 3, returnedfield3, rc)
+      call ESMF_FieldBundleGet(bundle1, 3, returnedfield3, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Getting a third Field by index from a non-create FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
@@ -1518,7 +1518,7 @@
       ! The ESMF_PACKED_DATA option is not implemented and until it is, it
       ! is correct for the method to return ESMF_RC_NOT_IMPL when it is used.
       write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
-      bundle4 = ESMF_FieldBundleCreate(3, fields, ESMF_PACKED_DATA, &
+      bundle4 = ESMF_FieldBundleCreate(3, fields, packflag=ESMF_PACKED_DATA, &
             name="atmosphere data", rc=rc)
       write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
       call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
@@ -1731,7 +1731,7 @@
 
       !EX_UTest
       ! Verify that the first Field name can be queried fron a FieldBundle
-      call ESMF_FieldBundleGet(bundle1, "pressure", returnedfield1, rc)
+      call ESMF_FieldBundleGet(bundle1, "pressure", returnedfield1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting first Field by name from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1747,7 +1747,7 @@
 
       !EX_UTest
       ! Verify that the second Field name can be queried from a FieldBundle
-      call ESMF_FieldBundleGet(bundle1, 2, returnedfield2, rc)
+      call ESMF_FieldBundleGet(bundle1, 2, returnedfield2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a second Field by index from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1762,7 +1762,7 @@
 
       !EX_UTest
       ! Verify that the third Field name can be queried fron a FieldBundle
-      call ESMF_FieldBundleGet(bundle1, 3, returnedfield3, rc)
+      call ESMF_FieldBundleGet(bundle1, 3, returnedfield3, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a third Field by index from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1783,7 +1783,7 @@
       !EX_UTest
       ! Verify that the fourth Field name cannot be queried from a FieldBundle
       ! because there are only three Fields in the FieldBundle
-      call ESMF_FieldBundleGet(bundle1, 4, returnedfield3, rc)
+      call ESMF_FieldBundleGet(bundle1, 4, returnedfield3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a non-existent Field from a FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1836,7 +1836,7 @@
 
       !EX_UTest
       ! Verify that the third Field names can be queried fron a FieldBundle
-      call ESMF_FieldBundleGet(bundle1, 3, returnedfield3, rc)
+      call ESMF_FieldBundleGet(bundle1, 3, returnedfield3, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a third Field by index from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1873,7 +1873,7 @@
 
       !EX_UTest
       ! Verify that the zeroth Field names cannot be queried fron a FieldBundle
-      call ESMF_FieldBundleGet(bundle1, 0, returnedfield3, rc)
+      call ESMF_FieldBundleGet(bundle1, 0, returnedfield3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a zeroth non-existent Field from a FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1882,7 +1882,7 @@
 
       !EX_UTest
       ! Verify that the querying Field with wrong name from a FieldBundle returns FAILURE
-      call ESMF_FieldBundleGet(bundle1, "nressure", returnedfield1, rc)
+      call ESMF_FieldBundleGet(bundle1, "nressure", returnedfield1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting wrong Field name from a FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

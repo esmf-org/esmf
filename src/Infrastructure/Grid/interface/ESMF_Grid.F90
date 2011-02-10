@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.194 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.195 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -176,8 +176,10 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !
 ! - ESMF-public methods:
 
-!  public operator(==)  ! operator defined as .eq. below
-!  public operator(/=)  ! operator defined as .eq. below
+  public operator(==)
+  public operator(/=)
+  public operator(>)
+  public operator(>=)  
 
   public ESMF_GridAddCoord
   public ESMF_GridCommit
@@ -214,8 +216,6 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 
   public ESMF_GridConvertIndex      ! For Arbitrarily distributed grid only
 
-  public operator(.eq.), operator(.ne.) 
-  public operator(.gt.), operator(.ge.)  
   public ESMF_ArrayCreateFromGrid
   public ESMF_GridGetArrayInfo
 
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.194 2011/01/25 20:55:52 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.195 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -334,7 +334,7 @@ end interface
       module procedure ESMF_GridGetDefault
       module procedure ESMF_GridGetPLocalDePSloc
       module procedure ESMF_GridGetPSloc
-      module procedure ESMF_GridGetIndex
+!      module procedure ESMF_GridGetIndex
       module procedure ESMF_GridGetPLocalDe
        
 ! !DESCRIPTION: 
@@ -492,7 +492,7 @@ end interface
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridConnEqual
@@ -508,7 +508,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridConnNotEqual
@@ -523,7 +523,7 @@ end interface
 !!==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridDecompEqual
@@ -539,7 +539,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridDecompNotEqual
@@ -554,7 +554,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusEqual
@@ -570,7 +570,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ne.)
+      interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusNotEqual
@@ -585,7 +585,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.gt.)
+      interface operator (>)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusGreater
@@ -615,7 +615,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      interface operator (.ge.)
+      interface operator (>=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusGreaterEqual
@@ -684,7 +684,7 @@ end interface
 ! !IROUTINE: ESMF_GridOperator(==) - Grid equality operator
 !
 ! !INTERFACE:
-  interface operator(.eq.)
+  interface operator(==)
 !   if (grid1 == grid2) then ... endif
 !             OR
 !   result = (grid1 == grid2)
@@ -724,7 +724,7 @@ end interface
 ! !IROUTINE: ESMF_GridOperator(/=) - Grid not equal operator
 !
 ! !INTERFACE:
-  interface operator(.ne.)
+  interface operator(/=)
 !   if (grid1 == grid2) then ... endif
 !             OR
 !   result = (grid1 == grid2)
@@ -808,9 +808,9 @@ contains
     ginit2 = ESMF_GridGetInit(grid2)
 
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
-    if (ginit1 .eq. ESMF_INIT_CREATED .and. &
-      ginit2 .eq. ESMF_INIT_CREATED) then
-      ESMF_GridEQ = grid1%this .eq. grid2%this
+    if (ginit1 == ESMF_INIT_CREATED .and. &
+      ginit2 == ESMF_INIT_CREATED) then
+      ESMF_GridEQ = grid1%this == grid2%this
     else
       ESMF_GridEQ = ESMF_FALSE
     endif
@@ -867,18 +867,19 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddCoord()
-     subroutine ESMF_GridAddCoordNoValues(grid, staggerloc,  &
-                staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign, &
-                staggerMemLBound, totalLWidth, totalUWidth,rc)
+     subroutine ESMF_GridAddCoordNoValues(grid, keywordEnforcer, staggerloc,  &
+       staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign, &
+       staggerMemLBound, totalLWidth, totalUWidth,rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)           :: grid 
-      type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
-      integer,                intent(in),optional  :: staggerEdgeLWidth(:)
-      integer,                intent(in),optional  :: staggerEdgeUWidth(:)
-      integer,                intent(in),optional  :: staggerAlign(:)
-      integer,                intent(in),optional  :: staggerMemLBound(:)      
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
+      integer,                intent(in), optional :: staggerEdgeLWidth(:)
+      integer,                intent(in), optional :: staggerEdgeUWidth(:)
+      integer,                intent(in), optional :: staggerAlign(:)
+      integer,                intent(in), optional :: staggerMemLBound(:)      
       integer,                intent(in), optional :: totalLWidth(:) !N. IMP
       integer,                intent(in), optional :: totalUWidth(:) !N. IMP
       integer,                intent(out),optional :: rc
@@ -971,8 +972,8 @@ contains
 
     ! handle staggerloc
     if (present(staggerloc)) then
-	 if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
- 	     (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+	 if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+ 	     (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -984,7 +985,7 @@ contains
        tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
 
-    if (decompType .eq. ESMF_GRID_ARBITRARY) then
+    if (decompType == ESMF_GRID_ARBITRARY) then
 	if (present(staggerEdgeLWidth) .or. present(staggerEdgeUWidth) .or. &
 	    present(staggerAlign)) then
 	    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -1207,13 +1208,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddItem()
      subroutine ESMF_GridAddItemNoValues(grid, staggerloc, item, &
-                itemTypeKind, staggerEdgeLWidth, staggerEdgeUWidth, &
-                staggerAlign, staggerMemLBound,  totalLWidth, totalUWidth,rc)
+       keywordEnforcer, itemTypeKind, staggerEdgeLWidth, staggerEdgeUWidth, &
+       staggerAlign, staggerMemLBound,  totalLWidth, totalUWidth,rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)           :: grid 
       type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)           :: item
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_TypeKind),   intent(in),optional  :: itemTypeKind
       integer,                intent(in),optional  :: staggerEdgeLWidth(:)
       integer,                intent(in),optional  :: staggerEdgeUWidth(:)
@@ -1321,7 +1323,7 @@ contains
     endif
 
     ! Check if the grid is arbitrary
-    if (decompType .eq. ESMF_GRID_ARBITRARY) then
+    if (decompType == ESMF_GRID_ARBITRARY) then
        if (present(staggerEdgeLWidth) .or. present(staggerEdgeUWidth)) then
 	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerEdgeLWidth and staggerEdigeUWidth are not allowed for arbitrary grid", &
@@ -1334,7 +1336,7 @@ contains
   	         ESMF_CONTEXT, rc) 
           return
        endif
-       if (present(staggerloc) .and. staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
+       if (present(staggerloc) .and. staggerloc /= ESMF_STAGGERLOC_CENTER) then
 	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
   	         ESMF_CONTEXT, rc) 
@@ -1558,7 +1560,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
     ! Check if the grid is arbitrary
-    if (decompType .ne. ESMF_GRID_ARBITRARY) then
+    if (decompType /= ESMF_GRID_ARBITRARY) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- ESMF_GridConvertIndex only works for arbritrarily distributed grid", & 
                  ESMF_CONTEXT, rc) 
@@ -1585,7 +1587,7 @@ contains
      call ESMF_DistGridGet(distGrid, dimcount = distGridDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if (distGridDimCount .gt. dimCount) then
+    if (distGridDimCount > dimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid dimension has to be less than or equal to dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -1594,7 +1596,7 @@ contains
 
     ! set distDimCount - number of dimensions arbitrarily distributed
     !     undistDimCount - number of dimensions not arbitrarily distributed
-    if (distGridDimCount .eq. 1) then
+    if (distGridDimCount == 1) then
        ! all dimensions are arbitrarily distributed
        distDimCount = dimCount
        undistDimCount = 0
@@ -1604,7 +1606,7 @@ contains
     endif
 
     ! Check index dimension
-    if (size(gridindex) .ne. dimCount) then
+    if (size(gridindex) /= dimCount) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
             "- gridindex dimension is different from the grid DimCount", & 
             ESMF_CONTEXT, rc) 
@@ -1613,7 +1615,7 @@ contains
 
     ! Check index out of bound
     do i=1,dimCount
-       if (gridindex(i) .lt. minIndex(i) .and. gridindex(i) .gt. maxIndex(i)) then
+       if (gridindex(i) .lt. minIndex(i) .and. gridindex(i) > maxIndex(i)) then
 	   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                "- gridindex is out of bound", & 
                       ESMF_CONTEXT, rc) 
@@ -1635,7 +1637,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (undistDimCount .ne. 0) then
+    if (undistDimCount /= 0) then
       allocate(distgridToGridMap(dimCount), stat=localrc)
       call ESMF_GridGet(grid, arbDim=arbDim, &
 	distgridToGridMap=distgridToGridMap, rc=localrc)
@@ -1646,7 +1648,7 @@ contains
       do i=1,dimCount
         found = .false.
 	do j=1,distDimCount
-	  if (i .eq. distgridToGridMap(j)) found=.true.
+	  if (i == distgridToGridMap(j)) found=.true.
 	enddo
         if (.not. found) then
 	  undistdim(k)=i
@@ -1656,7 +1658,7 @@ contains
      
       k=1
       do i=1,distGridDimCount
-	if (i .eq. arbDim) then
+	if (i == arbDim) then
            distgridindex(i)=index1D
         else
 	   distgridindex(i)=gridindex(undistdim(k))
@@ -1688,9 +1690,9 @@ end subroutine ESMF_GridConvertIndex
 ! !IROUTINE: ESMF_ArrayCreateFromGrid - Create an Array to hold data for a stagger location
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateFromGrid(grid,staggerloc,name,typekind, &
+      function ESMF_ArrayCreateFromGrid(grid,staggerloc, typekind, &
                            gridToArrayMap, ungriddedLBound, ungriddedUBound, &
-                           totalLWidth, totalUWidth, rc)
+                           totalLWidth, totalUWidth, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateFromGrid
@@ -1698,13 +1700,13 @@ end subroutine ESMF_GridConvertIndex
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)            :: grid
        type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-       character (len=*),     intent(in),  optional :: name
        type(ESMF_TypeKind),   intent(in),  optional :: typekind
        integer,               intent(in),  optional :: gridToArrayMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
        integer,               intent(in),  optional :: totalLWidth(:)
        integer,               intent(in),  optional :: totalUWidth(:)
+       character (len=*),     intent(in),  optional :: name
        integer,               intent(out), optional :: rc
 
 !
@@ -1724,8 +1726,6 @@ end subroutine ESMF_GridConvertIndex
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
-! \item[{[name]}]
-!     {\tt ESMF\_Grid} name.
 ! \item[{[typekind]}] 
 !     The type/kind of the newly created array data. 
 !     If not specified then the type/kind will be 8 byte reals.  
@@ -1746,6 +1746,8 @@ end subroutine ESMF_GridConvertIndex
 !     Extra padding to be added to the Array. {\tt totalUWidth} is the amount
 !     that the upper boundary of the Array should be raised relative
 !     to the upper bound of the exclusive region.
+! \item[{[name]}]
+!     {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1798,7 +1800,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! The bounds need to be the same size
     if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
-       if (size(ungriddedLBound) .ne. size(ungriddedUBound)) then
+       if (size(ungriddedLBound) /= size(ungriddedUBound)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                 "- ungriddedLBound and ungriddedUBound must be the same size ", & 
                   ESMF_CONTEXT, rc) 
@@ -1835,7 +1837,7 @@ end subroutine ESMF_GridConvertIndex
     if (present(gridToArrayMap)) then
        gridUsedDimCount=0
        do i=1,dimCount
-          if (gridToArrayMap(i) .gt. 0) then
+          if (gridToArrayMap(i) > 0) then
              gridUsedDimCount=gridUsedDimCount+1
           endif
        enddo
@@ -2053,7 +2055,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! The bounds need to be the same size
     if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
-       if (size(ungriddedLBound) .ne. size(ungriddedUBound)) then
+       if (size(ungriddedLBound) /= size(ungriddedUBound)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                 "- ungriddedLBound and ungriddedUBound must be the same size ", & 
                   ESMF_CONTEXT, rc) 
@@ -2086,7 +2088,7 @@ end subroutine ESMF_GridConvertIndex
     endif
     
     ! Get grid distgrid
-    call ESMF_GridGet(grid, localStaggerLoc, distgrid, rc=localrc)
+    call ESMF_GridGet(grid, localStaggerLoc, staggerDistgrid=distgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2098,13 +2100,13 @@ end subroutine ESMF_GridConvertIndex
 
     ! if the Grid is arbitrary, the array dimension will be different depending on how many
     ! grid dimensions are arbitrarily distributed
-    if (decompType .eq. ESMF_GRID_NONARBITRARY) then
+    if (decompType == ESMF_GRID_NONARBITRARY) then
 
        ! calc the number of dimensions from the grid being used (e.g. with non-zero mapping)
        if (present(gridToFieldMap)) then
           gridUsedDimCount=0
           do i=1,dimCount
-             if (gridToFieldMap(i) .gt. 0) then
+             if (gridToFieldMap(i) > 0) then
                 gridUsedDimCount=gridUsedDimCount+1
              endif
           enddo
@@ -2184,7 +2186,7 @@ end subroutine ESMF_GridConvertIndex
 
        ! construct array based on the presence of distributed dimensions
        ! if there are undistributed dimensions ...
-       if (undistArrayDimCount .gt. 0) then      
+       if (undistArrayDimCount > 0) then      
 
           !! allocate array dim. info arrays
           allocate(arrayDimType(arrayDimCount) , stat=localrc)
@@ -2197,7 +2199,7 @@ end subroutine ESMF_GridConvertIndex
           !! set which dimensions are used by the distgrid
           arrayDimType(:)=0 ! initialize to no type
           do i=1,dimCount
-             if (distGridToArrayMap(i) .gt. 0) then ! skip replicated dims 
+             if (distGridToArrayMap(i) > 0) then ! skip replicated dims 
                 arrayDimType(distGridToArrayMap(i))=1 ! set to distributed
              endif
           enddo
@@ -2206,7 +2208,7 @@ end subroutine ESMF_GridConvertIndex
           !! Fill in ungridded bound info
           bndpos=1
           do i=1,arrayDimCount
-             if (arrayDimType(i) .eq. 0) then
+             if (arrayDimType(i) == 0) then
                 arrayDimInd(i)=bndpos
                 arrayDimType(i)=2 ! set to undistributed Array
                 bndpos=bndpos+1
@@ -2216,7 +2218,7 @@ end subroutine ESMF_GridConvertIndex
           !! Finally setup new Array bounds based on info in arrayDimType and arrayDimInd
           bndpos=1
           do i=1,arrayDimCount
-             if (arrayDimType(i) .eq. 2) then
+             if (arrayDimType(i) == 2) then
                 undistLBound(bndpos)=ungriddedLBound(arrayDimInd(i))
                 undistUBound(bndpos)=ungriddedUBound(arrayDimInd(i))
                 bndpos=bndpos+1
@@ -2239,7 +2241,7 @@ end subroutine ESMF_GridConvertIndex
        if (present(gridToFieldMap)) then
           gridUsedDimCount=0
           do i=1,dimCount
-             if (gridToFieldMap(i) .gt. 0) then
+             if (gridToFieldMap(i) > 0) then
                 gridUsedDimCount=gridUsedDimCount+1
              endif
           enddo
@@ -2306,9 +2308,9 @@ end subroutine ESMF_GridConvertIndex
          k = 1
          do i=1,dimCount
            found = .false.
-	   if (localGridToFieldMap(i) .eq. 0) then
+	   if (localGridToFieldMap(i) == 0) then
 	     do j=1,dimCount
-		if (distgridToGridMap(j) .eq. i) then
+		if (distgridToGridMap(j) == i) then
 		  found = .true.
 		  exit
 	        endif
@@ -2318,7 +2320,7 @@ end subroutine ESMF_GridConvertIndex
 		rep_arb = 1
              else
 		rep_noarb = rep_noarb+1
-		if (k .eq. arbdim) k = k + 1
+		if (k == arbdim) k = k + 1
                 distgridToArrayMap(k) = 0
 		k=k+1
              endif
@@ -2326,7 +2328,7 @@ end subroutine ESMF_GridConvertIndex
          enddo
          j=1
          do i=1,distDimCount
-	  if (distgridToArrayMap(i) .ne. 0) then 
+	  if (distgridToArrayMap(i) /= 0) then 
 	     distgridToArrayMap(i)= j
 	     j=j+1
           endif
@@ -2339,7 +2341,7 @@ end subroutine ESMF_GridConvertIndex
               
        ! construct array based on the presence of distributed dimensions
        ! if there are undistributed dimensions ...
-       if (undistArrayDimCount .gt. 0) then      
+       if (undistArrayDimCount > 0) then      
 	  ! Copy ungriddedBound to undistBound
 	  do i=1,undistArrayDimCount
             undistLBound(i)=ungriddedLBound(i)
@@ -2361,18 +2363,19 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateCopyFromNewDG(grid, name, distgrid, &
-                 destroyDistGrid, destroyDELayout, rc)
+      function ESMF_GridCreateCopyFromNewDG(grid, distgrid, keywordEnforcer, &
+        destroyDistGrid, destroyDELayout, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateCopyFromNewDG
 !
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)              :: grid
-       character (len=*),     intent(in),   optional  :: name
        type(ESMF_DistGrid),   intent(in)              :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        logical,               intent(in),   optional  :: destroyDistGrid
        logical,               intent(in),   optional  :: destroyDELayout
+       character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2383,8 +2386,6 @@ end subroutine ESMF_GridConvertIndex
 ! \begin{description}
 ! \item[grid]
 !     {\tt ESMF\_Grid} to copy.
-! \item[{[name]}]
-!      Name of the new Grid. If not specified, a new unique name will be created for the Grid.
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object which describes how the Grid is decomposed and
 !      distributed over DEs. 
@@ -2394,6 +2395,9 @@ end subroutine ESMF_GridConvertIndex
 ! \item[{[destroyDELayout]}]
 !      If true, when the Grid is destroyed the DELayout will be destroyed also. 
 !      Defaults to false. 
+! \item[{[name]}]
+!      Name of the new Grid. If not specified, a new unique name will be created 
+!      for the Grid.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2704,8 +2708,8 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateCopyFromReg(grid, name, &
-                        regDecomp, decompFlag, rc)
+      function ESMF_GridCreateCopyFromReg(grid, keywordEnforcer, &
+        regDecomp, decompFlag, name, rc)
 
 !
 ! !RETURN VALUE:
@@ -2713,9 +2717,10 @@ end subroutine ESMF_GridConvertIndex
 !
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)              :: grid
-       character (len=*),     intent(in),   optional  :: name
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: regDecomp(:)
        type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
+       character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2731,8 +2736,6 @@ end subroutine ESMF_GridConvertIndex
 ! \begin{description}
 ! \item[grid]
 !     {\tt ESMF\_Grid} to copy.
-! \item[{[name]}]
-!      Name of the new Grid. If not specified, a new unique name will be created for the Grid.
 ! \item[{[regDecomp]}] 
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
@@ -2743,6 +2746,9 @@ end subroutine ESMF_GridConvertIndex
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
+! \item[{[name]}]
+!      Name of the new Grid. If not specified, a new unique name will be 
+!      created for the Grid.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2911,7 +2917,7 @@ end subroutine ESMF_GridConvertIndex
 
 
       !! copy petMap to petList
-      if (dimCount .gt. 2) then
+      if (dimCount > 2) then
 	 k=1
      	 do i3=1,regDecompLocal(3)
          do i2=1,regDecompLocal(2)
@@ -2964,10 +2970,10 @@ end subroutine ESMF_GridConvertIndex
 
 
   
-    ESMF_GridCreateCopyFromReg=ESMF_GridCreate(grid, name, distgrid, &
+    ESMF_GridCreateCopyFromReg=ESMF_GridCreate(grid, distgrid, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
-                                    rc=localrc)
+                                    name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2993,29 +2999,30 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateFrmDistGrid(name,coordTypeKind,distgrid, &
-                         distgridToGridMap, coordDimCount, coordDimMap, &
-                         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                         gridMemLBound, indexflag, destroyDistGrid, &
-                         destroyDELayout, rc)
+      function ESMF_GridCreateFrmDistGrid(coordTypeKind,distgrid, &
+        keywordEnforcer, distgridToGridMap, coordDimCount, coordDimMap, &
+        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+        gridMemLBound, indexflag, destroyDistGrid, &
+        destroyDELayout, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGrid
 !
 ! !ARGUMENTS:
-       character (len=*), intent(in), optional :: name
-       type(ESMF_TypeKind),  intent(in), optional  :: coordTypeKind
-       type(ESMF_DistGrid),   intent(in)              :: distgrid
-       integer,               intent(in), optional  :: distgridToGridMap(:)
-       integer,               intent(in), optional  :: coordDimCount(:)
-       integer,               intent(in), optional  :: coordDimMap(:,:)
-       integer,               intent(in), optional  :: gridEdgeLWidth(:)
-       integer,               intent(in), optional  :: gridEdgeUWidth(:)
-       integer,               intent(in), optional  :: gridAlign(:)
-       integer,               intent(in), optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in), optional  :: indexflag
-       logical,               intent(in), optional  :: destroyDistGrid
-       logical,               intent(in), optional  :: destroyDELayout
+       type(ESMF_TypeKind),   intent(in),  optional  :: coordTypeKind
+       type(ESMF_DistGrid),   intent(in)             :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,               intent(in),  optional  :: distgridToGridMap(:)
+       integer,               intent(in),  optional  :: coordDimCount(:)
+       integer,               intent(in),  optional  :: coordDimMap(:,:)
+       integer,               intent(in),  optional  :: gridEdgeLWidth(:)
+       integer,               intent(in),  optional  :: gridEdgeUWidth(:)
+       integer,               intent(in),  optional  :: gridAlign(:)
+       integer,               intent(in),  optional  :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in),  optional  :: indexflag
+       logical,               intent(in),  optional  :: destroyDistGrid
+       logical,               intent(in),  optional  :: destroyDELayout
+       character (len=*),     intent(in),  optional  :: name
        integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -3135,7 +3142,7 @@ end subroutine ESMF_GridConvertIndex
     call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    if (deCount .gt. 0) then
+    if (deCount > 0) then
       allocate(collocationPDim(distDimCount))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
            collocationPDim=collocationPDim, rc=localrc)
@@ -3149,7 +3156,7 @@ end subroutine ESMF_GridConvertIndex
       deallocate(collocationPDim)
     endif
 
-    if (arbDim .ne. -1) then
+    if (arbDim /= -1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid should not contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rc) 
@@ -3264,23 +3271,24 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-      function ESMF_GridCreateFrmDistGridArb(name,coordTypeKind,distgrid, &
-			 indexArray, distDim, coordDimCount, coordDimMap, &
-                         destroyDistGrid, destroyDELayout, rc)
+      function ESMF_GridCreateFrmDistGridArb(coordTypeKind,distgrid, &
+        indexArray, keywordEnforcer, distDim, coordDimCount, coordDimMap, &
+        destroyDistGrid, destroyDELayout, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGridArb
 !
 ! !ARGUMENTS:
-       character (len=*), intent(in), optional :: name
-       type(ESMF_TypeKind),  intent(in),   optional  :: coordTypeKind
+       type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in)              :: indexArray(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distDim(:)
        integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        logical,               intent(in),   optional  :: destroyDistGrid
        logical,               intent(in),   optional  :: destroyDELayout
+       character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -3377,13 +3385,13 @@ end subroutine ESMF_GridConvertIndex
     call ESMF_DistGridGet(distgrid, dimCount=dimCount1, tileCount=tileCount, &
     	rc=localrc)
     !! dimCount1 should be equal or less than dimCount
-    if (dimCount1 .gt. dimCount) then
+    if (dimCount1 > dimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid dimension has to be less or equal to dimCount", & 
                           ESMF_CONTEXT, rc) 
         return 
      endif
-    if (tileCount .ne. 1) then
+    if (tileCount /= 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid tile count has to be 1", & 
                           ESMF_CONTEXT, rc) 
@@ -3395,7 +3403,7 @@ end subroutine ESMF_GridConvertIndex
     !! distDim is a 1D array of size distDimCount.  The values are the 
     !! Grid dimensions that are arbitrarily distributed. 
     if (present(distDim)) then
-      if (size(distDim) .ne. distDimCount) then
+      if (size(distDim) /= distDimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- dimension of distDim has to be the same as the arbitrary distributed dim", & 
                           ESMF_CONTEXT, rc) 
@@ -3465,7 +3473,7 @@ end subroutine ESMF_GridConvertIndex
     do i=1,localCounts
       !! make it 0-based first before calculations
       local1DIndices(i)=local1DIndices(i)-1
-      if (distDimCount .ge. 2) then
+      if (distDimCount >= 2) then
         do j=distDimCount,2	
           !! add 1 to make the result 1-based
 	  localArbIndex(i,j) = mod(local1DIndices(i),distSize(j))+1
@@ -3489,7 +3497,7 @@ end subroutine ESMF_GridConvertIndex
       call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    if (deCount .gt. 0) then
+    if (deCount > 0) then
       allocate(collocationPDim(dimCount1))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
            collocationPDim=collocationPDim, rc=localrc)
@@ -3506,14 +3514,14 @@ end subroutine ESMF_GridConvertIndex
       deallocate(collocationPDim)
     endif
 
-    if (arbDim .eq. -1) then
+    if (arbDim == -1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                    "- distgrid should contain arbitrary sequence indices", & 
                           ESMF_CONTEXT, rc) 
 	return
     endif
 
-    if (undistDimCount .ne. 0) then
+    if (undistDimCount /= 0) then
       allocate(minIndexPTile(dimCount1,1))
       allocate(maxIndexPTile(dimCount1,1))
       call ESMF_DistGridGet(distgrid, minIndexPDimPTile=minIndexPTile, &
@@ -3534,9 +3542,9 @@ end subroutine ESMF_GridConvertIndex
 
       k = 1
       do i=1,dimCount1
-        if (arbDim .ne. i) then
-          if ((undistMinIndex(k) .ne. minIndexPTile(i,1)) .or. &
-            (undistMaxIndex(k) .ne. maxIndexPTile(i,1))) then
+        if (arbDim /= i) then
+          if ((undistMinIndex(k) /= minIndexPTile(i,1)) .or. &
+            (undistMaxIndex(k) /= maxIndexPTile(i,1))) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- Grid min/max index does not match with DistGrid min/max index", & 
                ESMF_CONTEXT, rc) 
@@ -3597,7 +3605,7 @@ end subroutine ESMF_GridConvertIndex
     deallocate(distDimLocal)
     deallocate(local1DIndices)
     deallocate(localArbIndex)
-    if (undistDimCount .ne. 0) then
+    if (undistDimCount /= 0) then
       deallocate(minIndexPTile)
       deallocate(maxIndexPTile)
       deallocate(undistMinIndex)
@@ -3643,13 +3651,15 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-     function ESMF_GridCreateFrmFile(fileName, convention, purpose, rc)
+     function ESMF_GridCreateFrmFile(fileName, keywordEnforcer, &
+       convention, purpose, rc)
 !
 ! !RETURN VALUE:
      type(ESMF_Grid) :: ESMF_GridCreateFrmFile
 !
 ! !ARGUMENTS:
        character (len=*), intent(in)            :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        character (len=*), intent(in),  optional :: convention
        character (len=*), intent(in),  optional :: purpose
        integer,           intent(out), optional :: rc
@@ -3729,7 +3739,7 @@ end subroutine ESMF_GridConvertIndex
     call c_ESMC_AttributeRead(grid, fileNameLen, fileName, 0, "", localrc)
 
     if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
-    if (localrc .ne. ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
+    if (localrc /= ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
@@ -3751,7 +3761,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(1)
-    if (localrc.ne.0) then
+    if (localrc/=0) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
@@ -3768,7 +3778,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) maxIndex(2)
-    if (localrc.ne.0) then
+    if (localrc/=0) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
@@ -3788,7 +3798,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(1)
-    if (localrc.ne.0) then
+    if (localrc/=0) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
@@ -3804,7 +3814,7 @@ end subroutine ESMF_GridConvertIndex
 
     ! convert from character to integer
     read(attrValue, *, iostat=localrc) regDecomp(2)
-    if (localrc.ne.0) then
+    if (localrc/=0) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)
       call ESMF_GridDestroy(grid)
@@ -3845,16 +3855,18 @@ end subroutine ESMF_GridConvertIndex
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-  function ESMF_GridCreateFrmScripDistGrd(distgrid, filename, rc)
+  function ESMF_GridCreateFrmScripDistGrd(distgrid, filename, &
+    keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScripDistGrd
 !
 ! !ARGUMENTS:
  
-    type(ESMF_DistGrid), intent(in) :: distgrid
-    character(len=*), intent(in)    :: filename
-    integer, intent(out), optional  :: rc
+    type(ESMF_DistGrid), intent(in)             :: distgrid
+    character(len=*),    intent(in)             :: filename
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional  :: rc
 
 ! !DESCRIPTION:
 ! This function creates a {\tt ESMF\_Grid} object using the grid definition from
@@ -4100,7 +4112,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  enddo
 
   ! Make sure we found a corner
-  if (TopCorner .eq. -1) then
+  if (TopCorner == -1) then
      call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rc)
      return
@@ -4141,7 +4153,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  enddo
 
   ! Make sure we found a corner
-  if (TopRightCorner .eq. -1) then
+  if (TopRightCorner == -1) then
      call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rc)
      return
@@ -4182,7 +4194,7 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  enddo
 
   ! Make sure we found a corner
-  if (BtmCorner .eq. -1) then
+  if (BtmCorner == -1) then
      call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rc)
      return
@@ -4195,15 +4207,15 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  do i=1,4
 
     ! eliminate all other possibilities
-    if (i .eq. TopCorner) cycle
-    if (i .eq. TopRightCorner) cycle
-    if (i .eq. BtmCorner) cycle
+    if (i == TopCorner) cycle
+    if (i == TopRightCorner) cycle
+    if (i == BtmCorner) cycle
 
     BtmRightCorner=i
  enddo
 
   ! Make sure we found a corner
-  if (BtmRightCorner .eq. -1) then
+  if (BtmRightCorner == -1) then
      call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rc)
      return
@@ -4263,20 +4275,21 @@ end subroutine convert_corner_arrays_to_1D
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-  function ESMF_GridCreateFrmScripReg(filename, regDecomp, decompflag, &
-             isSphere, addCornerStagger, rc)
+  function ESMF_GridCreateFrmScripReg(filename, regDecomp, keywordEnforcer, &
+    decompflag, isSphere, addCornerStagger, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScripReg
 !
 ! !ARGUMENTS:
  
-    character(len=*), intent(in)                :: filename
-    integer, intent(in)                         :: regDecomp(:)
-    type(ESMF_DecompFlag), intent(in),optional  :: decompflag(:)
-    logical, intent(in), optional               :: isSphere
-    logical, intent(in), optional               :: addCornerStagger
-    integer, intent(out), optional              :: rc
+    character(len=*),      intent(in)             :: filename
+    integer,               intent(in)             :: regDecomp(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_DecompFlag), intent(in),  optional  :: decompflag(:)
+    logical,               intent(in),  optional  :: isSphere
+    logical,               intent(in),  optional  :: addCornerStagger
+    integer,               intent(out), optional  :: rc
 
 ! !DESCRIPTION:
 ! This function creates a {\tt ESMF\_Grid} object using the grid definition from
@@ -4597,12 +4610,13 @@ end function ESMF_GridCreateFrmScripReg
 ! !IROUTINE: ESMF_GridCreateEmpty - Create a Grid that has no contents
 
 ! !INTERFACE:
-     function ESMF_GridCreateEmpty(rc)
+     function ESMF_GridCreateEmpty(keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
      type(ESMF_Grid) :: ESMF_GridCreateEmpty
 !
 ! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -4652,43 +4666,45 @@ end function ESMF_GridCreateFrmScripReg
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShapeTile()
-      function ESMF_GridCreateShapeTileIrreg(name,coordTypeKind, minIndex,  &
-                        countsPerDEDim1,countsPerDeDim2, countsPerDEDim3, &
-                        connDim1, connDim2, connDim3, &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        gridMemLBound, indexflag, petMap, rc)
+      function ESMF_GridCreateShapeTileIrreg(coordTypeKind, minIndex,  &
+        countsPerDEDim1,countsPerDeDim2, keywordEnforcer, &
+        countsPerDEDim3, &
+        connDim1, connDim2, connDim3, &
+        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+        bipolePos1, bipolePos2, bipolePos3, &
+        coordDep1, coordDep2, coordDep3, &
+        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+        gridMemLBound, indexflag, petMap, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileIrreg
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),  intent(in),  optional :: coordTypeKind
-       integer,               intent(in), optional :: minIndex(:)
-       integer,               intent(in)           :: countsPerDEDim1(:)
-       integer,               intent(in)           :: countsPerDEDim2(:)
-       integer,               intent(in), optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)      !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)      !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)      !N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in), optional :: bipolePos1(2)    !N. IMP.
-       integer,               intent(in), optional :: bipolePos2(2)    !N. IMP.
-       integer,               intent(in), optional :: bipolePos3(2)    !N. IMP.
-       integer,               intent(in), optional :: coordDep1(:)
-       integer,               intent(in), optional :: coordDep2(:)
-       integer,               intent(in), optional :: coordDep3(:)
-       integer,               intent(in), optional :: gridEdgeLWidth(:)
-       integer,               intent(in), optional :: gridEdgeUWidth(:)
-       integer,               intent(in), optional :: gridAlign(:)
-       integer,               intent(in), optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
-       integer,               intent(in), optional :: petMap(:,:,:)
+       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       integer,               intent(in),  optional :: minIndex(:)
+       integer,               intent(in)            :: countsPerDEDim1(:)
+       integer,               intent(in)            :: countsPerDEDim2(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,               intent(in),  optional :: countsPerDEDim3(:)
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)      !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)      !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)      !N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)    !N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)    !N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)    !N. IMP.
+       integer,               intent(in),  optional :: coordDep1(:)
+       integer,               intent(in),  optional :: coordDep2(:)
+       integer,               intent(in),  optional :: coordDep3(:)
+       integer,               intent(in),  optional :: gridEdgeLWidth(:)
+       integer,               intent(in),  optional :: gridEdgeUWidth(:)
+       integer,               intent(in),  optional :: gridAlign(:)
+       integer,               intent(in),  optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       integer,               intent(in),  optional :: petMap(:,:,:)
+       character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4711,8 +4727,6 @@ end function ESMF_GridCreateFrmScripReg
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals. 
@@ -4857,6 +4871,8 @@ end function ESMF_GridCreateFrmScripReg
 !       size(countsPerDEDim3). If countsPerDEDim3 isn't present, then
 !       the last dimension is of size 1.   
 !       \end{sloppypar}
+! \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -5005,7 +5021,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. dimCount) then
+       if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
@@ -5015,19 +5031,19 @@ end function ESMF_GridCreateFrmScripReg
 
 
     if (present(petMap)) then
-       if (dimCount .gt. 2) then
-          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
-              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
-              (size(petMap,3) .ne. size(countsPerDEDim3))) then
+       if (dimCount > 2) then
+          if ((size(petMap,1) /= size(countsPerDEDim1)) .or. &
+              (size(petMap,2) /= size(countsPerDEDim2)) .or. &
+              (size(petMap,3) /= size(countsPerDEDim3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
           endif
        else
-          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
-              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
-              (size(petMap,3) .ne. 1)) then
+          if ((size(petMap,1) /= size(countsPerDEDim1)) .or. &
+              (size(petMap,2) /= size(countsPerDEDim2)) .or. &
+              (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
@@ -5040,7 +5056,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. dimCount) then
+        if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -5049,7 +5065,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. dimCount) then
+        if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -5058,7 +5074,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. dimCount) then
+        if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -5068,10 +5084,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim1)) then
-      if (size(connDim1) .eq. 1) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim1) == 1) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5079,7 +5095,7 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5087,10 +5103,10 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-      else if (size(connDim1) .eq. 2) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim1) == 2) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5098,9 +5114,9 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5113,10 +5129,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim2)) then
-      if (size(connDim2) .eq. 1) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim2) == 1) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5124,7 +5140,7 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5132,10 +5148,10 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-      else if (size(connDim2) .eq. 2) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim2) == 2) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5143,9 +5159,9 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5159,10 +5175,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim3)) then
-      if (size(connDim3) .eq. 1) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim3) == 1) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5170,7 +5186,7 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5178,10 +5194,10 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-      else if (size(connDim3) .eq. 2) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim3) == 2) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5189,9 +5205,9 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -5209,7 +5225,7 @@ end function ESMF_GridCreateFrmScripReg
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
-      else if (.not. (indexflag .eq. ESMF_INDEX_USER)) then
+      else if (.not. (indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
@@ -5217,7 +5233,7 @@ end function ESMF_GridCreateFrmScripReg
       endif
    else
       if (present(indexflag)) then
-         if (indexflag .eq. ESMF_INDEX_USER) then
+         if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
@@ -5244,7 +5260,7 @@ end function ESMF_GridCreateFrmScripReg
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
        if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim3Local", &
                                       ESMF_CONTEXT, rc)) return
@@ -5269,10 +5285,10 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
-       if (size(connDim1) .eq. 1) then
+       if (size(connDim1) == 1) then
           connDim1Local(1)=connDim1(1)     
           connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) .ge. 2) then
+       else if (size(connDim1) >= 2) then
           connDim1Local(1)=connDim1(1)
           connDim1Local(2)=connDim1(2)
        endif
@@ -5282,10 +5298,10 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(connDim2)) then
-       if (size(connDim2) .eq. 1) then
+       if (size(connDim2) == 1) then
           connDim2Local(1)=connDim2(1)     
           connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) .ge. 2) then
+       else if (size(connDim2) >= 2) then
           connDim2Local(1)=connDim2(1)
           connDim2Local(2)=connDim2(2)
        endif
@@ -5295,10 +5311,10 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(connDim3)) then
-       if (size(connDim3) .eq. 1) then
+       if (size(connDim3) == 1) then
           connDim3Local(1)=connDim3(1)     
           connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) .ge. 2) then
+       else if (size(connDim3) >= 2) then
           connDim3Local(1)=connDim3(1)
           connDim3Local(2)=connDim3(2)
        endif
@@ -5309,24 +5325,24 @@ end function ESMF_GridCreateFrmScripReg
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
@@ -5365,7 +5381,7 @@ end function ESMF_GridCreateFrmScripReg
 
     countsPerDEDim2Local(1)=countsPerDEDim2Local(1)+gridEdgeLWidthLocal(2)
   
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        countsPerDEDim3Local(1)=countsPerDEDim3Local(1)+gridEdgeLWidthLocal(3)
     endif
 
@@ -5377,7 +5393,7 @@ end function ESMF_GridCreateFrmScripReg
     top=size(countsPerDEDim2Local)
     countsPerDEDim2Local(top)=countsPerDEDim2Local(top)+gridEdgeUWidthLocal(2)
   
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        top=size(countsPerDEDim3Local)
        countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
@@ -5393,7 +5409,7 @@ end function ESMF_GridCreateFrmScripReg
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
     maxIndexLocal(2)=sum(countsPerDEDim2Local)+minIndexLocal(2)-1
 
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
       maxIndexLocal(3)=sum(countsPerDEDim3Local)+minIndexLocal(3)-1
     endif
 
@@ -5410,20 +5426,20 @@ end function ESMF_GridCreateFrmScripReg
   deCount=1
   deCount=deCount*size(countsPerDEDim1Local) 
   deCount=deCount*size(countsPerDEDim2Local)
-  if (dimCount .gt. 2) then
+  if (dimCount > 2) then
      deCount=deCount*size(countsPerDEDim3Local)
   endif 
  
   ! Calc the max size of a DEDim
   maxSizeDEDim=1
-  if (size(countsPerDEDim1Local) .gt. maxSizeDEDim) then
+  if (size(countsPerDEDim1Local) > maxSizeDEDim) then
       maxSizeDEDim=size(countsPerDEDim1Local)
   endif
-  if (size(countsPerDEDim2Local) .gt. maxSizeDEDim) then
+  if (size(countsPerDEDim2Local) > maxSizeDEDim) then
       maxSizeDEDim=size(countsPerDEDim2Local)
   endif
-  if (dimCount .gt. 2) then
-      if (size(countsPerDEDim3Local) .gt. maxSizeDEDim) then
+  if (dimCount > 2) then
+      if (size(countsPerDEDim3Local) > maxSizeDEDim) then
          maxSizeDEDim=size(countsPerDEDim3Local)
       endif
   endif
@@ -5460,7 +5476,7 @@ end function ESMF_GridCreateFrmScripReg
      maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2Local(i)-1
   enddo
 
-  if (dimCount .gt. 2) then
+  if (dimCount > 2) then
     d=3
     deDimCount(d)=size(countsPerDEDim3Local)
     minPerDeDim(d,1)=minIndexLocal(d)
@@ -5477,7 +5493,7 @@ end function ESMF_GridCreateFrmScripReg
               ESMF_CONTEXT, rc)) return
 
   ! Fill in DeBlockList
-  if (dimCount .eq. 2) then
+  if (dimCount == 2) then
      k=1
      do i2=1,deDimCount(2)
      do i1=1,deDimCount(1)
@@ -5488,7 +5504,7 @@ end function ESMF_GridCreateFrmScripReg
         k=k+1
      enddo
      enddo
-  else if (dimCount .eq. 3) then
+  else if (dimCount == 3) then
      k=1
      do i3=1,deDimCount(3)
      do i2=1,deDimCount(2)
@@ -5526,7 +5542,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
       !! copy petMap to petList
-      if (dimCount .gt. 2) then
+      if (dimCount > 2) then
 	 k=1
      	 do i3=1,size(countsPerDEDim3Local)
          do i2=1,size(countsPerDEDim2Local)
@@ -5602,7 +5618,7 @@ end function ESMF_GridCreateFrmScripReg
       enddo
    endif
 
-   if (dimCount .gt. 2) then
+   if (dimCount > 2) then
       if (present(coordDep3)) then 
          coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
@@ -5619,9 +5635,9 @@ end function ESMF_GridCreateFrmScripReg
 
   
    ! Create Grid from specification -----------------------------------------------
-   ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFrmDistGrid(name, coordTypeKind, distgrid, &
+   ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFrmDistGrid(coordTypeKind, distgrid, &
                                     distgridToGridMap=distgridToGridMap, &
-                                    coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
+                                 coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
                                     gridEdgeUWidth=gridEdgeUWidthLocal, &
                                     gridAlign=gridAlignLocal, &
@@ -5629,7 +5645,7 @@ end function ESMF_GridCreateFrmScripReg
                                     indexflag=indexflag, & 
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
-                                   rc=localrc)
+                                    name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5648,7 +5664,7 @@ end function ESMF_GridCreateFrmScripReg
     deallocate(gridAlignLocal)
     deallocate(countsPerDEDim1Local) 
     deallocate(countsPerDEDim2Local) 
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        deallocate(countsPerDEDim3Local) 
     endif
 
@@ -5664,14 +5680,14 @@ end function ESMF_GridCreateFrmScripReg
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShapeTile()
-      function ESMF_GridCreateShapeTileReg(name, coordTypeKind, &
-                        regDecomp, decompFlag, minIndex, maxIndex, &
-                        connDim1, connDim2, connDim3, &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        gridMemLBound, indexflag, petMap, rc)
+      function ESMF_GridCreateShapeTileReg(coordTypeKind, &
+        regDecomp, decompFlag, minIndex, maxIndex, &
+        keywordEnforcer, connDim1, connDim2, connDim3, &
+        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+        bipolePos1, bipolePos2, bipolePos3, &
+        coordDep1, coordDep2, coordDep3, &
+        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+        gridMemLBound, indexflag, petMap, name, rc)
 
 
 !
@@ -5679,30 +5695,31 @@ end function ESMF_GridCreateFrmScripReg
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileReg
 !
 ! !ARGUMENTS:
-       character (len=*),     intent(in), optional :: name 
-       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
-       integer,               intent(in), optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in), optional :: decompflag(:)
-       integer,               intent(in), optional :: minIndex(:)
-       integer,               intent(in)           :: maxIndex(:)
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       !N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in), optional :: bipolePos1(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos2(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos3(2)     !N. IMP.
-       integer,               intent(in), optional :: coordDep1(:)
-       integer,               intent(in), optional :: coordDep2(:)
-       integer,               intent(in), optional :: coordDep3(:)
-       integer,               intent(in), optional :: gridEdgeLWidth(:)
-       integer,               intent(in), optional :: gridEdgeUWidth(:)
-       integer,               intent(in), optional :: gridAlign(:)
-       integer,               intent(in), optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
-       integer,               intent(in), optional :: petMap(:,:,:)
+       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       integer,               intent(in),  optional :: regDecomp(:)
+       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       integer,               intent(in),  optional :: minIndex(:)
+       integer,               intent(in)            :: maxIndex(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)       !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)       !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)       !N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)     !N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)     !N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)     !N. IMP.
+       integer,               intent(in),  optional :: coordDep1(:)
+       integer,               intent(in),  optional :: coordDep2(:)
+       integer,               intent(in),  optional :: coordDep3(:)
+       integer,               intent(in),  optional :: gridEdgeLWidth(:)
+       integer,               intent(in),  optional :: gridEdgeUWidth(:)
+       integer,               intent(in),  optional :: gridAlign(:)
+       integer,               intent(in),  optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       integer,               intent(in),  optional :: petMap(:,:,:)
+       character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5716,8 +5733,6 @@ end function ESMF_GridCreateFrmScripReg
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[name]}]
-!      {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
 !      If not specified then the type/kind will be 8 byte reals. 
@@ -5861,6 +5876,8 @@ end function ESMF_GridCreateFrmScripReg
 !       Sets the mapping of pets to the created DEs. This 3D
 !       should be of size regDecomp(1) x regDecomp(2) x regDecomp(3)
 !       If the Grid is 2D, then the last dimension is of size 1.   
+! \item[{[name]}]
+!      {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -6003,7 +6020,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. dimCount) then
+       if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
@@ -6013,7 +6030,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. dimCount) then
+        if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -6022,7 +6039,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. dimCount) then
+        if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -6031,7 +6048,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. dimCount) then
+        if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -6042,10 +6059,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim1)) then
-      if (size(connDim1) .eq. 1) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim1) == 1) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6053,7 +6070,7 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6061,10 +6078,10 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-      else if (size(connDim1) .eq. 2) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim1) == 2) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6072,9 +6089,9 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6087,10 +6104,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim2)) then
-      if (size(connDim2) .eq. 1) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim2) == 1) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6098,7 +6115,7 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6106,10 +6123,10 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-      else if (size(connDim2) .eq. 2) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim2) == 2) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6117,9 +6134,9 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6133,10 +6150,10 @@ end function ESMF_GridCreateFrmScripReg
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim3)) then
-      if (size(connDim3) .eq. 1) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim3) == 1) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6144,7 +6161,7 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6152,10 +6169,10 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-      else if (size(connDim3) .eq. 2) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim3) == 2) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6163,9 +6180,9 @@ end function ESMF_GridCreateFrmScripReg
                endif
             endif
          endif
-         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -6183,7 +6200,7 @@ end function ESMF_GridCreateFrmScripReg
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
-      else if (.not.(indexflag .eq. ESMF_INDEX_USER)) then
+      else if (.not.(indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
@@ -6191,7 +6208,7 @@ end function ESMF_GridCreateFrmScripReg
       endif
    else
       if (present(indexflag)) then
-         if (indexflag .eq. ESMF_INDEX_USER) then
+         if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
@@ -6253,10 +6270,10 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
-       if (size(connDim1) .eq. 1) then
+       if (size(connDim1) == 1) then
           connDim1Local(1)=connDim1(1)     
           connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) .ge. 2) then
+       else if (size(connDim1) >= 2) then
           connDim1Local(1)=connDim1(1)
           connDim1Local(2)=connDim1(2)
        endif
@@ -6266,10 +6283,10 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(connDim2)) then
-       if (size(connDim2) .eq. 1) then
+       if (size(connDim2) == 1) then
           connDim2Local(1)=connDim2(1)     
           connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) .ge. 2) then
+       else if (size(connDim2) >= 2) then
           connDim2Local(1)=connDim2(1)
           connDim2Local(2)=connDim2(2)
        endif
@@ -6279,10 +6296,10 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(connDim3)) then
-       if (size(connDim3) .eq. 1) then
+       if (size(connDim3) == 1) then
           connDim3Local(1)=connDim3(1)     
           connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) .ge. 2) then
+       else if (size(connDim3) >= 2) then
           connDim3Local(1)=connDim3(1)
           connDim3Local(2)=connDim3(2)
        endif
@@ -6294,24 +6311,24 @@ end function ESMF_GridCreateFrmScripReg
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
@@ -6319,19 +6336,19 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
   if (present(petMap)) then
-     if (dimCount .gt. 2) then
-          if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
-              (size(petMap,2) .ne. regDecompLocal(2)) .or. &
-              (size(petMap,3) .ne. regDecompLocal(3))) then
+     if (dimCount > 2) then
+          if ((size(petMap,1) /= regDecompLocal(1)) .or. &
+              (size(petMap,2) /= regDecompLocal(2)) .or. &
+              (size(petMap,3) /= regDecompLocal(3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
           endif
       else
-          if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
-              (size(petMap,2) .ne. regDecompLocal(2)) .or. &
-              (size(petMap,3) .ne. 1)) then
+          if ((size(petMap,1) /= regDecompLocal(1)) .or. &
+              (size(petMap,2) /= regDecompLocal(2)) .or. &
+              (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
@@ -6416,7 +6433,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
       !! copy petMap to petList
-      if (dimCount .gt. 2) then
+      if (dimCount > 2) then
 	 k=1
      	 do i3=1,regDecompLocal(3)
          do i2=1,regDecompLocal(2)
@@ -6500,7 +6517,7 @@ end function ESMF_GridCreateFrmScripReg
       enddo
    endif
 
-   if (dimCount .gt. 2) then
+   if (dimCount > 2) then
       if (present(coordDep3)) then 
          coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
@@ -6516,7 +6533,7 @@ end function ESMF_GridCreateFrmScripReg
    endif
 
   
-   ESMF_GridCreateShapeTileReg=ESMF_GridCreateFrmDistGrid(name, coordTypeKind, distgrid, &
+   ESMF_GridCreateShapeTileReg=ESMF_GridCreateFrmDistGrid(coordTypeKind, distgrid, &
                                     distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
@@ -6526,7 +6543,7 @@ end function ESMF_GridCreateFrmScripReg
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
-                                    rc=localrc)
+                                    name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6557,37 +6574,38 @@ end function ESMF_GridCreateFrmScripReg
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreateShapeTile()
-      function ESMF_GridCreateShapeTileArb(name,coordTypeKind, minIndex,  &
-			maxIndex, localArbIndex, localArbIndexCount, &
-                        connDim1, connDim2, connDim3, &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        distDim, rc)
+      function ESMF_GridCreateShapeTileArb(coordTypeKind, minIndex,  &
+        maxIndex, localArbIndex, localArbIndexCount, &
+        keywordEnforcer, connDim1, connDim2, connDim3, &
+        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+        bipolePos1, bipolePos2, bipolePos3, &
+        coordDep1, coordDep2, coordDep3, &
+        distDim, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileArb
 !
 ! !ARGUMENTS:
-      character (len=*),      intent(in), optional :: name 
-       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
-       integer,               intent(in), optional :: minIndex(:)
-       integer,               intent(in)           :: maxIndex(:)
-       integer,               intent(in)           :: localArbIndex(:,:)
-       integer,               intent(in)   	   :: localArbIndexCount
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       ! N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       ! N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)! N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)! N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)! N. IMP.
-       integer,               intent(in), optional :: bipolePos1(2)     ! N. IMP.
-       integer,               intent(in), optional :: bipolePos2(2)     ! N. IMP.
-       integer,               intent(in), optional :: bipolePos3(2)     ! N. IMP.
-       integer,               intent(in), optional :: coordDep1(:)
-       integer,               intent(in), optional :: coordDep2(:)
-       integer,               intent(in), optional :: coordDep3(:)
-       integer,               intent(in), optional :: distDim(:)
+       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       integer,               intent(in),  optional :: minIndex(:)
+       integer,               intent(in)            :: maxIndex(:)
+       integer,               intent(in)            :: localArbIndex(:,:)
+       integer,               intent(in)   	        :: localArbIndexCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)       ! N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)       ! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)! N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)! N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)     ! N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)     ! N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)     ! N. IMP.
+       integer,               intent(in),  optional :: coordDep1(:)
+       integer,               intent(in),  optional :: coordDep2(:)
+       integer,               intent(in),  optional :: coordDep3(:)
+       integer,               intent(in),  optional :: distDim(:)
+       character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -6605,8 +6623,6 @@ end function ESMF_GridCreateFrmScripReg
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals. 
@@ -6730,6 +6746,8 @@ end function ESMF_GridCreateFrmScripReg
 !       if not specified, defaults is all dimensions will be arbitrarily
 !       distributed.  The size has to agree with the size of the second
 !       dimension of {\tt localArbIndex}.
+! \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -6811,7 +6829,7 @@ end function ESMF_GridCreateFrmScripReg
     isDist(:)=.false.
     ! check distribution info
     if (present(distDim)) then
-       if (size(distDim) .ne. distDimCount) then
+       if (size(distDim) /= distDimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                  "- distDim must match with the second dimension of localArbIndex", & 
                  ESMF_CONTEXT, rc) 
@@ -6851,7 +6869,7 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. dimCount) then
+       if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
@@ -6890,7 +6908,7 @@ end function ESMF_GridCreateFrmScripReg
     undistDimCount=dimCount-distDimCount
 
     ! can't have all undistributed dimensions
-    if (distDimCount .eq. 0) then
+    if (distDimCount == 0) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
@@ -6899,7 +6917,7 @@ end function ESMF_GridCreateFrmScripReg
 
     ! convert localArbIndex into 1D index array for DistGrid
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
-    if (size(localArbIndex, 1) .ne. localArbIndexCount) then
+    if (size(localArbIndex, 1) /= localArbIndexCount) then
        	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
@@ -6910,11 +6928,11 @@ end function ESMF_GridCreateFrmScripReg
     if (ESMF_LogFoundAllocError(localrc, "Allocating local1DIndices", &
                                      ESMF_CONTEXT, rc)) return
       
-    if (localArbIndexCount .gt. 0) then
+    if (localArbIndexCount > 0) then
        ! use 0-based index to calculate the 1D index and add 1 back at the end
        do i = 1, localArbIndexCount
           local1DIndices(i) = localArbIndex(i,1)-1
-	  if (distDimCount .ge. 2) then 
+	  if (distDimCount >= 2) then 
 	     do j = 2,distDimCount
 	        local1DIndices(i) = local1DIndices(i)*distSize(j) + localArbIndex(i,j)-1
 	     enddo
@@ -6925,10 +6943,10 @@ end function ESMF_GridCreateFrmScripReg
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
-       if (size(connDim1) .eq. 1) then
+       if (size(connDim1) == 1) then
           connDim1Local(1)=connDim1(1)     
           connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) .ge. 2) then
+       else if (size(connDim1) >= 2) then
           connDim1Local(1)=connDim1(1)
           connDim1Local(2)=connDim1(2)
        endif
@@ -6938,10 +6956,10 @@ end function ESMF_GridCreateFrmScripReg
     endif
 
     if (present(connDim2)) then
-       if (size(connDim2) .eq. 1) then
+       if (size(connDim2) == 1) then
           connDim2Local(1)=connDim2(1)     
           connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) .ge. 2) then
+       else if (size(connDim2) >= 2) then
           connDim2Local(1)=connDim2(1)
           connDim2Local(2)=connDim2(2)
        endif
@@ -6950,10 +6968,10 @@ end function ESMF_GridCreateFrmScripReg
        connDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
     if (present(connDim3)) then
-       if (size(connDim3) .eq. 1) then
+       if (size(connDim3) == 1) then
           connDim3Local(1)=connDim3(1)     
           connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) .ge. 2) then
+       else if (size(connDim3) >= 2) then
           connDim3Local(1)=connDim3(1)
           connDim3Local(2)=connDim3(2)
        endif
@@ -6964,24 +6982,24 @@ end function ESMF_GridCreateFrmScripReg
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
@@ -7006,7 +7024,7 @@ end function ESMF_GridCreateFrmScripReg
       if (isDist(1)) then
 	found = .false.
 	do i=1,size(coordDep1)
-	  if (coordDep1(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep1(i) == ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -7036,7 +7054,7 @@ end function ESMF_GridCreateFrmScripReg
       if (isDist(2)) then
 	found = .false.
 	do i=1,size(coordDep2)
-	  if (coordDep2(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep2(i) == ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -7060,14 +7078,14 @@ end function ESMF_GridCreateFrmScripReg
       endif
    endif
 
-   if (dimCount .gt. 2) then
+   if (dimCount > 2) then
       if (present(coordDep3)) then 
         ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
         ! if dimension 3 is arbitrary
         if (isDist(3)) then
 	  found = .false.
 	  do i=1,size(coordDep3)
-	    if (coordDep3(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+	    if (coordDep3(i) == ESMF_GRID_ARBDIM) found = .true.
           enddo
 	  if (.not. found) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -7094,7 +7112,7 @@ end function ESMF_GridCreateFrmScripReg
 
 
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
-   if (undistDimCount .gt. 0) then
+   if (undistDimCount > 0) then
      allocate(undistLBound(undistDimCount), stat=localrc)
      if (ESMF_LogFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
@@ -7115,7 +7133,7 @@ end function ESMF_GridCreateFrmScripReg
   
 
    ! Create DistGrid --------------------------------------------------------------
-   if (undistDimCount .gt. 0) then 
+   if (undistDimCount > 0) then 
        distgrid=ESMF_DistGridCreate(local1DIndices, 1, undistLBound, undistUBound, rc=localrc)   
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7125,13 +7143,13 @@ end function ESMF_GridCreateFrmScripReg
         ESMF_CONTEXT, rcToReturn=rc)) return
    endif
    ! Create Grid from specification -----------------------------------------------
-   ESMF_GridCreateShapeTileArb=ESMF_GridCreateFrmDistGridArb(name, coordTypeKind, &
+   ESMF_GridCreateShapeTileArb=ESMF_GridCreateFrmDistGridArb(coordTypeKind, &
 			       distgrid, indexArray, &
                                distDim=distDimLocal, &
 			       coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                destroyDistGrid=.true., &
                                destroyDELayout=.false., &
-                               rc=localrc)
+                               name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7142,7 +7160,7 @@ end function ESMF_GridCreateFrmScripReg
     deallocate(distDimLocal)
     deallocate(coordDimCount)
     deallocate(coordDimMap)
-    if (undistDimCount .gt. 0) then
+    if (undistDimCount > 0) then
       deallocate(undistLBound)
       deallocate(undistUBound)
     endif
@@ -7159,10 +7177,11 @@ end function ESMF_GridCreateFrmScripReg
 ! !IROUTINE: ESMF_GridDestroy - Free all resources associated with a Grid 
 
 ! !INTERFACE:
-      subroutine ESMF_GridDestroy(grid, rc)
+      subroutine ESMF_GridDestroy(grid, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)         :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -7217,17 +7236,17 @@ end function ESMF_GridCreateFrmScripReg
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
-      subroutine ESMF_GridGetDefault(grid, name, coordTypeKind, &
-          dimCount, tileCount, staggerlocsCount, localDECount, distgrid, &
-          distgridToGridMap, coordDimCount, coordDimMap, &
-          localArbIndexCount, localArbIndex, arbDim, &
-          rank, arbDimCount, &
-          gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
-          indexFlag, rc)
+      subroutine ESMF_GridGetDefault(grid, keywordEnforcer, coordTypeKind, &
+        dimCount, tileCount, staggerlocsCount, localDECount, distgrid, &
+        distgridToGridMap, coordDimCount, coordDimMap, &
+        localArbIndexCount, localArbIndex, arbDim, &
+        rank, arbDimCount, &
+        gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
+        indexFlag, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
-      character (len=*),     intent(out), optional :: name
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TypeKind),   intent(out), optional :: coordTypeKind
       integer,               intent(out), optional :: dimCount
       integer,               intent(out), optional :: tileCount
@@ -7246,6 +7265,7 @@ end function ESMF_GridCreateFrmScripReg
       integer,       target, intent(out), optional :: gridEdgeUWidth(:)
       integer,       target, intent(out), optional :: gridAlign(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
+      character (len=*),     intent(out), optional :: name
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -7255,8 +7275,6 @@ end function ESMF_GridCreateFrmScripReg
 !\begin{description}
 !\item[{grid}]
 !   Grid to get the information from.
-!\item[{[name]}]
-!   {\tt ESMF\_Grid} name.
 !\item[{[coordTypeKind]}] 
 !   The type/kind of the grid coordinate data. 
 !   If not specified then the type/kind will be 8 byte reals.  
@@ -7306,6 +7324,8 @@ end function ESMF_GridCreateFrmScripReg
 ! \item[{[indexflag]}]
 !    Flag indicating the indexing scheme being used in the Grid. Please
 !    see Section~\ref{opt:indexflag} for the list of options. 
+!\item[{[name]}]
+!   {\tt ESMF\_Grid} name.
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -7333,7 +7353,7 @@ end function ESMF_GridCreateFrmScripReg
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	  
-    if (decompType .eq. ESMF_Grid_NONARBITRARY) then
+    if (decompType == ESMF_Grid_NONARBITRARY) then
 	if (present(localArbIndexCount) .or. present(localArbIndex) .or. present(arbDim)) then
          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- localArbIndexCount, localArbIndex or arbDim does not exist for a non-arbitrarily distributed grid", & 
@@ -7483,13 +7503,13 @@ end subroutine ESMF_GridGetDefault
 	call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-	if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	    (tileNo .ne. 1)) then
+	if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	    (tileNo /= 1)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
               "- tileNo has to be 1 for arbitrarily distributed grid", & 
               ESMF_CONTEXT, rc) 
 	  return
-	elseif (tileNo .ne. 1) then 
+	elseif (tileNo /= 1) then 
           call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
               "- multiple tiles is not implemented", & 
               ESMF_CONTEXT, rc) 
@@ -7533,13 +7553,14 @@ end subroutine ESMF_GridGetDefault
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
-      subroutine ESMF_GridGetPLocalDe(grid, localDe, &
-          isLBound,isUBound, rc)
+      subroutine ESMF_GridGetPLocalDe(grid, localDe, keywordEnforcer, &
+        isLBound,isUBound, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       integer,                intent(in)            :: localDe
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(out), optional :: isLBound(:)
       logical,                intent(out), optional :: isUBound(:)
       integer,                intent(out), optional :: rc
@@ -7613,14 +7634,14 @@ end subroutine ESMF_GridGetDefault
     if (present(isLBound)) then
        isLBound=.false.
        do i=1,dimCount
-          if (isLBoundTmp(i) .eq. 1) isLBound(i)=.true.
+          if (isLBoundTmp(i) == 1) isLBound(i)=.true.
        enddo
     endif
 
     if (present(isUBound)) then
        isUBound=.false.
        do i=1,dimCount
-          if (isUBoundTmp(i) .eq. 1) isUBound(i)=.true.
+          if (isUBoundTmp(i) == 1) isUBound(i)=.true.
        enddo
     endif
 
@@ -7639,14 +7660,15 @@ end subroutine ESMF_GridGetDefault
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPLocalDePSloc(grid, localDe, staggerloc, &
-          exclusiveLBound, exclusiveUBound, exclusiveCount,  &
-          computationalLBound, computationalUBound, computationalCount, rc)
+        keywordEnforcer, exclusiveLBound, exclusiveUBound, exclusiveCount,  &
+        computationalLBound, computationalUBound, computationalCount, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       integer,                intent(in)            :: localDe
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -7806,13 +7828,14 @@ end subroutine ESMF_GridGetDefault
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetPSloc(grid, staggerloc, &
-          staggerDistgrid, minIndex, maxIndex, rc)
+        keywordEnforcer, staggerDistgrid, minIndex, maxIndex, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
-      type(ESMF_DistGrid),   intent(out), optional :: staggerDistgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_DistGrid),    intent(out), optional :: staggerDistgrid
       integer,        target, intent(out), optional :: minIndex(:)
       integer,        target, intent(out), optional :: maxIndex(:)
       integer,                intent(out), optional :: rc
@@ -7926,19 +7949,22 @@ end subroutine ESMF_GridGetDefault
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridGetCoord - Get Grid coordinate bounds and a Fortran pointer to coordinate data
-
+!
 ! !INTERFACE:
-!      subroutine ESMF_GridGetCoord(grid, localDE, coordDim, staggerloc, &
-!         exclusiveLBound, exclusiveUBound, exclusiveCount,              &
-!         computationalLBound, computationalUBound, computationalCount,  &
-!         totalLBound, totalUBound, totalCount,                          &
-!         <pointer argument>, doCopy, rc)
+!      subroutine ESMF_GridGetCoord(grid, coordDim, staggerloc, localDE, &
+!        <pointer argument>, keywordEnforcer, &
+!        exclusiveLBound, exclusiveUBound, exclusiveCount,              &
+!        computationalLBound, computationalUBound, computationalCount,  &
+!        totalLBound, totalUBound, totalCount,                          &
+!        doCopy, rc)
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in)            :: grid
-!     integer,                intent(in)            :: localDE
 !     integer,                intent(in)            :: coordDim
 !     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+!     integer,                intent(in)            :: localDE
+!     <pointer argument>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,                intent(out), optional :: exclusiveLBound(:)
 !     integer,                intent(out), optional :: exclusiveUBound(:)
 !     integer,                intent(out), optional :: exclusiveCount(:)
@@ -7948,8 +7974,7 @@ end subroutine ESMF_GridGetDefault
 !     integer,                intent(out), optional :: totalLBound(:)
 !     integer,                intent(out), optional :: totalUBound(:)
 !     integer,                intent(out), optional :: totalCount(:)
-!     <pointer argument>, see below for supported values
-!     type(ESMF_CopyFlag),    intent(in), optional  :: docopy
+!     type(ESMF_CopyFlag),    intent(in),  optional :: docopy
 !     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -7978,14 +8003,16 @@ end subroutine ESMF_GridGetDefault
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -8033,8 +8060,6 @@ end subroutine ESMF_GridGetDefault
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -8053,17 +8078,20 @@ end subroutine ESMF_GridGetDefault
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord1DR4(grid, localDE, coordDim,     &
-          staggerloc, exclusiveLBound, exclusiveUBound,             &
+      subroutine ESMF_GridGetCoord1DR4(grid, coordDim, staggerloc, &
+          localDE, farrayPtr, keywordEnforcer, &
+          exclusiveLBound, exclusiveUBound, &
           exclusiveCount, computationalLBound, computationalUBound, &
           computationalCount, totalLBound, totalUBound, totalCount, &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      integer,                intent(in) :: localDE
       integer,                intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
+      integer,                intent(in) :: localDE
+      real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -8073,7 +8101,6 @@ end subroutine ESMF_GridGetDefault
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -8088,14 +8115,16 @@ end subroutine ESMF_GridGetDefault
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -8145,8 +8174,6 @@ end subroutine ESMF_GridGetDefault
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -8196,7 +8223,7 @@ end subroutine ESMF_GridGetDefault
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr typekind to match Grid typekind 
-    if (typekind .ne. ESMF_TYPEKIND_R4) then 
+    if (typekind /= ESMF_TYPEKIND_R4) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr typekind does not match Grid typekind", & 
         ESMF_CONTEXT, rc) 
@@ -8204,7 +8231,7 @@ end subroutine ESMF_GridGetDefault
     endif 
 
     ! make sure coord is legitimate
-    if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
+    if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- coordinate dimension outside of range specified for this Grid", & 
         ESMF_CONTEXT, rc) 
@@ -8212,7 +8239,7 @@ end subroutine ESMF_GridGetDefault
     endif 
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
-    if (coordDimCount(coordDim) .ne. 1) then 
+    if (coordDimCount(coordDim) /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested coordinate dimCount", & 
         ESMF_CONTEXT, rc) 
@@ -8255,8 +8282,8 @@ end subroutine ESMF_GridGetDefault
 
      ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -8270,7 +8297,7 @@ end subroutine ESMF_GridGetDefault
 
     ! Get the Array
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -8281,7 +8308,8 @@ end subroutine ESMF_GridGetDefault
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -8367,17 +8395,20 @@ end subroutine ESMF_GridGetDefault
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord2DR4(grid, localDE, coordDim, staggerloc, &
+      subroutine ESMF_GridGetCoord2DR4(grid, coordDim, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in),optional :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
+      integer, intent(in),optional :: localDE
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -8387,7 +8418,6 @@ end subroutine ESMF_GridGetDefault
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -8402,8 +8432,6 @@ end subroutine ESMF_GridGetDefault
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -8411,6 +8439,10 @@ end subroutine ESMF_GridGetDefault
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -8459,8 +8491,6 @@ end subroutine ESMF_GridGetDefault
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -8511,7 +8541,7 @@ end subroutine ESMF_GridGetDefault
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr typekind to match Grid typekind 
-    if (typekind .ne. ESMF_TYPEKIND_R4) then 
+    if (typekind /= ESMF_TYPEKIND_R4) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr typekind does not match Grid typekind", & 
         ESMF_CONTEXT, rc) 
@@ -8519,7 +8549,7 @@ end subroutine ESMF_GridGetDefault
     endif 
 
     ! make sure coord is legitimate
-    if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
+    if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- coordinate dimension outside of range specified for this Grid", & 
         ESMF_CONTEXT, rc) 
@@ -8527,7 +8557,7 @@ end subroutine ESMF_GridGetDefault
     endif 
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
-    if (coordDimCount(coordDim) .ne. 2) then 
+    if (coordDimCount(coordDim) /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested coordinate dimCount", & 
       ESMF_CONTEXT, rc) 
@@ -8571,8 +8601,8 @@ end subroutine ESMF_GridGetDefault
 
      ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -8587,7 +8617,7 @@ end subroutine ESMF_GridGetDefault
     ! Get the Array 
 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -8598,7 +8628,8 @@ end subroutine ESMF_GridGetDefault
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -8683,17 +8714,20 @@ end subroutine ESMF_GridGetDefault
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord3DR4(grid, localDE, coordDim, staggerloc, &
+      subroutine ESMF_GridGetCoord3DR4(grid, coordDim, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -8703,7 +8737,6 @@ end subroutine ESMF_GridGetDefault
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -8718,8 +8751,6 @@ end subroutine ESMF_GridGetDefault
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -8727,6 +8758,10 @@ end subroutine ESMF_GridGetDefault
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -8775,8 +8810,6 @@ end subroutine ESMF_GridGetDefault
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -8828,7 +8861,7 @@ end subroutine ESMF_GridGetDefault
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
- if (typekind .ne. ESMF_TYPEKIND_R4) then 
+ if (typekind /= ESMF_TYPEKIND_R4) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr typekind does not match Grid typekind", & 
  ESMF_CONTEXT, rc) 
@@ -8836,7 +8869,7 @@ end subroutine ESMF_GridGetDefault
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
+if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
@@ -8844,7 +8877,7 @@ if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  endif 
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
- if (coordDimCount(coordDim) .ne. 3) then 
+ if (coordDimCount(coordDim) /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
@@ -8890,8 +8923,8 @@ endif
 
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -8906,7 +8939,7 @@ endif
     ! Get the Array 
 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -8917,7 +8950,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -8926,7 +8960,7 @@ endif
     ! process optional arguments
     ! for non-arbitrarily grid only
     ! should check these optional arguments are not present for arbitrary grid????
-    if (decompType .ne. ESMF_GRID_ARBITRARY) then
+    if (decompType /= ESMF_GRID_ARBITRARY) then
 
     exclusiveLBoundArg=ESMF_InterfaceIntCreate(exclusiveLBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -9009,17 +9043,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord1DR8(grid, localDE, coordDim, staggerloc, & 
+      subroutine ESMF_GridGetCoord1DR8(grid, coordDim, staggerloc, localDE, & 
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in)         :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
+      integer, intent(in)         :: localDE
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -9029,7 +9066,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: farrayPtr(:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -9044,8 +9080,6 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -9053,6 +9087,10 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -9101,8 +9139,6 @@ endif
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -9154,7 +9190,7 @@ endif
                ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr typekind to match Grid typekind 
-    if (typekind .ne. ESMF_TYPEKIND_R8) then 
+    if (typekind /= ESMF_TYPEKIND_R8) then 
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr typekind does not match Grid typekind", & 
         ESMF_CONTEXT, rc) 
@@ -9162,7 +9198,7 @@ endif
     endif 
 
     ! make sure coord is legitimate
-    if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
+    if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
        "- coordinate dimension outside of range specified for this Grid", & 
        ESMF_CONTEXT, rc) 
@@ -9170,7 +9206,7 @@ endif
     endif 
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
-    if (coordDimCount(coordDim) .ne. 1) then 
+    if (coordDimCount(coordDim) /= 1) then 
        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
        "- farrayPtr dimCount does not match requested coordinate dimCount", & 
        ESMF_CONTEXT, rc) 
@@ -9215,8 +9251,8 @@ endif
 
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -9230,7 +9266,7 @@ endif
 
     ! Get the Array 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9241,7 +9277,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -9329,17 +9366,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord2DR8(grid, localDE, coordDim, staggerloc, & 
+      subroutine ESMF_GridGetCoord2DR8(grid, coordDim, staggerloc, localDE, & 
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -9349,7 +9389,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -9364,8 +9403,6 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -9373,6 +9410,10 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -9421,8 +9462,6 @@ endif
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -9474,7 +9513,7 @@ endif
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
- if (typekind .ne. ESMF_TYPEKIND_R8) then 
+ if (typekind /= ESMF_TYPEKIND_R8) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr typekind does not match Grid typekind", & 
  ESMF_CONTEXT, rc) 
@@ -9482,7 +9521,7 @@ endif
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
+if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
@@ -9490,7 +9529,7 @@ if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  endif 
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
- if (coordDimCount(coordDim) .ne. 2) then 
+ if (coordDimCount(coordDim) /= 2) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
@@ -9535,8 +9574,8 @@ endif
 
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -9550,7 +9589,7 @@ endif
 
     ! Get the Array 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9561,7 +9600,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -9647,17 +9687,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoord3DR8(grid, localDE, coordDim, staggerloc, & 
+      subroutine ESMF_GridGetCoord3DR8(grid, coordDim, staggerloc, localDE, & 
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
       integer, intent(in) :: coordDim
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -9667,7 +9710,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -9682,8 +9724,6 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{coordDim}]
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
@@ -9691,6 +9731,10 @@ endif
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the coordinate data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -9739,8 +9783,6 @@ endif
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the coordinate data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
@@ -9792,7 +9834,7 @@ endif
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr typekind to match Grid typekind 
- if (typekind .ne. ESMF_TYPEKIND_R8) then 
+ if (typekind /= ESMF_TYPEKIND_R8) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr typekind does not match Grid typekind", & 
  ESMF_CONTEXT, rc) 
@@ -9800,7 +9842,7 @@ endif
  endif 
 
 ! make sure coord is legitimate
-if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
+if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- coordinate dimension outside of range specified for this Grid", & 
  ESMF_CONTEXT, rc) 
@@ -9808,7 +9850,7 @@ if ((coordDim .lt. 1) .or. (coordDim .gt. dimCount)) then
  endif 
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
- if (coordDimCount(coordDim) .ne. 3) then 
+ if (coordDimCount(coordDim) /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested coordinate dimCount", & 
  ESMF_CONTEXT, rc) 
@@ -9853,8 +9895,8 @@ endif
 
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -9868,7 +9910,7 @@ endif
 
     ! Get the Array 
     call ESMF_GridGetCoordIntoArray(grid, staggerloc, coordDim, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -9879,7 +9921,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -9964,17 +10007,18 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordBounds(grid, localDE, coordDim,    &
-          staggerloc, exclusiveLBound, exclusiveUBound,              &
-          exclusiveCount, computationalLBound, computationalUBound , & 
-          computationalCount, totalLBound, totalUBound, totalCount, rc)
+      subroutine ESMF_GridGetCoordBounds(grid, coordDim,    &
+        staggerloc, localDE, keywordEnforcer, exclusiveLBound, exclusiveUBound, &
+        exclusiveCount, computationalLBound, computationalUBound , & 
+        computationalCount, totalLBound, totalUBound, totalCount, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in)            :: localDE
       integer,                intent(in)            :: coordDim
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: localDE
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -9999,8 +10043,6 @@ endif
 !\begin{description}
 !\item[{grid}]
 !    Grid to get the information from.
-!\item[{[localDE]}]
-!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
 !\item[{coordDim}]
 !     The coordinate dimension to get the information for (e.g. 1=x). 
 !\item[{staggerloc}]
@@ -10008,6 +10050,8 @@ endif
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
+!\item[{[localDE]}]
+!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -10172,15 +10216,16 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoordIntoArray(grid, staggerloc,coordDim, &
-                            array, docopy, rc)
+        array, keywordEnforcer, docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
-      integer, intent(in)  :: coordDim
-      type(ESMF_Array), intent(out) :: array
-      type(ESMF_CopyFlag), intent(in), optional :: docopy ! NOT IMPLEMENTED
-      integer, intent(out), optional :: rc
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: coordDim
+      type(ESMF_Array),       intent(out)           :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_CopyFlag),    intent(in),  optional :: docopy ! NOT IMPLEMENTED
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method allows the user to get access to the ESMF Array holding
@@ -10229,8 +10274,8 @@ endif
 
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -10267,17 +10312,18 @@ endif
 ! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridGetCoord()
+  ! Private name; call using ESMF_GridGetIndCoord()
       subroutine ESMF_GridGetCoordR4(grid, localDE, staggerloc, &
-         index, coord, rc)
+        index, coord, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in)                 :: grid
-      type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer, intent(in)                         :: localDE
-      integer, intent(in)                         :: index(:)
-      real(ESMF_KIND_R4)                          :: coord(:)
-      integer, intent(out), optional              :: rc
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: localDE
+      integer,                intent(in)            :: index(:)
+      real(ESMF_KIND_R4),     intent(out)           :: coord(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a specific index location in a Grid, this method returns the full set
@@ -10348,17 +10394,18 @@ endif
 ! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridGetCoord()
+  ! Private name; call using ESMF_GridGetICoord()
       subroutine ESMF_GridGetCoordR8(grid, localDE, staggerloc, &
-         index, coord, rc)
+        index, coord, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in)                 :: grid
-      type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer, intent(in)                         :: localDE
-      integer, intent(in)                         :: index(:)
-      real(ESMF_KIND_R8)                          :: coord(:)
-      integer, intent(out), optional              :: rc
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: localDE
+      integer,                intent(in)            :: index(:)
+      real(ESMF_KIND_R8),     intent(out)           :: coord(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a specific index location in a Grid, this method returns the full set
@@ -10428,17 +10475,20 @@ endif
 ! !IROUTINE: ESMF_GridGetItem - Get Grid coordinate bounds and an F90 pointer to coordinate data
 
 ! !INTERFACE:
-!      subroutine ESMF_GridGetItem(grid, localDE, staggerloc, item,      &
-!         exclusiveLBound, exclusiveUBound, exclusiveCount,              &
-!         computationalLBound, computationalUBound, computationalCount,  &
-!         totalLBound, totalUBound, totalCount,                          &
-!         <pointer argument>, doCopy, rc)
+!      subroutine ESMF_GridGetItem(grid, item, staggerloc, localDE, &
+!        <pointer argument>, keywordEnforcer, &
+!        exclusiveLBound, exclusiveUBound, exclusiveCount, &
+!        computationalLBound, computationalUBound, computationalCount,  &
+!        totalLBound, totalUBound, totalCount,                          &
+!        doCopy, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),        intent(in) :: grid
-!     integer,                intent(in) :: localDE
-!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+!     type(ESMF_Grid),        intent(in)            :: grid
 !     type (ESMF_GridItem),   intent(in)            :: item
+!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+!     integer,                intent(in)            :: localDE
+!     <pointer argument>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,                intent(out), optional :: exclusiveLBound(:)
 !     integer,                intent(out), optional :: exclusiveUBound(:)
 !     integer,                intent(out), optional :: exclusiveCount(:)
@@ -10448,8 +10498,7 @@ endif
 !     integer,                intent(out), optional :: totalLBound(:)
 !     integer,                intent(out), optional :: totalUBound(:)
 !     integer,                intent(out), optional :: totalCount(:)
-!     <pointer argument>, see below for supported values
-!     type(ESMF_CopyFlag),    intent(in), optional :: docopy
+!     type(ESMF_CopyFlag),    intent(in),  optional :: docopy
 !     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10480,15 +10529,17 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.  
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the grid dimCount.
@@ -10537,8 +10588,6 @@ endif
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -10557,17 +10606,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem1DI4(grid, localDE, staggerloc, item,      & 
+      subroutine ESMF_GridGetItem1DI4(grid, item, staggerloc, localDE,      & 
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in) :: grid
-      integer,                intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: localDE
+      integer(ESMF_KIND_I4), pointer                :: farrayPtr(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -10577,8 +10629,7 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      integer(ESMF_KIND_I4), pointer                   :: farrayPtr(:)
-      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      type(ESMF_CopyFlag),    intent(in), optional  :: docopy
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -10591,15 +10642,17 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.  
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -10648,8 +10701,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -10694,7 +10745,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr dimCount to match grid dimCount 
-    if (dimCount .ne. 1) then 
+    if (dimCount /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested item dimCount", & 
         ESMF_CONTEXT, rc) 
@@ -10744,8 +10795,8 @@ endif
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10756,7 +10807,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -10841,17 +10893,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem2DI4(grid, localDE, staggerloc, item, &
+      subroutine ESMF_GridGetItem2DI4(grid, item, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      integer, intent(in) :: localDE
+      integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -10861,7 +10916,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -10875,16 +10929,18 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.  
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -10933,8 +10989,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -10981,7 +11035,7 @@ endif
  
 
     ! Require farrayPtr dimCount to match grid dimCount 
-    if (dimCount .ne. 2) then 
+    if (dimCount /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested item dimCount", & 
       ESMF_CONTEXT, rc) 
@@ -11032,8 +11086,8 @@ endif
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11044,7 +11098,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -11129,17 +11184,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem3DI4(grid, localDE, staggerloc, item, &
+      subroutine ESMF_GridGetItem3DI4(grid, item, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer, intent(in) :: localDE
+      integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -11149,7 +11207,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -11163,16 +11220,18 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.  
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -11221,8 +11280,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -11268,7 +11325,7 @@ endif
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
- if (dimCount .ne. 3) then 
+ if (dimCount /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested item dimCount", & 
  ESMF_CONTEXT, rc) 
@@ -11322,8 +11379,8 @@ endif
 
     ! Get the Array 
 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11334,7 +11391,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -11419,17 +11477,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem1DR4(grid, localDE, staggerloc, item,      & 
+      subroutine ESMF_GridGetItem1DR4(grid, item, staggerloc, localDE,      & 
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      integer,                intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in) :: localDE
+      real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -11439,7 +11500,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -11453,15 +11513,17 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -11510,8 +11572,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -11556,7 +11616,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr dimCount to match grid dimCount 
-    if (dimCount .ne. 1) then 
+    if (dimCount /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested item dimCount", & 
         ESMF_CONTEXT, rc) 
@@ -11606,8 +11666,8 @@ endif
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11618,7 +11678,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -11703,17 +11764,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem2DR4(grid, localDE, staggerloc, item, &
+      subroutine ESMF_GridGetItem2DR4(grid, item, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -11723,7 +11787,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -11737,16 +11800,18 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -11795,8 +11860,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -11843,7 +11906,7 @@ endif
  
 
     ! Require farrayPtr dimCount to match grid dimCount 
-    if (dimCount .ne. 2) then 
+    if (dimCount /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested item dimCount", & 
       ESMF_CONTEXT, rc) 
@@ -11894,8 +11957,8 @@ endif
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -11906,7 +11969,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -11991,17 +12055,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem3DR4(grid, localDE, staggerloc, item, &
+      subroutine ESMF_GridGetItem3DR4(grid, item, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -12011,7 +12078,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -12025,16 +12091,18 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -12083,8 +12151,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -12130,7 +12196,7 @@ endif
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
- if (dimCount .ne. 3) then 
+ if (dimCount /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested item dimCount", & 
  ESMF_CONTEXT, rc) 
@@ -12184,8 +12250,8 @@ endif
 
     ! Get the Array 
 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -12196,7 +12262,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -12282,17 +12349,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem1DR8(grid, localDE, staggerloc, item,      & 
+      subroutine ESMF_GridGetItem1DR8(grid, item, staggerloc, localDE,      & 
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      integer,                intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in) :: localDE
+      real(ESMF_KIND_R8), pointer                   :: farrayPtr(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -12302,7 +12372,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer                   :: farrayPtr(:)
       type(ESMF_CopyFlag),    intent(in), optional :: docopy
       integer,                intent(out), optional :: rc
 !
@@ -12316,15 +12385,15 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -12419,7 +12488,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Require farrayPtr dimCount to match grid dimCount 
-    if (dimCount .ne. 1) then 
+    if (dimCount /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
         "- farrayPtr dimCount does not match requested item dimCount", & 
         ESMF_CONTEXT, rc) 
@@ -12469,8 +12538,8 @@ endif
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -12481,7 +12550,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -12566,17 +12636,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem2DR8(grid, localDE, staggerloc, item, &
+      subroutine ESMF_GridGetItem2DR8(grid, item, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -12586,7 +12659,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -12600,16 +12672,18 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -12658,8 +12732,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -12706,7 +12778,7 @@ endif
  
 
     ! Require farrayPtr dimCount to match grid dimCount 
-    if (dimCount .ne. 2) then 
+    if (dimCount /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
       "- farrayPtr dimCount does not match requested item dimCount", & 
       ESMF_CONTEXT, rc) 
@@ -12757,8 +12829,8 @@ endif
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -12769,7 +12841,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -12854,17 +12927,20 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem3DR8(grid, localDE, staggerloc, item, &
+      subroutine ESMF_GridGetItem3DR8(grid, item, staggerloc, localDE, &
+          farrayPtr, keywordEnforcer, &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          farrayPtr, doCopy, rc)
+          doCopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer, intent(in) :: localDE
+      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -12874,7 +12950,6 @@ endif
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
       type(ESMF_CopyFlag), intent(in), optional :: docopy
       integer, intent(out), optional :: rc
 !
@@ -12888,16 +12963,18 @@ endif
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{localDE}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{item}]
+!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!     \item[{localDE}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -12946,8 +13023,6 @@ endif
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
 !     \item[{[doCopy]}]
 !          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
@@ -12993,7 +13068,7 @@ endif
  ESMF_CONTEXT, rcToReturn=rc)) return
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
- if (dimCount .ne. 3) then 
+ if (dimCount /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
  "- farrayPtr dimCount does not match requested item dimCount", & 
  ESMF_CONTEXT, rc) 
@@ -13047,8 +13122,8 @@ endif
 
     ! Get the Array 
 
-    call ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                                    ESMF_DATA_REF, rc=localrc)
+    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+                                    docopy=ESMF_DATA_REF, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13059,7 +13134,8 @@ endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
-    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, doCopy, rc=localrc) 
+    call ESMF_LocalArrayGet(localarrayList(localDE+1), farrayPtr, &
+      docopy=doCopy, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
     deallocate(localarrayList) 
@@ -13145,17 +13221,18 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemBounds(grid, localDE, staggerloc, item, &
-          exclusiveLBound, exclusiveUBound, exclusiveCount,              &
-          computationalLBound, computationalUBound, computationalCount,  &
-          totalLBound, totalUBound, totalCount, rc)
+      subroutine ESMF_GridGetItemBounds(grid, item, staggerloc, localDE, &
+        keywordEnforcer, exclusiveLBound, exclusiveUBound, exclusiveCount, &
+        computationalLBound, computationalUBound, computationalCount,  &
+        totalLBound, totalUBound, totalCount, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in)            :: localDE
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: localDE
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -13180,16 +13257,16 @@ endif
 !\begin{description}
 !\item[{grid}]
 !    Grid to get the information from.
-!\item[{localDE}]
-!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
+!\item[{item}]
+!     The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.   
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{sec:opt:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
-!\item[{item}]
-!     The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.   
+!\item[{localDE}]
+!     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -13353,16 +13430,17 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemIntoArray(grid, staggerloc, item, array, &
-                            docopy, rc)
+      subroutine ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+        keywordEnforcer, docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
-      type (ESMF_GridItem), intent(in)   :: item
-      type(ESMF_Array), intent(out) :: array
-      type(ESMF_CopyFlag), intent(in), optional :: docopy ! NOT IMPLEMENTED
-      integer, intent(out), optional :: rc
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type(ESMF_Array),       intent(out)           :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_CopyFlag),    intent(in),  optional :: docopy ! NOT IMPLEMENTED
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !    This method allows the user to get access to the ESMF Array holding
@@ -13373,13 +13451,13 @@ endif
 !
 !     The arguments are:
 !     \begin{description}
+!     \item[{item}]
+!          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location from which to get the arrays. 
 !          Please see Section~\ref{sec:opt:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{item}]
-!          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.  
 !     \item[{array}]
 !          An array into which to put the item infomation. 
 !     \item[{[doCopy]}]
@@ -13441,7 +13519,7 @@ endif
      type(ESMF_GridStatus) :: ESMF_GridGetStatus
 !
 ! !ARGUMENTS:
-     type(ESMF_Grid) :: grid
+     type(ESMF_Grid)                :: grid
 
 !
 ! !DESCRIPTION:
@@ -13455,7 +13533,7 @@ endif
 !
 !EOP
 
-    integer :: rc ! fake return code for INIT_CHECK_DEEP
+    integer :: rc
 
     ! init grid status
     ESMF_GridGetStatus=ESMF_GRIDSTATUS_UNINIT
@@ -13636,7 +13714,7 @@ endif
 ! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
 
 ! !INTERFACE:
-  function ESMF_GridMatch(grid1, grid2, rc)
+  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
     logical :: ESMF_GridMatch
@@ -13644,6 +13722,7 @@ endif
 ! !ARGUMENTS:
     type(ESMF_Grid),  intent(in)              :: grid1
     type(ESMF_Grid),  intent(in)              :: grid2
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
 !         
 !
@@ -13690,7 +13769,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
-    if (matchResult .eq. 1) then
+    if (matchResult == 1) then
        ESMF_GridMatch = .true.
     else
        ESMF_GridMatch = .false.
@@ -13709,19 +13788,19 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
-    subroutine ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, distgrid, & 
-                 distgridToGridMap, distDim,			             &
+    subroutine ESMF_GridSetFromDistGrid(grid, keywordEnforcer, coordTypeKind, &
+                 distgrid,distgridToGridMap, distDim,			             &
                  coordDimCount, coordDimMap, minIndex, maxIndex,             &
                  localArbIndexCount, localArbIndex,                                   &
                  gridEdgeLWidth, gridEdgeUWidth, gridAlign, gridMemLBound,   &
-                 indexflag, destroyDistgrid, destroyDELayout, rc)
+                 indexflag, destroyDistgrid, destroyDELayout, name, rc)
 !
 ! !RETURN VALUE:
 
 !
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(inout)           :: grid
-       character (len=*),     intent(in),   optional  :: name
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
        type(ESMF_DistGrid),   intent(in),   optional  :: distgrid
        integer,               intent(in),   optional  :: distgridToGridMap(:)
@@ -13739,6 +13818,7 @@ endif
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
        logical,               intent(in),   optional  :: destroyDistgrid
        logical,               intent(in),   optional  :: destroyDELayout
+       character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -13751,8 +13831,6 @@ endif
 ! \begin{description}
 ! \item[{grid}]
 !     Partially created Grid to set information into.
-! \item[{[name]}]
-!     {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
 !     If not specified then the type/kind will be 8 byte reals.  
@@ -13807,6 +13885,8 @@ endif
 ! \item[{[destroyDELayout]}]
 !      If true, when the Grid is destroyed the DELayout will be destroyed also. 
 !      Defaults to false. 
+! \item[{[name]}]
+!     {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -13970,15 +14050,16 @@ endif
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromArray(grid, staggerloc, coordDim, &
-                            array, doCopy, rc)
+        array, keywordEnforcer, doCopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),      intent(in)            :: grid
-      type (ESMF_StaggerLoc), intent(in), optional :: staggerloc
-      integer,              intent(in)            :: coordDim
-      type(ESMF_Array),     intent(in)            :: array
-      type(ESMF_CopyFlag),  intent(in), optional  :: docopy !NOT IMPLEMENTED
-      integer,              intent(out), optional :: rc
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in)            :: coordDim
+      type(ESMF_Array),       intent(in)            :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_CopyFlag),    intent(in),  optional :: docopy !NOT IMPLEMENTED
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the coordinate data
@@ -14026,8 +14107,8 @@ endif
    
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -14059,41 +14140,42 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCommitShapeTile()
      subroutine ESMF_GridSetCmmitShapeTileIrreg(grid, name,coordTypeKind,  &
-                        minIndex, countsPerDEDim1, countsPerDeDim2,        &
-                        countsPerDEDim3, connDim1, connDim2, connDim3,     &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3,                &
-                        coordDep1, coordDep2, coordDep3,                   &
-                        gridEdgeLWidth, gridEdgeUWidth, gridAlign,         &
-                        gridMemLBound, indexflag, petMap, rc)
+       minIndex, countsPerDEDim1, countsPerDeDim2,        &
+       keywordEnforcer, countsPerDEDim3, connDim1, connDim2, connDim3,     &
+       poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+       bipolePos1, bipolePos2, bipolePos3,                &
+       coordDep1, coordDep2, coordDep3,                   &
+       gridEdgeLWidth, gridEdgeUWidth, gridAlign,         &
+       gridMemLBound, indexflag, petMap, rc)
 
 !
 ! !ARGUMENTS:
-	type (ESMF_Grid) :: grid
-      character (len=*), intent(in), optional :: name 
-       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
-       integer,               intent(in), optional :: minIndex(:)
-       integer,               intent(in)           :: countsPerDEDim1(:)
-       integer,               intent(in)           :: countsPerDEDim2(:)
-       integer,               intent(in), optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       !N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in), optional :: bipolePos1(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos2(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos3(2)     !N. IMP.
-       integer,               intent(in), optional :: coordDep1(:)
-       integer,               intent(in), optional :: coordDep2(:)
-       integer,               intent(in), optional :: coordDep3(:)
-       integer,               intent(in), optional :: gridEdgeLWidth(:)
-       integer,               intent(in), optional :: gridEdgeUWidth(:)
-       integer,               intent(in), optional :: gridAlign(:)
-       integer,               intent(in), optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
-       integer,               intent(in), optional :: petMap(:,:,:)
+	   type (ESMF_Grid)                             :: grid
+       character (len=*),     intent(in),  optional :: name 
+       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       integer,               intent(in),  optional :: minIndex(:)
+       integer,               intent(in)            :: countsPerDEDim1(:)
+       integer,               intent(in)            :: countsPerDEDim2(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,               intent(in),  optional :: countsPerDEDim3(:)
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)       !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)       !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)       !N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)     !N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)     !N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)     !N. IMP.
+       integer,               intent(in),  optional :: coordDep1(:)
+       integer,               intent(in),  optional :: coordDep2(:)
+       integer,               intent(in),  optional :: coordDep3(:)
+       integer,               intent(in),  optional :: gridEdgeLWidth(:)
+       integer,               intent(in),  optional :: gridEdgeUWidth(:)
+       integer,               intent(in),  optional :: gridAlign(:)
+       integer,               intent(in),  optional :: gridMemLBound(:)
+       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       integer,               intent(in),  optional :: petMap(:,:,:)
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14401,7 +14483,7 @@ endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. dimCount) then
+       if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
@@ -14411,19 +14493,19 @@ endif
 
 
     if (present(petMap)) then
-       if (dimCount .gt. 2) then
-          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
-              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
-              (size(petMap,3) .ne. size(countsPerDEDim3))) then
+       if (dimCount > 2) then
+          if ((size(petMap,1) /= size(countsPerDEDim1)) .or. &
+              (size(petMap,2) /= size(countsPerDEDim2)) .or. &
+              (size(petMap,3) /= size(countsPerDEDim3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
           endif
        else
-          if ((size(petMap,1) .ne. size(countsPerDEDim1)) .or. &
-              (size(petMap,2) .ne. size(countsPerDEDim2)) .or. &
-              (size(petMap,3) .ne. 1)) then
+          if ((size(petMap,1) /= size(countsPerDEDim1)) .or. &
+              (size(petMap,2) /= size(countsPerDEDim2)) .or. &
+              (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
@@ -14436,7 +14518,7 @@ endif
 
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. dimCount) then
+        if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -14445,7 +14527,7 @@ endif
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. dimCount) then
+        if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -14454,7 +14536,7 @@ endif
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. dimCount) then
+        if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -14464,10 +14546,10 @@ endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim1)) then
-      if (size(connDim1) .eq. 1) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim1) == 1) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14475,7 +14557,7 @@ endif
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14483,10 +14565,10 @@ endif
                endif
             endif
          endif
-      else if (size(connDim1) .eq. 2) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim1) == 2) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14494,9 +14576,9 @@ endif
                endif
             endif
          endif
-         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14509,10 +14591,10 @@ endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim2)) then
-      if (size(connDim2) .eq. 1) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim2) == 1) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14520,7 +14602,7 @@ endif
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14528,10 +14610,10 @@ endif
                endif
             endif
          endif
-      else if (size(connDim2) .eq. 2) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim2) == 2) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14539,9 +14621,9 @@ endif
                endif
             endif
          endif
-         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14555,10 +14637,10 @@ endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim3)) then
-      if (size(connDim3) .eq. 1) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim3) == 1) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14566,7 +14648,7 @@ endif
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14574,10 +14656,10 @@ endif
                endif
             endif
          endif
-      else if (size(connDim3) .eq. 2) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim3) == 2) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14585,9 +14667,9 @@ endif
                endif
             endif
          endif
-         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -14606,7 +14688,7 @@ endif
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
               return
-      else if (.not. (indexflag .eq. ESMF_INDEX_USER)) then
+      else if (.not. (indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
@@ -14614,7 +14696,7 @@ endif
       endif
    else
       if (present(indexflag)) then
-         if (indexflag .eq. ESMF_INDEX_USER) then
+         if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
@@ -14642,7 +14724,7 @@ endif
                                      ESMF_CONTEXT, rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
        if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
                                       ESMF_CONTEXT, rc)) return
@@ -14667,10 +14749,10 @@ endif
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
-       if (size(connDim1) .eq. 1) then
+       if (size(connDim1) == 1) then
           connDim1Local(1)=connDim1(1)     
           connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) .ge. 2) then
+       else if (size(connDim1) >= 2) then
           connDim1Local(1)=connDim1(1)
           connDim1Local(2)=connDim1(2)
        endif
@@ -14680,10 +14762,10 @@ endif
     endif
 
     if (present(connDim2)) then
-       if (size(connDim2) .eq. 1) then
+       if (size(connDim2) == 1) then
           connDim2Local(1)=connDim2(1)     
           connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) .ge. 2) then
+       else if (size(connDim2) >= 2) then
           connDim2Local(1)=connDim2(1)
           connDim2Local(2)=connDim2(2)
        endif
@@ -14693,10 +14775,10 @@ endif
     endif
 
     if (present(connDim3)) then
-       if (size(connDim3) .eq. 1) then
+       if (size(connDim3) == 1) then
           connDim3Local(1)=connDim3(1)     
           connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) .ge. 2) then
+       else if (size(connDim3) >= 2) then
           connDim3Local(1)=connDim3(1)
           connDim3Local(2)=connDim3(2)
        endif
@@ -14707,24 +14789,24 @@ endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
@@ -14762,7 +14844,7 @@ endif
 
     countsPerDEDim2Local(1)=countsPerDEDim2Local(1)+gridEdgeLWidthLocal(2)
   
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        countsPerDEDim3Local(1)=countsPerDEDim3Local(1)+gridEdgeLWidthLocal(3)
     endif
 
@@ -14774,7 +14856,7 @@ endif
     top=size(countsPerDEDim2Local)
     countsPerDEDim2Local(top)=countsPerDEDim2Local(top)+gridEdgeUWidthLocal(2)
   
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        top=size(countsPerDEDim3Local)
        countsPerDEDim3Local(top)=countsPerDEDim3Local(top)+gridEdgeUWidthLocal(3)
     endif
@@ -14790,7 +14872,7 @@ endif
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
     maxIndexLocal(2)=sum(countsPerDEDim2Local)+minIndexLocal(2)-1
 
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
       maxIndexLocal(3)=sum(countsPerDEDim3Local)+minIndexLocal(3)-1
     endif
 
@@ -14806,20 +14888,20 @@ endif
   deCount=1
   deCount=deCount*size(countsPerDEDim1Local) 
   deCount=deCount*size(countsPerDEDim2Local)
-  if (dimCount .gt. 2) then
+  if (dimCount > 2) then
      deCount=deCount*size(countsPerDEDim3Local)
   endif 
  
   ! Calc the max size of a DEDim
   maxSizeDEDim=1
-  if (size(countsPerDEDim1Local) .gt. maxSizeDEDim) then
+  if (size(countsPerDEDim1Local) > maxSizeDEDim) then
       maxSizeDEDim=size(countsPerDEDim1Local)
   endif
-  if (size(countsPerDEDim2Local) .gt. maxSizeDEDim) then
+  if (size(countsPerDEDim2Local) > maxSizeDEDim) then
       maxSizeDEDim=size(countsPerDEDim2Local)
   endif
-  if (dimCount .gt. 2) then
-      if (size(countsPerDEDim3Local) .gt. maxSizeDEDim) then
+  if (dimCount > 2) then
+      if (size(countsPerDEDim3Local) > maxSizeDEDim) then
          maxSizeDEDim=size(countsPerDEDim3Local)
       endif
   endif
@@ -14856,7 +14938,7 @@ endif
      maxPerDEDim(d,i)=minPerDEDim(d,i)+countsPerDEDim2Local(i)-1
   enddo
 
-  if (dimCount .gt. 2) then
+  if (dimCount > 2) then
     d=3
     deDimCount(d)=size(countsPerDEDim3Local)
     minPerDeDim(d,1)=minIndexLocal(d)
@@ -14873,7 +14955,7 @@ endif
               ESMF_CONTEXT, rc)) return
 
   ! Fill in DeBlockList
-  if (dimCount .eq. 2) then
+  if (dimCount == 2) then
      k=1
      do i2=1,deDimCount(2)
      do i1=1,deDimCount(1)
@@ -14884,7 +14966,7 @@ endif
         k=k+1
      enddo
      enddo
-  else if (dimCount .eq. 3) then
+  else if (dimCount == 3) then
      k=1
      do i3=1,deDimCount(3)
      do i2=1,deDimCount(2)
@@ -14922,7 +15004,7 @@ endif
 
 
       !! copy petMap to petList
-      if (dimCount .gt. 2) then
+      if (dimCount > 2) then
 	 k=1
      	 do i3=1,size(countsPerDEDim3Local)
          do i2=1,size(countsPerDEDim2Local)
@@ -14999,7 +15081,7 @@ endif
       enddo
    endif
 
-   if (dimCount .gt. 2) then
+   if (dimCount > 2) then
       if (present(coordDep3)) then 
          coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
@@ -15015,7 +15097,7 @@ endif
    endif
 
    ! Create Grid from specification -----------------------------------------------
-   call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
+   call ESMF_GridSetFromDistGrid(grid, coordTypeKind=coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
@@ -15025,7 +15107,7 @@ endif
                                     indexflag=indexflag, &
                                     destroyDistGrid=.true., &
                                     destroyDELayout=.true., &
-                                    rc=localrc)
+                                    name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15051,7 +15133,7 @@ endif
     deallocate(gridAlignLocal)
     deallocate(countsPerDEDim1Local) 
     deallocate(countsPerDEDim2Local) 
-    if (dimCount .gt. 2) then
+    if (dimCount > 2) then
        deallocate(countsPerDEDim3Local) 
     endif
 
@@ -15071,13 +15153,13 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCommitShapeTile()
       subroutine ESMF_GridSetCmmitShapeTileReg(grid, name, coordTypeKind, &
-                        regDecomp, decompFlag, minIndex, maxIndex, &
-                        connDim1, connDim2, connDim3, &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-                        gridMemLBound, indexflag, petMap, rc)
+        regDecomp, decompFlag, minIndex, maxIndex, &
+        keywordEnforcer, connDim1, connDim2, connDim3, &
+        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+        bipolePos1, bipolePos2, bipolePos3, &
+        coordDep1, coordDep2, coordDep3, &
+        gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
+        gridMemLBound, indexflag, petMap, rc)
 
 !
 ! !ARGUMENTS:
@@ -15088,6 +15170,7 @@ endif
        type(ESMF_DecompFlag), intent(in), optional :: decompflag(:)
        integer,               intent(in), optional :: minIndex(:)
        integer,               intent(in)           :: maxIndex(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       !N. IMP.
        type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       !N. IMP.
        type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       !N. IMP.
@@ -15129,8 +15212,6 @@ endif
 ! \begin{description}
 ! \item[{grid}]
 !     {\tt ESMF\_Grid} to set information into and then commit.  
-! \item[{[name]}]
-!      {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
 !      If not specified then the type/kind will be 8 byte reals. 
@@ -15276,6 +15357,8 @@ endif
 !       If the Grid is 2D, then the last dimension is of size 1.   
 !       If the Grid contains undistributed dimensions then these
 !       should also be of size 1. 
+! \item[{[name]}]
+!      {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -15398,7 +15481,7 @@ endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. dimCount) then
+       if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
@@ -15410,7 +15493,7 @@ endif
 
     ! Check DimCount of gridWidths and Aligns
     if (present(gridEdgeLWidth)) then
-        if (size(gridEdgeLWidth) .ne. dimCount) then
+        if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -15419,7 +15502,7 @@ endif
     endif
 
     if (present(gridEdgeUWidth)) then
-        if (size(gridEdgeUWidth) .ne. dimCount) then
+        if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -15428,7 +15511,7 @@ endif
     endif
 
     if (present(gridAlign)) then
-        if (size(gridAlign) .ne. dimCount) then
+        if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- gridAlign must be of size equal to Grid dimCount", & 
                      ESMF_CONTEXT, rc) 
@@ -15439,10 +15522,10 @@ endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim1)) then
-      if (size(connDim1) .eq. 1) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim1) == 1) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15450,7 +15533,7 @@ endif
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15458,10 +15541,10 @@ endif
                endif
             endif
          endif
-      else if (size(connDim1) .eq. 2) then
-         if (connDim1(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim1) == 2) then
+         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(1) .gt. 0) then
+               if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15469,9 +15552,9 @@ endif
                endif
             endif
          endif
-         if (connDim1(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(1) .gt. 0) then
+               if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15484,10 +15567,10 @@ endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim2)) then
-      if (size(connDim2) .eq. 1) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim2) == 1) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15495,7 +15578,7 @@ endif
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15503,10 +15586,10 @@ endif
                endif
             endif
          endif
-      else if (size(connDim2) .eq. 2) then
-         if (connDim2(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim2) == 2) then
+         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(2) .gt. 0) then
+               if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15514,9 +15597,9 @@ endif
                endif
             endif
          endif
-         if (connDim2(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(2) .gt. 0) then
+               if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15530,10 +15613,10 @@ endif
 
    ! make sure connected dimensions don't have an edge width
    if (present(connDim3)) then
-      if (size(connDim3) .eq. 1) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      if (size(connDim3) == 1) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15541,7 +15624,7 @@ endif
                endif
             endif
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15549,10 +15632,10 @@ endif
                endif
             endif
          endif
-      else if (size(connDim3) .eq. 2) then
-         if (connDim3(1) .ne. ESMF_GRIDCONN_NONE) then
+      else if (size(connDim3) == 2) then
+         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
-               if (gridEdgeLWidth(3) .gt. 0) then
+               if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have LWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15560,9 +15643,9 @@ endif
                endif
             endif
          endif
-         if (connDim3(2) .ne. ESMF_GRIDCONN_NONE) then
+         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
-               if (gridEdgeUWidth(3) .gt. 0) then
+               if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                      "- Connected dimensions must have UWidth 0", & 
                  ESMF_CONTEXT, rc) 
@@ -15580,7 +15663,7 @@ endif
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc)  
               return
-      else if (.not.(indexflag .eq. ESMF_INDEX_USER)) then
+      else if (.not.(indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
                  ESMF_CONTEXT, rc) 
@@ -15588,7 +15671,7 @@ endif
       endif
    else
       if (present(indexflag)) then
-         if (indexflag .eq. ESMF_INDEX_USER) then
+         if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                 "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
                    ESMF_CONTEXT, rc) 
@@ -15650,10 +15733,10 @@ endif
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
-       if (size(connDim1) .eq. 1) then
+       if (size(connDim1) == 1) then
           connDim1Local(1)=connDim1(1)     
           connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) .ge. 2) then
+       else if (size(connDim1) >= 2) then
           connDim1Local(1)=connDim1(1)
           connDim1Local(2)=connDim1(2)
        endif
@@ -15663,10 +15746,10 @@ endif
     endif
 
     if (present(connDim2)) then
-       if (size(connDim2) .eq. 1) then
+       if (size(connDim2) == 1) then
           connDim2Local(1)=connDim2(1)     
           connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) .ge. 2) then
+       else if (size(connDim2) >= 2) then
           connDim2Local(1)=connDim2(1)
           connDim2Local(2)=connDim2(2)
        endif
@@ -15676,10 +15759,10 @@ endif
     endif
 
     if (present(connDim3)) then
-       if (size(connDim3) .eq. 1) then
+       if (size(connDim3) == 1) then
           connDim3Local(1)=connDim3(1)     
           connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) .ge. 2) then
+       else if (size(connDim3) >= 2) then
           connDim3Local(1)=connDim3(1)
           connDim3Local(2)=connDim3(2)
        endif
@@ -15691,24 +15774,24 @@ endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
@@ -15717,19 +15800,19 @@ endif
 
 
   if (present(petMap)) then
-     if (dimCount .gt. 2) then
-          if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
-              (size(petMap,2) .ne. regDecompLocal(2)) .or. &
-              (size(petMap,3) .ne. regDecompLocal(3))) then
+     if (dimCount > 2) then
+          if ((size(petMap,1) /= regDecompLocal(1)) .or. &
+              (size(petMap,2) /= regDecompLocal(2)) .or. &
+              (size(petMap,3) /= regDecompLocal(3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
               return 
           endif
       else
-          if ((size(petMap,1) .ne. regDecompLocal(1)) .or. &
-              (size(petMap,2) .ne. regDecompLocal(2)) .or. &
-              (size(petMap,3) .ne. 1)) then
+          if ((size(petMap,1) /= regDecompLocal(1)) .or. &
+              (size(petMap,2) /= regDecompLocal(2)) .or. &
+              (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                      "- petMap wrong size in one or more dimensions", & 
                      ESMF_CONTEXT, rc) 
@@ -15814,7 +15897,7 @@ endif
 
 
       !! copy petMap to petList
-      if (dimCount .gt. 2) then
+      if (dimCount > 2) then
 	 k=1
      	 do i3=1,regDecompLocal(3)
          do i2=1,regDecompLocal(2)
@@ -15899,7 +15982,7 @@ endif
       enddo
    endif
 
-   if (dimCount .gt. 2) then
+   if (dimCount > 2) then
       if (present(coordDep3)) then 
          coordDimCount(3)=size(coordDep3)
           coordDimMap(3,:)=0
@@ -15916,7 +15999,7 @@ endif
 
   
    ! Create Grid from specification -----------------------------------------------
-   call ESMF_GridSetFromDistGrid(grid, name=name, coordTypeKind=coordTypeKind, &
+   call ESMF_GridSetFromDistGrid(grid, coordTypeKind=coordTypeKind, &
                                     distgrid=distgrid, distgridToGridMap=distgridToGridMap, &
                                     coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                     gridEdgeLWidth=gridEdgeLWidthLocal, &
@@ -15924,7 +16007,7 @@ endif
                                     gridAlign=gridAlignLocal, &
                                     gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
-                                    rc=localrc)
+                                    name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -15961,12 +16044,12 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSetCommitShapeTile()
       subroutine ESMF_GridSetCmmitShapeTileArb(grid, name,coordTypeKind, &
-			      minIndex, maxIndex, localArbIndex, localArbIndexCount, &
-                        connDim1, connDim2, connDim3, &
-                        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
-                        bipolePos1, bipolePos2, bipolePos3, &
-                        coordDep1, coordDep2, coordDep3, &
-                        distDim, rc)
+		minIndex, maxIndex, localArbIndex, localArbIndexCount, &
+        keywordEnforcer, connDim1, connDim2, connDim3, &
+        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
+        bipolePos1, bipolePos2, bipolePos3, &
+        coordDep1, coordDep2, coordDep3, &
+        distDim, rc)
 !
 ! !ARGUMENTS:
 
@@ -15976,7 +16059,8 @@ endif
        integer,               intent(in), optional :: minIndex(:)
        integer,               intent(in)           :: maxIndex(:)
        integer,               intent(in)           :: localArbIndex(:,:)
-       integer,               intent(in)   	   :: localArbIndexCount
+       integer,               intent(in)   	       :: localArbIndexCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       !N. IMP.
        type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       !N. IMP.
        type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       !N. IMP.
@@ -16200,7 +16284,7 @@ endif
     isDist(:)=.false.
     ! check distribution info
     if (present(distDim)) then
-       if (size(distDim) .ne. distDimCount) then
+       if (size(distDim) /= distDimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
                  "- distDim must match with the second dimension of localArbIndex", & 
                  ESMF_CONTEXT, rc) 
@@ -16240,7 +16324,7 @@ endif
     endif
 
     if (present(minIndex)) then
-       if (size(minIndex) .ne. dimCount) then
+       if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
                "- minIndex size must equal grid dimCount", & 
                ESMF_CONTEXT, rc) 
@@ -16285,7 +16369,7 @@ endif
     undistDimCount=dimCount-distDimCount
 
     ! can't have all undistributed dimensions
-    if (distDimCount .eq. 0) then
+    if (distDimCount == 0) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- Need to have at least one distributed dimension", & 
                  ESMF_CONTEXT, rc) 
@@ -16293,7 +16377,7 @@ endif
     endif
 
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
-    if (size(localArbIndex, 1) .ne. localArbIndexCount) then
+    if (size(localArbIndex, 1) /= localArbIndexCount) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
                  ESMF_CONTEXT, rc) 
@@ -16305,10 +16389,10 @@ endif
                                   ESMF_CONTEXT, rc)) return
 
     ! convert localArbIndex into 1D index array for DistGrid
-    if (localArbIndexCount .gt. 0) then
+    if (localArbIndexCount > 0) then
        do i = 1, localArbIndexCount
           local1DIndices(i) = localArbIndex(i,1)-1
-	  if (distDimCount .ge. 2) then 
+	  if (distDimCount >= 2) then 
 	     do j = 2, distDimCount
 	        local1DIndices(i) = local1DIndices(i)*distSize(j) + localArbIndex(i,j)-1
 	     enddo
@@ -16319,10 +16403,10 @@ endif
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
     if (present(connDim1)) then
-       if (size(connDim1) .eq. 1) then
+       if (size(connDim1) == 1) then
           connDim1Local(1)=connDim1(1)     
           connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) .ge. 2) then
+       else if (size(connDim1) >= 2) then
           connDim1Local(1)=connDim1(1)
           connDim1Local(2)=connDim1(2)
        endif
@@ -16332,10 +16416,10 @@ endif
     endif
 
     if (present(connDim2)) then
-       if (size(connDim2) .eq. 1) then
+       if (size(connDim2) == 1) then
           connDim2Local(1)=connDim2(1)     
           connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) .ge. 2) then
+       else if (size(connDim2) >= 2) then
           connDim2Local(1)=connDim2(1)
           connDim2Local(2)=connDim2(2)
        endif
@@ -16345,10 +16429,10 @@ endif
     endif
 
     if (present(connDim3)) then
-       if (size(connDim3) .eq. 1) then
+       if (size(connDim3) == 1) then
           connDim3Local(1)=connDim3(1)     
           connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) .ge. 2) then
+       else if (size(connDim3) >= 2) then
           connDim3Local(1)=connDim3(1)
           connDim3Local(2)=connDim3(2)
        endif
@@ -16359,24 +16443,24 @@ endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim2Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
        return 
     endif
 
-    if (connDim3Local(1) .ne. ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) .ne. ESMF_GRIDCONN_NONE) then
+    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rc) 
@@ -16401,7 +16485,7 @@ endif
       if (isDist(1)) then
 	found = .false.
 	do i=1,size(coordDep1)
-	  if (coordDep1(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep1(i) == ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -16431,7 +16515,7 @@ endif
       if (isDist(2)) then
 	found = .false.
 	do i=1,size(coordDep2)
-	  if (coordDep2(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep2(i) == ESMF_GRID_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -16455,14 +16539,14 @@ endif
       endif
    endif
 
-   if (dimCount .gt. 2) then
+   if (dimCount > 2) then
       if (present(coordDep3)) then 
         ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
         ! if dimension 3 is arbitrary
         if (isDist(3)) then
 	  found = .false.
 	  do i=1,size(coordDep3)
-	    if (coordDep3(i) .eq. ESMF_GRID_ARBDIM) found = .true.
+	    if (coordDep3(i) == ESMF_GRID_ARBDIM) found = .true.
           enddo
 	  if (.not. found) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -16489,7 +16573,7 @@ endif
 
 
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
-   if (undistDimCount .gt. 0) then
+   if (undistDimCount > 0) then
      allocate(undistLBound(undistDimCount), stat=localrc)
      if (ESMF_LogFoundAllocError(localrc, "Allocating undistLBound", &
               ESMF_CONTEXT, rc)) return
@@ -16510,7 +16594,7 @@ endif
   
 
    ! Create DistGrid --------------------------------------------------------------
-   if (undistDimCount .gt. 0) then 
+   if (undistDimCount > 0) then 
        distgrid=ESMF_DistGridCreate(local1DIndices, 1, undistLBound, undistUBound, rc=localrc)   
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -16522,14 +16606,14 @@ endif
 
 
    ! Create Grid from specification -----------------------------------------------
-   call ESMF_GridSetFromDistGrid(grid, name, coordTypeKind, &
-                               distgrid, distDim=distDimLocal, &
+   call ESMF_GridSetFromDistGrid(grid, coordTypeKind=coordTypeKind, &
+                               distgrid=distgrid, distDim=distDimLocal, &
 			       coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
  	    		       localArbIndexCount=localArbIndexCount, localArbIndex=localArbIndex, &
                                destroyDistGrid=.true., &
                                destroyDELayout=.false., &
-			       rc=localrc)
+			       name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16541,7 +16625,7 @@ endif
     deallocate(distDimLocal)
     deallocate(coordDimCount)
     deallocate(coordDimMap)
-    if (undistDimCount .gt. 0) then
+    if (undistDimCount > 0) then
        deallocate(undistLBound)
        deallocate(undistUBound)
     endif
@@ -16565,15 +16649,16 @@ endif
 
 ! !INTERFACE:
       subroutine ESMF_GridSetItemFromArray(grid, staggerloc, item, &
-                            array, doCopy, rc)
+        array, keywordEnforcer, doCopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),     intent(in)           :: grid
-      type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc 
-      type (ESMF_GridItem), intent(in)          :: item
-      type(ESMF_Array),    intent(in)           :: array
-      type(ESMF_CopyFlag), intent(in), optional :: docopy ! NOT IMPLEMENTED
-      integer,             intent(out), optional :: rc
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
+      type (ESMF_GridItem),   intent(in)            :: item
+      type(ESMF_Array),       intent(in)            :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_CopyFlag),    intent(in),  optional :: docopy ! NOT IMPLEMENTED
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the item data
@@ -16626,8 +16711,8 @@ endif
 
     ! handle staggerloc
     if (present(staggerloc)) then
-       if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                  "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
                  ESMF_CONTEXT, rc) 
@@ -16657,10 +16742,11 @@ endif
 ! !IROUTINE: ESMF_GridValidate - Validate Grid internals
 
 ! !INTERFACE:
-  subroutine ESMF_GridValidate(grid, rc)
+  subroutine ESMF_GridValidate(grid, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(in)              :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out),  optional  :: rc  
 !         
 !
@@ -17100,7 +17186,7 @@ endif
 !
 !EOPI
 
-      ESMF_GridStatusGreater = (GridStatus1%gridstatus .gt. &
+      ESMF_GridStatusGreater = (GridStatus1%gridstatus > &
                               GridStatus2%gridstatus)
 
       end function ESMF_GridStatusGreater
@@ -17169,7 +17255,7 @@ endif
 !
 !EOPI
 
-      ESMF_GridStatusGreaterEqual = (GridStatus1%gridstatus .ge. &
+      ESMF_GridStatusGreaterEqual = (GridStatus1%gridstatus >= &
                               GridStatus2%gridstatus)
 
       end function ESMF_GridStatusGreaterEqual

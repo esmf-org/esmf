@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.42 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.42 2011/01/19 02:13:18 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -374,10 +374,11 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleCreate()
-  function ESMF_ArrayBundleCreate(arrayList, arrayCount, name, rc)
+  function ESMF_ArrayBundleCreate(arrayList, keywordEnforcer, arrayCount, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)            :: arrayList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(in),  optional :: arrayCount
     character (len=*),intent(in),  optional :: name
     integer,          intent(out), optional :: rc
@@ -499,10 +500,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleDestroy - Destroy an ArrayBundle
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleDestroy(arraybundle, rc)
+  subroutine ESMF_ArrayBundleDestroy(arraybundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
 !         
 !
@@ -556,11 +558,12 @@ contains
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()
-    subroutine ESMF_ArrayBundleGet(arraybundle, arrayCount, arrayList, &
-      name, rc)
+    subroutine ESMF_ArrayBundleGet(arraybundle, keywordEnforcer, arrayCount, &
+      arrayList, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)               :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),    optional :: arrayCount
     type(ESMF_Array),       intent(inout),  optional :: arrayList(:)
     character(len=*),       intent(out),    optional :: name
@@ -654,12 +657,13 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleHalo - Execute an ArrayBundle halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleHalo(arraybundle, routehandle, &
+  subroutine ESMF_ArrayBundleHalo(arraybundle, routehandle, keywordEnforcer, &
     checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -724,10 +728,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleHaloRelease - Release resources associated with an ArrayBundle halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleHaloRelease(routehandle, rc)
+  subroutine ESMF_ArrayBundleHaloRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -772,13 +777,13 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleHaloStore(arraybundle, routehandle, &
-      halostartregionflag, haloLDepth, haloUDepth, rc)
+      keywordEnforcer, halostartregionflag, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)                :: arraybundle
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
-    type(ESMF_HaloStartRegionFlag), intent(in), &
-                            optional :: halostartregionflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -904,12 +909,12 @@ contains
 ! !IROUTINE: ESMF_ArrayBundlePrint - Print ArrayBundle internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundlePrint(arraybundle, options, rc)
+  subroutine ESMF_ArrayBundlePrint(arraybundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)        :: arraybundle
-    character(len=*), intent(in),   optional  :: options
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_ArrayBundle), intent(in)              :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -925,8 +930,6 @@ contains
 !   \begin{description}
 !   \item[arraybundle] 
 !     {\tt ESMF\_ArrayBundle} object.
-!   \item[{[options]}] 
-!     Print options are not yet supported.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -962,11 +965,13 @@ contains
 ! \label{api:ArrayBundleRead}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRead(arraybundle, file, singleFile, iofmt, rc)
+  subroutine ESMF_ArrayBundleRead(arraybundle, file, keywordEnforcer, &
+    singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
     character(*),           intent(in)             :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: singleFile
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
@@ -1084,12 +1089,13 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleRedist - Execute an ArrayBundle redistribution
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleRedist(srcArrayBundle, dstArrayBundle, &
-    routehandle, checkflag, rc)
+    routehandle, keywordEnforcer, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in),     optional  :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout),  optional  :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)             :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),     optional  :: checkflag
     integer,                intent(out),    optional  :: rc
 !
@@ -1172,10 +1178,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleRedistRelease - Release resources associated with ArrayBundle redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRedistRelease(routehandle, rc)
+  subroutine ESMF_ArrayBundleRedistRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1219,15 +1226,16 @@ contains
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleRedistStore()
 ! subroutine ESMF_ArrayBundleRedistStore<type><kind>(srcArrayBundle, &
-!   dstArrayBundle, routehandle, factor, srcToDstTransposeMap, rc)
+!   dstArrayBundle, routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
-!   type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
-!   type(ESMF_RouteHandle), intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)          :: factor
-!   integer,                intent(in),  optional :: srcToDstTransposeMap(:)
-!   integer,                intent(out), optional :: rc
+!   type(ESMF_ArrayBundle),   intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle),   intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
+!   integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
@@ -1303,13 +1311,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreI4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     integer(ESMF_KIND_I4),  intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
 !
@@ -1364,13 +1373,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreI8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     integer(ESMF_KIND_I8),  intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
 !
@@ -1425,13 +1435,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreR4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     real(ESMF_KIND_R4),     intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
 !
@@ -1486,13 +1497,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreR8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factor, srcToDstTransposeMap, rc)
+    routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     real(ESMF_KIND_R8),     intent(in)              :: factor
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
 !
@@ -1547,12 +1559,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleRedistStore()
   subroutine ESMF_ArrayBundleRedistStoreNF(srcArrayBundle, dstArrayBundle, &
-    routehandle, srcToDstTransposeMap, rc)
+    routehandle, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)            :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout)         :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)         :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: srcToDstTransposeMap(:)
     integer,                intent(out), optional :: rc
 !
@@ -1661,15 +1674,16 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, &
-    routehandle, zeroflag, checkflag, rc)
+    routehandle, keywordEnforcer, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in),   optional  :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout),optional  :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
-    logical,                intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
+    type(ESMF_ArrayBundle), intent(in),    optional  :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout), optional  :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)            :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
+    logical,                intent(in),    optional  :: checkflag
+    integer,                intent(out),   optional  :: rc
 !
 ! !DESCRIPTION:
 !   Execute a precomputed ArrayBundle sparse matrix multiplication from the
@@ -1762,10 +1776,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleSMMRelease - Release resources associated with ArrayBundle sparse matrix multiplication
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleSMMRelease(routehandle, rc)
+  subroutine ESMF_ArrayBundleSMMRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1809,15 +1824,16 @@ contains
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayBundleSMMStore()
 ! subroutine ESMF_ArrayBundleSMMStore<type><kind>(srcArrayBundle, &
-!   dstArrayBundle, routehandle, factorList, factorIndexList, rc)
+!   dstArrayBundle, routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),   intent(in)             :: srcArrayBundle
-!   type(ESMF_ArrayBundle),   intent(inout)          :: dstArrayBundle
-!   type(ESMF_RouteHandle),   intent(inout)          :: routehandle
-!   <type>(ESMF_KIND_<kind>), target, intent(in)     :: factorList(:)
-!   integer,                   intent(in)            :: factorIndexList(:,:)
-!   integer,                   intent(out), optional :: rc
+!   type(ESMF_ArrayBundle),           intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle),           intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle),           intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), target, intent(in)            :: factorList(:)
+!   integer,                          intent(in)            :: factorIndexList(:,:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle sparse matrix multiplication operation from
@@ -1919,7 +1935,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
@@ -1927,6 +1943,7 @@ contains
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I4), target, intent(in)           :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -1985,7 +2002,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreI8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
@@ -1993,6 +2010,7 @@ contains
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     integer(ESMF_KIND_I8), target, intent(in)           :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -2051,7 +2069,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR4(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
@@ -2059,6 +2077,7 @@ contains
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -2117,7 +2136,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreR8(srcArrayBundle, dstArrayBundle, &
-    routehandle, factorList, factorIndexList, rc)
+    routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
@@ -2125,6 +2144,7 @@ contains
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
     real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
     integer,                    intent(in)              :: factorIndexList(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 !EOPI
@@ -2183,12 +2203,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayBundleSMMStore()
   subroutine ESMF_ArrayBundleSMMStoreNF(srcArrayBundle, dstArrayBundle, &
-    routehandle, rc)
+    routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
     type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
     type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2332,12 +2353,13 @@ contains
 ! \label{api:ArrayBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, singleFile, timeslice, &
-             iofmt, rc)
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, keywordEnforcer, &
+    singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
     character(*),           intent(in)              :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional  :: singleFile
     integer,                intent(in),   optional  :: timeslice
     type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt

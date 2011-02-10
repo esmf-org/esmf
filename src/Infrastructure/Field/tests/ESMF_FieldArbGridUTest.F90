@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.15 2011/01/18 18:24:09 feiliu Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.16 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -140,9 +140,10 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  grid2d = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid2d = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount, &
+    name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
@@ -317,9 +318,10 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  grid3d = ESMF_GridCreateShapeTile("arb3dgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid3d = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount, &
+    name="arb3dgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
@@ -1218,9 +1220,10 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  grid2d = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid2d = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount, &
+    name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &

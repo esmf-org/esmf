@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.10 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.11 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -144,9 +144,10 @@
   correct=.true.
   rc=ESMF_SUCCESS
   
-  srcgrid2D = ESMF_GridCreateShapeTile("srcgrid2D", coordTypeKind=ESMF_TYPEKIND_R4, &
+  srcgrid2D = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount, &
+    name="srcgrid2D", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
@@ -179,9 +180,10 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  srcgrid = ESMF_GridCreateShapeTile("srcgrid", coordTypeKind=ESMF_TYPEKIND_R4, &
+  srcgrid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, &
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-    localArbIndex=localIndices,localArbIndexCount=localCount,rc=rc)
+    localArbIndex=localIndices,localArbIndexCount=localCount, &
+    name="srcgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &
@@ -252,9 +254,10 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  dstgrid2D = ESMF_GridCreateShapeTile("dstgrid2D", coordTypeKind=ESMF_TYPEKIND_R8, &
+  dstgrid2D = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
-    localArbIndex=localIndices1,localArbIndexCount=localCount1,rc=rc)
+    localArbIndex=localIndices1,localArbIndexCount=localCount1, &
+    name="dstgrid2D", rc=rc)
   if (rc /= ESMF_SUCCESS) correct=.false.
 
   dstfield2D = ESMF_FieldCreate(dstgrid2D, arrayspec1D, rc=localrc)
@@ -272,9 +275,10 @@
   correct=.true.
   rc=ESMF_SUCCESS
 
-  dstgrid = ESMF_GridCreateShapeTile("dstgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  dstgrid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-    localArbIndex=localIndices1,localArbIndexCount=localCount1,rc=rc)
+    localArbIndex=localIndices1,localArbIndexCount=localCount1, &
+    name="dstgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) correct=.false.
 
 !  call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &

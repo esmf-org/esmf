@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.17 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.18 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,7 +69,8 @@
 !EOP
 
 !BOC
-      call ESMF_ArraySpecGet(arrayDS, myrank, mytypekind, rc)
+      call ESMF_ArraySpecGet(arrayDS, rank=myrank, &
+        typekind=mytypekind, rc=rc)
       print *, "Returned values from ArraySpec:"
       print *, "rank =", myrank
 !EOC

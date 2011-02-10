@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.152 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.153 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.152 2011/01/25 15:34:54 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.153 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 !
@@ -685,15 +685,14 @@ contains
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, name, gridcomptype, &
+  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, gridcomptype, &
     grid, config, &
     configFile, clock, localPet, petCount, contextflag, currentMethod, &
-    currentPhase, comptype, vm, rc)
+    currentPhase, comptype, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len=*),        intent(out), optional :: name
     type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
     type(ESMF_Grid),         intent(out), optional :: grid
     type(ESMF_Config),       intent(out), optional :: config
@@ -706,6 +705,7 @@ contains
     integer,                 intent(out), optional :: currentPhase
     type(ESMF_CompType),     intent(out), optional :: comptype
     type(ESMF_VM),           intent(out), optional :: vm
+    character(len=*),        intent(out), optional :: name
     integer,                 intent(out), optional :: rc
 
 !
@@ -720,8 +720,6 @@ contains
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} object to query.
-! \item[{[name]}]
-!   Return the name of the {\tt ESMF\_GridComp}.
 ! \item[{[gridcomptype]}]
 !   Return the model type of this {\tt ESMF\_GridComp}. See section
 !   \ref{opt:gridcomptype} for a complete list of valid types.
@@ -750,6 +748,8 @@ contains
 !   {\tt ESMF\_COMPTYPE\_CPL}.
 ! \item[{[vm]}]
 !   Return the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+! \item[{[name]}]
+!   Return the name of the {\tt ESMF\_GridComp}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1093,12 +1093,11 @@ contains
 ! !IROUTINE:  ESMF_GridCompPrint - Print the contents of a GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompPrint(gridcomp, keywordEnforcer, options, rc)
+  subroutine ESMF_GridCompPrint(gridcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                       :: gridcomp
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len = *), intent(in),  optional :: options
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1114,8 +1113,6 @@ contains
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to print.
-! \item[{[options]}]
-!   Print options are not yet supported.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1132,7 +1129,7 @@ contains
 
     print *, "Gridded Component:"
     ! call Comp method
-    call ESMF_CompPrint(gridcomp%compp, options, rc=localrc)
+    call ESMF_CompPrint(gridcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2134,12 +2131,11 @@ contains
 ! !IROUTINE: ESMF_GridCompValidate - Check validity of a GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompValidate(gridcomp, keywordEnforcer, options, rc)
+  subroutine ESMF_GridCompValidate(gridcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                       :: gridcomp
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len = *), intent(in),  optional :: options
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2149,8 +2145,6 @@ contains
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to validate.
-! \item[{[options]}]  
-!   Validation options are not yet supported.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2166,7 +2160,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompValidate(gridcomp%compp, options, rc=localrc)
+    call ESMF_CompValidate(gridcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

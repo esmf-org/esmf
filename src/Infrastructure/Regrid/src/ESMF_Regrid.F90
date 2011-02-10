@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.156 2011/02/09 22:35:27 ESRL\robert.oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
     public ESMF_RegridGetIwts
     public ESMF_RegridGetArea
     public ESMF_RegridGetFrac
-    public operator (.eq.)
+    public operator (==)
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.156 2011/02/09 22:35:27 ESRL\robert.oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 !
@@ -114,7 +114,7 @@
 !==============================================================================
 !BOPI
 ! !INTERFACE:
-      interface operator (.eq.)
+      interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_RegridMethodEqual

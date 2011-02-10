@@ -1,4 +1,4 @@
-!  $Id: ESMF_FieldBundle_C.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $
+!  $Id: ESMF_FieldBundle_C.F90,v 1.13 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_FieldBundle_C.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $'
+!      '$Id: ESMF_FieldBundle_C.F90,v 1.13 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
      use ESMF_UtilTypesMod    ! ESMF generic types class
@@ -61,7 +61,7 @@
      ! Initialize return codes; assume routines not initialized
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_FieldBundleDestroy(bundlep, rc)
+     call ESMF_FieldBundleDestroy(bundlep, rc=rc)
 
 
    end subroutine f_esmf_bundledestroy

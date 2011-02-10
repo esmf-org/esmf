@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleComm.F90,v 1.11 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleComm.F90,v 1.12 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleComm.F90,v 1.11 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleComm.F90,v 1.12 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 !
@@ -690,18 +690,18 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleRedist()
-      subroutine ESMF_FieldBundleRedistAllinOne(srcFieldBundle, dstFieldBundle, parentVM, &
-                                   blocking, commhandle, routeOptions, rc)
+      subroutine ESMF_FieldBundleRedistAllinOne(srcFieldBundle, dstFieldBundle, &
+        parentVM, blocking, commhandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
-      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
-      type(ESMF_VM), intent(in) :: parentVM
-      type(ESMF_BlockingFlag), intent(in) , optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle),  intent(inout)           :: srcFieldBundle
+      type(ESMF_FieldBundle),  intent(inout)           :: dstFieldBundle
+      type(ESMF_VM),           intent(in)              :: parentVM
+      type(ESMF_BlockingFlag), intent(in),    optional :: blocking
+      type(ESMF_CommHandle),   intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in),    optional :: routeOptions
+      integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !     Perform a redistribution operation over the data
@@ -807,18 +807,18 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldRedist()
-      subroutine ESMF_FieldBundleRedistRun(srcFieldBundle, dstFieldBundle, routehandle, &
-                                   blocking, commhandle, routeOptions, rc)
+      subroutine ESMF_FieldBundleRedistRun(srcFieldBundle, dstFieldBundle, &
+        routehandle, blocking, commhandle, routeOptions, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: srcFieldBundle
-      type(ESMF_FieldBundle), intent(inout) :: dstFieldBundle
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_BlockingFlag), intent(in) , optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      type(ESMF_RouteOptions), intent(in), optional :: routeOptions
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle),  intent(inout)           :: srcFieldBundle
+      type(ESMF_FieldBundle),  intent(inout)           :: dstFieldBundle
+      type(ESMF_RouteHandle),  intent(inout)           :: routehandle
+      type(ESMF_BlockingFlag), intent(in),    optional :: blocking
+      type(ESMF_CommHandle),   intent(inout), optional :: commhandle
+      type(ESMF_RouteOptions), intent(in),    optional :: routeOptions
+      integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !     Perform a redistribution operation over the data

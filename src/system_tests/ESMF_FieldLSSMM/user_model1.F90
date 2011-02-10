@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_model1.F90,v 1.8 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -162,9 +162,9 @@
         call ESMF_FieldGet(humidity, locstream=locs, rc=rc)
         if(rc/=ESMF_SUCCESS) return
 
-        call ESMF_FieldDestroy(humidity, rc)
+        call ESMF_FieldDestroy(humidity, rc=rc)
         if(rc/=ESMF_SUCCESS) return
-        call ESMF_LocStreamDestroy(locs, rc)
+        call ESMF_LocStreamDestroy(locs, rc=rc)
         if(rc/=ESMF_SUCCESS) return
         print *, "User Comp Final returning"
 

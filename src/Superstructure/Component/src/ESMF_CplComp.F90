@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.133 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.134 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.133 2011/01/25 15:34:54 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.134 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 !
@@ -665,14 +665,13 @@ contains
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, name, config, &
+  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, config, &
     configFile, clock, &
-    localPet, petCount, contextflag, currentMethod, currentPhase, vm, rc)
+    localPet, petCount, contextflag, currentMethod, currentPhase, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(inout)         :: cplcomp
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len=*),       intent(out), optional :: name
     type(ESMF_Config),      intent(out), optional :: config
     character(len=*),       intent(out), optional :: configFile
     type(ESMF_Clock),       intent(out), optional :: clock
@@ -682,6 +681,7 @@ contains
     type(ESMF_Method),      intent(out), optional :: currentMethod
     integer,                intent(out), optional :: currentPhase
     type(ESMF_VM),          intent(out), optional :: vm
+    character(len=*),       intent(out), optional :: name
     integer,                intent(out), optional :: rc
 
 !
@@ -696,8 +696,6 @@ contains
 ! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to query.
-! \item[{[name]}]
-!   Return the name of the {\tt ESMF\_CplComp}.
 ! \item[{[config]}]
 !   Return the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
 ! \item[{[configFile]}]
@@ -718,6 +716,8 @@ contains
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
 ! \item[{[vm]}]
 !   Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+! \item[{[name]}]
+!   Return the name of the {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1009,12 +1009,11 @@ contains
 ! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a CplComp
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompPrint(cplcomp, keywordEnforcer, options, rc)
+  subroutine ESMF_CplCompPrint(cplcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                        :: cplcomp
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len = *), intent(in),  optional :: options
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1030,8 +1029,6 @@ contains
 ! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to print.
-! \item[{[options]}]
-!   Print options are not yet supported.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1048,7 +1045,7 @@ contains
 
     print *, "Coupler Component:"
     ! call Comp method
-    call ESMF_CompPrint(cplcomp%compp, options, rc=localrc)
+    call ESMF_CompPrint(cplcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2040,12 +2037,11 @@ contains
 ! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompValidate(cplcomp, keywordEnforcer, options, rc)
+  subroutine ESMF_CplCompValidate(cplcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                        :: cplcomp
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len = *), intent(in),  optional :: options
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2055,8 +2051,6 @@ contains
 ! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to validate.
-! \item[{[options]}]
-!   Validation options are not yet supported.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2072,7 +2066,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompValidate(cplcomp%compp, options, rc=localrc)
+    call ESMF_CompValidate(cplcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

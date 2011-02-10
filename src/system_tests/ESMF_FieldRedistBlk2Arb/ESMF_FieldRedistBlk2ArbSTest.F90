@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.22 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.23 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! System test FieldRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -131,9 +131,10 @@
        j1 = j - counts(2)
      enddo
 
-     grid2 = ESMF_GridCreateShapeTile("arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+     grid2 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices,localArbIndexCount=localCount,rc=rc)
+       localArbIndex=myIndices,localArbIndexCount=localCount, &
+       name="arbgrid", rc=rc)
      if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! Set up a 1D (for the arbitrarily distributed Field) and a 2D real array
@@ -273,19 +274,19 @@
 
     deallocate(myIndices)
 
-    call ESMF_FieldRedistRelease(rh12, rc)
+    call ESMF_FieldRedistRelease(rh12, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldRedistRelease(rh23, rc)
+    call ESMF_FieldRedistRelease(rh23, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity1, rc)
+    call ESMF_FieldDestroy(humidity1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity2, rc)
+    call ESMF_FieldDestroy(humidity2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldDestroy(humidity3, rc)
+    call ESMF_FieldDestroy(humidity3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid1, rc)
+    call ESMF_GridDestroy(grid1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_GridDestroy(grid2, rc)
+    call ESMF_GridDestroy(grid2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 

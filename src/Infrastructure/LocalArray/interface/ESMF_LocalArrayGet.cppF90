@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.20 2011/01/08 16:22:39 svasquez Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.21 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,12 +34,13 @@ module ESMF_LocalArrayGetMod
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayGet() @\
-! subroutine ESMF_LocalArrayGetData<rank><type><kind>(larray, fptr, & @\
-!               docopy, rc) @\
+! subroutine ESMF_LocalArrayGetData<rank><type><kind>(localarray, farrayPtr, & @\
+!   keywordEnforcer, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_LocalArray) :: larray @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!   type(ESMF_LocalArray) :: localarray @\
+!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag), intent(in), optional :: docopy @\
 !   integer, intent(out), optional :: rc @\
 ! @\
@@ -49,9 +50,9 @@ module ESMF_LocalArrayGetMod
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
-! \item[larray] @\
+! \item[localarray] @\
 !   The {\tt ESMF\_LocalArray} to get the value from. @\
-! \item[fptr] @\
+! \item[farrayPtr] @\
 !   An unassociated or associated Fortran pointer correctly allocated.@\
 ! \item[{[docopy]}] @\
 !   An optional copy flag which can be specified. @\
@@ -70,10 +71,12 @@ module ESMF_LocalArrayGetMod
 ^undef  ESMF_METHOD @\
 !define ESMF_METHOD "ESMF_LocalArrayGetData##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrayGetData" @\
-    subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(larray, fptr, docopy, rc) @\
+    subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(localarray, & @\
+      farrayPtr, keywordEnforcer, docopy, rc) @\
  @\
-      type(ESMF_LocalArray) :: larray @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+      type(ESMF_LocalArray) :: localarray @\
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc @\
  @\
@@ -97,39 +100,39 @@ module ESMF_LocalArrayGetMod
         if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
       endif @\
  @\
-      ! Check tkr matching between larray and fptr @\
-      call ESMF_LocalArrayGet(larray, typekind=typekind, rank=rank, rc=localrc) @\
+      ! Check tkr matching between localarray and farrayPtr @\
+      call ESMF_LocalArrayGet(localarray, typekind=typekind, rank=rank, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
       ! check typekind match @\
       if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-          "- fptr typekind does not match LocalArray typekind", & @\
+          "- farrayPtr typekind does not match LocalArray typekind", & @\
           ESMF_CONTEXT, rc) @\
         return @\
       endif @\
       ! check rank match @\
       if (rank /= mrank) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-          "- fptr rank does not match LocalArray rank", & @\
+          "- farrayPtr rank does not match LocalArray rank", & @\
           ESMF_CONTEXT, rc) @\
         return @\
       endif @\
  @\
-      ! Gain access to the F90 array pointer stored in larray @\
-      call c_ESMC_LocalArrayGetFPtr(larray, wrap, localrc) @\
+      ! Gain access to the F90 array pointer stored in localarray @\
+      call c_ESMC_LocalArrayGetFPtr(localarray, wrap, localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rc)) return @\
  @\
       ! Allocate a new buffer if requested and return a copy @\
       if (copyreq) then @\
-        call c_ESMC_LocalArrayGetLbounds(larray, lb, localrc) @\
+        call c_ESMC_LocalArrayGetLbounds(localarray, lb, localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
-        call c_ESMC_LocalArrayGetUbounds(larray, ub, localrc) @\
+        call c_ESMC_LocalArrayGetUbounds(localarray, ub, localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rc)) return @\
@@ -140,23 +143,23 @@ module ESMF_LocalArrayGetMod
           "local data space", & @\
           ESMF_CONTEXT, rc)) return @\
         ! test if incoming pointer was associated @\
-        if (associated(fptr)) then @\
-          if (size(fptr) .ne. size(lp)) then @\
+        if (associated(farrayPtr)) then @\
+          if (size(farrayPtr) .ne. size(lp)) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-              "- fptr was associated but of incorrect size", & @\
+              "- farrayPtr was associated but of incorrect size", & @\
               ESMF_CONTEXT, rc) @\
             return @\
           endif @\
           ! this must do a contents assignment to perform a copy operation @\
-          fptr = wrap%ptr##mrank##D##mtypekind @\
+          farrayPtr = wrap%ptr##mrank##D##mtypekind @\
           deallocate(lp) @\
         else @\
           ! this must do a contents assignment to perform a copy operation @\
           lp = wrap%ptr##mrank##D##mtypekind @\
-          fptr => lp  @\
+          farrayPtr => lp  @\
         endif @\
       else @\
-        fptr => wrap%ptr##mrank##D##mtypekind ! return a reference @\
+        farrayPtr => wrap%ptr##mrank##D##mtypekind ! return a reference @\
       endif @\
  @\
       ! return successfully @\
@@ -204,7 +207,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.20 2011/01/08 16:22:39 svasquez Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.21 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -262,18 +265,19 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
-  subroutine ESMF_LocalArrayGetDefault(larray, typekind, rank, counts, &
-    lbounds, ubounds, base, name, rc)
+  subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
+    typekind, rank, counts, lbounds, ubounds, base, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray),      intent(in)            :: larray
+    type(ESMF_LocalArray),      intent(in)            :: localarray
+	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TypeKind),        intent(out), optional :: typekind
     integer,                    intent(out), optional :: rank
     integer,                    intent(out), optional :: counts(:)
     integer,                    intent(out), optional :: lbounds(:)
     integer,                    intent(out), optional :: ubounds(:)
     type(ESMF_Pointer),         intent(out), optional :: base
-    character(len=ESMF_MAXSTR), intent(out), optional :: name
+    character(len=*), intent(out), optional :: name
     integer,                    intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
@@ -281,7 +285,7 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[larray] 
+!   \item[localarray] 
 !     Queried {\tt ESMF\_LocalArray} object.
 !   \item[{[typekind]}]
 !     TypeKind of the LocalArray object.
@@ -311,9 +315,9 @@ contains
     localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, larray, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, localarray, rc)
 
-    call c_ESMC_LocalArrayGetRank(larray, lrank, localrc)
+    call c_ESMC_LocalArrayGetRank(localarray, lrank, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -323,7 +327,7 @@ contains
     endif
 
     if (present(typekind)) then
-      call c_ESMC_LocalArrayGetTypeKind(larray, typekind, localrc)
+      call c_ESMC_LocalArrayGetTypeKind(localarray, typekind, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -336,7 +340,7 @@ contains
           ESMF_CONTEXT, rc)
         return
       endif
-      call c_esmc_localarraygetcounts(larray, counts, localrc)
+      call c_esmc_localarraygetcounts(localarray, counts, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -349,7 +353,7 @@ contains
           ESMF_CONTEXT, rc)
         return
       endif
-      call c_ESMC_LocalArrayGetLbounds(larray, lbounds, localrc)
+      call c_ESMC_LocalArrayGetLbounds(localarray, lbounds, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -362,21 +366,21 @@ contains
           ESMF_CONTEXT, rc)
         return
       endif
-      call c_ESMC_LocalArrayGetUbounds(larray, ubounds, localrc)
+      call c_ESMC_LocalArrayGetUbounds(localarray, ubounds, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(base)) then
-      call c_ESMC_LocalArrayGetBaseAddr(larray, base, localrc)
+      call c_ESMC_LocalArrayGetBaseAddr(localarray, base, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(name)) then
-      call c_ESMC_GetName(larray, name, localrc)
+      call c_ESMC_GetName(localarray, name, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

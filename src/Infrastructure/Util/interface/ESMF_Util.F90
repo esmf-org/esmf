@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.44 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_Util.F90,v 1.45 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -60,6 +60,11 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
+!  Overloaded = operator functions
+      public :: operator(==)
+      public :: operator(/=)
+      public :: assignment(=)
+
 !  STL map container interface
 
       public :: ESMF_UtilMapNameAdd
@@ -86,8 +91,6 @@
       public :: ESMF_TypeKindString
       public :: ESMF_LogicalString
 
-!  Overloaded = operator functions
-      public :: operator(.eq.), operator(.ne.), assignment(=)
 !
 !
 
@@ -101,7 +104,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.44 2011/01/05 20:05:46 svasquez Exp $'
+               '$Id: ESMF_Util.F90,v 1.45 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -933,12 +936,12 @@
 !
 !EOPI
 
-      if (status .eq. ESMF_STATUS_UNINIT) string = "Uninitialized"
-      if (status .eq. ESMF_STATUS_READY) string = "Ready"
-      if (status .eq. ESMF_STATUS_UNALLOCATED) string = "Unallocated"
-      if (status .eq. ESMF_STATUS_ALLOCATED) string = "Allocated"
-      if (status .eq. ESMF_STATUS_BUSY) string = "Busy"
-      if (status .eq. ESMF_STATUS_INVALID) string = "Invalid"
+      if (status == ESMF_STATUS_UNINIT) string = "Uninitialized"
+      if (status == ESMF_STATUS_READY) string = "Ready"
+      if (status == ESMF_STATUS_UNALLOCATED) string = "Unallocated"
+      if (status == ESMF_STATUS_ALLOCATED) string = "Allocated"
+      if (status == ESMF_STATUS_BUSY) string = "Busy"
+      if (status == ESMF_STATUS_INVALID) string = "Invalid"
  
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -976,17 +979,17 @@
 !EOPI
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-      if (datakind .eq. ESMF_TYPEKIND_I1)  string = "Integer*1"
+      if (datakind == ESMF_TYPEKIND_I1)  string = "Integer*1"
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-      if (datakind .eq. ESMF_TYPEKIND_I2)  string = "Integer*2"
+      if (datakind == ESMF_TYPEKIND_I2)  string = "Integer*2"
 #endif
-      if (datakind .eq. ESMF_TYPEKIND_I4)  string = "Integer*4"
-      if (datakind .eq. ESMF_TYPEKIND_I8)  string = "Integer*8"
-      if (datakind .eq. ESMF_TYPEKIND_R4)  string = "Real*4"
-      if (datakind .eq. ESMF_TYPEKIND_R8)  string = "Real*8"
-      if (datakind .eq. ESMF_C8)  string = "Complex*8"
-      if (datakind .eq. ESMF_C16) string = "Complex*16"
+      if (datakind == ESMF_TYPEKIND_I4)  string = "Integer*4"
+      if (datakind == ESMF_TYPEKIND_I8)  string = "Integer*8"
+      if (datakind == ESMF_TYPEKIND_R4)  string = "Real*4"
+      if (datakind == ESMF_TYPEKIND_R8)  string = "Real*8"
+      if (datakind == ESMF_C8)  string = "Complex*8"
+      if (datakind == ESMF_C16) string = "Complex*16"
  
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1023,8 +1026,8 @@
 !
 !EOPI
 
-      if (tf .eq. ESMF_TRUE)  string = "True"
-      if (tf .eq. ESMF_FALSE) string = "False"
+      if (tf == ESMF_TRUE)  string = "True"
+      if (tf == ESMF_FALSE) string = "False"
  
       if (present(rc)) rc = ESMF_SUCCESS
 

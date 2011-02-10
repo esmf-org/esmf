@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.24 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.25 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        bundle = ESMF_FieldBundleCreate(grid, 'mybundle', rc=localrc)
+        bundle = ESMF_FieldBundleCreate(grid, name='mybundle', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -238,7 +238,8 @@ contains
             enddo
         enddo
 
-        f1 = ESMF_FieldCreate(grid, farray1, ESMF_INDEX_DELOCAL, copyflag, name='field1', rc=localrc)
+        f1 = ESMF_FieldCreate(grid, farray1, ESMF_INDEX_DELOCAL, &
+               copyflag=copyflag, name='field1', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -248,7 +249,8 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
 
-        f2 = ESMF_FieldCreate(grid, farray2(:,:), ESMF_INDEX_DELOCAL, copyflag, name='field2', rc=localrc)
+        f2 = ESMF_FieldCreate(grid, farray2(:,:), ESMF_INDEX_DELOCAL, &
+               copyflag=copyflag, name='field2', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rc)) return
@@ -260,7 +262,8 @@ contains
 
         if(ldo_slicing) then
 
-            f3 = ESMF_FieldCreate(grid, farray3(:, 4:13), ESMF_INDEX_DELOCAL, copyflag, name='field3', rc=localrc)
+            f3 = ESMF_FieldCreate(grid, farray3(:, 4:13), ESMF_INDEX_DELOCAL, &
+                   copyflag=copyflag, name='field3', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -272,7 +275,8 @@ contains
         endif
 
         if(ldo_slicing1) then
-            f4 = ESMF_FieldCreate(grid, farray4(3:7, 4:13), ESMF_INDEX_DELOCAL, copyflag, name='field4', rc=localrc)
+            f4 = ESMF_FieldCreate(grid, farray4(3:7, 4:13), ESMF_INDEX_DELOCAL, &
+                   copyflag=copyflag, name='field4', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
@@ -282,7 +286,8 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return
 
-            f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), ESMF_INDEX_DELOCAL, copyflag, name='field5', rc=localrc)
+            f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), ESMF_INDEX_DELOCAL, &
+                   copyflag=copyflag, name='field5', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rc)) return

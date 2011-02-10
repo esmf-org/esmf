@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.85 2011/01/24 23:04:58 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.86 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2860,7 +2860,8 @@ endif
 !EOE
 
 !BOC
-   call ESMF_GridGet(grid2D, minIndex=minIndex, maxIndex=maxIndex, rc=rc)
+   call ESMF_GridGet(grid2D, minIndex=minIndex, maxIndex=maxIndex, &
+     staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
    print *, "minIndex(1), minIndex(2) = ", minIndex(1), minIndex(2)
    print *, "maxIndex(1), maxIndex(2) = ", maxIndex(1), maxIndex(2)
 !EOC

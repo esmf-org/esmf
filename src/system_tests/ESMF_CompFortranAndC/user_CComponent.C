@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.13 2010/10/08 15:39:45 oehmke Exp $
+// $Id: user_CComponent.C,v 1.14 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -247,7 +247,7 @@ extern "C" {
     
     printf("In mySetServicesInC()\n");
     
-    *rc = ESMC_GridCompPrint(gcomp, "");
+    *rc = ESMC_GridCompPrint(gcomp);
     if (*rc!=ESMF_SUCCESS) return;  // bail out
 
     *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.81 2011/01/24 22:31:17 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.82 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -166,8 +166,8 @@
        ! public ESMF_FieldBundleCongDataVdate  ! For Standardized Initialization
        ! ESMF_FieldBundleCongrntData(Init) and (GetInit) are private
 
-!       public operator(==) ! operator defined as .eq. below
-!       public operator(/=) ! operator defined as .ne. below
+       public operator(==)
+       public operator(/=)
 
        public ESMF_LocalFieldBundleInit     ! For Standardized Initialization
        public ESMF_LocalFieldBundleValidate ! For Standardized Initialization
@@ -219,8 +219,6 @@
     public ESMF_FieldBundlePrint        ! Print contents of a FieldBundle
     public ESMF_FieldBundleWrite        ! Write array contents of a FieldBundle
     public ESMF_FieldBundleRead         ! Read array contents for a FieldBundle
-
-    public operator(.eq.), operator(.ne.)
 
 !  !subroutine ESMF_FieldBundleWriteRestart(fieldbundle, rc)
 !  !function ESMF_FieldBundleReadRestart(name, rc)
@@ -327,11 +325,11 @@
 
 
 !------------------------------------------------------------------------------
-interface operator (.eq.)
+interface operator (==)
  module procedure ESMF_pfeq
 end interface
 
-interface operator (.ne.)
+interface operator (/=)
  module procedure ESMF_pfne
 end interface
 
@@ -379,7 +377,7 @@ end interface
 ! !IROUTINE: ESMF_FieldBundleOperator(==) - FieldBundle equality operator
 !
 ! !INTERFACE:
-  interface operator(.eq.)
+  interface operator(==)
 !   if (fieldbundle1 == fieldbundle2) then ... endif
 !             OR
 !   result = (fieldbundle1 == fieldbundle2)
@@ -421,7 +419,7 @@ end interface
 ! !IROUTINE: ESMF_FieldBundleOperator(/=) - FieldBundle not equal operator
 !
 ! !INTERFACE:
-  interface operator(.ne.)
+  interface operator(/=)
 !   if (fieldbundle1 == fieldbundle2) then ... endif
 !             OR
 !   result = (fieldbundle1 == fieldbundle2)
@@ -473,14 +471,14 @@ function ESMF_pfeq(pf1, pf2)
  logical ESMF_pfeq
  type(ESMF_PackFlag), intent(in) :: pf1, pf2
 
- ESMF_pfeq = (pf1%packflag .eq. pf2%packflag)
+ ESMF_pfeq = (pf1%packflag == pf2%packflag)
 end function
 
 function ESMF_pfne(pf1, pf2)
  logical ESMF_pfne
  type(ESMF_PackFlag), intent(in) :: pf1, pf2
 
- ESMF_pfne = (pf1%packflag .ne. pf2%packflag)
+ ESMF_pfne = (pf1%packflag /= pf2%packflag)
 end function
 
 
@@ -524,8 +522,8 @@ end function
     fbinit2 = ESMF_FieldBundleGetInit(fieldbundle2)
 
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
-    if (fbinit1 .eq. ESMF_INIT_CREATED .and. &
-      fbinit2 .eq. ESMF_INIT_CREATED) then
+    if (fbinit1 == ESMF_INIT_CREATED .and. &
+      fbinit2 == ESMF_INIT_CREATED) then
       ESMF_FieldBundleEQ = associated(fieldbundle1%btypep,fieldbundle2%btypep)
     else
       ESMF_FieldBundleEQ = ESMF_FALSE
@@ -580,12 +578,14 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAdd()
-      subroutine ESMF_FieldBundleAddOneField(fieldbundle, field, rc)
+      subroutine ESMF_FieldBundleAddOneField(fieldbundle, field, &
+        keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      type(ESMF_Field), intent(inout) :: field
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+      type(ESMF_Field),       intent(inout)         :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Adds a single {\tt field} to an existing {\tt fieldbundle}.  The
@@ -660,13 +660,14 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAdd()
       subroutine ESMF_FieldBundleAddFieldList(fieldbundle, fieldCount, &
-          fieldList, rc)
+          fieldList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle        
-      integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(inout) :: fieldList
-      integer, intent(out), optional :: rc          
+      type(ESMF_FieldBundle),         intent(inout)         :: fieldbundle        
+      integer,                        intent(in)            :: fieldCount
+      type(ESMF_Field), dimension(:), intent(inout)         :: fieldList
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                        intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
 !      Adds a {\tt fieldList} to an existing {\tt ESMF\_FieldBundle}.  
@@ -753,17 +754,18 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
       function ESMF_FieldBundleCreateNew(fieldCount, fieldList, &
-                                    packflag, name, rc)
+        keywordEnforcer, packflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: fieldCount           
-      type(ESMF_Field), dimension (:) :: fieldList
-      type(ESMF_PackFlag), intent(in), optional :: packflag 
-      character (len = *), intent(in), optional :: name 
-      integer, intent(out), optional :: rc             
+      integer,                        intent(in)            :: fieldCount           
+      type(ESMF_Field), dimension (:)                       :: fieldList
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_PackFlag),            intent(in),  optional :: packflag 
+      character (len = *),            intent(in),  optional :: name 
+      integer,                        intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -880,14 +882,15 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFNone(name, rc)
+      function ESMF_FieldBundleCreateNFNone(keywordEnforcer, name, rc)
 !
 ! !RETURN VALUE:                
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFNone
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in), optional :: name 
-      integer, intent(out), optional :: rc             
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len = *), intent(in),  optional :: name 
+      integer,             intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -949,15 +952,16 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFGrid(grid, name, rc)
+      function ESMF_FieldBundleCreateNFGrid(grid, keywordEnforcer, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFGrid
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      character (len = *), intent(in), optional :: name 
-      integer, intent(out), optional :: rc             
+      type(ESMF_Grid),     intent(in)            :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len = *), intent(in),  optional :: name 
+      integer,             intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -1049,15 +1053,16 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFMesh(mesh, name, rc)
+      function ESMF_FieldBundleCreateNFMesh(mesh, keywordEnforcer, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFMesh
 !
 ! !ARGUMENTS:
-      type(ESMF_Mesh), intent(in) :: mesh
-      character (len = *), intent(in), optional :: name 
-      integer, intent(out), optional :: rc             
+      type(ESMF_Mesh),     intent(in)            :: mesh
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len = *), intent(in),  optional :: name 
+      integer,             intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -1136,15 +1141,16 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFLS(locstream, name, rc)
+      function ESMF_FieldBundleCreateNFLS(locstream, keywordEnforcer, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFLS
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in) :: locstream
-      character (len = *), intent(in), optional :: name 
-      integer, intent(out), optional :: rc             
+      type(ESMF_LocStream), intent(in)            :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len = *),  intent(in),  optional :: name 
+      integer,              intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -1220,10 +1226,11 @@ end function
 ! !IROUTINE: ESMF_FieldBundleDestroy - Free all resources associated with a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleDestroy(fieldbundle, rc)
+      subroutine ESMF_FieldBundleDestroy(fieldbundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -1287,18 +1294,19 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetInfo(fieldbundle, geomtype, grid, mesh, &
-                          locstream, fieldCount, name, rc)
+      subroutine ESMF_FieldBundleGetInfo(fieldbundle, keywordEnforcer, &
+        geomtype, grid, mesh, locstream, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      type(ESMF_GeomType), intent(out), optional :: geomtype
-      type(ESMF_Grid), intent(out), optional :: grid
-      type(ESMF_Mesh), intent(out), optional :: mesh
-      type(ESMF_LocStream), intent(out), optional :: locstream
-      integer, intent(out), optional :: fieldCount
-      character (len = *), intent(out), optional :: name
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_GeomType),    intent(out), optional :: geomtype
+      type(ESMF_Grid),        intent(out), optional :: grid
+      type(ESMF_Mesh),        intent(out), optional :: mesh
+      type(ESMF_LocStream),   intent(out), optional :: locstream
+      integer,                intent(out), optional :: fieldCount
+      character (len = *),    intent(out), optional :: name
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Returns information about the {\tt fieldbundle}.  
@@ -1358,7 +1366,7 @@ end function
 
     ! Get the geometry type
     if (present(geomtype)) then
-        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+        if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                             "No Grid or Mesh or LocStream attached to FieldBundle", &
                              ESMF_CONTEXT, rc)) return
@@ -1372,7 +1380,7 @@ end function
     endif
 
     if (present(grid)) then
-        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+        if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                             "No Grid or invalid Grid attached to FieldBundle", &
                              ESMF_CONTEXT, rc)) return
@@ -1385,7 +1393,7 @@ end function
     endif
 
     if (present(mesh)) then
-        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+        if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                             "No Mesh or invalid Mesh attached to FieldBundle", &
                              ESMF_CONTEXT, rc)) return
@@ -1398,7 +1406,7 @@ end function
     endif
 
     if (present(locstream)) then
-        if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+        if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                             "No LocStream or invalid LocStream attached to FieldBundle", &
                              ESMF_CONTEXT, rc)) return
@@ -1513,8 +1521,8 @@ end function
       logical :: ESMF_FieldBundleIsCongruent
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      integer, intent(out), optional :: rc   
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+      integer,                intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !      Returns {\tt .TRUE.} if the data in all {\tt ESMF\_Fields} in the
@@ -1578,7 +1586,7 @@ end function
         call ESMF_FieldGet(fieldp, array=array, datamap=datamap, &
                            staggerloc=pattern%datastaggerloc, &
                            haloWidth=pattern%haloWidth, rc=status)
-        if (status .ne. ESMF_SUCCESS) cycle
+        if (status /= ESMF_SUCCESS) cycle
 
 
         ! if you get here, this field has an array.  check it for 
@@ -1586,11 +1594,11 @@ end function
         call ESMF_InternArrayGet(array, rank=pattern%datarank, &
                            typekind=pattern%typekind, &
                            rc=status)
-        if (status .ne. ESMF_SUCCESS) cycle
+        if (status /= ESMF_SUCCESS) cycle
 
         call ESMF_FieldDataMapGet(datamap, dataIndexList=pattern%indexorders, &
                                   counts=pattern%nonindexcounts, rc=status)
-        if (status .ne. ESMF_SUCCESS) cycle
+        if (status /= ESMF_SUCCESS) cycle
 
         newstart = i+1
         exit
@@ -1614,32 +1622,32 @@ end function
         call ESMF_FieldGet(fieldp, array=array, datamap=datamap, &
                            staggerloc=candidate%datastaggerloc, &
                            haloWidth=candidate%haloWidth, rc=status)
-        if (status .ne. ESMF_SUCCESS) return
+        if (status /= ESMF_SUCCESS) return
 
         ! if you get here, this field has an array.  check it for 
         ! data types, etc.
         call ESMF_InternArrayGet(array, rank=candidate%datarank, &
                            typekind=candidate%typekind, &
                            rc=status)
-        if (status .ne. ESMF_SUCCESS) return
+        if (status /= ESMF_SUCCESS) return
 
         call ESMF_FieldDataMapGet(datamap, &
                                   dataIndexList=candidate%indexorders, &
                                   counts=candidate%nonindexcounts, rc=status)
-        if (status .ne. ESMF_SUCCESS) return
+        if (status /= ESMF_SUCCESS) return
 
         ! now we have all the info; compare and bail on first mismatch
-        if (pattern%datarank .ne. candidate%datarank ) return
-        if (pattern%typekind .ne. candidate%typekind ) return
-        if (pattern%haloWidth .ne. candidate%haloWidth) return
-        if (pattern%datastaggerloc .ne. candidate%datastaggerloc) return
+        if (pattern%datarank /= candidate%datarank ) return
+        if (pattern%typekind /= candidate%typekind ) return
+        if (pattern%haloWidth /= candidate%haloWidth) return
+        if (pattern%datastaggerloc /= candidate%datastaggerloc) return
 
         ! TODO: finish this
         !do j=1, gridrank
-        !if (pattern%indexorders(ESMF_MAXDIM) .ne. &
+        !if (pattern%indexorders(ESMF_MAXDIM) /= &
         !     candidate%indexorders(ESMF_MAXDIM)) return
         !do j=1, datarank-gridrank 
-        !if (pattern%nonindexcounts(ESMF_MAXDIM) .ne. &
+        !if (pattern%nonindexcounts(ESMF_MAXDIM) /= &
         !     candidate%nonindexcounts(ESMF_MAXDIM)) return
 
       enddo
@@ -1663,13 +1671,15 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, name, field, rc)
+      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, name, field, &
+        keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      character (len = *), intent(in) :: name
-      type(ESMF_Field), intent(out) :: field
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+      character (len = *),    intent(in)            :: name
+      type(ESMF_Field),       intent(out)           :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Returns a {\tt field} from a {\tt fieldbundle} using
@@ -1717,7 +1727,7 @@ end function
       btype => fieldbundle%btypep
 
       ! Check for an empty FieldBundle first
-      if(btype%field_count .eq. 0) then
+      if(btype%field_count == 0) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "Empty FieldBundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -1732,7 +1742,7 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-       if (name .eq. temp_name) then
+       if (name == temp_name) then
            field = fieldbundle%btypep%flist(i) 
            found = .TRUE.
            ! found match, exit loop early
@@ -1760,13 +1770,14 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
       subroutine ESMF_FieldBundleGetFieldByNum(fieldbundle, fieldIndex, &
-           field, rc)
+        field, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      integer, intent(in) :: fieldIndex
-      type(ESMF_Field), intent(out) :: field
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+      integer,                intent(in)            :: fieldIndex
+      type(ESMF_Field),       intent(out)           :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Returns a {\tt field} from a {\tt fieldbundle} by index number.
@@ -1808,7 +1819,7 @@ end function
       btype => fieldbundle%btypep
 
       ! Check for an empty FieldBundle first
-      if(btype%field_count .eq. 0) then
+      if(btype%field_count == 0) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "Empty FieldBundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -1841,13 +1852,14 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
       subroutine ESMF_FieldBundleGetFieldNames(fieldbundle, nameList, &
-          nameCount, rc)
+        keywordEnforcer, nameCount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle 
-      character (len = *), intent(out) :: nameList(:)
-      integer, intent(out), optional :: nameCount     
-      integer, intent(out), optional :: rc     
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle 
+      character (len = *),    intent(out)           :: nameList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: nameCount     
+      integer,                intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Returns an array of {\tt ESMF\_Field} names in an {\tt ESMF\_FieldBundle}.
@@ -1907,12 +1919,12 @@ end function
 ! !IROUTINE: ESMF_FieldBundlePrint - Print information about a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundlePrint(fieldbundle, options, rc)
+      subroutine ESMF_FieldBundlePrint(fieldbundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      character (len=*), intent(in), optional :: options
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Prints diagnostic information about the {\tt fieldbundle}
@@ -1928,8 +1940,6 @@ end function
 !     \begin{description}
 !     \item [fieldbundle]
 !           An {\tt ESMF\_FieldBundle} object.
-!     \item [{[options]}]
-!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2007,12 +2017,13 @@ end function
 ! \label{api:FieldBundleRead}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRead(fieldbundle, file, singleFile, &
-         iofmt, rc)
+      subroutine ESMF_FieldBundleRead(fieldbundle, file, keywordEnforcer, &
+        singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
       character(*),           intent(in)              :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),   optional  :: singleFile
       type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
       integer,                intent(out),  optional  :: rc
@@ -2133,8 +2144,8 @@ end function
 !      type(ESMF_FieldBundle) :: ESMF_FieldBundleReadRestart
 !
 ! !ARGUMENTS:
-!      character (len = *), intent(in) :: name     
-!      integer, intent(out), optional :: rc         
+!      character (len = *), intent(in)            :: name     
+!      integer,             intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
@@ -2177,9 +2188,9 @@ end function
       subroutine ESMF_FieldBundleRemoveField(fieldbundle, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      character (len = *), intent(in) :: name
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+      character (len = *),    intent(in)            :: name
+      integer,                intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -2223,10 +2234,10 @@ end function
       subroutine ESMF_FieldBundleSetDataValues(fieldbundle, index, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      integer, dimension (:), intent(in) :: index
-      real(ESMF_KIND_R8), dimension (:), intent(in) :: value
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle),            intent(inout)         :: fieldbundle
+      integer, dimension (:),            intent(in)            :: index
+      real(ESMF_KIND_R8), dimension (:), intent(in)            :: value
+      integer,                           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allows data values associated with an {\tt ESMF\_FieldBundle} to be 
@@ -2274,12 +2285,13 @@ end function
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
-      subroutine ESMF_FieldBundleSetGrid(fieldbundle, grid, rc)
+      subroutine ESMF_FieldBundleSetGrid(fieldbundle, grid, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+      type(ESMF_Grid),        intent(in)            :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -2326,7 +2338,7 @@ end function
    
       ! here we will only let someone associate a grid with a fieldbundle
       ! if there is not one already associated with it.  
-      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+      if (btype%gridstatus == ESMF_STATUS_READY) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "FieldBundle is already associated with a Grid", &
                                  ESMF_CONTEXT, rc)) return
@@ -2368,12 +2380,13 @@ end function
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
-      subroutine ESMF_FieldBundleSetMesh(fieldbundle, mesh, rc)
+      subroutine ESMF_FieldBundleSetMesh(fieldbundle, mesh, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      type(ESMF_Mesh), intent(in) :: mesh
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+      type(ESMF_Mesh),        intent(in)            :: mesh
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -2419,7 +2432,7 @@ end function
    
       ! here we will only let someone associate a grid with a fieldbundle
       ! if there is not one already associated with it.  
-      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+      if (btype%gridstatus == ESMF_STATUS_READY) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "FieldBundle is already associated with a geometry", &
                                  ESMF_CONTEXT, rc)) return
@@ -2450,12 +2463,14 @@ end function
 ! 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleSet()
-      subroutine ESMF_FieldBundleSetLS(fieldbundle, locstream, rc)
+      subroutine ESMF_FieldBundleSetLS(fieldbundle, locstream, &
+        keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundle
-      type(ESMF_LocStream), intent(in) :: locstream
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+      type(ESMF_LocStream),   intent(in)            :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Sets the {\tt locstream} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
@@ -2499,7 +2514,7 @@ end function
    
       ! here we will only let someone associate a grid with a fieldbundle
       ! if there is not one already associated with it.  
-      if (btype%gridstatus .eq. ESMF_STATUS_READY) then
+      if (btype%gridstatus == ESMF_STATUS_READY) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "FieldBundle is already associated with a geometry", &
                                  ESMF_CONTEXT, rc)) return
@@ -2526,12 +2541,12 @@ end function
 ! !IROUTINE: ESMF_FieldBundleValidate - Check validity of a FieldBundle
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleValidate(fieldbundle, options, rc)
+      subroutine ESMF_FieldBundleValidate(fieldbundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in) :: fieldbundle
-      character (len=*), intent(in), optional :: options 
-      integer, intent(out), optional :: rc
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt fieldbundle} is internally consistent.
@@ -2543,8 +2558,6 @@ end function
 !     \begin{description}
 !     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to validate.
-!     \item [{[options]}]
-!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt fieldbundle}
 !           is valid.
@@ -2575,7 +2588,7 @@ end function
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
           
-      if (fieldbundlestatus .ne. ESMF_STATUS_READY) then
+      if (fieldbundlestatus /= ESMF_STATUS_READY) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed FieldBundle", &
                                  ESMF_CONTEXT, rc)) return
@@ -2596,12 +2609,13 @@ end function
 ! \label{api:FieldBundleWrite}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(fieldbundle, file, singleFile, &
-            timeslice, iofmt, rc)
+      subroutine ESMF_FieldBundleWrite(fieldbundle, file, keywordEnforcer, &
+        singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
       character(*),           intent(in)             :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),  optional  :: singleFile
       integer,                intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
@@ -2867,7 +2881,7 @@ end function
       !    if all ok, then if fieldbundle had no grid originally, set it here 
 
       isGeomFound=.false.
-      if (btype%gridstatus .ne. ESMF_STATUS_READY) then
+      if (btype%gridstatus /= ESMF_STATUS_READY) then
           do i=1, fieldCount
             ! determine if a Field is committed and has a Grid associated with it
             call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
@@ -2948,7 +2962,7 @@ end function
        endif
 
        ! Set FieldBundle geombase if we now have one
-       if (isGeomFound .and. (btype%gridstatus .ne. ESMF_STATUS_READY)) then
+       if (isGeomFound .and. (btype%gridstatus /= ESMF_STATUS_READY)) then
             ! Get geom based on geomtype
             if (geomtype==ESMF_GEOMTYPE_GRID) then
                ! Construct GeomBase for FieldBundle
@@ -3001,7 +3015,7 @@ end function
                         ESMF_CONTEXT, rc)) return
 
             ! Make sure geomtypes match
-            if (geomType .ne. geomTypeToCheck) then
+            if (geomType /= geomTypeToCheck) then
                if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                    " Fields in Field Bundle must all have the same type of gemetry (e.g. grid, mesh, etc)", &
                     ESMF_CONTEXT, rc)) return     
@@ -3074,7 +3088,7 @@ end function
       ! have passed the consistency check.  add them to the fieldbundle.
 
       ! Add the fields in the list, checking for consistency.
-      if (btype%field_count .eq. 0) then
+      if (btype%field_count == 0) then
         
           wasempty = .TRUE. 
 
@@ -3119,7 +3133,7 @@ end function
       endif
 
       ! If packed data buffer requested, create or update it here.
-      ! if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
+      ! if (btype%pack_flag == ESMF_PACKED_DATA) then
 
       !   call ESMF_FieldBundleTypeRepackData(btype, rc=status)
       !   if (ESMF_LogFoundAllocError(status, ESMF_ERR_PASSTHRU, &
@@ -3251,7 +3265,7 @@ end function
 
       ! If specified, set packflag and interleave
       if(present(packflag)) then
-        if(packflag.eq.ESMF_PACKED_DATA) then
+        if(packflag==ESMF_PACKED_DATA) then
           call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
                                  "Packed data option not implemented", &
                                  ESMF_CONTEXT, rc) 
@@ -3383,7 +3397,7 @@ end function
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rc)) return
 
-      if (fieldbundlestatus .eq. ESMF_STATUS_READY) then
+      if (fieldbundlestatus == ESMF_STATUS_READY) then
         if (associated(btype%flist)) then
           deallocate(btype%flist, stat=localrc)
           if (ESMF_LogFoundAllocError(localrc, "FieldBundle deallocate", &
@@ -3495,7 +3509,7 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
+      if (bp%gridstatus == ESMF_STATUS_READY) then
           call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
                                   attreconflag=lattreconflag, &
                                   inquireflag=linquireflag, rc=localrc)
@@ -3615,7 +3629,7 @@ end function
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      if (bp%gridstatus .eq. ESMF_STATUS_READY) then
+      if (bp%gridstatus == ESMF_STATUS_READY) then
           bp%geombase = ESMF_GeomBaseDeserialize(buffer, offset, &
                                       attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -3630,7 +3644,7 @@ end function
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) return
 
-            if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
+            if (geomtype == ESMF_GEOMTYPE_GRID) then
        	       call ESMF_GeomBaseGet(bp%geombase,grid=grid,rc=localrc)            
                if (ESMF_LogFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &

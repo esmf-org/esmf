@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.67 2011/01/25 15:34:54 rokuingh Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.68 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.67 2011/01/25 15:34:54 rokuingh Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.68 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -542,7 +542,7 @@ end subroutine f_esmf_gridcompget
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcompvalidate"
-subroutine f_esmf_gridcompvalidate(comp, options, rc)
+subroutine f_esmf_gridcompvalidate(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -552,18 +552,17 @@ subroutine f_esmf_gridcompvalidate(comp, options, rc)
   implicit none
 
   type(ESMF_GridComp) :: comp      
-  character(len=*)    :: options
   integer             :: rc     
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompValidate(comp, options=options, rc=rc)
+  call ESMF_GridCompValidate(comp, rc=rc)
 end subroutine f_esmf_gridcompvalidate
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcompprint"
-subroutine f_esmf_gridcompprint(comp, options, rc)
+subroutine f_esmf_gridcompprint(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -573,13 +572,12 @@ subroutine f_esmf_gridcompprint(comp, options, rc)
   implicit none
 
   type(ESMF_GridComp) :: comp      
-  character(len=*)    :: options
   integer             :: rc     
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_GridCompPrint(comp, options=options, rc=rc)
+  call ESMF_GridCompPrint(comp, rc=rc)
 end subroutine f_esmf_gridcompprint
 
 
@@ -802,7 +800,7 @@ end subroutine f_esmf_cplcompget
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcompvalidate"
-subroutine f_esmf_cplcompvalidate(comp, options, rc)
+subroutine f_esmf_cplcompvalidate(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -812,15 +810,14 @@ subroutine f_esmf_cplcompvalidate(comp, options, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp      
-  character(len=*)   :: options
   integer            :: rc     
 
-  call ESMF_CplCompValidate(comp, options=options, rc=rc)
+  call ESMF_CplCompValidate(comp, rc=rc)
 end subroutine f_esmf_cplcompvalidate
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcompprint"
-subroutine f_esmf_cplcompprint(comp, options, rc)
+subroutine f_esmf_cplcompprint(comp, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -830,11 +827,10 @@ subroutine f_esmf_cplcompprint(comp, options, rc)
   implicit none
 
   type(ESMF_CplComp) :: comp      
-  character(len=*)   :: options
   integer            :: rc     
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CplCompPrint(comp, options=options, rc=rc)
+  call ESMF_CplCompPrint(comp, rc=rc)
 end subroutine f_esmf_cplcompprint

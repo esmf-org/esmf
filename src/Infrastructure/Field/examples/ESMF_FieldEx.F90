@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.30 2011/01/18 18:24:09 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.31 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -290,11 +290,11 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! setup arrayspec
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field from the Grid and arrayspec
-    field1 = ESMF_FieldCreate(grid, arrayspec, ESMF_INDEX_DELOCAL, &
+    field1 = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -342,10 +342,10 @@
           maxIndex=(/180,360/), regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid2d, arrayspec, ESMF_INDEX_DELOCAL, &
+    field1 = ESMF_FieldCreate(grid2d, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, &
          gridToFieldMap=(/1,2/), &
          ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
@@ -376,7 +376,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a 2D ESMF_TYPEKIND_R4 arrayspec
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Create a ESMF_Array from the arrayspec and distgrid
@@ -434,7 +434,7 @@
 
 !BOC
     ! create an empty Field
-    field3 = ESMF_FieldCreateEmpty("precip", rc=rc)
+    field3 = ESMF_FieldCreateEmpty(name="precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! use FieldGet to retrieve total counts 

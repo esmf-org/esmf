@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.13 2011/01/05 23:26:30 svasquez Exp $
+! $Id: ESMF_FieldWr.F90,v 1.14 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -71,12 +71,14 @@ contains
 ! \label{api:FieldWrite}
 
 ! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, file, append, timeslice, iofmt, rc)
+      subroutine ESMF_FieldWrite(field, file, keywordEnforcer, &
+        append, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field),     intent(inout)          :: field 
       character(*),         intent(in)             :: file 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,              intent(in),  optional  :: append
       integer,              intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt

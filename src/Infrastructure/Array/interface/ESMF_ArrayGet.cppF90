@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.54 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.55 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.54 2011/01/25 20:55:52 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.55 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
 
 !==============================================================================
 ! 
@@ -135,9 +135,9 @@ contains
     arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
     exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
     totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
-    totalUWidth, name, distgrid, dimCount, tileCount, minIndexPDimPTile, &
+    totalUWidth, distgrid, dimCount, tileCount, minIndexPDimPTile, &
     maxIndexPDimPTile, tileListPDe, indexCountPDimPDe, delayout, deCount, &
-    localDeCount, localDeList, rc)
+    localDeCount, localDeList, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
@@ -162,7 +162,6 @@ contains
     integer,               target, intent(out), optional :: computationalUWidth(:,:)
     integer,               target, intent(out), optional :: totalLWidth(:,:)
     integer,               target, intent(out), optional :: totalUWidth(:,:)
-    character(len=*),              intent(out), optional :: name
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
     integer,                       intent(out), optional :: tileCount
@@ -174,6 +173,7 @@ contains
     integer,                       intent(out), optional :: deCount
     integer,                       intent(out), optional :: localDeCount
     integer,                       intent(out), optional :: localDeList(:)
+    character(len=*),              intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
 !         
 !
@@ -278,8 +278,6 @@ contains
 !     all PET-local DEs. {\tt totalUWidth} must be allocated to be
 !     of size {\tt (dimCount, localDeCount)}.
 !     \end{sloppypar}
-!   \item [{[name]}]
-!     Name of the Array object.
 !   \item[{[distgrid]}]
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
 !   \item[{[dimCount]}]
@@ -312,6 +310,8 @@ contains
 !     Upon return this holds the list of DE ids for the PET-local
 !     DEs defined in the DELayout associated with the Array object.
 !     The provided argument must be of size {\tt localDeCount}.
+!   \item [{[name]}]
+!     Name of the Array object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -757,7 +757,7 @@ contains
     call ESMF_ArrayGet(array, localDe=localDe, localarray=localarray, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_LocalArrayGet(localarray, farrayPtr, ESMF_DATA_REF, rc=localrc) @\
+    call ESMF_LocalArrayGet(localarray, farrayPtr, docopy=ESMF_DATA_REF, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
@@ -878,13 +878,14 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetTotalElementMask1D(array, routehandlelist, localDe, &
-    totalElementMask, rc)
+    totalElementMask, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
     integer,        target, intent(out)           :: totalElementMask(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -916,13 +917,14 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetTotalElementMask2D(array, routehandlelist, localDe, &
-    totalElementMask, rc)
+    totalElementMask, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
     integer,        target, intent(out)           :: totalElementMask(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -954,13 +956,14 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetTotalElementMask3D(array, routehandlelist, localDe, &
-    totalElementMask, rc)
+    totalElementMask, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
     type(ESMF_RouteHandle), intent(in)            :: routehandlelist(:)
     integer,                intent(in)            :: localDe
     integer,        target, intent(out)           :: totalElementMask(:,:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -991,12 +994,13 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetHalo(array, routehandle, regionflag, &
+  subroutine ESMF_ArrayGetHalo(array, routehandle, keywordEnforcer, regionflag, &
     haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)             :: array
     type(ESMF_RouteHandle), intent(in)             :: routehandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RegionFlag),  intent(out),  optional :: regionflag
     integer,        target, intent(out),  optional :: haloLDepth(:)
     integer,        target, intent(out),  optional :: haloUDepth(:)

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.88 2011/02/04 22:27:49 ESRL\silverio.vasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.89 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.88 2011/02/04 22:27:49 ESRL\silverio.vasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.89 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -206,7 +206,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from an empty import State 
-      call ESMF_StateGet(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="FieldBundle1", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting item info from an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -229,7 +229,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from destroyed import State 
-      call ESMF_StateGet(state1, name="FieldBundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="FieldBundle1", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Getting item info from destroyed State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -298,7 +298,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from State 
-      call ESMF_StateGet(state1, name="Temperature", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="Temperature", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting FieldBundle item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -338,21 +338,21 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      field5(1) = ESMF_FieldCreateEmpty("heat flux", rc=rc)
+      field5(1) = ESMF_FieldCreateEmpty(name="heat flux", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      field5(2) = ESMF_FieldCreateEmpty("density", rc=rc)
+      field5(2) = ESMF_FieldCreateEmpty(name="density", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      field5(3) = ESMF_FieldCreateEmpty("sea surface temperature", rc=rc)
+      field5(3) = ESMF_FieldCreateEmpty(name="sea surface temperature", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test 3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -376,7 +376,7 @@
       !EX_UTest
       ! Test adding Field to a State
       fieldname = "Humidity"
-      field1 = ESMF_FieldCreateEmpty(fieldname, rc=rc)
+      field1 = ESMF_FieldCreateEmpty(name=fieldname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -390,7 +390,7 @@
 
       !EX_UTest 
       ! Test Get Item Info from State 
-      call ESMF_StateGet(state1, name="Humidity", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="Humidity", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -408,7 +408,7 @@
 
       !EX_UTest 
       ! Test Get Unknown Item Info from State 
-      call ESMF_StateGet(state1, name="Humanity", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="Humanity", stateitemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting unknown item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -455,7 +455,7 @@
   !------------------------------------------------------------------------
   !EX_UTest 
   ! Test Get Item Info from State 
-  call ESMF_StateGet(state1, name="testArray", stateitemtype=stateItemType, rc=rc)
+  call ESMF_StateGet(state1, itemName="testArray", stateitemtype=stateItemType, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Getting Array item info from State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
@@ -905,7 +905,7 @@
       statename = "Export State"
       x = 4
       fieldname = "Precipitation"
-      field3(1) = ESMF_FieldCreateEmpty(fieldname, rc=rc)
+      field3(1) = ESMF_FieldCreateEmpty(name=fieldname, rc=rc)
       state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
                                 fieldList=field3, itemcount=x, rc=rc)
       write(failMsg, *) ""
@@ -922,7 +922,7 @@
       statename = "Export State"
       x = 1
       fieldname = "Precipitation"
-      field3(1) = ESMF_FieldCreateEmpty(fieldname, rc=rc)
+      field3(1) = ESMF_FieldCreateEmpty(name=fieldname, rc=rc)
       state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
                                 fieldList=field3(1:1), itemcount=x, rc=rc)
       write(failMsg, *) ""

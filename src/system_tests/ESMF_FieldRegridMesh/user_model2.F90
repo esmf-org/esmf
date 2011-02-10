@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2011/01/24 23:05:00 rokuingh Exp $
+! $Id: user_model2.F90,v 1.6 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -108,7 +108,7 @@
       endif
 
       ! Create source/destination fields
-      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc)
+      call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
 
       dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dst", rc=localrc)
