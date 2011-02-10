@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.329 2010/12/24 00:06:58 rokuingh Exp $
+#  $Id: common.mk,v 1.330 2011/02/10 17:44:56 gerhard.j.theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1389,7 +1389,7 @@ endif
 lib: info
 	@$(MAKE) build_libs
 	@$(MAKE) info_mk
-	@echo "ESMF library built successfully."
+	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
 
