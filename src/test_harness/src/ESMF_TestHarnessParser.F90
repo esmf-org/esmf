@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.10 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.11 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@ logical                       :: checkpoint = .FALSE.
 
   ! determine the number of entries
   call ESMF_ConfigGetDim(localcf, har%numRecords, ncolumns,                    &
-       trim(adjustL(ltag)), rc=localrc)
+       label=trim(adjustL(ltag)), rc=localrc)
   if( ESMF_LogFoundError(localrc, "cannot find the size of the table " //   &
       trim(adjustL(ltag)), rcToReturn=returnrc) ) return
 
@@ -566,7 +566,7 @@ logical                       :: checkpoint = .FALSE.
     ! determine the number of entries
     !---------------------------------------------------------------------------
     call ESMF_ConfigGetDim(localcf, nstrings(kfile), ntmp,                     &
-             trim(adjustL(descriptor_label)), rc=localrc)
+             label=trim(adjustL(descriptor_label)), rc=localrc)
     if( CheckError(checkpoint, __LINE__, __FILE__, localrc, "cannot get descriptor table size in "  &
             // "file " // trim(adjustL(lfilename)), rcToReturn=rc) ) return
 

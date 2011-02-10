@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessGridMod.F90,v 1.33 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_TestHarnessGridMod.F90,v 1.34 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
   !-----------------------------------------------------------------------------
   ! open the grid file
   !-----------------------------------------------------------------------------
-  localcf = ESMF_ConfigCreate(localrc)
+  localcf = ESMF_ConfigCreate(rc=localrc)
   if( ESMF_LogFoundError(localrc, "cannot create config object",            &
                             rcToReturn=rc) ) return
 
@@ -283,7 +283,7 @@
   ! NOTE: the number of table rows >= number of grid entries due to the
   ! possibility of continued lines.
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigGetDim(localcf, nrows, ntmp, trim(descriptor_label),         &
+  call ESMF_ConfigGetDim(localcf, nrows, ntmp, label=trim(descriptor_label),         &
                          rc=localrc)
   if( ESMF_LogFoundError(localrc,                                           &
          "cannot get descriptor table size in file " // trim(lfilename),       &
@@ -668,7 +668,7 @@
   ! NOTE: the number of table rows >= number of grid entries due to the
   ! possibility of continued lines.
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigGetDim(localcf, nrows, ntmp, trim(descriptor_label),         &
+  call ESMF_ConfigGetDim(localcf, nrows, ntmp, label=trim(descriptor_label),         &
            rc=localrc)
   if( ESMF_LogFoundError(localrc,                                           &
      "cannot get descriptor table size in file " // trim(lfilename),           &

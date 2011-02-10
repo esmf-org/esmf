@@ -94,7 +94,7 @@
 !EOE
 
 !BOC
-      cf = ESMF_ConfigCreate(rc)                    ! Create the empty Config
+      cf = ESMF_ConfigCreate(rc=rc)                    ! Create the empty Config
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
@@ -378,7 +378,7 @@
 !EOE
 
 !BOC
-      call ESMF_ConfigDestroy(cf, rc) ! Destroy the Config
+      call ESMF_ConfigDestroy(cf, rc=rc) ! Destroy the Config
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_ConfigUTest.F90,v 1.41 2011/01/05 20:05:41 svasquez Exp $
+! $Id: ESMF_ConfigUTest.F90,v 1.42 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -92,7 +92,7 @@ module config_subrs
         ! Create Config Test
         write(failMsg, *) "Did not return ESMF_SUCCESS"
         write(name, *) "Create Config Test"
-        cf = ESMF_ConfigCreate( rc )
+        cf = ESMF_ConfigCreate(rc=rc)
 	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
         if ( rc /= 0 ) then 
@@ -226,7 +226,7 @@ module config_subrs
      ! Non-created Config Get Attribute Char Test
      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
      write(name, *) "Config Get Attribute Char Test"
-     call ESMF_ConfigGetChar( cf1, answer, 'Do_you_want_quality_control:', &
+     call ESMF_ConfigGetChar( cf1, answer, label='Do_you_want_quality_control:', &
                                     rc = rc )
      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
@@ -235,7 +235,7 @@ module config_subrs
      ! Config Get Attribute Char Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute Char Test"
-     call ESMF_ConfigGetChar( cf, answer, 'Do_you_want_quality_control:', &
+     call ESMF_ConfigGetChar( cf, answer, label='Do_you_want_quality_control:', &
                                     rc = rc )
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
@@ -270,7 +270,7 @@ module config_subrs
      ! Config Get Attribute String Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute String Test"
-     call ESMF_ConfigGetAttribute( cf, restart_file ,'restart_file_name:', &
+     call ESMF_ConfigGetAttribute( cf, restart_file ,label='restart_file_name:', &
            rc = rc )
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
@@ -303,7 +303,7 @@ module config_subrs
      ! Config Get Attribute Logical Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute Logical Test"
-     call ESMF_ConfigGetAttribute( cf, optimize, 'Optimization:', rc = rc )
+     call ESMF_ConfigGetAttribute( cf, optimize, label='Optimization:', rc = rc )
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -352,7 +352,7 @@ module config_subrs
      ! Config Find Label Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Find Label Test"
-     call ESMF_ConfigFindLabel( cf, 'u-wind_error:', rc ) ! identifies label
+     call ESMF_ConfigFindLabel( cf, 'u-wind_error:', rc=rc) ! identifies label
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !''''''''''''''''''''''''''''
@@ -434,7 +434,7 @@ module config_subrs
      ! Config Get Attribute Floats Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Floats Test"
-     call ESMF_ConfigGetAttribute( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8
+     call ESMF_ConfigGetAttribute(cf, sigU, count=nu, rc=rc)     ! tokens 3 thru 8
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -483,7 +483,7 @@ subroutine MultPar_SingleLine_V
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf, 'v-wind_error:', rc )
+      call ESMF_ConfigFindLabel( cf, 'v-wind_error:', rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -612,7 +612,7 @@ subroutine MultPar_SingleLine_Vf
       ! Non-created Config Find Label Test
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Non-create Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf1, 'v-wind_flag:', rc )
+      call ESMF_ConfigFindLabel( cf1, 'v-wind_flag:', rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -620,7 +620,7 @@ subroutine MultPar_SingleLine_Vf
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf, 'v-wind_flag:', rc )
+      call ESMF_ConfigFindLabel( cf, 'v-wind_flag:', rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -754,7 +754,7 @@ subroutine MultPar_SingleLine_Vf
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf, 'ObsErr*QSCAT::', rc ) ! identify label
+      call ESMF_ConfigFindLabel( cf, 'ObsErr*QSCAT::', rc=rc) ! identify label
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -1066,7 +1066,7 @@ subroutine MultPar_SingleLine_Vf
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc )
+      call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
@@ -1131,7 +1131,7 @@ subroutine MultPar_SingleLine_Vf
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc )
+      call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
@@ -1145,7 +1145,7 @@ subroutine MultPar_SingleLine_Vf
 
 !''''''''''''''''''''''''''''
       do line = 1, nlines
-         call ESMF_ConfigNextLine( cf, end, rc )
+         call ESMF_ConfigNextLine( cf, tableEnd=end, rc=rc)
 !''''''''''''''''''''''''''''
 
          if (rc /= 0) then
@@ -1349,7 +1349,7 @@ subroutine MultPar_SingleLine_Vf
       ! Test Config Validate
       write(failMsg, *) "Did not return ESMF_RC_ATTR_UNUSED"
       write(name, *) "Config Validate Test"
-      call ESMF_ConfigValidate( cf, "unusedAttributes", rc)
+      call ESMF_ConfigValidate( cf, options="unusedAttributes", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_ATTR_UNUSED), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -1366,7 +1366,7 @@ subroutine MultPar_SingleLine_Vf
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
-      call ESMF_ConfigDestroy( cf, rc ) 
+      call ESMF_ConfigDestroy( cf, rc=rc) 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.41 2011/01/05 20:05:41 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.42 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1419,7 +1419,7 @@ end module config_subrs
       ! Test Config Create
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Create Test"
-      cf = ESMF_ConfigCreate( rc )
+      cf = ESMF_ConfigCreate(rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1427,7 +1427,7 @@ end module config_subrs
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
-      call ESMF_ConfigDestroy( cf, rc ) 
+      call ESMF_ConfigDestroy( cf, rc=rc) 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -1437,7 +1437,7 @@ end module config_subrs
       ! Test Config Destroy of a destroyed Config
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Destroy a destroyed Config Test"
-      call ESMF_ConfigDestroy( cf, rc ) 
+      call ESMF_ConfigDestroy( cf, rc=rc) 
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
      !------------------------------------------------------------------------
@@ -1454,7 +1454,7 @@ end module config_subrs
      ! Destroyed Config Get Attribute Char Test
      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
      write(name, *) "Destroyed Config Get Attribute Char Test"
-     call ESMF_ConfigGetChar( cf, answer, 'Do_you_want_quality_control:', &
+     call ESMF_ConfigGetChar( cf, answer, label='Do_you_want_quality_control:', &
                                     rc = rc )
      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
@@ -1463,7 +1463,7 @@ end module config_subrs
      ! Destroyed Config Find Label Test
       write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
       write(name, *) "Non-create Config Find Label Test"
-      call ESMF_ConfigFindLabel( cf, 'v-wind_flag:', rc )
+      call ESMF_ConfigFindLabel( cf, 'v-wind_flag:', rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -1473,7 +1473,7 @@ end module config_subrs
 !----------------
       call Initialization()
       if (rc /= ESMF_RC_DUP_NAME) then
-        call ESMF_ConfigDestroy( cf, rc ) 
+        call ESMF_ConfigDestroy( cf, rc=rc) 
         call ESMF_TestEnd(result, ESMF_SRCLINE)
         STOP            ! Catastropic Error
       endif

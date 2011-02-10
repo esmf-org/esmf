@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.70 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_Config.F90,v 1.71 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -442,16 +442,15 @@
 !
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigCreate"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigCreate - Instantiate a Config object
 !
 ! !INTERFACE:
-      type(ESMF_Config) function ESMF_ConfigCreate( rc )
+      type(ESMF_Config) function ESMF_ConfigCreate(keywordEnforcer, rc)
 
 ! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      integer,intent(out), optional              :: rc 
 !
 ! !DESCRIPTION: 
@@ -502,17 +501,16 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigDestroy"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigDestroy - Destroy a Config object
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigDestroy( config, rc )
+    subroutine ESMF_ConfigDestroy(config, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)          :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out),  optional :: rc
 !
 ! !DESCRIPTION: 
@@ -559,19 +557,18 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigFindLabel"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigFindLabel - Find a label
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigFindLabel( config, label, rc )
+    subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout) :: config 
-      character(len=*), intent(in)     :: label
-      integer, intent(out), optional   :: rc 
+      type(ESMF_Config), intent(inout)           :: config 
+      character(len=*),  intent(in)              :: label
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,           intent(out),  optional  :: rc 
 
 ! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
 !
@@ -639,24 +636,21 @@
       
     end subroutine ESMF_ConfigFindLabel
 
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
+!BOP
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a value 
 !
 !
 ! !INTERFACE:
-!      subroutine ESMF_ConfigGetAttribute( config, <value>, &
-!                                          label, default, rc )
+!      subroutine ESMF_ConfigGetAttribute(config, <value>, &
+!        keywordEnforcer, label, default, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_Config), intent(inout)       :: config     
+!      type(ESMF_Config), intent(inout)         :: config     
 !      <value argument>, see below for supported values
-!      character(len=*), intent(in), optional :: label 
-!      character(len=*), intent(in), optional :: default 
-!      integer, intent(out), optional         :: rc     
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!      character(len=*),  intent(in),  optional :: label 
+!      character(len=*),  intent(in),  optional :: default 
+!      integer,           intent(out), optional :: rc     
 !
 ! !DESCRIPTION: 
 !      Gets a value from the {\tt config} object.  When the
@@ -686,26 +680,23 @@
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
-
 !EOP -------------------------------------------------------------------
 
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
-!
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of values 
 !
 ! !INTERFACE:
-!      subroutine ESMF_ConfigGetAttribute( config, <value list argument>, &
-!                                          count, label, default, rc )
+!      subroutine ESMF_ConfigGetAttribute(config, <value list argument>, &
+!        keywordEnforcer, count, label, default, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF_Config), intent(inout)       :: config     
+!      type(ESMF_Config), intent(inout)         :: config     
 !      <value list argument>, see below for values      
-!      integer, intent(in)                    :: count
-!      character(len=*), intent(in), optional :: label 
-!      character(len=*), intent(in), optional :: default 
-!      integer, intent(out), optional         :: rc     
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!      integer,           intent(in)   optional :: count
+!      character(len=*),  intent(in),  optional :: label 
+!      character(len=*),  intent(in),  optional :: default 
+!      integer,           intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Gets a list of values from the {\tt config} object.  
@@ -734,25 +725,24 @@
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
-!
 !EOP -------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetString"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI ------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a character string
 !
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetString( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetString(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: config     
       character(len=*), intent(out)          :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional :: label 
       character(len=*), intent(in), optional :: default 
       integer, intent(out), optional         :: rc     
@@ -795,7 +785,7 @@
 
 ! Processing
       if(present( label )) then
-         call ESMF_ConfigFindLabel( config, label, localrc )
+         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
          if ( localrc /= 0 ) then
             if (present(default)) then
                localrc = ESMF_SUCCESS
@@ -848,20 +838,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatR4"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a 4-byte real number
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetFloatR4( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetFloatR4(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)      :: config    
       real(ESMF_KIND_R4), intent(out)          :: value    
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional   :: label
       real(ESMF_KIND_R4), intent(in), optional :: default 
       integer, intent(out), optional           :: rc     
@@ -907,7 +897,7 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = localrc )
+         call ESMF_ConfigGetString( config, string, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
@@ -942,20 +932,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatR8"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get an 8-byte real number
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetFloatR8( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetFloatR8(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)      :: config    
       real(ESMF_KIND_R8), intent(out)          :: value 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional   :: label
       real(ESMF_KIND_R8), intent(in), optional :: default 
       integer, intent(out), optional           :: rc     
@@ -1001,7 +991,7 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = localrc )
+         call ESMF_ConfigGetString( config, string, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
@@ -1036,21 +1026,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatsR4"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 4-byte real numbers
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetFloatsR4( config, valueList, count, label,  &
-                                         default, rc )
+      subroutine ESMF_ConfigGetFloatsR4(config, valueList, &
+        keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),  intent(inout)         :: config    
       real(ESMF_KIND_R4), intent(inout)         :: valueList(:) 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,            intent(in),  optional :: count 
       character(len=*),   intent(in),  optional :: label 
       real(ESMF_KIND_R4), intent(in),  optional :: default
@@ -1113,7 +1102,7 @@
       endif
 ! Processing
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = localrc )
+         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
       end if
 
       do i = 1, localcount
@@ -1133,21 +1122,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetFloatsR8"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI 
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 8-byte real numbers
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetFloatsR8( config, valueList, count, label,  &
-                                         default, rc )
+      subroutine ESMF_ConfigGetFloatsR8(config, valueList, &
+        keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),  intent(inout)         :: config    
       real(ESMF_KIND_R8), intent(inout)         :: valueList(:) 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,            intent(in),  optional :: count 
       character(len=*),   intent(in),  optional :: label 
       real(ESMF_KIND_R8), intent(in),  optional :: default
@@ -1209,7 +1197,7 @@
 
 ! Processing
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = localrc )
+         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
       end if
 
       do i = 1, localcount
@@ -1229,20 +1217,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntI4"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a 4-byte integer number
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetIntI4( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetIntI4(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)          :: config     
       integer(ESMF_KIND_I4), intent(out)           :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional       :: label 
       integer(ESMF_KIND_I4), intent(in), optional  :: default
       integer, intent(out), optional               :: rc   
@@ -1289,7 +1277,7 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = localrc )
+         call ESMF_ConfigGetString( config, string, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
@@ -1327,20 +1315,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntI8"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get an 8-byte integer number
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetIntI8( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetIntI8(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)          :: config     
       integer(ESMF_KIND_I8), intent(out)           :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional       :: label 
       integer(ESMF_KIND_I8), intent(in), optional  :: default
       integer, intent(out), optional               :: rc   
@@ -1387,7 +1375,7 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = localrc )
+         call ESMF_ConfigGetString( config, string, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
@@ -1426,20 +1414,19 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntsI4"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 4-byte integers
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetIntsI4( config, valueList, count, label,  &
-                                       default, rc )
+      subroutine ESMF_ConfigGetIntsI4(config, valueList, &
+        keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),     intent(inout)         :: config      
       integer(ESMF_KIND_I4), intent(inout)         :: valueList(:)  
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(in),  optional :: count  
       character(len=*),      intent(in),  optional :: label 
       integer(ESMF_KIND_I4), intent(in),  optional :: default
@@ -1502,7 +1489,7 @@
 
 ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = localrc )
+         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
       end if
 
       do i = 1, localcount
@@ -1524,20 +1511,19 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetIntsI8"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of 8-byte integers
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetIntsI8( config, valueList, count, label,  &
-                                       default, rc )
+      subroutine ESMF_ConfigGetIntsI8(config, valueList, &
+        keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),     intent(inout)         :: config      
       integer(ESMF_KIND_I8), intent(inout)         :: valueList(:)  
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(in),  optional :: count  
       character(len=*),      intent(in),  optional :: label 
       integer(ESMF_KIND_I8), intent(in),  optional :: default
@@ -1597,7 +1583,7 @@
 
 ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = localrc )
+         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
       end if
 
       do i = 1, localcount
@@ -1618,20 +1604,20 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLogical"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a logical value
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetLogical( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetLogical(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)         :: config     
       logical,           intent(out)           :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),  intent(in),  optional :: label 
       logical,           intent(in),  optional :: default
       integer,           intent(out), optional :: rc   
@@ -1681,7 +1667,7 @@
 
       ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = localrc )
+         call ESMF_ConfigGetString( config, string, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
@@ -1729,20 +1715,19 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLogicals"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of logical values
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      subroutine ESMF_ConfigGetLogicals( config, valueList, count, label,  &
-                                         default, rc )
+      subroutine ESMF_ConfigGetLogicals(config, valueList, &
+        keywordEnforcer, count, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)         :: config      
       logical,           intent(inout)         :: valueList(:)  
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(in),  optional :: count  
       character(len=*),  intent(in),  optional :: label 
       logical,           intent(in),  optional :: default
@@ -1805,7 +1790,7 @@
 
       ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label, rc = localrc )
+         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
       end if
 
       do i = 1, localcount
@@ -1826,18 +1811,18 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetChar"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigGetChar - Get a character
 !
 ! !INTERFACE:
-      subroutine ESMF_ConfigGetChar( config, value, label, default, rc )
+      subroutine ESMF_ConfigGetChar(config, value, &
+        keywordEnforcer, label, default, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)         :: config 
       character,         intent(out)           :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),  intent(in),  optional :: label   
       character,         intent(in),  optional :: default
       integer,           intent(out), optional :: rc    
@@ -1880,7 +1865,7 @@
 
 ! Processing
       if (present (label ) ) then
-         call ESMF_ConfigGetString( config, string, label, rc = localrc )
+         call ESMF_ConfigGetString( config, string, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, string, rc = localrc )
       endif
@@ -1902,27 +1887,23 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetDim"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigGetDim - Get table sizes
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetDim( config, lineCount, columnCount, label, rc )
+    subroutine ESMF_ConfigGetDim(config, lineCount, columnCount, &
+      keywordEnforcer, label, rc)
 
       implicit none
 
-      type(ESMF_Config), intent(inout)       :: config ! ESMF Configuration
-      integer, intent(out)                   :: lineCount
-      integer, intent(out)                   :: columnCount
-
-      character(len=*), intent(in), optional :: label ! label (if present)
-                                                      ! otherwise, current
-                                                      ! line
-
-      integer, intent(out), optional         :: rc     ! Error code
+      type(ESMF_Config), intent(inout)         :: config
+      integer,           intent(out)           :: lineCount
+      integer,           intent(out)           :: columnCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*),  intent(in),  optional :: label
+      integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION: 
 !  Returns the number of lines in the table in {\tt lineCount} and 
@@ -1937,7 +1918,7 @@
 !   \item [columnCount]
 !     Returned maximum number of words in a table line. 
 !   \item [{[label]}]
-!     Identifying label.
+!     Identifying label (if present), otherwise current line.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1958,7 +1939,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if ( present(label) ) then
-        call ESMF_ConfigFindLabel(config, label = label, rc = localrc )
+        call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
         if ( localrc /= ESMF_SUCCESS ) then
            if ( present( rc )) then
              rc = localrc
@@ -1968,7 +1949,7 @@
       endif
 
       do 
-         call ESMF_ConfigNextLine( config, tend, rc = localrc)
+         call ESMF_ConfigNextLine(config, tableEnd=tend, rc=localrc)
          if (localrc /= ESMF_SUCCESS ) then
             lineCount = 0
             columnCount = 0
@@ -1999,18 +1980,17 @@
     
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigGetLen"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_ConfigGetLen - Get the length of the line in words
 !
 ! !INTERFACE:
-    integer function ESMF_ConfigGetLen( config, label, rc )
+    integer function ESMF_ConfigGetLen(config, keywordEnforcer, label, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)         :: config 
-      character(len=*),  intent(in),  optional :: label
-      integer,           intent(out), optional :: rc         
+      type(ESMF_Config), intent(inout)          :: config 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*),  intent(in),   optional :: label
+      integer,           intent(out),  optional :: rc         
 !
 ! !DESCRIPTION: 
 ! Gets the length of the line in words by counting words
@@ -2042,7 +2022,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if( present( label )) then
-         call ESMF_ConfigFindLabel(config, label = label, rc = localrc )
+         call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
          if( localrc /= 0) then
             if (present( rc )) then
               rc = localrc
@@ -2072,18 +2052,18 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigLoadFile"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into memory
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigLoadFile( config, filename, delayout, unique, rc )
+    subroutine ESMF_ConfigLoadFile(config, filename, &
+      keywordEnforcer, delayout, unique, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),   intent(inout)         :: config     
       character(len=*),    intent(in)            :: filename 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_DELayout), intent(in),  optional :: delayout 
       logical,             intent(in),  optional :: unique 
       integer,             intent(out), optional :: rc         
@@ -2140,8 +2120,6 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigLoadFile_1proc_"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
 !BOPI -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigLoadFile_1proc - Load resource file into memory
@@ -2249,19 +2227,18 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigNextLine"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigNextLine - Find next line
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigNextLine( config, tableEnd, rc)
+    subroutine ESMF_ConfigNextLine(config, keywordEnforcer, tableEnd, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)         :: config 
-      logical,           intent(out), optional :: tableEnd
-      integer,           intent(out), optional :: rc 
+      type(ESMF_Config), intent(inout)          :: config 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      logical,           intent(out),  optional :: tableEnd
+      integer,           intent(out),  optional :: rc 
 !
 ! !DESCRIPTION: 
 !   Selects the next line (for tables).
@@ -2328,9 +2305,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigParseAttributes"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigParseAttributes - Parse all attribute labels
 !
@@ -2437,22 +2412,21 @@
 
     end subroutine ESMF_ConfigParseAttributes
 
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigSetAttribute - Set a value
 !
 !
 ! !INTERFACE:
-!     subroutine ESMF_ConfigSetAttribute( config, <value argument>, &
-!                                         label, rc )
+!     subroutine ESMF_ConfigSetAttribute(config, <value argument>, &
+!       keywordEnforcer, label, rc)
 !
 ! !ARGUMENTS:
-!     type(ESMF_Config), intent(inout)             :: config     
+!     type(ESMF_Config), intent(inout)           :: config     
 !     <value argument>, see below for supported values
-!     character(len=*), intent(in), optional       :: label 
-!     integer, intent(out), optional               :: rc   
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character(len=*),  intent(in),   optional  :: label 
+!     integer,           intent(out),  optional  :: rc   
 !
 !
 ! !DESCRIPTION: 
@@ -2477,23 +2451,22 @@
 !
 !EOP -------------------------------------------------------------------
 
-
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigSetIntI4"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigSetAttribute - Set a 4-byte integer number
 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigSetAttribute()
-      subroutine ESMF_ConfigSetIntI4( config, value, label, rc )
+      subroutine ESMF_ConfigSetIntI4(config, value, &
+        keywordEnforcer, label, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config),     intent(inout)         :: config     
       integer(ESMF_KIND_I4), intent(in)            :: value
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),      intent(in),  optional :: label 
       integer,               intent(out), optional :: rc   
 
@@ -2529,7 +2502,7 @@
 
       ! Set config buffer at desired attribute
       if ( present (label) ) then
-         call ESMF_ConfigGetString( config, curVal, label, rc = localrc )
+         call ESMF_ConfigGetString( config, curVal, label=label, rc=localrc)
       else
          call ESMF_ConfigGetString( config, curVal, rc = localrc )
       endif
@@ -2644,9 +2617,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigSetCurrentAttrUsed"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOPI -------------------------------------------------------------------
+!BOPI
 !
 ! !IROUTINE: ESMF_ConfigSetCurrentAttrUsed - Set Current Attribute "Used" flag
 !
@@ -2692,19 +2663,19 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ConfigValidate"
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOP
 !
 ! !IROUTINE: ESMF_ConfigValidate - Validate a Config object
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigValidate(config, options, rc)
+    subroutine ESMF_ConfigValidate(config, &
+      keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Config), intent(inout)         :: config 
-      character (len=*), intent(in),  optional :: options
-      integer,           intent(out), optional :: rc 
+      type(ESMF_Config), intent(inout)          :: config 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len=*), intent(in),   optional :: options
+      integer,           intent(out),  optional :: rc 
 !
 ! !DESCRIPTION: 
 !   Checks whether a {\tt config} object is valid.

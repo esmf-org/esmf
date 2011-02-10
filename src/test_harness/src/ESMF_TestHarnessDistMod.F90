@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessDistMod.F90,v 1.22 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_TestHarnessDistMod.F90,v 1.23 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
   ! NOTE: the number of table rows >= number of dist entries due to the
   ! possibility of continued lines.
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigGetDim(localcf, nrows, ntmp, trim(distribution_label),       &
+  call ESMF_ConfigGetDim(localcf, nrows, ntmp, label=trim(distribution_label),       &
                          rc=localrc)
   if( ESMF_LogFoundError(localrc,                                           &
          "cannot get descriptor table size in file " // trim(Dfile%filename),  &

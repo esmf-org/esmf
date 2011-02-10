@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.17 2011/01/05 20:05:41 svasquez Exp $
+!  $Id: ESMF_Config_C.F90,v 1.18 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.17 2011/01/05 20:05:41 svasquez Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.18 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -225,7 +225,7 @@
      ! Initialize return code; assume routine not implemented
      rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigGetDim(config, lineCount, columnCount, label,  rc=rc)
+     call ESMF_ConfigGetDim(config, lineCount, columnCount, label=label,  rc=rc)
 
    end subroutine f_esmf_configgetdim
 !------------------------------------------------------------------------------
