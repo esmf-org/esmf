@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.118 2011/01/07 21:09:51 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.119 2011/02/17 23:44:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.118 2011/01/07 21:09:51 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.119 2011/02/17 23:44:39 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -3120,6 +3120,14 @@ int Grid::constructInternal(
 //-----------------------------------------------------------------------------
   int rc,localrc;
 
+
+  // Init lat lon flag
+  // Eventually this'll come through the interface
+  coordGeom=ESMC_GRIDCOORDGEOM_CART;
+
+  // Connections aren't being forced at the start
+  forceConn=false;
+
   // Copy values into the grid object
   typekind = typekindArg;
 
@@ -3593,6 +3601,9 @@ Grid::Grid(
   // Init lat lon flag
   coordGeom=ESMC_GRIDCOORDGEOM_CART;
   
+  // Start out with connections unforced
+  forceConn=false;
+
   // Set default values for grid members
   proto = ESMC_NULL_POINTER; 
   
@@ -3686,6 +3697,11 @@ Grid::Grid(
   // Set default values for grid members
   proto = ESMC_NULL_POINTER; 
   
+  // Init lat lon flag
+  coordGeom=ESMC_GRIDCOORDGEOM_CART;
+
+  forceConn=false;
+
   status=ESMC_GRIDSTATUS_NOT_READY; // default status not ready
   decompType = ESMC_GRID_INVALID;   // grid deompose type unknonw
   
@@ -4544,9 +4560,10 @@ int Grid::serialize(
     // non-ready Grids don't worry about serializing
     // the protogrid
 
-    // Don't do status since we're changing it anyway
-  
+    // Don't do status since we're changing it anyway  
     SERIALIZE_VAR(cp, buffer,loffset,coordGeom,int);
+
+    SERIALIZE_VAR(cp, buffer,loffset,forceConn,bool);
 
     SERIALIZE_VAR(cp, buffer,loffset, decompType, ESMC_GridDecompType);
 
@@ -4781,6 +4798,8 @@ int Grid::deserialize(
   status =  ESMC_GRIDSTATUS_SHAPE_READY;
 
   DESERIALIZE_VAR( buffer,loffset, coordGeom, int);
+
+  DESERIALIZE_VAR( buffer,loffset, forceConn, bool);
 
   DESERIALIZE_VAR( buffer,loffset, decompType, ESMC_GridDecompType);
 
@@ -5073,6 +5092,10 @@ static  void _free3D(Type ****array)
     *in=ESMC_NULL_POINTER;
   }
 
+
+#if 0
+// OLD WAY OF CALCULATING EDGE LOCAL DEs
+
   // Create arrays (isDEUBnd and isDELBnd) which tell if a particular DE is on
   // the edge of a tile.
   // If bit r of isDEUBnd is 1 then the DE is on the upper boundary in dim. r
@@ -5185,6 +5208,75 @@ static  void _free3D(Type ****array)
     return ESMF_SUCCESS;
   }
 
+#endif
+
+
+
+  // Create arrays (isDEUBnd and isDELBnd) which tell if a particular DE is on
+  // the edge of a tile.
+  // If bit r of isDEUBnd is 1 then the DE is on the upper boundary in dim. r
+  // If bit r of isDELBnd is 1 then the DE is on the lower boundary in dim. r
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::_createIsBnd()"
+  static int _createIsDEBnd(char **_isDELBnd, char **_isDEUBnd, 
+                            DistGrid *distgrid, int *distgridToGridMap) {
+    char *isDELBnd,*isDEUBnd;
+    int rc,localrc;
+
+    // get dimCount;
+    int dimCount=distgrid->getDimCount();
+
+    // Get the DELayout
+    DELayout *delayout=distgrid->getDELayout();
+
+    // Get the number of local DEs
+    const int localDECount=delayout->getLocalDeCount();
+
+    // allocate Bnds
+    if (localDECount > 0) {
+      isDELBnd=new char[localDECount];
+      isDEUBnd=new char[localDECount];
+    } else {
+      isDELBnd=ESMC_NULL_POINTER;
+      isDEUBnd=ESMC_NULL_POINTER;
+    }
+
+    // loop through local DE's setting flags
+    for (int lDE=0; lDE<localDECount; lDE++) {
+        
+        //// Init flags
+        isDELBnd[lDE]=0xff;
+        isDEUBnd[lDE]=0xff;
+        
+        //// loop setting flags
+        for (int d=0; d<dimCount; d++) {
+          
+          // if we're not a lower bound turn off the bit
+          bool isLBnd=distgrid->isLocalDeOnEdgeL(lDE,d+1,&localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                              ESMF_ERR_PASSTHRU, &rc)) return rc;
+          if (!isLBnd) {
+            isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
+          } 
+          
+
+          // if we're not an upper bound turn off the bit
+          bool isUBnd=distgrid->isLocalDeOnEdgeU(lDE,d+1,&localrc);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                              ESMF_ERR_PASSTHRU, &rc)) return rc;
+          if (!isUBnd) {
+            isDEUBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
+          }
+        }
+    }
+    
+    // set output variables
+    *_isDELBnd=isDELBnd;
+    *_isDEUBnd=isDEUBnd;
+
+    // return success
+    return ESMF_SUCCESS;
+  }
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -6297,15 +6389,28 @@ void GridIter::getDEBnds(
   grid->getExclusiveUBound(staggerloc, localDE, uBnd);  
   grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
 
-
   // if cell iterator then expand bounds
   if (cellNodes) {
-    for (int i=0; i<rank; i++) {
-      //// Expand to include all nodes touched by cells on this proc
-      if (!grid->isLBnd(localDE,i)) lBnd[i]--;
-      if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+    if (grid->isForceConn()) {
+      for (int i=0; i<rank; i++) {
+        //// Expand to include all nodes touched by cells on this proc
+        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
+        if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+      } 
+
+    } else {
+
+      int localrc;
+      for (int i=0; i<rank; i++) {
+        //// Expand to include all nodes touched by cells on this proc
+        //// Note the below expect dim in 1 based.
+        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
+        if (!grid->isUBnd(localDE,i)) uBnd[i]++; 
+      } 
     }
   }
+
+
 
 }
 //-----------------------------------------------------------------------------
@@ -6352,6 +6457,11 @@ void GridIter::setDEBnds(
 
   // Exclusive Bounds
   grid->getExclusiveLBound(staggerloc, localDE, exLBndInd);
+
+  // Get Original bounds for detecting localness
+  grid->getExclusiveUBound(staggerloc, localDE, uBndOrig);  
+  grid->getExclusiveLBound(staggerloc, localDE, lBndOrig);  
+
 
   // Set to first index on DE
   for (int i=0; i<rank; i++) {
@@ -6611,29 +6721,42 @@ int GridIter::getGlobalID(
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 #else
 
-  // Temporarily handle periodicity until GT's permenant solution
-  for (int i=0; i<rank; i++) {
-    deBasedInd[i]=curInd[i];
 
-    if ((curInd[i]==lBndInd[i]) &&
-        (connL[i]==ESMC_GRIDCONN_PERIODIC) && 
-         grid->isLBndNT(curDE,i)) {
+  if (grid->isForceConn()) {
+    // Temporarily handle periodicity until GT's permenant solution
+    for (int i=0; i<rank; i++) {
+      deBasedInd[i]=curInd[i];
+      
+      if ((curInd[i]==lBndInd[i]) &&
+          (connL[i]==ESMC_GRIDCONN_PERIODIC) && 
+          grid->isLBndNT(curDE,i)) {
+        
+        deBasedInd[i]=maxInd[i];
+      } 
+      
+      if ((curInd[i]==uBndInd[i]) &&
+          (connU[i]==ESMC_GRIDCONN_PERIODIC) && 
+          grid->isUBndNT(curDE,i)) {
+        
+        deBasedInd[i]=minInd[i];
+      }
+    }
 
-      deBasedInd[i]=maxInd[i];
-    } 
+    // NOTE THAT THIS ONLY WORKS FOR SINGLE TILE GRIDS WITH GLOBAL INDEXING
+    gid=staggerDistgrid->getSequenceIndexTile(1,deBasedInd,0,&localrc); 
+     
+  } else {
 
-    if ((curInd[i]==uBndInd[i]) &&
-        (connU[i]==ESMC_GRIDCONN_PERIODIC) && 
-         grid->isUBndNT(curDE,i)) {
+    // Convert to DE based
+    for (int i=0; i<rank; i++) {
+      deBasedInd[i]=curInd[i]-exLBndInd[i];
+    }
+      
+    // return sequence index
+    gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
 
-      deBasedInd[i]=minInd[i];
-    } 
-
+    if (gid <0) printf("GI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
   }
-
-
-  // NOTE THAT THIS ONLY WORKS FOR SINGLE TILE GRIDS WITH GLOBAL INDEXING
-  gid=staggerDistgrid->getSequenceIndexTile(1,deBasedInd,0,&localrc);
 
   //  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
@@ -6796,10 +6919,11 @@ bool GridIter::isLocal(
   // if not cell then they're all on this proc
   if (!cellNodes) return true;
 
+  // TODO: FIX THIS FOR DISTGRID CONNECTIONS!!!!!!!!!!!!!!
+
   // check to see if we're on this proc
   for (int i=0; i<rank; i++) {
-    if ((curInd[i]==lBndInd[i]) && !grid->isLBnd(curDE,i)) return false;
-    if ((curInd[i]==uBndInd[i]) && !grid->isUBnd(curDE,i)) return false;
+    if ((curInd[i]<lBndOrig[i]) || (curInd[i]>uBndOrig[i])) return false;
   }
 
   // if we pass the above test then we're on the proc
@@ -6841,14 +6965,21 @@ bool GridIter::isShared(
   // if not cell then they're no shared nodes
   if (!cellNodes) return false;
 
-  // check to see if we're on this proc
+  // If we're more than 1 inside the exclusive region then we shouldn't be shared
+  bool interior=true;
   for (int i=0; i<rank; i++) {
-    if (!grid->isLBnd(curDE,i) && (curInd[i]<=lBndInd[i]+1)) return true;
-    if (!grid->isUBnd(curDE,i) && (curInd[i]>=uBndInd[i]-1)) return true;
+    if ((curInd[i]<lBndOrig[i]+1) || (curInd[i]>uBndOrig[i]-1)) {
+      interior=false;
+      break;
+    }
   }
+  if (interior) return false;
 
-  // if we pass the above test then we're exclusive to the proc
-  return false;
+  // TODO: Could also check if we're next to a non-shared edge
+
+
+  // If none of the above are true then return true, because we might be shared
+  return true;
 }
 //-----------------------------------------------------------------------------
 
@@ -7254,15 +7385,26 @@ void GridCellIter::getDEBnds(
   grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
 
   // if cell iterator then expand bounds
-  for (int i=0; i<rank; i++) {
-    //// Adjust based on alignment of each dimension
-    //// to just cover cell indices
-    if (align[i] <0) {
-      if (grid->isUBnd(localDE,i)) uBnd[i]--;
-    } else {
-      if (grid->isLBnd(localDE,i)) lBnd[i]++;
+  if (grid->isForceConn()) {
+    for (int i=0; i<rank; i++) {
+      //// Adjust based on alignment of each dimension
+      //// to just cover cell indices
+      if (align[i] <0) {
+        if (grid->isUBnd(localDE,i)) uBnd[i]--;
+      } else {
+        if (grid->isLBnd(localDE,i)) lBnd[i]++;
+      }   
     }
+  } else {
+    int localrc;
 
+    for (int i=0; i<rank; i++) {
+      if (align[i] <0) {
+        if (grid->isUBnd(localDE,i)) uBnd[i]--;
+      } else {
+        if (grid->isLBnd(localDE,i)) lBnd[i]++;
+      }    
+    } 
   }
 
   // If using center make sure we aren't going to go outside the bounds
@@ -7312,8 +7454,8 @@ void GridCellIter::setDEBnds(
   // Set Bounds of iteration on this proc
   this->getDEBnds(localDE, uBndInd, lBndInd);
 
-  // Get exclusive bounds
-  grid->getExclusiveLBound(staggerloc, localDE, exLBndInd);
+  // Get exclusive bounds for center stagger
+  grid->getExclusiveLBound(0, localDE, exLBndInd);
 
   // Setup info for calculating the DE index tuple location quickly
   // Needs to be done after bounds are set
@@ -7596,18 +7738,30 @@ int GridCellIter::getGlobalID(
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 #else
 
+  
+  if (grid->isForceConn()) {
+    // Temporarily handle periodicity until GT's permenant solution
 
-  // NOTE THAT THIS ONLY WORKS FOR SINGLE TILE GRIDS WITH GLOBAL INDEXING
-  //  gid=staggerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
+    // TODO: There is an assumption here that the center and the stagger that this iterator
+    // was created on have the same align. This problem will go away when we put in the 
+    // the topo stuff, becasue then we will be doing stuff relative to the bottom of the DE, but
+    // if this change doesn't happen, then need to take care of that. 
+    gid=centerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
+  } else {
+    int deBasedInd[ESMF_MAXDIM];
 
 
-  // TODO: There is an assumption here that the center and the stagger that this iterator
-  // was created on have the same align. This problem will go away when we put in the 
-  // the topo stuff, becasue then we will be doing stuff relative to the bottom of the DE, but
-  // if this change doesn't happen, then need to take care of that. 
-  gid=centerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
+    // Convert to DE based
+    for (int i=0; i<rank; i++) {
+      deBasedInd[i]=curInd[i]-exLBndInd[i];
+    }
+      
+    // return sequence index
+    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,3,&localrc);
 
-  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
+    if (gid <0) printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
+  }
+
 #endif
 
 
@@ -7743,7 +7897,7 @@ int GridCellIter::getLocalID(
 
 
 // This method must correspond to GridIter::setDEBnds(), so adjust accordingly
-void precomputeCellNodeLIDInfo(Grid *grid, int dimCount, int staggerloc, int localDE, 
+void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCount, int staggerloc, int localDE, 
                                int *dimOffCN, int *lOffCN) {
   int uBnd[ESMF_MAXDIM];
   int lBnd[ESMF_MAXDIM];
@@ -7752,13 +7906,27 @@ void precomputeCellNodeLIDInfo(Grid *grid, int dimCount, int staggerloc, int loc
   // Set Bounds of iteration on this proc
   grid->getExclusiveUBound(staggerloc, localDE, uBnd);  
   grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
+ /* XMRKX */
+
 
   // if cell iterator then expand bounds
-  for (int i=0; i<dimCount; i++) {
-      //// Expand to include all nodes touched by cells on this proc
-      if (!grid->isLBnd(localDE,i)) lBnd[i]--;
-      if (!grid->isUBnd(localDE,i)) uBnd[i]++;
-  }
+    if (grid->isForceConn()) {
+      for (int i=0; i<dimCount; i++) {
+        //// Expand to include all nodes touched by cells on this proc
+        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
+        if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+      } 
+    } else {
+      int localrc;
+      for (int i=0; i<dimCount; i++) {
+        //// Expand to include all nodes touched by cells on this proc
+        if (!grid->isLBnd(localDE,i)) lBnd[i]--;
+        if (!grid->isUBnd(localDE,i)) uBnd[i]++;
+      } 
+    }
+
+
+
 
   // Setup info for calculating the DE index tuple location quickly
   // Needs to be done after bounds are set
@@ -7834,7 +8002,7 @@ void GridCellIter::getCornersCellNodeLocalID(
   *cnrCount=cnrNum;
 
   // Precompute info for calculating local IDs
-  precomputeCellNodeLIDInfo(grid, rank, staggerloc, curDE, dimOffCN, &lOffCN);
+  precomputeCellNodeLIDInfo(grid, staggerDistgrid, rank, staggerloc, curDE, dimOffCN, &lOffCN);
 
   // Loop through setting corners
   for (int i=0; i<cnrNum; i++) {

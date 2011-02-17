@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.76 2011/01/07 18:32:17 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.77 2011/02/17 23:44:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,6 +94,9 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
   // prototype for indicating coordGeom
   int coordGeom;
+
+  // forceConn
+  bool forceConn; // connections being forced by Store()
  
   // holder for set/commit data
   ProtoGrid *proto;
@@ -314,15 +317,16 @@ template <class TYPE>
 
   int getCartCoordDimCount();
 
-  // Temporary and will go away soon
+  // Temporary and will go away soon  
+  bool isForceConn() {return forceConn;} 
   bool isSphere() { return connL[0]==ESMC_GRIDCONN_PERIODIC && connU[0]==ESMC_GRIDCONN_PERIODIC &&
                            connL[1]==ESMC_GRIDCONN_POLE && connU[1]==ESMC_GRIDCONN_POLE; }
   bool isLBndNT(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}
   bool isUBndNT(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
   // Temporary create sphere until I have topology setting worked out 
-  void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE;}
-  void clearSphere() {connL[0]=ESMC_GRIDCONN_NONE; connU[0]=ESMC_GRIDCONN_NONE; connL[1]=ESMC_GRIDCONN_NONE; connU[1]=ESMC_GRIDCONN_NONE;}
+  void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE; forceConn=true;}
+  void clearSphere() {connL[0]=ESMC_GRIDCONN_NONE; connU[0]=ESMC_GRIDCONN_NONE; connL[1]=ESMC_GRIDCONN_NONE; connU[1]=ESMC_GRIDCONN_NONE; forceConn=false;}
 
   // End of Temporary
   
@@ -681,6 +685,9 @@ int getComputationalUBound(
     int lBndInd[ESMF_MAXDIM]; // start position for allon this local DE  
     int uBndInd[ESMF_MAXDIM]; // end position on this local DE  
     int exLBndInd[ESMF_MAXDIM]; // start position on exlusive region on this DE
+
+    int lBndOrig[ESMF_MAXDIM]; // start position for non-expanded this local DE
+    int uBndOrig[ESMF_MAXDIM]; // end position for non-expanded on this local DE  
 
     int dimOff[ESMF_MAXDIM]; // Offset for each dimension for computing lid
     int lOff;                // lower bound offset
