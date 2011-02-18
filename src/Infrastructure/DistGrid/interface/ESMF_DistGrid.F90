@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.73 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_DistGrid.F90,v 1.74 2011/02/18 18:38:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.73 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.74 2011/02/18 18:38:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -387,16 +387,17 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDG()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from DistGrid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDG(distgrid, firstExtra, lastExtra, &
-    indexflag, connectionList, rc)
+  function ESMF_DistGridCreateDG(distgrid, keywordEnforcer, &
+    firstExtra, lastExtra, indexflag, connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),          intent(in)            :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,              intent(in), optional  :: firstExtra(:)
     integer, target,              intent(in), optional  :: lastExtra(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
@@ -456,7 +457,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: dg           ! opaque pointer to new C++ DistGrid
@@ -531,7 +532,7 @@ contains
     type(ESMF_DistGrid),   intent(in)            :: distgrid
     integer, target,       intent(in)            :: firstExtra(:,:)
     integer, target,       intent(in)            :: lastExtra(:,:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IndexFlag),  intent(in), optional  :: indexflag
     integer, target,       intent(in), optional  :: connectionList(:,:)
     integer,               intent(out),optional  :: rc
@@ -643,7 +644,7 @@ contains
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:)
     integer,                      intent(in)            :: maxIndex(:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               target,intent(in), optional  :: regDecomp(:)
     type(ESMF_DecompFlag), target,intent(in), optional  :: decompflag(:)
     integer,               target,intent(in), optional  :: regDecompFirstExtra(:)
@@ -846,7 +847,7 @@ contains
     integer,                      intent(in)           :: minIndex(:)
     integer,                      intent(in)           :: maxIndex(:)
     integer,                      intent(in)           :: deBlockList(:,:,:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in), optional :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional :: indexflag
     integer,                      intent(in), optional :: connectionList(:,:)
@@ -1371,7 +1372,7 @@ contains
 ! !ARGUMENTS:
     integer,                      intent(in)            :: minIndex(:,:)
     integer,                      intent(in)            :: maxIndex(:,:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in), optional  :: regDecomp(:,:)
     type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
     integer,              target, intent(in), optional  :: regDecompFirstExtra(:,:)
@@ -2065,7 +2066,7 @@ contains
 !
 ! !ARGUMENTS:
     integer,    intent(in)            :: arbSeqIndexList(:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,    intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -2186,7 +2187,7 @@ contains
     integer,    intent(in)            :: arbDim
     integer,    intent(in)            :: minIndex(:)
     integer,    intent(in)            :: maxIndex(:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,    intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -2363,7 +2364,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid), intent(inout)           :: distgrid
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out),  optional  :: rc  
 !         
 !
@@ -2422,7 +2423,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),    intent(out), optional :: delayout
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: tileCount
@@ -2681,7 +2682,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
     integer,                intent(in)            :: localDe
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: collocation
     logical,                intent(out), optional :: arbSeqIndexFlag
     integer,        target, intent(out), optional :: seqIndexList(:)
@@ -2772,7 +2773,7 @@ contains
     integer,                intent(in)            :: localDe
     integer,                intent(in)            :: dim
     integer,        target, intent(out)           :: indexList(:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 !
@@ -2841,7 +2842,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -2901,7 +2902,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid1
     type(ESMF_DistGrid),  intent(in)              :: distgrid2
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -3024,7 +3025,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -3154,7 +3155,7 @@ contains
     integer,                intent(in)            :: tileIndexA
     integer,                intent(in)            :: tileIndexB
     integer,                intent(in)            :: positionVector(:)
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: orientationVector(:)
     integer,                intent(out), optional :: rc
 !         
