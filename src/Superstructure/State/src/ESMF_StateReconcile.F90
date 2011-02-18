@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.87 2011/01/26 05:28:50 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.88 2011/02/18 23:13:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.87 2011/01/26 05:28:50 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.88 2011/02/18 23:13:51 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -141,11 +141,11 @@
       subroutine ESMF_StateReconcile(state, vm, keywordEnforcer, attreconflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_VM),    intent(in)    :: vm
-    type(ESMF_KeywordEnforcer),      optional :: keywordEnforcer ! must use keywords for the below
-      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag        
-      integer,          intent(out), optional :: rc               
+      type(ESMF_State),            intent(inout)         :: state
+      type(ESMF_VM),               intent(in),  optional :: vm
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
+      type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
+      integer,                     intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
 !     Must be called for any {\tt ESMF\_State} which contains ESMF objects
@@ -167,7 +167,7 @@
 !     \item[state]
 !       {\tt ESMF\_State} to reconcile.
 !     \item[vm]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  Default is the current vm.
 !     \item[{[attreconflag]}]
 !       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !     \item[{[rc]}]
@@ -182,22 +182,38 @@
 !            \end{enumerate}
 !EOP
     integer :: localrc
-    type(ESMF_StateItemInfo), dimension(:), pointer :: stateinfo
+    type(ESMF_VM) :: localvm
+    type(ESMF_StateItemInfo), pointer :: stateinfo(:)
     type(ESMF_AttReconcileFlag) :: lattreconflag
 
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
 
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! It is no longer necessary for a caller to provide vm.  In case
+    ! it is present, make sure it is correct.
+    call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+			   ESMF_ERR_PASSTHRU, &
+			   ESMF_CONTEXT, rc)) return
+
+    if (present (vm)) then
+      if (localvm /= vm) then
+      if (ESMF_LogFoundError(localrc, &
+                     	     "vm passed to StateReconcile is not current", &
+                             ESMF_CONTEXT, rc)) return
+      end if
+    end if
       
       
     ! First remove all empty nested States from State
     ! Doing this leads to much lower (factor petCount) complexity of the 
     ! current ProxyCreate() code.
-    call ESMF_StateZapEmptyNests(state, localrc)
+    call ESMF_StateZapEmptyNests(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
@@ -224,14 +240,14 @@
     ! This recursively descends the state objects and collects information
     ! about each one.
     nullify(stateinfo)
-    call ESMF_StateInfoBuild(state, stateinfo, vm, lattreconflag, localrc)
+    call ESMF_StateInfoBuild(state, stateinfo, vm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
     
     ! This one sends missing objects from the PETs which contain them
     ! to the PETs which do not.
-    call ESMF_StateProxyCreate(state, stateinfo, vm, lattreconflag, localrc)
+    call ESMF_StateProxyCreate(state, stateinfo, vm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
@@ -273,7 +289,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      type(ESMF_StateItemInfo), dimension(:), pointer :: stateInfoList
+      type(ESMF_StateItemInfo), pointer :: stateInfoList(:)
       type(ESMF_VM), intent(in) :: vm
       type(ESMF_AttReconcileFlag), intent(in) :: attreconflag        
       integer, intent(out), optional :: rc               
@@ -305,7 +321,7 @@
     type(ESMF_StateItem), pointer :: stateitem
     type(ESMF_StateItemInfo), pointer :: si
     type(ESMF_State) :: wrapper
-    character, pointer, dimension(:) :: bptr
+    character, pointer :: bptr(:)
     integer :: offset, mypet
     type(ESMF_VMId) :: VMdummyID
 
