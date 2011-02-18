@@ -1,8 +1,9 @@
-/* $Id: ESMF_WebServController.C,v 1.1 2011/02/18 01:31:53 theurich Exp $ */
+/* $Id: ESMF_WebServController.C,v 1.2 2011/02/18 01:51:54 theurich Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "ESMCI_WebServPassThruSvr.h"
 
