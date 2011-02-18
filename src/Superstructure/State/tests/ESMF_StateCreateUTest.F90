@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.34 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.35 2011/02/18 23:52:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.34 2011/01/21 00:11:47 rokuingh Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.35 2011/02/18 23:52:42 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -545,7 +545,7 @@ end module
       ! Test getting a nested State object Info item type list
       allocate (itemtypelist(itemcount))
       call ESMF_StateGet(state=state5,  &
-         stateitemtypeList=itemtypelist, rc=rc)
+         itemtypeList=itemtypelist, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting item type list from a nested State - single level"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -588,7 +588,7 @@ end module
       ! Test getting a nested State object Info item type list
       allocate (itemtypelist(itemcountnested))
       call ESMF_StateGet(state=state5, nestedFlag=.true.,  &
-         stateitemtypeList=itemtypelist, rc=rc)
+         itemtypeList=itemtypelist, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting item type list from a nested State - nested"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &

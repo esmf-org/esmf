@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.31 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_State_C.F90,v 1.32 2011/02/18 23:52:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.31 2011/01/21 00:11:47 rokuingh Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.32 2011/02/18 23:52:42 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -349,7 +349,7 @@
 !                              stateitemtypeList=localTypeList, rc=rc)
        call ESMF_StateGet(state=state, itemCount=itemCount, &
                           itemNameList=localNameList, &
-                          stateitemtypeList=localTypeList, rc=rc)
+                          itemtypeList=localTypeList, rc=rc)
 
        do i = 1, itemCount
           itemTypeList(i) = localTypeList(i)
