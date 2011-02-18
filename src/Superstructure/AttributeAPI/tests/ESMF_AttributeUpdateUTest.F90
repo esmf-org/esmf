@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.8 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.9 2011/02/18 22:53:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -297,9 +297,9 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(importState, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(importState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_StateReconcile(exportState, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_StateReconcile(exportState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl_init
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.8 2011/01/25 15:34:54 rokuingh Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.9 2011/02/18 22:53:05 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 
