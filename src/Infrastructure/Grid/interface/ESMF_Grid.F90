@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.195 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_Grid.F90,v 1.196 2011/02/18 19:37:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.195 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_Grid.F90,v 1.196 2011/02/18 19:37:52 eschwab Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3694,9 +3694,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     type(ESMF_Grid) :: grid 
-    character(ESMF_MAXSTR) :: attrvalue
+    character(ESMF_MAXSTR) :: attrvalue, attPackInstanceName
     integer :: maxIndex(2), regDecomp(2)  ! TODO: allow more dimensions
-    integer :: fileNameLen, ordinal, localrc
+    integer :: fileNameLen, localrc
     logical :: xercesPresent
 
     ! Initialize return code; assume failure until success is certain 
@@ -3750,9 +3750,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! (required, for maxIndex in GriCreate())
     ! use C calls rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
-    ordinal = 1   ! get the 1st AttPack of type (conv, purp) on 'grid'
+    attPackInstancename = ""  ! get the 1st AttPack of type (conv, purp) on 'grid'
     call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
-                               'GridSpec', 'General', 'grid', ordinal, localrc)
+                               'GridSpec', 'General', 'grid', &
+                               attPackInstanceName, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
@@ -3769,7 +3770,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
-                               'GridSpec', 'General', 'grid', ordinal, localrc)
+                               'GridSpec', 'General', 'grid', &
+                               attPackInstanceName, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
