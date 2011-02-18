@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.12 2011/01/26 05:29:37 w6ws Exp $
+! $Id: ESMF_StateVa.F90,v 1.13 2011/02/18 23:19:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.12 2011/01/26 05:29:37 w6ws Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.13 2011/02/18 23:19:00 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -86,12 +86,11 @@
 ! !IROUTINE: ESMF_StateValidate - Check validity of a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateValidate(state, keywordEnforcer, options, nestedFlag, rc)
+      subroutine ESMF_StateValidate(state, keywordEnforcer, nestedFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
-      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
-      character (len = *),  intent(in), optional :: options
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical, intent(in),  optional :: nestedFlag
       integer, intent(out), optional :: rc 
 !
@@ -108,8 +107,6 @@
 !     \item[{[nestedFlag]}]
 !       {\tt .false.} - validates at the current State level only (default)
 !       {\tt .true.} - recursively validates any nested States
-!     \item[{[options]}]
-!       Validation options are not yet supported.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -120,7 +117,6 @@
 !
 ! TODO: code goes here
 !
-      character (len=16) :: localopts
       integer :: localrc
       logical :: localnestedflag
       type(ESMF_StateClass), pointer :: stypep
@@ -136,24 +132,6 @@
       if (present (nestedFlag)) then
         localnestedflag = nestedFlag
       end if
-
-      localopts = "brief"
-      if (present (options)) then
-        if (options /= " ")  &
-          localopts = options
-      end if
-
-      call ESMF_StringLowerCase (localopts)
-      select case (localopts)
-      case ("brief")
-      case ("collective")
-        write (ESMF_IOstderr,*)  &
-            "ESMF_StateValidate: warning: collective option is deferred"
-      case default
-        write (ESMF_IOstderr,*) "ESMF_StateValidate: unknown options arg: ", &
-            trim (localopts)
-        return 
-      end select
 
       ! Validate the State
 
