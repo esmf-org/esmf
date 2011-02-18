@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.242 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_State.F90,v 1.243 2011/02/18 23:49:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.242 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_State.F90,v 1.243 2011/02/18 23:49:57 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -424,11 +424,12 @@ contains
 ! !IROUTINE: ESMF_StateAdd - Add a single item to a State
 !
 ! !INTERFACE:
-!  subroutine ESMF_StateAdd(state, <item>, rc)
+!  subroutine ESMF_StateAdd(state, <item>, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state
 !    <item>, see below for supported values
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -487,7 +488,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Array), intent(in)             :: array
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -629,7 +630,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
-    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional           :: keywordEnforcer ! must use keywords for the below
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -771,7 +772,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)         :: state
       type(ESMF_Field), intent(in)            :: field
-      type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer), optional    :: keywordEnforcer ! must use keywords for the below
       integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -915,7 +916,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State),       intent(inout)         :: state
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
-      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer), optional          :: keywordEnforcer ! must use keywords for the below
       integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1061,7 +1062,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State),  intent(inout)         :: state
       character (len=*), intent(in)            :: name
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
       integer,           intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1124,7 +1125,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State),       intent(inout)         :: state
       type(ESMF_RouteHandle), intent(in)            :: routehandle
-      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer), optional          :: keywordEnforcer ! must use keywords for the below
       integer,                intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1191,7 +1192,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)         :: state
       type(ESMF_State), intent(in)            :: nestedState
-      type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_KeywordEnforcer), optional    :: keywordEnforcer ! must use keywords for the below
       integer,          intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
@@ -1335,6 +1336,7 @@ contains
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state 
 !    <itemList>, see below for supported values
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,          intent(in),   optional :: count
 !    integer,          intent(out),  optional :: rc     
 !
@@ -1386,7 +1388,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state 
     type(ESMF_Array), intent(in)             :: arrayList(:)
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
     integer,          intent(in),   optional :: count
     integer,          intent(out),  optional :: rc     
 !
@@ -1503,7 +1505,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state 
     type(ESMF_ArrayBundle), intent(in)             :: arraybundleList(:)
-    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional           :: keywordEnforcer ! must use keywords for the below
     integer,                intent(in),   optional :: count
     integer,                intent(out),  optional :: rc     
 !
@@ -2133,32 +2135,27 @@ contains
 
 ! !INTERFACE:
       function ESMF_StateCreate(keywordEnforcer, statetype, &
-                   fieldbundleList, fieldList, arrayList, nestedStateList, &
-                   nameList, itemCount, neededflag, readyflag, validflag, &
-                   reqforrestartflag, name, rc)
+                   arrayList, arraybundleList,  &
+                   fieldList, fieldbundleList,  &
+                   nestedStateList,  nameList,  &
+                   routehandleList, itemCount, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
 !
 ! !ARGUMENTS:
-      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use 
-                                                      ! keywords for the below
-      type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_FieldBundle), dimension(:), intent(inout), &
-                                        optional :: fieldbundleList
-      type(ESMF_Field), dimension(:), intent(inout), optional :: fieldList
-      type(ESMF_Array), dimension(:), intent(in), optional :: arrayList
-      type(ESMF_State), dimension(:), intent(in), optional :: nestedStateList
-      character(len=*), dimension(:), intent(in), optional :: nameList
-      integer,               intent(in),  optional :: itemCount
-#if defined (ESMF_ENABLESTATENEEDED)
-      type(ESMF_NeededFlag), intent(in),  optional :: neededflag
-#endif
-      type(ESMF_ReadyFlag),  intent(in),  optional :: readyflag
-      type(ESMF_ValidFlag),  intent(in),  optional :: validflag
-      type(ESMF_ReqForRestartFlag), intent(in), optional :: reqforrestartflag
-      character(len=*),     intent(in), optional :: name 
-      integer,               intent(out), optional :: rc 
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_StateType),   intent(in),  optional :: statetype
+      type(ESMF_Array),       intent(in),  optional :: arrayList(:)
+      type(ESMF_ArrayBundle), intent(in),  optional :: arraybundleList(:)
+      type(ESMF_Field),       intent(in),  optional :: fieldList(:)
+      type(ESMF_FieldBundle), intent(in),  optional :: fieldbundleList(:)
+      type(ESMF_State),       intent(in),  optional :: nestedStateList(:)
+      character(len=*),       intent(in),  optional :: nameList(:)
+      type(ESMF_RouteHandle), intent(in),  optional :: routehandleList(:)
+      integer,                intent(in),  optional :: itemCount
+      character(len=*),       intent(in),  optional :: name 
+      integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_State}, set default characteristics for
@@ -2171,45 +2168,26 @@ contains
 !    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
 !    or {\tt ESMF\_STATE\_UNSPECIFIED} The default 
 !    is {\tt ESMF\_STATE\_UNSPECIFIED}.
-!   \item[{[fieldbundleList]}]
-!    A list (Fortran array) of {\tt ESMF\_FieldBundle}s.
-!   \item[{[fieldList]}]
-!    A list (Fortran array) of {\tt ESMF\_Field}s.
 !   \item[{[arrayList]}]
 !    A list (Fortran array) of {\tt ESMF\_Array}s.
+!   \item[{[arraybundleList]}]
+!    A list (Fortran array) of {\tt ESMF\_ArrayBundle}s.
+!   \item[{[fieldList]}]
+!    A list (Fortran array) of {\tt ESMF\_Field}s.
+!   \item[{[fieldbundleList]}]
+!    A list (Fortran array) of {\tt ESMF\_FieldBundle}s.
 !   \item[{[nestedStateList]}]
 !    A list (Fortran array) of {\tt ESMF\_State}s to be nested 
 !    inside the outer {\tt ESMF\_State}.
 !   \item[{[nameList]}]
 !    A list (Fortran array) of character string name placeholders.
+!   \item[{[routehandleList]}]
+!    A list (Fortran array) of {\tt ESMF\_RouteHandle}s.
 !   \item[{[itemCount]}]
-!    \begin{sloppypar}
-!    The total number of things -- FieldBundles, Fields, 
-!    Arrays, States, and Names -- to be added.
-!    If {\tt itemCount} is not specified, it will be computed internally based
-!    on the length of each object list.
-!    If {\tt itemCount} is specified this routine
-!    will do an error check to verify the total number of items found
-!    in the argument lists matches this count of the expected number of items.
-!    \end{sloppypar}
-!    The total number of things -- FieldBundles, Fields, 
-!   \item[{[neededflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.
-!    Possible values are listed in Section~\ref{opt:neededflag}.  
-!    If not specified, the default value is set to {\tt ESMF\_NEEDED}.
-!   \item[{[readyflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Possible values are listed in Section~\ref{opt:readyflag}. 
-!    If not specified, the default value is set to {\tt ESMF\_READYTOREAD}.
-!   \item[{[validflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.
-!    Possible values are listed in Section~\ref{opt:validflag}.   
-!    If not specified, the default value is set to {\tt ESMF\_VALID}.
-!   \item[{[reqforrestartflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}. 
-!    Possible values are listed in Section~\ref{opt:reqforrestartflag}.    
-!    If not specified, the default 
-!    value is set to {\tt ESMF\_REQUIRED\_FOR\_RESTART}.
+!    Presets the initial size of the internal State item table.  By default
+!    the size will be set to the sum of the sizes of the arrayList,
+!    arraybundleList, fieldList, fieldbundleList, nestedStateList, nameList,
+!    and routehandleList arrays.
 !   \item[{[name]}]
 !    Name of this {\tt ESMF\_State} object.   A default name will be generated
 !    if none is specified.
@@ -2229,6 +2207,16 @@ contains
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
         ! check input variables
+        if (present(arrayList)) then
+           do i=1,size(arrayList)
+              ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
+           enddo
+        endif
+        if (present(arraybundleList)) then
+           do i=1,size(arraybundleList)
+              ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
+           enddo
+        endif
         if (present(fieldbundleList)) then
            do i=1,size(fieldbundleList)
               ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundleList(i),rc)
@@ -2239,14 +2227,14 @@ contains
               ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
            enddo
         endif
-        if (present(arrayList)) then
-           do i=1,size(arrayList)
-              ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
-           enddo
-        endif
         if (present(nestedStateList)) then
            do i=1,size(nestedStateList)
               ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
+           enddo
+        endif
+        if (present(routehandleList)) then
+           do i=1,size(routehandleList)
+              ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
            enddo
         endif
 
@@ -2262,18 +2250,24 @@ contains
       !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
       !      work-around for Intel's ifort version 9.1.045 and 9.1.051
       !      on NAS' columbia.
+      ! wws: 2/4/2011: This may have been needed because
+      ! a prior version of this file had 'nameList' at the beginning of
+      ! a line.  This might have confused the compiler with the Fortran
+      ! NAMELIST I/O statement.
         if (present(nameList)) then 
-          call ESMF_StateConstruct(stypep, name, statetype, &
-                   fieldbundleList, fieldList, arrayList, nestedStateList, &
-                   nameList, itemCount, &
-                   neededflag, readyflag, validflag, reqforrestartflag, localrc)
+          call ESMF_StateConstruct(stypep,  &
+                   statename=name, statetype=statetype, &
+                   arrays=arrayList, arraybundles=arraybundleList, &
+                   fields=fieldList, fieldbundles=fieldbundleList, &
+                   states=nestedStateList, names=nameList, &
+                   routehandles=routehandleList, rc=localrc)
         else
-          call ESMF_StateConstruct(stypep, name, statetype, &
-                   fieldbundleList, fieldList, arrayList, nestedStateList, &
-                   itemcount=itemCount, &
-                   neededflag=neededflag, readyflag=readyflag, &
-                   validflag=validflag, reqforrestartflag=reqforrestartflag, &
-                   rc=localrc)
+          call ESMF_StateConstruct(stypep,  &
+                   statename=name, statetype=statetype, &
+                   arrays=arrayList, arraybundles=arraybundleList, &
+                   fields=fieldList, fieldbundles=fieldbundleList, &
+                   states=nestedStateList,  &
+                   routehandles=routehandleList, rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -2307,8 +2301,7 @@ contains
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)          :: state
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
-                                                    ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -2374,21 +2367,20 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetInfo(state,  &
-            keywordEnforcer, itemSearch, nestedFlag, name, &
-            statetype, itemCount, itemNameList, stateitemtypeList, rc)
+            keywordEnforcer, itemSearch, nestedFlag, name, statetype,  &
+            itemCount, itemNameList, itemtypeList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),      intent(in) :: state
-      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use 
-                                                        ! keywords for the below
-      character (len=*),     intent(in),  optional :: itemSearch
-      logical,               intent(in),  optional :: nestedFlag
-      character (len=*),     intent(out), optional :: name
-      type(ESMF_StateType),  intent(out), optional :: statetype
-      integer,               intent(out), optional :: itemCount
-      character (len=*),     intent(out), optional :: itemNameList(:)
-      type(ESMF_StateItemType), intent(out), optional :: stateitemtypeList(:)
-      integer,               intent(out), optional :: rc             
+      type(ESMF_State),         intent(in)            :: state
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len=*),        intent(in),  optional :: itemSearch
+      logical,                  intent(in),  optional :: nestedFlag
+      character (len=*),        intent(out), optional :: name
+      type(ESMF_StateType),     intent(out), optional :: statetype
+      integer,                  intent(out), optional :: itemCount
+      character (len=*),        intent(out), optional :: itemNameList(:)
+      type(ESMF_StateItemType), intent(out), optional :: itemtypeList(:)
+      integer,                  intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -2411,10 +2403,10 @@ contains
 !       When set to {\tt .true.}, additionally returns information from
 !       nested States
 !     \item[{[name]}]
-!       Name of this {\tt ESMF\_State}.
+!       Returns the name of this {\tt ESMF\_State}.
 !     \item[{[statetype]}]
-!       Import or Export of this {\tt ESMF\_State}.  Possible values are
-!       listed in Section~\ref{opt:statetype}.
+!       Returns the type, e.g., Import or Export, of this {\tt ESMF\_State}.
+!       Possible values are listed in Section~\ref{opt:statetype}.
 !     \item[{[itemCount]}]
 !       Count of items in this {\tt ESMF\_State}, including all objects
 !       as well as placeholder names.  When the {\tt nestedFlag} option is
@@ -2428,7 +2420,7 @@ contains
 !       States.  When using {\tt itemSearch}, it will return the names of
 !       items matching the specified name.  {\tt itemNameList} must be at least
 !       {\tt itemCount} long.
-!     \item[{[stateitemtypeList]}]  
+!     \item[{[itemtypeList]}]  
 !       Array of possible item object types in this {\tt ESMF\_State}, including
 !       placeholder names.  When the {\tt nestedFlag} option is
 !       set to {\tt .true.}, the list will include items present in nested
@@ -2442,7 +2434,7 @@ contains
 !     Typically, an {\tt ESMF\_StateGet()} information request will be performed
 !     twice.  The first time, the {\tt itemCount} argument will be used to
 !     query the size of arrays that are needed.  Arrays can then be allocated
-!     to the correct size for {\tt itemNameList} and {\tt stateitemtypeList}
+!     to the correct size for {\tt itemNameList} and {\tt itemtypeList}
 !     as needed.  A second call to {\tt ESMF\_StateGet()} will then fill in the
 !     values.
 !
@@ -2486,7 +2478,7 @@ contains
         call itemNameWorker (stypep, prefix="")
       endif
 
-      if (present(stateitemtypeList)) then
+      if (present(itemtypeList)) then
         ilpos = 1
         call itemTypeWorker (stypep)
       endif
@@ -2568,18 +2560,18 @@ contains
           type(ESMF_StateItem) , pointer :: dp
 
           do, i1 = 1, sp%datacount
-            if (ilpos > size (stateitemtypeList)) then
+            if (ilpos > size (itemtypeList)) then
               localrc = ESMF_RC_ARG_SIZE
               exit
             end if
 
             dp => sp%datalist(i1)
             if (.not. present (itemSearch)) then
-              stateitemtypeList(ilpos) = dp%otype
+              itemtypeList(ilpos) = dp%otype
               ilpos = ilpos + 1
             else
               if (dp%namep == itemSearch) then
-              stateitemtypeList(ilpos) = dp%otype
+              itemtypeList(ilpos) = dp%otype
               ilpos = ilpos + 1
               end if
             end if
@@ -2606,6 +2598,7 @@ contains
 !      type(ESMF_State),      intent(in)            :: state
 !      character (len=*),     intent(in)            :: itemName
 !      <item>, see below for supported values
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      character (len=*),     intent(in),  optional :: nestedStateName
 !      integer,               intent(out), optional :: rc             
 !
@@ -2622,10 +2615,10 @@ contains
 !      to access the desired item with a single call.  This is performed
 !      using the ``/'' character to separate the names of the intermediate
 !      State names leading to the desired item.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}.
+!      {\tt itemName=``state1/state12/item''}).
 !
-!      An alternative technique for accessing a nested item which is only
-!      one level down, is to specify the nested State with the
+!      An alternative, and deprecated, technique for accessing a nested item
+!      which is only one level down, is to specify the nested State with the
 !      {\tt nestedStateName} argument.  While States can be nested to any
 !      depth, this option only searches immediate descendents.
 !      It is an error to specify a {\tt nestedStateName} if the
@@ -2653,7 +2646,7 @@ contains
 !     \item[<item>]
 !     Returned reference to the <item>.
 !     \item[{[nestedStateName]}]
-!     Optional.  Used when the {\tt state} contains 
+!     Optional.  Deprecated.  Used when the {\tt state} contains 
 !     multiple nested {\tt ESMF\_State}s and the <item> being requested is
 !     one level down in one of the nested {\tt ESMF\_State}.
 !     An error if specified when the {\tt state} argument contains
@@ -2681,7 +2674,7 @@ contains
       type(ESMF_State),  intent(in)	       :: state
       character (len=*), intent(in)	       :: itemName
       type(ESMF_Array),  intent(out)	       :: array
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: nestedStateName
       integer,           intent(out), optional :: rc		 
 
@@ -2815,7 +2808,7 @@ contains
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_ArrayBundle), intent(out)           :: arraybundle
-      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),      intent(in),  optional :: nestedStateName
       integer,                intent(out), optional :: rc             
 
@@ -2949,7 +2942,7 @@ contains
       type(ESMF_State),      intent(in)            :: state
       character (len=*),     intent(in)            :: itemName
       type(ESMF_Field),      intent(out)           :: field
-      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),     intent(in),  optional :: nestedStateName
       integer,               intent(out), optional :: rc             
 
@@ -3088,7 +3081,7 @@ contains
       type(ESMF_State),       intent(in)            :: state
       character (len=*),      intent(in)            :: itemName
       type(ESMF_FieldBundle), intent(out)           :: fieldbundle
-      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),      intent(in),  optional :: nestedStateName
       integer,                intent(out), optional :: rc             
 
@@ -3220,8 +3213,7 @@ contains
       type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
       type(ESMF_StateItemType),    intent(out) :: stateitemtype
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
-                                                    ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc             
 
 !
@@ -3303,12 +3295,11 @@ contains
       subroutine ESMF_StateGetNeeded(state, itemName, neededflag, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(in) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_NeededFlag),       intent(out) :: neededflag
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
-                                                    ! keywords for the below
-      integer,           intent(out), optional :: rc             
+      type(ESMF_State),      intent(in)  :: state
+      character (len=*),     intent(in)  :: itemName
+      type(ESMF_NeededFlag), intent(out) :: neededflag
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,               intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -3371,10 +3362,10 @@ contains
                                          keywordEnforcer, nestedStateName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),       intent(in)            :: state
-      character (len=*),      intent(in)            :: itemName
-      type(ESMF_RouteHandle), intent(out)           :: routehandle
-      type(ESMF_KeywordEnforcer),          optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_State),       intent(in)  :: state
+      character (len=*),      intent(in)  :: itemName
+      type(ESMF_RouteHandle), intent(out) :: routehandle
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),      intent(in),  optional :: nestedStateName
       integer,                intent(out), optional :: rc             
 
@@ -3504,10 +3495,10 @@ contains
       subroutine ESMF_StateGetState(state, itemName, nestedState, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),      intent(in)            :: state
-      character (len=*),     intent(in)            :: itemName
-      type(ESMF_State),      intent(out)           :: nestedState
-      type(ESMF_KeywordEnforcer),         optional :: keywordEnforcer ! must use keywords for the below
+      type(ESMF_State),      intent(in)  :: state
+      character (len=*),     intent(in)  :: itemName
+      type(ESMF_State),      intent(out) :: nestedState
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc             
 
 !
@@ -3598,8 +3589,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
-                                                    ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc             
 
 !
@@ -3672,8 +3662,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
-    type(ESMF_KeywordEnforcer),    optional :: keywordEnforcer ! must use 
-                                                 ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,          intent(in),  optional :: collectiveflag
     type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
@@ -3777,12 +3766,11 @@ contains
       subroutine ESMF_StatePrint(state, keywordEnforcer, options, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State) :: state
-      type(ESMF_KeywordEnforcer),       optional :: keywordEnforcer ! must use 
-                                                      ! keywords for the below
-      character (len = *),  intent(in), optional :: options
-      logical, intent(in),  optional :: nestedFlag
-      integer, intent(out), optional :: rc 
+      type(ESMF_State),    intent(in) :: state
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character (len = *), intent(in),  optional :: options
+      logical,             intent(in),  optional :: nestedFlag
+      integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt state} to {\tt stdout}. \\
@@ -4009,8 +3997,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State)                          :: state 
       character (len=*),  intent(in)            :: fileName
-      type(ESMF_KeywordEnforcer),      optional :: keywordEnforcer ! must use 
-                                                   ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4080,17 +4067,16 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     character(*),     intent(in)             :: itemName
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use 
-                                                  ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
-!      Remove an existing reference to a an item by a {\tt state}.
+!      Remove an existing reference to an item from a {\tt State}.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[state]
-!      The {\tt ESMF\_State} to which <item>s will be replaced.
+!      The {\tt ESMF\_State} within which {\tt itemName} will be replaced.
 ! \item[itemName]
 !      The name of the item to be removed.  This is a reference only.
 !      The item itself is unchanged.
@@ -4102,8 +4088,8 @@ contains
 !      State names leading to the desired item.  (E.g.,
 !      {\tt itemName=``state1/state12/item''}.
 !
-!      Since <item>s can be added to multiple containers, it remains
-!      the user's responsibility to manage their
+!      Since items could potentially be referenced by multiple containers,
+!      it remains the user's responsibility to manage their
 !      destruction when they are no longer in use.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4191,11 +4177,13 @@ contains
                              ESMF_ERR_PASSTHRU, &
                              ESMF_CONTEXT, rc)) return
 
+
     case (ESMF_STATEITEM_INDIRECT%ot)
       errmsg = "Indirect field " // trim (itemname) //  &
                " must be removed by removing its field bundle"
       if (ESMF_LogFoundError(ESMF_RC_NOT_VALID, errmsg, &
                              ESMF_CONTEXT, rc)) return
+
     end select
 
     dataitem%removedflag = .true.
@@ -4218,6 +4206,7 @@ contains
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state
 !    <item>, see below for supported values
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4231,8 +4220,6 @@ contains
 !      \item type(ESMF\_ArrayBundle), intent(in)      :: arraybundle
 !      \item type(ESMF\_Field), intent(in)            :: field
 !      \item type(ESMF\_FieldBundle), intent(in)      :: fieldbundle
-!      \item character (len=*), intent(in)            :: name
-!      \item type(ESMF\_RouteHandle), intent(in)      :: routehandle
 !      \item type(ESMF\_State), intent(in)            :: nestedState
 !      \end{description}
 !
@@ -4267,7 +4254,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Array), intent(in)             :: array
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4313,7 +4300,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
-    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4359,7 +4346,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_Field), intent(in)             :: Field
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4405,7 +4392,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State),       intent(inout)          :: state
     type(ESMF_FieldBundle), intent(in)             :: Fieldbundle
-    type(ESMF_KeywordEnforcer),           optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4470,7 +4457,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     type(ESMF_State), intent(in)             :: nestedState
-    type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -4518,7 +4505,7 @@ contains
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name              
-      type(ESMF_KeywordEnforcer),     optional :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,  intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -4612,8 +4599,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
-      type(ESMF_KeywordEnforcer),            optional :: keywordEnforcer ! must use 
-                                                           ! keywords for the below
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4678,9 +4664,9 @@ contains
       subroutine ESMF_StateWriteRestart(state, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State) :: state 
-      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
-      integer, intent(out),       optional :: rc            
+      type(ESMF_State), intent(in)            :: state 
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,          intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
 !      Used to save all data to disk as quickly as possible.  
@@ -4726,27 +4712,24 @@ contains
 
 ! !INTERFACE:
       subroutine ESMF_StateConstruct(stypep, statename, statetype, & 
-                         fieldbundles, fields, arrays, states, names, itemcount, &
-#if defined (ESMF_ENABLESTATENEEDED)
-                         neededflag, readyflag, validflag, reqforrestartflag, &
-#endif
-                         rc)
+                         arrays, arraybundles, &
+                         fields, fieldbundles, &
+                         names, routehandles, states, &
+                         itemCount, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
-      character(len=*), intent(in), optional :: statename 
-      type(ESMF_StateType), intent(in), optional :: statetype
-      type(ESMF_FieldBundle), dimension(:), intent(inout), optional :: fieldbundles
-      type(ESMF_Field), dimension(:), intent(inout), optional :: fields
-      type(ESMF_Array), dimension(:), intent(in), optional :: arrays
-      type(ESMF_State), dimension(:), intent(in), optional :: states
-      character(len=*), dimension(:), intent(in), optional :: names
-      integer, intent(in), optional :: itemcount
-      type(ESMF_NeededFlag), optional :: neededflag
-      type(ESMF_ReadyFlag), optional :: readyflag
-      type(ESMF_ValidFlag), optional :: validflag
-      type(ESMF_ReqForRestartFlag), optional :: reqforrestartflag
-      integer, intent(out), optional :: rc 
+      character(len=*),       intent(in),  optional :: statename 
+      type(ESMF_StateType),   intent(in),  optional :: statetype
+      type(ESMF_Array),       intent(in),  optional :: arrays(:)
+      type(ESMF_ArrayBundle), intent(in),  optional :: arraybundles(:)
+      type(ESMF_Field),       intent(in),  optional :: fields(:)
+      type(ESMF_FieldBundle), intent(in),  optional :: fieldbundles(:)
+      character(len=*),       intent(in),  optional :: names(:)
+      type(ESMF_RouteHandle), intent(in),  optional :: routehandles(:)
+      type(ESMF_State),       intent(in),  optional :: states(:)
+      integer,                intent(in),  optional :: itemCount
+      integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Construct a new State and set the decomposition characteristics.
@@ -4762,44 +4745,25 @@ contains
 !    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATE\_IMPORT},
 !    {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.   
 !    {\tt ESMF\_STATE\_LIST} is the default if not specified.
-!   \item[{[fieldbundles]}]
-!    An array of {\tt FieldBundles}.
-!   \item[{[fields]}]
-!    An array of {\tt Fields}.
 !   \item[{[arrays]}]
-!    An array of {\tt Arrays}.
+!    An array of {\tt ESMF\_Arrays}.
+!   \item[{[arraybundles]}]
+!    An array of {\tt ESNF\_ArrayBundle}s.
+!   \item[{[fields]}]
+!    An array of {\tt ESMF\_Field}s.
+!   \item[{[fieldbundles]}]
+!    An array of {\tt ESMF\_FieldBundle}s.
 !   \item[{[states]}]
 !    An array of nested {\tt ESMF\_State}s.
 !   \item[{[names]}]
 !    An array of name placeholders.
-!   \item[{[itemcount]}]
-!    The total number of FieldBundles, Fields, Arrays, States, and Names specified.
-!    This argument is optional, and if specified is used as an error check
-!    to verify that the actual total number of items found matches this count.
-#if defined (ESMF_ENABLESTATENEEDED)
-!   \item[{[neededflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEITEM\_NEEDED} or 
-!    {\tt ESMF\_STATEITEM\_NOTNEEDED}.  If not specified, the default value is
-!    set to {\tt ESMF\_STATEITEM\_NEEDED}.
-!   \item[{[readyflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEITEM\_READYTOWRITE},
-!    {\tt ESMF\_STATEITEM\_READYTOREAD}, or {\tt ESMF\_STATEITEMNOTREADY}.
-!    If not specified, the default value is set to 
-!    {\tt ESMF\_STATEITEM\_READYTOREAD}.
-!   \item[{[validflag]}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEITEM\_VALID},
-!    {\tt ESMF\_STATEITEM\_INVALID}, or {\tt ESMF\_STATEITEM\_VALIDITYUNKNOWN}.
-!    If not specified, the default value is set to 
-!    {\tt ESMF\_STATEITEM\_VALID}.
-!   \item[{[reqforrestartflag}]
-!    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_REQUIRED\_FOR\_RESTART} or
-!    {\tt ESMF\_NOTREQUIRED\_FOR\_RESTART}. If not specified, the default 
-!    value is set to {\tt ESMF\_REQUIRED\_FOR\_RESTART}.
-#endif
+!   \item[{[routehandles]}]
+!    An array of {\tt ESMF\_RouteHandle}s.
+!   \item[{[itemCount]}]
+!    Initial size of the internal item array.  Must be at least the
+!    sum of sizes of the arrays, arraybundles, fields, fieldbundles, names,
+!    routehandles, and states arrays.  If it is set too small, the initial
+!    size will be set to the sum of sizes of the arrays.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -4807,8 +4771,9 @@ contains
 !EOPI
 
         ! Local vars
-        integer :: count
+        integer :: localitemcount
         integer :: localrc                   ! local error status
+        character(ESMF_MAXSTR) :: errmsg
         integer :: i
 
         ! Initialize return code; assume failure until success is certain
@@ -4816,89 +4781,87 @@ contains
         localrc = ESMF_RC_NOT_IMPL
 
         ! check input variables
-        if (present(fieldbundles)) then
-           do i=1,size(fieldbundles)
-              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
+        localitemcount = 0
+        if (present(arrays)) then
+           do i=1,size(arrays)
+              ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrays(i),rc)
            enddo
+           localitemcount = localitemcount + size (arrays)
+        endif
+        if (present(arraybundles)) then
+           do i=1,size(arraybundles)
+              ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
+           enddo
+           localitemcount = localitemcount + size (arraybundles)
         endif
         if (present(fields)) then
            do i=1,size(fields)
               ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
+           localitemcount = localitemcount + size (fields)
            enddo
         endif
-        if (present(arrays)) then
-           do i=1,size(arrays)
-              ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrays(i),rc)
+        if (present(fieldbundles)) then
+           do i=1,size(fieldbundles)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
+           localitemcount = localitemcount + size (fieldbundles)
            enddo
         endif
         if (present(states)) then
            do i=1,size(states)
               ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
            enddo
+           localitemcount = localitemcount + size (states)
+        endif
+        if (present(routehandles)) then
+           do i=1,size(routehandles)
+              ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
+           enddo
+           localitemcount = localitemcount + size (routehandles)
         endif
 
-
-        ! Quick sanity check on the values
-        count = 0
-        if (present(fieldbundles)) count = count + size(fieldbundles)
-        if (present(fields)) count = count + size(fields)
-        if (present(arrays)) count = count + size(arrays)
-        if (present(states)) count = count + size(states)
-        if (present(names)) count = count + size(names)
-
-        if (present(itemcount)) then
-          if (count .ne. itemcount) then
-              if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                                  "itemcount does not match lists given", &
-                                  ESMF_CONTEXT, rc)) return
-          endif
-        endif
+        if (present (itemCount)) then
+          if (itemCount < localitemcount) then
+            write (errmsg,*)  &
+               'itemCount', itemCount, ' too small.  Setting to', localitemcount
+            call ESMF_LogWrite (trim (errmsg), ESMF_LOG_INFO,  &
+                method=ESMF_METHOD, rc=rc)
+          end if
+          localitemcount = max (localitemcount, itemCount)
+        end if
 
         ! Set initial values
-        call ESMF_StateConstructEmpty(stypep, statename, statetype, localrc)
+        call ESMF_StateConstructEmpty(stypep, statename, statetype, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-#if defined (ESMF_ENABLESTATENEEDED)
-        ! Set the defaults for objects added to this state
-        if (present(neededflag)) then
-            stypep%needed_default = neededflag
-        else
-            stypep%needed_default = ESMF_NEEDED
-        endif
-
-        if (present(readyflag)) then
-            stypep%ready_default = readyflag
-        else
-            stypep%ready_default = ESMF_READYTOREAD
-        endif
-
-        if (present(validflag)) then
-            stypep%stvalid_default = validflag
-        else
-            stypep%stvalid_default = ESMF_VALID
-        endif
-
-        if (present(reqforrestartflag)) then
-            stypep%reqrestart_default = reqforrestartflag
-        else
-            stypep%reqrestart_default = ESMF_REQUIRED_FOR_RESTART
-        endif
-#endif
-
         ! Set the initial size of the datalist
-        call ESMF_StateClassExtendList(stypep, count, localrc)
+        
+        call ESMF_StateClassExtendList(stypep, localitemcount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       
         ! For each item type, set the data values.  All the allocation 
         !  has already been done.
-        if (present(fieldbundles)) then
-          count = size(fieldbundles)
-          if (count .gt. 0) then
-            call ESMF_StateClAddFieldBundleList(stypep, count, fieldbundles, &
+
+        if (present(arrays)) then
+          localitemcount = size(arrays)
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddArrayList(stypep,  &
+              localitemcount, arrays, &
+              rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+          endif
+        endif
+
+        if (present(arraybundles)) then
+          localitemcount = size(arraybundles)
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddArrayBundleList(stypep,  &
+              localitemcount, arraybundles, &
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4907,9 +4870,10 @@ contains
         endif
 
         if (present(fields)) then
-          count = size(fields)
-          if (count .gt. 0) then
-            call ESMF_StateClsAddFieldList(stypep, count, fields, &
+          localitemcount = size(fields)
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddFieldList(stypep,  &
+              localitemcount, fields, &
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4917,21 +4881,11 @@ contains
           endif
         endif
 
-        if (present(arrays)) then
-          count = size(arrays)
-          if (count .gt. 0) then
-            call ESMF_StateClsAddArrayList(stypep, count, arrays, &
-              rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-          endif
-        endif
-
-        if (present(states)) then
-          count = size(states)
-          if (count .gt. 0) then
-            call ESMF_StateClsAddStateList(stypep, count, states, &
+        if (present(fieldbundles)) then
+          localitemcount = size(fieldbundles)
+          if (localitemcount > 0) then
+            call ESMF_StateClAddFieldBundleList(stypep,  &
+              localitemcount, fieldbundles, &
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4940,9 +4894,34 @@ contains
         endif
 
         if (present(names)) then
-          count = size(names)
-          if (count .gt. 0) then
-            call ESMF_StateClsAddDataNameList(stypep, count, names, &
+          localitemcount = size(names)
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddDataNameList(stypep,  &
+              localitemcount, names, &
+              rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+          endif
+        endif
+
+        if (present(routehandles)) then
+          localitemcount = size(routehandles)
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddRHandleList(stypep,  &
+              localitemcount, routehandles, &
+              rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+          endif
+        endif
+
+        if (present(states)) then
+          localitemcount = size(states)
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddStateList(stypep,  &
+              localitemcount, states, &
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4966,10 +4945,10 @@ contains
       subroutine ESMF_StateConstructEmpty(stypep, statename, statetype, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_StateClass), pointer :: stypep
-      character(len=*), intent(in), optional :: statename 
-      type(ESMF_StateType), intent(in), optional :: statetype
-      integer, intent(out), optional :: rc 
+      type (ESMF_StateClass), pointer             :: stypep
+      character(len=*),     intent(in),  optional :: statename 
+      type(ESMF_StateType), intent(in),  optional :: statetype
+      integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Construct a new empty {\tt State}.  The return value is a new {\tt State}.
@@ -6087,9 +6066,9 @@ contains
         replaceflag, proxyflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateClass),  pointer       :: stypep
-      integer,                intent(in)    :: bcount
-      type(ESMF_FieldBundle), intent(inout) :: fieldbundles(:)
+      type(ESMF_StateClass),  pointer               :: stypep
+      integer,                intent(in)            :: bcount
+      type(ESMF_FieldBundle), intent(in)            :: fieldbundles(:)
       logical,                intent(in),  optional :: replaceflag
       logical,                intent(in),  optional :: proxyflag
       integer,                intent(out), optional :: rc     
@@ -6122,6 +6101,7 @@ contains
       integer :: memstat                  ! Stat from allocate/deallocate
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
+      type(ESMF_VMId)  :: fb_vmid
       character(len=ESMF_MAXSTR) :: bname, fname
       logical, allocatable :: btodo(:)
       integer, allocatable :: ftodo(:)
@@ -6573,7 +6553,7 @@ contains
       ! For each state...
       do i=1, scount
 
-        call ESMF_StateValidate(states(i), options="", rc=localrc)
+        call ESMF_StateValidate(states(i), rc=localrc)
         ! TODO: add state number to error msg
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
