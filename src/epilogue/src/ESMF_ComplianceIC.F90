@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.17 2010/11/03 22:48:47 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.18 2011/02/19 00:05:06 w6ws Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -707,7 +707,7 @@ module ESMF_ComplianceICMod
         allocate(itemNameList(itemCount))
         allocate(stateitemtypeList(itemCount))
         call ESMF_StateGet(state, itemNameList=itemNameList, &
-          stateitemtypeList=stateitemtypeList, rc=rc)
+          itemtypeList=stateitemtypeList, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
           file=__FILE__)) &
