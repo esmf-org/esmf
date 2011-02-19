@@ -54,7 +54,7 @@ contains
     ! Change History
     ! 20070608 R. Loy  added optional args
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90,v 1.3 2010/11/28 04:24:23 samsoncheung Exp $
+    ! $Id: pio_support.F90,v 1.4 2011/02/19 01:44:43 samsoncheung Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -98,12 +98,12 @@ contains
 #endif
 #endif
 
-#if (defined _MPI)
+#ifdef _MPISERIAL
+    call abort
+#else
     ! passing an argument of 1 to mpi_abort will lead to a STOPALL output 
     ! error code of 257
     call mpi_abort (MPI_COMM_WORLD, 1)  
-#else
-    call abort
 #endif
 
   end subroutine piodie
@@ -150,7 +150,7 @@ contains
     ! Change History
     ! 
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90,v 1.3 2010/11/28 04:24:23 samsoncheung Exp $
+    ! $Id: pio_support.F90,v 1.4 2011/02/19 01:44:43 samsoncheung Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -256,7 +256,7 @@ contains
     ! Change History
     ! 
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90,v 1.3 2010/11/28 04:24:23 samsoncheung Exp $
+    ! $Id: pio_support.F90,v 1.4 2011/02/19 01:44:43 samsoncheung Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none

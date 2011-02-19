@@ -374,13 +374,16 @@ contains
     offset     = iodesc%IOmap%start
     len        = iodesc%IOmap%length
 
-    if(Debug) print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank,' UseRearranger: ',UseRearranger, glen, offset, len   
+    if(Debug) &
+      print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank, &
+      ' UseRearranger: ',UseRearranger, glen, offset, len   
 #ifdef TIMING
     call t_startf("pio_rearrange_write")
 #endif
     if(UseRearranger) then 
        if (IOproc) then 
-          if(Debug) print *, subName,': IAM: ',File%iosystem%comp_rank,'Before call to allocate(IOBUF): ',len
+          if(Debug) print *, subName,': IAM: ',File%iosystem%comp_rank, &
+                    'Before call to allocate(IOBUF): ',len
 
           call alloc_check(IOBUF,len,' TYPE :IOBUF')
 
@@ -394,7 +397,9 @@ contains
           !  set the IO buffer to a particular test pattern
           !------------------------------------------------
           !JMD	IOBUF(:) = real(File%iosystem%io_rank,kind=r8)
-          if(Debug) print *, subName,': {comp,io}_rank: ',File%iosystem%comp_rank,File%iosystem%io_rank,  &
+          if(Debug) &
+            print *, subName,': {comp,io}_rank: ', &
+            File%iosystem%comp_rank,File%iosystem%io_rank,  &
                'offset: ',offset,'len: ',len   !,' IOBUF: ',IOBUF
 
        else

@@ -1201,7 +1201,9 @@ contains
        end select
     endif
 
-    if(Debug .or. Debugasync) print *,__FILE__,__LINE__,file%fh, name, dimid, ios%async_interface, ios%iomaster,ios%my_comm,ios%intercomm, ierr
+    if(Debug .or. Debugasync)  &
+      print *,__FILE__,__LINE__,file%fh, name, dimid, &
+      ios%async_interface, ios%iomaster,ios%my_comm,ios%intercomm, ierr
     call check_netcdf(File, ierr,_FILE_,__LINE__)
 
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then

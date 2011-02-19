@@ -10,7 +10,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.1 2010/06/04 23:24:15 theurich Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.2 2011/02/19 01:44:43 samsoncheung Exp $
 !  CVS:$Name:  $
 
 ! !USES:
@@ -18,9 +18,9 @@
 
    implicit none
    private
+   include 'mpif.h'   ! _EXTERNAL
    save
 
-   include 'mpif.h'   ! _EXTERNAL
 
 ! !DEFINED PARAMETERS:
 
@@ -35,7 +35,7 @@
 
 
    integer, parameter, public ::          &
-      PIO_OFFSET = MPI_OFFSET_KIND
+      PIO_OFFSET = MPI_OFFSET_KIND 
 
 !EOP
 !BOC

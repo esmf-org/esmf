@@ -34,9 +34,9 @@ module piolib_mod
 
   implicit none
   private
+  include 'mpif.h'    ! _EXTERNAL
   save
 
-  include 'mpif.h'    ! _EXTERNAL
 
   ! !public member functions:
 
@@ -154,7 +154,7 @@ module piolib_mod
   interface PIO_initdecomp
      module procedure PIO_initdecomp_dof  ! previous name: initdecomop_1dof_nf_box
      module procedure PIO_initdecomp_bc
-     module procedure PIO_initdecomp_dof_dof
+!cheung     module procedure PIO_initdecomp_dof_dof
      module procedure initdecomp_1dof_nf
      module procedure initdecomp_1dof_bin
      module procedure initdecomp_2dof_nf
@@ -426,19 +426,20 @@ contains
 !! @param iodesc @copydoc iodesc_generate
 !! @param iodof Mapping of the storage order for the IO decomposition its memory order
 !<
-  subroutine PIO_initdecomp_dof_dof(iosystem,basepiotype,dims,compdof,iodesc,iodof)
-    type (iosystem_desc_t), intent(inout)          :: iosystem
-    integer(i4), intent(in)                        :: basepiotype
-    integer(i4), intent(in)                        :: dims(:)
-    integer(i4), intent(in)                        :: compdof(:)
-    type (IO_desc_t), intent(out)                   :: iodesc
-    integer(i4), intent(in)                        :: iodof(:)
-
-!    character(len=*), parameter :: subName=modName//'::PIO_initdecomp_dof_dof'
-
-!    call piodie(subname,__LINE__,'subroutine not yet implemented')
-
-  end subroutine PIO_initdecomp_dof_dof
+!cheung
+!  subroutine PIO_initdecomp_dof_dof(iosystem,basepiotype,dims,compdof,iodesc,iodof)
+!    type (iosystem_desc_t), intent(inout)          :: iosystem
+!    integer(i4), intent(in)                        :: basepiotype
+!    integer(i4), intent(in)                        :: dims(:)
+!    integer(i4), intent(in)                        :: compdof(:)
+!    type (IO_desc_t), intent(out)                   :: iodesc
+!    integer(i4), intent(in)                        :: iodof(:)
+!
+!!    character(len=*), parameter :: subName=modName//'::PIO_initdecomp_dof_dof'
+!
+!!    call piodie(subname,__LINE__,'subroutine not yet implemented')
+!
+!  end subroutine PIO_initdecomp_dof_dof
 
 !> 
 !! @public 
@@ -924,7 +925,8 @@ contains
        
     iodesc%start=0
     iodesc%count=0
-    if(DebugAsync) print*,__FILE__,__LINE__, iosystem%num_tasks, iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iosystem%ioranks
+    if(DebugAsync) print*,__FILE__,__LINE__, iosystem%num_tasks, &
+    iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iosystem%ioranks
 
     if (iosystem%ioproc) then
        if(present(iostart) .and. present(iocount)) then
@@ -2239,7 +2241,9 @@ contains
 
 
 
-    if(Debug .or. Debugasync) print *,'PIO_openfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank,'io proc: ',iosystem%ioproc
+    if(Debug .or. Debugasync) &
+      print *,'PIO_openfile: {comp,io}_rank:',iosystem%comp_rank, &
+      iosystem%io_rank,'io proc: ',iosystem%ioproc
     ierr=PIO_noerr
 
     file%iosystem => iosystem
@@ -2496,7 +2500,9 @@ contains
        read(unit=lun,fmt=*,iostat=ios) iobuf(i)
        if (ios /= 0) then
           write (6,*) rank,': error reading item ',i,' of ',size
-          call abort
+          ! Thus us not Fortran standard, besides, this routine is not used. 
+          ! call abort
+          return
        endif
 
     end do

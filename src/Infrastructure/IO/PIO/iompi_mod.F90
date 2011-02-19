@@ -19,9 +19,9 @@ module iompi_mod
     use alloc_mod, only : alloc_check
     implicit none
     private
+    include 'mpif.h'        ! _EXTERNAL
     save
   
-    include 'mpif.h'        ! _EXTERNAL
 
     public :: open_mpiio, create_mpiio, close_mpiio, write_mpiio,read_mpiio
 

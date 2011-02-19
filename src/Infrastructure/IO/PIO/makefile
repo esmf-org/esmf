@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2010/11/30 22:38:14 theurich Exp $
+# $Id: makefile,v 1.10 2011/02/19 01:44:43 samsoncheung Exp $
 
 # locally disable parallel build:
 .NOTPARALLEL:
@@ -11,7 +11,7 @@ CPPFLAGS += -D_USEBOX
 CPPFLAGS += -DNO_MPI2
 
 ifdef ESMF_MPIIO
-CPPFLAGS += -DUSEMPIIO
+CPPFLAGS += -DUSEMPIIO -DNO_SIZEOF
 endif
 
 ifdef ESMF_NETCDF

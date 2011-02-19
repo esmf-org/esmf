@@ -786,12 +786,12 @@ end subroutine box_rearrange_io2comp_{TYPE}
   logical function find_ioproc( gcoord, lb, ub, lstride, ndim, nioproc, &
        io_proc, io_index )
     implicit none
+    integer,intent(in) :: ndim
+    integer,intent(in) :: nioproc
     integer,intent(in) :: gcoord(:)
     integer,intent(in) :: lb(ndim,nioproc)
     integer,intent(in) :: ub(ndim,nioproc)
     integer,intent(in) :: lstride(ndim,nioproc)
-    integer,intent(in) :: ndim
-    integer,intent(in) :: nioproc
     integer,intent(out) :: io_proc
     integer,intent(out) :: io_index
 

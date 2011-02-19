@@ -1730,7 +1730,9 @@ contains
     offset     = iodesc%IOmap%start
     len        = iodesc%IOmap%length
 
-    if(Debug) print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank,' UseRearranger: ',UseRearranger, glen, offset, len   
+    if(Debug) &
+     print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank, &
+     ' UseRearranger: ',UseRearranger, glen, offset, len   
 #ifdef TIMING
     call t_startf("pio_rearrange_write")
 #endif
@@ -1960,7 +1962,9 @@ contains
     offset     = iodesc%IOmap%start
     len        = iodesc%IOmap%length
 
-    if(Debug) print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank,' UseRearranger: ',UseRearranger, glen, offset, len   
+    if(Debug) &
+     print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank, &
+     ' UseRearranger: ',UseRearranger, glen, offset, len   
 #ifdef TIMING
     call t_startf("pio_rearrange_write")
 #endif
@@ -2190,7 +2194,9 @@ contains
     offset     = iodesc%IOmap%start
     len        = iodesc%IOmap%length
 
-    if(Debug) print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank,' UseRearranger: ',UseRearranger, glen, offset, len   
+    if(Debug) &
+      print *,_FILE_,__LINE__,' NAME : IAM: ',File%iosystem%comp_rank, &
+      ' UseRearranger: ',UseRearranger, glen, offset, len   
 #ifdef TIMING
     call t_startf("pio_rearrange_write")
 #endif
