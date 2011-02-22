@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.30 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.31 2011/02/22 17:12:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.30 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.31 2011/02/22 17:12:13 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1082,7 +1082,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !   integer,               intent(in),  optional :: gridIndex @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
