@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.33 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.34 2011/02/22 23:37:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.33 2011/01/05 20:05:40 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.34 2011/02/22 23:37:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -192,7 +192,7 @@ ArrayBundle *ArrayBundle::create(
   // call class constructor
   try{
     arraybundle = new ArrayBundle(arrayListArg, arrayCount, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
     // allocation error
@@ -246,7 +246,7 @@ int ArrayBundle::destroy(
 
   // destruct ArrayBundle object
   localrc = (*arraybundle)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // mark as invalid object
@@ -347,7 +347,7 @@ int ArrayBundle::haloStore(
   
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   int petCount = vm->getPetCount();
   int localPet = vm->getLocalPet();
@@ -384,7 +384,7 @@ int ArrayBundle::haloStore(
       for (int j=i-1; j>=0; j--){
         bool match = Array::match(array, arraybundle->getArrayList()[j],
           &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         if (match){
           // found match
@@ -405,10 +405,10 @@ int ArrayBundle::haloStore(
     }
     // create and initialize the RouteHandle
     *routehandle = RouteHandle::create(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     localrc = (*routehandle)->setType(ESMC_ARRAYBUNDLEXXE);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
     XXE *xxe;
@@ -419,7 +419,7 @@ int ArrayBundle::haloStore(
       return rc;
     }
     localrc = (*routehandle)->setStorage(xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     // use Array::haloStore() to determine the required XXE streams
     int rraShift = 0; // reset
@@ -434,7 +434,7 @@ int ArrayBundle::haloStore(
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
           vectorLengthShift);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
         // Array does _not_ match any previous Array in ArrayBundle
@@ -443,26 +443,26 @@ int ArrayBundle::haloStore(
         RouteHandle *rh;
         localrc = Array::haloStore(array, &rh, halostartregionflag,
           haloLDepth, haloUDepth);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // get a handle on the XXE stored in rh
         xxeSub[i] = (XXE *)rh->getStorage();
         // delete the temporary routehandle w/o deleting the xxeSub
         localrc = rh->setType(ESMC_UNINITIALIZEDHANDLE);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         localrc = RouteHandle::destroy(rh);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift,
           vectorLengthShift);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // keep track of xxeSub for xxe garbage collection
         localrc = xxe->storeXxeSub(xxeSub[i]);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
+          ESMCI_ERR_PASSTHRU, &rc)) return rc;
       }
       rraShift += 2 * array->getDELayout()->getLocalDeCount();
       ++vectorLengthShift;
@@ -515,7 +515,7 @@ int ArrayBundle::halo(
   // implemented via sparseMatMul
   localrc = sparseMatMul(arraybundle, arraybundle, routehandle,
     ESMF_REGION_SELECT, checkflag, true);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
@@ -553,7 +553,7 @@ int ArrayBundle::haloRelease(
   
   // implemented via sparseMatMul
   localrc = sparseMatMulRelease(routehandle);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
 
   // return successfully
@@ -598,7 +598,7 @@ int ArrayBundle::redistStore(
   
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   int petCount = vm->getPetCount();
   int localPet = vm->getLocalPet();
@@ -647,11 +647,11 @@ int ArrayBundle::redistStore(
       for (int j=i-1; j>=0; j--){
         bool srcMatch = Array::match(srcArray,
           srcArraybundle->getArrayList()[j], &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         bool dstMatch = Array::match(dstArray,
           dstArraybundle->getArrayList()[j], &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         if (srcMatch && dstMatch){
           // found match
@@ -672,10 +672,10 @@ int ArrayBundle::redistStore(
     }
     // create and initialize the RouteHandle
     *routehandle = RouteHandle::create(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     localrc = (*routehandle)->setType(ESMC_ARRAYBUNDLEXXE);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
     XXE *xxe;
@@ -686,7 +686,7 @@ int ArrayBundle::redistStore(
       return rc;
     }
     localrc = (*routehandle)->setStorage(xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     // use Array::redistStore() to determine the required XXE streams
     int rraShift = 0; // reset
@@ -702,7 +702,7 @@ int ArrayBundle::redistStore(
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
           vectorLengthShift);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
@@ -711,26 +711,26 @@ int ArrayBundle::redistStore(
         RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
           srcToDstTransposeMap, typekindFactor, factor);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // get a handle on the XXE stored in rh
         xxeSub[i] = (XXE *)rh->getStorage();
         // delete the temporary routehandle w/o deleting the xxeSub
         localrc = rh->setType(ESMC_UNINITIALIZEDHANDLE);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         localrc = RouteHandle::destroy(rh);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift,
           vectorLengthShift);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // keep track of xxeSub for xxe garbage collection
         localrc = xxe->storeXxeSub(xxeSub[i]);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
+          ESMCI_ERR_PASSTHRU, &rc)) return rc;
       }
       rraShift += srcArray->getDELayout()->getLocalDeCount()
         + dstArray->getDELayout()->getLocalDeCount();
@@ -785,7 +785,7 @@ int ArrayBundle::redist(
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
     ESMF_REGION_SELECT, checkflag);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
@@ -823,7 +823,7 @@ int ArrayBundle::redistRelease(
   
   // implemented via sparseMatMul
   localrc = sparseMatMulRelease(routehandle);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
 
   // return successfully
@@ -866,7 +866,7 @@ int ArrayBundle::sparseMatMulStore(
 
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   int petCount = vm->getPetCount();
   int localPet = vm->getLocalPet();
@@ -915,11 +915,11 @@ int ArrayBundle::sparseMatMulStore(
       for (int j=i-1; j>=0; j--){
         bool srcMatch = Array::match(srcArray,
           srcArraybundle->getArrayList()[j], &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         bool dstMatch = Array::match(dstArray,
           dstArraybundle->getArrayList()[j], &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         if (srcMatch && dstMatch){
           // found match
@@ -940,10 +940,10 @@ int ArrayBundle::sparseMatMulStore(
     }
     // create and initialize the RouteHandle
     *routehandle = RouteHandle::create(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     localrc = (*routehandle)->setType(ESMC_ARRAYBUNDLEXXE);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     // allocate XXE and attach to RouteHandle
     XXE *xxe;
@@ -954,7 +954,7 @@ int ArrayBundle::sparseMatMulStore(
       return rc;
     }
     localrc = (*routehandle)->setStorage(xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       &rc)) return rc;
     // use Array::sparseMatMulStore() to determine the required XXE streams
     int rraShift = 0; // reset
@@ -970,7 +970,7 @@ int ArrayBundle::sparseMatMulStore(
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
           vectorLengthShift);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
@@ -979,26 +979,26 @@ int ArrayBundle::sparseMatMulStore(
         RouteHandle *rh;
         localrc = Array::sparseMatMulStore(srcArray, dstArray, &rh, 
           sparseMatrix);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // get a handle on the XXE stored in rh
         xxeSub[i] = (XXE *)rh->getStorage();
         // delete the temporary routehandle w/o deleting the xxeSub
         localrc = rh->setType(ESMC_UNINITIALIZEDHANDLE);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         localrc = RouteHandle::destroy(rh);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[i], rraShift,
           vectorLengthShift);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         // keep track of xxeSub for xxe garbage collection
         localrc = xxe->storeXxeSub(xxeSub[i]);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-          ESMF_ERR_PASSTHRU, &rc)) return rc;
+          ESMCI_ERR_PASSTHRU, &rc)) return rc;
       }
       rraShift += srcArray->getDELayout()->getLocalDeCount()
         + dstArray->getDELayout()->getLocalDeCount();
@@ -1079,7 +1079,7 @@ int ArrayBundle::sparseMatMul(
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }else if (srcArraybundle != NULL){
@@ -1087,7 +1087,7 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }else if (dstArraybundle != NULL){
@@ -1095,7 +1095,7 @@ int ArrayBundle::sparseMatMul(
           dstArray = dstArraybundle->getArrayList()[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
-          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         }
       }
@@ -1203,7 +1203,7 @@ int ArrayBundle::sparseMatMul(
       // execute XXE stream
       localrc = xxe->exec(rraCount, &(rraList[0]), &(vectorLength[0]), 
         filterBitField);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &rc)) return rc;
       // return successfully
       rc = ESMF_SUCCESS;
@@ -1262,7 +1262,7 @@ int ArrayBundle::sparseMatMulRelease(
 #ifdef XXEPROFILEPRINT
     // print XXE stream profile
     VM *vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
@@ -1276,7 +1276,7 @@ int ArrayBundle::sparseMatMulRelease(
     for (int pet=0; pet<petCount; pet++){
       if (pet==localPet){
         localrc = xxe->printProfile(fp);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc))
         return rc;
       }
@@ -1354,7 +1354,7 @@ int ArrayBundle::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,inquireflag);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the ArrayBundle with all its Arrays
   r=*offset%8;
@@ -1369,7 +1369,7 @@ int ArrayBundle::serialize(
   *offset = (cp - buffer);
   for (int i=0; i<arrayCount; i++){
     localrc = arrayList[i]->serialize(buffer,length,offset,attreconflag,inquireflag);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
   
@@ -1414,7 +1414,7 @@ int ArrayBundle::deserialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   localrc = ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   // Deserialize the ArrayBundle with all its Arrays
   r=*offset%8;
