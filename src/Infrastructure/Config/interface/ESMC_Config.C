@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.22 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMC_Config.C,v 1.23 2011/02/22 22:07:39 w6ws Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char* const version = "$Id: ESMC_Config.C,v 1.22 2011/01/05 20:05:41 svasquez Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.23 2011/02/22 22:07:39 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // class declaration type -> this should be moved into ESMCI namespace
@@ -210,7 +210,7 @@ ESMC_Config ESMC_ConfigCreate(
 
   // call into Fortran interface
   FTN(f_esmf_configcreate)(configp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
     delete configp;
     return config;
   }
@@ -274,7 +274,7 @@ int ESMC_ConfigDestroy(
 
   // call into Fortran interface
   FTN(f_esmf_configdestroy)(configp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
   delete configp;
@@ -389,14 +389,14 @@ int ESMC_ConfigLoadFile(
   fName = new char[nlen];
   // debug!  localrc = ESMC_CtoF90string(name, fName, ESMF_MAXSTR);
   localrc = ESMC_CtoF90string(name, fName, nlen);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     delete[] fName;
     return rc;
   }
 
   // call Fortran interface
   FTN(f_esmf_configloadfile)(configp, fName, uniquep, &localrc, nlen);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     delete[] fName;
     return rc;
   }
@@ -477,14 +477,14 @@ int ESMC_ConfigFindLabel(
   llen = strlen(label);
   fLabel = new char[llen];
   localrc = ESMC_CtoF90string(label, fLabel, llen);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     delete[] fLabel;
     return rc;
   }
 
   // call Fortran interface
   FTN(f_esmf_configfindlabel)(configp, fLabel, &localrc, llen);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     delete[] fLabel;
     return rc;
   }
@@ -553,7 +553,7 @@ int ESMC_ConfigNextLine(
 
   // call Fortran interface
   FTN(f_esmf_confignextline)(configp, &localtableEnd, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
 
@@ -673,7 +673,7 @@ int ESMC_ConfigNextLine(
 //    llen = strlen(label);
 //    fLabel = new char[llen];
 //    localrc = ESMC_CtoF90string(label, fLabel, llen);
-//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //      delete[] fLabel;
 //      return rc;
 //    }
@@ -682,7 +682,7 @@ int ESMC_ConfigNextLine(
 //  // call Fortran interface
 //  FTN(f_esmf_configgetchar)(configp, value, fLabel, dvaluep, &localrc, 1, llen,
 //    1);
-//  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //    if (fLabel != NULL) {delete[] fLabel;}
 //    return rc;
 //  }
@@ -794,14 +794,14 @@ int ESMC_ConfigNextLine(
     llen = strlen(label);
     fLabel = new char[llen];
     localrc = ESMC_CtoF90string(label, fLabel, llen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       delete[] fLabel;
       return rc;
     }
 
     // call into Fortran interface
     FTN(f_esmf_configgetlen)(configp, wordCount, fLabel, &localrc, llen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       if (fLabel != NULL) {delete[] fLabel;}
       return rc;
     }
@@ -813,7 +813,7 @@ int ESMC_ConfigNextLine(
 
    // call into Fortran interface without the label optional argument
     FTN(f_esmf_configgetlennolabel)(configp, wordCount, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       return rc;
     }
 
@@ -923,7 +923,7 @@ int ESMC_ConfigNextLine(
     llen = strlen(label);
     fLabel = new char[llen];
     localrc = ESMC_CtoF90string(label, fLabel, llen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       delete[] fLabel;
       return rc;
     }
@@ -931,7 +931,7 @@ int ESMC_ConfigNextLine(
     // call Fortran interface
     FTN(f_esmf_configgetdim)(configp, lineCount, columnCount, fLabel, &localrc,
       llen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       delete[] fLabel;
       return rc;
     }
@@ -942,7 +942,7 @@ int ESMC_ConfigNextLine(
   }else{
 
     FTN(f_esmf_configgetdimnolabel)(configp, lineCount, columnCount, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
 
@@ -1054,13 +1054,13 @@ int ESMC_ConfigValidate(
     olen = strlen(options);
     foptions = new char[olen];
     localrc = ESMC_CtoF90string(options, foptions, olen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       delete[] foptions;
       return rc;
     }
     // call Fortran interface
     FTN(f_esmf_configvalidate)(configp, foptions, &localrc, olen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       if (foptions != NULL) {delete[] foptions;}
       return rc;
     }
@@ -1069,7 +1069,7 @@ int ESMC_ConfigValidate(
 
   }else{
         FTN(f_esmf_configvalidatenooptions)(configp,  &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
   }
@@ -1283,7 +1283,7 @@ int ESMC_ConfigValidate(
 //   llen = strlen(label);
 //   fLabel = new char[llen];
 //   localrc = ESMC_CtoF90string(label, fLabel, llen);
-//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //     delete[] fLabel;
 //     return rc;
 //   }
@@ -1303,7 +1303,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configgetinti4)(configp, (ESMC_I4*)value,
 //                  fLabel, (ESMC_I4*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1325,7 +1325,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configgetinti8)(configp, (ESMC_I8*)value,
 //                  fLabel, (ESMC_I8*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1347,7 +1347,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configgetfloatr4)(configp, (ESMC_R4*)value,
 //                  fLabel, (ESMC_R4*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1369,7 +1369,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configgetfloatr8)(configp, (ESMC_R8*)value,
 //                  fLabel, (ESMC_R8*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1391,7 +1391,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configgetlogical)(configp, (int*)value,
 //                  fLabel, (int*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1410,7 +1410,7 @@ int ESMC_ConfigValidate(
 //       dlen = strlen(dvalue_s);
 //       fDvalue = new char[dlen];
 //       localrc = ESMC_CtoF90string(dvalue_s, fDvalue, dlen);
-//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //         if (fLabel != NULL) {delete[] fLabel;}
 //         delete[] fDvalue;
 //         return rc;
@@ -1426,7 +1426,7 @@ int ESMC_ConfigValidate(
 //     if (localrc == -1 && dvaluep != NULL) localrc = ESMF_SUCCESS;
 
 //     // check local return code
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       if (fDvalue != NULL) {delete[] fDvalue;}
 //       return rc;
@@ -1434,7 +1434,7 @@ int ESMC_ConfigValidate(
 
 //     // assign fValue_s to value
 //     localrc = ESMC_F90toCstring(fValue, ESMF_MAXSTR, (char*)value, ESMF_MAXSTR);
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       if (fDvalue != NULL) {delete[] fDvalue;}
 //       return rc;
@@ -1587,7 +1587,7 @@ int ESMC_ConfigValidate(
 //   llen = strlen(label);
 //   fLabel = new char[llen];
 //   localrc = ESMC_CtoF90string(label, fLabel, llen);
-//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //     delete[] fLabel;
 //     return rc;
 //   }
@@ -1608,7 +1608,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configsetinti4)(configp, (ESMC_I4*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1632,7 +1632,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configsetinti8)(configp, (ESMC_I8*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1656,7 +1656,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configsetfloatr4)(configp, (ESMC_R4*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1680,7 +1680,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configsetfloatr8)(configp, (ESMC_R8*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1704,7 +1704,7 @@ int ESMC_ConfigValidate(
 //       FTN(f_esmf_configsetlogical)(configp, (int*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1723,7 +1723,7 @@ int ESMC_ConfigValidate(
 //     if ((char*)value != NULL) {
 //       vlen = strlen((char*)value);
 //       localrc = ESMC_CtoF90string((char*)value, fValue, vlen);
-//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //         if (fLabel != NULL) {delete[] fLabel;}
 //         return rc;
 //       }
@@ -1735,7 +1735,7 @@ int ESMC_ConfigValidate(
 //                fLabel, &localrc, vlen, llen);
 
 //     // check local return code
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
