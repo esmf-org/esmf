@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.22 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMC_Array.C,v 1.23 2011/02/22 23:30:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Array.C,v 1.22 2011/01/05 20:05:40 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Array.C,v 1.23 2011/02/22 23:30:47 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -61,7 +61,7 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
 
   // Set name in newly created Array
   localrc = ((ESMCI::Array*)(array.ptr))->ESMCI::Array::setName(name);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)){
     array.ptr = NULL;
     return array;  // bail out
@@ -88,7 +88,7 @@ int ESMC_ArrayDestroy(ESMC_Array *array){
 
   // call into ESMCI method  
   localrc = ESMCI::Array::destroy(&ap);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
   
   // invalidate pointer
@@ -115,7 +115,7 @@ int ESMC_ArrayPrint(ESMC_Array array){
 
   // call into ESMCI method  
   localrc = ap->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
     
   // return successfully
@@ -199,7 +199,7 @@ int ESMC_ArraySetLWidth(ESMC_Array array,
   // call into ESMCI method
   localrc = ap->setComputationalLWidth(
     (ESMCI::InterfaceInt *)(computationalLWidthArg.ptr));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
 
   // return successfully

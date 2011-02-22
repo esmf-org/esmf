@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.46 2011/01/07 18:32:16 rokuingh Exp $
+// $Id: ESMCI_Array_F.C,v 1.47 2011/02/22 23:30:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ extern "C" {
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag),
       *undistLBoundArg, *undistUBoundArg, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
     char *cname = ESMC_F90toCstring(name, *len_name);
@@ -110,7 +110,7 @@ extern "C" {
       *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
       *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), NULL,
       *undistLBoundArg, *undistUBoundArg, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the Array object
     char *cname = ESMC_F90toCstring(name, *len_name);
@@ -133,7 +133,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *arrayOut = ESMCI::Array::create(*ptr, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   
@@ -144,7 +144,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::destroy(ptr),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -592,7 +592,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -603,7 +603,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -619,7 +619,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::haloStore(
       *array, routehandle, *halostartregionflag, *haloLDepth, *haloUDepth),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -640,7 +640,7 @@ extern "C" {
     bool cancelled;
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::halo(
       *array, routehandle, *commflag, &finished, &cancelled, checkflagOpt),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // translate back finishedflag
     if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
@@ -670,7 +670,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap, *typekind,
       factor),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -684,7 +684,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -706,7 +706,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redist(
       *srcArray, *dstArray, routehandle, *commflag, &finished, &cancelled,
       checkflagOpt),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // translate back finishedflag
     if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
@@ -771,12 +771,12 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
     }catch(int localrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
       return;
     }catch(exception &x){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
@@ -802,7 +802,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -825,7 +825,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *commflag, &finished, &cancelled,
       *zeroflag, checkflagOpt),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // translate back finishedflag
     if (ESMC_NOT_PRESENT_FILTER(finishedflag) != ESMC_NULL_POINTER){
@@ -858,7 +858,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*array)->gather(
       farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -876,7 +876,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*array)->gather(
       NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -895,7 +895,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*array)->scatter(
       farray, *typekind, *rank, counts, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -913,7 +913,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*array)->scatter(
       NULL, ESMF_NOKIND, 0, NULL, ESMC_NOT_PRESENT_FILTER(tile),
       *rootPet, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -927,12 +927,12 @@ extern "C" {
     // Call into the C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->setComputationalLWidth(
       *computationalLWidthArg),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // Call into the C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->setComputationalUWidth(
       *computationalUWidthArg),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -945,7 +945,7 @@ extern "C" {
     // Call into the C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->setRimSeqIndex(*localDe,
       *rimSeqIndexArg),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -973,7 +973,7 @@ extern "C" {
     // fill seqIndexList
     if (*pioDofList){
       localrc = (*ptr)->constructPioDof(*pioDofList, localDe);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
     // return successfully
@@ -991,7 +991,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->serialize(
       buf, length, offset, *attreconflag, *inquireflag),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1006,7 +1006,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*array)->deserialize(
       buf, offset, *attreconflag),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -1040,7 +1040,7 @@ extern "C" {
     *ptr = ESMC_newArrayCreate(opt_larray, opt_haloWidth, opt_deCount, *rootPET,
       &localrc);
     // Use LogErr to handle return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1049,7 +1049,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_newarraydestroy()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMC_newArrayDestroy(ptr),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -1058,7 +1058,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_newarrayprint()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayPrint(),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -1082,7 +1082,7 @@ extern "C" {
       globalDataUBound, len_globalDataUBound,
       localDataLBound, len_localDataLBound, 
       localDataUBound, len_localDataUBound),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -1102,7 +1102,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScatter(
       opt_larray, *rootPET, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1141,7 +1141,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScatter(
       opt_larray, *rootPET, *commh, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1161,7 +1161,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScatter(
       opt_larray, *rootPET, *de, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1179,7 +1179,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
       result, *dtk, *op, *rootPET, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1215,7 +1215,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
       result, *dtk, *op, *rootPET, *commh, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1233,7 +1233,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayScalarReduce(
       result, *dtk, *op, *rootPET, *de, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -1267,7 +1267,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayWait(
       *rootPET, *commh, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // delete the commhandle and set to NULL
     delete *commh;
@@ -1286,7 +1286,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->ESMC_newArrayWait(
       *de, opt_vm),
-      ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
