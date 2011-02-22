@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.18 2011/02/22 18:09:58 theurich Exp $
+#  $Id: protex,v 1.19 2011/02/22 20:52:05 theurich Exp $
 #
 #BOP
 #
@@ -545,6 +545,22 @@ LINE:
 }#         end if
 }#      end if
 
+#       Status
+#       ----------------------------------
+        if ($Fld[2] eq '!STATUS:') {            # Internal routine
+           if ($prologue) {
+              shift @Fld;
+              shift @Fld;
+              $_ = join(' ', @Fld);
+              if ($verb) {
+                 printf "\\end{verbatim}";
+                 $verb = 0;
+              }
+              printf "\n{\\sf STATUS:\\\\ }\n\n";
+              next LINE;
+}#         end if
+}#      end if
+
 #       Description: what follows will be regular LaTeX (no verbatim)
 #       -------------------------------------------------------------
         if (/!DESCRIPTION:/) {
@@ -553,7 +569,8 @@ LINE:
                  printf "\\end{verbatim}";
                  printf "\n{\\sf DESCRIPTION:\\\\ }\n\n";
                  $verb = 0; }
-              else {                          # probably never occurs
+              else {
+                 printf "\n{\\sf DESCRIPTION:\\\\ }\n\n";
 }#            end if
               if ($opt_x) {
                  printf "\\begin{verbatim} ";
