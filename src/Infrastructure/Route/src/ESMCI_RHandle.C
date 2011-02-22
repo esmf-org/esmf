@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_RHandle.C,v 1.11 2011/02/22 23:05:00 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.11 2011/02/22 23:05:00 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -80,14 +80,14 @@ RouteHandle *RouteHandle::create(
     routehandle = new RouteHandle;
 
     localrc = routehandle->construct();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc)){
       routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
     
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
@@ -137,7 +137,7 @@ int RouteHandle::destroy(
   
   // destruct DistGrid object
   localrc = routehandle->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // mark as invalid object
@@ -277,7 +277,7 @@ int RouteHandle::print(
   
     // print XXE stream profile
     VM *vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
@@ -291,7 +291,7 @@ int RouteHandle::print(
     for (int pet=0; pet<petCount; pet++){
       if (pet==localPet){
         localrc = xxe->printProfile(fp);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc))
         return rc;
       }
@@ -300,7 +300,7 @@ int RouteHandle::print(
     fclose(fp);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
