@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.45 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_Util.F90,v 1.46 2011/02/22 17:58:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.45 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+               '$Id: ESMF_Util.F90,v 1.46 2011/02/22 17:58:13 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -453,10 +453,12 @@
 ! !IROUTINE:  ESMF_UtilGetArgC - Return number of command line arguments
 !
 ! !INTERFACE:
-  function ESMF_UtilGetArgC ()
+  subroutine ESMF_UtilGetArgC (count, keywordEnforcer, rc)
 !
-! !RETURN VALUE:
-    integer :: ESMF_UtilGetArgC
+! !ARGUMENTS:
+    integer, intent(out)           :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! This method returns the number of command line arguments specified
@@ -464,6 +466,14 @@
 !
 ! The number of arguments returned does not include the name of the
 ! command itself - which is typically returned as argument zero.
+!
+! The arguments are:
+! \begin{description}
+! \item [count]
+! Count of command line arguments.
+! \item [{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 ! Some MPI implementations do not consistently provide command line
 ! arguments on PETs other than PET 0.  It is therefore recommended
@@ -493,9 +503,13 @@
 
 #endif
 
-    ESMF_UtilGetArgC = argc
+    count = argc
 
-  end function ESMF_UtilGetArgC
+    if (present (rc)) then
+      rc = ESMF_SUCCESS
+    end if
+
+  end subroutine ESMF_UtilGetArgC
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
@@ -504,13 +518,14 @@
 ! !IROUTINE:  ESMF_UtilGetArg - Return a command line argument
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilGetArg (argindex, value, length, rc)
+  subroutine ESMF_UtilGetArg (argindex, keywordEnforcer, argvalue, arglength, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in) :: argindex
-    character(*), intent(out), optional :: value
-    integer, intent(out), optional :: length
-    integer, intent(out), optional :: rc
+    integer,      intent(in) :: argindex
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*), intent(out), optional :: argvalue
+    integer,      intent(out), optional :: arglength
+    integer,      intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! This method returns a copy of a command line argument specified
@@ -523,12 +538,12 @@
 ! A non-negative index into the command line argument {\tt argv} array.
 ! If argindex is negative or greater than the number of user-specified
 ! arguments, {\tt ESMF\_RC\_ARG\_VALUE} is returned in the {\tt rc} argument.
-! \item [{[value]}]
+! \item [{[argvalue]}]
 ! Returns a copy of the desired command line argument.  If the provided
 ! character string is longer than the command line argument, the string
 ! will be blank padded.  If the string is too short, truncation will
 ! occur and {\tt ESMF\_RC\_ARG\_SIZE} is returned in the {\tt rc} argument.
-! \item [{[length]}]
+! \item [{[arglength]}]
 ! Returns the length of the desired command line argument in characters.
 ! The length result does not depend on the length of the {\tt value}
 ! string.  It may be used to query the length of the argument.
@@ -547,6 +562,7 @@
     integer :: locallength
 #endif
     integer :: localargc, localrc
+    integer :: localstat
 
 #if defined (ESMF_NEEDSPXFGETARG)
     integer, external :: ipxfconst
@@ -558,9 +574,9 @@
       rc = ESMF_RC_NOT_IMPL
     end if
 
-    localargc = ESMF_UtilGetArgc ()
-    if (present (value)) value = ""
-    if (present (length)) length = 0
+    call ESMF_UtilGetArgc (count=localargc)
+    if (present (argvalue)) argvalue = ""
+    if (present (arglength)) arglength = 0
     localrc = merge (ESMF_SUCCESS, ESMF_RC_ARG_VALUE,  &
         argindex >= 0 .and. argindex <= localargc)
     if (ESMF_LogFoundError ( localrc,  &
@@ -570,9 +586,13 @@
 #if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
 ! Fortran 2003 version (default and preferred)
 
-    call get_command_argument (argindex, value, length, status=localrc)
+    call get_command_argument (number=argindex,  &
+                               value=argvalue, length=arglength,  &
+                               status=localstat)
 
-    select case (localrc)
+    ! Convert Fortran status to ESMF rc
+
+    select case (localstat)
     case (0)
       localrc = ESMF_SUCCESS
     case (-1)
@@ -593,17 +613,19 @@
     EINVAL = ipxfconst ("EINVAL")
 
     if (present (value)) then
-      call pxfgetarg (argindex, value, locallength, localrc)
+      call pxfgetarg (argindex, value, locallength, localstat)
     else
-      call pxfgetarg (argindex, localvalue, locallength, localrc)
-      if (localrc == ETRUNC) localrc = 0
+      call pxfgetarg (argindex, localvalue, locallength, localstat)
+      if (localstat == ETRUNC) localrc = 0
     end if
 
-    if (localrc == 0) then
+    ! Convert PXF ierror to ESMF rc
+
+    if (localstat == 0) then
       localrc = ESMF_SUCCESS
-    else if (localrc == ETRUNC) then
+    else if (localstat == ETRUNC) then
       localrc = ESMF_RC_ARG_SIZE
-    else if (localrc == EINVAL) then
+    else if (localstat == EINVAL) then
       localrc = ESMF_RC_ARG_VALUE
     else
       localrc = ESMF_RC_VAL_OUTOFRANGE
@@ -663,12 +685,13 @@
 ! !IROUTINE:  ESMF_UtilGetArgIndex - Return the index of a command line argument
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilGetArgIndex (value, argindex, rc)
+  subroutine ESMF_UtilGetArgIndex (argvalue, keywordEnforcer, argindex, rc)
 !
 ! !ARGUMENTS:
-    character(*), intent(in) :: value
-    integer, intent(out), optional :: argindex
-    integer, intent(out), optional :: rc
+    character(*), intent(in) :: argvalue
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,      intent(out), optional :: argindex
+    integer,      intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! This method searches for, and returns the index of a desired command
@@ -678,7 +701,7 @@
 !
 ! The arguments are:
 ! \begin{description}
-! \item [value]
+! \item [argvalue]
 ! A character string which will be searched for in the command line
 ! argument list.
 ! \item [{[argindex]}]
@@ -706,13 +729,13 @@
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    nargs = ESMF_UtilGetArgC ()
+    call ESMF_UtilGetArgC (count=nargs)
 
     ! Find the maximum string length of all command line arguments
 
     len_max = 0
     do, i=0, nargs
-      call ESMF_UtilGetArg (i, length=len_local)
+      call ESMF_UtilGetArg (i, arglength=len_local)
       len_max = max (len_max, len_local)
     end do
 
@@ -737,8 +760,8 @@
       integer :: i1
 
       do, i1=0, nargs
-        call ESMF_UtilGetArg (i1, value=string)
-        if (string == value) exit
+        call ESMF_UtilGetArg (i1, argvalue=string)
+        if (string == argvalue) exit
       end do
 
       if (i1 <= nargs) then
