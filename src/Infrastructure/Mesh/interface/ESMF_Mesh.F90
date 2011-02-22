@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.56 2011/01/14 15:56:47 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.57 2011/02/22 17:34:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.56 2011/01/14 15:56:47 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.57 2011/02/22 17:34:40 w6ws Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -195,7 +195,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.56 2011/01/14 15:56:47 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.57 2011/02/22 17:34:40 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1494,7 +1494,7 @@ end function ESMF_MeshCreateFromUnstruct
 !      write(cmd, '("/bin/rm ",A)') trim(esmffilename)
 !      call system(cmd)
 !      First find an available unit numer
-       call ESMF_UtilIOUnitGet(unit,rc)
+       call ESMF_UtilIOUnitGet(unit, rc=rc)
        if (rc==ESMF_SUCCESS) then
   	  open(unit, FILE=esmffilename,status='unknown')
           close (unit, STATUS='delete')
