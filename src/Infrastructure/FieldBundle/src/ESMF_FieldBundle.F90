@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.82 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.83 2011/02/22 20:56:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -2280,7 +2280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetGrid"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a Grid with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -2313,7 +2313,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOP
+!EOPI
 
 
       integer :: status                           ! Error status
@@ -2375,7 +2375,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetMesh"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a Mesh with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -2408,7 +2408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOP
+!EOPI
 
 
       integer :: status                           ! Error status
@@ -2458,7 +2458,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetLS"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a LocStream with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -2490,7 +2490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOP
+!EOPI
 
 
       integer :: status                           ! Error status
