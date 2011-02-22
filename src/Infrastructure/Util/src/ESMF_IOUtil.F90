@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.12 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_IOUtil.F90,v 1.13 2011/02/22 18:00:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.12 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.13 2011/02/22 18:00:01 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -107,10 +107,11 @@ module ESMF_IOUtilMod
 ! !IROUTINE: ESMF_UtilIOUnitFlush - Flush output on a unit number
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilIOUnitFlush (unit, rc)
+  subroutine ESMF_UtilIOUnitFlush (unit, keywordEnforcer, rc)
 !
 ! !PARAMETERS:
     integer, intent(in) :: unit
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 
 !
@@ -120,13 +121,14 @@ module ESMF_IOUtilMod
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[unit]}]
+!     \item[unit]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
 !       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}
 !     \end{description}
 !EOP
     integer :: localrc
+    integer :: localstat
 
 !   By default, use the F2003 FLUSH statement.  For older compilers,
 !   use a macro defined in the configuration-specific ESMF_Conf.inc
@@ -135,20 +137,28 @@ module ESMF_IOUtilMod
 
 #if !defined (ESMF_IOFlushMacro)
 
-    flush (unit, iostat=localrc)
+    flush (unit, iostat=localstat)
+
+    ! Convert Fortran iostat to ESMF rc
+
+    localrc = merge (ESMF_SUCCESS, ESMF_FAILURE, localstat == 0)
 
 #else
 !   Preset localrc in advance, since some library versions of FLUSH do
 !   not support a status argument for detecting errors.
 
-    localrc = 0
+    localstat = 0
 
-ESMF_IOFlushMacro(unit, localrc)
+ESMF_IOFlushMacro(unit, localstat)
+
+    ! Convert status return to ESMF rc
+
+    localrc = merge (ESMF_SUCCESS, ESMF_FAILURE, localstat == 0)
 
 #endif
 
     if (present(rc)) then
-      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
+      rc = localrc
     end if
 
   end subroutine ESMF_UtilIOUnitFlush
@@ -159,10 +169,11 @@ ESMF_IOFlushMacro(unit, localrc)
 ! !IROUTINE:  ESMF_UtilIOUnitGet - Scan for a free I/O unit number
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilIOUnitGet (unit, rc)
+  subroutine ESMF_UtilIOUnitGet (unit, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     integer, intent(out) :: unit
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 
 !
@@ -183,21 +194,22 @@ ESMF_IOFlushMacro(unit, localrc)
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[unit]}]
+!     \item[unit]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
 !       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}.
 !     \end{description}
 !EOP
 
-    integer :: i, localrc
+    integer :: i
+    integer :: localstat
     logical :: inuse
   
     if (present(rc)) rc = ESMF_FAILURE
   
     do, i=ESMF_IOUnitLower, ESMF_IOUnitUpper
-      inquire (unit=i, opened=inuse, iostat=localrc)
-      if (.not. inuse .and. localrc == 0) exit
+      inquire (unit=i, opened=inuse, iostat=localstat)
+      if (.not. inuse .and. localstat == 0) exit
     end do
   
     if (i <= ESMF_IOUnitUpper) then
@@ -219,8 +231,8 @@ ESMF_IOFlushMacro(unit, localrc)
   subroutine ESMF_UtilIOUnitInit (lower, upper, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(in), optional :: lower
-    integer, intent(in), optional :: upper
+    integer, intent(in),  optional :: lower
+    integer, intent(in),  optional :: upper
     integer, intent(out), optional :: rc
 
 !
