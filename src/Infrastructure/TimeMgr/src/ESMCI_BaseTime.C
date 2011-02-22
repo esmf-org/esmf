@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.12 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_BaseTime.C,v 1.13 2011/02/22 21:35:57 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.12 2011/01/05 20:05:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.13 2011/02/22 21:35:57 w6ws Exp $";
 //-------------------------------------------------------------------------
 
   namespace ESMCI{
@@ -369,7 +369,7 @@
       // convert remaining time to milliseconds
       Fraction msRemainingTime = remainingTime;
       int rc = msRemainingTime.convert(1000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       *ms = msRemainingTime.getn();
 
@@ -381,7 +381,7 @@
       // convert remaining time to microseconds
       Fraction usRemainingTime = remainingTime;
       int rc = usRemainingTime.convert(1000000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       *us = usRemainingTime.getn();
 
@@ -393,7 +393,7 @@
       // convert remaining time to nanoseconds
       Fraction nsRemainingTime = remainingTime;
       int rc = nsRemainingTime.convert(1000000000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       *ns = nsRemainingTime.getn();
     }

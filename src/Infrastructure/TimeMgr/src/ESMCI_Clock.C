@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.18 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Clock.C,v 1.19 2011/02/22 21:35:57 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.18 2011/01/05 20:05:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.19 2011/02/22 21:35:57 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -156,7 +156,7 @@ int Clock::count=0;
     clock->prevTime = clock->currTime = clock->startTime;
 
     returnCode = clock->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete clock;
@@ -214,7 +214,7 @@ int Clock::count=0;
     }
 
     returnCode = clockCopy->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete clockCopy;
@@ -369,7 +369,7 @@ int Clock::count=0;
     }
 
     rc = Clock::validate();
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
       // restore original clock values
       *this = saveClock;
     }
@@ -1318,7 +1318,7 @@ int Clock::count=0;
     // set current time to wall clock time
     // TODO:  ensure current time is within startTime and stopTime
     rc = currTime.Time::syncToRealTime();
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       return(rc);
     return(Clock::validate());
 

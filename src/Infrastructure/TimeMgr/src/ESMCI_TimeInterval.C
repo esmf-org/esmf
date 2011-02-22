@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.17 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.18 2011/02/22 21:35:57 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.17 2011/01/05 20:05:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.18 2011/02/22 21:35:57 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -169,7 +169,7 @@ namespace ESMCI{
       } else if (calendarType != ESMC_NULL_POINTER) {
         // set to specified built-in type; create if necessary
         rc = ESMCI_CalendarCreate(*calendarType);
-        if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
           { *this = saveTimeInterval; return(rc); }
         this->calendar = Calendar::internalCalendar[*calendarType-1];
                                                          // 4th choice
@@ -181,7 +181,7 @@ namespace ESMCI{
       } else {
         // create default calendar
         rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
-        if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
           { *this = saveTimeInterval; return(rc); }
         this->calendar = Calendar::defaultCalendar; // 6th choice
       }
@@ -218,11 +218,11 @@ namespace ESMCI{
     // use base class set for sub-day values
     rc = BaseTime::set(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                           ms_r8, us_r8, ns_r8, sN, sN_i8, sD, sD_i8);
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       { *this = saveTimeInterval; return(rc); }
 
     rc = TimeInterval::validate();
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       { *this = saveTimeInterval; return(rc); }
 
     return(ESMF_SUCCESS);
@@ -345,7 +345,7 @@ namespace ESMCI{
     } else if (calendarTypeIn != ESMC_NULL_POINTER) {  // 4th choice
       // use specified built-in type; create if necessary
       rc = ESMCI_CalendarCreate(*calendarType);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       tiToConvert.calendar = Calendar::internalCalendar[*calendarType-1];
 
@@ -784,7 +784,7 @@ namespace ESMCI{
     rc = BaseTime::get(&tiToConvert, h, m, s, s_i8,
                           ms, us, ns, h_r8, m_r8, s_r8,
                           ms_r8, us_r8, ns_r8, sN, sN_i8, sD, sD_i8);
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       return(rc);
 
     // return any requested properties startTime, endTime, calendar
@@ -810,7 +810,7 @@ namespace ESMCI{
     // if requested, return time interval in string format
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
       rc = TimeInterval::getString(tempTimeString);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
       // see also method TimeInterval::print()
@@ -818,7 +818,7 @@ namespace ESMCI{
     if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
         timeStringLenISOFrac > 0) {
       rc = TimeInterval::getString(tempTimeStringISOFrac, "isofrac");
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
       // see also method TimeInterval::print()
@@ -918,7 +918,7 @@ namespace ESMCI{
 
     // use base class Set()
     rc = BaseTime::set(s, sN, sD);
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       return(rc);
 
     this->yy = yy;
@@ -941,7 +941,7 @@ namespace ESMCI{
     } else if (calendarType != (ESMC_CalendarType)0) {
       // set to specified built-in type; create if necessary
       rc = ESMCI_CalendarCreate(calendarType);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       this->calendar = Calendar::internalCalendar[calendarType-1];
                                                        // 2nd choice
@@ -953,7 +953,7 @@ namespace ESMCI{
     } else {
       // create default calendar
       rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
       this->calendar = Calendar::defaultCalendar; // 4th choice
     }
@@ -2837,7 +2837,7 @@ namespace ESMCI{
     int rc = ESMF_SUCCESS;
 
     rc = BaseTime::validate();
-    ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
     return(rc);
 
@@ -2932,7 +2932,7 @@ namespace ESMCI{
    } else {
      // create default calendar
      int rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
-     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
        return;
      calendar = Calendar::defaultCalendar; // 2nd choice
    }
@@ -2998,7 +2998,7 @@ namespace ESMCI{
    } else if (calendarType != (ESMC_CalendarType)0) {
      // set to specified built-in type; create if necessary
      int rc = ESMCI_CalendarCreate(calendarType);
-     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
        return;
      this->calendar = Calendar::internalCalendar[calendarType-1];
                                                       // 2nd choice
@@ -3010,7 +3010,7 @@ namespace ESMCI{
    } else {
      // create default calendar
      int rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
-     if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
        return;
      this->calendar = Calendar::defaultCalendar; // 4th choice
    }
@@ -3099,7 +3099,7 @@ namespace ESMCI{
                           ESMC_NULL_POINTER, &sN,
                           ESMC_NULL_POINTER, &sD);
 
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       return(rc);
 
     // format everything except seconds

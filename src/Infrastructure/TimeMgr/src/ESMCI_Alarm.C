@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.19 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Alarm.C,v 1.20 2011/02/22 21:35:57 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.19 2011/01/05 20:05:45 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.20 2011/02/22 21:35:57 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -180,7 +180,7 @@ int Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     returnCode = alarm->Alarm::validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete alarm;
@@ -189,7 +189,7 @@ int Alarm::count=0;
       // add this new valid alarm to the given clock
       if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
       returnCode = clock->Clock::addAlarm(alarm);
-      ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
     }
  
     return(alarm);
@@ -242,7 +242,7 @@ int Alarm::count=0;
     }
 
     returnCode = alarmCopy->Alarm::validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete alarmCopy;
@@ -252,7 +252,7 @@ int Alarm::count=0;
       if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
       if (alarmCopy->clock != ESMC_NULL_POINTER) {
         returnCode = (alarmCopy->clock)->Clock::addAlarm(alarmCopy);
-        ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+        ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
       }
     }
 
@@ -294,7 +294,7 @@ int Alarm::count=0;
   // remove alarm from associated clock's alarmList
   if ((*alarm)->clock != ESMC_NULL_POINTER) {
     rc = ((*alarm)->clock)->Clock::removeAlarm(*alarm);
-    ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
   }
   delete *alarm;   // ok to delete null pointer
   *alarm = ESMC_NULL_POINTER;
@@ -371,12 +371,12 @@ int Alarm::count=0;
       // remove this alarm from associated clock's alarmList
       if (this->clock != ESMC_NULL_POINTER) {
         rc = (this->clock)->Clock::removeAlarm(this);
-        ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+        ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
       }
 
       // and add it to the given clock's alarmList
       rc = (*clock)->Clock::addAlarm(this);
-      ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
       // this alarm is now associated with the given clock
       this->clock = *clock;
@@ -424,7 +424,7 @@ int Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     rc = Alarm::validate();
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
       // restore original alarm values
       *this = saveAlarm;
     }
@@ -1849,7 +1849,7 @@ int Alarm::count=0;
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, &s);
 
-    ESMC_LogDefault.MsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
  } // end Alarm
 
