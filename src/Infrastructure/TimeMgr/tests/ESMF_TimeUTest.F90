@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.41 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.42 2011/02/22 15:49:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.41 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.42 2011/02/22 15:49:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -99,18 +99,13 @@
       ! Calendar Interval tests
       ! ----------------------------------------------------------------------------
       ! initialize calendars
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
-      julianCalendar = ESMF_CalendarCreate("Julian", &
-                                              ESMF_CAL_JULIAN, rc)
-      noLeapCalendar = ESMF_CalendarCreate("No Leap", &
-                                              ESMF_CAL_NOLEAP, rc)
-      day360Calendar = ESMF_CalendarCreate("360 Day", &
-                                              ESMF_CAL_360DAY, rc)
-      julianDayCalendar = ESMF_CalendarCreate("Julian Day", &
-                                              ESMF_CAL_JULIANDAY, rc)
-      modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
-                                                      ESMF_CAL_MODJULIANDAY, rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIAN, name="Julian", rc=rc)
+      noLeapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, name="No Leap", rc=rc)
+      day360Calendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, name="360 Day", rc=rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="Julian Day", rc=rc)
+      modifiedJulianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_MODJULIANDAY, &
+                                                       name="ModifiedJulianDay", rc=rc)
 
       ! ----------------------------------------------------------------------------
 

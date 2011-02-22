@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.28 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.29 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -89,8 +89,8 @@
 
 !BOC
       ! create & initialize the clock with the above values
-      clock = ESMF_ClockCreate("The Clock", timeStep, startTime, stopTime, &
-                               rc=rc)
+      clock = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                               name="The Clock", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -111,8 +111,8 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      alarm(1) = ESMF_AlarmCreate("Example alarm 1", clock, &
-                                  ringTime=alarmTime, rc=rc)
+      alarm(1) = ESMF_AlarmCreate(clock, &
+                                  ringTime=alarmTime, name="Example alarm 1", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

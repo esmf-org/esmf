@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.105 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_Clock.F90,v 1.106 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.105 2011/01/19 02:13:18 svasquez Exp $'
+      '$Id: ESMF_Clock.F90,v 1.106 2011/02/22 15:49:33 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -389,20 +389,20 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
-      function ESMF_ClockCreateNew(name, timeStep, startTime, stopTime, &
-        runDuration, runTimeStepCount, refTime, rc)
+      function ESMF_ClockCreateNew(timeStep, startTime, stopTime, &
+        runDuration, runTimeStepCount, refTime, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateNew
 
 ! !ARGUMENTS:
-      character (len=*),       intent(in),  optional :: name
       type(ESMF_TimeInterval), intent(in)            :: timeStep
       type(ESMF_Time),         intent(in)            :: startTime
       type(ESMF_Time),         intent(in),  optional :: stopTime
       type(ESMF_TimeInterval), intent(in),  optional :: runDuration
       integer,                 intent(in),  optional :: runTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
+      character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -410,10 +410,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[name]}]     
-!          The name for the newly created clock.  If not specified, a
-!          default unique name will be generated: "ClockNNN" where NNN
-!          is a unique sequence number from 001 to 999.
 !     \item[timeStep]
 !          The {\tt ESMF\_Clock}'s time step interval, which can be
 !          positive or negative.
@@ -443,6 +439,10 @@
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
+!     \item[{[name]}]     
+!          The name for the newly created clock.  If not specified, a
+!          default unique name will be generated: "ClockNNN" where NNN
+!          is a unique sequence number from 001 to 999.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -612,14 +612,13 @@
 ! !IROUTINE: ESMF_ClockGet - Get a Clock's properties
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
+      subroutine ESMF_ClockGet(clock, timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, prevTime, &
         currSimTime, prevSimTime, calendar, calendarType, timeZone, &
-        advanceCount, alarmCount, direction, rc)
+        advanceCount, alarmCount, direction, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
-      character (len=*),       intent(out), optional :: name
       type(ESMF_TimeInterval), intent(out), optional :: timeStep
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Time),         intent(out), optional :: stopTime
@@ -636,6 +635,7 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
       type(ESMF_Direction),    intent(out), optional :: direction
+      character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -645,8 +645,6 @@
 !     \begin{description}
 !     \item[clock]
 !          The object instance to query.
-!     \item[{[name]}]
-!          The name of this clock.
 !     \item[{[timeStep]}]
 !          The {\tt ESMF\_Clock}'s time step interval.
 !     \item[{[startTime]}]
@@ -690,6 +688,8 @@
 !          The {\tt ESMF\_Clock}'s time stepping direction.  See also
 !          {\tt ESMF\_ClockIsReverse()}, an alternative for convenient use in
 !          "if" and "do while" constructs.
+!     \item[{[name]}]
+!          The name of this clock.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1305,13 +1305,12 @@
 ! !IROUTINE: ESMF_ClockSet - Set one or more properties of a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockSet(clock, name, timeStep, startTime, stopTime, &
+      subroutine ESMF_ClockSet(clock, timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, advanceCount, &
-        direction, rc)
+        direction, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)           :: clock
-      character (len=*),       intent(in),    optional :: name
       type(ESMF_TimeInterval), intent(inout), optional :: timeStep
       type(ESMF_Time),         intent(inout), optional :: startTime
       type(ESMF_Time),         intent(inout), optional :: stopTime
@@ -1321,6 +1320,7 @@
       type(ESMF_Time),         intent(inout), optional :: currTime
       integer(ESMF_KIND_I8),   intent(in),    optional :: advanceCount
       type(ESMF_Direction),    intent(in),    optional :: direction
+      character (len=*),       intent(in),    optional :: name
       integer,                 intent(out),   optional :: rc
     
 ! !DESCRIPTION:
@@ -1333,8 +1333,6 @@
 !     \begin{description}
 !     \item[clock]
 !          The object instance to set.
-!     \item[{[name]}]
-!          The new name for this clock.
 !     \item[{[timeStep]}]
 !          The {\tt ESMF\_Clock}'s time step interval, which can be positive or
 !          negative.  This is used to change a clock's timestep property for
@@ -1392,6 +1390,8 @@
 !          clock is placed in {\tt ESMF\_MODE\_REVERSE}, subsequent calls to
 !          {\tt ESMF\_ClockAdvance()} will cause the clock's current time to
 !          be decremented by the new timeStep's magnitude.
+!     \item[{[name]}]
+!          The new name for this clock.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1580,11 +1580,10 @@
 ! !IROUTINE:  ESMF_ClockValidate - Validate a Clock's properties
 
 ! !INTERFACE:
-      subroutine ESMF_ClockValidate(clock, options, rc)
+      subroutine ESMF_ClockValidate(clock, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(inout)         :: clock
-      character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1597,8 +1596,6 @@
 !     \begin{description}
 !     \item[clock]
 !          {\tt ESMF\_Clock} to be validated.
-!     \item[{[options]}]
-!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
@@ -1607,6 +1604,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       integer :: localrc                        ! local return code
+      character :: options ! dummy options
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.42 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.43 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.42 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.43 2011/02/22 15:49:33 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -113,25 +113,22 @@
       ! Julian Day Calendar
 
       ! initialize calendar to be Julian Day type
-      julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
-                                              ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="JulianDay", rc=rc)
 
       ! Modified Julian Day Calendar
 
       ! initialize calendar to be Modified Julian Day type
-      modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
-                                              ESMF_CAL_MODJULIANDAY, rc)
+      modifiedJulianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_MODJULIANDAY, &
+                                               name="ModifiedJulianDay", rc=rc)
 
       ! Gregorian Calendar
 
       ! initialize calendar to be Gregorian type
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
       ! Julian Calendar
 
       ! initialize calendar to be Julian type
-      julianCalendar = ESMF_CalendarCreate("Julian", &
-                                              ESMF_CAL_JULIAN, rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIAN, name="Julian", rc=rc)
 
 
       !-------------------------------------------------------------------------

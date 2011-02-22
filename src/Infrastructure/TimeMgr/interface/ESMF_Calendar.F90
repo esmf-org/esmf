@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.124 2011/01/24 22:31:17 svasquez Exp $
+! $Id: ESMF_Calendar.F90,v 1.125 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -142,7 +142,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.124 2011/01/24 22:31:17 svasquez Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.125 2011/02/22 15:49:33 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -580,14 +580,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
-      function ESMF_CalendarCreateBuiltIn(name, calendartype, rc)
+      function ESMF_CalendarCreateBuiltIn(calendartype, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateBuiltIn
 
 ! !ARGUMENTS:
-      character (len=*),       intent(in),  optional :: name
       type(ESMF_CalendarType), intent(in)            :: calendartype
+      character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -596,10 +596,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[name]}]
-!          The name for the newly created calendar.  If not specified, a
-!          default unique name will be generated: "CalendarNNN" where NNN
-!          is a unique sequence number from 001 to 999.
 !     \item[calendartype]
 !          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
 !            \newline
@@ -619,6 +615,10 @@
 !            \newline
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar type.
+!     \item[{[name]}]
+!          The name for the newly created calendar.  If not specified, a
+!          default unique name will be generated: "CalendarNNN" where NNN
+!          is a unique sequence number from 001 to 999.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -708,19 +708,19 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
-      function ESMF_CalendarCreateCustom(name, daysPerMonth, secondsPerDay, &
-        daysPerYear, daysPerYearDn, daysPerYearDd, rc)
+      function ESMF_CalendarCreateCustom(daysPerMonth, secondsPerDay, &
+        daysPerYear, daysPerYearDn, daysPerYearDd, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateCustom
 
 ! !ARGUMENTS:
-      character (len=*),     intent(in),  optional :: name
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not imp
+      character (len=*),     intent(in),  optional :: name
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -728,10 +728,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[name]}]
-!          The name for the newly created calendar.  If not specified, a
-!          default unique name will be generated: "CalendarNNN" where NNN
-!          is a unique sequence number from 001 to 999.
 !     \item[{[daysPerMonth]}]
 !          Integer array of days per month, for each month of the year.
 !          The number of months per year is variable and taken from the
@@ -758,6 +754,10 @@
 !          Use with daysPerYear and daysPerYearDn (see above) to
 !          specify a days-per-year calendar for any planetary body.
 !          Default = 1.  (Not implemented yet).
+!     \item[{[name]}]
+!          The name for the newly created calendar.  If not specified, a
+!          default unique name will be generated: "CalendarNNN" where NNN
+!          is a unique sequence number from 001 to 999.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -911,7 +911,6 @@
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
-      character (len=*),       intent(out), optional :: name
       type(ESMF_CalendarType), intent(out), optional :: calendartype
       integer, dimension(:),   intent(out), optional :: daysPerMonth
       integer,                 intent(out), optional :: monthsPerYear
@@ -920,6 +919,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYear   ! not imp
       integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDn ! not imp
       integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDd ! not imp
+      character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1301,12 +1301,12 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSet()
-      subroutine ESMF_CalendarSetBuiltIn(calendar, name, calendartype, rc)
+      subroutine ESMF_CalendarSetBuiltIn(calendar, calendartype, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
-      character (len=*),       intent(in),  optional :: name
       type(ESMF_CalendarType), intent(in)            :: calendartype
+      character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1316,8 +1316,6 @@
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to initialize.
-!     \item[{[name]}]
-!          The new name for this calendar.
 !     \item[calendartype]
 !          The built-in {\tt CalendarType}.  Valid values are:
 !            \newline
@@ -1337,6 +1335,8 @@
 !            \newline
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar type.
+!     \item[{[name]}]
+!          The new name for this calendar.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1377,17 +1377,17 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSet()
-      subroutine ESMF_CalendarSetCustom(calendar, name, daysPerMonth, &
-        secondsPerDay, daysPerYear, daysPerYearDn, daysPerYearDd, rc)
+      subroutine ESMF_CalendarSetCustom(calendar, daysPerMonth, &
+        secondsPerDay, daysPerYear, daysPerYearDn, daysPerYearDd, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
-      character (len=*),     intent(in),  optional :: name
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not imp
+      character (len=*),     intent(in),  optional :: name
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1397,8 +1397,6 @@
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to initialize.
-!     \item[{[name]}]
-!          The new name for this calendar.
 !     \item[{[daysPerMonth]}]
 !          Integer array of days per month, for each month of the year.
 !          The number of months per year is variable and taken from the
@@ -1425,6 +1423,8 @@
 !          specify a days-per-year calendar for any planetary body.
 !          Default = 1.  (Not implemented yet).
 !          \end{sloppypar}
+!     \item[{[name]}]
+!          The new name for this calendar.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1576,11 +1576,10 @@
 ! !IROUTINE:  ESMF_CalendarValidate - Validate a Calendar's properties
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarValidate(calendar, options, rc)
+      subroutine ESMF_CalendarValidate(calendar, rc)
  
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout)         :: calendar
-      character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1592,14 +1591,13 @@
 !     \begin{description}
 !     \item[calendar]
 !          {\tt ESMF\_Calendar} to be validated.
-!     \item[{[options]}]
-!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
       integer :: localrc                        ! local return code
+      character :: options ! dummy options
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL

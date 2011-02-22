@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.41 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.42 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -59,16 +59,16 @@
 
 !BOC
       ! create a Gregorian calendar
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+                                              name="Gregorian", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
       ! create a Julian Day calendar
-      julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
-                                              ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, &
+                                              name="JulianDay", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

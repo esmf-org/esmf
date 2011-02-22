@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.22 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.23 2011/02/22 15:49:34 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -254,8 +254,8 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
   ! initialize calendar to be Gregorian type
-  gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                           ESMF_CAL_GREGORIAN, rc)
+  gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+                                           name="Gregorian", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
   ! initialize time interval to 1 hour
@@ -274,7 +274,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (rc .ne. ESMF_SUCCESS) goto 10
 
   ! initialize the clock with the above values
-  clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
+  clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------

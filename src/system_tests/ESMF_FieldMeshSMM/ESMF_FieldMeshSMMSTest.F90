@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.13 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.14 2011/02/22 15:49:34 rokuingh Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -149,8 +149,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                            ESMF_CAL_GREGORIAN, rc=localrc)
+    gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+                                            name="Gregorian", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -176,7 +176,7 @@
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! initialize the clock with the above values
-    clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=localrc)
+    clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)

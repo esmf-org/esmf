@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.50 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_ClockEx.F90,v 1.51 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
 
 !BOC
       ! initialize the clock with the above values
-      clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

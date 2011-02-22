@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.110 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.111 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.110 2011/01/19 02:13:18 svasquez Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.111 2011/02/22 15:49:33 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -2585,11 +2585,10 @@
 ! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalValidate(timeinterval, options, rc)
+      subroutine ESMF_TimeIntervalValidate(timeinterval, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
-      character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2601,8 +2600,6 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          {\tt ESMF\_TimeInterval} to be validated.
-!     \item[{[options]}]
-!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2611,6 +2608,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       integer :: localrc                        ! local return code
+      character :: options ! dummy options
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL

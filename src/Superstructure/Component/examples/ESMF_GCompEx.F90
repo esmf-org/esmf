@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.54 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_GCompEx.F90,v 1.55 2011/02/22 15:49:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -332,7 +332,7 @@
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc)
+    gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -366,7 +366,7 @@
 
 
     ! initialize the clock with the above values
-    tclock = ESMF_ClockCreate("top clock", timeStep, startTime, stopTime, rc=rc)
+    tclock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="top clock", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.56 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.57 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.56 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.57 2011/02/22 15:49:33 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -96,17 +96,16 @@
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! initialize one calendar to be Gregorian type
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
 
       ! initialize secand calendar to be Julian type
-      julianCalendar = ESMF_CalendarCreate("Julian", ESMF_CAL_JULIANDAY, rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="Julian", rc=rc)
 
       ! initialize third calendar to be No Leap type
-      no_leapCalendar = ESMF_CalendarCreate("NoLeap", ESMF_CAL_NOLEAP, rc)
+      no_leapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, name="NoLeap", rc=rc)
 
       ! initialize third calendar to be 360 day type
-      esmf_360dayCalendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
+      esmf_360dayCalendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, name="360Day", rc=rc)
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -166,8 +165,8 @@
       !NEX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Clock Initialization Test"
-      clock1 = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
-                               stopTime, rc=rc)
+      clock1 = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                               name="Clock 1", rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -935,8 +934,7 @@
       !EX_UTest
        write(name, *) "Clock Initialization Test"
        write(failMsg, *) " Did not return ESMF_SUCCESS"
-       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
-                                          stopTime, rc=rc)
+       clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
 
@@ -1133,8 +1131,7 @@
       !EX_UTest
        write(name, *) "Clock Initialization Test"
        write(failMsg, *) " Did not return ESMF_SUCCESS"
-       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
-                                          stopTime, rc=rc)
+       clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
 
@@ -1228,7 +1225,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=3, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
@@ -1272,7 +1269,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
@@ -1312,7 +1309,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
@@ -1351,7 +1348,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
@@ -1394,7 +1391,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
@@ -1470,7 +1467,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=1999, mm=12, dd=31, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=-2, rc=rc)
@@ -1549,7 +1546,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, rc=rc)
@@ -1599,7 +1596,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
@@ -1654,8 +1651,8 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2005, mm=6, dd=15, h=5, &
                         calendar=gregorianCalendar, rc=rc)
-      domainClock = ESMF_ClockCreate("WRF Clock", &
-                                     timeStep, startTime, stopTime, rc=rc)
+      domainClock = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                     name="WRF Clock", rc=rc)
 
       call ESMF_TimeSet(beforeAlarmTime, yy=2005, mm=6, dd=15, h=2, &
                         calendar=gregorianCalendar, rc=rc)
@@ -1776,8 +1773,8 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2005, mm=6, dd=15, h=10, &
                         calendar=gregorianCalendar, rc=rc)
-      domainClock = ESMF_ClockCreate("WRF Clock", &
-                                     timeStep, startTime, stopTime, rc=rc)
+      domainClock = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                     name="WRF Clock", rc=rc)
 
       call ESMF_TimeSet(beforeAlarmTime, yy=2005, mm=6, dd=15, h=2, &
                         calendar=gregorianCalendar, rc=rc)
@@ -1911,8 +1908,8 @@
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=3, &
                                    calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("Clock", timeStep, startTime, stopTime, &
-                                rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                name="Clock", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, h=3, rc=rc)
@@ -2007,8 +2004,8 @@
       ! dd=3, instead of original 30 in Jims report, to shorten test run time
       call ESMF_TimeSet(stopTime, yy=2003, mm=9, dd=3, &
                                    calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("The Clock", timeStep, startTime, stopTime, &
-                                rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                name="The Clock", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, s=900, rc=rc)
@@ -2093,8 +2090,8 @@
       ! dd=3, instead of original 30 in Jims report, to save test run time
       call ESMF_TimeSet(stopTime, yy=2003, mm=9, dd=3, &
                                    calendar=gregorianCalendar, rc=rc)
-      clock2 = ESMF_ClockCreate("The Clock", timeStep, startTime, stopTime, &
-                                rc=rc)
+      clock2 = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                name="The Clock", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(alarmStep, s=900, rc=rc)
@@ -2193,7 +2190,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
                         ms=200, calendar=gregorianCalendar, rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
@@ -2229,7 +2226,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=1999, mm=12, dd=31, h=23, m=59, s=28, &
                         sN=4, sD=7, calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=53, &
                         sN=2, sD=7, calendar=gregorianCalendar, rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
@@ -2274,7 +2271,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=startTime, rc=rc)
 
       bool = ESMF_AlarmIsRinging(alarm4)
@@ -2299,7 +2296,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2007, mm=9, dd=19, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=startTime, &
                                 ringInterval=alarmStep, rc=rc)
 
@@ -2329,8 +2326,8 @@
       call ESMF_TimeIntervalSet(alarmStep, s=180, rc=rc)
       call ESMF_TimeSet(startTime, yy=2007, mm=9, dd=18, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, &
-                              runDuration=runDuration, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, &
+                              runDuration=runDuration, name="Clock 2", rc=rc)
 
       ! Tom Black's AlarmCreate() ...
       alarm4=ESMF_AlarmCreate(       &
@@ -2421,8 +2418,8 @@
       call ESMF_TimeIntervalSet(alarmStep, s=180, rc=rc)
       call ESMF_TimeSet(startTime, yy=2007, mm=9, dd=18, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, &
-                              runDuration=runDuration, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, &
+                              runDuration=runDuration, name="Clock 2", rc=rc)
 
       ! like Tom Black's AlarmCreate(), but sticky
       alarm4=ESMF_AlarmCreate(       &
@@ -2569,7 +2566,7 @@
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
-      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      clock2=ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 2", rc=rc)
       call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
                         ms=200, calendar=gregorianCalendar, rc=rc)
 
@@ -2654,19 +2651,18 @@
       call ESMF_TimeSet (stopTime, yy=2009, mm=1, dd=2, h=0, &
           calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet (timeStep, s=3600, rc=rc)
-      clock = ESMF_ClockCreate ("ApplClock", &
-                                timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="ApplClock", rc=rc)
       if (rc /= ESMF_SUCCESS) testPass = .false.
 
       call ESMF_TimeIntervalSet (alarmStep, s=7200, rc=rc)
       !call ESMF_TimeIntervalSet(ringDuration, h=1, rc=rc)
       !call ESMF_TimeSet(alarmStopTime, yy=2009, mm=1, dd=1, h=21, &
       !                  calendar=gregorianCalendar, rc=rc)
-      alarm1 = ESMF_AlarmCreate ("testAlarm", clock=clock,  &
+      alarm1 = ESMF_AlarmCreate (clock=clock,  &
           ringTime=startTime, ringInterval=alarmStep, &
       !    ringDuration=ringDuration, &
       !    stopTime=alarmStopTime, &
-          sticky=.false., rc=rc)
+          sticky=.false., name="testAlarm", rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       !call ESMF_AlarmPrint(alarm1, "ringduration string", rc)
@@ -2781,9 +2777,8 @@
           calendar=gregorianCalendar, rc=rc)
       !call ESMF_TimePrint (startTime, "string isofrac", rc=rc)
       call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
-      clock = ESMF_ClockCreate (  &
-          name = "clock 1",  &
-          startTime = startTime, timeStep=timeStep, rc=rc)
+      clock = ESMF_ClockCreate(startTime = startTime, timeStep=timeStep, &
+                              name="clock 1", rc=rc)
       if (rc /= ESMF_SUCCESS) testPass = .false.
 
       call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=6,  &
@@ -2891,9 +2886,8 @@
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
           calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
-      clock = ESMF_ClockCreate (  &
-          name = "clock 1",  &
-          startTime = startTime, timeStep=timeStep, rc=rc)
+      clock = ESMF_ClockCreate(startTime = startTime, timeStep=timeStep, &
+                               name="clock 1", rc=rc)
       if (rc /= ESMF_SUCCESS) testPass = .false.
 
       call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=6,  &
@@ -2964,9 +2958,8 @@
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
           calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet (timeStep, h=3, rc=rc)
-      clock = ESMF_ClockCreate (  &
-          name = "clock 1",  &
-          startTime = startTime, timeStep=timeStep, rc=rc)
+      clock = ESMF_ClockCreate(startTime = startTime, timeStep=timeStep, &
+                               name="clock 1", rc=rc)
       if (rc /= ESMF_SUCCESS) testPass = .false.
 
       call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=6,  &
@@ -3049,9 +3042,8 @@
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
           calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet (timeStep, h=1, rc=rc)
-      clock = ESMF_ClockCreate (  &
-          name = "clock 1",  &
-          startTime = startTime, timeStep=timeStep, rc=rc)
+      clock = ESMF_ClockCreate(startTime=startTime, timeStep=timeStep, &
+                               name="clock 1", rc=rc)
       if (rc /= ESMF_SUCCESS) testPass = .false.
 
       call ESMF_TimeSet (alarmTime, yy=2008, mm=1, dd=23, h=2,  &

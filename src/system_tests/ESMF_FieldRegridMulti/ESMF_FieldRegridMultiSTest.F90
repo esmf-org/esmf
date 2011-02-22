@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.31 2011/01/25 15:34:55 rokuingh Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.32 2011/02/22 15:49:34 rokuingh Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -136,8 +136,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                            ESMF_CAL_GREGORIAN, rc)
+    gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize time interval to 6 hours
@@ -155,7 +154,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize the clock with the above values
-    clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
+    clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------

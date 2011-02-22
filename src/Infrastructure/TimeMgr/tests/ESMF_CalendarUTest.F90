@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.60 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.61 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.60 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.61 2011/02/22 15:49:33 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -105,8 +105,7 @@
       ! initialize one calendar to be Gregorian type
       write(name, *) "Create Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, "Gregorian", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -348,8 +347,7 @@
       ! initialize one calendar to be Gregorian type
       write(name, *) "Initialize Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, "Gregorian", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -449,8 +447,7 @@
       ! initialize another calendar to be Gregorian type
       write(name, *) "Initialize Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      gregorianCalendar2 = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar2 = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, "Gregorian", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -559,8 +556,7 @@
       ! initialize secand calendar to be Julian Day type
       write(name, *) "Initialize Julian Day Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
-                                              ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, "JulianDay", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -735,7 +731,7 @@
       ! initialize third calendar to be No Leap type
       write(name, *) "Initialize No Leap Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      no_leapCalendar = ESMF_CalendarCreate("No_Leap", ESMF_CAL_NOLEAP, rc)
+      no_leapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, "No_Leap", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -767,7 +763,7 @@
       ! initialize third calendar to be 360 day type
       write(name, *) "Initialize 360 Day Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      esmf_360dayCalendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
+      esmf_360dayCalendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, "360Day", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -799,12 +795,9 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
-                                        daysPerMonth=days_per_month, &
-					secondsPerDay=86400, &
-					daysPerYear=360, &
-					daysPerYearDn=1, &
-					daysPerYearDd=1, rc=rc)
+      customCalendar = ESMF_CalendarCreate(daysPerMonth=days_per_month, &
+					secondsPerDay=86400, daysPerYear=360, daysPerYearDn=1, &
+					daysPerYearDd=1, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -836,12 +829,9 @@
       ! Testing ESMF_CalendarOperator(==)(calendar1,calendar2)
       write(name, *) "Calendar equality of custom Calendars Test"
       write(failMsg, *) "Returned not equal"
-      customCalendar2 = ESMF_CalendarCreate("CustomCalendar2", &
-                                          daysPerMonth=days_per_month, &
-					secondsPerDay=86400, &
-					daysPerYear=360, &
-					daysPerYearDn=1, &
-					daysPerYearDd=1, rc=rc)
+      customCalendar2 = ESMF_CalendarCreate(daysPerMonth=days_per_month, &
+					secondsPerDay=86400, daysPerYear=360, daysPerYearDn=1, &
+					daysPerYearDd=1, name="CustomCalendar2", rc=rc)
       call ESMF_Test((customCalendar.eq.customCalendar2 .and. &
                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -862,12 +852,9 @@
       ! Testing ESMF_CalendarOperator(/=)(calendar1,calendar2)
       write(name, *) "Calendar inequality of custom Calendars Test"
       write(failMsg, *) "Returned equal"
-      customCalendar2 = ESMF_CalendarCreate("CustomCalendar2", &
-                                          daysPerMonth=days_per_month, &
-					secondsPerDay=20000, &
-					daysPerYear=360, &
-					daysPerYearDn=1, &
-					daysPerYearDd=1, rc=rc)
+      customCalendar2 = ESMF_CalendarCreate(daysPerMonth=days_per_month, &
+					secondsPerDay=20000, daysPerYear=360, daysPerYearDn=1, &
+					daysPerYearDd=1, name="CustomCalendar2", rc=rc)
       call ESMF_Test((customCalendar.ne.customCalendar2 .and. &
                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -889,12 +876,9 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with overflow Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
-                                        daysPerMonth=dayspermonth, &
-					secondsPerDay=86400, &
-					daysPerYear=100000000, &
-					daysPerYearDn=1, &
-					daysPerYearDd=1, rc=rc)
+      customCalendar = ESMF_CalendarCreate(daysPerMonth=dayspermonth, &
+					secondsPerDay=86400, daysPerYear=100000000, daysPerYearDn=1, &
+					daysPerYearDd=1, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc)
@@ -927,12 +911,9 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with negative number seconds Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
-                                        daysPerMonth=dayspermonth, &
-					secondsPerDay=-400, &
-					daysPerYear=1, &
-					daysPerYearDn=1, &
-					daysPerYearDd=0, rc=rc)
+      customCalendar = ESMF_CalendarCreate(daysPerMonth=dayspermonth, &
+					secondsPerDay=-400, daysPerYear=1, daysPerYearDn=1, &
+					daysPerYearDd=0, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc)
@@ -964,12 +945,9 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with nonsense numbers Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
-                                        daysPerMonth=dayspermonth, &
-					secondsPerDay=86400, &
-					daysPerYear=1, &
-					daysPerYearDn=1, &
-					daysPerYearDd=0, rc=rc)
+      customCalendar = ESMF_CalendarCreate(daysPerMonth=dayspermonth, &
+					secondsPerDay=86400, daysPerYear=1, daysPerYearDn=1, &
+					daysPerYearDd=0, name="CustomCalendar", rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_CalendarDestroy(customCalendar, rc)
@@ -1210,8 +1188,8 @@
       !EX_UTest
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Clock Initialization with Gregorian CalendarTest"
-      clock_gregorian = ESMF_ClockCreate("Gregorian Clock", timeStep, &
-                                         startTime, stopTime, rc=rc)
+      clock_gregorian = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                         name="Gregorian Clock", rc=rc)
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -1265,8 +1243,8 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      clock_no_leap = ESMF_ClockCreate("No Leap Clock", timeStep, &    
-                                        startTime, stopTime, rc=rc) 
+      clock_no_leap = ESMF_ClockCreate(timeStep, startTime, stopTime, &    
+                                       name="No Leap Clock", rc=rc) 
       write(name, *) "Clock initialization with above settings Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -1318,8 +1296,8 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      clock_360day = ESMF_ClockCreate("360 Day Clock", timeStep, startTime, &
-                                         stopTime, rc=rc)
+      clock_360day = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+                                      name="360 Day Clock", rc=rc)
       write(name, *) "Clock initialization with above settings Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -1389,7 +1367,7 @@
       !EX_UTest
       write(name, *) "Create Julian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      julianCalendar = ESMF_CalendarCreate("Julian", ESMF_CAL_JULIAN, rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIAN, "Julian", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -1556,8 +1534,8 @@
       ! initialize calendar to be Modified Julian Day type
       write(name, *) "Initialize Modified Julian Day Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      modifiedJulianDayCalendar = ESMF_CalendarCreate("ModifiedJulianDay", &
-                                                      ESMF_CAL_MODJULIANDAY, rc)
+      modifiedJulianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_MODJULIANDAY, &
+                                                      "ModifiedJulianDay", rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 

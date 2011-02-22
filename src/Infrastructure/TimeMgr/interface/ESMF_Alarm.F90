@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.100 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_Alarm.F90,v 1.101 2011/02/22 15:49:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.100 2011/01/19 02:13:18 svasquez Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.101 2011/02/22 15:49:33 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -266,15 +266,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_AlarmCreate()
-      function ESMF_AlarmCreateNew(name, clock, ringTime, ringInterval, &
+      function ESMF_AlarmCreateNew(clock, ringTime, ringInterval, &
         stopTime, ringDuration, ringTimeStepCount, refTime, enabled, &
-        sticky, rc)
+        sticky, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmCreateNew
 
 ! !ARGUMENTS:
-      character (len=*),       intent(in),  optional :: name
       type(ESMF_Clock),        intent(in)            :: clock
       type(ESMF_Time),         intent(in),  optional :: ringTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
@@ -284,6 +283,7 @@
       type(ESMF_Time),         intent(in),  optional :: refTime
       logical,                 intent(in),  optional :: enabled
       logical,                 intent(in),  optional :: sticky
+      character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -295,10 +295,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[name]}]
-!          The name for the newly created alarm.  If not specified,
-!          a default unique name will be generated: "AlarmNNN" where NNN
-!          is a unique sequence number from 001 to 999.
 !     \item[clock]
 !          The clock with which to associate this newly created alarm.
 !     \item[{[ringTime]}]
@@ -349,6 +345,10 @@
 !          {\tt ESMF\_AlarmRingerOff()}.  An error message will be logged
 !          when this limitation is not satisfied.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[name]}]
+!          The name for the newly created alarm.  If not specified,
+!          a default unique name will be generated: "AlarmNNN" where NNN
+!          is a unique sequence number from 001 to 999.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -589,14 +589,13 @@
 ! !IROUTINE: ESMF_AlarmGet - Get Alarm properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmGet(alarm, name, clock, ringTime, prevRingTime, &
+      subroutine ESMF_AlarmGet(alarm, clock, ringTime, prevRingTime, &
         ringInterval, stopTime, ringDuration, ringTimeStepCount, &
         timeStepRingingCount, ringBegin, ringEnd, refTime, ringing, &
-        ringingOnPrevTimeStep, enabled, sticky, rc)
+        ringingOnPrevTimeStep, enabled, sticky, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
-      character (len=*),       intent(out), optional :: name
       type(ESMF_Clock),        intent(out), optional :: clock
       type(ESMF_Time),         intent(out), optional :: ringTime
       type(ESMF_Time),         intent(out), optional :: prevRingTime
@@ -612,6 +611,7 @@
       logical,                 intent(out), optional :: ringingOnPrevTimeStep
       logical,                 intent(out), optional :: enabled
       logical,                 intent(out), optional :: sticky
+      character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -621,8 +621,6 @@
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to query.
-!     \item[{[name]}]
-!          The name of this alarm.
 !     \item[{[clock]}]
 !          The associated clock.
 !     \item[{[ringTime]}]
@@ -668,6 +666,10 @@
 !     \item[{[sticky]}]
 !          The sticky state. 
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[name]}]
+!          The name of this alarm.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
 ! !REQUIREMENTS:
@@ -1162,13 +1164,12 @@
 ! !IROUTINE: ESMF_AlarmSet - Set Alarm properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmSet(alarm, name, clock, ringTime, ringInterval, &
+      subroutine ESMF_AlarmSet(alarm, clock, ringTime, ringInterval, &
         stopTime, ringDuration, ringTimeStepCount, refTime, ringing, &
-        enabled, sticky, rc)
+        enabled, sticky, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
-      character (len=*),       intent(in),  optional :: name
       type(ESMF_Clock),        intent(in),  optional :: clock
       type(ESMF_Time),         intent(in),  optional :: ringTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
@@ -1179,6 +1180,7 @@
       logical,                 intent(in),  optional :: ringing
       logical,                 intent(in),  optional :: enabled
       logical,                 intent(in),  optional :: sticky
+      character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1191,8 +1193,6 @@
 !     \begin{description}
 !     \item[alarm]
 !          The object instance to set.
-!     \item[{[name]}]
-!          The new name for this alarm.  
 !     \item[{[clock]}]
 !          Re-associates this alarm with a different clock.
 !     \item[{[ringTime]}]
@@ -1240,6 +1240,8 @@
 !          user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
 !          will be logged when this limitation is not satisfied.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[name]}]
+!          The new name for this alarm.  
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1337,11 +1339,10 @@
 ! !IROUTINE:  ESMF_AlarmValidate - Validate an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmValidate(alarm, options, rc)
+      subroutine ESMF_AlarmValidate(alarm, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),  intent(inout)         :: alarm
-      character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1353,8 +1354,6 @@
 !     \begin{description}
 !     \item[alarm]
 !          {\tt ESMF\_Alarm} to be validated.
-!     \item[{[options]}]
-!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 
@@ -1363,6 +1362,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       integer :: localrc                        ! local return code
+      character :: options ! dummy options
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
