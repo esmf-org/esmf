@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.30 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.31 2011/02/22 18:01:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.30 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.31 2011/02/22 18:01:19 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -157,7 +157,7 @@
     ! Obtain a few Fortran units
     funits = -1
     do, i=1, size (funits)
-      call ESMF_UtilIOUnitGet(funits(i), rc)
+      call ESMF_UtilIOUnitGet(funits(i), rc=rc)
       ioerr = 0
       if (rc == ESMF_SUCCESS) then
         write (filename,'(a,2i2.2)') 'IOtempfile', localPet, i
@@ -187,7 +187,7 @@
     !NEX_UTest
     ! Get a unit number for flush
     write (name, *) "Testing ESMF_UtilIOUnitFlush, get a free unit"
-    call ESMF_UtilIOUnitGet (funits(1), rc)
+    call ESMF_UtilIOUnitGet (funits(1), rc=rc)
     write (failMsg, *) "Obtaining a fresh unit"
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -206,7 +206,7 @@
     write (name, *) "ESMF_UtilIOUnitFlush, flush the scratch file"
     write (funits(1), *) 'Testing ESMF_UtilIOUnitFlush'
     write (failMsg, *) 'calling ESMF_UtilIOUnitFlush'
-    call ESMF_UtilIOUnitFlush (funits(1), rc)
+    call ESMF_UtilIOUnitFlush (funits(1), rc=rc)
     call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     close (funits(1), status='delete', iostat=ioerr)
@@ -221,7 +221,7 @@
     ! Get command line argument count
     write (name, *) "Testing ESMF_UtilGetArgC, command line argument count"
     write (failMsg, *) "Obtaining the command line argument count"
-    nargs = ESMF_UtilGetArgC ()
+    call ESMF_UtilGetArgC (nargs)
     call ESMF_Test(nargs >= 0, name, failMsg, result, ESMF_SRCLINE)
 
     !
@@ -237,7 +237,7 @@
     ! Get command name
     write (name, *) "Testing ESMF_UtilGetArgC, get command name"
     write (failMsg, *) "Obtaining the command name"
-    call ESMF_UtilGetArg (argindex=0, value=arg, rc=rc)
+    call ESMF_UtilGetArg (argindex=0, argvalue=arg, rc=rc)
     print *, 'command name = ', trim (arg)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -246,7 +246,7 @@
     ! Get command line arguments
     write (name, *) "Testing ESMF_UtilGetArgC, get truncated command name"
     write (failMsg, *) "Obtaining truncated command name"
-    call ESMF_UtilGetArg (argindex=0, value=argshort, rc=rc)
+    call ESMF_UtilGetArg (argindex=0, argvalue=argshort, rc=rc)
     call ESMF_Test(rc == ESMF_RC_ARG_SIZE, name, failMsg, result, ESMF_SRCLINE)
 
     !
@@ -254,7 +254,7 @@
     ! Get command line arguments
     write (name, *) "Testing ESMF_UtilGetArgC, compare arg lengths"
     write (failMsg, *) "Returned arg length does not match actual arg length"
-    call ESMF_UtilGetArg (argindex=0, value=arg, length=arg_len, rc=rc)
+    call ESMF_UtilGetArg (argindex=0, argvalue=arg, arglength=arg_len, rc=rc)
     print *, 'arg_len =', arg_len, ', len_trim (arg) =', len_trim (arg)
     call ESMF_Test(rc == ESMF_SUCCESS .and. arg_len == len_trim (arg),  &
         name, failMsg, result, ESMF_SRCLINE)
@@ -274,7 +274,7 @@
     ! Test command line argument index with the program name
     write (name, *) "Testing ESMF_UtilGetArgIndex for program path"
     write (failMsg, *) "did not find program path"
-    call ESMF_UtilGetArgIndex (value=program_path, argindex=argindex, rc=rc)
+    call ESMF_UtilGetArgIndex (argvalue=program_path, argindex=argindex, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS .and. argindex == 0,  &
       name, failMsg, result, ESMF_SRCLINE)
 
@@ -283,7 +283,7 @@
     ! Test command line argument index with unknown value
     write (name, *) "Testing ESMF_UtilGetArgIndex for program path"
     write (failMsg, *) "did not return -1"
-    call ESMF_UtilGetArgIndex (value="esmf_xyzzy", argindex=argindex, rc=rc)
+    call ESMF_UtilGetArgIndex (argvalue="esmf_xyzzy", argindex=argindex, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS .and. argindex == -1,  &
       name, failMsg, result, ESMF_SRCLINE)
 
