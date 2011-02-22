@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.153 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_GridComp.F90,v 1.154 2011/02/22 21:54:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.153 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.154 2011/02/22 21:54:04 theurich Exp $'
 
 !==============================================================================
 !
@@ -350,6 +350,9 @@ contains
     character(len=*),        intent(in),    optional :: name
     integer,                 intent(out),   optional :: rc
 !
+! !STATUS:
+! Backward compatible for ESMF 5.2r and above.
+!
 ! !DESCRIPTION:
 ! This interface creates an {\tt ESMF\_GridComp} object. By default, a
 ! separate VM context will be created for each component.  This implies
@@ -483,6 +486,9 @@ contains
     type(ESMF_GridComp), intent(inout)          :: gridcomp
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out),  optional :: rc
+!
+! !STATUS:
+! Backward compatible for ESMF 5.2r and above.
 !
 ! !DESCRIPTION:
 ! Releases all resources associated with this {\tt ESMF\_GridComp}.  This
