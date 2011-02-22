@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.17 2010/12/10 21:07:09 theurich Exp $
+#  $Id: protex,v 1.18 2011/02/22 18:09:58 theurich Exp $
 #
 #BOP
 #
@@ -279,7 +279,7 @@ LINE:
         
 #       eliminate/replace keywordEnforcer arguments from API
         s/keywordEnforcer, //g;
-        s/^[! ]*type\(ESMF_KeywordEnforcer\), optional:: keywordEnforcer.*$/ ---- Argument keyword syntax is required for the following arguments! ----/g;
+        s/^[! \t]*type\(ESMF_KeywordEnforcer\), optional:: keywordEnforcer.*$/-- The following arguments require argument keyword syntax (e.g. rc=rc) on the calling side. --/g;
 
 #       !PARAMETERS: really mean !ARGUMENTS:
 #       ------------------------------------
