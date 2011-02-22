@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.C,v 1.15 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMC_ArraySpec.C,v 1.16 2011/02/22 22:27:45 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_ArraySpec.C,v 1.15 2011/01/05 20:05:40 svasquez Exp $";
+  "$Id: ESMC_ArraySpec.C,v 1.16 2011/02/22 22:27:45 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -52,7 +52,7 @@ int ESMC_ArraySpecSet(ESMC_ArraySpec *arrayspec,int rank,
 
   // call into ESMCI interface
   localrc = ((ESMCI::ArraySpec *)arrayspec)->set(rank, typekind);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
@@ -71,10 +71,10 @@ int ESMC_ArraySpecGet(ESMC_ArraySpec arrayspec, int *rank,
 
   // call into ESMCI interface
   *rank = ((ESMCI::ArraySpec *)&arrayspec)->getRank(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   *typekind = ((ESMCI::ArraySpec *)&arrayspec)->getTypeKind(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully

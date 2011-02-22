@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.19 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_LocalArray.C,v 1.20 2011/02/22 22:32:00 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.19 2011/01/05 20:05:44 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.20 2011/02/22 22:32:00 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -202,7 +202,7 @@ int LocalArray::construct(
     LocalArray *aptr = this;
     FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &typekind, counts, 
       lbound, ubound, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   } 
 
@@ -264,7 +264,7 @@ int LocalArray::construct(
   if (dealloc){
     // must deallocate data allocation
     FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &typekind, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
 
@@ -324,7 +324,7 @@ LocalArray *LocalArray::create(
   
   localrc = a->construct(false, DATA_NONE, tk, rank, oflag, false,
     NULL, NULL, NULL, NULL, NULL, NULL, name);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
   // return successfully
@@ -383,7 +383,7 @@ LocalArray *LocalArray::create(
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
     NULL, NULL, NULL, counts, base_addr, NULL, name);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
   // return successfully
@@ -444,7 +444,7 @@ LocalArray *LocalArray::create(
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
     NULL, lbounds, ubounds, counts, base_addr, NULL, name);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
   // return successfully
@@ -507,7 +507,7 @@ LocalArray *LocalArray::create(
 
   // call into Fortran copy method, which will use larrayOut's lbound and ubound
   FTN(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
   
   // return successfully 
@@ -568,7 +568,7 @@ LocalArray *LocalArray::create(
   if (copyflag == DATA_COPY){
     // make a copy of the LocalArray object including the data allocation
     larrayOut = LocalArray::create(larrayIn, lbounds, ubounds, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return NULL;
   }else{
     // allocate memory for new LocalArray object
@@ -591,7 +591,7 @@ LocalArray *LocalArray::create(
     // adjust the Fortran dope vector to reflect the new bounds
     FTN(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
       larrayOut->lbound, larrayOut->ubound, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return NULL;
   }
   
@@ -638,7 +638,7 @@ int LocalArray::destroy(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   localrc = localarray->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
 
   delete localarray;
