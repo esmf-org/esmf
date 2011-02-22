@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.12 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.13 2011/02/22 21:17:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.12 2011/01/05 20:05:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.13 2011/02/22 21:17:11 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -107,13 +107,13 @@ namespace ESMCI
       returnCode = io_netcdf->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
                                                "IO_NetCDF");
     }
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
 
     if (base != ESMC_NULL_POINTER) io_netcdf->base = base;
 
     // TODO returnCode = io_netcdf->validate();
     returnCode = ESMF_SUCCESS;
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
     return(io_netcdf);
 
  } // end ESMCI_IO_NetCDFCreate (new)
@@ -154,7 +154,7 @@ namespace ESMCI
     (*io_netcdf)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.22 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_VM.C,v 1.23 2011/02/22 21:14:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.22 2011/01/05 20:05:46 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.23 2011/02/22 21:14:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -410,7 +410,7 @@ void *VM::startup(
 
     // The VMId is that same for all PETs spawned by local PET
     VMId vmID = VMIdCreate(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return NULL;  // bail out on error
     // vmKey part of the vmID gets set to the appropriate bit pattern:
     // ->  set the bit in vmKey for each VAS in which this VM exists <-
@@ -470,7 +470,7 @@ void *VM::startup(
       matchTable_tid[index]  = vmp->myvms[j]->getMypthid(); // pthid
       matchTable_vm[index]   = vmp->myvms[j];               // ptr to this VM
       matchTable_vmID[index] = VMIdCreate(&localrc);        // vmID
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
         return NULL;  // bail out on error
       matchTable_BaseIDCount[index] = 0;                    // reset
       matchTable_Objects[index].reserve(1000);              // start w/ 1000 obj
@@ -479,7 +479,7 @@ void *VM::startup(
     }
     delete [] emptyList;
     VMIdDestroy(&vmID, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return NULL;  // bail out on error
   }
   
@@ -538,7 +538,7 @@ void VM::shutdown(
         matchTable_vm[i] = NULL;  // mark this entry invalid
         // destroy VMId object
         VMIdDestroy(&(matchTable_vmID[i]), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           rc)) return;
         // automatic garbage collection of ESMF objects
         try{
@@ -547,37 +547,37 @@ void VM::shutdown(
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN(f_esmf_fieldcollectgarbage)
                 (&(matchTable_FObjects[i][k].fobject),&localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_FIELDBUNDLE.objectID){
               FTN(f_esmf_fbundlecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
               FTN(f_esmf_geombasecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_LOCSTREAM.objectID){
               FTN(f_esmf_locstreamcollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_STATE.objectID){
               FTN(f_esmf_statecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_COMPONENT.objectID){
               FTN(f_esmf_compcollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }
             matchTable_FObjects[i].pop_back();
@@ -590,7 +590,7 @@ void VM::shutdown(
           }
         }catch(int localrc){
           // catch standard ESMF return code
-          ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
           return;
         }catch(...){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -936,7 +936,7 @@ int VM::print() const{
   // print info about the ESMCI::VM object
   printf("--- ESMCI::VM::print() start ---\n");
   VMId *vmid = getVMId(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     &rc)) return rc;
   VMIdPrint(vmid);
   VMK::print();
@@ -1479,7 +1479,7 @@ void VM::finalize(
 
   // delete the VM association table
   VMIdDestroy(&(matchTable_vmID[0]), &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return;
   // automatic garbage collection of ESMF objects
   try{
@@ -1488,37 +1488,37 @@ void VM::finalize(
       if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
         FTN(f_esmf_fieldcollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           rc)) return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_FIELDBUNDLE.objectID){
         FTN(f_esmf_fbundlecollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
         FTN(f_esmf_geombasecollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_LOCSTREAM.objectID){
         FTN(f_esmf_locstreamcollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_STATE.objectID){
         FTN(f_esmf_statecollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_COMPONENT.objectID){
         FTN(f_esmf_compcollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }
       matchTable_FObjects[0].pop_back();
@@ -1531,7 +1531,7 @@ void VM::finalize(
     }
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", rc);

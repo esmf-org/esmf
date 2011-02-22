@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.15 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_IO_XML.C,v 1.16 2011/02/22 21:17:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.15 2011/01/05 20:05:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.16 2011/02/22 21:17:11 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -113,7 +113,7 @@ namespace ESMCI{
       returnCode = io_xml->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
                                             "IO_XML");
     }
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
 
     if (fileName != ESMC_NULL_POINTER) {
       if (fileNameLen < ESMF_MAXSTR) {
@@ -137,7 +137,7 @@ namespace ESMCI{
 
     // TODO returnCode = io_xml->validate();
     returnCode = ESMF_SUCCESS;
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
 
 #ifdef ESMF_XERCES
     try {
@@ -151,7 +151,7 @@ namespace ESMCI{
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
         XMLString::release(&message);
         returnCode = ESMC_RC_LIB;
-        ESMC_LogDefault.MsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+        ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
     }
 #endif
 
@@ -195,7 +195,7 @@ namespace ESMCI{
     (*io_xml)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -348,7 +348,7 @@ namespace ESMCI{
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_comp.xsd file\n");
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
       return rc;
     }
     if (!parser->loadGrammar ("esmf_grid.xsd",
@@ -357,7 +357,7 @@ namespace ESMCI{
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_grid.xsd file\n");
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
       return rc;
     }
     if (!parser->loadGrammar ("esmf_field.xsd",
@@ -366,7 +366,7 @@ namespace ESMCI{
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_field.xsd file\n");
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
       return rc;
     }
 
@@ -379,7 +379,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Unable to load file %s\n", this->schemaFileName);
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
       }
     }
@@ -406,7 +406,7 @@ namespace ESMCI{
         sprintf(logMsg, "XML Parse Exception, message is: %s\n", message);
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
         XMLString::release(&message);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
     }
     catch (const SAXParseException& toCatch) {
@@ -415,14 +415,14 @@ namespace ESMCI{
         sprintf(logMsg, "SAX Parse Exception, message is: %s\n", message);
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
         XMLString::release(&message);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
     }
     catch (...) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Unexpected, unknown exception during SAX parse.\n");
         ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMF_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
     }
     // parser deleted by auto_ptr via either normal or exception exit
@@ -589,7 +589,7 @@ namespace ESMCI{
 
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
     // write end-of-line
     XMLCh* newLine = XMLString::transcode("\n");
@@ -649,7 +649,7 @@ namespace ESMCI{
 
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
     // write the end of the XML element </name>
     XMLCh* qname = XMLString::transcode(name.c_str());
