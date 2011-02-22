@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMC_Time.C,v 1.11 2011/02/22 21:42:40 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_Time.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $";
+  "$Id: ESMC_Time.C,v 1.11 2011/02/22 21:42:40 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing
@@ -85,7 +85,7 @@ int ESMC_TimeSet(ESMC_Time *time,
                   (ESMCI::Calendar **)&(calendar.ptr),
                                        &calendartype,
                                        &timeZone);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
@@ -138,7 +138,7 @@ int ESMC_TimeGet(ESMC_Time time,
              (int)0, (int *)NULL, (char *)NULL, (int)0, 
              (int *)NULL, (char *)NULL, (int *)NULL, (ESMCI::Time *)NULL,
              (ESMC_I4 *)NULL, (ESMC_R8 *)NULL, (ESMCI::TimeInterval *)NULL); 
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
@@ -159,7 +159,7 @@ int ESMC_TimePrint(ESMC_Time time) {
 
   // call into ESMCI method
   localrc = ((ESMCI::Time *)&time)->print("string");
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
