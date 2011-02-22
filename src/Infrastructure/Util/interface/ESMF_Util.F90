@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.46 2011/02/22 17:58:13 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.47 2011/02/22 18:59:49 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.46 2011/02/22 17:58:13 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.47 2011/02/22 18:59:49 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -580,7 +580,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = merge (ESMF_SUCCESS, ESMF_RC_ARG_VALUE,  &
         argindex >= 0 .and. argindex <= localargc)
     if (ESMF_LogFoundError ( localrc,  &
-        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc))  &
+        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
       return
 
 #if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
@@ -669,7 +669,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     if (ESMF_LogFoundError ( localrc,  &
-        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rc))  &
+        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
       return
 
     if (present (rc)) then
