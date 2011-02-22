@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.11 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.12 2011/02/22 18:06:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@ program ESMF_CubedSphereRegridEx
       !------------------------------------------------------------------------
       ! Usage:  ESMF_CubedSphereRegrid input_grid output_grid weight_file regrid_method
       !
-      numarg = ESMF_UtilGetArgC()
+      call ESMF_UtilGetArgC(numarg)
       if (numarg < 4) then
 	if (PetNo == 0) then
           print *, 'ERROR: insufficient arguments'
@@ -138,12 +138,12 @@ program ESMF_CubedSphereRegridEx
 	endif
         call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
-      call ESMF_UtilGetArg(1,srcfile)
-      call ESMF_UtilGetArg(2,dstfile)
-      call ESMF_UtilGetArg(3,wgtfile)
-      call ESMF_UtilGetArg(4,regrid_type)
+      call ESMF_UtilGetArg(1, argvalue=srcfile)
+      call ESMF_UtilGetArg(2, argvalue=dstfile)
+      call ESMF_UtilGetArg(3, argvalue=wgtfile)
+      call ESMF_UtilGetArg(4, argvalue=regrid_type)
       if (numarg == 5) then
-	call ESMF_UtilGetArg(5, revflag)
+	call ESMF_UtilGetArg(5, argvalue=revflag)
         if (trim(revflag) .ne. 'rev') then
 	     print *, 'The fifth argument is not "rev".'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
