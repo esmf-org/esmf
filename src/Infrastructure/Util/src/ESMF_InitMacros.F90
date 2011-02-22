@@ -1,4 +1,4 @@
-! $Id: ESMF_InitMacros.F90,v 1.18 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_InitMacros.F90,v 1.19 2011/02/22 18:40:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -133,9 +133,9 @@ end function ESMF_InitCheckDeep
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_IMErr=ESMF_LogFoundError(ESMF_InitCheckDeep(isInit), &
-                                     "Bad Object", &
-                                     line, file, method, &
-                                     rc)
+                                     msg="Bad Object", &
+                                     line=line, file=file, method=method, &
+                                     rcToReturn=rc)
        
 end function ESMF_IMErr
 
