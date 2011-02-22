@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.30 2011/01/07 18:32:16 rokuingh Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.31 2011/02/22 23:16:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ extern "C" {
     // call into C++
     *ptr = ESMCI::DistGrid::create(*dg, *firstExtra, *lastExtra,
       ESMC_NOT_PRESENT_FILTER(indexflag), *connectionList, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -90,7 +90,7 @@ extern "C" {
       *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, opt_delayout, opt_vm,
       &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -119,7 +119,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, opt_delayout, opt_vm,
       &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -147,7 +147,7 @@ extern "C" {
       *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, *fastAxis, opt_vm,
       &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -180,7 +180,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(indexflag),
       *connectionList, opt_delayout, opt_vm,
       &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -191,7 +191,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.MsgFoundError(ESMCI::DistGrid::destroy(ptr),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -494,7 +494,7 @@ extern "C" {
     }
     const int *arbSeqIndexList =
       (*ptr)->getArbSeqIndexList(localDe, collocation, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (ESMC_NOT_PRESENT_FILTER(arbSeqIndexFlag) != ESMC_NULL_POINTER){  
       if (arbSeqIndexList)
@@ -504,7 +504,7 @@ extern "C" {
     }
     // fill seqIndexList
     localrc = (*ptr)->fillSeqIndexList(*seqIndexList, localDe, collocation);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set elementCount
     if (ESMC_NOT_PRESENT_FILTER(elementCount) != ESMC_NULL_POINTER){
@@ -532,7 +532,7 @@ extern "C" {
       // getIndexListPDimPLocalDe() checks localDe and dim for range!
       const int *indexListPtr =
         (*ptr)->getIndexListPDimPLocalDe(localDe, dim+1, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc))) return;
       if ((*indexList)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -563,7 +563,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     bool matchBool = ESMCI::DistGrid::match(*ptr1, *ptr2, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (matchBool) *matchResult = ESMF_TRUE;
     else *matchResult = ESMF_FALSE;
@@ -576,7 +576,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -587,7 +587,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -604,7 +604,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(
       ESMCI::DistGrid::connection(*connection, *tileIndexA,
       *tileIndexB, *positionVector, *orientationVector), 
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -617,7 +617,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
       (*ptr)->setCollocationPDim(*collocationPDim),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
@@ -631,7 +631,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
       (*ptr)->setArbSeqIndex(*arbSeqIndex, *localDe, *collocation),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -648,7 +648,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
       (*distgrid)->serialize(buf, length, offset, *inquireflag),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.54 2011/02/02 23:08:48 gerhard.j.theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.55 2011/02/22 23:13:22 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.54 2011/02/02 23:08:48 gerhard.j.theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.55 2011/02/22 23:13:22 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -294,14 +294,14 @@ DistGrid *DistGrid::create(
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
           firstExtra, lastExtra, NULL, indexflag,
           connectionList, dg->delayout, dg->vm, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
       }else{
         // multi tile
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
           firstExtra, lastExtra, NULL, indexflag,
           connectionList, dg->delayout, dg->vm, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
       }
       delete regDecomp;
@@ -348,7 +348,7 @@ DistGrid *DistGrid::create(
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
           NULL, indexflag, connectionList, dg->delayout, dg->vm, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
         delete deBlockList;
         delete [] deBlockListAlloc;
@@ -550,7 +550,7 @@ DistGrid *DistGrid::create(
   if (vm == ESMC_NULL_POINTER){
     // vm was not provided -> get the current VM
     vm = VM::getCurrent(&localrc);  // get current VM for default
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
@@ -581,7 +581,7 @@ DistGrid *DistGrid::create(
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
@@ -884,7 +884,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, delayout, delayoutCreator, vm);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
@@ -1003,7 +1003,7 @@ DistGrid *DistGrid::create(
   if (vm == ESMC_NULL_POINTER){
     // vm was not provided -> get the current VM
     vm = VM::getCurrent(&localrc);  // get current VM for default
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
@@ -1039,7 +1039,7 @@ DistGrid *DistGrid::create(
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
@@ -1155,7 +1155,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
     connectionList, delayout, delayoutCreator, vm);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
@@ -1229,7 +1229,7 @@ DistGrid *DistGrid::create(
     create(minIndex, maxIndex, regDecomp, decompflag,
       decompflagCount, regDecompFirstExtra, regDecompLastExtra, deLabelList,
       indexflag, connectionList, delayout, vm, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return distgrid;
   
   // return successfully
@@ -1330,7 +1330,7 @@ DistGrid *DistGrid::create(
   if (vm == ESMC_NULL_POINTER){
     // vm was not provided -> get the current VM
     vm = VM::getCurrent(&localrc);  // get current VM for default
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
@@ -1377,7 +1377,7 @@ DistGrid *DistGrid::create(
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
     delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
     }
@@ -1725,7 +1725,7 @@ DistGrid *DistGrid::create(
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
     regDecomp->array, connectionList, delayout, delayoutCreator, vm);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
@@ -1799,7 +1799,7 @@ int DistGrid::destroy(
 
   // destruct DistGrid object
   localrc = (*distgrid)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // mark as invalid object
@@ -2050,7 +2050,7 @@ int DistGrid::destruct(bool followCreator){
     
     if (delayoutCreator && followCreator){
       localrc = DELayout::destroy(&delayout); 
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
     }
   }
@@ -2119,7 +2119,7 @@ int DistGrid::fillSeqIndexList(
     // check for arbitrary sequence indices
     const int *arbSeqIndexList =
       getArbSeqIndexList(localDe, collocation, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     if (arbSeqIndexList){
       // arbitrary seq indices -> fill seqIndexList with arbSeqIndexList
@@ -2219,7 +2219,7 @@ int DistGrid::fillSeqIndexList(
   
   InterfaceInt *seqIndexListAux = new InterfaceInt(seqIndexList);
   localrc = fillSeqIndexList(seqIndexListAux, localDe, collocation);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   delete seqIndexListAux;
     
@@ -2275,7 +2275,7 @@ int DistGrid::fillIndexListPDimPDe(
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
     vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
   
@@ -2306,7 +2306,7 @@ int DistGrid::fillIndexListPDimPDe(
       const int *localIndexList =
         getIndexListPDimPLocalDe(deList[de], dim, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
+        ESMCI_ERR_PASSTHRU, &rc)) return rc;
       memcpy(indexList, localIndexList, sizeof(int)*
         indexCountPDimPDe[de*dimCount+dim-1]);
     }
@@ -2316,7 +2316,7 @@ int DistGrid::fillIndexListPDimPDe(
       const int *localIndexList =
         getIndexListPDimPLocalDe(deList[de], dim, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMF_ERR_PASSTHRU, &rc)) return rc;
+        ESMCI_ERR_PASSTHRU, &rc)) return rc;
       if (*commh == NULL) *commh = new VMK::commhandle;
       localrc = vm->send(localIndexList,
         sizeof(int)*indexCountPDimPDe[de*dimCount+dim-1], rootPet, commh);
@@ -2773,7 +2773,7 @@ bool DistGrid::isLocalDeOnEdgeL(
       // get sequence index providing localDe relative index tuple
       int seqindex =
         getSequenceIndexLocalDe(localDe, localDeIndexTuple, 3, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
         return false;
       // determine if seqindex indicates edge or not
       if (seqindex != -1){
@@ -2856,7 +2856,7 @@ bool DistGrid::isLocalDeOnEdgeU(
       // get sequence index providing localDe relative index tuple
       int seqindex =
         getSequenceIndexLocalDe(localDe, localDeIndexTuple, 3, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
         return false;
       // determine if seqindex indicates edge or not
       if (seqindex != -1){
@@ -3064,7 +3064,7 @@ int DistGrid::getSequenceIndexLocalDe(
       }
       // get sequence index providing tile relative index tuple
       seqindex = getSequenceIndexTile(tile, tileIndexTuple, depth, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
         return -1;  //  bail out with invalid seqindex
       delete [] tileIndexTuple;
     }
@@ -3126,7 +3126,7 @@ int DistGrid::getSequenceIndexTileRelative(
   
   int seqindex = getSequenceIndexTile(tile, indexTileSpecific, depth,
     &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     rc)) return seqindex;  // bail out
   
   delete [] indexTileSpecific;
@@ -3234,7 +3234,7 @@ int DistGrid::getSequenceIndexTile(
           }
         }
         seqindex = getSequenceIndexTile(tileB, indexB, depth, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           rc)) return seqindex;  // bail out
         delete [] indexB;
         if (seqindex > -1)
@@ -3257,7 +3257,7 @@ int DistGrid::getSequenceIndexTile(
           }
         }
         seqindex = getSequenceIndexTile(tileA, indexA, depth, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           rc)) return seqindex;  // bail out
         delete [] indexA;
         if (seqindex > -1)
@@ -3586,11 +3586,11 @@ int DistGrid::serialize(
   ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
   localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,
       inquireflag);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the DELayout
   localrc = delayout->serialize(buffer, length, offset,inquireflag);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize DistGrid meta data
   r=*offset%8;
@@ -3690,7 +3690,7 @@ DistGrid *DistGrid::deserialize(
   if (r!=0) *offset += 8-r;  // alignment
   ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
   localrc = a->ESMC_Base::ESMC_Deserialize(buffer,offset,attreconflag);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return NULL;
   // Deserialize the DELayout
   a->delayout = DELayout::deserialize(buffer, offset);
