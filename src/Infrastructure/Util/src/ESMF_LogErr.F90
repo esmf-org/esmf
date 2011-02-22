@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.75 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_LogErr.F90,v 1.76 2011/02/22 17:37:34 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -802,13 +802,13 @@ end subroutine ESMF_LogFinalize
       132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
       133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
 
-      call ESMF_UtilIOUnitFlush (alog%unitNumber, localrc)
+      call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc)
  
       alog%flushed = ESMF_TRUE
       alog%dirty = ESMF_FALSE
 
       if (present (rc)) then    
-        rc=merge (ESMF_SUCCESS, ESMF_FAILURE, localrc == 0)
+        rc = localrc
       end if
       
     endif
@@ -1112,7 +1112,7 @@ end function ESMF_LogFoundError
 !
 ! !ARGUMENTS:
 !      
-      type(ESMF_Log), target,optional            :: log         	
+      type(ESMF_Log),optional            :: log         	
       type(ESMF_Logical), intent(out),optional   :: verbose     	
       type(ESMF_Logical), intent(out),optional   :: flush       	
       type(ESMF_Logical), intent(out),optional   :: rootOnly    	
