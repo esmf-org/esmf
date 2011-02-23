@@ -1,4 +1,4 @@
-! $Id: ESMF_Info.F90,v 1.5 2010/11/03 22:48:47 theurich Exp $
+! $Id: ESMF_Info.F90,v 1.6 2011/02/23 16:06:27 w6ws Exp $
 
 program ESMF_Info
 
@@ -20,7 +20,7 @@ program ESMF_Info
   
   if (localPet == 0) then
     ! check for standard command line arguments
-    call ESMF_UtilGetArgIndex(value="--help", argIndex=argIndex, rc=rc)
+    call ESMF_UtilGetArgIndex(argvalue="--help", argIndex=argIndex, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     if (argIndex >= 0) then
       ! standard --help argument was specified
