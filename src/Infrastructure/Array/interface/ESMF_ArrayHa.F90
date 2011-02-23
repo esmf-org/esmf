@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.22 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.23 2011/02/23 19:56:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.22 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.23 2011/02/23 19:56:16 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -555,7 +555,7 @@ contains
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
-        ESMF_CONTEXT, rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
 #endif
 
@@ -567,13 +567,13 @@ contains
       if (present(variableName)) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
           "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
-          ESMF_CONTEXT, rc)
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
-        ESMF_CONTEXT, rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
 #endif
 
@@ -582,7 +582,7 @@ contains
       ! format option that is not supported
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
         "this format is not currently supported by the ESMF IO layer", &
-        ESMF_CONTEXT, rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
 
     endif
@@ -630,7 +630,7 @@ contains
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
-              ESMF_CONTEXT, rc)
+              ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
 
@@ -659,7 +659,7 @@ contains
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
-              ESMF_CONTEXT, rc)
+              ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
 
@@ -688,13 +688,13 @@ contains
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
-              ESMF_CONTEXT, rc)
+              ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
 
       case default
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
-          ESMF_CONTEXT, rc)
+          ESMF_CONTEXT, rcToReturn=rc)
         return
 
     end select
@@ -705,8 +705,8 @@ contains
 #else
     ! Return indicating PIO not present
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
-      "ESMF must be compiled with PIO support to support I/O methods", &
-      ESMF_CONTEXT, rc)
+      msg="ESMF must be compiled with PIO support to support I/O methods", &
+      ESMF_CONTEXT, rcToReturn=rc)
 #endif
 
   end subroutine ESMF_ArrayRead

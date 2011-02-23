@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.56 2011/02/23 01:18:00 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.57 2011/02/23 19:56:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.56 2011/02/23 01:18:00 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.57 2011/02/23 19:56:16 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -619,22 +619,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localDeArg = 0 ! default
       else
         call ESMF_LogSetError(ESMF_RC_ARG_OPT, &
-          "- must provide optional localDe argument for localDeCount > 1", &
-          ESMF_CONTEXT, rc)
+          msg="- must provide optional localDe argument for localDeCount > 1", &
+          ESMF_CONTEXT, rcToReturn=rc)
       endif
     endif
     ! Check that localDeArg is within limits
     if (localDeArg < 0 .or. localDeArg > localDeCount-1) then
       call ESMF_LogSetError(ESMF_RC_ARG_OUTOFRANGE, &
-        "- localDe out of range", &
-        ESMF_CONTEXT, rc)
+        msg="- localDe out of range", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
     if (dim < 1 .or. dim > rank) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        "dim argument out of range", &
-        ESMF_CONTEXT, rc)
+        msg="dim argument out of range", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     allocate(arrayToDistgridMap(rank))
@@ -645,8 +645,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deallocate(arrayToDistgridMap)
     if (distgridDim == 0) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        "dim argument does not map to a DistGrid dimension", &
-        ESMF_CONTEXT, rc)
+        msg="dim argument does not map to a DistGrid dimension", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     allocate(indexCountInternal(dimCount,0:deCount-1))
@@ -672,8 +672,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(indexList)) then
       if (size(indexList) < count) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-          "indexList argument dimensioned too small", &
-          ESMF_CONTEXT, rc)
+          msg="indexList argument dimensioned too small", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       call ESMF_DistGridGet(distgrid, localDe=localDeArg, dim=dim, &
@@ -765,15 +765,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr typekind to match Array typekind @\
     if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-        "- farrayPtr typekind does not match Array typekind", & @\
-        ESMF_CONTEXT, rc) @\
+        msg="- farrayPtr typekind does not match Array typekind", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
       return @\
     endif @\
     ! Require farrayPtr rank to match Array rank @\
     if (rank /= mrank) then @\
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-        "- farrayPtr rank does not match Array rank", & @\
-        ESMF_CONTEXT, rc) @\
+        msg="- farrayPtr rank does not match Array rank", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
       return @\
     endif @\
 @\
@@ -856,8 +856,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Sanity check localDeCount
     if (localDeCount <= 0) then
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, &
-        "- localDeCount <= 0 prohibits request", &
-        ESMF_CONTEXT, rc)
+        msg="- localDeCount <= 0 prohibits request", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     ! Deal with optional localDe argument
@@ -868,15 +868,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localDeArg = 0 ! default
       else
         call ESMF_LogSetError(ESMF_RC_ARG_OPT, &
-          "- must provide optional localDe argument for localDeCount > 1", &
-          ESMF_CONTEXT, rc)
+          msg="- must provide optional localDe argument for localDeCount > 1", &
+          ESMF_CONTEXT, rcToReturn=rc)
       endif
     endif
     ! Check that localDeArg is within limits
     if (localDeArg < 0 .or. localDeArg > localDeCount-1) then
       call ESMF_LogSetError(ESMF_RC_ARG_OUTOFRANGE, &
-        "- localDe out of range", &
-        ESMF_CONTEXT, rc)
+        msg="- localDe out of range", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     ! get localArray via localarrayList
@@ -1140,8 +1140,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localDeArg = 0 ! default
       else
         call ESMF_LogSetError(ESMF_RC_ARG_OPT, &
-          "- must provide optional localDe argument for localDeCount > 1", &
-          ESMF_CONTEXT, rc)
+          msg="- must provide optional localDe argument for localDeCount > 1", &
+          ESMF_CONTEXT, rcToReturn=rc)
       endif
     endif
     

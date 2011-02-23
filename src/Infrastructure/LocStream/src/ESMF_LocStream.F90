@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.47 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_LocStream.F90,v 1.48 2011/02/23 20:02:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.47 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.48 2011/02/23 20:02:53 w6ws Exp $'
 
 !==============================================================================
 !
@@ -508,7 +508,7 @@ contains
     call ESMF_ArraySpecSet(arrayspec, rank=1, typekind=localKeyTypeKind, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Array
     array=ESMF_ArrayCreate(arrayspec, distgrid=lstypep%distgrid, &
@@ -516,14 +516,14 @@ contains
                            rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
    ! Add key to structure
    call ESMF_LocStreamAddKeyArray(locstream, keyName, keyArray=array, destroyKey=.true., &
                keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! return success
@@ -623,8 +623,8 @@ contains
    ! If something found return error
    if (keyIndex .ne. 0) then
       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-            " - keyName already exists in this LocStream", &
-            ESMF_CONTEXT, rc)) return
+            msg=" - keyName already exists in this LocStream", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
 
@@ -641,20 +641,20 @@ contains
 
    !! Allocate new space for keys (note +1 to increase space for new key)
    allocate (lstypep%keyNames(keyCount+1), stat=localrc )
-   if (ESMF_LogFoundAllocError(localrc, " Allocating KeyNames", &
-                                     ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg=" Allocating KeyNames", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
    allocate (lstypep%keyUnits(keyCount+1), stat=localrc )
-   if (ESMF_LogFoundAllocError(localrc, " Allocating units", &
-                                     ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg=" Allocating units", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
    allocate (lstypep%keyLongNames(keyCount+1), stat=localrc )
-   if (ESMF_LogFoundAllocError(localrc, " Allocating longNames", &
-                                     ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg=" Allocating longNames", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
    allocate( lstypep%keys(keyCount+1), stat=localrc )  ! Array of keys
-   if (ESMF_LogFoundAllocError(localrc, " Allocating keys", &
-                                     ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
    allocate( lstypep%destroyKeys(keyCount+1), stat=localrc )  ! Array of keys
-   if (ESMF_LogFoundAllocError(localrc, " Allocating keys", &
-                                     ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
    !! Copy and deallocate old arrays
    if (keyCount .gt. 0) then
@@ -815,7 +815,7 @@ contains
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Add key to structure
@@ -823,7 +823,7 @@ contains
                keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! return success
@@ -905,7 +905,7 @@ contains
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Add key to structure
@@ -913,7 +913,7 @@ contains
                keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! return success
@@ -995,7 +995,7 @@ contains
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! Add key to structure
@@ -1003,7 +1003,7 @@ contains
                keyUnits=keyUnits, keyLongName=keyLongName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    ! return success
@@ -1109,7 +1109,7 @@ contains
       call ESMF_GridGet(background, dimCount=gridDimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      ! Chose staggerloc based on dimension
@@ -1119,22 +1119,22 @@ contains
         staggerLoc=ESMF_STAGGERLOC_CORNER_VFACE
      else 
         if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-           " - only Grids of dimension 2 or 3 may be used as a background grid ", &
-            ESMF_CONTEXT, rc)) return
+           msg=" - only Grids of dimension 2 or 3 may be used as a background grid ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
      endif
 
      ! Convert Grid to Mesh
      mesh=ESMF_GridToMesh(background, staggerLoc, 0, maskValues=maskValues, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
      ! Create new locstream from Background Mesh
      ESMF_LocStreamCreateByBkgGrid=ESMF_LocStreamCreate(locstream, name, coordKeyNames, &
                  mesh, unmappedAction, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
       
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1232,8 +1232,8 @@ contains
       ! Currently ESMF_UNMAPPEDACTION_IGNORE not implemented here
       if (localunmappedAction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
         if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
-           " - ESMF_UNMAPPEDACTION_IGNORE option currently not implemented ", &
-            ESMF_CONTEXT, rc)) return
+           msg=" - ESMF_UNMAPPEDACTION_IGNORE option currently not implemented ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
 
@@ -1253,25 +1253,25 @@ contains
                                      rc=localrc)      
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Allocate memory for points
       allocate(pntList(pntDim*pntCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating pntList", &
-                                     ESMF_CONTEXT, rc)) return   
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return   
 
       ! Allocate memory for pets
       allocate(petList(pntCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating pntList", &
-                                     ESMF_CONTEXT, rc)) return   
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return   
 
       ! Get Points 
       call ESMF_LocStreamGetPntList(locstream, coordKeyNames, pntDim, &
               pntCount, pntList, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Find out where points lie on Mesh
@@ -1281,7 +1281,7 @@ contains
 
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Can now get rid of pntList
       deallocate(pntList)
@@ -1292,7 +1292,7 @@ contains
                                   petList, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
     
      ! Can now get rid of pntList
       deallocate(petList)
@@ -1365,11 +1365,11 @@ contains
       call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       if (dimCount .ne. 1) then
          if (ESMF_LogFoundError(ESMF_RC_ARG_RANK, &
-                           " - DistGrid must be 1D", &
-                                      ESMF_CONTEXT, rc)) return
+                           msg=" - DistGrid must be 1D", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! Set defaults
@@ -1392,8 +1392,8 @@ contains
 
       ! allocate LocStream type
       allocate(lstypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating LocStream type object", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Allocate space for keys
@@ -1413,7 +1413,7 @@ contains
       call ESMF_BaseCreate(lstypep%base,"LocStream",name,0,rc=localrc)       
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Set pointer to internal locstream type
@@ -1514,8 +1514,8 @@ contains
       ! make they've given us info
       if (numDEs .eq. 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-              "- countsPerDE is of length 0", & 
-              ESMF_CONTEXT, rc) 
+              msg="- countsPerDE is of length 0", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
           return
       endif
 
@@ -1525,8 +1525,8 @@ contains
      ! Setup DistGrid
      !! setup deBlockList
       allocate(deBlockList(1,2,numDEs), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating deBlockList", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating deBlockList", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       currMin=minIndexLocal
       do i=1,numDEs
            deBlockList(1,1,i)=currMin    
@@ -1542,7 +1542,7 @@ contains
                                    rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! cleanup local allocations
       deallocate(deBlockList)
@@ -1555,7 +1555,7 @@ contains
                                                                rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1630,24 +1630,24 @@ contains
       call ESMF_VMGetGlobal( vm, rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Gather localCount for each Pet
       call ESMF_VMGet( vm, localPet = localPet,                        &
                        petCount = petCount, rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       
       allocate(countsPerPet(petCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerPet", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating countsPerPet", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_VMAllGather(vm, sendData=(/localCount/),               &
                             recvData=countsPerPet, count=1, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
      ! Setup DistGrid
      !! define min and maxIndex
@@ -1656,8 +1656,8 @@ contains
 
      !! setup deBlockList
       allocate(deBlockList(1,2,petCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating deBlockList", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating deBlockList", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       currMin=1
       do i=1,petCount
            deBlockList(1,1,i)=currMin    
@@ -1673,7 +1673,7 @@ contains
                                                       rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! cleanup local allocations
       deallocate(countsPerPet)
@@ -1687,7 +1687,7 @@ contains
                                                                rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! return successfully
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1794,13 +1794,13 @@ contains
         call ESMF_VMGetGlobal(vm, rc=localrc )
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
         !! Get petCount from VM
         call ESMF_VMGet(vm, petCount=regDecompLocal, rc=localrc )
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! Create DistGrid
@@ -1812,7 +1812,7 @@ contains
                                    rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Create LocStream using CreateFromDistGrid version
@@ -1823,7 +1823,7 @@ contains
                                                          rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! return successfully
@@ -1873,8 +1873,8 @@ contains
 
       if (.not.associated(locstream%lstypep)) then 
         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-          "Uninitialized or already destroyed LocStream: lstypep unassociated", &
-          ESMF_CONTEXT, rc)
+          msg="Uninitialized or already destroyed LocStream: lstypep unassociated", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif 
 
@@ -1882,13 +1882,13 @@ contains
       call ESMF_LocStreamDestruct(locstream%lstypep, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! mark object invalid
       call ESMF_BaseSetStatus(locstream%lstypep%base, ESMF_STATUS_INVALID, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
                                 
       ! Set init status to indicate structure has been destroyed
       ESMF_INIT_SET_DELETED(locstream)
@@ -1937,7 +1937,7 @@ contains
       call ESMF_BaseGetStatus(lstypep%base, status, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
         
       if (status .eq. ESMF_STATUS_READY) then  
         
@@ -1947,7 +1947,7 @@ contains
              call ESMF_ArrayDestroy(lstypep%keys(i), rc=localrc)       
              if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         enddo
 
@@ -1958,7 +1958,7 @@ contains
          call ESMF_DistGridDestroy(lstypep%distgrid, rc=localrc)       
          if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         ! Deallocate space for key data (if its been allocated)
@@ -2056,8 +2056,8 @@ contains
     if (present(keyNames)) then
        if (size(keyNames) .lt. lstypep%keyCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-              "- keyNames array too short", & 
-              ESMF_CONTEXT, rc) 
+              msg="- keyNames array too short", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
 
@@ -2087,7 +2087,7 @@ contains
         call c_ESMC_GetName(lstypep%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2154,8 +2154,8 @@ contains
    ! If nothing found return error
    if (keyIndex==0) then
       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-            " - keyName not found in this LocStream", &
-            ESMF_CONTEXT, rc)) return
+            msg=" - keyName not found in this LocStream", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
    ! Get Array
@@ -2252,21 +2252,21 @@ contains
  !if (localDeCount < 0) then 
  !   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  !          "- Negative number of localDeCount prohibits request", & 
- !          ESMF_CONTEXT, rc) 
+ !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE>=localDeCount) then 
  !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  !          "- localDE too big", & 
- !          ESMF_CONTEXT, rc) 
+ !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE<0) then 
  !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  !          "- localDE can't be less than 0", & 
- !          ESMF_CONTEXT, rc) 
+ !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
 
@@ -2358,8 +2358,8 @@ end subroutine ESMF_LocStreamGetKeyBounds
    ! If nothing found return error
    if (keyIndex==0) then
       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-            " - keyName not found in this LocStream", &
-            ESMF_CONTEXT, rc)) return
+            msg=" - keyName not found in this LocStream", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
    ! Get Info
@@ -2577,29 +2577,29 @@ end subroutine ESMF_LocStreamGetKeyBounds
  ! Check consistency  of localDE
  if (localDeCount < 0) then 
     call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-           "- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rc) 
+           msg="- Negative number of localDeCount prohibits request", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDeCount == 0) then 
     call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-           "- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDeCount == 0 prohibits request", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif
  
  if (localDE>=localDeCount) then 
     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- localDE too big", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDE too big", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDE<0) then 
     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDE can't be less than 0", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
@@ -2743,29 +2743,29 @@ end subroutine ESMF_LocStreamGetKeyI4
  ! Check consistency  of localDE
  if (localDeCount < 0) then 
     call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-           "- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rc) 
+           msg="- Negative number of localDeCount prohibits request", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDeCount == 0) then 
     call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-           "- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDeCount == 0 prohibits request", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif
  
  if (localDE>=localDeCount) then 
     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- localDE too big", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDE too big", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDE<0) then 
     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDE can't be less than 0", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
@@ -2910,29 +2910,29 @@ end subroutine ESMF_LocStreamGetKeyR4
  ! Check consistency  of localDE
  if (localDeCount < 0) then 
     call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-           "- Negative number of localDeCount prohibits request", & 
-           ESMF_CONTEXT, rc) 
+           msg="- Negative number of localDeCount prohibits request", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDeCount == 0) then 
     call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-           "- localDeCount == 0 prohibits request", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDeCount == 0 prohibits request", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif
  
  if (localDE>=localDeCount) then 
     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- localDE too big", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDE too big", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDE<0) then 
     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- localDE can't be less than 0", & 
-           ESMF_CONTEXT, rc) 
+           msg="- localDE can't be less than 0", & 
+           ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
@@ -3042,21 +3042,21 @@ end subroutine ESMF_LocStreamGetKeyR8
  !if (localDeCount < 0) then 
  !   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
  !          "- Negative number of localDeCount prohibits request", & 
- !          ESMF_CONTEXT, rc) 
+ !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE>=localDeCount) then 
  !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  !          "- localDE too big", & 
- !          ESMF_CONTEXT, rc) 
+ !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE<0) then 
  !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
  !          "- localDE can't be less than 0", & 
- !          ESMF_CONTEXT, rc) 
+ !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
 
@@ -3253,7 +3253,7 @@ end subroutine ESMF_LocStreamGetBounds
         call c_ESMC_GetName(lstypep%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         write(*, *)  "Name =     '",  trim(name), "'" 
         write(*, *)  "KeyCount =",lstypep%keyCount
@@ -3341,21 +3341,21 @@ end subroutine ESMF_LocStreamGetBounds
       attreconflag, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
      ! Serialize Distgrid
      call c_ESMC_DistgridSerialize(lstypep%distgrid, buffer, length, offset, &
                                  linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Serialize other locstream items
       call c_ESMC_LocStreamSerialize(lstypep%indexflag, lstypep%keyCount, &
               buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Serialize locstream key info
       do i=1,lstypep%keyCount
@@ -3367,14 +3367,14 @@ end subroutine ESMF_LocStreamGetBounds
                  buffer, length, offset, linquireflag, localrc)
          if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
          ! Serialize key Array
          call c_ESMC_ArraySerialize(lstypep%keys(i), buffer, length, offset, &
           attreconflag, linquireflag, localrc)
          if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       enddo
 
@@ -3432,8 +3432,8 @@ end subroutine ESMF_LocStreamGetBounds
 
       ! allocate LocStream type
       allocate(lstypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating LocStream type object", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating LocStream type object", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
      ! Deserialize Base
      attreconflag = ESMF_ATTRECONCILE_OFF
@@ -3441,24 +3441,24 @@ end subroutine ESMF_LocStreamGetBounds
       attreconflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_BaseSetInitCreated(lstypep%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      ! Deserialize Distgrid
      call c_ESMC_DistGridDeserialize(lstypep%distgrid, buffer, offset, localrc)
      if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_DistGridSetInitCreated(lstypep%distgrid, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Deserialize other locstream items
@@ -3466,25 +3466,25 @@ end subroutine ESMF_LocStreamGetBounds
               buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Allocate arrays for names, etc.
       allocate (lstypep%keyNames(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, " Allocating KeyNames", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating KeyNames", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       allocate (lstypep%keyUnits(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, " Allocating units", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating units", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       allocate (lstypep%keyLongNames(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, " Allocating longNames", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating longNames", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       allocate( lstypep%keys(lstypep%keyCount), stat=localrc )  ! Array of keys
-      if (ESMF_LogFoundAllocError(localrc, " Allocating keys", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       allocate( lstypep%destroyKeys(lstypep%keyCount), stat=localrc )  ! Array of keys
-      if (ESMF_LogFoundAllocError(localrc, " Allocating keys", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Serialize locstream key info
       do i=1,lstypep%keyCount
@@ -3496,19 +3496,19 @@ end subroutine ESMF_LocStreamGetBounds
                  buffer, offset, localrc)
          if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
          ! Deserialize key Array
          call c_ESMC_ArrayDeserialize(lstypep%keys(i), buffer, offset, &
           attreconflag, localrc)
          if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
          call ESMF_ArraySetInitCreated(lstypep%keys(i), rc=localrc)
          if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       enddo
 
@@ -3787,14 +3787,14 @@ end subroutine ESMF_LocStreamGetBounds
 
       if (igridIn%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
         if ( ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                   "LocStream object not location stream", &
-                                   ESMF_CONTEXT, rc) ) return
+                                   msg="LocStream object not location stream", &
+                                   ESMF_CONTEXT, rcToReturn=rc) ) return
         return
       endif
 
 ! check grid status
       if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
-        call ESMF_LogWrite("trying to copy an uninitialized igrid", &
+        call ESMF_LogWrite(msg="trying to copy an uninitialized igrid", &
                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
@@ -3807,13 +3807,13 @@ end subroutine ESMF_LocStreamGetBounds
 
       allocate(igrid, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, "Allocating LocStream object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize igrid internals.
       call ESMF_LocStreamConstructNew(igrid, name, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_InternDGGetDELayout(igridIn%ptr%internDGs(1)%ptr, delayout, &
                                     localrc)
@@ -3835,7 +3835,7 @@ end subroutine ESMF_LocStreamGetBounds
       lsIn => igridIn%ptr%igridSpecific%locStream
       igrid%igridSpecific%locStream => ESMF_LSConstructCopy(lsIn,localrc)
       if (ESMF_LogFoundAllocError(localrc, "locStream",              &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       ls => igrid%igridSpecific%locStream
 
 !
@@ -3847,7 +3847,7 @@ end subroutine ESMF_LocStreamGetBounds
           ls%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
           if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
       enddo
 
@@ -3863,14 +3863,14 @@ end subroutine ESMF_LocStreamGetBounds
                                       (/1/), ls%dist, rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! now that it's created, add the interndg to the igrid
       call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
 
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
       igrid%igridStatus  = ESMF_IGRID_STATUS_READY
@@ -4030,7 +4030,7 @@ end subroutine ESMF_LocStreamGetBounds
       if (igridIn%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
         if ( ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                    "LocStream object not location stream", &
-                                   ESMF_CONTEXT, rc) ) return
+                                   ESMF_CONTEXT, rcToReturn=rc) ) return
         return
       endif
 
@@ -4048,13 +4048,13 @@ end subroutine ESMF_LocStreamGetBounds
 
       allocate(igrid, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, "Allocating LocStream object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize igrid internals.
       call ESMF_LocStreamConstructNew(igrid, name, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_LocStreamGetDELayout(igridIn, delayout, rc=localrc)
 
@@ -4075,7 +4075,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
       igrid%igridSpecific%locStream => ESMF_LSConstructCopy(lsIn,localrc)
       if (ESMF_LogFoundAllocError(localrc, "locStream",              &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       ls => igrid%igridSpecific%locStream
 
       allocate( ls%dist( size(lsIn%dist) ) )
@@ -4088,7 +4088,7 @@ end subroutine ESMF_LocStreamGetBounds
         nLocalActive = lsIn%nLocalActive 
         allocate ( selected(nLocalActive), stat=localrc )
         if (ESMF_LogFoundAllocError(localrc, "locStream",              &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 !  All data are selected to begin with
 !  -----------------------------------
@@ -4102,17 +4102,17 @@ end subroutine ESMF_LocStreamGetBounds
           if ( i > lsIn%keyCount ) then
             dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                           "TOO MANY KEYS SPECIFIED", &
-                                          ESMF_CONTEXT, rc)
+                                          ESMF_CONTEXT, rcToReturn=rc)
           endif
           call ESMF_StripKey( string, key )
 
           call ESMF_LSGetLocalArrayKey(lsIn, key, lArray, keyLen, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
           if ( keyLen /= lsIn%nLocalActive ) then
             dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                           "size of array does not match", &
-                                          ESMF_CONTEXT, rc)
+                                          ESMF_CONTEXT, rcToReturn=rc)
           endif
 
 !
@@ -4153,7 +4153,7 @@ end subroutine ESMF_LocStreamGetBounds
             ls%keys(i) = ESMF_LocalArraySelect( lsIn%keys(i), selected, &
                                                 rc=localrc )
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         enddo
 
@@ -4164,24 +4164,24 @@ end subroutine ESMF_LocStreamGetBounds
         call ESMF_DELayoutGet(delayout, vm=vm, deCount=deCount,         &
                               oneToOneFlag=otoFlag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,           &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (otoflag .ne. ESMF_TRUE) then
           dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                         "DELAYOUT not one-to-one", &
-                                        ESMF_CONTEXT, rc)
+                                        ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
         call ESMF_VMGet( vm, localPet = localPet,                       &
                          petCount = petCount, rc=localrc )
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,           &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         if ( petCount /= deCount ) then
           dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD,                &
                                         "PETs to DEs not one-to-one",   &
-                                        ESMF_CONTEXT, rc)
+                                        ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
@@ -4190,14 +4190,14 @@ end subroutine ESMF_LocStreamGetBounds
         call ESMF_VMAllGather(vm, sendData=(/ls%nLocalActive/),         &
                               recvData=ls%dist, count=1, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       
         counts(1) = sum( ls%dist(1:deCount) )
         if ( counts(1) > ls%maxGlobal ) then
           dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                         "TOO MANY TOTAL LOCATIONS", &
-                                        ESMF_CONTEXT, rc)
+                                        ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
@@ -4211,10 +4211,10 @@ end subroutine ESMF_LocStreamGetBounds
           if ( ptr /= ESMF_NULL_POINTER ) then
             ls%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_LocalArrayGet( lsIn%keys(k), kind = keyKind, rc=localrc )
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
             localkind = keyKind%dkind
           endif
         enddo
@@ -4224,7 +4224,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
         call ESMF_LSSortLocal( ls, keyNames, rc=localrc )
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       endif
 
@@ -4236,14 +4236,14 @@ end subroutine ESMF_LocStreamGetBounds
                                       (/1/), ls%dist, rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! now that it's created, add the interndg to the igrid
       call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
 
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
       igrid%igridStatus  = ESMF_IGRID_STATUS_READY
@@ -4323,13 +4323,13 @@ end subroutine ESMF_LocStreamGetBounds
 
       allocate(igrid, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, "Allocating LocStream object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize igrid internals.
       call ESMF_LocStreamConstructNew(igrid, name, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 !
 ! Compare key names to see if the location streams are compatible
 !
@@ -4349,11 +4349,11 @@ end subroutine ESMF_LocStreamGetBounds
       lsIn => igridsIn(1)%ptr%igridSpecific%locStream 
       igrid%igridSpecific%locStream => ESMF_LSConstructCopy( lsIn, localrc )
       if (ESMF_LogFoundAllocError(localrc, "locStream", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_InternDGGetDELayout(igridsIn(1)%ptr%internDGs(1)%ptr, &
                                     delayout, localrc)
       if (ESMF_LogFoundAllocError(localrc, "locStream", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ls => igrid%igridSpecific%locStream 
 
@@ -4379,7 +4379,7 @@ end subroutine ESMF_LocStreamGetBounds
         if ( keyCount /= keyCountIn ) then
           if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
                                     "LocStream array inconsistent", &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
 !
@@ -4412,7 +4412,7 @@ end subroutine ESMF_LocStreamGetBounds
           call ESMF_LocalArrayGet( lsIn%keys(k), kind = keyKind, rc=localrc )
           if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
           localkind = keyKind%dkind
 
           select case (localkind)
@@ -4425,7 +4425,7 @@ end subroutine ESMF_LocStreamGetBounds
                                              ESMF_DATA_REF, localrc )
                 if (ESMF_LogFoundError(localrc, &
                                           ESMF_ERR_PASSTHRU, &
-                                          ESMF_CONTEXT, rc)) return
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
                 do i=1, lsIn%nLocalActive
                   count = count + 1
                   intArrayNew(count) = intPtr(i)     ! Copy key
@@ -4446,7 +4446,7 @@ end subroutine ESMF_LocStreamGetBounds
                                              ESMF_DATA_REF, localrc )
                 if (ESMF_LogFoundError(localrc, &
                                           ESMF_ERR_PASSTHRU, &
-                                          ESMF_CONTEXT, rc)) return
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
                 
                 do i=1, lsIn%nLocalActive
                   count = count + 1
@@ -4457,12 +4457,12 @@ end subroutine ESMF_LocStreamGetBounds
                                                  ESMF_DATA_COPY, localrc)
               if (ESMF_LogFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
-                                        ESMF_CONTEXT, rc)) return
+                                        ESMF_CONTEXT, rcToReturn=rc)) return
 
             case default
               if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
                                         "Unsupported Key Type", &
-                                        ESMF_CONTEXT, rc) ) return
+                                        ESMF_CONTEXT, rcToReturn=rc) ) return
           end select
 
         endif
@@ -4479,14 +4479,14 @@ end subroutine ESMF_LocStreamGetBounds
                                       (/1/), ls%dist, rc=localrc )
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! now that it's created, add the interndg to the igrid
       call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
 
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
       igrid%igridStatus  = ESMF_IGRID_STATUS_READY
@@ -4618,7 +4618,7 @@ end subroutine ESMF_LocStreamGetBounds
       if (igridIn%ptr%horzLocStreamType /= ESMF_IGRID_TYPE_LOCATIONSTREAM ) then
         if ( ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                    "LocStream object not location stream", &
-                                   ESMF_CONTEXT, rc) ) return
+                                   ESMF_CONTEXT, rcToReturn=rc) ) return
         return
       endif
 
@@ -4636,12 +4636,12 @@ end subroutine ESMF_LocStreamGetBounds
 
       allocate(igrid, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, "Allocating LocStream object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize igrid internals.
       call ESMF_LocStreamConstructNew(igrid, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 !
 ! Compare key names to see if the location streams are compatible
@@ -4658,7 +4658,7 @@ end subroutine ESMF_LocStreamGetBounds
       lsIn => igridIn%ptr%igridSpecific%locStream 
       igrid%igridSpecific%locStream => ESMF_LSConstructCopy( lsIn, localrc )
       if (ESMF_LogFoundAllocError(localrc, "locStream", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 !     To bind with ESMF:  allocate the specific igrid, bind to lsOut
       lsOut => igrid%igridSpecific%locStream
@@ -4672,14 +4672,14 @@ end subroutine ESMF_LocStreamGetBounds
           lsOut%keys(k) = ESMF_LocalArrayCreate( lsIn%keys(k), localrc )
           if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
       enddo
 
 !
       call ESMF_LocStreamGetDELayout(igridIn, delayout, rc=localrc)
       if (ESMF_LogFoundAllocError(localrc, "locStream", &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 !
 ! Distribution part of Create
@@ -4687,12 +4687,12 @@ end subroutine ESMF_LocStreamGetBounds
                             oneToOneFlag=otoFlag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (otoflag .ne. ESMF_TRUE) then
         dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                       "DELAYOUT not one-to-one", &
-                                      ESMF_CONTEXT, rc)
+                                      ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
 
@@ -4714,14 +4714,14 @@ end subroutine ESMF_LocStreamGetBounds
 !
         call ESMF_LSGetLocalArrayKey(lsOut, primaryKey, lArray, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate( indx(nLocalActive) )
         call ESMF_MSIndexSet( nLocalActive, indx )
         call ESMF_MSIndexSort( indx, lArray, .false., localrc )
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 !
 ! Find the lowest and highest keys locally
@@ -4736,7 +4736,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
         call ESMF_LSRedistribute( lsOut, vm, lsOut%dist, indx, rc=localrc )
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 !
 ! Now consolidate and gather all the new local sizes
@@ -4745,13 +4745,13 @@ end subroutine ESMF_LocStreamGetBounds
         call ESMF_VMAllGather(vm, sendData=(/lsOut%nLocalActive/), &
                               recvData=lsOut%dist, count=1, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       
         counts(1) = sum( lsOut%dist(1:deCount) )
         if ( counts(1) > lsOut%maxGlobal ) then
           dummy = ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                         "TOO MANY TOTAL LOCATIONS", &
-                                        ESMF_CONTEXT, rc)
+                                        ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
@@ -4761,13 +4761,13 @@ end subroutine ESMF_LocStreamGetBounds
                                         (/1/), lsOut%dist, rc=localrc )
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! now that it's created, add the interndg to the igrid
         call ESMF_LocStreamAddInternDG(igrid, internDG, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate( indx )
 
       endif
@@ -4777,7 +4777,7 @@ end subroutine ESMF_LocStreamGetBounds
 !
       call ESMF_LSSortLocal( lsOut, sortKeys, localrc )
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       igrid%igridStorage = ESMF_IGRID_STORAGE_ARBITRARY
       igrid%igridStatus  = ESMF_IGRID_STATUS_READY
@@ -4816,7 +4816,7 @@ end subroutine ESMF_LocStreamGetBounds
         call ESMF_LocalArrayGet( lArray, kind = keyKind, rc = localrc )
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
         localkind = keyKind%dkind
 
         select case (localkind)
@@ -4825,7 +4825,7 @@ end subroutine ESMF_LocStreamGetBounds
                                          ESMF_DATA_REF, localrc )
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
             allocate( resultI4(deCount-1), partitionI4(deCount-1) )
             partitionI4 = 0
@@ -4859,7 +4859,7 @@ end subroutine ESMF_LocStreamGetBounds
                                          ESMF_DATA_REF, localrc )
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
             allocate( resultR4(deCount-1), partitionR4(deCount-1) )
@@ -4893,7 +4893,7 @@ end subroutine ESMF_LocStreamGetBounds
                                      ESMF_DATA_REF, localrc )
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) return
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
             allocate( resultR8(deCount-1), partitionR8(deCount-1) )
             partitionR8 = 0.0
@@ -4924,7 +4924,7 @@ end subroutine ESMF_LocStreamGetBounds
           case default
            if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
                                      "Unsupported Key Type", &
-                                     ESMF_CONTEXT, rc) ) return
+                                     ESMF_CONTEXT, rcToReturn=rc) ) return
         endselect
       endif
       
@@ -5023,30 +5023,30 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Allocate stuff for AllToAllV 
      allocate(sndCounts(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndCounts", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndCounts", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
      allocate(sndOffsets(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndOffsets", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndOffsets", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
      allocate(rcvCounts(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating rcvCounts", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating rcvCounts", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
      allocate(rcvOffsets(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndCounts", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndCounts", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
      ! Allocate first set of buffers for commmunicating sizes
      allocate(sndSizes(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndCounts", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndCounts", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
      allocate(rcvSizes(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndCounts", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndCounts", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
      ! Count the number going to each Pet
@@ -5097,8 +5097,8 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Allocate space for seqInd
      allocate(seqInd(petListCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating pntList", &
-                                     ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
      ! Get number of localDEs
@@ -5121,8 +5121,8 @@ end subroutine ESMF_LocStreamGetBounds
         ! Make sure we aren't going to overrun memory
         if ((pos+seqCount-1) >petListCount) then
 	     if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-                 " - Too many seq indices in locstream disgrid", &
-                ESMF_CONTEXT, rc)) return               
+                 msg=" - Too many seq indices in locstream disgrid", &
+                ESMF_CONTEXT, rcToReturn=rc)) return               
 	endif
 
         ! Get list of seqindices
@@ -5151,13 +5151,13 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Allocate postions for seqInd data
      allocate(sndPos(petCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndCounts", &
-         ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndCounts", &
+         ESMF_CONTEXT, rcToReturn=rc)) return         
 
      ! Allocate sndSeqInd
      allocate(sndSeqInd(petListCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating sndSeqInd", &
-                                     ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndSeqInd", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
      ! Reset positions
@@ -5188,8 +5188,8 @@ end subroutine ESMF_LocStreamGetBounds
 
      ! Allocate rcvSeqInd
      allocate(rcvSeqInd(newCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating rcvSeqInd", &
-                                     ESMF_CONTEXT, rc)) return         
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating rcvSeqInd", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
 
@@ -5225,7 +5225,7 @@ end subroutine ESMF_LocStreamGetBounds
                    distgrid=newDistgrid, destroyDistgrid=.true., rc=localrc)
      if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return     
+        ESMF_CONTEXT, rcToReturn=rc)) return     
 
 
      ! Return success
@@ -5303,7 +5303,7 @@ end subroutine ESMF_LocStreamGetBounds
                 destroyDistgrid=destroyDistgrid, indexflag=oldLSTypep%indexFlag, rc=localrc) 
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return     
+          ESMF_CONTEXT, rcToReturn=rc)) return     
 
 
       ! Add keys to new Locstream
@@ -5316,13 +5316,13 @@ end subroutine ESMF_LocStreamGetBounds
          call ESMF_ArrayGet(oldLStypep%keys(i), typekind=keyTypeKind, rc=localrc)
          if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
          call ESMF_LocStreamAddKey(newLocStream, oldLstypep%keyNames(i), keyTypeKind, &
                        oldLstypep%keyUnits(i), oldLstypep%keyLongNames(i), rc=localrc)
          if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
       enddo
 
 
@@ -5341,12 +5341,12 @@ end subroutine ESMF_LocStreamGetBounds
       oldAB=ESMF_ArrayBundleCreate(oldLStypep%keys, rc=localrc)      
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
       newAB=ESMF_ArrayBundleCreate(newLStypep%keys, rc=localrc)      
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
 
       ! Setup for redist
@@ -5354,31 +5354,31 @@ end subroutine ESMF_LocStreamGetBounds
              routehandle=routeHandle, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
       ! Do redist
       call ESMF_ArrayBundleRedist(srcArrayBundle=oldAB, dstArrayBundle=newAB, &
             routehandle=routeHandle, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
       ! Get rid of routehandle
       call  ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
       ! Get rid of ArrayBundles
       call ESMF_ArrayBundleDestroy(oldAB, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
       call ESMF_ArrayBundleDestroy(newAB, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return     
+             ESMF_CONTEXT, rcToReturn=rc)) return     
 
      ! Output new locstream
      ESMF_LocStreamCreateFromNewDG=newLocStream
@@ -5528,8 +5528,8 @@ end subroutine ESMF_LocStreamGetBounds
           ! make sure that we aren't overwriting our array
        	  if (dim >3) then
 	     if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-                 " - too many coordinate key names", &
-                ESMF_CONTEXT, rc)) return
+                 msg=" - too many coordinate key names", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
 	  ! Pull out coordinate name
@@ -5542,8 +5542,8 @@ end subroutine ESMF_LocStreamGetBounds
        ! check pntDim
        if (pntDim /= dim-1) then
 	  if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-           " - number of coordinate key names doesn't match pnt dimension", &
-           ESMF_CONTEXT, rc)) return
+           msg=" - number of coordinate key names doesn't match pnt dimension", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
 
@@ -5614,8 +5614,8 @@ end subroutine ESMF_LocStreamGetBounds
 
 	else 
 	  if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-           " - unsupported coordinate data type", &
-           ESMF_CONTEXT, rc)) return
+           msg=" - unsupported coordinate data type", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        endif
      enddo
      
@@ -5695,13 +5695,13 @@ end module ESMF_LocStreamMod
     call ESMF_LocStreamDestruct(ls%lstypep, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! deallocate actual LocStreamType allocation      
     if (associated(ls%lstypep)) then
       deallocate(ls%lstypep, stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Deallocating LocStream", &
-        ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Deallocating LocStream", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     nullify(ls%lstypep)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.21 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.22 2011/02/23 19:53:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,19 +104,19 @@ module ESMF_LocalArrayGetMod
       call ESMF_LocalArrayGet(localarray, typekind=typekind, rank=rank, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rc)) return @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
       ! check typekind match @\
       if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-          "- farrayPtr typekind does not match LocalArray typekind", & @\
-          ESMF_CONTEXT, rc) @\
+          msg="- farrayPtr typekind does not match LocalArray typekind", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       ! check rank match @\
       if (rank /= mrank) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-          "- farrayPtr rank does not match LocalArray rank", & @\
-          ESMF_CONTEXT, rc) @\
+          msg="- farrayPtr rank does not match LocalArray rank", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -124,30 +124,30 @@ module ESMF_LocalArrayGetMod
       call c_ESMC_LocalArrayGetFPtr(localarray, wrap, localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rc)) return @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       ! Allocate a new buffer if requested and return a copy @\
       if (copyreq) then @\
         call c_ESMC_LocalArrayGetLbounds(localarray, lb, localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, rc)) return @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_LocalArrayGetUbounds(localarray, ub, localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
-          ESMF_CONTEXT, rc)) return @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         ! Macro mrng @\
         ! is a macro that has correct construction of lb and ub elements @\
         allocate(lp(mrng), stat=localrc) @\
         if (ESMF_LogFoundAllocError(localrc, & @\
-          "local data space", & @\
-          ESMF_CONTEXT, rc)) return @\
+          msg="local data space", & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         ! test if incoming pointer was associated @\
         if (associated(farrayPtr)) then @\
           if (size(farrayPtr) .ne. size(lp)) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-              "- farrayPtr was associated but of incorrect size", & @\
-              ESMF_CONTEXT, rc) @\
+              msg="- farrayPtr was associated but of incorrect size", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
           ! this must do a contents assignment to perform a copy operation @\
@@ -207,7 +207,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.21 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.22 2011/02/23 19:53:02 w6ws Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -336,8 +336,8 @@ contains
     if (present(counts)) then
       if (size(counts) < lrank) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          "- size of counts argument is smaller than rank", &
-          ESMF_CONTEXT, rc)
+          msg="- size of counts argument is smaller than rank", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       call c_esmc_localarraygetcounts(localarray, counts, localrc)
@@ -349,8 +349,8 @@ contains
     if (present(lbounds)) then
       if (size(lbounds) < lrank) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          "- size of lbounds argument is smaller than rank", &
-          ESMF_CONTEXT, rc)
+          msg="- size of lbounds argument is smaller than rank", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       call c_ESMC_LocalArrayGetLbounds(localarray, lbounds, localrc)
@@ -362,8 +362,8 @@ contains
     if (present(ubounds)) then
       if (size(ubounds) < lrank) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          "- size of ubounds argument is smaller than rank", &
-          ESMF_CONTEXT, rc)
+          msg="- size of ubounds argument is smaller than rank", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       call c_ESMC_LocalArrayGetUbounds(localarray, ubounds, localrc)

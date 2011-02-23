@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.15 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.16 2011/02/23 19:53:02 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::LocalArray::create(*tk, *rank, *oflag, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -77,7 +77,7 @@ extern "C" {
     }
     // call into C++
     *larrayOut = ESMCI::LocalArray::create(*ptr, NULL, NULL, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -115,7 +115,7 @@ extern "C" {
     //TODO: replace this by multiple set() calls.
     localrc = (*ptr)->setInfo(fptr, XD base, counts, lbounds, ubounds, offsets,
       cf, df);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -228,7 +228,7 @@ extern "C" {
       return;
     }
     localrc = ESMCI::LocalArray::destroy(*ptr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -282,7 +282,7 @@ extern "C" {
       return;
     }
     localrc = (*ptr)->setFortranDopev(fptr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -302,7 +302,7 @@ extern "C" {
       return;
     }
     localrc = (*ptr)->getFortranDopev(fptr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -322,7 +322,7 @@ extern "C" {
       return;
     }
     localrc = (*ptr)->forceFortranPtr(XD base);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -390,7 +390,7 @@ extern "C" {
       temp[clen] = '\0';
     }
     localrc = (*ptr)->print(temp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     if (temp) delete[] temp;
     // return successfully
@@ -427,7 +427,7 @@ extern "C" {
       filetemp[flen] = '\0';
     }
     localrc = (*ptr)->write(opttemp, filetemp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     if (opttemp) delete[] opttemp;
     if (filetemp) delete[] filetemp;

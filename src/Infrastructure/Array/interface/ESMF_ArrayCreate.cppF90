@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.69 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.70 2011/02/23 19:56:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.69 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.70 2011/02/23 19:56:16 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -721,8 +721,8 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 @\
     if (dimCount /= 1) then @\
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
-        "- this ArrayCreate() interface requires 1D DistGrid", & @\
-        ESMF_CONTEXT, rc) @\
+        msg="- this ArrayCreate() interface requires 1D DistGrid", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
       return @\
     endif @\
 @\
@@ -733,8 +733,8 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 @\
     if (localDeCount /= 1) then @\
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
-        "- this ArrayCreate() interface only supports 1DE/PETs", & @\
-        ESMF_CONTEXT, rc) @\
+        msg="- this ArrayCreate() interface only supports 1DE/PETs", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
       return @\
     endif @\
 @\
@@ -965,8 +965,8 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
     ! Check that indexflag does not specify mode that is not supported here @\
     if (indexflag==ESMF_INDEX_USER) then @\
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
-        "- ESMF_INDEX_USER not supported as input value", & @\
-        ESMF_CONTEXT, rc) @\
+        msg="- ESMF_INDEX_USER not supported as input value", & @\
+        ESMF_CONTEXT, rcToReturn=rc) @\
       return @\
     endif @\
 @\
@@ -1218,7 +1218,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      if (indexflag==ESMF_INDEX_USER) then
 !        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
 !          "- ESMF_INDEX_USER not supported as input value", &
-!          ESMF_CONTEXT, rc)
+!          ESMF_CONTEXT, rcToReturn=rc)
 !        return
 !      endif
 !    endif
@@ -1444,8 +1444,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     if (dimCount /= 1) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        "- this ArrayCreate() interface requires 1D DistGrid", &
-        ESMF_CONTEXT, rc)
+        msg="- this ArrayCreate() interface requires 1D DistGrid", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1456,8 +1456,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     if (localDeCount /= 1) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        "- this ArrayCreate() interface only supports 1DE/PETs", &
-        ESMF_CONTEXT, rc)
+        msg="- this ArrayCreate() interface only supports 1DE/PETs", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1938,8 +1938,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(indexflag)) then
       if (indexflag==ESMF_INDEX_USER) then
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          "- ESMF_INDEX_USER not supported as input value", &
-          ESMF_CONTEXT, rc)
+          msg="- ESMF_INDEX_USER not supported as input value", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -2145,8 +2145,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     if (dimCount /= 1) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        "- this ArrayCreate() interface requires 1D DistGrid", &
-        ESMF_CONTEXT, rc)
+        msg="- this ArrayCreate() interface requires 1D DistGrid", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -2157,8 +2157,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       
     if (localDeCount /= 1) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-        "- this ArrayCreate() interface only supports 1DE/PETs", &
-        ESMF_CONTEXT, rc)
+        msg="- this ArrayCreate() interface only supports 1DE/PETs", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -2716,8 +2716,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         call ESMF_LocalArrayGet(localarray, rank=laRank, rc=localrc)
         if (len_haloWidth/=laRank) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-            "size of haloWidth array does not match rank of LocalArray", &
-            ESMF_CONTEXT, rc)) return
+            msg="size of haloWidth array does not match rank of LocalArray", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
       endif
     else

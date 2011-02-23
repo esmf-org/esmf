@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.51 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_RHandle.F90,v 1.52 2011/02/23 19:54:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.51 2011/01/05 20:05:45 svasquez Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.52 2011/02/23 19:54:43 w6ws Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -221,7 +221,7 @@ contains
     call c_ESMC_RouteHandleCreate(rhandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return values
     ESMF_RouteHandleCreate = rhandle
@@ -281,7 +281,7 @@ contains
     call c_ESMC_RouteHandleDestroy(rhandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! nullify pointer
     rhandle%this = ESMF_NULL_POINTER
@@ -379,7 +379,7 @@ contains
     call c_ESMC_RouteHandlePrepXXE(rhandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -433,7 +433,7 @@ contains
       rraShift, vectorLengthShift, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -487,7 +487,7 @@ contains
       call c_ESMC_RouteHandleGetType(rhandle, htype, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(name)) then
@@ -549,7 +549,7 @@ contains
       call c_ESMC_RouteHandleSetType(rhandle, htype, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(name)) then
@@ -675,7 +675,7 @@ contains
 
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS

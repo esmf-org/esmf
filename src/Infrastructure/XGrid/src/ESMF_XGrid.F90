@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.17 2011/01/20 20:55:57 rokuingh Exp $
+! $Id: ESMF_XGrid.F90,v 1.18 2011/02/23 20:05:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.17 2011/01/20 20:55:57 rokuingh Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.18 2011/02/23 20:05:29 w6ws Exp $'
 
 !==============================================================================
 !
@@ -687,8 +687,8 @@ contains
 
       if (.not.associated(xgrid%xgtypep)) then 
          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-            "Uninitialized or already destroyed XGrid: xgtypep unassociated", &
-             ESMF_CONTEXT, rc)
+            msg="Uninitialized or already destroyed XGrid: xgtypep unassociated", &
+             ESMF_CONTEXT, rcToReturn=rc)
          return
       endif 
 
@@ -698,11 +698,11 @@ contains
       call ESMF_BaseGetStatus(xgtypep%base, xgridstatus, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
       if (xgridstatus .ne. ESMF_STATUS_READY) then
          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-            "Uninitialized or already destroyed XGrid: xgridstatus not ready", &
-             ESMF_CONTEXT, rc)
+            msg="Uninitialized or already destroyed XGrid: xgridstatus not ready", &
+             ESMF_CONTEXT, rcToReturn=rc)
          return
       endif 
 
@@ -713,8 +713,8 @@ contains
       if(associated(xgtypep%area) .and. associated(xgtypep%centroid)) then
         if(size(xgtypep%area, 1) /= size(xgtypep%centroid, 1)) then
            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-             "number of area cells differs from number of centroid cells", &
-             ESMF_CONTEXT, rc)
+             msg="number of area cells differs from number of centroid cells", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
         endif
       endif
@@ -723,8 +723,8 @@ contains
         if(associated(xgtypep%distgridA)) then
           if(size(xgtypep%distgridA, 1) /= ngridA) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-               "number of distgrids on side A differs from number of Grids on side A", &
-               ESMF_CONTEXT, rc)
+               msg="number of distgrids on side A differs from number of Grids on side A", &
+               ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
         endif
@@ -733,16 +733,16 @@ contains
       if(associated(xgtypep%sparseMatA2X)) then
         if(size(xgtypep%sparseMatA2X, 1) /= ngridA) then
            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-             "number of sparseMat objects on side A differs from number of Grids on side A", &
-             ESMF_CONTEXT, rc)
+             msg="number of sparseMat objects on side A differs from number of Grids on side A", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
         endif
         do i = 1, ngridA
           if(size(xgtypep%sparseMatA2X(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatA2X(i)%factorList, 1)) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-               "number of elements in sparseMatA2X is inconsistent", &
-               ESMF_CONTEXT, rc)
+               msg="number of elements in sparseMatA2X is inconsistent", &
+               ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
         enddo
@@ -751,16 +751,16 @@ contains
       if(associated(xgtypep%sparseMatX2A)) then
         if(size(xgtypep%sparseMatX2A, 1) /= ngridA) then
            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-             "number of sparseMat objects on side A differs from number of Grids on side A", &
-             ESMF_CONTEXT, rc)
+             msg="number of sparseMat objects on side A differs from number of Grids on side A", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
         endif
         do i = 1, ngridA
           if(size(xgtypep%sparseMatX2A(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatX2A(i)%factorList, 1)) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-               "number of elements in sparseMatX2A is inconsistent", &
-               ESMF_CONTEXT, rc)
+               msg="number of elements in sparseMatX2A is inconsistent", &
+               ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
         enddo
@@ -771,8 +771,8 @@ contains
         if(associated(xgtypep%distgridB)) then
           if(size(xgtypep%distgridB, 1) /= ngridB) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-               "number of distgrids on side B differs from number of Grids on side B", &
-               ESMF_CONTEXT, rc)
+               msg="number of distgrids on side B differs from number of Grids on side B", &
+               ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
         endif
@@ -781,16 +781,16 @@ contains
       if(associated(xgtypep%sparseMatB2X)) then
         if(size(xgtypep%sparseMatB2X, 1) /= ngridB) then
            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-             "number of sparseMat objects on side B differs from number of Grids on side B", &
-             ESMF_CONTEXT, rc)
+             msg="number of sparseMat objects on side B differs from number of Grids on side B", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
         endif
         do i = 1, ngridB
           if(size(xgtypep%sparseMatB2X(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatB2X(i)%factorList, 1)) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-               "number of elements in sparseMatB2X is inconsistent", &
-               ESMF_CONTEXT, rc)
+               msg="number of elements in sparseMatB2X is inconsistent", &
+               ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
         enddo
@@ -799,16 +799,16 @@ contains
       if(associated(xgtypep%sparseMatX2B)) then
         if(size(xgtypep%sparseMatX2B, 1) /= ngridB) then
            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-             "number of sparseMat objects on side B differs from number of Grids on side B", &
-             ESMF_CONTEXT, rc)
+             msg="number of sparseMat objects on side B differs from number of Grids on side B", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
         endif
         do i = 1, ngridB
           if(size(xgtypep%sparseMatX2B(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatX2B(i)%factorList, 1)) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-               "number of elements in sparseMatX2B is inconsistent", &
-               ESMF_CONTEXT, rc)
+               msg="number of elements in sparseMatX2B is inconsistent", &
+               ESMF_CONTEXT, rcToReturn=rc)
             return
           endif
         enddo
@@ -912,14 +912,14 @@ contains
                                  lattreconflag, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! serialize the balanced distgrid
       call C_ESMC_DistGridSerialize(fp%distgridM, buffer(1), length, offset, &
                                    linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rc)) return
+                               ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! set up the association status array and other meta-data
       s = 0
@@ -987,7 +987,7 @@ contains
                                  buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! serialize the rest of the XGrid members
       if(associated(fp%distgridA)) then
@@ -997,7 +997,7 @@ contains
                                          linquireflag, localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1008,7 +1008,7 @@ contains
                                          linquireflag, localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1022,7 +1022,7 @@ contains
                          rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1035,7 +1035,7 @@ contains
                          rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1048,7 +1048,7 @@ contains
                  buffer(1), length, offset, linquireflag, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountA2X)
       endif
@@ -1060,7 +1060,7 @@ contains
                  buffer(1), length, offset, linquireflag, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountX2A)
       endif
@@ -1072,7 +1072,7 @@ contains
                  buffer(1), length, offset, linquireflag, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountB2X)
       endif
@@ -1084,7 +1084,7 @@ contains
                  buffer(1), length, offset, linquireflag, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountX2B)
       endif
@@ -1162,31 +1162,31 @@ contains
       ! Shortcut to internals
       allocate(fp, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, &
-                                     "space for new XGrid object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="space for new XGrid object", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_XGridInitialize(fp, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize Base
       call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
                                  
       call ESMF_BaseSetInitCreated(fp%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize the balanced distgrid
       call C_ESMC_DistGridDeserialize(fp%distgridM, buffer(1), offset, &
                                    localrc)
       if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rc)) return
+                               ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! call into the C api first to deserialize this status array and other meta-data
       ! step 1 doesn't initialize area and centroid
@@ -1197,7 +1197,7 @@ contains
                                  buffer(1), offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! set up memory based on the association status array and other meta-data
       if(s(XG_S_DGA) == 1) allocate(fp%distgridA(ngridA))
@@ -1219,7 +1219,7 @@ contains
                                  buffer(1), offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       if(s(XG_S_SMMA2X) == 1) then
         allocate(fp%sparseMatA2X(ngridA))
@@ -1257,7 +1257,7 @@ contains
                                      localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1267,7 +1267,7 @@ contains
                                      localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1278,7 +1278,7 @@ contains
                                      rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1288,7 +1288,7 @@ contains
                                      rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
       endif
 
@@ -1301,7 +1301,7 @@ contains
                  buffer(1), offset, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountA2X)
       endif
@@ -1313,7 +1313,7 @@ contains
                  buffer(1), offset, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountX2A)
       endif
@@ -1325,7 +1325,7 @@ contains
                  buffer(1), offset, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountB2X)
       endif
@@ -1337,7 +1337,7 @@ contains
                  buffer(1), offset, localrc)
               if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
           deallocate(eleCountX2B)
       endif

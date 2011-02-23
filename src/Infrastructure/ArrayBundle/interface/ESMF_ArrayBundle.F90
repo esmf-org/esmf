@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.44 2011/02/23 19:57:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.44 2011/02/23 19:57:28 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -424,13 +424,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(arrayCount)) then
       if (arrayCount < 0) then
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          "- arrayCount must be positive", &
+          msg="- arrayCount must be positive", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       if (arrayCount > arrayCount_opt) then
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          "- arrayCount cannot be larger than size of arrayList", &
+          msg="- arrayCount cannot be larger than size of arrayList", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif

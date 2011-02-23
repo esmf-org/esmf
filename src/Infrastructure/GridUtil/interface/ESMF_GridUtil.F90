@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.22 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_GridUtil.F90,v 1.23 2011/02/23 20:01:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.22 2011/01/05 20:05:44 svasquez Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.23 2011/02/23 20:01:10 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -410,8 +410,8 @@ module ESMF_GridUtilMod
     ! Make sure indexflag is ESMF_INDEX_GLOBAL
     if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
        if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-" - Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality", &
-       ESMF_CONTEXT, rc)) return
+msg=" - Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality", &
+       ESMF_CONTEXT, rcToReturn=rc)) return
     endif 
 
     ! convert mask values 

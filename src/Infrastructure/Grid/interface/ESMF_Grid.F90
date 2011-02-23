@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.197 2011/02/23 18:53:49 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.198 2011/02/23 19:58:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.197 2011/02/23 18:53:49 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.198 2011/02/23 19:58:36 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -958,15 +958,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check for not implemented parameters
     if (present(totalLWidth)) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- totalLWidth specification not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- totalLWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(totalUWidth)) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- totalUWidth specification not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- totalUWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -975,8 +975,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	 if ((decompType == ESMF_GRID_ARBITRARY) .and. &
  	     (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	 else
 	    tmp_staggerloc=staggerloc%staggerloc
@@ -989,8 +989,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (present(staggerEdgeLWidth) .or. present(staggerEdgeUWidth) .or. &
 	    present(staggerAlign)) then
 	    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- stagger arguments should not be set for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- stagger arguments should not be set for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
 	else
 	    ! Call C++ Subroutine to do the create
@@ -1303,15 +1303,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check for not implemented parameters
     if (present(totalLWidth)) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- totalLWidth specification not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- totalLWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(totalUWidth)) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- totalUWidth specification not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- totalUWidth specification not yet implemented", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -1326,20 +1326,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (decompType == ESMF_GRID_ARBITRARY) then
        if (present(staggerEdgeLWidth) .or. present(staggerEdgeUWidth)) then
 	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerEdgeLWidth and staggerEdigeUWidth are not allowed for arbitrary grid", &
-	         ESMF_CONTEXT, rc) 
+                 msg="- staggerEdgeLWidth and staggerEdigeUWidth are not allowed for arbitrary grid", &
+	         ESMF_CONTEXT, rcToReturn=rc) 
           return
        endif
        if (present(staggerAlign)) then
 	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerAlign is not allowed for arbitrarily distributed grid", &
-  	         ESMF_CONTEXT, rc) 
+                 msg="- staggerAlign is not allowed for arbitrarily distributed grid", &
+  	         ESMF_CONTEXT, rcToReturn=rc) 
           return
        endif
        if (present(staggerloc) .and. staggerloc /= ESMF_STAGGERLOC_CENTER) then
 	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
-  	         ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
+  	         ESMF_CONTEXT, rcToReturn=rc) 
           return
        endif
 
@@ -1474,15 +1474,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check for Not Implemented options
     if (present(status)) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- status not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- status not yet implemented", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(defaultflag)) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- defaultflag not yet implemented", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- defaultflag not yet implemented", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -1562,8 +1562,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check if the grid is arbitrary
     if (decompType /= ESMF_GRID_ARBITRARY) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- ESMF_GridConvertIndex only works for arbritrarily distributed grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_GridConvertIndex only works for arbritrarily distributed grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif  
 
@@ -1575,8 +1575,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! allocate minIndex and maxIndex
     allocate(minIndex(DimCount), maxIndex(DimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndex and maxIndex", &
-                                     ESMF_CONTEXT, rc)) return 
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndex and maxIndex", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return 
  
     ! Get minIndex and maxIndex from the grid
     call ESMF_GridGetIndex(grid, minIndex= minIndex, maxIndex=maxIndex, rc=localrc)
@@ -1589,8 +1589,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (distGridDimCount > dimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- distgrid dimension has to be less than or equal to dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                   msg="- distgrid dimension has to be less than or equal to dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
         return 
      endif
 
@@ -1608,8 +1608,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check index dimension
     if (size(gridindex) /= dimCount) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-            "- gridindex dimension is different from the grid DimCount", & 
-            ESMF_CONTEXT, rc) 
+            msg="- gridindex dimension is different from the grid DimCount", & 
+            ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
 
@@ -1617,8 +1617,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i=1,dimCount
        if (gridindex(i) .lt. minIndex(i) .and. gridindex(i) > maxIndex(i)) then
 	   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-               "- gridindex is out of bound", & 
-                      ESMF_CONTEXT, rc) 
+               msg="- gridindex is out of bound", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
 	   return
        endif
     enddo
@@ -1793,8 +1793,8 @@ end subroutine ESMF_GridConvertIndex
     if ((present(ungriddedLBound) .or. present(ungriddedUBound)) .and. &
         .not. (present(ungriddedLBound) .and. present(ungriddedUBound))) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-               "- if either ungriddedBound is present both need to be", & 
-                      ESMF_CONTEXT, rc) 
+               msg="- if either ungriddedBound is present both need to be", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -1802,8 +1802,8 @@ end subroutine ESMF_GridConvertIndex
     if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
        if (size(ungriddedLBound) /= size(ungriddedUBound)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                "- ungriddedLBound and ungriddedUBound must be the same size ", & 
-                  ESMF_CONTEXT, rc) 
+                msg="- ungriddedLBound and ungriddedUBound must be the same size ", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -1827,8 +1827,8 @@ end subroutine ESMF_GridConvertIndex
     if (present(gridToArrayMap)) then
        if (size(gridToArrayMap) < dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- gridToArrayMap needs to at least be of the Grid's dimCount", & 
-                      ESMF_CONTEXT, rc) 
+               msg="- gridToArrayMap needs to at least be of the Grid's dimCount", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -1856,8 +1856,8 @@ end subroutine ESMF_GridConvertIndex
        do i=1,dimCount
           if ((gridToArrayMap(i) <0) .or. (gridToArrayMap(i) > arrayDimCount)) then
               call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- gridToArrayMap value is outside range", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- gridToArrayMap value is outside range", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
        enddo
@@ -1873,8 +1873,8 @@ end subroutine ESMF_GridConvertIndex
        enddo
        if (.not. contains_nonzero) then 
              call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- gridToArrayMap must contains at least one value greater than 0", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- gridToArrayMap must contains at least one value greater than 0", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
               return 
        endif
     endif
@@ -1886,16 +1886,16 @@ end subroutine ESMF_GridConvertIndex
 
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(dimCount) , stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToArrayMap", &
-                                     ESMF_CONTEXT, rc)) return   
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToArrayMap", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return   
 
     ! allocate undistributed Bounds
     allocate(arrayLBound(undistArrayDimCount) , stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridLBound", &
-                                     ESMF_CONTEXT, rc)) return   
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridLBound", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return   
     allocate(arrayUBound(undistArrayDimCount) , stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
-                                     ESMF_CONTEXT, rc)) return   
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridUBound", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return   
 
 
     ! Get dimmap and undistibuted bounds
@@ -2048,8 +2048,8 @@ end subroutine ESMF_GridConvertIndex
     if ((present(ungriddedLBound) .or. present(ungriddedUBound)) .and. &
         .not. (present(ungriddedLBound) .and. present(ungriddedUBound))) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-               "- if either ungriddedBound is present both need to be", & 
-                      ESMF_CONTEXT, rc) 
+               msg="- if either ungriddedBound is present both need to be", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -2057,8 +2057,8 @@ end subroutine ESMF_GridConvertIndex
     if (present(ungriddedLBound) .and. present(ungriddedUBound)) then
        if (size(ungriddedLBound) /= size(ungriddedUBound)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                "- ungriddedLBound and ungriddedUBound must be the same size ", & 
-                  ESMF_CONTEXT, rc) 
+                msg="- ungriddedLBound and ungriddedUBound must be the same size ", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -2081,8 +2081,8 @@ end subroutine ESMF_GridConvertIndex
     if (present(gridToFieldMap)) then
        if (size(gridToFieldMap) < dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- gridToFieldMap needs to at least be of the Grid's dimCount", & 
-                      ESMF_CONTEXT, rc) 
+               msg="- gridToFieldMap needs to at least be of the Grid's dimCount", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -2124,8 +2124,8 @@ end subroutine ESMF_GridConvertIndex
           do i=1,dimCount
              if ((gridToFieldMap(i) <0) .or. (gridToFieldMap(i) > arrayDimCount)) then
                  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- gridToFieldMap value is outside range", & 
-                          ESMF_CONTEXT, rc) 
+                     msg="- gridToFieldMap value is outside range", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
                  return 
              endif
           enddo
@@ -2144,8 +2144,8 @@ end subroutine ESMF_GridConvertIndex
           enddo
           if (.not. contains_nonzero) then 
                 call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                      "- gridToFieldMap must contains at least one value greater than 0", & 
-                             ESMF_CONTEXT, rc) 
+                      msg="- gridToFieldMap must contains at least one value greater than 0", & 
+                             ESMF_CONTEXT, rcToReturn=rc) 
                 return 
           endif
        endif
@@ -2154,8 +2154,8 @@ end subroutine ESMF_GridConvertIndex
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                      "- distgridToArrayMap is too small", & 
-                          ESMF_CONTEXT, rc) 
+                      msg="- distgridToArrayMap is too small", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
            return 
        endif
 
@@ -2172,8 +2172,8 @@ end subroutine ESMF_GridConvertIndex
 
        ! allocate distgridToGridMap
        allocate(distgridToGridMap(dimCount) , stat=localrc)
-       if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
-                                        ESMF_CONTEXT, rc)) return   
+       if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToGridMap", &
+                                        ESMF_CONTEXT, rcToReturn=rc)) return   
        ! Get info from Grid
        call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2190,11 +2190,11 @@ end subroutine ESMF_GridConvertIndex
 
           !! allocate array dim. info arrays
           allocate(arrayDimType(arrayDimCount) , stat=localrc)
-          if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
-                                         ESMF_CONTEXT, rc)) return   
+          if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridUBound", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return   
           allocate(arrayDimInd(arrayDimCount) , stat=localrc)
-          if (ESMF_LogFoundAllocError(localrc, "Allocating gridUBound", &
-                                         ESMF_CONTEXT, rc)) return   
+          if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridUBound", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return   
 
           !! set which dimensions are used by the distgrid
           arrayDimType(:)=0 ! initialize to no type
@@ -2260,8 +2260,8 @@ end subroutine ESMF_GridConvertIndex
           do i=1,dimCount
              if ((gridToFieldMap(i) <0) .or. (gridToFieldMap(i) > fieldDimCount)) then
                  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                      "- gridToFieldMap value is outside range", & 
-                          ESMF_CONTEXT, rc) 
+                      msg="- gridToFieldMap value is outside range", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
                  return 
              endif
           enddo
@@ -2287,8 +2287,8 @@ end subroutine ESMF_GridConvertIndex
        ! Check distgridToArrayMap
        if (size(distgridToArrayMap) < distDimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                      "- distgridToArrayMap is too small", & 
-                          ESMF_CONTEXT, rc) 
+                      msg="- distgridToArrayMap is too small", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
            return 
        endif
 
@@ -2785,8 +2785,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(regDecomp)) then
         if (size(regDecomp) .lt. dimCount) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- regDecomp size doesn't match Grid dimCount ", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- regDecomp size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
@@ -2794,8 +2794,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         if (size(decompFlag) .lt. dimCount) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- decompFlag size doesn't match Grid dimCount ", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- decompFlag size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
@@ -2819,12 +2819,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get Index info from DistGrid
     allocate(minIndexPDimPTile(dimCount,tileCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexPDimTile", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexPDimTile", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate(maxIndexPDimPTile(dimCount,tileCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexPDimTile", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexPDimTile", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     call ESMF_DistgridGet(oldDistgrid, &
@@ -2838,22 +2838,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! This doesn't work right now for Multitile Grids
     if (tileCount > 1) then
        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            "- GridCopy with reg distribution not supported for multitile grids", &
-            ESMF_CONTEXT, rc)
+            msg="- GridCopy with reg distribution not supported for multitile grids", &
+            ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
     ! Set minIndex
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     minIndexLocal(1:dimCount)=minIndexPDimPTile(1:dimCount,1)
 
     ! Set maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     maxIndexLocal(1:dimCount)=maxIndexPDimPTile(1:dimCount,1)
 
@@ -2866,8 +2866,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating regDecompLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating regDecompLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(regDecomp)) then
        regDecompLocal(:)=regDecomp(:)
@@ -2890,8 +2890,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
@@ -2913,7 +2913,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
-              ESMF_CONTEXT, rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       !! copy petMap to petList
@@ -3158,8 +3158,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (arbDim /= -1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- distgrid should not contain arbitrary sequence indices", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- distgrid should not contain arbitrary sequence indices", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
         return
     endif
 
@@ -3387,14 +3387,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !! dimCount1 should be equal or less than dimCount
     if (dimCount1 > dimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- distgrid dimension has to be less or equal to dimCount", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- distgrid dimension has to be less or equal to dimCount", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
         return 
      endif
     if (tileCount /= 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- distgrid tile count has to be 1", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- distgrid tile count has to be 1", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
         return 
     endif
     distDimCount = dimCount - dimCount1 + 1
@@ -3405,8 +3405,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(distDim)) then
       if (size(distDim) /= distDimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- dimension of distDim has to be the same as the arbitrary distributed dim", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- dimension of distDim has to be the same as the arbitrary distributed dim", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
 	return
       endif
     endif
@@ -3516,8 +3516,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (arbDim == -1) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                   "- distgrid should contain arbitrary sequence indices", & 
-                          ESMF_CONTEXT, rc) 
+                   msg="- distgrid should contain arbitrary sequence indices", & 
+                          ESMF_CONTEXT, rcToReturn=rc) 
 	return
     endif
 
@@ -3546,8 +3546,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if ((undistMinIndex(k) /= minIndexPTile(i,1)) .or. &
             (undistMaxIndex(k) /= maxIndexPTile(i,1))) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- Grid min/max index does not match with DistGrid min/max index", & 
-               ESMF_CONTEXT, rc) 
+               msg="- Grid min/max index does not match with DistGrid min/max index", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
           k = k + 1
@@ -3919,28 +3919,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !
     call ESMF_VMGetGlobal(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! get dimension from distgrid
     call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPDimPTile=minInd,&
 		         maxIndexPDimPTile=maxInd, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (numDim /=2) then
         call ESMF_LogSetError(ESMF_RC_ARG_RANK, &
-	  "- The distgrid dimCount has to be 2", ESMF_CONTEXT, rc)
+	  msg="- The distgrid dimCount has to be 2", ESMF_CONTEXT, rcToReturn=rc)
 	return
     endif
 
     if (minInd(1,1) /= 1 .and. minInd(2,1) /=1) then
         call ESMF_LogSetError(ESMF_RC_ARG_RANK, &
-	  "- The minIndex of distgrip has to be 1", ESMF_CONTEXT, rc)
+	  msg="- The minIndex of distgrip has to be 1", ESMF_CONTEXT, rcToReturn=rc)
 	return
     endif
 
@@ -3948,21 +3948,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
    	  grid_size=totalpoints, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! check if the grid_dim matches with the distgrid dimension
        if (dims(1) /= maxInd(1,1) .and. dims(2) /= maxInd(2,1) ) then
 	  call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-	   "- The grid_dims does not match with distgrid dimension", &
- 	    ESMF_CONTEXT, rc)
+	   msg="- The grid_dims does not match with distgrid dimension", &
+ 	    ESMF_CONTEXT, rcToReturn=rc)
             return
        endif
 	
        ! if grid_rank is not equal to 2, return error 
        ! Does SCRIP allow 3D datasets?  What will be the format??
        if (totaldims /= 2) then
-	  call ESMF_LogSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
-	  ESMF_CONTEXT, rc)
+	  call ESMF_LogSetError(ESMF_RC_ARG_RANK,msg="- The grip has to be 2D", &
+	  ESMF_CONTEXT, rcToReturn=rc)
 	  return
        endif
 
@@ -3973,7 +3973,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           grid_center_lat=coordY, grid_imask=imask,  &
 	  convertToDeg=.TRUE., rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Create Grid based on the input distgrid
@@ -3981,16 +3981,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
 		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     ! Set coordinate tables 
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
        allocate(coord2D(dims(1),dims(2)))
@@ -3999,31 +3999,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Latitude
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
        coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
 
     ! Mask
     call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 	item = ESMF_GRIDITEM_MASK, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
        allocate(mask2D(dims(1),dims(2)))
@@ -4032,7 +4032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0)  deallocate(imask, mask2D)
     
     ESMF_GridCreateFrmScripDistGrd = grid
@@ -4115,8 +4115,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (TopCorner == -1) then
-     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
-	  ESMF_CONTEXT, rc)
+     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
+	  ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
 
@@ -4156,8 +4156,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (TopRightCorner == -1) then
-     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
-	  ESMF_CONTEXT, rc)
+     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
+	  ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
 
@@ -4197,8 +4197,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (BtmCorner == -1) then
-     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
-	  ESMF_CONTEXT, rc)
+     call ESMF_LogSetError(ESMF_RC_ARG_WRONG, msg="- Bad corner array in SCRIP file", &
+	  ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
 
@@ -4218,8 +4218,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (BtmRightCorner == -1) then
-     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- Bad corner array in SCRIP file", &
-	  ESMF_CONTEXT, rc)
+     call ESMF_LogSetError(ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
+	  ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
 
@@ -4423,15 +4423,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! if grid_rank is not equal to 2, return error 
     ! Does SCRIP allow 3D datasets?  What will be the format??
     if (totaldims /= 2) then
-	call ESMF_LogSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
-	  ESMF_CONTEXT, rc)
+	call ESMF_LogSetError(ESMF_RC_ARG_RANK,msg="- The grip has to be 2D", &
+	  ESMF_CONTEXT, rcToReturn=rc)
 	return
     endif
 
     ! if user wants corners and there aren't 4 then error
     if (localAddCornerStagger .and. (grid_corners /= 4)) then
-	call ESMF_LogSetError(ESMF_RC_ARG_WRONG,"- The SCRIP file has grid_corners/=4, so can't add Grid corners", &
-	  ESMF_CONTEXT, rc)
+	call ESMF_LogSetError(ESMF_RC_ARG_WRONG,msg="- The SCRIP file has grid_corners/=4, so can't add Grid corners", &
+	  ESMF_CONTEXT, rcToReturn=rc)
 	return
     endif
        
@@ -4487,14 +4487,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
             destroyDELayout=.true., rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     else
        grid = ESMF_GridCreate(distgrid=distgrid, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
             indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
             destroyDELayout=.true., rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
     
@@ -4502,11 +4502,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
        allocate(coord2D(dims(1),dims(2)))
@@ -4515,29 +4515,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Latitude
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
        coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mask
     call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
 	item = ESMF_GRIDITEM_MASK, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
        allocate(mask2D(dims(1),dims(2)))
@@ -4546,7 +4546,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
     !print *, "Finish ArrayScatter 1st dim coord"
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (PetNo == 0) then
       deallocate(coord2D, coordX, coordY)
@@ -4557,13 +4557,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (localAddCornerStagger) then 
         call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Longitude
         call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
   	       array = array, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridGet(grid,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex)
 
@@ -4574,20 +4574,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        call ESMF_ArrayScatter(array, corner2D, rootPet=0, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Latitude
        call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
 	      array = array, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
        if (PetNo == 0) then
            corner2D = RESHAPE(cornerY,(/cornerDims(1),cornerDims(2)/))
        endif
 
        call ESMF_ArrayScatter(array, corner2D, rootPet=0, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (PetNo == 0) then
           deallocate(corner2D, cornerX, cornerY)
@@ -4945,61 +4945,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Argument Consistency Checking --------------------------------------------------------------
     if (size(countsPerDEDim1) .lt. 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- size 0 countsPerDEDim1 not allowed", & 
-               ESMF_CONTEXT, rc) 
+               msg="- size 0 countsPerDEDim1 not allowed", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
     if (size(countsPerDEDim2) .lt. 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- size 0 countsPerDEDim2 not allowed", & 
-               ESMF_CONTEXT, rc) 
+               msg="- size 0 countsPerDEDim2 not allowed", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
     if (present(countsPerDEDim3)) then
         if (size(countsPerDEDim3) .lt. 1) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- size 0 countsPerDEDim3 not allowed", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- size 0 countsPerDEDim3 not allowed", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- bipolePos3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep1 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -5007,8 +5007,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep2 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -5016,8 +5016,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep3 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -5025,8 +5025,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(minIndex)) then
        if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- minIndex size must equal grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -5038,8 +5038,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= size(countsPerDEDim2)) .or. &
               (size(petMap,3) /= size(countsPerDEDim3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
        else
@@ -5047,8 +5047,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= size(countsPerDEDim2)) .or. &
               (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
        endif
@@ -5060,8 +5060,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeLWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -5069,8 +5069,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeUWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -5078,8 +5078,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridAlign)) then
         if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridAlign must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -5091,16 +5091,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5110,8 +5110,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5120,8 +5120,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5136,16 +5136,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5155,8 +5155,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5165,8 +5165,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5182,16 +5182,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5201,8 +5201,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5211,8 +5211,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -5224,21 +5224,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       else if (.not. (indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       endif
    else
       if (present(indexflag)) then
          if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
-                   ESMF_CONTEXT, rc) 
+                msg="- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
               return
          endif
       endif
@@ -5253,19 +5253,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Copy vales for countsPerDEDim --------------------------------------------
     allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim1Local", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating countsPerDEDim1Local", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim1Local=countsPerDEDim1
 
     allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim2Local", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating countsPerDEDim2Local", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
     if (dimCount > 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
-       if (ESMF_LogFoundAllocError(localrc, "Allocating countsPerDEDim3Local", &
-                                      ESMF_CONTEXT, rc)) return
+       if (ESMF_LogFoundAllocError(localrc, msg="Allocating countsPerDEDim3Local", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
        countsPerDEDim3Local=countsPerDEDim3
     endif
 
@@ -5274,8 +5274,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
@@ -5330,24 +5330,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -5355,14 +5355,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
@@ -5405,8 +5405,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
     ! Set default for maxIndex 
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
     maxIndexLocal(2)=sum(countsPerDEDim2Local)+minIndexLocal(2)-1
@@ -5417,8 +5417,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
-               ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToGridMap", &
+               ESMF_CONTEXT, rcToReturn=rc)) return
    do i=1,dimCount
      distgridToGridMap(i)=i
    enddo    
@@ -5449,14 +5449,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! generate deblocklist
   allocate(maxPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxPerDEDim", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
   allocate(minPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating minPerDEDim", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating minPerDEDim", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
  allocate(deDimCount(dimCount), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxPerDEDim", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
@@ -5491,8 +5491,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! allocate deblocklist
   allocate(deBlockList(dimCount,2,deCount), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating deBlockList", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating deBlockList", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Fill in DeBlockList
   if (dimCount == 2) then
@@ -5539,8 +5539,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
-              ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating petList", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       !! copy petMap to petList
@@ -5588,11 +5588,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (present(coordDep1)) then
       coordDimCount(1)=size(coordDep1)
@@ -5940,8 +5940,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
-               ESMF_CONTEXT, rc) 
+               msg="- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
@@ -5949,8 +5949,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(regDecomp)) then
         if (size(regDecomp) .lt. dimCount) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- regDecomp size doesn't match Grid dimCount ", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- regDecomp size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
@@ -5958,8 +5958,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         if (size(decompFlag) .lt. dimCount) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- decompFlag size doesn't match Grid dimCount ", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- decompFlag size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
@@ -5967,38 +5967,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- bipolePos3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep1 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -6006,8 +6006,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep2 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -6015,8 +6015,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep3 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -6024,8 +6024,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(minIndex)) then
        if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- minIndex size must equal grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -6034,8 +6034,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeLWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -6043,8 +6043,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeUWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -6052,8 +6052,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridAlign)) then
         if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridAlign must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -6066,16 +6066,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6085,8 +6085,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6095,8 +6095,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6111,16 +6111,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6130,8 +6130,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6140,8 +6140,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6157,16 +6157,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6176,8 +6176,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6186,8 +6186,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -6199,21 +6199,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       else if (.not.(indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       endif
    else
       if (present(indexflag)) then
          if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
-                   ESMF_CONTEXT, rc) 
+                msg="- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
               return
          endif
       endif
@@ -6230,8 +6230,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for minIndex
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
@@ -6244,15 +6244,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating regDecompLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating regDecompLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(regDecomp)) then
        regDecompLocal(:)=regDecomp(:)
@@ -6316,24 +6316,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -6343,8 +6343,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= regDecompLocal(2)) .or. &
               (size(petMap,3) /= regDecompLocal(3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
       else
@@ -6352,8 +6352,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= regDecompLocal(2)) .or. &
               (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
       endif
@@ -6362,14 +6362,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
    ! setup maxIndexLocal to hold modified bounds
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
@@ -6397,8 +6397,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
@@ -6408,8 +6408,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
-               ESMF_CONTEXT, rc)) return          
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToGridMap", &
+               ESMF_CONTEXT, rcToReturn=rc)) return          
    do i=1,dimCount
      distgridToGridMap(i)=i
    enddo    
@@ -6430,8 +6430,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (present(petMap)) then
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
-              ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating petList", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       !! copy petMap to petList
@@ -6487,11 +6487,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (present(coordDep1)) then
       coordDimCount(1)=size(coordDep1)
@@ -6808,8 +6808,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
-               ESMF_CONTEXT, rc) 
+               msg="- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
     
@@ -6818,23 +6818,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distDimCount = size(localArbIndex,2)
     if (distDimCount > dimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- the second dim of localArbIndex must be equal or less than grid dimension", & 
-               ESMF_CONTEXT, rc) 
+               msg="- the second dim of localArbIndex must be equal or less than grid dimension", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
  
     allocate(distDimLocal(distDimCount), stat=localrc)
     allocate(isDist(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating distDimLocal or isDist", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distDimLocal or isDist", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     isDist(:)=.false.
     ! check distribution info
     if (present(distDim)) then
        if (size(distDim) /= distDimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must match with the second dimension of localArbIndex", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- distDim must match with the second dimension of localArbIndex", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
             return 
        endif
        distDimLocal(:)=distDim(:)
@@ -6851,30 +6851,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Argument Consistency Checking --------------------------------------------------------------
     if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- bipolePos3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(minIndex)) then
        if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- minIndex size must equal grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -6884,8 +6884,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set Defaults -------------------------------------------------------------
     ! Set default for minIndex 
     allocate(indexArray(2,dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        indexArray(1,:)=minIndex(:)
@@ -6898,8 +6898,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! dimCount of distributed part
     allocate(distSize(distDimCount),stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating distSize", &
-                                   ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distSize", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
     do i=1,distDimCount   
        ind = distDimLocal(i)
@@ -6912,8 +6912,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! can't have all undistributed dimensions
     if (distDimCount == 0) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- Need to have at least one distributed dimension", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Need to have at least one distributed dimension", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -6921,14 +6921,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
     if (size(localArbIndex, 1) /= localArbIndexCount) then
        	  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- localArbIndex 1st dimension has to match with localArbIndexCount", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
           return
     endif
 
     allocate(local1DIndices(localArbIndexCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating local1DIndices", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating local1DIndices", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       
     if (localArbIndexCount > 0) then
        ! use 0-based index to calculate the 1D index and add 1 back at the end
@@ -6987,24 +6987,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -7014,11 +7014,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (present(coordDep1)) then
       ! error checking, if this dimension is arbitrary, one of the 
@@ -7030,8 +7030,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
       endif	
@@ -7060,8 +7060,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
       endif	
@@ -7091,8 +7091,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           enddo
 	  if (.not. found) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
           endif
         endif	
@@ -7116,11 +7116,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistDimCount > 0) then
      allocate(undistLBound(undistDimCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating undistLBound", &
-              ESMF_CONTEXT, rc)) return
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating undistLBound", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
      allocate(undistUBound(undistDimCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating undistUBound", &
-              ESMF_CONTEXT, rc)) return     
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating undistUBound", &
+              ESMF_CONTEXT, rcToReturn=rc)) return     
    
       ! Fill in undistLBound, undistUBound
       ud=1
@@ -7358,8 +7358,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (decompType == ESMF_Grid_NONARBITRARY) then
 	if (present(localArbIndexCount) .or. present(localArbIndex) .or. present(arbDim)) then
          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- localArbIndexCount, localArbIndex or arbDim does not exist for a non-arbitrarily distributed grid", & 
-                 ESMF_CONTEXT, rc)
+                 msg="- localArbIndexCount, localArbIndex or arbDim does not exist for a non-arbitrarily distributed grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc)
          return 
 	endif
     endif
@@ -7508,13 +7508,13 @@ end subroutine ESMF_GridGetDefault
 	if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	    (tileNo /= 1)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-              "- tileNo has to be 1 for arbitrarily distributed grid", & 
-              ESMF_CONTEXT, rc) 
+              msg="- tileNo has to be 1 for arbitrarily distributed grid", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
 	  return
 	elseif (tileNo /= 1) then 
           call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-              "- multiple tiles is not implemented", & 
-              ESMF_CONTEXT, rc) 
+              msg="- multiple tiles is not implemented", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
 	  return
       endif
       localTileNo = tileNo
@@ -7609,8 +7609,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(isLBound)) then
        if (size(isLBound) < dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_RANK, & 
-              "- isLBound must have at least the same size as the grid dimCount", & 
-              ESMF_CONTEXT, rc) 
+              msg="- isLBound must have at least the same size as the grid dimCount", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
 	  return
        endif
     endif
@@ -7618,8 +7618,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(isUBound)) then
        if (size(isUBound) < dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_RANK, & 
-              "- isUBound must have at least the same size as the grid dimCount", & 
-              ESMF_CONTEXT, rc) 
+              msg="- isUBound must have at least the same size as the grid dimCount", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
 	  return
        endif
     endif
@@ -8227,24 +8227,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr typekind to match Grid typekind 
     if (typekind /= ESMF_TYPEKIND_R4) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr typekind does not match Grid typekind", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr typekind does not match Grid typekind", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     ! make sure coord is legitimate
     if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- coordinate dimension outside of range specified for this Grid", & 
-        ESMF_CONTEXT, rc) 
+        msg="- coordinate dimension outside of range specified for this Grid", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
     if (coordDimCount(coordDim) /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr dimCount does not match requested coordinate dimCount", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr dimCount does not match requested coordinate dimCount", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -8263,8 +8263,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -8518,24 +8518,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr typekind to match Grid typekind 
     if (typekind /= ESMF_TYPEKIND_R4) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr typekind does not match Grid typekind", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr typekind does not match Grid typekind", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     ! make sure coord is legitimate
     if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- coordinate dimension outside of range specified for this Grid", & 
-        ESMF_CONTEXT, rc) 
+        msg="- coordinate dimension outside of range specified for this Grid", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
     if (coordDimCount(coordDim) /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-      "- farrayPtr dimCount does not match requested coordinate dimCount", & 
-      ESMF_CONTEXT, rc) 
+      msg="- farrayPtr dimCount does not match requested coordinate dimCount", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
     return 
     endif 
 
@@ -8554,8 +8554,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -8808,24 +8808,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  ! Require farrayPtr typekind to match Grid typekind 
  if (typekind /= ESMF_TYPEKIND_R4) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr typekind does not match Grid typekind", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr typekind does not match Grid typekind", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
 ! make sure coord is legitimate
 if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- coordinate dimension outside of range specified for this Grid", & 
- ESMF_CONTEXT, rc) 
+ msg="- coordinate dimension outside of range specified for this Grid", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (coordDimCount(coordDim) /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr dimCount does not match requested coordinate dimCount", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr dimCount does not match requested coordinate dimCount", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
@@ -8844,8 +8844,8 @@ endif
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -9105,24 +9105,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr typekind to match Grid typekind 
     if (typekind /= ESMF_TYPEKIND_R8) then 
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr typekind does not match Grid typekind", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr typekind does not match Grid typekind", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
         return 
     endif 
 
     ! make sure coord is legitimate
     if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-       "- coordinate dimension outside of range specified for this Grid", & 
-       ESMF_CONTEXT, rc) 
+       msg="- coordinate dimension outside of range specified for this Grid", & 
+       ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif 
 
     ! Require farrayPtr dimCount to match coordinate dimCount 
     if (coordDimCount(coordDim) /= 1) then 
        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-       "- farrayPtr dimCount does not match requested coordinate dimCount", & 
-       ESMF_CONTEXT, rc) 
+       msg="- farrayPtr dimCount does not match requested coordinate dimCount", & 
+       ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif 
 
@@ -9140,8 +9140,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -9396,24 +9396,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  ! Require farrayPtr typekind to match Grid typekind 
  if (typekind /= ESMF_TYPEKIND_R8) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr typekind does not match Grid typekind", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr typekind does not match Grid typekind", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
 ! make sure coord is legitimate
 if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- coordinate dimension outside of range specified for this Grid", & 
- ESMF_CONTEXT, rc) 
+ msg="- coordinate dimension outside of range specified for this Grid", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (coordDimCount(coordDim) /= 2) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr dimCount does not match requested coordinate dimCount", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr dimCount does not match requested coordinate dimCount", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
@@ -9431,8 +9431,8 @@ endif
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -9685,24 +9685,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  ! Require farrayPtr typekind to match Grid typekind 
  if (typekind /= ESMF_TYPEKIND_R8) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr typekind does not match Grid typekind", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr typekind does not match Grid typekind", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
 ! make sure coord is legitimate
 if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- coordinate dimension outside of range specified for this Grid", & 
- ESMF_CONTEXT, rc) 
+ msg="- coordinate dimension outside of range specified for this Grid", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (coordDimCount(coordDim) /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr dimCount does not match requested coordinate dimCount", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr dimCount does not match requested coordinate dimCount", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
@@ -9720,8 +9720,8 @@ endif
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -10094,8 +10094,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -10564,8 +10564,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr dimCount does not match requested item dimCount", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr dimCount does not match requested item dimCount", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -10580,27 +10580,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- negative number of localDeCount prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- localDeCount == 0 prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE too big", ESMF_CONTEXT, rc) 
+        msg="- localDE too big", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDE<0) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
+        msg="- localDE can't be less than 0", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -10854,8 +10854,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-      "- farrayPtr dimCount does not match requested item dimCount", & 
-      ESMF_CONTEXT, rc) 
+      msg="- farrayPtr dimCount does not match requested item dimCount", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
     return 
     endif 
 
@@ -10869,28 +10869,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- Negative number of localDeCount prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- Negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- localDeCount == 0 prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE too big", ESMF_CONTEXT, rc) 
+        msg="- localDE too big", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDE<0) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE can't be less than 0", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDE can't be less than 0", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -11144,8 +11144,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (dimCount /= 3) then 
  call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr dimCount does not match requested item dimCount", & 
- ESMF_CONTEXT, rc) 
+ msg="- farrayPtr dimCount does not match requested item dimCount", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
@@ -11160,29 +11160,29 @@ endif
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
  call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
- "- Negative number of localDeCount prohibits request", & 
- ESMF_CONTEXT, rc) 
+ msg="- Negative number of localDeCount prohibits request", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
  if (localDeCount == 0) then 
  call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
- "- localDeCount == 0 prohibits request", & 
- ESMF_CONTEXT, rc) 
+ msg="- localDeCount == 0 prohibits request", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif
  
  if (localDE>=localDeCount) then 
  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
- "- localDE too big", & 
- ESMF_CONTEXT, rc) 
+ msg="- localDE too big", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
  if (localDE<0) then 
  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
- "- localDE can't be less than 0", & 
- ESMF_CONTEXT, rc) 
+ msg="- localDE can't be less than 0", & 
+ ESMF_CONTEXT, rcToReturn=rc) 
  return 
  endif 
 
@@ -11435,8 +11435,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr dimCount does not match requested item dimCount", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr dimCount does not match requested item dimCount", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -11451,27 +11451,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- negative number of localDeCount prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- localDeCount == 0 prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE too big", ESMF_CONTEXT, rc) 
+        msg="- localDE too big", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDE<0) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
+        msg="- localDE can't be less than 0", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -11725,8 +11725,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-      "- farrayPtr dimCount does not match requested item dimCount", & 
-      ESMF_CONTEXT, rc) 
+      msg="- farrayPtr dimCount does not match requested item dimCount", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
     return 
     endif 
 
@@ -11740,28 +11740,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- Negative number of localDeCount prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- Negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- localDeCount == 0 prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE too big", ESMF_CONTEXT, rc) 
+        msg="- localDE too big", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDE<0) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE can't be less than 0", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDE can't be less than 0", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -12014,10 +12014,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (dimCount /= 3) then 
- call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr dimCount does not match requested item dimCount", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
+     msg="- farrayPtr dimCount does not match requested item dimCount", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
 ! Set Defaults
@@ -12030,31 +12030,31 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
- "- Negative number of localDeCount prohibits request", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+     msg="- Negative number of localDeCount prohibits request", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
- "- localDeCount == 0 prohibits request", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+     msg="- localDeCount == 0 prohibits request", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
- "- localDE too big", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+   msg="- localDE too big", & 
+   ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
- "- localDE can't be less than 0", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+     msg="- localDE can't be less than 0", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
 
@@ -12307,8 +12307,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount /= 1) then 
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-        "- farrayPtr dimCount does not match requested item dimCount", & 
-        ESMF_CONTEXT, rc) 
+        msg="- farrayPtr dimCount does not match requested item dimCount", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -12323,27 +12323,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- negative number of localDeCount prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- localDeCount == 0 prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE too big", ESMF_CONTEXT, rc) 
+        msg="- localDE too big", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDE<0) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE can't be less than 0", ESMF_CONTEXT, rc) 
+        msg="- localDE can't be less than 0", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -12597,8 +12597,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require farrayPtr dimCount to match grid dimCount 
     if (dimCount /= 2) then 
     call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
-      "- farrayPtr dimCount does not match requested item dimCount", & 
-      ESMF_CONTEXT, rc) 
+      msg="- farrayPtr dimCount does not match requested item dimCount", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
     return 
     endif 
 
@@ -12612,28 +12612,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Require DELayout to be 1 DE per PET 
     if (localDeCount < 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- Negative number of localDeCount prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- Negative number of localDeCount prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDeCount == 0) then 
       call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
-        "- localDeCount == 0 prohibits request", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDeCount == 0 prohibits request", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif
  
     if (localDE>=localDeCount) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE too big", ESMF_CONTEXT, rc) 
+        msg="- localDE too big", ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
     if (localDE<0) then 
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-        "- localDE can't be less than 0", & 
-        ESMF_CONTEXT, rc) 
+        msg="- localDE can't be less than 0", & 
+        ESMF_CONTEXT, rcToReturn=rc) 
       return 
     endif 
 
@@ -12886,10 +12886,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
  ! Require farrayPtr dimCount to match coordinate dimCount 
  if (dimCount /= 3) then 
- call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
- "- farrayPtr dimCount does not match requested item dimCount", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & 
+     msg="- farrayPtr dimCount does not match requested item dimCount", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
 ! Set Defaults
@@ -12902,31 +12902,31 @@ endif
 
  ! Require DELayout to be 1 DE per PET 
  if (localDeCount < 0) then 
- call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
- "- Negative number of localDeCount prohibits request", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+     msg="- Negative number of localDeCount prohibits request", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
  if (localDeCount == 0) then 
- call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
- "- localDeCount == 0 prohibits request", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+     msg="- localDeCount == 0 prohibits request", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif
  
  if (localDE>=localDeCount) then 
- call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
- "- localDE too big", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+     msg="- localDE too big", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
  if (localDE<0) then 
- call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
- "- localDE can't be less than 0", & 
- ESMF_CONTEXT, rc) 
- return 
+   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+     msg="- localDE can't be less than 0", & 
+     ESMF_CONTEXT, rcToReturn=rc) 
+   return 
  endif 
 
 
@@ -13442,7 +13442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  lattreconflag, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -13511,7 +13511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         lattreconflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Set return value
       ESMF_GridDeserialize = grid
@@ -13927,8 +13927,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc
@@ -14222,61 +14222,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Argument Consistency Checking --------------------------------------------------------------
     if (size(countsPerDEDim1) .lt. 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- size 0 countsPerDEDim1 not allowed", & 
-               ESMF_CONTEXT, rc) 
+               msg="- size 0 countsPerDEDim1 not allowed", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
     if (size(countsPerDEDim2) .lt. 1) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- size 0 countsPerDEDim2 not allowed", & 
-               ESMF_CONTEXT, rc) 
+               msg="- size 0 countsPerDEDim2 not allowed", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
     if (present(countsPerDEDim3)) then
         if (size(countsPerDEDim3) .lt. 1) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- size 0 countsPerDEDim3 not allowed", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- size 0 countsPerDEDim3 not allowed", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- bipolePos3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep1 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -14284,8 +14284,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep2 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -14293,8 +14293,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep3 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -14302,8 +14302,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(minIndex)) then
        if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- minIndex size must equal grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -14315,8 +14315,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= size(countsPerDEDim2)) .or. &
               (size(petMap,3) /= size(countsPerDEDim3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
        else
@@ -14324,8 +14324,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= size(countsPerDEDim2)) .or. &
               (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
        endif
@@ -14337,8 +14337,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeLWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -14346,8 +14346,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeUWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -14355,8 +14355,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridAlign)) then
         if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridAlign must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -14368,16 +14368,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14387,8 +14387,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14397,8 +14397,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14413,16 +14413,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14432,8 +14432,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14442,8 +14442,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14459,16 +14459,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14478,8 +14478,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14488,8 +14488,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -14502,21 +14502,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       else if (.not. (indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       endif
    else
       if (present(indexflag)) then
          if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
-                   ESMF_CONTEXT, rc) 
+                msg="- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
               return
          endif
       endif
@@ -14532,19 +14532,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Copy vales for countsPerDEDim --------------------------------------------
     allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim1Local=countsPerDEDim1
 
     allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
     if (dimCount > 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
-       if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                      ESMF_CONTEXT, rc)) return
+       if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
        countsPerDEDim3Local=countsPerDEDim3
     endif
 
@@ -14553,8 +14553,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
@@ -14609,37 +14609,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
    ! Make alterations to size due to GridEdgeWidths ----------------------------
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
@@ -14683,8 +14683,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Calc minIndex,maxIndex,distgridToGridMap for DistGrid -----------------------------------
     ! Set default for maxIndex 
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
     maxIndexLocal(2)=sum(countsPerDEDim2Local)+minIndexLocal(2)-1
@@ -14694,8 +14694,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
-               ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToGridMap", &
+               ESMF_CONTEXT, rcToReturn=rc)) return
    do i=1,dimCount
      distgridToGridMap(i)=i
    enddo    
@@ -14726,14 +14726,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! generate deblocklist
   allocate(maxPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxPerDEDim", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
   allocate(minPerDEDim(dimCount,maxSizeDEDim), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating minPerDEDim", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating minPerDEDim", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
  allocate(deDimCount(dimCount), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating maxPerDEDim", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxPerDEDim", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! Calc the maximum end of each DE in a Dim, and the size of each DEDim
@@ -14768,8 +14768,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   ! allocate deblocklist
   allocate(deBlockList(dimCount,2,deCount), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, "Allocating deBlockList", &
-              ESMF_CONTEXT, rc)) return
+  if (ESMF_LogFoundAllocError(localrc, msg="Allocating deBlockList", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Fill in DeBlockList
   if (dimCount == 2) then
@@ -14816,8 +14816,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
-              ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating petList", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       !! copy petMap to petList
@@ -14866,11 +14866,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (present(coordDep1)) then
       coordDimCount(1)=size(coordDep1)
@@ -15217,8 +15217,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
-               ESMF_CONTEXT, rc) 
+               msg="- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
@@ -15226,8 +15226,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(regDecomp)) then
         if (size(regDecomp) .lt. dimCount) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- regDecomp size doesn't match Grid dimCount ", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- regDecomp size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
@@ -15235,46 +15235,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         if (size(decompFlag) .lt. dimCount) then
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                    "- decompFlag size doesn't match Grid dimCount ", & 
-                    ESMF_CONTEXT, rc) 
+                    msg="- decompFlag size doesn't match Grid dimCount ", & 
+                    ESMF_CONTEXT, rcToReturn=rc) 
             return 
         endif
     endif
 
     if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- bipolePos3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
 
     if ((dimCount .lt. 3) .and. present(coordDep3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(coordDep1)) then
        if ((size(coordDep1) < 1) .or. (size(coordDep1)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep1 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep1 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -15282,8 +15282,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep2)) then
        if ((size(coordDep2) < 1) .or. (size(coordDep2)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep2 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep2 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -15291,8 +15291,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(coordDep3)) then
        if ((size(coordDep3) < 1) .or. (size(coordDep3)>dimCount)) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- coordDep3 size incompatible with grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- coordDep3 size incompatible with grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -15300,8 +15300,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(minIndex)) then
        if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- minIndex size must equal grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- minIndex size must equal grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -15312,8 +15312,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeLWidth)) then
         if (size(gridEdgeLWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeLWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeLWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -15321,8 +15321,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridEdgeUWidth)) then
         if (size(gridEdgeUWidth) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridEdgeUWidth must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridEdgeUWidth must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -15330,8 +15330,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(gridAlign)) then
         if (size(gridAlign) /= dimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- gridAlign must be of size equal to Grid dimCount", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- gridAlign must be of size equal to Grid dimCount", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return
         endif 
     endif
@@ -15344,16 +15344,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15363,8 +15363,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15373,8 +15373,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15389,16 +15389,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15408,8 +15408,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15418,8 +15418,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15435,16 +15435,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15454,8 +15454,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have LWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have LWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15464,8 +15464,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                     "- Connected dimensions must have UWidth 0", & 
-                 ESMF_CONTEXT, rc) 
+                     msg="- Connected dimensions must have UWidth 0", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 		return
                endif
             endif
@@ -15477,21 +15477,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (present(gridMemLBound)) then
       if (.not. present(indexflag)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc)  
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc)  
               return
       else if (.not.(indexflag == ESMF_INDEX_USER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
-                 ESMF_CONTEXT, rc) 
+                msg="- when using gridMemLBound must specify indexflag=ESMF_INDEX_USER ", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
               return
       endif
    else
       if (present(indexflag)) then
          if (indexflag == ESMF_INDEX_USER) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                "- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
-                   ESMF_CONTEXT, rc) 
+                msg="- when using indexflag=ESMF_INDEX_USER must provide gridMemLBound ", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
               return
          endif
       endif
@@ -15508,8 +15508,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for minIndex
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
@@ -15522,15 +15522,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
 
     ! Set default for regDecomp 
     allocate(regDecompLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating regDecompLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating regDecompLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(regDecomp)) then
        regDecompLocal(:)=regDecomp(:)
@@ -15594,24 +15594,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -15622,8 +15622,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= regDecompLocal(2)) .or. &
               (size(petMap,3) /= regDecompLocal(3))) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
       else
@@ -15631,8 +15631,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               (size(petMap,2) /= regDecompLocal(2)) .or. &
               (size(petMap,3) /= 1)) then
               call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                     "- petMap wrong size in one or more dimensions", & 
-                     ESMF_CONTEXT, rc) 
+                     msg="- petMap wrong size in one or more dimensions", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
               return 
           endif
       endif
@@ -15641,14 +15641,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Modify Bounds by GridEdgeUWidth and GridEdgeLWidth  -------------------------
    ! setup maxIndexLocal to hold modified bounds
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeLWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeLWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridEdgeUWidthLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeUWidthLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating gridAlignLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridAlignLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
@@ -15675,8 +15675,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for decompFlag 
     allocate(decompFlagLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating decompFlagLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating decompFlagLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
@@ -15686,8 +15686,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating distgridToGridMap", &
-               ESMF_CONTEXT, rc)) return          
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToGridMap", &
+               ESMF_CONTEXT, rcToReturn=rc)) return          
    do i=1,dimCount
      distgridToGridMap(i)=i
    enddo    
@@ -15709,8 +15709,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (present(petMap)) then
       !! Allocate petList
       allocate(petList(deCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, "Allocating petList", &
-              ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating petList", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       !! copy petMap to petList
@@ -15767,11 +15767,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (present(coordDep1)) then
       coordDimCount(1)=size(coordDep1)
@@ -16078,8 +16078,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dimCount=size(maxIndex)
     if ((dimCount < 2) .or. (dimCount > 3)) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
-               ESMF_CONTEXT, rc) 
+               msg="- maxIndex size and thus Grid dimCount must be either 2 or 3 when using create shape ", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
@@ -16088,23 +16088,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     distDimCount = size(localArbIndex,2)
     if (distDimCount > dimCount) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-               "- the second dim of localArbIndex must be equal or less than grid dimension", & 
-               ESMF_CONTEXT, rc) 
+               msg="- the second dim of localArbIndex must be equal or less than grid dimension", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
          return 
     endif
 
     allocate(distDimLocal(distDimCount), stat=localrc)
     allocate(isDist(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating distDimLocal or isDist", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distDimLocal or isDist", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     isDist(:)=.false.
     ! check distribution info
     if (present(distDim)) then
        if (size(distDim) /= distDimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
-                 "- distDim must match with the second dimension of localArbIndex", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- distDim must match with the second dimension of localArbIndex", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
             return 
        endif
        distDimLocal(:)=distDim(:)
@@ -16121,30 +16121,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Argument Consistency Checking --------------------------------------------------------------
     if ((dimCount .lt. 3) .and. present(connDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- connDim3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
 
     if ((dimCount .lt. 3) .and. present(poleStaggerLoc3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- poleStaggerLoc3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if ((dimCount .lt. 3) .and. present(bipolePos3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- bipolePos3 not allowed when grid is less than dimCount 3", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- bipolePos3 not allowed when grid is less than dimCount 3", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (present(minIndex)) then
        if (size(minIndex) /= dimCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-               "- minIndex size must equal grid dimCount", & 
-               ESMF_CONTEXT, rc) 
+               msg="- minIndex size must equal grid dimCount", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
     endif
@@ -16156,8 +16156,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set Defaults -------------------------------------------------------------
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
@@ -16169,13 +16169,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default for maxIndex
     allocate(maxIndexLocal(dimCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
     maxIndexLocal(:)=maxIndex(:)
 
     allocate(distSize(distDimCount),stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating distSize", &
-                                     ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distSize", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
     do i=1,distDimCount   
        ind = distDimLocal(i)
@@ -16188,22 +16188,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! can't have all undistributed dimensions
     if (distDimCount == 0) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- Need to have at least one distributed dimension", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Need to have at least one distributed dimension", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     ! Check localArbIndex dimension matched with localArbIndexCount and diskDimCount
     if (size(localArbIndex, 1) /= localArbIndexCount) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- localArbIndex 1st dimension has to match with localArbIndexCount", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- localArbIndex 1st dimension has to match with localArbIndexCount", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
 
     allocate(local1DIndices(localArbIndexCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "Allocating local1DIndices", &
-                                  ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating local1DIndices", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! convert localArbIndex into 1D index array for DistGrid
     if (localArbIndexCount > 0) then
@@ -16263,24 +16263,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
     if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
         connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
-                 "- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
@@ -16290,11 +16290,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    ! Convert coordDeps to coordDimCount and coordDimMap -------------------------------
    allocate(coordDimCount(dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimCount", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimCount", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
    allocate(coordDimMap(dimCount,dimCount), stat=localrc)
-   if (ESMF_LogFoundAllocError(localrc, "Allocating coordDimMap", &
-              ESMF_CONTEXT, rc)) return
+   if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (present(coordDep1)) then
       ! error checking, if this dimension is arbitrary, one of the 
@@ -16306,8 +16306,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
       endif	
@@ -16336,8 +16336,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
       endif	
@@ -16367,8 +16367,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           enddo
 	  if (.not. found) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 	    return
           endif
         endif	
@@ -16392,11 +16392,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Calc undistLBound, undistUBound for Grid -----------------------------------------------
    if (undistDimCount > 0) then
      allocate(undistLBound(undistDimCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating undistLBound", &
-              ESMF_CONTEXT, rc)) return
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating undistLBound", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
      allocate(undistUBound(undistDimCount), stat=localrc)
-     if (ESMF_LogFoundAllocError(localrc, "Allocating undistUBound", &
-              ESMF_CONTEXT, rc)) return     
+     if (ESMF_LogFoundAllocError(localrc, msg="Allocating undistUBound", &
+              ESMF_CONTEXT, rcToReturn=rc)) return     
    
       ! Fill in undistLBound, undistUBound
       ud=1
@@ -16531,8 +16531,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType == ESMF_GRID_ARBITRARY) .and. &
 	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 "- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
            return
 	else
        	   tmp_staggerloc=staggerloc%staggerloc

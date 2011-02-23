@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.16 2011/01/20 20:55:57 rokuingh Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.17 2011/02/23 20:05:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.16 2011/01/20 20:55:57 rokuingh Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.17 2011/02/23 20:05:29 w6ws Exp $'
 
 !==============================================================================
 !
@@ -272,8 +272,8 @@ integer, intent(out), optional  :: rc
     ngrid_b = size(sideB, 1)
     if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- number of Grids are invalid on one side of the XGrid", &
-           ESMF_CONTEXT, rc) 
+           msg="- number of Grids are invalid on one side of the XGrid", &
+           ESMF_CONTEXT, rcToReturn=rc) 
         return
     endif
     do i = 1, ngrid_a
@@ -288,14 +288,14 @@ integer, intent(out), optional  :: rc
     nullify(ESMF_XGridCreateDefault%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-                                "Constructing xgtype base object ", &
-                                ESMF_CONTEXT, rc)) return
+                                msg="Constructing xgtype base object ", &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! copy the Grids
     allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "- Allocating xgtype%grids ", &
-        ESMF_CONTEXT, rc)) return
+        msg="- Allocating xgtype%grids ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     xgtype%sideA = sideA
     xgtype%sideB = sideB
 
@@ -309,7 +309,7 @@ integer, intent(out), optional  :: rc
     call ESMF_XGridValidate(ESMF_XGridCreateDefault, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -398,8 +398,8 @@ integer, intent(out), optional  :: rc
     ngrid_b = size(sideB, 1)
     if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- number of Grids are invalid on one side of the XGrid", &
-           ESMF_CONTEXT, rc) 
+           msg="- number of Grids are invalid on one side of the XGrid", &
+           ESMF_CONTEXT, rcToReturn=rc) 
         return
     endif
     do i = 1, ngrid_a
@@ -414,14 +414,14 @@ integer, intent(out), optional  :: rc
     nullify(ESMF_XGridCreateRaw%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-                                "Constructing xgtype base object ", &
-                                ESMF_CONTEXT, rc)) return
+                                msg="Constructing xgtype base object ", &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! copy the Grids
     allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "- Allocating xgtype%grids ", &
-        ESMF_CONTEXT, rc)) return
+        msg="- Allocating xgtype%grids ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     xgtype%sideA = sideA
     xgtype%sideB = sideB
 
@@ -430,8 +430,8 @@ integer, intent(out), optional  :: rc
         ncells = size(area, 1)
         allocate(xgtype%area(ncells), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating xgtype%area ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating xgtype%area ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         xgtype%area = area
     endif
 
@@ -440,8 +440,8 @@ integer, intent(out), optional  :: rc
         ndim = size(centroid, 2)
         allocate(xgtype%centroid(ncells, ndim), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating xgtype%centroid ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating xgtype%centroid ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         xgtype%centroid = centroid
     endif
 
@@ -449,15 +449,15 @@ integer, intent(out), optional  :: rc
     if(present(sparseMatA2X)) then
         call ESMF_SparseMatca(sparseMatA2X, xgtype%sparseMatA2X, ngrid_a, 'sparseMatA2X', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Initializing xgtype%sparseMatX2A ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Initializing xgtype%sparseMatX2A ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if(present(sparseMatX2A)) then
         call ESMF_SparseMatca(sparseMatX2A, xgtype%sparseMatX2A, ngrid_a, 'sparseMatX2A', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Initializing xgtype%sparseMatX2A ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Initializing xgtype%sparseMatX2A ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! TODO:
@@ -471,15 +471,15 @@ integer, intent(out), optional  :: rc
     if(present(sparseMatB2X)) then
         call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, 'sparseMatB2X', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Initializing xgtype%sparseMatB2X ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Initializing xgtype%sparseMatB2X ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if(present(sparseMatX2B)) then
         call ESMF_SparseMatca(sparseMatX2B, xgtype%sparseMatX2B, ngrid_b, 'sparseMatX2B', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Initializing xgtype%sparseMatX2B ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Initializing xgtype%sparseMatX2B ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! TODO:
@@ -492,7 +492,7 @@ integer, intent(out), optional  :: rc
     call ESMF_XGridDistGrids(xgtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
@@ -502,7 +502,7 @@ integer, intent(out), optional  :: rc
     call ESMF_XGridValidate(ESMF_XGridCreateRaw, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -528,14 +528,14 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         ngrid = size(xgtype%sideA, 1)
         allocate(xgtype%distgridA(ngrid), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating xgtype%distgridA(ngrid) ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating xgtype%distgridA(ngrid) ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         do i = 1, ngrid
             call ESMF_XGridDG(xgtype%sideA(i), xgtype%distgridA(i), &
                 xgtype%sparseMatA2X(i)%factorIndexList, 2, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
     endif
 
@@ -546,14 +546,14 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         ngrid = size(xgtype%sideA, 1)
         allocate(xgtype%distgridA(ngrid), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating xgtype%distgridA(ngrid) ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating xgtype%distgridA(ngrid) ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         do i = 1, ngrid
             call ESMF_XGridDG(xgtype%sideA(i), xgtype%distgridA(i), &
                 xgtype%sparseMatX2A(i)%factorIndexList, 1, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
     endif
 
@@ -562,14 +562,14 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         ngrid = size(xgtype%sideB, 1)
         allocate(xgtype%distgridB(ngrid), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating xgtype%distgridB(ngrid) ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating xgtype%distgridB(ngrid) ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         do i = 1, ngrid
             call ESMF_XGridDG(xgtype%sideB(i), xgtype%distgridB(i), &
                 xgtype%sparseMatB2X(i)%factorIndexList, 2, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
     endif
 
@@ -580,14 +580,14 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         ngrid = size(xgtype%sideB, 1)
         allocate(xgtype%distgridB(ngrid), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating xgtype%distgridB(ngrid) ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating xgtype%distgridB(ngrid) ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         do i = 1, ngrid
             call ESMF_XGridDG(xgtype%sideB(i), xgtype%distgridB(i), &
                 xgtype%sparseMatX2B(i)%factorIndexList, 1, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
     endif
 
@@ -596,7 +596,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatA2X, 2, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! if A2X is not provided and X2A is provided
@@ -606,7 +606,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatX2A, 1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! use the union of B2X indices to create the balanced distgrid
@@ -616,7 +616,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatB2X, 2, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! use the union of X2B indices to create the balanced distgrid
@@ -627,7 +627,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
         xgtype%distgridM = ESMF_XGridDGOverlay(xgtype%sparseMatX2B, 1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     !if(.not. associated(xgtype%sparseMatA2X) .and. &
@@ -636,7 +636,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
     !   .not. associated(xgtype%sparseMatX2B)) then
     !    call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
     !       "- one of the sparse matrix arguments must be specified", &
-    !       ESMF_CONTEXT, rc) 
+    !       ESMF_CONTEXT, rcToReturn=rc) 
     !    return
 
     !endif
@@ -670,8 +670,8 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
     maxidx = maxval(sparseMat(1)%factorIndexList(dim,:))
     allocate(iarray(minidx:maxidx), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "- Allocating iarray(minidx:maxidx) ", &
-        ESMF_CONTEXT, rc)) return
+        msg="- Allocating iarray(minidx:maxidx) ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     iarray = 0
     do i = minidx, maxidx
         iarray(sparseMat(1)%factorIndexList(dim,i)) = 1
@@ -686,8 +686,8 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 
         allocate(iarray_t(minidx_n:maxidx_n), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating iarray_t(minidx_n:maxidx_n) ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating iarray_t(minidx_n:maxidx_n) ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         ! copy the old index position array
         do j = minidx, maxidx
             iarray_t(j) = iarray(j)
@@ -706,8 +706,8 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
         deallocate(iarray)         
         allocate(iarray(minidx:maxidx), stat=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
-            "- Allocating iarray(minidx:maxidx) ", &
-            ESMF_CONTEXT, rc)) return
+            msg="- Allocating iarray(minidx:maxidx) ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         do j = minidx, maxidx
             iarray(j) = iarray_t(j)
         enddo
@@ -723,8 +723,8 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 
     allocate(indices(nidx), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "- Allocating indices(nidx) ", &
-        ESMF_CONTEXT, rc)) return
+        msg="- Allocating indices(nidx) ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! every marked position means that index exists
     ! add that index to indices array
@@ -739,7 +739,7 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
     ESMF_XGridDGOverlay = ESMF_DistGridCreate(indices, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     
     deallocate(iarray, indices)
 
@@ -768,8 +768,8 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 
     distgrid = ESMF_DistGridCreate(factorIndexList(dim,:), rc=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "- Creating distgrid from factorIndexList", &
-        ESMF_CONTEXT, rc)) return
+        msg="- Creating distgrid from factorIndexList", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -794,8 +794,8 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
 
     if(size(sparseMats,1) /= ngrid) then
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-           "- number of Grids different from size of sparseMat for "//tag, &
-           ESMF_CONTEXT, rc) 
+           msg="- number of Grids different from size of sparseMat for "//tag, &
+           ESMF_CONTEXT, rcToReturn=rc) 
         return
     endif
 
@@ -803,23 +803,23 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
         if(.not. associated(sparseMats(i)%factorIndexList) .or. &
           .not. associated(sparseMats(i)%factorList)) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-               "- sparseMat not initiailzed properly for "//tag, &
-               ESMF_CONTEXT, rc) 
+               msg="- sparseMat not initiailzed properly for "//tag, &
+               ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
 
         if(size(sparseMats(i)%factorIndexList, 2) /= size(sparseMats(i)%factorList, 1)) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-               "- sparseMat factorIndexList and factorList sizes not consistent "//tag, &
-               ESMF_CONTEXT, rc) 
+               msg="- sparseMat factorIndexList and factorList sizes not consistent "//tag, &
+               ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
     enddo
         
     allocate(sparseMatd(ngrid), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "Allocating xgtype%"//tag, &
-        ESMF_CONTEXT, rc)) return
+        msg="Allocating xgtype%"//tag, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     sparseMatd = sparseMats
 
     if(present(rc)) rc = ESMF_SUCCESS
@@ -866,16 +866,16 @@ subroutine ESMF_XGridConstructBaseObj(xgtype, name, rc)
 
     allocate(xgtype, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        "- Allocating XGrid Type", &
-        ESMF_CONTEXT, rc)) return
+        msg="- Allocating XGrid Type", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_XGridInitialize(xgtype, rc=localrc) 
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_BaseCreate(xgtype%base, "XGrid", name, 0, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridConstructBaseObj
@@ -921,12 +921,12 @@ end subroutine ESMF_XGridConstructBaseObj
     call ESMF_XGridValidate(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (.not.associated(xgrid%xgtypep)) then 
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-        "Uninitialized or already destroyed XGrid: xgtypep unassociated", &
-        ESMF_CONTEXT, rc)
+        msg="Uninitialized or already destroyed XGrid: xgtypep unassociated", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif 
 
@@ -934,7 +934,7 @@ end subroutine ESMF_XGridConstructBaseObj
     call ESMF_BaseGetStatus(xgrid%xgtypep%base, xgridstatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
         
     if (xgridstatus .eq. ESMF_STATUS_READY) then
 
@@ -945,7 +945,7 @@ end subroutine ESMF_XGridConstructBaseObj
             call ESMF_DistGridDestroy(xgrid%xgtypep%distgridA(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
         endif
         if(associated(xgrid%xgtypep%distgridB)) then
@@ -953,14 +953,14 @@ end subroutine ESMF_XGridConstructBaseObj
             call ESMF_DistGridDestroy(xgrid%xgtypep%distgridB(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
         endif
 
         !call ESMF_DistGridDestroy(xgrid%xgtypep%distgridM, rc=localrc)
         !if (ESMF_LogFoundError(localrc, &
         !    ESMF_ERR_PASSTHRU, &
-        !    ESMF_CONTEXT, rc)) return
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(associated(xgrid%xgtypep%centroid)) then
             deallocate(xgrid%xgtypep%centroid)
@@ -990,7 +990,7 @@ end subroutine ESMF_XGridConstructBaseObj
     call ESMF_BaseSetStatus(xgrid%xgtypep%base, ESMF_STATUS_INVALID, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(xgrid)
 
