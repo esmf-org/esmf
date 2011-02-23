@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.86 2011/02/23 22:39:47 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.87 2011/02/23 22:44:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.86 2011/02/23 22:39:47 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.87 2011/02/23 22:44:48 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -764,8 +764,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
-    vasMap, compCapacity, commCapacity, oneToOneFlag, dePinFlag, &
-    localDeCount, localDeList, vasLocalDeCount, vasLocalDeList, rc)
+    vasMap, oneToOneFlag, dePinFlag, localDeCount, localDeList, &
+    vasLocalDeCount, vasLocalDeList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
@@ -774,8 +774,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out),  optional  :: deCount
     integer, target,          intent(out),  optional  :: petMap(:)
     integer, target,          intent(out),  optional  :: vasMap(:)
-    integer, target,          intent(out),  optional  :: compCapacity(:)
-    integer, target,          intent(out),  optional  :: commCapacity(:,:)
     logical,                  intent(out),  optional  :: oneToOneFlag
     type(ESMF_DePinFlag),     intent(out),  optional  :: dePinFlag
     integer,                  intent(out),  optional  :: localDeCount
@@ -805,16 +803,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Upon return this holds the list of VASs against which the DEs are 
 !        mapped. The {\tt vasMap} argument must at least be of size
 !        {\tt deCount}.
-!     \item[{[compCapacity]}]
-!        \begin{sloppypar}
-!        Upon return this holds a relative measure of the computational
-!        capacity for each DE. The {\tt compCapacity} argument must at least be
-!        of size {\tt deCount}.
-!        \end{sloppypar}
-!     \item[{[commCapacity]}]
-!        Upon return this holds a relative measure of the communication
-!        capacity for each pair of DEs. The {\tt commCapacity} argument is a
-!        2D array where each dimension must at least be of size {\tt deCount}.
 !     \item[{[oneToOneFlag]}]
 !        Upon return this holds {\tt .TRUE.} if the specified 
 !        {\tt ESMF\_DELayout} describes a 1-to-1 mapping between DEs and PETs,
@@ -838,6 +826,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \end{description}
 !
 !EOP
+!
+!
+!    integer, target,          intent(out),  optional  :: compCapacity(:)
+!    integer, target,          intent(out),  optional  :: commCapacity(:,:)
+!     \item[{[compCapacity]}]
+!        \begin{sloppypar}
+!        Upon return this holds a relative measure of the computational
+!        capacity for each DE. The {\tt compCapacity} argument must at least be
+!        of size {\tt deCount}.
+!        \end{sloppypar}
+!     \item[{[commCapacity]}]
+!        Upon return this holds a relative measure of the communication
+!        capacity for each pair of DEs. The {\tt commCapacity} argument is a
+!        2D array where each dimension must at least be of size {\tt deCount}.
+!
 !------------------------------------------------------------------------------
     integer                 :: localrc                ! local return code
     type(ESMF_InterfaceInt) :: petMapArg              ! helper variable
@@ -854,18 +857,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
     ! Not implemented features
-    if (present(compCapacity)) then
-      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        msg="- compCapacity query not implemented", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-    if (present(commCapacity)) then
-      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        msg="- commCapacity query not implemented", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
+!    if (present(compCapacity)) then
+!      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+!        msg="- compCapacity query not implemented", &
+!        ESMF_CONTEXT, rcToReturn=rc)
+!      return
+!    endif
+!    if (present(commCapacity)) then
+!      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+!        msg="- commCapacity query not implemented", &
+!        ESMF_CONTEXT, rcToReturn=rc)
+1      return
+!    endif
     
     ! Deal with (optional) array arguments
     petMapArg = ESMF_InterfaceIntCreate(petMap, rc=localrc)
