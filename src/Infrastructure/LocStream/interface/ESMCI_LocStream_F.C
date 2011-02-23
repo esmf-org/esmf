@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.12 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.13 2011/02/23 01:20:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.12 2011/01/05 20:05:44 svasquez Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.13 2011/02/23 01:20:19 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -180,13 +180,13 @@ void FTN(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
     // obtain indexList for this DE and dim
     const int *indexList =
       distgrid->getIndexListPDimPLocalDe(localDE, 1, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc)))
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc)))
         return;
       
       // make sure this dimension is contiguous         
       const int contig=distgrid->getContigFlagPDimPDe(de, 1, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
-                                    ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc))) return;
+                                    ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc))) return;
       if (!contig) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
 				      "- doesn't handle non-contiguous DEs yet ",  ESMC_NOT_PRESENT_FILTER(rc));
@@ -250,13 +250,13 @@ void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
     // obtain indexList for this DE and dim
     const int *indexList =
       distgrid->getIndexListPDimPLocalDe(localDE, 1, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc)))
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc)))
       return;
     
     // make sure is contiguous         
     const int contig=distgrid->getContigFlagPDimPDe(de, 1, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
-				      ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc))) return;
+				      ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (!contig) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
 				    "- doesn't handle non-contiguous DEs yet ", ESMC_NOT_PRESENT_FILTER(rc));
