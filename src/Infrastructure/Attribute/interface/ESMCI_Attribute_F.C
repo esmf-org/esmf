@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.42 2011/02/23 05:29:13 w6ws Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.43 2011/02/23 06:58:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include <algorithm> // std::min()
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_Attribute.h"
@@ -33,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.42 2011/02/23 05:29:13 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.43 2011/02/23 06:58:59 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -570,13 +571,15 @@ extern "C" {
       char *nestPurpose,         // in - nest purpose list
       int  *nestConvLens,        // in - length of each nestConvention
       int  *nestPurpLens,        // in - length of each nestPurpose
-      int *nestAttPackInstanceCountList, // in - number of desired instances
-                                         //   of each (conv,purp) attpack type
+      int  *nestAttPackInstanceCountList, // in - number of desired instances
+                                          //   of each (conv,purp) attpack type
       int  *nestCount,           // in - number of nested attpacks (child nodes)
-      char *nestAttPackInstanceNameList, // out - attpack instance name list
-      int *nestAttPackInstanceNameLens,  // out - length of each instance name
-      int *nestAttPackInstanceNameCount, // inout - number of attpack 
-                                         //   instance names
+      char *nestAttPackInstanceNameList,  // out - attpack instance name list
+      int  *nestAttPackInstanceNameLens,  // inout - length of each inst name
+      int  *nestAttPackInstanceNameSize,  // in - number of elements in 
+                                     //      attPackInstanceNameList
+      int  *nestAttPackInstanceNameCount, // out - number of attpack 
+                                          //   instance names
       int  *rc,                  // in - return code
       ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
       ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
@@ -629,13 +632,6 @@ extern "C" {
       return;
   }
 
-  // simple sanity check before doing any more work
-  if (!nestCount) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute nestCount", &status);
-      if (rc) *rc = status;
-      return;
-  }
 
   // simple sanity check before doing any more work
   if ((!nestConvention) || (nclen <= 0) || (nestConvention[0] == '\0')) {
@@ -678,13 +674,45 @@ extern "C" {
   }
 
   // simple sanity check before doing any more work
+  if (!nestCount) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                        "bad attribute nestCount,", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
   if (!nestAttPackInstanceNameList) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "no attribute nestAttPackInstanceNameList", &status);
       if (rc) *rc = status;
       return;
   }
+
+  // simple sanity check before doing any more work
+  if (!nestAttPackInstanceNameLens) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestAttPackInstanceNameLens", &status);
+      if (rc) *rc = status;
+      return;
+  }
   
+  // simple sanity check before doing any more work
+  if (!nestAttPackInstanceNameSize) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestAttPackInstanceNameSize", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!nestAttPackInstanceNameCount) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute nestAttPackInstanceNameCount", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   string cconv(convention, clen);
   string cpurp(purpose, plen);
   string cobj(object, olen);
@@ -768,15 +796,19 @@ extern "C" {
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
-  // return number of attpack instance names
-  *nestAttPackInstanceNameCount = cnapinamecount;
-
   // convert attpack instance names to F90
+  int namecount = std::min(cnapinamecount, *nestAttPackInstanceNameSize);
   j = 0;
-  for (unsigned int i=0; i<cnapinamecount; i++) {
-    // TODO:  check if F90 buffer size is big enough:
-    //        nestAttPackInstanceNameCount >= cnapinamecount (before loop)
-    //        NameLens[i] >= [i].length()
+  for (unsigned int i=0; i<namecount; i++) {
+    // check if F90 name buffer length is big enough
+    if (cnapinamelist[i].length() > nestAttPackInstanceNameLens[i]) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
+          "returning attPackInstanceName too long for given F90 name buffer",
+           &status);
+        if (rc) *rc = status;
+        return;
+    }
+
     nestAttPackInstanceNameLens[i] = cnapinamelist[i].length();
     status = ESMC_CtoF90string(const_cast<char*>(cnapinamelist[i].c_str()), 
                                &nestAttPackInstanceNameList[j], 
@@ -785,6 +817,9 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     j += nestAttPackInstanceNameLens[i];
   }
+
+  // return number of converted attpack instance names
+  *nestAttPackInstanceNameCount = namecount;
 
 }  // end c_esmc_attpackcreatestdnest
 
@@ -1697,6 +1732,182 @@ extern "C" {
   if (rc) *rc = status;
 
 }  // end c_esmc_attpackgetvalue
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attpackgetapinstnames - get attpack instance names
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackgetapinstnames)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackgetapinstnames()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *convention,         // in - convention
+      char *purpose,            // in - purpose
+      char *object,             // in - object
+      char *attPackInstanceNameList, // out - attpack instance names
+      int *attPackInstanceNameLens,  // inout - lengths of attpack inst names
+      int *attPackInstanceNameSize,  // in - number of elements in 
+                                     //      attPackInstanceNameList
+      int *attPackInstanceNameCount, // out - number of attpack instance names
+      int *rc,                  // in - return code
+      ESMCI_FortranStrLenArg clen, // hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen, // hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen, // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg napinlen) { // hidden/in - strlen count for attPackInstanceNameList
+// 
+// !DESCRIPTION:
+//     Return the attpack instance names for (convention,purpose)
+//
+//EOP
+
+  int j, k, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!attPackInstanceNameList) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "no attribute attPackInstanceNameList", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!attPackInstanceNameLens) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute attPackInstanceNameLens", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!attPackInstanceNameSize) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute attPackInstanceNameSize", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if (!attPackInstanceNameCount) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute attPackInstanceNameCount", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cpurp.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cobj.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // local buffer for returned attpack instance names and count
+  vector<string> capinamelist;
+  capinamelist.reserve(*attPackInstanceNameSize);
+  int capinamecount;
+
+  // Create the attribute package on the object
+  status = (**base).root.AttPackGet(cconv, cpurp, cobj,
+                                    capinamelist, capinamecount);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
+
+  // check if F90 name buffer size is big enough
+  if (capinamecount > *attPackInstanceNameSize) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
+        "given F90 buffer size too small for number of returning attPackInstanceNames",
+         &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // convert attpack instance names to F90
+  j = 0;
+  for (unsigned int i=0; i<capinamecount; i++) {
+    // check if F90 name buffer length is big enough
+    if (capinamelist[i].length() > attPackInstanceNameLens[i]) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
+         "returning attPackInstanceName too long for given F90 name buffer len",
+           &status);
+        if (rc) *rc = status;
+        return;
+    }
+
+    attPackInstanceNameLens[i] = capinamelist[i].length();
+    status = ESMC_CtoF90string(const_cast<char*>(capinamelist[i].c_str()), 
+                               &attPackInstanceNameList[j], 
+                               attPackInstanceNameLens[i]);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    j += attPackInstanceNameLens[i];
+  }
+
+  // return number of converted attpack instance names
+  *attPackInstanceNameCount = capinamecount;
+
+}  // end c_esmc_attpackgetapinstnames
 
 //-----------------------------------------------------------------------------
 //BOP

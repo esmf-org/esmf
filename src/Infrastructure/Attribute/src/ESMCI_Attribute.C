@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.91 2011/02/23 05:27:21 w6ws Exp $
+// $Id: ESMCI_Attribute.C,v 1.92 2011/02/23 06:58:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.91 2011/02/23 05:27:21 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.92 2011/02/23 06:58:59 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1056,6 +1056,61 @@ int Attribute::count=0;
   }
   
   return ap;
+
+}  // end AttPackGet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackGet"
+//BOPI
+// !IROUTINE:  AttPackGet - get attpack instance names associated with the given
+//                          convention, purpose, and object
+//
+// !INTERFACE:
+      int Attribute::AttPackGet(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      const string &convention,        // in - Attribute convention to retrieve
+      const string &purpose,           // in - Attribute purpose to retrieve
+      const string &object,            // in - Attribute object type to retrieve
+      vector<string> &attPackInstanceNameList, // out - Attribute package instance names
+      int &attPackInstanceNameCount) const { // out - # of attPack instance names
+// !DESCRIPTION:
+//    Get the attpack instance names given its convention, 
+//    purpose, and object type.  Looks for all the instance names to be 
+//    at one level in the tree.
+//
+//EOPI
+
+  int i;
+  Attribute *ap;
+
+  // look for the attpacks on this Attribute, at this level
+  attPackInstanceNameCount = 0;
+  for (i=0; i<packList.size(); i++) {
+    ap = packList.at(i);
+    if (convention.compare(ap->attrConvention) == 0 && 
+        purpose.compare(ap->attrPurpose) == 0 &&
+        object.compare(ap->attrObject) == 0) {
+      attPackInstanceNameList.push_back(ap->attrName); 
+      attPackInstanceNameCount++;
+    }
+  }
+  if (attPackInstanceNameCount > 0) return ESMF_SUCCESS;
+
+  // if not found at this level, recurse through the nested Attribute packages,
+  // one level at a time, right-to-left, to find right-most package
+  for (i=packList.size()-1; i >= 0; i--) {
+    packList.at(i)->AttPackGet(convention, purpose, object,
+                               attPackInstanceNameList, 
+                               attPackInstanceNameCount);
+    if (attPackInstanceNameCount > 0) return ESMF_SUCCESS;
+  }
+
+  // none found
+  return ESMF_FAILURE;
 
 }  // end AttPackGet
 //-----------------------------------------------------------------------------

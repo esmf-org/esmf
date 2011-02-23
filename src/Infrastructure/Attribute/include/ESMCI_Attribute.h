@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.42 2011/02/09 06:59:15 earl.r.schwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.43 2011/02/23 06:58:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,6 +129,10 @@ class Attribute
     Attribute *AttPackGet(const string &convention, 
       const string &purpose, const string &object,
       const string &attPackInstanceName) const;
+    int AttPackGet(const string &convention, 
+      const string &purpose, const string &object,
+      vector<string> &attPackInstanceNameList, 
+      int &attPackInstanceNameCount) const;
     Attribute *AttPackGetAttribute(const string &name) const;
     int AttPackIsPresent(const string &name, const string &convention, 
       const string &purpose, const string &object,
@@ -350,6 +354,7 @@ extern "C" {
                                   int *nestCount,
                                   char *nestAttPackInstanceNameList,
                                   int *nestAttPackInstanceNameLens,
+                                  int *nestattPackInstanceNameSize,
                                   int *nestAttPackInstanceNameCount,
                                   int *rc, 
                                   ESMCI_FortranStrLenArg clen, 
@@ -408,6 +413,18 @@ extern "C" {
                                   ESMCI_FortranStrLenArg plen, 
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
+  void FTN(c_esmc_attpackgetapinstnames)(ESMC_Base **base, 
+                                  char *convention, char *purpose, 
+                                  char *object, 
+                                  char *attPackInstanceNameList,
+                                  int *attPackInstanceNameLens,
+                                  int *attPackInstanceNameSize,
+                                  int *attPackInstanceNameCount,
+                                  int *rc, 
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen,
+                                  ESMCI_FortranStrLenArg napinlen);
   void FTN(c_esmc_attpackispresent)(ESMC_Base **base, char *name,
                                   char *convention, char *purpose, 
                                   char *object, char *attPackInstanceName,
