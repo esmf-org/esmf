@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.71 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_Config.F90,v 1.72 2011/02/23 19:49:18 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -472,19 +472,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
 ! Initialization
       allocate(config_local, stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, "Allocating config class", &
-                                        ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="Allocating config class", &
+                                        ESMF_CONTEXT, rcToReturn=rc)) return
 
       allocate(config_local%buffer, config_local%this_line, stat = memstat)
-      if (ESMF_LogFoundAllocError(memstat, "Allocating local buffer 1", &
-                                        ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="Allocating local buffer 1", &
+                                        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! TODO: Absoft 8 compiler bug necessitates allocating pointer within
       ! derived type via local pointer first.  Absoft 9/Jazz bug necessitates
       ! this must be a separate allocate statement.
       allocate(attr_used_local(NATT_MAX), stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, "Allocating local buffer 2", &
-                                        ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="Allocating local buffer 2", &
+                                        ESMF_CONTEXT, rcToReturn=rc)) return
 
       config_local%nbuf = 0
       config_local%next_line = 0
@@ -538,14 +538,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! TODO: Absoft 9/Jazz bug necessitates this separate deallocate statement
       ! before the other (must be in reverse order of allocation)
       deallocate(config%cptr%attr_used, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "Deallocating local buffer 2", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 2", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(config%cptr%buffer, config%cptr%this_line, stat = memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "Deallocating local buffer 1", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating local buffer 1", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       deallocate(config%cptr, stat = memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "Deallocating config type", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="Deallocating config type", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       nullify(config%cptr)
 
       ! return successfully
@@ -608,12 +608,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if ( i .eq. 1 ) then
          config%cptr%this_line = BLK // EOL
          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
-                                "label not found", &
-                                 ESMF_CONTEXT, rc)) return
+                                msg="label not found", &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
       elseif(i.le.0) then
          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                "invalid operation with index_", &
-                                 ESMF_CONTEXT, rc)) return
+                                msg="invalid operation with index_", &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
 !     Save current attribute label without colon,
@@ -786,7 +786,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Processing
       if(present( label )) then
          call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
-         if ( localrc /= 0 ) then
+         if ( localrc /= ESMF_SUCCESS ) then
             if (present(default)) then
                localrc = ESMF_SUCCESS
             end if
@@ -825,7 +825,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          
          value = config%cptr%this_line(ib:ie) 
          config%cptr%this_line = config%cptr%this_line(ie+2:)
-         localrc = 0
+         localrc = ESMF_SUCCESS
       end if
 
       if ( present (rc)) then
@@ -884,7 +884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      localrc = 0
+      localrc = ESMF_RC_NOT_IMPL
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -978,7 +978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      localrc = 0
+      localrc = ESMF_RC_NOT_IMPL
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1074,7 +1074,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      localrc = 0
+      localrc = ESMF_RC_NOT_IMPL
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1082,12 +1082,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (count)) then
 	if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else if (count > size (valueList)) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else
            localcount = count
         end if
@@ -1169,7 +1169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      localrc = 0
+      localrc = ESMF_RC_NOT_IMPL
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1177,12 +1177,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (count)) then
 	if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else if (count > size (valueList)) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else
            localcount = count
         end if
@@ -1469,12 +1469,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (count)) then
 	if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else if (count > size (valueList)) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else
            localcount = count
         end if
@@ -1563,12 +1563,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (count)) then
 	if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else if (count > size (valueList)) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else
            localcount = count
         end if
@@ -1654,7 +1654,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      localrc = 0
+      localrc = ESMF_RC_NOT_IMPL
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
@@ -1696,9 +1696,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               call ESMF_ConfigSetCurrentAttrUsed(config, used=.false.)
 
               if (ESMF_LogFoundError(ESMF_RC_CANNOT_GET, &
-                                "bad boolean value '" // string // &
-                                "' in configuration file.", &
-                                 ESMF_CONTEXT, rc)) return
+                                msg="bad boolean value '" // string // &
+                                  "' in configuration file.", &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
             endif
          endif
       else
@@ -1770,12 +1770,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (count)) then
 	if (count <= 0) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else if (count > size (valueList)) then
            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                  "invalid SIZE", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="invalid SIZE", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else
            localcount = count
         end if
@@ -1931,6 +1931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
 
       lineCount = 0
       columnCount = 0
@@ -2099,12 +2100,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       call ESMF_ConfigLoadFile_1proc_( config, filename, localrc )
            if (ESMF_LogFoundError(localrc, &
-                                "unable to load file: " // trim (filename), &
-                                 ESMF_CONTEXT, rc)) return
+                                msg="unable to load file: " // trim (filename), &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_ConfigParseAttributes( config, unique, localrc )
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       if ( present (delayout) ) then
          call ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
@@ -2151,7 +2152,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     ---------     
       call ESMF_UtilIOUnitGet (lu, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       ! A open through an interface to avoid portability problems.
       ! (J.G.)
 
@@ -2159,8 +2160,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if ( localrc /= ESMF_SUCCESS ) then
          if (ESMF_LogFoundError(localrc, &
-                              "error opening text file: " // trim (filename), &
-                               ESMF_CONTEXT, rc)) return
+                              msg="error opening text file: " // trim (filename), &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
 !     Read to end of file
@@ -2371,8 +2372,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     duplicate = .true.
                     logmsg = "Duplicate label '" // trim(label) // &
                                   "' found in attributes file"
-                    call ESMF_LogSetError(ESMF_RC_DUP_NAME, logmsg, &
-                                             ESMF_CONTEXT, rc)
+                    call ESMF_LogSetError(ESMF_RC_DUP_NAME, msg=logmsg, &
+                                             ESMF_CONTEXT, rcToReturn=rc)
                     localrc = ESMF_RC_DUP_NAME
                   endif
                 enddo
@@ -2385,8 +2386,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   config%cptr%attr_used(a)%label = label
                else
                   if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST,    &
-                       "attribute out-of-range; increase NATT_MAX", &
-                       ESMF_CONTEXT, rc)) return
+                       msg="attribute out-of-range; increase NATT_MAX", &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
                endif
                a = a + 1
             endif
@@ -2533,8 +2534,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if ( (j-i) .gt. LSZ) then
            write(logmsg, *) ", attribute label, value & EOL are ", j-i, &
                " characters long, only ", LSZ, " characters allowed per line"
-           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
-                                     ESMF_CONTEXT, rc)) return
+           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         ! check if enough space left in config buffer
@@ -2542,8 +2543,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            write(logmsg, *) ", attribute label & value require ", j-i+1, &
                " characters (including EOL & EOB), only ", NBUF_MAX-i, &
                " characters left in config buffer"
-           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
-                                     ESMF_CONTEXT, rc)) return
+           if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
         endif
       endif
 
@@ -2568,8 +2569,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (j-m+1 .gt. LSZ) then
                write(logmsg, *) ", attribute label, value & EOL are ", j-m+1, &
                   " characters long, only ", LSZ, " characters allowed per line"
-               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
-                                         ESMF_CONTEXT, rc)) return
+               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
             ! check if enough space left in config buffer to extend line
@@ -2577,8 +2578,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                write(logmsg, *) ", attribute label & value require ", j-m+1, &
                    " characters (including EOL & EOB), only ", NBUF_MAX-i, &
                    " characters left in config buffer"
-               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, logmsg, &
-                                         ESMF_CONTEXT, rc)) return
+               if (ESMF_LogFoundError(ESMC_RC_LONG_STR, msg=logmsg, &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
             ninsert = nchar - lenThisLine
@@ -2718,20 +2719,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (config%cptr%nbuf < 0 .or. config%cptr%nbuf > NBUF_MAX) then
         if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST, &
-                                  "config%cptr%nbuf out-of-range.", &
-                                  ESMF_CONTEXT, rc)) return
+                                  msg="config%cptr%nbuf out-of-range.", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (config%cptr%next_line < 0 .or. config%cptr%next_line >= config%cptr%nbuf) then
         if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST, &
-                                  "config%cptr%next_line out-of-range.", &
-                                  ESMF_CONTEXT, rc)) return
+                                  msg="config%cptr%next_line out-of-range.", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (config%cptr%nattr < 0 .or. config%cptr%nattr > NATT_MAX) then
         if (ESMF_LogFoundError(ESMF_RC_INTNRL_LIST, &
-                                  "config%cptr%nattr out-of-range.", &
-                                  ESMF_CONTEXT, rc)) return
+                                  msg="config%cptr%nattr out-of-range.", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! optional validations

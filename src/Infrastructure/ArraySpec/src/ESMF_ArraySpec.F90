@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.44 2011/02/23 19:50:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.43 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.44 2011/02/23 19:50:41 w6ws Exp $'
 
 !==============================================================================
 
@@ -209,7 +209,7 @@ module ESMF_ArraySpecMod
     ! check status
     if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
        ! Use LogErr to handle return code (to record other info for logfile)
-       if (ESMF_LogFoundError(ESMF_RC_OBJ_INIT, "ArraySpec hasn't been set", &
+       if (ESMF_LogFoundError(ESMF_RC_OBJ_INIT, msg="ArraySpec hasn't been set", &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
@@ -280,8 +280,8 @@ module ESMF_ArraySpecMod
       ! something to trigger on next time that this is bad
       arrayspec%rank = 0
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                            "bad value for rank", &
-                             ESMF_CONTEXT, rc)) return
+                            msg="bad value for rank", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Since typekind is a derived type, you cannot set it to
@@ -345,7 +345,7 @@ module ESMF_ArraySpecMod
     ! check status
     if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
        ! Use LogErr to handle return code (to record other info for logfile)
-       if (ESMF_LogFoundError(ESMF_RC_OBJ_INIT, "ArraySpec hasn't been set", &
+       if (ESMF_LogFoundError(ESMF_RC_OBJ_INIT, msg="ArraySpec hasn't been set", &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
