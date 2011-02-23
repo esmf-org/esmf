@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.72 2011/02/23 19:49:18 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.73 2011/02/23 22:49:04 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -415,7 +415,7 @@
     function ESMF_ConfigGetInit(d)
 !
 ! !ARGUMENTS:
-       type(ESMF_Config), intent(inout), optional :: d
+       type(ESMF_Config), intent(in), optional :: d
        ESMF_INIT_TYPE :: ESMF_ConfigGetInit
 !
 ! !DESCRIPTION:
