@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.77 2011/02/23 06:59:22 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.78 2011/02/23 19:08:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.77 2011/02/23 06:59:22 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.78 2011/02/23 19:08:43 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1250,7 +1250,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+! !IROUTINE: ESMF_AttributeGet  - Get Attribute package instance names
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
@@ -1282,9 +1282,9 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object
 !     \item [convention]
-!           The convention of the Attribute package(s).
+!           The convention of the Attribute package instances.
 !     \item [purpose]
-!           The purpose of the Attribute package(s).
+!           The purpose of the Attribute package instances.
 !     \item [attPackInstanceNameList]
 !           The name(s) of the Attribute package instances of the given 
 !           convention and purpose.
@@ -3680,7 +3680,7 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetAPinstNames" @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a list of AttPack Instance Names @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a list of AttPack instance names @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
@@ -3697,7 +3697,7 @@ contains
  @\
 ! @\
 ! !DESCRIPTION: @\
-!     Get the Attribute Package instance names of the specified convention @\
+!     Get the Attribute package instance names of the specified convention @\
 !     and purpose.  Also get the number of such names. @\
 ! @\
 !     The arguments are: @\
@@ -3705,9 +3705,9 @@ contains
 !     \item [mthis] @\
 !      An ESMF object. @\
 !     \item [convention] @\
-!      The convention of the Attribute package(s). @\
+!      The convention of the Attribute package instances. @\
 !     \item [purpose] @\
-!      The purpose of the Attribute package(s). @\
+!      The purpose of the Attribute package instances. @\
 !     \item [attPackInstanceNameList] @\
 !      The name(s) of the Attribute package instances of the given @\
 !      convention and purpose. @\
