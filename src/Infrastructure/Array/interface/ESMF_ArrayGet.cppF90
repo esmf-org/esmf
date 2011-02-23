@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.55 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.56 2011/02/23 01:18:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.55 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.56 2011/02/23 01:18:00 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -141,7 +141,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),          intent(out), optional :: arrayspec
     type(ESMF_TypeKind),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
@@ -544,14 +544,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetPLocalDePDim(array, dim, localDe, keywordEnforcer, &
+  subroutine ESMF_ArrayGetPLocalDePDim(array, dim, keywordEnforcer, localDe, &
     indexCount, indexList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
     integer,                       intent(in)            :: dim
-    integer,                       intent(in)            :: localDe
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(in),  optional :: localDe
     integer,                       intent(out), optional :: indexCount
     integer,                       intent(out), optional :: indexList(:)
     integer,                       intent(out), optional :: rc  
@@ -566,10 +566,12 @@ contains
 !   \begin{description}
 !   \item[array] 
 !     Queried {\tt ESMF\_Array} object.
-!   \item[localDe]
-!     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}
 !   \item[dim]
 !     Dimension for which information is requested. {\tt [1,..,dimCount]}
+!   \item[{[localDe]}]
+!     Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
+!     For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
+!     in which case it will default to {\tt localDe=0}.
 !   \item[{[indexCount]}]
 !     DistGrid indexCount associated with {\tt localDe, dim}.
 !   \item[{[indexList]}]
@@ -589,6 +591,7 @@ contains
     type(ESMF_DELayout) :: delayout       ! helper variable
     integer             :: deCount        ! helper variable
     integer             :: localDeCount   ! helper variable
+    integer             :: localDeArg     ! helper variable
     integer, allocatable:: localDeList(:) ! helper variable
     integer             :: de             ! helper variable
     integer             :: rank           ! helper variable
@@ -607,6 +610,27 @@ contains
       delayout=delayout, deCount=deCount, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deal with optional localDe argument
+    if (present(localDe)) then
+      localDeArg = localDe
+    else
+      if (localDeCount == 1) then
+        localDeArg = 0 ! default
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_OPT, &
+          "- must provide optional localDe argument for localDeCount > 1", &
+          ESMF_CONTEXT, rc)
+      endif
+    endif
+    ! Check that localDeArg is within limits
+    if (localDeArg < 0 .or. localDeArg > localDeCount-1) then
+      call ESMF_LogSetError(ESMF_RC_ARG_OUTOFRANGE, &
+        "- localDe out of range", &
+        ESMF_CONTEXT, rc)
+      return
+    endif
+
     if (dim < 1 .or. dim > rank) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         "dim argument out of range", &
@@ -634,7 +658,7 @@ contains
     call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    de=localDeList(localDe)
+    de=localDeList(localDeArg)
     deallocate(localDeList)
     count = indexCountInternal(distgridDim, de)
     deallocate(indexCountInternal)
@@ -652,7 +676,7 @@ contains
           ESMF_CONTEXT, rc)
         return
       endif
-      call ESMF_DistGridGet(distgrid, localDe=localDe, dim=dim, &
+      call ESMF_DistGridGet(distgrid, localDe=localDeArg, dim=dim, &
         indexList=indexList, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -678,7 +702,7 @@ contains
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Array),           intent(in)              :: array @\
-!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+! type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,                    intent(in),  optional   :: localDe @\
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   integer,                    intent(out), optional   :: rc  @\
@@ -716,7 +740,7 @@ contains
     localDe, farrayPtr, rc) @\
 @\
     type(ESMF_Array),           intent(in)                :: array @\
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     integer,                    intent(in),  optional     :: localDe @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     integer,                    intent(out), optional     :: rc @\
@@ -778,13 +802,13 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetLocalArray(array, localDe, localarray, keywordEnforcer, rc)
+  subroutine ESMF_ArrayGetLocalArray(array, keywordEnforcer, localDe, localarray, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: localDe
     type(ESMF_LocalArray),  intent(inout)         :: localarray
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
 !         
 !
