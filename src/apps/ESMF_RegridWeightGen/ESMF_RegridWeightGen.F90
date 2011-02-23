@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.23 2011/02/09 23:28:23 ESRL\robert.oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.24 2011/02/23 17:33:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -74,50 +74,50 @@ program ESMF_RegridWeightGen
       !   then broadcast the results to the rest of the Pets
       !
       if (PetNo == 0) then
-         call ESMF_UtilGetArgIndex('--help',index)
+         call ESMF_UtilGetArgIndex('--help', argindex=index)
          if (index /= -1) then
 	   call PrintUsage()
 	   call ESMF_Finalize(terminationflag=ESMF_ABORT)
          endif
-         call ESMF_UtilGetArgIndex('-s',index)
-         if (index == -1) call ESMF_UtilGetArgIndex('--source',index,rc)
+         call ESMF_UtilGetArgIndex('-s', argindex=index)
+         if (index == -1) call ESMF_UtilGetArgIndex('--source', argindex=index, rc=rc)
          if (index == -1) then
            print *, 'the required argument [-s|--source] is missing'
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
-           call ESMF_UtilGetArg(index+1,srcfile)
+           call ESMF_UtilGetArg(index+1, argvalue=srcfile)
          endif
       
-         call ESMF_UtilGetArgIndex('-d',index,rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--destination',index,rc)
+         call ESMF_UtilGetArgIndex('-d', argindex=index, rc=rc)
+         if (index == -1) call ESMF_UtilGetArgIndex('--destination', argindex=index, rc=rc)
          if (index == -1) then
            print *, 'the required argument [-w|--weight] is missing'
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
-           call ESMF_UtilGetArg(index+1,dstfile)
+           call ESMF_UtilGetArg(index+1, argvalue=dstfile)
          endif
           
-         call ESMF_UtilGetArgIndex('-w',index,rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--weight',index,rc)
+         call ESMF_UtilGetArgIndex('-w', argindex=index, rc=rc)
+         if (index == -1) call ESMF_UtilGetArgIndex('--weight', argindex=index, rc=rc)
          if (index == -1) then
            print *, 'the required argument [-w|--weight] is missing'
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else	
-           call ESMF_UtilGetArg(index+1,wgtfile)
+           call ESMF_UtilGetArg(index+1, argvalue=wgtfile)
          endif
 
-         call ESMF_UtilGetArgIndex('-m',index,rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--method',index,rc)
+         call ESMF_UtilGetArgIndex('-m', argindex=index, rc=rc)
+         if (index == -1) call ESMF_UtilGetArgIndex('--method', argindex=index, rc=rc)
          if (index == -1) then
            print *, 'use default interpolation method: bilinear'
            method = 'bilinear'
          else
-           call ESMF_UtilGetArg(index+1,method)
+           call ESMF_UtilGetArg(index+1, argvalue=method)
          endif
     	
          poleptrs = -1
-         call ESMF_UtilGetArgIndex('-p',index,rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--pole',index,rc)
+         call ESMF_UtilGetArgIndex('-p', argindex=index, rc=rc)
+         if (index == -1) call ESMF_UtilGetArgIndex('--pole', argindex=index, rc=rc)
          if (index == -1) then
 	   if (method .eq. 'conserve') then
               print *, 'use default pole: None'
@@ -128,7 +128,7 @@ program ESMF_RegridWeightGen
               pole = ESMF_REGRIDPOLE_ALLAVG
            endif
          else
-           call ESMF_UtilGetArg(index+1,flag)
+           call ESMF_UtilGetArg(index+1, argvalue=flag)
            if (trim(flag) .eq. 'none') then
 	     pole = ESMF_REGRIDPOLE_NONE
 	     poleptrs = 0
@@ -153,9 +153,9 @@ program ESMF_RegridWeightGen
          dstIsScrip = .true.
          srcIsRegional = .false.
          dstIsRegional = .false.
-         call ESMF_UtilGetArgIndex('-t',index,rc)
+         call ESMF_UtilGetArgIndex('-t', argindex=index, rc=rc)
          if (index /= -1) then
-           call ESMF_UtilGetArg(index+1,flag)
+           call ESMF_UtilGetArg(index+1, argvalue=flag)
 	   if (trim(flag) .eq. 'ESMF') then
              srcIsScrip = .false.
              dstIsScrip = .false.
@@ -167,9 +167,9 @@ program ESMF_RegridWeightGen
            typeSetFlag = .true.
          endif
 
-         call ESMF_UtilGetArgIndex('--src_type',index,rc)
+         call ESMF_UtilGetArgIndex('--src_type', argindex=index, rc=rc)
          if (index /= -1) then
-           call ESMF_UtilGetArg(index+1,flag)
+           call ESMF_UtilGetArg(index+1, argvalue=flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. srcIsScrip) .or.   &
@@ -187,9 +187,9 @@ program ESMF_RegridWeightGen
            endif
          endif
 
-         call ESMF_UtilGetArgIndex('--dst_type',index,rc)
+         call ESMF_UtilGetArgIndex('--dst_type', argindex=index, rc=rc)
          if (index /= -1) then
-           call ESMF_UtilGetArg(index+1,flag)
+           call ESMF_UtilGetArg(index+1, argvalue=flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. dstIsScrip) .or.   &
@@ -207,7 +207,7 @@ program ESMF_RegridWeightGen
            endif
          endif
 
-         call ESMF_UtilGetArgIndex('-r',index,rc)
+         call ESMF_UtilGetArgIndex('-r', argindex=index, rc=rc)
          if (index /= -1) then
            srcIsRegional = .true.
            dstIsRegional = .true.
@@ -216,7 +216,7 @@ program ESMF_RegridWeightGen
            print *, 'Set pole to None for regional grids'
          end if
 
-         call ESMF_UtilGetArgIndex('--src_regional',index,rc)
+         call ESMF_UtilGetArgIndex('--src_regional', argindex=index, rc=rc)
          if (index /= -1) then
            srcIsRegional = .true.
            pole = ESMF_REGRIDPOLE_NONE
@@ -224,7 +224,7 @@ program ESMF_RegridWeightGen
            print *, 'Set pole to None for regional source grid'
          end if
 
-         call ESMF_UtilGetArgIndex('--dst_regional',index,rc)
+         call ESMF_UtilGetArgIndex('--dst_regional', argindex=index, rc=rc)
          if (index /= -1) then
            dstIsRegional = .true.
          end if
