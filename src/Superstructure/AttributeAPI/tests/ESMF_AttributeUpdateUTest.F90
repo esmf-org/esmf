@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.9 2011/02/18 22:53:05 w6ws Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.10 2011/02/23 20:58:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -346,7 +346,7 @@ module ESMF_AttributeUpdateUTestMod
     call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_FieldBundleGet(fieldbundle, name="field", field=field, rc=rc)
+    call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
@@ -458,7 +458,7 @@ module ESMF_AttributeUpdateUTestMod
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldBundleGet(fieldbundle, name="field", field=field, rc=rc)
+    call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldDestroy(field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.9 2011/02/18 22:53:05 w6ws Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.10 2011/02/23 20:58:24 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -643,7 +643,7 @@ program ESMF_AttributeUpdateUTest
     call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    call ESMF_FieldBundleGet(fieldbundle, name="field", field=field, rc=rc)
+    call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     !EX_UTest_Multi_Proc_Only
