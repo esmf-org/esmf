@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.67 2011/02/23 06:54:17 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.68 2011/02/23 16:50:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.67 2011/02/23 06:54:17 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.68 2011/02/23 16:50:20 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -159,7 +159,7 @@
       !NEX_UTest
       ! Test Log Close
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogClose(log1, rc)
+      call ESMF_LogClose(log1, rc=rc)
       write(name, *) "Close Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -172,7 +172,7 @@
       !EX_UTest
       ! Test Log Close of never pened file
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogClose(log4, rc)
+      call ESMF_LogClose(log4, rc=rc)
       write(name, *) "Close Log File of never opened file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -199,7 +199,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundError(ESMF_FAILURE, msg="hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -215,7 +215,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundError(ESMF_SUCCESS, msg="hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -239,7 +239,7 @@
       !EX_UTest
       ! Test Error Msg Found Alloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE, msg="hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -255,7 +255,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS, msg="hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -313,7 +313,7 @@
       !EX_UTest
       ! Test Error Msg Found Dealloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE, msg="hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -329,7 +329,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS,"hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS, msg="hello",rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -514,7 +514,7 @@
       !EX_UTest
       ! Test Log Close
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogClose(log2, rc)
+      call ESMF_LogClose(log2, rc=rc)
       write(name, *) "Close Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -523,7 +523,7 @@
       !EX_UTest
       ! Test Log Close
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogClose(log2, rc)
+      call ESMF_LogClose(log2, rc=rc)
       write(name, *) "Close a closed Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -654,7 +654,7 @@
 	call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
 	if (rc /= ESMF_SUCCESS) exit
 
-	call ESMF_LogSet (log8,  &
+	call ESMF_LogSet (log=log8,  &
             msgAllow=(/ ESMF_LOG_INFO /),  &
             rc=rc)
 	if (rc /= ESMF_SUCCESS) exit
