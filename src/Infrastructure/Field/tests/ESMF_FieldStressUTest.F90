@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.13 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.14 2011/02/23 17:08:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,18 +108,18 @@ contains
                                       regDecomp=(/1,1/), name="landgrid", rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_GridGet(grid, localde=0, staggerloc=ESMF_STAGGERLOC_CENTER, &
                 computationalCount=gcc, exclusiveCount=gec, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             allocate(farray(max(gcc(1), gec(1)), max(gcc(2), gec(2))) )
 
@@ -128,25 +128,25 @@ contains
                 computationalEdgeUWidth=(/-1,-1/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             field = ESMF_FieldCreate(grid, array, copyflag=ESMF_DATA_COPY, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldDestroy(field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_ArrayDestroy(array, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_GridDestroy(grid, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             deallocate(farray)
         enddo
         rc = localrc

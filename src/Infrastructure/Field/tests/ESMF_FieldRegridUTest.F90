@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.24 2011/02/17 23:44:39 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.25 2011/02/23 17:08:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -363,12 +363,12 @@ contains
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
 
@@ -841,12 +841,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   B_nx = 20
@@ -1309,12 +1309,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   B_nx = 20
@@ -1730,12 +1730,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   B_nx = 20
@@ -2195,12 +2195,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   A_nx = 10
@@ -2646,12 +2646,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   B_nx = 20
@@ -3013,12 +3013,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   B_nx = 20
@@ -3385,12 +3385,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
@@ -3970,12 +3970,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
@@ -4527,12 +4527,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
@@ -5272,12 +5272,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! If we don't have 1 or 4 PETS then exit successfully
   if ((petCount .ne. 1) .and. (petCount .ne. 4)) then
@@ -5912,12 +5912,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   !! THESE RESOLUTIONS ARE SETUP SO THE DEST GRID (GRID B) HAS
@@ -6267,12 +6267,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   !! THESE RESOLUTIONS ARE SETUP SO THE DEST GRID (GRID B) HAS
@@ -6628,12 +6628,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   !! THESE RESOLUTIONS ARE SETUP SO THE DEST GRID (GRID B) HAS
@@ -6990,12 +6990,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   !! THESE RESOLUTIONS ARE SETUP SO THE DEST GRID (GRID B) HAS
@@ -7353,12 +7353,12 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   src_nx = 20
