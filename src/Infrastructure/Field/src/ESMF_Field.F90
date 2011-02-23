@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.357 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_Field.F90,v 1.358 2011/02/23 20:10:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -127,7 +127,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.357 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_Field.F90,v 1.358 2011/02/23 20:10:08 w6ws Exp $'
 
 !==============================================================================
 !
@@ -206,8 +206,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (.not.associated(field%ftypep)) then 
          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-            "Uninitialized or already destroyed Field: ftypep unassociated", &
-             ESMF_CONTEXT, rc)
+            msg="Uninitialized or already destroyed Field: ftypep unassociated", &
+             ESMF_CONTEXT, rcToReturn=rc)
          return
       endif 
 
@@ -218,11 +218,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_BaseGetStatus(ftypep%base, fieldstatus, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
       if (fieldstatus .ne. ESMF_STATUS_READY) then
          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-            "Uninitialized or already destroyed Field: fieldstatus not ready", &
-             ESMF_CONTEXT, rc)
+            msg="Uninitialized or already destroyed Field: fieldstatus not ready", &
+             ESMF_CONTEXT, rcToReturn=rc)
          return
       endif 
 
@@ -231,32 +231,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_GeomBaseValidate(ftypep%geombase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  ! get the grid decomp type if geombase is grid
       decompType = ESMF_GRID_NONARBITRARY
           call ESMF_GeomBaseGet(ftypep%geombase, geomType=geomType, rc=localrc)
           if (ESMF_LogFoundError(localrc, &  
             ESMF_ERR_PASSTHRU, &  
-            ESMF_CONTEXT, rc)) return  
+            ESMF_CONTEXT, rcToReturn=rc)) return  
           
           if (geomType .eq. ESMF_GEOMTYPE_GRID) then
              call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
              if (ESMF_LogFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  
-           	    ESMF_CONTEXT, rc)) return  
+           	    ESMF_CONTEXT, rcToReturn=rc)) return  
              call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
              if (ESMF_LogFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  
-           	    ESMF_CONTEXT, rc)) return  
+           	    ESMF_CONTEXT, rcToReturn=rc)) return  
           endif   
           ! get grid dim and extents for the local piece
           call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                "Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
-                 ESMF_CONTEXT, rc)
+                msg="Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
+                 ESMF_CONTEXT, rcToReturn=rc)
              return
           endif 
           ! Bounds only valid if there are local DE's
@@ -267,8 +267,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
                  call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                    "Cannot retrieve exclusive bounds from ftypep%grid", &
-                     ESMF_CONTEXT, rc)
+                    msg="Cannot retrieve exclusive bounds from ftypep%grid", &
+                     ESMF_CONTEXT, rcToReturn=rc)
                  return
               endif 
           enddo
@@ -278,24 +278,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                "Cannot validate ftypep%array", &
-                 ESMF_CONTEXT, rc)
+                msg="Cannot validate ftypep%array", &
+                 ESMF_CONTEXT, rcToReturn=rc)
              return
           endif 
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
               distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                "Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
-                 ESMF_CONTEXT, rc)
+                msg="Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
+                 ESMF_CONTEXT, rcToReturn=rc)
              return
           endif 
           
           ! Verify the distgrids in array and grid match.
           if(.not. ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc)) then
               call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                 "grid DistGrid does not match array DistGrid", &
-                  ESMF_CONTEXT, rc)
+                 msg="grid DistGrid does not match array DistGrid", &
+                  ESMF_CONTEXT, rcToReturn=rc)
               return
           endif
 
@@ -312,8 +312,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) then
                  call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                 "Cannot retrieve distgridToPackedArrayMap from ftypep%array", &
-                 ESMF_CONTEXT, rc)
+                 msg="Cannot retrieve distgridToPackedArrayMap from ftypep%array", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                 return
              endif 
 
@@ -325,8 +325,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             if ( arrayrank .lt. gridrank_norep) then
                 call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-                   "grid rank + ungridded Bound rank not equal to array rank", &
-                    ESMF_CONTEXT, rc)
+                   msg="grid rank + ungridded Bound rank not equal to array rank", &
+                    ESMF_CONTEXT, rcToReturn=rc)
                 return
             endif
 
@@ -429,7 +429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  lattreconflag, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_FieldSerialize(fp%gridstatus, &
                                  fp%datastatus, fp%iostatus, & 
@@ -439,7 +439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
@@ -447,7 +447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                     lattreconflag, linquireflag, localrc)
         if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (fp%datastatus .eq. ESMF_STATUS_READY) then
@@ -455,7 +455,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      lattreconflag, linquireflag, localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
@@ -528,19 +528,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Shortcut to internals
       allocate(fp, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, &
-                                     "space for new Field object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="space for new Field object", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize Base
       call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
                                  
       call ESMF_BaseSetInitCreated(fp%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize other Field members
 
@@ -552,14 +552,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                    buffer(1), offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (fp%gridstatus .eq. ESMF_STATUS_READY) then
           fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
                                               lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           
           !  here we relink the Field Attribute hierarchy to the Attribute
           !  hierarchy of the object in the GeomBase, Grid for now
@@ -569,7 +569,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call c_ESMC_AttributeLink(fp%base, fp%geombase%gbcp%grid, linkChange, localrc)
             if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
       endif
@@ -579,12 +579,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                       lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
           call ESMF_ArraySetInitCreated(fp%array,rc=localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     
       fp%is_proxy = .true.

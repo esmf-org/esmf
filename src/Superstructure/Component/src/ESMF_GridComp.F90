@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.155 2011/02/23 00:29:03 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.156 2011/02/23 20:17:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.155 2011/02/23 00:29:03 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.156 2011/02/23 20:17:12 w6ws Exp $'
 
 !==============================================================================
 !
@@ -442,8 +442,8 @@ contains
 
     ! Allocate a new comp class
     allocate(compclass, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, "compclass", &
-      ESMF_CONTEXT, rc)) return
+    if (ESMF_LogFoundAllocError(localrc, msg="compclass", &
+      ESMF_CONTEXT, rcTOReturn=rc)) return
       
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
@@ -452,7 +452,7 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) then
+      ESMF_CONTEXT, rcTOReturn=rc)) then
       deallocate(compclass)
       return
     endif
@@ -518,22 +518,22 @@ contains
     ! Check to see if already destroyed
     if (.not.associated(gridcomp%compp)) then
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-        "GridComp not initialized or already destroyed", &
-        ESMF_CONTEXT, rc)) return
+        msg="GridComp not initialized or already destroyed", &
+        ESMF_CONTEXT, rcTOReturn=rc)) return
     endif
 
     ! call Comp method
     call ESMF_CompDestruct(gridcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(gridcomp%compp%base, ESMF_STATUS_INVALID, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(gridcomp)
 
@@ -1082,7 +1082,7 @@ contains
     localresult = ESMF_CompIsPetLocal(gridcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ESMF_GridCompIsPetLocal = localresult
 
@@ -1980,7 +1980,7 @@ contains
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2052,7 +2052,7 @@ contains
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2122,7 +2122,7 @@ contains
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2226,7 +2226,7 @@ contains
       userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcTOReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

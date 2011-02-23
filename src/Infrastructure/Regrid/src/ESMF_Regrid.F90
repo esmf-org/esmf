@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.158 2011/02/23 18:53:49 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.159 2011/02/23 20:08:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.158 2011/02/23 18:53:49 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.159 2011/02/23 20:08:43 w6ws Exp $'
 
 !==============================================================================
 !
@@ -369,8 +369,8 @@ end function my_xor
 
        if (isMemFreed)  then
            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
-                 "- source Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- source Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
 
@@ -381,8 +381,8 @@ end function my_xor
 
        if (isMemFreed)  then
            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
-                 "- destination Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- destination Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
 
@@ -471,8 +471,8 @@ end function my_xor
 
        if (isMemFreed)  then
            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
-                 "- Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
 
@@ -536,8 +536,8 @@ end function my_xor
 
        if (isMemFreed)  then
            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
-                 "- Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
 
@@ -599,8 +599,8 @@ end function my_xor
 
        if (isMemFreed)  then
            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
-                 "- Mesh has had its coordinate and connectivity info freed", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
           return 
        endif
 

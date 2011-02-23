@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.17 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.18 2011/02/23 20:13:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.17 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.18 2011/02/23 20:13:06 w6ws Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -330,8 +330,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of Fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of Fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 

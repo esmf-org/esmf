@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.14 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldWr.F90,v 1.15 2011/02/23 20:10:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -154,16 +154,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_GetName(fp%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, array=array, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayWrite(array, file, variableName=trim(name), &
           append=appd_internal, timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
 

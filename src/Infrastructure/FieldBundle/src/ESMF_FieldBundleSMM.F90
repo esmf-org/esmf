@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.26 2011/02/22 21:18:39 feiliu Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.27 2011/02/23 20:13:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.26 2011/02/22 21:18:39 feiliu Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.27 2011/02/23 20:13:06 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -462,8 +462,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -557,8 +557,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -652,8 +652,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -747,8 +747,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -921,8 +921,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -931,7 +931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         !if(ESMF_GridMatch(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
         !    call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         !       "src and dst FieldBundle must have matching grid", &
-        !        ESMF_CONTEXT, rc)
+        !        ESMF_CONTEXT, rcToReturn=rc)
         !    return
         !endif 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.24 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.25 2011/02/23 20:13:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.24 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.25 2011/02/23 20:13:06 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -420,8 +420,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -462,7 +462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
         call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
@@ -519,8 +519,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -558,7 +558,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
         call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
@@ -615,8 +615,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -654,7 +654,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
         call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
@@ -711,8 +711,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -750,7 +750,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
         call ESMF_ArrayBundleDestroy(srcab, rc=localrc)
@@ -893,8 +893,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! field_count match
         if(srcFieldBundle%btypep%field_count /= dstFieldBundle%btypep%field_count) then
             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-               "src and dst FieldBundle must have same number of fields", &
-                ESMF_CONTEXT, rc)
+               msg="src and dst FieldBundle must have same number of fields", &
+                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif 
 
@@ -903,7 +903,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         !if(ESMF_GridMatch(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
         !    call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         !       "src and dst FieldBundle must have matching grid", &
-        !        ESMF_CONTEXT, rc)
+        !        ESMF_CONTEXT, rcToReturn=rc)
         !    return
         !endif 
 
@@ -941,7 +941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! garbage collection
         call ESMF_ArrayBundleDestroy(srcab, rc=localrc)

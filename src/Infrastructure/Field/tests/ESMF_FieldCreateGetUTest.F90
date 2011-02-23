@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.73 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.74 2011/02/23 20:10:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1989,11 +1989,11 @@ contains
         field = ESMF_FieldCreateEmpty(rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test1
 
@@ -2023,12 +2023,12 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test2
 
@@ -2052,17 +2052,17 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 !        print *, 'localPet = ', lpe
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
@@ -2070,7 +2070,7 @@ contains
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(ec(1), ec(2)))
 
@@ -2079,16 +2079,16 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
     end subroutine test2a
 
@@ -2116,17 +2116,17 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 !        print *, 'localPet = ', lpe
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
@@ -2134,7 +2134,7 @@ contains
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(ec(1), ec(2)))
 
@@ -2144,23 +2144,23 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, totalCount=totalCount, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
     end subroutine test2a_get
 
@@ -2178,7 +2178,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, indexflag=ESMF_INDEX_DELOCAL, &
             copyflag=ESMF_DATA_COPY, &
@@ -2186,17 +2186,17 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2a_bigarray
 
     subroutine test2a_fail(rc)
@@ -2213,7 +2213,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2221,17 +2221,17 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2a_fail
 
     subroutine test2b(rc)
@@ -2249,7 +2249,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2257,12 +2257,12 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
@@ -2282,7 +2282,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2290,17 +2290,17 @@ contains
             totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2c
 
     subroutine test2d(rc)
@@ -2318,7 +2318,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2326,17 +2326,17 @@ contains
             totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2d
 
     subroutine test2d_fail(rc)
@@ -2354,7 +2354,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2362,17 +2362,17 @@ contains
             totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2d_fail
 
     ! test2d_generic provides an generic interface to test fieldCreateFromDataPtr
@@ -2433,18 +2433,18 @@ contains
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridGet(grid, localDe=0, staggerloc=staggerloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(gridToFieldMap)) then
             g2fm(1:size(gridToFieldMap)) = gridToFieldMap
@@ -2474,16 +2474,16 @@ contains
             totalCount=fsize, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 !        write(*, "(A5, 13I3)") 'MZZ: ', lpe, ec(1:2), cc(1:2), fsize(1:2),&
 !             mhlw(1:2), mhuw(1:2), g2fm(1:2)
 
@@ -2505,7 +2505,7 @@ contains
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -2516,11 +2516,11 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGetBounds(field, exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -2528,7 +2528,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !write(*, "(A5, 42I3)") 'MZY: ', felb, feub, fclb, fcub, ftlb, ftub
             do i = ftlb(1), ftub(1)
                 do j = ftlb(2), ftub(2)
@@ -2537,18 +2537,18 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test2d_generic
@@ -2573,23 +2573,23 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         allocate(farray(ec(1), ec(2), 10))
 
         field = ESMF_FieldCreate(grid, farray, &
@@ -2600,11 +2600,11 @@ contains
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test2e
@@ -2629,23 +2629,23 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(ec(1), ec(2), 10))
 
@@ -2656,17 +2656,17 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test2e_ugb
@@ -2685,7 +2685,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2694,17 +2694,17 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2e_ugb_bigarray
 
     subroutine test2e_ugb_fail(rc)
@@ -2721,7 +2721,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2730,17 +2730,17 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2e_ugb_fail
 
     subroutine test2e_fail(rc)
@@ -2757,7 +2757,7 @@ contains
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -2766,17 +2766,17 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test2e_fail
 
     ! test2e_generic provides an generic interface to test fieldCreateFromDataPtr
@@ -2834,18 +2834,18 @@ contains
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridGet(grid, dimCount=gridDimCount, distgridToGridMap=dg2gm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridGet(grid, localDe=0, staggerloc=staggerloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 !        call ESMF_GridGetArrayUndistInfo(grid, &
 !             staggerloc=staggerloc, & 
 !             gridToArrayMap=g2fm, &
@@ -2853,7 +2853,7 @@ contains
 !             rc=localrc)
 !        if (ESMF_LogFoundError(localrc, &
 !            ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rc)) return
+!            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(gridToFieldMap)) then
             g2fm(1:size(gridToFieldMap)) = gridToFieldMap
@@ -2890,11 +2890,11 @@ contains
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 !        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
 !            dg2fm(1:3), f2dgm(1:3), gridDimCount
 
@@ -2907,7 +2907,7 @@ contains
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -2918,18 +2918,18 @@ contains
                 rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
     end subroutine test2e_generic
 
@@ -2986,7 +2986,7 @@ contains
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -2994,16 +2994,16 @@ contains
             totalCount=fsize, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 !        write(*, "(A7, 17I3)") 'MZS: ', lpe, ec(1:3), cc(1:3), fsize(1:3), &
 !            dg2fm(1:3), f2dgm(1:3), gridDimCount
 
@@ -3016,7 +3016,7 @@ contains
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -3027,18 +3027,18 @@ contains
                 rc=localrc)
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
     end subroutine test2f_generic
 
@@ -3062,23 +3062,23 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(max(cc(1)+5, ec(1)), max(cc(2)+5, ec(2))))
 
@@ -3088,17 +3088,17 @@ contains
             totalLWidth=(/2,2/), totalUWidth=(/3,3/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3a
@@ -3123,12 +3123,12 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(tlb(1):tub(1), tlb(2):tub(2)))
 
@@ -3137,7 +3137,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, &
@@ -3145,7 +3145,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! test pointer equivalence
         t = associated(farray, farray1)
@@ -3156,8 +3156,8 @@ contains
 
         if(.not. t) then
           call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-            "- pointer queried from object is not equivalent to the one passed in)", &
-            ESMF_CONTEXT, rc)
+            msg="- pointer queried from object is not equivalent to the one passed in)", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
@@ -3168,7 +3168,7 @@ contains
             rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         t = .true.
         do i = 1, 2
@@ -3179,20 +3179,20 @@ contains
         enddo
         if(.not. t) then
           call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-            "- bounds queried from grid different from those queried from field)", &
-            ESMF_CONTEXT, rc)
+            msg="- bounds queried from grid different from those queried from field)", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray1)
 
@@ -3220,18 +3220,18 @@ contains
                                   regDecomp=(/4/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, &
                                   name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(tlb(1):tub(1), -3:3))
 
@@ -3240,7 +3240,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, &
@@ -3248,7 +3248,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! test pointer equivalence
         t = associated(farray, farray1)
@@ -3259,8 +3259,8 @@ contains
 
         if(.not. t) then
           call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-            "- pointer queried from object is not equivalent to the one passed in)", &
-            ESMF_CONTEXT, rc)
+            msg="- pointer queried from object is not equivalent to the one passed in)", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
@@ -3271,7 +3271,7 @@ contains
             rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         t = .true.
         do i = 1, 1
@@ -3282,20 +3282,20 @@ contains
         enddo
         if(.not. t) then
           call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-            "- bounds queried from grid different from those queried from field)", &
-            ESMF_CONTEXT, rc)
+            msg="- bounds queried from grid different from those queried from field)", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray1)
 
     end subroutine test3a2_fptr
@@ -3320,7 +3320,7 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
@@ -3338,16 +3338,16 @@ contains
             totalLWidth=(/6,7/), totalUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3b
@@ -3366,7 +3366,7 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, farray, &
             indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, &
@@ -3374,17 +3374,17 @@ contains
             totalLWidth=(/6,7/), totalUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     end subroutine test3b_fail
 
     subroutine test3c(rc)
@@ -3407,23 +3407,23 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         !allocate(farray(max(cc(1)+14, ec(1)), max(cc(2)+16, ec(2))))
         allocate(farray(max(cc(2)+14, ec(2)), max(cc(1)+16, ec(1))))
@@ -3434,17 +3434,17 @@ contains
             totalLWidth=(/6,7/), totalUWidth=(/8,9/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3c
@@ -3469,23 +3469,23 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(max(cc(1)+7, ec(1)), max(cc(2)+10, ec(2)), 10))
 
@@ -3496,16 +3496,16 @@ contains
             totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3d
@@ -3530,23 +3530,23 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(max(cc(2)+7, ec(2)), max(cc(1)+10, ec(1)), 10))
         !write(*, "(22I3)") lpe, ec(1:2), cc(1:2)
@@ -3558,17 +3558,17 @@ contains
             totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3e
@@ -3593,23 +3593,23 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(max(cc(1)+7, ec(1)), 10, max(cc(2)+10, ec(2))))
         !write(*, "(A7, 22I3)") 'MZS: ', lpe, ec(1:2), cc(1:2), max(cc(1)+7, ec(1)), max(cc(2)+10, ec(2))
@@ -3621,17 +3621,17 @@ contains
             totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3f
@@ -3660,23 +3660,23 @@ contains
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         sloc = ESMF_STAGGERLOC_CENTER
         call ESMF_GridGet(grid, localDe=0, staggerloc=sloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(max(cc(2)+7, ec(2)), 10, max(cc(1)+10, ec(1))))
         !write(*, "(22I3)") lpe, ec(1:2), cc(1:2)
@@ -3688,7 +3688,7 @@ contains
             totalLWidth=(/2,4/), totalUWidth=(/5,6/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
             exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
@@ -3697,18 +3697,18 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         !write(*, "(42I3)") lpe, felb, feub, fclb, fcub, ftlb, ftub
         
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3g
@@ -3771,18 +3771,18 @@ contains
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridGet(grid, dimCount=gridDimCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridGet(grid, localDe=0, staggerloc=staggerloc, &
            exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=ec,  &
            computationalLBound=gclb, computationalUBound=gcub, computationalCount=cc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(gridToFieldMap)) then
             g2fm(1:size(gridToFieldMap)) = gridToFieldMap
@@ -3808,11 +3808,11 @@ contains
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, localPet=lpe, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         !write(*, "(A5, 22I3)") 'MZZ: ', lpe, ec, cc, fsize
         !write(*, "(A5, 22I3)") 'MZZ: ', lpe, mhlw, mhuw
 
@@ -3836,7 +3836,7 @@ contains
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -3847,7 +3847,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -3855,7 +3855,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !write(*, "(42I3)") felb, feub, fclb, fcub, ftlb, ftub
             do i = ftlb(1), ftub(1)
                 do j = ftlb(2), ftub(2)
@@ -3867,18 +3867,18 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(farray)
 
     end subroutine test3d_generic
@@ -3901,12 +3901,12 @@ contains
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
 ! Cannot use the following numbers, cause overflow on most systems due to memory requirement
 !        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/10,23/), &
@@ -3920,7 +3920,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
 
@@ -3931,22 +3931,22 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(f8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         deallocate(farray)
     end subroutine test7d1
@@ -3969,12 +3969,12 @@ contains
             regDecomp=(/2,1,2,1,1/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
@@ -3983,7 +3983,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
@@ -3995,22 +3995,22 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(f8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
             
         deallocate(farray)
     end subroutine test7d2
@@ -4070,7 +4070,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
             distgridToGridMap=distgridToGridMap, &
@@ -4078,7 +4078,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -4088,7 +4088,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), fsize(6), fsize(7)))
         !write(*, '(7I4)') fsize
@@ -4124,7 +4124,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -4135,7 +4135,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -4143,7 +4143,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !write(*, "(A5, 42I3)") 'MZY: ', felb, feub, fclb, fcub, ftlb, ftub
             ! reverse looping order to make this a little faster by improving data locality
             do ip = ftlb(7), ftub(7)
@@ -4167,24 +4167,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray)
     end subroutine test7d_generic
@@ -4251,7 +4251,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
             distgridToGridMap=distgridToGridMap, &
@@ -4259,7 +4259,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridGet(grid, localDe=0, staggerloc=localStaggerLoc, &
             exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=gec, &
@@ -4267,7 +4267,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=localStaggerLoc, &
@@ -4277,7 +4277,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
@@ -4311,7 +4311,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -4321,7 +4321,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -4329,7 +4329,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! test pointer equivalence
             t = associated(farray, farray1)
@@ -4343,8 +4343,8 @@ contains
 
             if(.not. t) then
               call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-                "- pointer queried from object is not equivalent to the one passed in)", &
-                ESMF_CONTEXT, rc)
+                msg="- pointer queried from object is not equivalent to the one passed in)", &
+                ESMF_CONTEXT, rcToReturn=rc)
               return
             endif
 
@@ -4355,7 +4355,7 @@ contains
                 rc=localrc) 
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             t = .true.
             do i = 1, 2
@@ -4367,8 +4367,8 @@ contains
     
             if(.not. t) then
               call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-                "- bounds queried from grid different from those queried from field)", &
-                ESMF_CONTEXT, rc)
+                msg="- bounds queried from grid different from those queried from field)", &
+                ESMF_CONTEXT, rcToReturn=rc)
               return
             endif
 
@@ -4391,7 +4391,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
@@ -4404,17 +4404,17 @@ contains
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test7d2_generic_fptr
 !------------------------------------------------------------------------
@@ -4480,7 +4480,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
             distgridToGridMap=distgridToGridMap, &
@@ -4488,7 +4488,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridGet(grid, localDe=0, staggerloc=localStaggerLoc, &
             exclusiveLBound=gelb, exclusiveUBound=geub, exclusiveCount=gec, &
@@ -4496,7 +4496,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=localStaggerLoc, &
@@ -4506,7 +4506,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
@@ -4535,7 +4535,7 @@ contains
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldSetCommit(field, grid, farray, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -4545,7 +4545,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -4555,7 +4555,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -4563,7 +4563,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! test pointer equivalence
             t = associated(farray, farray1)
@@ -4577,8 +4577,8 @@ contains
 
             if(.not. t) then
               call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-                "- pointer queried from object is not equivalent to the one passed in)", &
-                ESMF_CONTEXT, rc)
+                msg="- pointer queried from object is not equivalent to the one passed in)", &
+                ESMF_CONTEXT, rcToReturn=rc)
               return
             endif
 
@@ -4589,7 +4589,7 @@ contains
                 rc=localrc) 
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             t = .true.
             do i = 1, 2
@@ -4601,8 +4601,8 @@ contains
     
             if(.not. t) then
               call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
-                "- bounds queried from grid different from those queried from field)", &
-                ESMF_CONTEXT, rc)
+                msg="- bounds queried from grid different from those queried from field)", &
+                ESMF_CONTEXT, rcToReturn=rc)
               return
             endif
 
@@ -4625,7 +4625,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
@@ -4638,17 +4638,17 @@ contains
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test7d3_generic_fptr
 
@@ -4708,7 +4708,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
             distgridToGridMap=distgridToGridMap, &
@@ -4716,7 +4716,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
@@ -4726,7 +4726,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
@@ -4761,7 +4761,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -4772,7 +4772,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -4780,7 +4780,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! reverse looping order to make this a little faster by improving data locality
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
@@ -4800,24 +4800,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray)
     end subroutine test7d2_generic
@@ -4887,7 +4887,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -4896,7 +4896,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -4907,13 +4907,13 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create arrayspec
         call ESMF_ArraySpecSet(arrayspec, 7, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreate(grid, arrayspec, &
@@ -4924,7 +4924,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
 
         if(present(fieldget)) then
@@ -4936,7 +4936,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -4944,13 +4944,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             allocate(audlb(arank-adimCount), audub(arank-adimCount))
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
@@ -4960,18 +4960,18 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
 
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -4979,14 +4979,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 7
@@ -4995,7 +4995,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
@@ -5020,7 +5020,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
@@ -5040,24 +5040,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test7d3_generic
 
@@ -5127,7 +5127,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -5136,7 +5136,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -5147,13 +5147,13 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create arrayspec
         call ESMF_ArraySpecSet(arrayspec, 7, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreate(grid, arrayspec, &
@@ -5164,7 +5164,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -5175,7 +5175,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -5183,13 +5183,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             gridrank_repdim = 0
             if(present(gridToFieldMap)) then
@@ -5206,17 +5206,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
             
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -5224,14 +5224,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 7
@@ -5240,7 +5240,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ip = flb(7), fub(7)
@@ -5263,7 +5263,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
               do im = ftlb(5), ftub(5)
@@ -5282,24 +5282,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test7d3_generic_repdim
 
@@ -5369,7 +5369,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -5378,7 +5378,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -5389,13 +5389,13 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create arrayspec
         call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreate(grid, arrayspec, &
@@ -5406,7 +5406,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -5417,7 +5417,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -5425,13 +5425,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             gridrank_repdim = 0
             if(present(gridToFieldMap)) then
@@ -5448,17 +5448,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
             
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -5466,14 +5466,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 3
@@ -5482,7 +5482,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ik = flb(3), fub(3)
@@ -5497,7 +5497,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ik = ftlb(3), ftub(3)
              do ij = ftlb(2), ftub(2)
               do ii = ftlb(1), ftub(1)
@@ -5508,24 +5508,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test3d_generic_repdim
 
@@ -5596,7 +5596,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -5605,7 +5605,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -5616,19 +5616,19 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create arrayspec
         call ESMF_ArraySpecSet(arrayspec, 7, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
@@ -5640,7 +5640,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -5651,7 +5651,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -5659,13 +5659,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             gridrank_repdim = 0
             if(present(gridToFieldMap)) then
@@ -5682,17 +5682,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
             
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -5700,14 +5700,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 7
@@ -5716,7 +5716,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ip = flb(7), fub(7)
@@ -5739,7 +5739,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
               do im = ftlb(5), ftub(5)
@@ -5758,24 +5758,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray_cr)
     end subroutine test7d3_generic_repdim_sct
@@ -5847,7 +5847,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -5856,7 +5856,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -5867,19 +5867,19 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create arrayspec
         call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3)))
         call ESMF_FieldSetCommit(field, grid, farray_cr, &
@@ -5890,7 +5890,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -5901,7 +5901,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -5909,13 +5909,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             gridrank_repdim = 0
             if(present(gridToFieldMap)) then
@@ -5932,17 +5932,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
             
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -5950,14 +5950,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 3
@@ -5966,7 +5966,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ik = flb(3), fub(3)
@@ -5981,7 +5981,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ik = ftlb(3), ftub(3)
              do ij = ftlb(2), ftub(2)
               do ii = ftlb(1), ftub(1)
@@ -5992,24 +5992,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray_cr)
     end subroutine test3d_generic_repdim_sct
@@ -6079,7 +6079,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -6088,7 +6088,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -6098,19 +6098,19 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create arrayspec
         call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3)))
         call ESMF_FieldSetCommit(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
@@ -6119,7 +6119,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -6130,7 +6130,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -6138,13 +6138,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             gridrank_repdim = 0
             if(present(gridToFieldMap)) then
@@ -6161,17 +6161,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
             
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -6179,14 +6179,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 3
@@ -6195,7 +6195,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ik = flb(3), fub(3)
@@ -6210,7 +6210,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ik = ftlb(3), ftub(3)
              do ij = ftlb(2), ftub(2)
               do ii = ftlb(1), ftub(1)
@@ -6221,24 +6221,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray_cr)
     end subroutine test3d_generic_sctptr
@@ -6307,7 +6307,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -6316,7 +6316,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(grid, localDe=0, &
             staggerloc=staggerloc,&
@@ -6326,13 +6326,13 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2)))
         call ESMF_FieldSetCommit(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
@@ -6341,7 +6341,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -6352,7 +6352,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
                 exclusiveLBound=felb, exclusiveUBound=feub, exclusiveCount=fec, &
                 computationalLBound=fclb, computationalUBound=fcub, computationalCount=fcc, &
@@ -6360,13 +6360,13 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             gridrank_repdim = 0
             if(present(gridToFieldMap)) then
@@ -6383,17 +6383,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
             
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -6401,14 +6401,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 2
@@ -6417,7 +6417,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the data in the created Field can be accessed, updated and verified
             ! access and update
             do ij = flb(2), fub(2)
@@ -6430,7 +6430,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ij = ftlb(2), ftub(2)
              do ii = ftlb(1), ftub(1)
                n = ii+ij*2
@@ -6439,24 +6439,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray_cr)
     end subroutine test2d_generic_sctptr
@@ -6536,7 +6536,7 @@ contains
             regDecomp=regDecomp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create grid
         grid = ESMF_GridCreate(distgrid=distgrid, name="grid", &
@@ -6545,7 +6545,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! get distgrid for staggerloc
         if (present(staggerloc)) then
@@ -6553,13 +6553,13 @@ contains
                   staggerdistgrid=staggerdistgrid,rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rc)) return
+               ESMF_CONTEXT, rcToReturn=rc)) return
         else 
            call ESMF_GridGet(grid,ESMF_STAGGERLOC_CENTER, &
                   staggerdistgrid=staggerdistgrid,rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rc)) return
+               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
 
@@ -6572,7 +6572,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! prepare input to ESMF_ArrayCreate
         ! array pointer
@@ -6647,7 +6647,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
         field = ESMF_FieldCreate(grid, array, copyflag=copyflag, &
@@ -6658,7 +6658,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(present(fieldget)) then
           if(fieldget) then
@@ -6670,7 +6670,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(field, grid=grid1, array=array1, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
@@ -6679,7 +6679,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify parameters from getdefault are correct
             if(present(gridToFieldMap)) then
@@ -6688,7 +6688,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(ungriddedLBound)) then
                 do i = 1, size(ungriddedLBound)
@@ -6696,7 +6696,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(ungriddedUBound)) then
                 do i = 1, size(ungriddedUBound)
@@ -6704,7 +6704,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(totalLWidth)) then
                 do i = 1, size(totalLWidth)
@@ -6712,7 +6712,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(totalUWidth)) then
                 do i = 1, size(totalUWidth)
@@ -6720,7 +6720,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
             ! Allocate serialization buffer
@@ -6732,7 +6732,7 @@ contains
                 inquireflag=ESMF_INQUIREONLY, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             deallocate (buffer)
 
             buff_length = offset
@@ -6744,21 +6744,21 @@ contains
             call ESMF_FieldSerialize(field, buffer, buff_length, offset, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             offset = 0
 
             field1 = ESMF_FieldDeserialize(buffer, offset, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             deallocate (buffer)
 
             call ESMF_FieldValidate(field1, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(field1, grid=grid2, array=array2, typekind=typekind, &
                 dimCount=dimCount, staggerloc=lstaggerloc, gridToFieldMap=lgridToFieldMap, &
@@ -6767,7 +6767,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! verify parameters from getdefault are correct from a deseriailzed field
             if(present(gridToFieldMap)) then
@@ -6776,7 +6776,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(ungriddedLBound)) then
                 do i = 1, size(ungriddedLBound)
@@ -6784,7 +6784,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(ungriddedUBound)) then
                 do i = 1, size(ungriddedUBound)
@@ -6792,7 +6792,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(totalLWidth)) then
                 do i = 1, size(totalLWidth)
@@ -6800,7 +6800,7 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
             if(present(totalUWidth)) then
                 do i = 1, size(totalUWidth)
@@ -6808,14 +6808,14 @@ contains
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             endif
 
             ! verify that the field and array bounds agree with each other
             call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             allocate(audlb(arank-adimCount), audub(arank-adimCount))
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
@@ -6825,17 +6825,17 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! verify the numbers returned are correct
             if(ldec .ne. 1)  localrc = ESMF_FAILURE
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             !ldel(1) is PET dependent 
             !if(ldel(1) .ne. 0) localrc = ESMF_FAILURE
             !if (ESMF_LogFoundError(localrc, &
             !    ESMF_ERR_PASSTHRU, &
-            !    ESMF_CONTEXT, rc)) return
+            !    ESMF_CONTEXT, rcToReturn=rc)) return
 
             do i = 1, arank-adimCount
                 if(lungriddedLBound(i) .ne. audlb(i) ) &
@@ -6843,14 +6843,14 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, arank-adimCount
                 if(lungriddedUBound(i) .ne. audub(i) ) &
                     localrc = ESMF_FAILURE
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! compare the total bounds computed from FieldGetAllocBounds and FieldGetDataBounds
             do i = 1, 7
@@ -6859,13 +6859,13 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             ! access and verify
             call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
             do ip = ftlb(7), ftub(7)
              do io = ftlb(6), ftub(6)
               do im = ftlb(5), ftub(5)
@@ -6884,24 +6884,24 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif ! fieldget = .true.
         endif ! present(fieldget) = .true.
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray)
 
@@ -6926,42 +6926,42 @@ contains
         call ESMF_ArraySpecSet(arrayspec, rank=3, typekind=ESMF_TYPEKIND_I4, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/10, 10/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         array = ESMF_ArrayCreate(arrayspec, distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     
         grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, array, copyflag=ESMF_DATA_COPY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_ArrayDestroy(array, rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, array=o_array, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayGet(array, localDe=0, farrayPtr=fptr, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test_eric_klusek
 
@@ -6982,49 +6982,49 @@ contains
         distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/16, 16/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(fa(4))
         call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field1 = ESMF_FieldCreate(grid, fa, gridToFieldMap=(/0,0/), & 
           indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(fa)
 
@@ -7046,48 +7046,48 @@ contains
         distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/16, 16/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(fa(4))
         call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field1 = ESMF_FieldCreate(grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_DistGridDestroy(distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(fa)
 
@@ -7110,17 +7110,17 @@ contains
         distgrid = ESMF_DistGridCreate(minIndex=(/1, 1/), maxIndex=(/10, 10/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         
         grid = ESMF_GridCreate(distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(grid, array, copyflag=ESMF_DATA_COPY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine test_uninit_array
 
@@ -7144,12 +7144,12 @@ contains
         call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! only do this if there is 4 Pets
         if (petCount .eq. 4) then
@@ -7158,19 +7158,19 @@ contains
                                   regDecomp=(/2,2/), indexflag=ESMF_INDEX_GLOBAL , rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rc)) return
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! set arrayspec
             call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rc)) return
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! create field on grid
             field = ESMF_FieldCreate(grid, arrayspec, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
        
             ! Get field bounds
             call ESMF_FieldGet(field, localde=0, farrayPtr=farray, &
@@ -7178,7 +7178,7 @@ contains
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
            
             ! check bounds
             if (localpet .eq. 0) then
@@ -7206,12 +7206,12 @@ contains
             call ESMF_FieldDestroy(field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_GridDestroy(grid, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
 

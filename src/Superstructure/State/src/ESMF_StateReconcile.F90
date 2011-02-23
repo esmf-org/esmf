@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.88 2011/02/18 23:13:51 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.89 2011/02/23 20:14:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.88 2011/02/18 23:13:51 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.89 2011/02/23 20:14:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -199,13 +199,13 @@
     call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
 			   ESMF_ERR_PASSTHRU, &
-			   ESMF_CONTEXT, rc)) return
+			   ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present (vm)) then
       if (localvm /= vm) then
       if (ESMF_LogFoundError(localrc, &
-                     	     "vm passed to StateReconcile is not current", &
-                             ESMF_CONTEXT, rc)) return
+                     	     msg="vm passed to StateReconcile is not current", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     end if
       
@@ -216,7 +216,7 @@
     call ESMF_StateZapEmptyNests(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! This turns off the fast option on Regrid; it is working now for
@@ -243,28 +243,28 @@
     call ESMF_StateInfoBuild(state, stateinfo, vm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! This one sends missing objects from the PETs which contain them
     ! to the PETs which do not.
     call ESMF_StateProxyCreate(state, stateinfo, vm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! This frees resources which were allocated during the building of
     ! the information blocks during the InfoBuild call.
     call ESMF_StateInfoDrop(stateinfo, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Reset the change flags in the Attribute hierarchy
     if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
       call c_ESMC_AttributeUpdateReset(state%statep%base, localrc);
       if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Only clear the reconcileneeded flag at this State level.
@@ -343,14 +343,14 @@
     ! messages below.
     call ESMF_VMGet(vm, localPet=mypet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                              "Accessing the VM", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="Accessing the VM", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get the VM ID of the state to use as a dummy in the code below
     call c_ESMC_GetVMId(state%statep, VMdummyID, localrc)
     if (ESMF_LogFoundError(localrc, &
-                              "Getting VM ID", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="Getting VM ID", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make some initial space
     ! TODO: the current code only uses the first entry and hangs everything
@@ -358,12 +358,12 @@
     ! the state. 
     allocate(stateInfoList(4), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, &
-                                   "Allocating buffer for ID list", &
-                                   ESMF_CONTEXT, rc)) return
+                                   msg="Allocating buffer for ID list", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(stateInfoList(1)%childList(4), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, &
-                                   "Allocating buffer for child ID list", &
-                                   ESMF_CONTEXT, rc)) return
+                                   msg="Allocating buffer for child ID list", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! shortname for use in the code below
@@ -378,16 +378,16 @@
     if (si%mycount .gt. 0) then
         allocate(si%idsend(si%mycount), stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                   "Allocating buffer for local ID list", &
-                                       ESMF_CONTEXT, rc)) return
+                                   msg="Allocating buffer for local ID list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
         allocate(si%vmidsend(si%mycount), stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                   "Allocating buffer for local VM ID list", &
-                                       ESMF_CONTEXT, rc)) return
+                                   msg="Allocating buffer for local VM ID list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
         allocate(si%objsend(si%mycount), stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                   "Allocating buffer for local obj list", &
-                                       ESMF_CONTEXT, rc)) return
+                                   msg="Allocating buffer for local obj list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
 #if defined (FIXED_BUFFER)
@@ -397,8 +397,8 @@
     if (si%mycount > 0) then
       allocate(si%blindsend(lbufsize, si%mycount), stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                           "Allocating buffer for local buf list", &
-                               ESMF_CONTEXT, rc)) return
+                           msg="Allocating buffer for local buf list", &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 #else
     do, pass=1,2
@@ -411,14 +411,14 @@
         lbufsize = 1
         allocate (si%blindsend(1,si%mycount), stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                 "Allocating inquiry pass dummy buffer", &
-                                     ESMF_CONTEXT, rc)) return
+                                 msg="Allocating inquiry pass dummy buffer", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       else
         ! Allocate the buffer, and do the serialization for real
         deallocate (si%blindsend, stat=memstat)
         if (ESMF_LogFoundDeAllocError(memstat, &
-                             "Deallocating dummy buffer", &
-                                 ESMF_CONTEXT, rc)) return
+                             msg="Deallocating dummy buffer", &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
         inqflag = ESMF_NOINQUIRE
 !DEBUG        print *, 'ESMF_StateInfoBuild: leading buffer dimension =', maxbufsize
         lbufsize = maxbufsize
@@ -426,8 +426,8 @@
         if (si%mycount > 0) then
           allocate(si%blindsend(lbufsize, si%mycount), stat=memstat)
           if (ESMF_LogFoundAllocError(memstat, &
-                               "Allocating buffer for local buf list", &
-                                   ESMF_CONTEXT, rc)) return
+                               msg="Allocating buffer for local buf list", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
         end if
       end if
 #endif
@@ -438,21 +438,21 @@
       offset = 0
       call c_ESMC_GetID(state%statep%base, si%idsend(1), localrc)
       if (ESMF_LogFoundError(localrc, &
-                             "Top level get ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="Top level get ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_GetVMId(state%statep%base, si%vmidsend(1), localrc)
       if (ESMF_LogFoundError(localrc, &
-                             "Top level get VM ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="Top level get VM ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       si%objsend(1) = ESMF_ID_BASE%objectID
       bptr => si%blindsend(:,1)
       call c_ESMC_BaseSerialize(state%statep%base, bptr(1), lbufsize, offset, &
         attreconflag, inqflag, localrc)
       if (ESMF_LogFoundError(localrc, &
-                             "Top level Base serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="Top level Base serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       maxbufsize = offset
       attreconstart = 2
@@ -474,13 +474,13 @@
            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%fbp%btypep, si%idsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested fieldbundle get ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested fieldbundle get ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%fbp%btypep, si%vmidsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested fieldbundle get VM ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested fieldbundle get VM ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              si%objsend(i) = ESMF_ID_FIELDBUNDLE%objectID
              bptr => si%blindsend(:,i)
@@ -488,21 +488,21 @@
                                        offset, attreconflag=attreconflag, &
                                        inquireflag=inqflag, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested fieldbundle serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested fieldbundle serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized fieldbundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_FIELD%ot)
              call c_ESMC_GetID(stateitem%datap%fp%ftypep, si%idsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested Field get ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Field get ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%fp%ftypep, si%vmidsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested Field get VM ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Field get VM ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
@@ -510,21 +510,21 @@
                                        offset, attreconflag=attreconflag, &
                                        inquireflag=inqflag, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested Field serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Field serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized field, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested Array get ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Array get ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%ap, si%vmidsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested Array get VM ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Array get VM ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
@@ -532,21 +532,21 @@
                                        lbufsize, offset, attreconflag, &
                                        inqflag, localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested Array serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Array serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized array, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%abp, si%idsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested arraybundle get ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested arraybundle get ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%abp, si%vmidsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested arraybundle get VM ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested arraybundle get VM ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              si%objsend(i) = ESMF_ID_ARRAYBUNDLE%objectID
              bptr => si%blindsend(:,i)
@@ -554,21 +554,21 @@
                                        lbufsize, offset, attreconflag, &
                                        inqflag, localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested arraybundle serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested arraybundle serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized arraybundle, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, si%idsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested State get ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested State get ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              call c_ESMC_GetVMId(stateitem%datap%spp, si%vmidsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested State get VM ID", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested State get VM ID", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
              si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
@@ -577,8 +577,8 @@
              call ESMF_StateSerialize(wrapper, bptr, lbufsize, offset, &
               attreconflag=attreconflag, inquireflag=inqflag, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested State serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested State serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized substate, obj=", si%objsend(i), " id=", si%idsend(i)
 
@@ -591,8 +591,8 @@
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), lbufsize, offset, &
                inqflag, localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested string serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested string serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized placeholder, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
@@ -605,8 +605,8 @@
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), lbufsize, offset, &
                inqflag, localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested string serialize (indirect)", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested string serialize (indirect)", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized field-in-fieldbundle, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
@@ -619,8 +619,8 @@
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), lbufsize, offset, &
                inqflag, localrc)
              if (ESMF_LogFoundError(localrc, &
-                             "nested unknown type serialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested unknown type serialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "serialized unknown type, name=", trim(stateitem%namep)
              localrc = ESMF_SUCCESS
@@ -628,7 +628,7 @@
 
         if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) then
+                                 ESMF_CONTEXT, rcToReturn=rc)) then
         
 !!DEBUG "error -- i, offset, lbufsize = ", i, offset, lbufsize
 
@@ -637,8 +637,8 @@
            ! but better late than never??
            if (offset > lbufsize) then
                call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
-                         "Too many objects in State for Reconcile to handle", &
-                                        ESMF_CONTEXT, rc)
+                         msg="Too many objects in State for Reconcile to handle", &
+                                        ESMF_CONTEXT, rcToReturn=rc)
            endif
         ! either way, return here.
         return
@@ -703,32 +703,32 @@
     if (si%mycount .gt. 0) then
         deallocate(si%idsend, stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                 "Deallocating buffer for local ID list", &
-                                       ESMF_CONTEXT, rc)) return
+                                 msg="Deallocating buffer for local ID list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(si%vmidsend, stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                 "Deallocating buffer for local VM ID list", &
-                                       ESMF_CONTEXT, rc)) return
+                                 msg="Deallocating buffer for local VM ID list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(si%objsend, stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                 "Deallocating buffer for local obj list", &
-                                       ESMF_CONTEXT, rc)) return
+                                 msg="Deallocating buffer for local obj list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(si%blindsend, stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, &
-                                 "Deallocating buffer for local buf list", &
-                                       ESMF_CONTEXT, rc)) return
+                                 msg="Deallocating buffer for local buf list", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! The tree of objects - currently we are only using the first entry
     ! and creating blocks all attached to it.
     deallocate(stateInfoList(1)%childList, stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, &
-                                   "Deallocating buffer for child ID list", &
-                                   ESMF_CONTEXT, rc)) return
+                                   msg="Deallocating buffer for child ID list", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
     deallocate(stateInfoList, stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, &
-                                  "DeaAllocating buffer for state ID list", &
-                                   ESMF_CONTEXT, rc)) return
+                                  msg="DeaAllocating buffer for state ID list", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
     nullify(stateInfoList)
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -813,7 +813,7 @@
     call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                    ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rc)) return
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
     myOrigCount = si%mycount  ! my original count on entering this routine
 
@@ -832,7 +832,7 @@ petloop:  &
                       root=j, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rc)) return
+                      ESMF_CONTEXT, rcToReturn=rc)) return
 
        objcount  = comm_ints(1)
        if (i_recv)  &
@@ -847,13 +847,13 @@ petloop:  &
            else
                allocate(si%idrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Allocating buffer for local ID list", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="Allocating buffer for local ID list", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
                call ESMF_VMBroadcast (vm, si%idrecv, count=si%theircount, root=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
-                          ESMF_CONTEXT, rc)) return
+                          ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "completed broadcast of id list"
 
            ! Broadcast the object types
@@ -862,13 +862,13 @@ petloop:  &
            else
                allocate(si%objrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Allocating buffer for local obj list", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="Allocating buffer for local obj list", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
                call ESMF_VMBroadcast (vm, si%objrecv, count=si%theircount, root=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
-                          ESMF_CONTEXT, rc)) return
+                          ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "completed broadcast of object type list"
 
            ! Broadcast VMIds
@@ -878,8 +878,8 @@ petloop:  &
            else
 	       allocate(si%vmidrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Allocating buffer for local VM ID list", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="Allocating buffer for local VM ID list", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
                do, k=1, si%theircount
                    call ESMF_VMIdCreate (si%vmidrecv(k))
                enddo                              
@@ -888,7 +888,7 @@ petloop:  &
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
-                          ESMF_CONTEXT, rc)) return
+                          ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! Broadcast serialized object buffers
            if (i_send) then
@@ -896,13 +896,13 @@ petloop:  &
 	   else
                allocate(si%blindrecv(bsbufsize, si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Allocating buffer for local buf list", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="Allocating buffer for local buf list", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
                call ESMF_VMBroadcast (vm, si%blindrecv, size (si%blindrecv), root=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
-                          ESMF_CONTEXT, rc)) return
+                          ESMF_CONTEXT, rcToReturn=rc)) return
 
        end if ! objcount > 0
 
@@ -930,18 +930,18 @@ petloop:  &
               attreconflag, localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_BaseSetInitCreated(base, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             call c_ESMC_AttributeCopy(base, state%statep%base, &
               ESMF_ATTCOPY_VALUE, ESMF_ATTTREE_OFF, localrc)
             if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rc)) return
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
           endif
           attreconstart = 2
@@ -1005,20 +1005,20 @@ itemloop:  do k=attreconstart, si%theircount
                     fieldbundle = ESMF_FieldBundleDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested fieldbundle deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested fieldbundle deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created fieldbundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(fieldbundle%btypep, si%vmidrecv(k), localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested fieldbundle SetVMId call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested fieldbundle SetVMId call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     call ESMF_StateAdd(state, fieldbundle, proxyflag=.true., &
                       rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested fieldbundle add to local state", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested fieldbundle add to local state", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "fieldbundle added to state"
 
                    case (ESMF_ID_FIELD%objectID)
@@ -1027,20 +1027,20 @@ itemloop:  do k=attreconstart, si%theircount
                     field = ESMF_FieldDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Field deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Field deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created field, ready to set id and add to local state"
                     call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Field SetVMId call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Field SetVMId call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     call ESMF_StateAdd(state, field, proxyflag=.true., &
                       rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Field add to local state", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Field add to local state", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "field added to state"
 
                    case (ESMF_ID_ARRAY%objectID)
@@ -1049,26 +1049,26 @@ itemloop:  do k=attreconstart, si%theircount
                     call c_ESMC_ArrayDeserialize(array, bptr, offset, &
                       attreconflag, localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Array deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Array deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     ! Set init code
                     call ESMF_ArraySetInitCreated(array, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "Array SetInit call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="Array SetInit call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created array, ready to set id and add to local state"
                     call c_ESMC_SetVMId(array, si%vmidrecv(k), localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Array SetVMId call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Array SetVMId call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     call ESMF_StateAdd(state, array, proxyflag=.true., &
                       rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Array add to local state", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Array add to local state", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "array added to state"
 
                    case (ESMF_ID_ARRAYBUNDLE%objectID)
@@ -1077,26 +1077,26 @@ itemloop:  do k=attreconstart, si%theircount
                     call c_ESMC_ArrayBundleDeserialize(arraybundle, bptr, &
                       offset, attreconflag, localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested arraybundle deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested arraybundle deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     ! Set init code
                     call ESMF_ArrayBundleSetInitCreated(arraybundle, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "arraybundle SetInit call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="arraybundle SetInit call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created arraybundle, ready to set id and add to local state"
                     call c_ESMC_SetVMId(arraybundle, si%vmidrecv(k), localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested arraybundle SetVMId call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested arraybundle SetVMId call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     call ESMF_StateAdd(state, arraybundle, &
                       proxyflag=.true., rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested arraybundle add to local state", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested arraybundle add to local state", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "arraybundle added to state"
 
                    case (ESMF_ID_STATE%objectID)
@@ -1105,20 +1105,20 @@ itemloop:  do k=attreconstart, si%theircount
                     substate = ESMF_StateDeserialize(vm, bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Substate deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Substate deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created substate, ready to set id and add to local state"
                     call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Substate SetVMId call", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Substate SetVMId call", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                     call ESMF_StateAdd(state, substate, proxyflag=.true., &
                       rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Substate add to local state", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Substate add to local state", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "substate added to state"
 
                    case (ESMF_STATEITEM_NAME%ot)
@@ -1126,14 +1126,14 @@ itemloop:  do k=attreconstart, si%theircount
                      call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Stateitem deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Stateitem deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created string, ready to add to local state"
                     call ESMF_StateAdd(state, thisname, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested Stateitem add to local state", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested Stateitem add to local state", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 !!DEBUG "placeholder added to state"
          
                   case (ESMF_STATEITEM_INDIRECT%ot)
@@ -1141,8 +1141,8 @@ itemloop:  do k=attreconstart, si%theircount
                     call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested String deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested String deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                      ! do nothing here
             
@@ -1151,8 +1151,8 @@ itemloop:  do k=attreconstart, si%theircount
                     call c_ESMC_StringDeserialize(thisname, &
                                                    bptr(1), offset, localrc)
                     if (ESMF_LogFoundError(localrc, &
-                             "nested 'unknown' deserialize", &
-                             ESMF_CONTEXT, rc)) return
+                             msg="nested 'unknown' deserialize", &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
                      ! do nothing here
 
@@ -1168,23 +1168,23 @@ itemloop:  do k=attreconstart, si%theircount
 !!DEBUG "the remote pet had sent us objects; remove temp space now"
                deallocate(si%idrecv, stat=memstat)
                if (ESMF_LogFoundDeAllocError(memstat, &
-                              "Deallocating buffer for local ID list", &
-                               ESMF_CONTEXT, rc)) return
+                              msg="Deallocating buffer for local ID list", &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
                do k = 1, si%theircount
                    call ESMF_VMIdDestroy(si%vmidrecv(k))
                enddo
                deallocate(si%vmidrecv, stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Deallocating buffer for local VM ID list", &
-                               ESMF_CONTEXT, rc)) return
+                              msg="Deallocating buffer for local VM ID list", &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
                deallocate(si%objrecv, stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Deallocating buffer for local obj list", &
-                               ESMF_CONTEXT, rc)) return
+                              msg="Deallocating buffer for local obj list", &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
                deallocate(si%blindrecv, stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
-                              "Deallocating buffer for local buf list", &
-                               ESMF_CONTEXT, rc)) return
+                              msg="Deallocating buffer for local buf list", &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
            endif
 !!DEBUG "done deleting local space"
            
@@ -1198,12 +1198,12 @@ itemloop:  do k=attreconstart, si%theircount
            call ESMF_StateInfoDrop(stateInfoList, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
            call ESMF_StateInfoBuild(state, stateInfoList, vm, attreconflag, localrc)
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "reset pointer to state list"
            si => stateInfoList(1)
@@ -1256,7 +1256,7 @@ itemloop:  do k=attreconstart, si%theircount
               linkChange, localrc)
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 !print *, "gjt: zap empty nest in State"
         endif

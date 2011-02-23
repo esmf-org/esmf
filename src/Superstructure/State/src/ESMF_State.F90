@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.244 2011/02/23 18:58:55 feiliu Exp $
+! $Id: ESMF_State.F90,v 1.245 2011/02/23 20:14:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.244 2011/02/23 18:58:55 feiliu Exp $'
+      '$Id: ESMF_State.F90,v 1.245 2011/02/23 20:14:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -580,7 +580,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1) = array
 
@@ -605,13 +605,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -722,7 +722,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1) = arraybundle
 
@@ -747,13 +747,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -865,7 +865,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1) = field
 
@@ -891,13 +891,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1010,7 +1010,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1) = fieldbundle
 
@@ -1036,13 +1036,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1100,7 +1100,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1) = name
 
@@ -1166,7 +1166,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       temp_list(1) = routehandle
 
@@ -1287,7 +1287,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       temp_list(1) = nestedState
@@ -1314,13 +1314,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1430,19 +1430,19 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
                                   
       localcount = size(arrayList)
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of arrayList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of arrayList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -1479,13 +1479,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1547,19 +1547,19 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
                                   
       localcount = size(arraybundleList)
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of arraybundleList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of arraybundleList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -1596,13 +1596,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1664,13 +1664,13 @@ contains
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of fieldList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of fieldList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -1685,7 +1685,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_StateClsAddFieldList(state%statep, localcount, fieldList, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1710,13 +1710,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1778,13 +1778,13 @@ contains
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of fieldbundleList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of fieldbundleList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -1799,7 +1799,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_StateClAddFieldBundleList(state%statep, &
                                           localcount, fieldbundleList, rc=localrc)
@@ -1825,13 +1825,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1895,19 +1895,19 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       localcount = size(nameList)
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of State nameList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of State nameList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -1917,7 +1917,7 @@ contains
       call ESMF_StateClsAddDataNameList(state%statep, localcount, &
                   namelist, rc=localrc)      
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_StateAddNameList
@@ -1981,19 +1981,19 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       localcount = size(routehandleList)
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of routehandleList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of routehandleList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -2063,13 +2063,13 @@ contains
       if (present(count)) then
         if (count < 0) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be positive", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else if (count > localcount) then
           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            "- count must be smaller than or equal to the size of nestedStateList", &
-            ESMF_CONTEXT, rc)
+            msg="- count must be smaller than or equal to the size of nestedStateList", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         else
           localcount = count
@@ -2089,7 +2089,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_StateClsAddStateList(state%statep, localcount, &
                                       nestedStateList, rc=localrc)
@@ -2115,13 +2115,13 @@ contains
           lname, lvalue1, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       else if (state%statep%st == ESMF_STATE_EXPORT) then
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base, lobject, &
           lname, lvalue2, localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2244,8 +2244,8 @@ contains
         nullify(stypep)
 
         allocate(stypep, stat=memstat)
-        if (ESMF_LogFoundAllocError(memstat, "State type", &
-                                       ESMF_CONTEXT, rc)) return
+        if (ESMF_LogFoundAllocError(memstat, msg="State type", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
         
       !TODO: COLUMBIA_BUG: The following "if (present())" construct is a
       !      work-around for Intel's ifort version 9.1.045 and 9.1.051
@@ -2271,7 +2271,7 @@ contains
         endif
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then 
+                                  ESMF_CONTEXT, rcToReturn=rc)) then 
             deallocate(stypep, stat=memstat)
             return
         endif
@@ -2332,8 +2332,8 @@ contains
 
         if (.not.associated(state%statep)) then 
           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-            "Uninitialized or already destroyed State: statep unassociated", &
-            ESMF_CONTEXT, rc)
+            msg="Uninitialized or already destroyed State: statep unassociated", &
+            ESMF_CONTEXT, rcToReturn=rc)
           return
         endif 
 
@@ -2341,14 +2341,14 @@ contains
         call ESMF_StateDestruct(state%statep, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! mark object invalid
         call ESMF_BaseSetStatus(state%statep%base, ESMF_STATUS_INVALID, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Invalidate Destroyed State
         ESMF_INIT_SET_DELETED(state)
@@ -2451,7 +2451,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       localnestedflag = .false.
       if (present (nestedFlag)) then
@@ -2737,7 +2737,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
@@ -2745,8 +2745,8 @@ contains
 
       if (present (nestedStateName) .and. index (itemName, '/') > 0) then
           errmsg = "both nestedStateName and fully qualified itemName were specified"
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
       if (present(nestedStateName)) then
@@ -2755,14 +2755,14 @@ contains
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg,*) trim(nestedStateName), " found but not type State"
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -2777,14 +2777,14 @@ contains
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Array found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_ARRAY) then
           write(errmsg, *) trim(itemName), " found but not type Array"
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       array = dataitem%datap%ap
@@ -2871,7 +2871,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
@@ -2879,8 +2879,8 @@ contains
 
       if (present (nestedStateName) .and. index (itemName, '/') > 0) then
           errmsg = "both nestedStateName and fully qualified itemName were specified"
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
       if (present(nestedStateName)) then
@@ -2889,14 +2889,14 @@ contains
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg,*) trim(nestedStateName), " found but not type State"
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -2911,14 +2911,14 @@ contains
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no ArrayBundle found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_ARRAYBUNDLE) then
           write(errmsg, *) trim(itemName), " found but not type ArrayBundle"
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       arraybundle = dataitem%datap%abp
@@ -3007,12 +3007,12 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present (nestedStateName) .and. index (itemName, '/') > 0) then
           errmsg = "both nestedStateName and fully qualified itemName were specified"
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
       if (present(nestedStateName)) then
@@ -3021,14 +3021,14 @@ contains
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                         ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg, *) trim(nestedStateName), " found but not type State"
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -3043,20 +3043,20 @@ contains
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Field found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_FIELD) then
           if (dataitem%otype .eq. ESMF_STATEITEM_INDIRECT) then
               ! TODO: how do we return the info that this is inside a fieldbundle?
               if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
-                       "extracting Fields directly from FieldBundles in a State", &
-                       ESMF_CONTEXT, rc)) return
+                       msg="extracting Fields directly from FieldBundles in a State", &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           write(errmsg, *) trim(itemName), " found but not type Field"
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       field = dataitem%datap%fp
@@ -3147,12 +3147,12 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present (nestedStateName) .and. index (itemName, '/') > 0) then
           errmsg = "both nestedStateName and fully qualified itemName were specified"
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
       if (present(nestedStateName)) then
@@ -3161,14 +3161,14 @@ contains
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg, *) trim(nestedStateName), " found but not type State"
-             if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+             if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -3183,14 +3183,14 @@ contains
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no FieldBundle found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_FIELDBUNDLE) then
           write(errmsg, *) trim(itemName), " found but not type FieldBundle"
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       fieldbundle = dataitem%datap%fbp
@@ -3259,7 +3259,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       stypep => state%statep
 
@@ -3335,13 +3335,13 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, trim(itemName), &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=trim(itemName), &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       neededflag = dataitem%needed
@@ -3428,7 +3428,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_RC_NOT_IMPL
@@ -3436,8 +3436,8 @@ contains
 
       if (present (nestedStateName) .and. index (itemName, '/') > 0) then
           errmsg = "both nestedStateName and fully qualified itemName were specified"
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, errmsg,  &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
       if (present(nestedStateName)) then
@@ -3446,14 +3446,14 @@ contains
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg,*) trim(nestedStateName), " found but not type State"
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)) return
+              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                          ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -3468,14 +3468,14 @@ contains
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no RouteHandle found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_ROUTEHANDLE) then
           write(errmsg, *) trim(itemName), " found but not type RouteHandle"
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       routehandle = dataitem%datap%rp
@@ -3546,7 +3546,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       exists = ESMF_StateClassFindData(state%statep,   &
                                        dataname=itemName, expected=.true., &
@@ -3554,14 +3554,14 @@ contains
                                        rc=localrc)
       if (.not. exists) then
           write (errmsg,*) "no nested state found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
           write (errmsg, *) trim(itemName), " found but not type State"
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       nestedState%statep => dataitem%datap%spp
@@ -3626,7 +3626,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! TODO: decide on the behavior:
       ! should it be an error to ask about a state which doesn't exist?
@@ -3636,8 +3636,8 @@ contains
                                       dataitem=dataitem, rc=localrc)
       if (.not. exists) then
           if (ESMF_LogFoundError(localrc, &
-                                      "Item by that name not found", &
-                                      ESMF_CONTEXT, rc)) return
+                                      msg="Item by that name not found", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (dataitem%needed .eq. ESMF_NEEDED) ESMF_StateIsNeeded = .TRUE.
@@ -3708,8 +3708,8 @@ contains
         if (.not. present (vm)) then
           localrc = ESMF_FAILURE
           if (ESMF_LogFoundError(localrc, &
-                                    "VM is required for collective inquiry", &
-                                    ESMF_CONTEXT, rc)) return
+                                    msg="VM is required for collective inquiry", &
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
         end if
 
         commsend = merge (1, 0, localrecflag)
@@ -3718,7 +3718,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
         localrecflag = commrecv /= 0
       end if
     end if
@@ -3892,7 +3892,7 @@ contains
        call c_ESMC_GetName(sp%base, name, localrc)
        if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc1)) return
+                                ESMF_CONTEXT, rcToReturn=rc1)) return
        write (ESMF_IOstdout,*) nestr, "State name: ", trim(name)
        if (sp%st == ESMF_STATE_IMPORT) then
          msgbuf = "Import State"
@@ -3901,8 +3901,8 @@ contains
        else if (sp%st == ESMF_STATE_UNSPECIFIED) then
          msgbuf = "Unspecified direction"
        else if (sp%st == ESMF_STATE_INVALID) then
-         call ESMF_LogWrite("Uninitialized or already destroyed State", &
-                                ESMF_LOG_INFO)
+         call ESMF_LogWrite(msg="Uninitialized or already destroyed State", &
+                                msgtype=ESMF_LOG_INFO)
          if (present (rc1)) rc1 = ESMF_SUCCESS
          return
        else
@@ -3921,7 +3921,7 @@ contains
        call c_ESMC_BasePrint(sp%base, level, "brief", localrc)
        if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc1)) return
+                                  ESMF_CONTEXT, rcToReturn=rc1)) return
        
       
        do i=1, sp%datacount
@@ -4124,8 +4124,8 @@ contains
                                        rc=localrc)
     if (.not. exists) then
         errmsg = "can not find " // trim (itemname) // " for removal"
-        if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                    ESMF_CONTEXT, rc)) return
+        if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
     select case (dataitem%otype%ot)
@@ -4139,18 +4139,18 @@ contains
       call ESMF_FieldBundleGet(localfbundle, fieldCount=fnamecount, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                              ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rc)) return
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       allocate (fnames(fnamecount), stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
                              ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rc)) return
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_FieldBundleGet (localfbundle,  &
                 fieldnameList=fnames, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                              ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rc)) return
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       do, i=1, fnamecount
         exists = ESMF_StateClassFindData (localstatep,  &
@@ -4166,8 +4166,8 @@ contains
           errmsg = "can not find indirect Field " // trim (fnames(i)) //  &
                    " in FieldBundle " // trim (itemname) //  &
                    " for removal from State item list"
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                	ESMF_CONTEXT, rc)) continue
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+                                	ESMF_CONTEXT, rcToReturn=rc)) continue
         end if
 
       end do
@@ -4175,14 +4175,14 @@ contains
       deallocate (fnames, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
                              ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rc)) return
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     case (ESMF_STATEITEM_INDIRECT%ot)
       errmsg = "Indirect field " // trim (itemname) //  &
                " must be removed by removing its field bundle"
-      if (ESMF_LogFoundError(ESMF_RC_NOT_VALID, errmsg, &
-                             ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundError(ESMF_RC_NOT_VALID, msg=errmsg, &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
     end select
 
@@ -4190,7 +4190,7 @@ contains
 
     call ESMF_StateClassCompressList (localstatep, rc=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = localrc
 
@@ -4581,7 +4581,7 @@ contains
 !
 !        if (ESMF_LogFoundError(localrc, &
 !                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
+!                                  ESMF_CONTEXT, rcToReturn=rc)) return
 !  
 !
 !        if (present(rc)) rc = ESMF_SUCCESS
@@ -4833,14 +4833,14 @@ contains
         call ESMF_StateConstructEmpty(stypep, statename, statetype, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set the initial size of the datalist
         
         call ESMF_StateClassExtendList(stypep, localitemcount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       
         ! For each item type, set the data values.  All the allocation 
         !  has already been done.
@@ -4853,7 +4853,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4865,7 +4865,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4877,7 +4877,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4889,7 +4889,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4901,7 +4901,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4913,7 +4913,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4925,7 +4925,7 @@ contains
               rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
 
@@ -4980,7 +4980,7 @@ contains
         call ESMF_BaseCreate(stypep%base, "State", statename, 0, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Fill in basic information
         if (present(statetype)) then
@@ -4997,14 +4997,14 @@ contains
         call ESMF_UtilMapNameCreate (stypep%nameMap, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
         ! create methodTable object
         call c_ESMC_MethodTableCreate(stypep%methodTable, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set as created
         ESMF_INIT_SET_CREATED(stypep)
@@ -5052,7 +5052,7 @@ contains
         call ESMF_BaseGetStatus(stypep%base, status, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
         
         if (status .eq. ESMF_STATUS_READY) then
         
@@ -5066,8 +5066,8 @@ contains
           ! Now release the entire list
           if (associated(stypep%datalist)) then
             deallocate(stypep%datalist, stat=memstat)
-            if (ESMF_LogFoundDeallocError(memstat, "data list", &
-                                         ESMF_CONTEXT, rc)) return
+            if (ESMF_LogFoundDeallocError(memstat, msg="data list", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
             nullify(stypep%datalist)
           endif
           stypep%alloccount = 0
@@ -5076,14 +5076,14 @@ contains
           call c_ESMC_MethodTableDestroy(stypep%methodTable, localrc)
           if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if defined (ESMF_ENABLENAMEMAP)
           ! destroy the nameMap
           call ESMF_UtilMapNameDestroy (stypep%nameMap, rc=localrc)
           if (ESMF_LogFoundError (localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
         endif
 
@@ -5166,14 +5166,14 @@ contains
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (acount <= 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="acount must be >= 0", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (acount > size (routehandles)) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
-                                     "acount must be <= size (routehandles)", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="acount must be <= size (routehandles)", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the routehandles to the state, checking for name clashes
@@ -5188,18 +5188,18 @@ contains
       ! How can this happen?  is atodo some sort of static?
       if (allocated(atodo)) then
         call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
-                                         "atodo already allocated", &
-                                         ESMF_CONTEXT, rc)
+                                         msg="atodo already allocated", &
+                                         ESMF_CONTEXT, rcToReturn=rc)
         deallocate(atodo, stat=memstat)
-        if (ESMF_LogFoundDeallocError (memstat, 'atodo',  &
-                                         ESMF_CONTEXT, rc)) return
+        if (ESMF_LogFoundDeallocError (memstat, msg='atodo',  &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
         return
       endif
 
       allocate(atodo(acount), stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                                     "adding RouteHandles to a State", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="adding RouteHandles to a State", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       atodo = .false.
 
@@ -5215,14 +5215,14 @@ contains
         !if (localrc .ne. ESMF_SUCCESS) then
         !    write(errmsg, *) "item", i
         !    call ESMF_LogSetError(localrc, errmsg, &
-        !                                ESMF_CONTEXT, rc)
+        !                                ESMF_CONTEXT, rcToReturn=rc)
         !    deallocate(atodo, stat=localrc)
         !    return
         !endif
         call ESMF_RouteHandleGet(routehandles(i), name=rhname, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(atodo, stat=memstat)
           return
         endif
@@ -5231,8 +5231,8 @@ contains
         exists = ESMF_StateClassFindData(stypep, rhname, .false., &
                                         dataitem=dataitem, dataindex=aindex,  &
                                         rc=localrc)
-        if (ESMF_LogFoundError(localrc, "looking for preexisting entry", &
-                                  ESMF_CONTEXT, rc)) then
+        if (ESMF_LogFoundError(localrc, msg="looking for preexisting entry", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(atodo, stat=memstat)
           return
         endif
@@ -5245,8 +5245,8 @@ contains
               atodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing RouteHandle '" // trim (rhname) // "' not found", &
-                                      ESMF_CONTEXT, rc)) then
+                                      msg="existing RouteHandle '" // trim (rhname) // "' not found", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) then
                 deallocate (atodo, stat=memstat)
                 return
               end if
@@ -5278,7 +5278,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! There is enough space now to add new routehandles to the list.
@@ -5297,15 +5297,15 @@ contains
             ! Add name
             call ESMF_RouteHandleGet(routehandles(i), name=nextitem%namep, &
               rc=localrc)
-            if (ESMF_LogFoundError(localrc, "getting name from routehandle", &
-                                      ESMF_CONTEXT, rc)) return
+            if (ESMF_LogFoundError(localrc, msg="getting name from routehandle", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
             nextitem%datap%rp = routehandles(i)
@@ -5329,8 +5329,8 @@ contains
 
       ! Get rid of temp flag arrays
       deallocate(atodo, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "deallocating internal list, 1c", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="deallocating internal list, 1c", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5408,14 +5408,14 @@ contains
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (acount <= 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="acount must be >= 0", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (acount > size (arrays)) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
-                                     "acount must be <= size (arrays)", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="acount must be <= size (arrays)", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the arrays to the state, checking for name clashes
@@ -5430,16 +5430,16 @@ contains
       ! How can this happen?  is atodo some sort of static?
       if (allocated(atodo)) then
         call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
-                                         "atodo already allocated", &
-                                         ESMF_CONTEXT, rc)
+                                         msg="atodo already allocated", &
+                                         ESMF_CONTEXT, rcToReturn=rc)
         deallocate(atodo, stat=memstat)
         return
       endif
 
       allocate(atodo(acount), stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                                     "adding Arrays to a State", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="adding Arrays to a State", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       atodo = .false.
 
@@ -5455,14 +5455,14 @@ contains
         !if (localrc .ne. ESMF_SUCCESS) then
         !    write(errmsg, *) "item", i
         !    call ESMF_LogSetError(localrc, errmsg, &
-        !                                ESMF_CONTEXT, rc)
+        !                                ESMF_CONTEXT, rcToReturn=rc)
         !    deallocate(atodo, stat=localrc)
         !    return
         !endif
         call ESMF_ArrayGet(arrays(i), name=aname, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(atodo, stat=memstat)
           return
         endif
@@ -5471,8 +5471,8 @@ contains
         exists = ESMF_StateClassFindData(stypep, aname, .false., &
                                         dataitem=dataitem, dataindex=aindex,  &
                                         rc=localrc)
-        if (ESMF_LogFoundError(localrc, "looking for preexisting entry", &
-                                  ESMF_CONTEXT, rc)) then
+        if (ESMF_LogFoundError(localrc, msg="looking for preexisting entry", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(atodo, stat=memstat)
           return
         endif
@@ -5486,8 +5486,8 @@ contains
               atodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing Array '" // trim (aname) // "' not found", &
-                                      ESMF_CONTEXT, rc)) then
+                                      msg="existing Array '" // trim (aname) // "' not found", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) then
                 deallocate (atodo, stat=memstat)
                 return
               end if
@@ -5519,7 +5519,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! There is enough space now to add new arrays to the list.
@@ -5537,15 +5537,15 @@ contains
 
             ! Add name
             call ESMF_ArrayGet(arrays(i), name=nextitem%namep, rc=localrc)
-            if (ESMF_LogFoundError(localrc, "getting name from array", &
-                                      ESMF_CONTEXT, rc)) return
+            if (ESMF_LogFoundError(localrc, msg="getting name from array", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
             nextitem%datap%ap = arrays(i)
@@ -5569,8 +5569,8 @@ contains
 
       ! Get rid of temp flag arrays
       deallocate(atodo, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "deallocating internal list, 1c", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="deallocating internal list, 1c", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5647,14 +5647,14 @@ contains
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (acount <= 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="acount must be >= 0", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (acount > size (arraybundles)) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
-                                     "acount must be <= size (arraybundles)", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="acount must be <= size (arraybundles)", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the arraybundles to the state, checking for name clashes
@@ -5669,16 +5669,16 @@ contains
       ! How can this happen?  is atodo some sort of static?
       if (allocated(atodo)) then
         call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
-                                         "atodo already allocated", &
-                                         ESMF_CONTEXT, rc)
+                                         msg="atodo already allocated", &
+                                         ESMF_CONTEXT, rcToReturn=rc)
         deallocate(atodo, stat=memstat)
         return
       endif
 
       allocate(atodo(acount), stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                                     "adding ArrayBundles to a State", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="adding ArrayBundles to a State", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       atodo = .false.
 
@@ -5694,14 +5694,14 @@ contains
         !if (localrc .ne. ESMF_SUCCESS) then
         !    write(errmsg, *) "item", i
         !    call ESMF_LogSetError(localrc, errmsg, &
-        !                                ESMF_CONTEXT, rc)
+        !                                ESMF_CONTEXT, rcToReturn=rc)
         !    deallocate(atodo, stat=localrc)
         !    return
         !endif
         call ESMF_ArrayBundleGet(arraybundles(i), name=aname, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(atodo, stat=memstat)
           return
         endif
@@ -5710,8 +5710,8 @@ contains
         exists = ESMF_StateClassFindData(stypep, aname, .false., &
                                         dataitem=dataitem, dataindex=aindex, &
                                         rc=localrc)
-        if (ESMF_LogFoundError(localrc, "looking for preexisting entry", &
-                                  ESMF_CONTEXT, rc)) then
+        if (ESMF_LogFoundError(localrc, msg="looking for preexisting entry", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(atodo, stat=memstat)
           return
         endif
@@ -5725,8 +5725,8 @@ contains
               atodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing ArrayBundle '" // trim (aname) // "' not found", &
-                                      ESMF_CONTEXT, rc)) then
+                                      msg="existing ArrayBundle '" // trim (aname) // "' not found", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) then
                 deallocate (atodo, stat=memstat)
                 return
               end if
@@ -5758,7 +5758,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! There is enough space now to add new arraybundles to the list.
@@ -5776,15 +5776,15 @@ contains
 
             ! Add name
             call ESMF_ArrayBundleGet(arraybundles(i), name=nextitem%namep, rc=localrc)
-            if (ESMF_LogFoundError(localrc, "getting name from arraybundle", &
-                                      ESMF_CONTEXT, rc)) return
+            if (ESMF_LogFoundError(localrc, msg="getting name from arraybundle", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
             nextitem%datap%abp = arraybundles(i)
@@ -5808,8 +5808,8 @@ contains
 
       ! Get rid of temp flag arraybundles
       deallocate(atodo, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "deallocating internal list, 1c", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="deallocating internal list, 1c", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5886,14 +5886,14 @@ contains
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (fcount <= 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "fcount must be >= 0", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="fcount must be >= 0", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (fcount > size (fields)) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
-                                     "fcount must be <= size (fields)", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="fcount must be <= size (fields)", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the fields to the state, checking for name clashes
@@ -5911,14 +5911,14 @@ contains
         ! print *, "ftodo already allocated"
         deallocate(ftodo, stat=memstat)
         if (ESMF_LogFoundDeallocError(memstat, &
-                                  "deallocating fields from a state", &
-                                  ESMF_CONTEXT, rc)) return
+                                  msg="deallocating fields from a state", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       allocate(ftodo(fcount), stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                                  "adding fields to a state", &
-                                  ESMF_CONTEXT, rc)) return
+                                  msg="adding fields to a state", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       ftodo = .false.
 
       ! Initialize counters to 0, indices to 1
@@ -5931,14 +5931,14 @@ contains
         call ESMF_FieldValidate(fields(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(ftodo, stat=memstat)
           return
         endif
         call ESMF_FieldGet(fields(i), name=fname, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(ftodo, stat=memstat)
           return
         endif
@@ -5947,8 +5947,8 @@ contains
         exists = ESMF_StateClassFindData(stypep, fname, .false., &
                                         dataitem=dataitem, dataindex=findex, &
                                         rc=localrc)
-        if (ESMF_LogFoundError(localrc, "looking for preexisting entry", &
-                                  ESMF_CONTEXT, rc)) then
+        if (ESMF_LogFoundError(localrc, msg="looking for preexisting entry", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(ftodo, stat=memstat)
           return
         endif
@@ -5962,8 +5962,8 @@ contains
               ftodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing Field '" // trim (fname) // "' not found", &
-                                      ESMF_CONTEXT, rc)) then
+                                      msg="existing Field '" // trim (fname) // "' not found", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) then
                 deallocate (ftodo, stat=memstat)
                 return
               end if
@@ -5996,7 +5996,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! There is enough space now to add new fields to the list.
@@ -6016,14 +6016,14 @@ contains
             call ESMF_FieldGet(fields(i), name=nextitem%namep, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if defined (ESMF_ENABLENAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
             nextitem%datap%fp = fields(i)
@@ -6048,8 +6048,8 @@ contains
       ! Get rid of temp flag array
       deallocate(ftodo, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
-                                  "adding fields to a state", &
-                                  ESMF_CONTEXT, rc)) return
+                                  msg="adding fields to a state", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6128,21 +6128,21 @@ contains
         localrepflag = .false.
       end if
       if (localrepflag) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "replace option not supported yet", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="replace option not supported yet", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (bcount <= 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "bcount must be >= 0", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="bcount must be >= 0", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (bcount > size (fieldbundles)) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
-                                     "bcount must be <= size (fieldbundles)", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="bcount must be <= size (fieldbundles)", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the fieldbundles to the state, checking for name clashes
@@ -6157,11 +6157,11 @@ contains
         call ESMF_FieldBundleValidate(fieldbundles(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_FieldBundleGet(fieldbundles(i), fieldCount=fcounts(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       end do
       fruncount = sum (fcounts)
 
@@ -6169,8 +6169,8 @@ contains
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(btodo(bcount), stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, "btodo", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="btodo", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! IMPORTANT: from here down, do not return on error, but goto 10
       !  to at least try to deallocate the temp storage.
@@ -6179,8 +6179,8 @@ contains
 
       if (fruncount .ge. 0) then
         allocate(ftodo(fruncount), stat=memstat)
-        if (ESMF_LogFoundAllocError(memstat, "ftodo", &
-                                       ESMF_CONTEXT, rc)) goto 10
+        if (ESMF_LogFoundAllocError(memstat, msg="ftodo", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) goto 10
         ftodo = 0
       endif
 
@@ -6196,14 +6196,14 @@ contains
         call ESMF_FieldBundleGet(fieldbundles(i), name=bname, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) goto 10
+                                  ESMF_CONTEXT, rcToReturn=rc)) goto 10
     
         ! See if this name is already in the state
         exists = ESMF_StateClassFindData(stypep, bname, .false., &
                                         dataitem=dataitem, dataindex=bindex,  &
                                         rc=localrc)
-        if (ESMF_LogFoundError(localrc, "looking for preexisting entry", &
-                                  ESMF_CONTEXT, rc)) goto 10
+        if (ESMF_LogFoundError(localrc, msg="looking for preexisting entry", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) goto 10
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -6234,7 +6234,7 @@ contains
             call ESMF_FieldBundleGet(fieldbundles(i), j, field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) goto 10
+                                      ESMF_CONTEXT, rcToReturn=rc)) goto 10
 
             ! what is this?  leftover debugging code?
             !call ESMF_FieldPrint(field, "", localrc)
@@ -6242,14 +6242,14 @@ contains
             call ESMF_FieldGet(field, name=fname, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) goto 10
+                                      ESMF_CONTEXT, rcToReturn=rc)) goto 10
     
             exists = ESMF_StateClassFindData(stypep, fname, .false.,  &
                                       dataitem=dataitem, dataindex=findex, &
                                       rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) goto 10
+                                      ESMF_CONTEXT, rcToReturn=rc)) goto 10
 
             ! If the field is going to have to be added later,
             !  keep track of whether it belongs to a fieldbundle which has to
@@ -6299,7 +6299,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) goto 10
+                                ESMF_CONTEXT, rcToReturn=rc)) goto 10
 
 
       ! There is enough space now to add new fieldbundles & fields to the list.
@@ -6320,14 +6320,14 @@ contains
             call ESMF_FieldBundleGet(fieldbundles(i), name=nextitem%namep, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) goto 10
+                                      ESMF_CONTEXT, rcToReturn=rc)) goto 10
 
 #if defined (ESMF_NAMEMAP)
             call ESMF_UtilMapNameAdd (stypep%nameMap,  &
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
            nextitem%datap%fbp = fieldbundles(i)
@@ -6368,12 +6368,12 @@ contains
             call ESMF_FieldBundleGet(fieldbundles(i), j, field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) goto 10
+                                      ESMF_CONTEXT, rcToReturn=rc)) goto 10
 
             call ESMF_FieldGet(field, name=nextitem%namep, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rc)) goto 10
+                                      ESMF_CONTEXT, rcToReturn=rc)) goto 10
     
             ! If we found the corresponding fieldbundle entry during pass 1,
             ! it was stored in the todo list.  Otherwise, we just added it
@@ -6402,8 +6402,8 @@ contains
 
             if (.not. exists) then
               call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
-                                          "field/fieldbundle lists", &
-                                          ESMF_CONTEXT, rc)
+                                          msg="field/fieldbundle lists", &
+                                          ESMF_CONTEXT, rcToReturn=rc)
               localrc = ESMF_RC_INTNRL_INCONS
               goto 10
             endif
@@ -6434,16 +6434,16 @@ contains
       if (allocated (btodo)) then
         deallocate(btodo, stat=memstat)
         if (localrc == ESMF_SUCCESS) then
-          if (ESMF_LogFoundDeallocError(memstat, "fieldbundle list", &
-                                         ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundDeallocError(memstat, msg="fieldbundle list", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
         end if
       end if
 
       if (allocated (ftodo)) then
         deallocate(ftodo, stat=memstat)
         if (localrc == ESMF_SUCCESS) then
-          if (ESMF_LogFoundDeallocError(memstat, "field list", &
-                                         ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundDeallocError(memstat, msg="field list", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
         end if
       end if
 
@@ -6522,14 +6522,14 @@ contains
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (scount <= 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "scount must be >= 0", &
-                                     ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="scount must be >= 0", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (scount > size (states)) then
           if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  &
-                                     "scount must be <= size (states)", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="scount must be <= size (states)", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the states to the state, checking for name clashes
@@ -6542,8 +6542,8 @@ contains
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(stodo(scount), stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, "adding States", &
-                                       ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="adding States", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
       stodo = .false.
 
       ! Initialize counters to 0, indices to 1
@@ -6557,7 +6557,7 @@ contains
         ! TODO: add state number to error msg
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(stodo, stat=memstat)
           return
         endif
@@ -6568,8 +6568,8 @@ contains
         ! detect that loop.
         if (associated(stypep, states(i)%statep)) then
            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                                    "Cannot add a State to itself", &
-                                    ESMF_CONTEXT, rc)
+                                    msg="Cannot add a State to itself", &
+                                    ESMF_CONTEXT, rcToReturn=rc)
           deallocate(stodo, stat=memstat)
           return
         endif
@@ -6577,7 +6577,7 @@ contains
         call c_ESMC_GetName(states(i)%statep%base, sname, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(stodo, stat=memstat)
           return
         endif
@@ -6588,7 +6588,7 @@ contains
                                          rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(stodo, stat=memstat)
           return
         endif
@@ -6602,8 +6602,8 @@ contains
               stodo(i) = .true.
             else
               if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
-                                      "existing nested State '" // trim (sname) // "' not found", &
-                                      ESMF_CONTEXT, rc)) then
+                                      msg="existing nested State '" // trim (sname) // "' not found", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) then
                 deallocate (stodo, stat=memstat)
                 return
               end if
@@ -6638,7 +6638,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
           deallocate(stodo, stat=memstat)
           return
       endif
@@ -6661,7 +6661,7 @@ contains
             call c_ESMC_GetName(states(i)%statep%base, nextitem%namep, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) then
+                                  ESMF_CONTEXT, rcToReturn=rc)) then
               deallocate(stodo, stat=memstat)
               return
             end if
@@ -6671,7 +6671,7 @@ contains
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) then
+                                       ESMF_CONTEXT, rcToReturn=rc)) then
               deallocate(stodo, stat=memstat)
               return
             end if
@@ -6701,8 +6701,8 @@ contains
       ! Get rid of temp flag states
       deallocate(stodo, stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                                       "Adding States to a State", &
-                                       ESMF_CONTEXT, rc)) return
+                                       msg="Adding States to a State", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6798,7 +6798,7 @@ contains
       if (usenested_lookup .and. index (dataname, '/') /= 0) then
         if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
                                  ESMF_ERR_PASSTHRU,  &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
       if (present (dataitem)) then
@@ -6822,7 +6822,7 @@ contains
             rc=localrc)
         if (ESMF_LogFoundError (localrc,  &
                                    ESMF_ERR_PASSTHRU,  &
-                                   ESMF_CONTEXT, rc)) return
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
 #else
         dcount0 = stypep%datacount
         do, i0=1, dcount0
@@ -6894,7 +6894,7 @@ contains
               rc=lrc)
           if (ESMF_LogFoundError (lrc,  &
                                      ESMF_ERR_PASSTHRU,  &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 #else
           do, i1=1, sp%datacount
             nextitem1 => sp%datalist(i1)
@@ -6973,7 +6973,7 @@ contains
                                        rc=lrc)
             if (ESMF_LogFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #else
             dcount1 = sp%datacount
             do, i1=1, dcount1
@@ -7005,7 +7005,7 @@ contains
                                        rc=lrc)
             if (ESMF_LogFoundError (lrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #else
             dcount1 = sp%datacount
             do, i1=1, dcount1
@@ -7086,8 +7086,8 @@ contains
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (ncount .le. 0) then
-          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, "ncount must be >= 0", &
-                                      ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, msg="ncount must be >= 0", &
+                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! Add the fields to the state, checking for name clashes
@@ -7100,8 +7100,8 @@ contains
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(ntodo(ncount), stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, "adding names to a state", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="adding names to a state", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
       ntodo(1:ncount) = 0
 
       ! Initialize counters to 0, indices to 1
@@ -7114,8 +7114,8 @@ contains
         ! Make sure name does not have a slash in it
         if (index (namelist(i), '/') > 0) then
           if (ESMF_LogFoundError (ESMF_RC_ARG_BAD,  &
-                                    "namelist name must not have slashes in it",  &
-                                    ESMF_CONTEXT, rc)) return
+                                    msg="namelist name must not have slashes in it",  &
+                                    ESMF_CONTEXT, rcToReturn=rc)) return
         end if
                                  
 
@@ -7125,7 +7125,7 @@ contains
                                 rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -7163,7 +7163,7 @@ contains
       call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! There is enough space now to add new names to the list.
@@ -7187,7 +7187,7 @@ contains
               name=nextitem%namep, value=stypep%datacount, rc=localrc)
             if (ESMF_LogFoundError (localrc,  &
                                        ESMF_ERR_PASSTHRU,  &
-                                       ESMF_CONTEXT, rc)) return
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
             nextitem%removedFlag = .false.
@@ -7209,8 +7209,8 @@ contains
 
       ! Get rid of temp flag array
       deallocate(ntodo, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, "adding names to a state", &
-                                     ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundDeallocError(memstat, msg="adding names to a state", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -7300,8 +7300,8 @@ contains
 	! need to be updated with the new position numbers.
 	if (iscompressed) then
           if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
-                              "compression of namemap entries not supported yet", &
-                              ESMF_CONTEXT, rc)) return
+                              msg="compression of namemap entries not supported yet", &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
 	end if
 #endif
 
@@ -7366,8 +7366,8 @@ contains
 
           allocsize = itemcount + chunksize - mod(itemcount,chunksize)
           allocate(stypep%datalist(allocsize), stat=memstat)
-          if (ESMF_LogFoundAllocError(memstat, "datalist", &
-                                         ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundAllocError(memstat, msg="datalist", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
           stypep%alloccount = allocsize
 
       ! Extend an existing list to the right length, including copy
@@ -7376,8 +7376,8 @@ contains
           newsize = stypep%datacount + itemcount
           allocsize = newsize + chunksize - mod(newsize,chunksize)
           allocate(temp_list(allocsize), stat=memstat)
-          if (ESMF_LogFoundAllocError(memstat, "datalist realloc", &
-                                         ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundAllocError(memstat, msg="datalist realloc", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
   
           ! Preserve old contents
 
@@ -7387,8 +7387,8 @@ contains
 
           ! Delete old list
           deallocate(stypep%datalist, stat=memstat)
-          if (ESMF_LogFoundDeallocError(memstat, "datalist dealloc", &
-                                         ESMF_CONTEXT, rc)) return
+          if (ESMF_LogFoundDeallocError(memstat, msg="datalist dealloc", &
+                                         ESMF_CONTEXT, rcToReturn=rc)) return
   
           ! Now make this the permanent list
           stypep%datalist => temp_list
@@ -7483,7 +7483,7 @@ contains
       call ESMF_StateValidate(state, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       sp => state%statep
 
@@ -7491,7 +7491,7 @@ contains
                                  linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_StateSerialize(sp%st, sp%needed_default, &
                                  sp%ready_default, sp%stvalid_default, &
@@ -7501,7 +7501,7 @@ contains
                                  localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i = 1, sp%datacount
           sip => sp%datalist(i)
@@ -7630,17 +7630,17 @@ contains
 
       allocate(sp, stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, &
-                                     "space for new State object", &
-                                     ESMF_CONTEXT, rc)) return
+                                     msg="space for new State object", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_BaseDeserialize(sp%base, buffer, offset, lattreconflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_BaseSetInitCreated(sp%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_StateDeserialize(sp%st, sp%needed_default, &
                                  sp%ready_default, sp%stvalid_default, &
@@ -7649,18 +7649,18 @@ contains
                                  buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
 #if defined (ESMF_ENABLENAMEMAP)
       call ESMF_UtilMapNameCreate (sp%nameMap, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
       allocate(sp%datalist(sp%alloccount), stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, "State type", &
-                                       ESMF_CONTEXT, rc)) return
+      if (ESMF_LogFoundAllocError(memstat, msg="State type", &
+                                       ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i = 1, sp%datacount
           sip => sp%datalist(i)
@@ -7676,7 +7676,7 @@ contains
             name=sip%namep, value=i, rc=localrc)
           if (ESMF_LogFoundError (localrc,  &
                                      ESMF_ERR_PASSTHRU,  &
-                                     ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
           select case (sip%otype%ot)
@@ -7691,7 +7691,7 @@ contains
                   linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) then
+                                    ESMF_CONTEXT, rcToReturn=rc)) then
 #if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
 #endif
@@ -7711,7 +7711,7 @@ contains
                   linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) then
+                                    ESMF_CONTEXT, rcToReturn=rc)) then
 #if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
 #endif
@@ -7742,7 +7742,7 @@ contains
                   linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) then
+                                    ESMF_CONTEXT, rcToReturn=rc)) then
 #if defined (ESMF_ENABLENAMEMAP)
                   call ESMF_UtilMapNameDestroy (sp%nameMap)
 #endif
@@ -7771,7 +7771,7 @@ contains
       call c_ESMC_MethodTableCreate(sp%methodTable, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                ESMF_CONTEXT, rcToReturn=rc)) return
                                   
       ESMF_INIT_SET_CREATED(sp)
 

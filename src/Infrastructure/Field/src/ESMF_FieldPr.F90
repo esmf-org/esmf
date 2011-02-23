@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.38 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldPr.F90,v 1.39 2011/02/23 20:10:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_BaseGetStatus(fp%base, fieldstatus, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
         !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
         write(*,*) "Field Print Starts ====>"
@@ -141,7 +141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_StatusString(fieldstatus, str, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
         write(*, *)  "Field status = ", trim(str)
 
         if (fieldstatus .ne. ESMF_STATUS_READY) then
@@ -162,7 +162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_GetName(fp%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "  Name = '",  trim(name), "'"
@@ -170,7 +170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_BasePrint(fp%base, defaultopts, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
         call ESMF_StatusString(fp%gridstatus, str, localrc)
@@ -179,11 +179,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
 !          if (ESMF_LogFoundError(localrc, &
 !            ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rc)) return
+!            ESMF_CONTEXT, rcToReturn=rc)) return
           call ESMF_GeomBaseGet(fp%geombase, dimCount=gridrank, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
           write(*, *) "gridrank = ", gridrank
         endif
 
@@ -193,11 +193,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArrayPrint(fp%array, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
           call ESMF_ArrayGet(fp%array, rank=arrayrank, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
           write(*, *) "arrayrank = ", arrayrank
         endif
 
@@ -292,16 +292,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_GetName(fp%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(field, array=array, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayRead(array, file, variableName=trim(name), &
           timeslice=time, iofmt=iofmtd, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
         if (present(rc)) rc = ESMF_SUCCESS
 

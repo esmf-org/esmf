@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.30 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.31 2011/02/23 20:11:21 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.30 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.31 2011/02/23 20:11:21 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -373,11 +373,11 @@ contains
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! perform redist through array 
         ! For performance consideration: 
@@ -386,7 +386,7 @@ contains
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreI4
@@ -430,11 +430,11 @@ contains
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! perform redist through array 
         ! For performance consideration: 
@@ -443,7 +443,7 @@ contains
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreI8
@@ -487,11 +487,11 @@ contains
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! perform redist through array 
         ! For performance consideration: 
@@ -500,7 +500,7 @@ contains
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreR4
@@ -544,11 +544,11 @@ contains
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! perform redist through array 
         ! For performance consideration: 
@@ -557,7 +557,7 @@ contains
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreR8
@@ -700,11 +700,11 @@ contains
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
         call ESMF_FieldGet(dstField, array=dstArray, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         ! perform redist through array 
         ! For performance consideration: 
@@ -713,7 +713,7 @@ contains
             srcToDstTransposeMap=srcToDstTransposeMap, rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
-            ESMF_CONTEXT, rc)) return 
+            ESMF_CONTEXT, rcToReturn=rc)) return 
 
         if (present(rc)) rc = ESMF_SUCCESS 
     end subroutine ESMF_FieldRedistStoreNF

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.13 2011/02/18 23:19:00 w6ws Exp $
+! $Id: ESMF_StateVa.F90,v 1.14 2011/02/23 20:14:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.13 2011/02/18 23:19:00 w6ws Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.14 2011/02/23 20:14:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -137,8 +137,8 @@
 
       if (.not. associated (state%statep)) then
           if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                 "State uninitialized or already destroyed", &
-                                  ESMF_CONTEXT, rc)) return
+                                 msg="State uninitialized or already destroyed", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
 
@@ -164,8 +164,8 @@
 
           if (sp%st == ESMF_STATE_INVALID) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                 "State uninitialized or already destroyed", &
-                                  ESMF_CONTEXT, rc)) return
+                                 msg="State uninitialized or already destroyed", &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
           end if
 
           do, i1 = 1, sp%datacount

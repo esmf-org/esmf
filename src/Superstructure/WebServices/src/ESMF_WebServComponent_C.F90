@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServComponent_C.F90,v 1.6 2011/02/09 05:58:14 gerhard.j.theurich Exp $
+! $Id: ESMF_WebServComponent_C.F90,v 1.7 2011/02/23 20:18:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@
                                     proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                                 "Error while processing init request", &
+                                 msg="Error while processing init request", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
@@ -98,7 +98,7 @@
     call ESMF_GridCompInitialize(comp, exportState=expState, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                                 "Error while calling ESMF Initialize", &
+                                 msg="Error while calling ESMF Initialize", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
@@ -166,7 +166,7 @@
                                     proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                                 "Error while processing run request", &
+                                 msg="Error while processing run request", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
@@ -174,7 +174,7 @@
     call ESMF_GridCompRun(comp, exportState=expState, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                                 "Error while calling ESMF Run", &
+                                 msg="Error while calling ESMF Run", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
@@ -242,7 +242,7 @@
                                     proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                                 "Error while processing final request", &
+                                 msg="Error while processing final request", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
@@ -250,7 +250,7 @@
     call ESMF_GridCompFinalize(comp, exportState=expState, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                                 "Error while calling ESMF Finalize", &
+                                 msg="Error while calling ESMF Finalize", &
                                  ESMF_CONTEXT, rcToReturn=rc)
         return
     endif

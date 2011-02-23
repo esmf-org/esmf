@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.16 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.17 2011/02/23 20:11:21 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.16 2011/01/25 20:55:52 rokuingh Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.17 2011/02/23 20:11:21 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -158,13 +158,13 @@ contains
         call ESMF_FieldGet(field, array=array, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
-            ESMF_CONTEXT, rc)) return @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
         ! perform gather through internal array @\
         call ESMF_ArrayGather(array, farray, tile, rootPet, vm=vm, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
-            ESMF_CONTEXT, rc)) return @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
         if (present(rc)) rc = ESMF_SUCCESS @\
     end subroutine ESMF_FieldGather##mrank##D##mtypekind @\
@@ -198,12 +198,12 @@ subroutine ESMF_FieldGatherNotRoot(field, tile, rootPet, vm, rc)
         call ESMF_FieldGet(field, array=array, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayGather(array, tile, rootPet, vm=vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Return successfully
         if (present(rc)) rc = ESMF_SUCCESS
