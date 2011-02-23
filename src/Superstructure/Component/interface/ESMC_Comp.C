@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.52 2011/02/23 06:32:06 w6ws Exp $
+// $Id: ESMC_Comp.C,v 1.53 2011/02/23 23:37:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.52 2011/02/23 06:32:06 w6ws Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.53 2011/02/23 23:37:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -47,7 +47,7 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCompCreate()"
-ESMC_GridComp ESMC_GridCompCreate(const char *name, enum ESMC_GridCompType mtype,
+ESMC_GridComp ESMC_GridCompCreate(const char *name,
   const char *configFile, ESMC_Clock clock, int *rc){
 
   // initialize return code; assume routine not implemented
@@ -57,11 +57,10 @@ ESMC_GridComp ESMC_GridCompCreate(const char *name, enum ESMC_GridCompType mtype
   ESMC_GridComp comp = NULL;  // initialize
   
   // typecast into ESMCI types
-  enum ESMCI::GridCompType mtypeArg = (enum ESMCI::GridCompType)mtype;
   ESMCI::Clock *clockp = (ESMCI::Clock *)(clock.ptr);
   
   comp = (void *)
-    ESMCI::GridComp::create(name, mtypeArg, configFile, clockp, &localrc);
+    ESMCI::GridComp::create(name, configFile, clockp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;  // bail out
   

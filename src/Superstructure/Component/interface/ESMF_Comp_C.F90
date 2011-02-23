@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.69 2011/02/23 20:17:12 w6ws Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.70 2011/02/23 23:37:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.69 2011/02/23 20:17:12 w6ws Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.70 2011/02/23 23:37:42 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -326,7 +326,7 @@ end subroutine f_esmf_compcollectgarbage
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcompcreate"
-subroutine f_esmf_gridcompcreate(gcomp, name, mtype, configFile, clock, rc)
+subroutine f_esmf_gridcompcreate(gcomp, name, configFile, clock, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ConfigMod
@@ -341,7 +341,6 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, configFile, clock, rc)
 
   type(ESMF_GridComp)       :: gcomp
   character(len=*)          :: name
-  type(ESMF_GridCompType)   :: mtype
   character(len=*)          :: configFile
   type(ESMF_Clock)          :: clock
   integer                   :: rc
@@ -357,7 +356,7 @@ subroutine f_esmf_gridcompcreate(gcomp, name, mtype, configFile, clock, rc)
   call ESMF_ClockSetThis(local_clock, this, rc=rc)
   call ESMF_ClockSetInitCreated(local_clock)
 
-  gcomp = ESMF_GridCompCreate(name=name, gridcomptype=mtype, &
+  gcomp = ESMF_GridCompCreate(name=name, &
     configFile=configFile, clock=local_clock, rc=rc)
 end subroutine f_esmf_gridcompcreate
 

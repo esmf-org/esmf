@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.15 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.16 2011/02/23 23:37:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -263,8 +263,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  gcomp = ESMC_GridCompCreate("gridded component in C", ESMF_ATM, "grid.rc",
-    clock, &rc);
+  gcomp = ESMC_GridCompCreate("gridded component in C", "grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -330,7 +329,7 @@ int main(void){
   strcpy(name, "Create ESMC_GridComp object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gcomp = ESMC_GridCompCreate("gridded Component in C w/ Fortran registration",
-    ESMF_ATM, "grid.rc", clock, &rc);
+    "grid.rc", clock, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   

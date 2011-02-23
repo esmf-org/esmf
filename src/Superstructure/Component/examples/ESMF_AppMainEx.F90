@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.46 2011/02/23 14:49:54 eschwab Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.47 2011/02/23 23:37:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -276,7 +276,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     cname1 = "Atmosphere Physics"
-    gcomp1 = ESMF_GridCompCreate(name=cname1, gridcomptype=ESMF_ATM, rc=rc)  
+    gcomp1 = ESMF_GridCompCreate(name=cname1, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -293,7 +293,7 @@
     print *, "Comp Create returned, name = ", trim(cname1)
 
     cname2 = "Atmosphere Dynamics"
-    gcomp2 = ESMF_GridCompCreate(name=cname2, gridcomptype=ESMF_ATM, rc=rc)  
+    gcomp2 = ESMF_GridCompCreate(name=cname2, rc=rc)  
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

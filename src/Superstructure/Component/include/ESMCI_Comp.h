@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.21 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: ESMCI_Comp.h,v 1.22 2011/02/23 23:37:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ class Comp{
 
 class GridComp:public Comp{
   public:
-    static GridComp *create(char const *name, enum GridCompType mtype,
+    static GridComp *create(char const *name, 
       char const *configFile, ESMCI::Clock *clock, int *rc=NULL);
     static int destroy(GridComp *comp);
     int print() const;

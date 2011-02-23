@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.35 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: ESMC_GridComp.h,v 1.36 2011/02/23 23:37:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,9 +39,6 @@
 extern "C" {
 #endif
 
-enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
-  ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
-
 enum ESMC_Method { ESMF_SETINIT=1, ESMF_SETRUN, ESMF_SETFINAL,
   ESMF_SETWRITERESTART, ESMF_SETREADRESTART };
 
@@ -57,7 +54,6 @@ typedef void* ESMC_GridComp;
 // !INTERFACE:
 ESMC_GridComp ESMC_GridCompCreate(
   const char *name,                    // in 
-  enum ESMC_GridCompType mtype,        // in
   const char *configFile,              // in
   ESMC_Clock clock,                    // in
   int *rc                              // out

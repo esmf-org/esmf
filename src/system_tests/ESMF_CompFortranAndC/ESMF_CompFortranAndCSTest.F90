@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.25 2011/02/23 14:45:08 eschwab Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.26 2011/02/23 23:37:42 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -126,7 +126,7 @@ program ESMF_CompFortranAndC
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   cname = "Fortran Component"
-  compInFortran = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
+  compInFortran = ESMF_GridCompCreate(name=cname, &
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -135,7 +135,7 @@ program ESMF_CompFortranAndC
   print *, "Comp Create (Fortran) finished, name = ", trim(cname)
 
   cname = "C Component"
-  compInC = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, rc=localrc)
+  compInC = ESMF_GridCompCreate(name=cname, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)

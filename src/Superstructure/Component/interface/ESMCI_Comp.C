@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.19 2011/02/23 06:32:06 w6ws Exp $
+// $Id: ESMCI_Comp.C,v 1.20 2011/02/23 23:37:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.19 2011/02/23 06:32:06 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.20 2011/02/23 23:37:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -49,7 +49,7 @@ static const char *const version = "$Id: ESMCI_Comp.C,v 1.19 2011/02/23 06:32:06
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
   void FTN(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name, 
-    ESMCI::GridCompType *mtype, char const *configFile, ESMCI::Clock **clock, 
+    char const *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
   void FTN(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
   void FTN(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
@@ -352,7 +352,6 @@ GridComp *GridComp::create(
 // !ARGUMENTS:
 //
     char const *name, 
-    enum GridCompType mtype,
     char const *configFile,
     Clock *clock,
     int *rc
@@ -368,7 +367,7 @@ GridComp *GridComp::create(
   
   GridComp *comp = new GridComp;
   
-  FTN(f_esmf_gridcompcreate)(comp, name, &mtype,
+  FTN(f_esmf_gridcompcreate)(comp, name,
     configFile, &clock, &localrc, strlen(name), strlen(configFile));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;

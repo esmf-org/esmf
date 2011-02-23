@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.34 2011/02/23 00:46:44 theurich Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.35 2011/02/23 23:37:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -73,8 +73,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                             configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -128,8 +127,7 @@
     !------------------------------------------------------------------------
     !NEX_UTest
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                             configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -160,8 +158,7 @@
     !EX_UTest
 !   !  Test creation of a Component
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-                                             configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"

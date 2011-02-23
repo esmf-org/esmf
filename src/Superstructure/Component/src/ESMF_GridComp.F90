@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.156 2011/02/23 20:17:12 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.157 2011/02/23 23:37:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.156 2011/02/23 20:17:12 w6ws Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.157 2011/02/23 23:37:42 theurich Exp $'
 
 !==============================================================================
 !
@@ -332,19 +332,18 @@ contains
 ! !IROUTINE: ESMF_GridCompCreate - Create a GridComp
 !
 ! !INTERFACE:
-  recursive function ESMF_GridCompCreate(keywordEnforcer, gridcomptype, grid, &
+  recursive function ESMF_GridCompCreate(keywordEnforcer, grid, &
     config, configFile, clock, petList, contextflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_GridComp) :: ESMF_GridCompCreate
 !
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-    type(ESMF_Grid),         intent(inout), optional :: grid
-    type(ESMF_Config),       intent(inout), optional :: config
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Grid),         intent(in),    optional :: grid
+    type(ESMF_Config),       intent(in),    optional :: config
     character(len=*),        intent(in),    optional :: configFile
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: petList(:)
     type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
     character(len=*),        intent(in),    optional :: name
@@ -368,14 +367,6 @@ contains
 !   
 ! The arguments are:
 ! \begin{description}
-! \item[{[gridcomptype]}]
-!   \begin{sloppypar}
-!   {\tt ESMF\_GridComp} model type, where model includes 
-!   {\tt ESMF\_ATM, ESMF\_LAND, ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
-!   Note that this has no meaning to the framework, it is an
-!   annotation for user code to query. See section
-!   \ref{opt:gridcomptype} for a complete list of valid types.
-!   \end{sloppypar}
 ! \item[{[grid]}]
 !   Default {\tt ESMF\_Grid} associated with this {\tt gridcomp}. Note that
 !   it is perfectly ok to not pass a Grid in for this argument. This argument is 
@@ -447,7 +438,7 @@ contains
       
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
-      gridcomptype=gridcomptype, configFile=configFile, config=config, &
+      configFile=configFile, config=config, &
       grid=grid, clock=clock, petList=petList, contextflag=contextflag, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -484,7 +475,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)          :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out),  optional :: rc
 !
 ! !STATUS:
@@ -555,8 +546,8 @@ contains
     importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -647,7 +638,7 @@ contains
     exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -691,15 +682,13 @@ contains
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, gridcomptype, &
-    grid, config, &
+  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, grid, config, &
     configFile, clock, localPet, petCount, contextflag, currentMethod, &
     currentPhase, comptype, vm, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
+    type(ESMF_GridComp),     intent(in)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid),         intent(out), optional :: grid
     type(ESMF_Config),       intent(out), optional :: config
     character(len=*),        intent(out), optional :: configFile
@@ -726,9 +715,6 @@ contains
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} object to query.
-! \item[{[gridcomptype]}]
-!   Return the model type of this {\tt ESMF\_GridComp}. See section
-!   \ref{opt:gridcomptype} for a complete list of valid types.
 ! \item[{[grid]}]
 !   Return the {\tt ESMF\_Grid} associated with this {\tt ESMF\_GridComp}.
 ! \item[{[config]}]
@@ -772,7 +758,7 @@ contains
 
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
-      gridcomptype=gridcomptype, grid=grid, clock=clock, &
+      grid=grid, clock=clock, &
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       ctype=comptype, rc=localrc)
@@ -796,10 +782,10 @@ contains
   subroutine ESMF_GridCompGetEPPhaseCount(gridcomp, method, phaseCount, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)   :: gridcomp
-    type(ESMF_Method),   intent(in)   :: method
-    integer,             intent(out)  :: phaseCount
-    integer, intent(out), optional    :: rc 
+    type(ESMF_GridComp),  intent(in)            :: gridcomp
+    type(ESMF_Method),    intent(in)            :: method
+    integer,              intent(out)           :: phaseCount
+    integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Get phaseCount
@@ -844,12 +830,12 @@ contains
 ! !IROUTINE: ESMF_GridCompGetInternalState - Get private data block pointer
 !
 ! !INTERFACE:
-! subroutine ESMF_GridCompGetInternalState(gridcomp, dataPointer, rc)
+! subroutine ESMF_GridCompGetInternalState(gridcomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_GridComp), intent(inout) :: gridcomp
-!   type(any), pointer                 :: dataPointer
-!   integer, intent(out)   :: rc
+!   type(ESMF_GridComp)               :: gridcomp
+!   type(wrapper)                     :: wrappedDataPointer
+!   integer,            intent(out)   :: rc
 !
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_GridComp} at any time after 
@@ -864,7 +850,7 @@ contains
 ! each run with private data blocks.  A corresponding 
 ! {\tt ESMF\_GridCompSetInternalState} call sets the data pointer to 
 ! this block, and this call retrieves the data pointer.
-! Note that the {\tt dataPointer} argument needs to be a derived type
+! Note that the {\tt wrappedDataPointer} argument needs to be a derived type
 ! which contains only a pointer of the type of the data block defined
 ! by the user.  When making this call the pointer needs to be unassociated.
 ! When the call returns, the pointer will now reference the original
@@ -873,13 +859,16 @@ contains
 !
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_GridCompSetInternalState} will be accessible.
+!
+! CAUTION: This method does not have an explicit Fortran interface. Do not 
+! specify argument keywords when calling this method!
 !   
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
-! \item[dataPointer]
-!   A derived type, containing only an unassociated pointer 
+! \item[wrappedDataPointer]
+!   A derived type (wrapper), containing only an unassociated pointer 
 !   to the private data block.
 !   The framework will fill in the pointer. When this call returns, the
 !   pointer is set to the same address set during the last
@@ -907,8 +896,8 @@ contains
     importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -997,7 +986,7 @@ contains
     exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -1046,8 +1035,8 @@ contains
     logical :: ESMF_GridCompIsPetLocal
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)         :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_GridComp), intent(in)            :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1102,9 +1091,9 @@ contains
   subroutine ESMF_GridCompPrint(gridcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                       :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: rc
+    type(ESMF_GridComp), intent(in)            :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Prints information about an {\tt ESMF\_GridComp} to {\tt stdout}. \\
@@ -1157,8 +1146,8 @@ contains
     importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -1249,8 +1238,8 @@ contains
     clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -1339,7 +1328,7 @@ contains
     clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
@@ -1382,19 +1371,18 @@ contains
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, name, gridcomptype, &
-    grid, config, configFile, clock, rc)
+  subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, grid, config, &
+    configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len=*),        intent(in),    optional :: name
-    type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
-    type(ESMF_Grid),         intent(inout), optional :: grid
-    type(ESMF_Config),       intent(inout), optional :: config
-    character(len=*),        intent(in),    optional :: configFile
-    type(ESMF_Clock),        intent(inout), optional :: clock
-    integer,                 intent(out),   optional :: rc
+    type(ESMF_GridComp),     intent(inout)          :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Grid),         intent(in),   optional :: grid
+    type(ESMF_Config),       intent(in),   optional :: config
+    character(len=*),        intent(in),   optional :: configFile
+    type(ESMF_Clock),        intent(in),   optional :: clock
+    character(len=*),        intent(in),   optional :: name
+    integer,                 intent(out),  optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1408,11 +1396,6 @@ contains
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to change.
-! \item[{[name]}]
-!   Set the name of the {\tt ESMF\_GridComp}.
-! \item[{[gridcomptype]}]
-!   Set the model type for this {\tt ESMF\_GridComp}. See section
-!   \ref{opt:gridcomptype} for a complete list of valid types.
 ! \item[{[grid]}]
 !   Set the {\tt ESMF\_Grid} associated with the {\tt ESMF\_GridComp}.
 ! \item[{[config]}]
@@ -1426,6 +1409,8 @@ contains
 !   if both are specified.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_GridComp}.
+! \item[{[name]}]
+!   Set the name of the {\tt ESMF\_GridComp}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1444,7 +1429,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
-    call ESMF_CompSet(gridcomp%compp, name, gridcomptype=gridcomptype, &
+    call ESMF_CompSet(gridcomp%compp, name=name, &
       grid=grid, clock=clock, configFile=configFile, config=config, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -1464,11 +1449,11 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSetEntryPoint(gridcomp, method, userRoutine, &
-		keywordEnforcer, phase, rc)
+    keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in) :: gridcomp
-    type(ESMF_Method),   intent(in) :: method
+    type(ESMF_GridComp),  intent(inout)         :: gridcomp
+    type(ESMF_Method),    intent(in)            :: method
     interface
       subroutine userRoutine(gridcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1482,9 +1467,9 @@ contains
         integer, intent(out)        :: rc           ! must not be optional
       end subroutine
     end interface
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(in),  optional  :: phase
-    integer, intent(out), optional  :: rc 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(in),  optional :: phase
+    integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
@@ -1544,12 +1529,12 @@ contains
 ! !IROUTINE: ESMF_GridCompSetInternalState - Set private data block pointer
 !
 ! !INTERFACE:
-! subroutine ESMF_GridCompSetInternalState(gridcomp, dataPointer, rc)
+! subroutine ESMF_GridCompSetInternalState(gridcomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_GridComp), intent(inout) :: gridcomp
-!   type(any), pointer                 :: dataPointer
-!   integer,             intent(out)   :: rc
+!   type(ESMF_GridComp)               :: gridcomp
+!   type(wrapper)                     :: wrappedDataPointer
+!   integer,            intent(out)   :: rc
 !
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_GridComp} at any time, but 
@@ -1568,11 +1553,14 @@ contains
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_GridCompSetInternalState} will be accessible.
 !
+! CAUTION: This method does not have an explicit Fortran interface. Do not 
+! specify argument keywords when calling this method!
+!   
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
-! \item[dataPointer]
+! \item[wrappedDataPointer]
 !   A pointer to the private data block, wrapped in a derived type which
 !   contains only a pointer to the block.  This level of indirection is
 !   needed to reliably set and retrieve the data block no matter which
@@ -1595,10 +1583,10 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompSetServices(gridcomp, &
-			userRoutine, keywordEnforcer, userRc, rc)
+    userRoutine, keywordEnforcer, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)          :: gridcomp
     interface
       subroutine userRoutine(gridcomp, rc)
         use ESMF_CompMod
@@ -1607,9 +1595,9 @@ contains
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(out), optional :: userRc
-    integer, intent(out), optional :: rc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional  :: userRc
+    integer,             intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
@@ -1676,7 +1664,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
     character(len=*),    intent(in)            :: userRoutine
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
@@ -1765,7 +1753,7 @@ contains
   recursive subroutine ESMF_GridCompSetVM(gridcomp, userRoutine, keywordEnforcer, &
     userRc, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp)            :: gridcomp
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
     interface
       subroutine userRoutine(gridcomp, rc)
         use ESMF_CompMod
@@ -1774,13 +1762,13 @@ contains
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(out), optional :: userRc
-    integer, intent(out), optional :: rc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: userRc
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
-! for setting Component's VM properties. 
+! for setting Component's VM properties.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1841,7 +1829,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
     character(len=*),    intent(in)            :: userRoutine
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
@@ -1929,7 +1917,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -2000,7 +1988,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -2072,7 +2060,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -2140,9 +2128,9 @@ contains
   subroutine ESMF_GridCompValidate(gridcomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                       :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out), optional :: rc
+    type(ESMF_GridComp), intent(in)            :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Currently all this method does is to check that the {\tt gridcomp} exists.
@@ -2188,7 +2176,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
@@ -2245,8 +2233,8 @@ contains
     importState, exportState, clock, blockingflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: gridcomp
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
