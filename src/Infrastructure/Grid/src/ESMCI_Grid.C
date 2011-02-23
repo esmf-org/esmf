@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.119 2011/02/17 23:44:39 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.120 2011/02/23 00:31:55 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.119 2011/02/17 23:44:39 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.120 2011/02/23 00:31:55 w6ws Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -185,13 +185,13 @@ int Grid::addCoordArray(
   localrc=this->setStaggerInfo(staggerloc, staggerEdgeLWidthArg, staggerEdgeUWidthArg,
 			       staggerAlignArg, staggerMemLBoundArg);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
 
   // Get distgrid for this staggerloc 
   localrc=this->getStaggerDistgrid(staggerloc, &staggerDistgrid);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
   // construct ArraySpec for using to call Array::create
   ArraySpec *arrayspec= new ArraySpec;     
@@ -287,12 +287,12 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER, 
                           &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                  ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                 ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                                 ESMCI_ERR_PASSTHRU, &rc)) return rc;        
     
   } // end of coord loop
 
@@ -420,12 +420,12 @@ int Grid::addCoordArrayArb(
                        (InterfaceInt *)ESMC_NULL_POINTER, 
 			&localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                  ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                 ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                                 ESMCI_ERR_PASSTHRU, &rc)) return rc;        
     
   } // end of coord loop
 
@@ -611,13 +611,13 @@ int Grid::addItemArray(
   localrc=this->setStaggerInfo(staggerloc, staggerEdgeLWidthArg, staggerEdgeUWidthArg,
 			       staggerAlignArg, staggerMemLBoundArg);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
 
   // Get distgrid for this staggerloc 
   localrc=this->getStaggerDistgrid(staggerloc, &staggerDistgrid);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
   // construct ArraySpec for using to call Array::create
   ArraySpec *arrayspec= new ArraySpec;     
@@ -702,13 +702,13 @@ int Grid::addItemArray(
                           (InterfaceInt *)ESMC_NULL_POINTER, 
                           &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                  ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
 
    // Set newly created Array into Grid
    localrc=this->setItemArrayInternal(staggerloc, item, array, true);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                               ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                               ESMCI_ERR_PASSTHRU, &rc)) return rc;        
     
 
   // Dellocate temporay arrays
@@ -863,12 +863,12 @@ int Grid::addItemArrayArb(
 		       &localrc);
 
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-	   ESMF_ERR_PASSTHRU, &rc)) return rc;        
+	   ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
    // Set newly created Array into Grid
    localrc=this->setItemArrayInternal(staggerloc, item, array, true);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                               ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                               ESMCI_ERR_PASSTHRU, &rc)) return rc;        
     
 
   // Dellocate temporay arrays
@@ -952,12 +952,12 @@ int Grid::commit(
                        proto->destroyDistgrid, proto->destroyDELayout);
   }  
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
    // Now that we don't need it anymore, remove the protogrid from the grid
    localrc=this->delProtoGrid();
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                       ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                       ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
   // return successfully
   return ESMF_SUCCESS;
@@ -1029,7 +1029,7 @@ Grid *Grid::create(
                     indexflagArg,
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
+            ESMCI_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
   // return successfully
   *rcArg = ESMF_SUCCESS;
@@ -1103,7 +1103,7 @@ Grid *Grid::create(
 		    coordDimMapArg,  
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
+            ESMCI_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
   // return successfully
   *rcArg = ESMF_SUCCESS;
@@ -1158,7 +1158,7 @@ Grid *Grid::create(
   // by commit to construct the internal structures of the Grid
   localrc=grid->addProtoGrid();
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
+            ESMCI_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
   // return successfully
   *rcArg = ESMF_SUCCESS;
@@ -1210,7 +1210,7 @@ int Grid::destroy(
     (*gridArg)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -1298,7 +1298,7 @@ Array *Grid::getCoordArray(
   // Get Coord Array
   localrc=this->getCoordArrayInternal(staggerloc, coord, &array);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
+            ESMCI_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
   // return SUCCESS
   if (rcArg != ESMC_NULL_POINTER) *rcArg = ESMF_SUCCESS;  
@@ -1394,7 +1394,7 @@ Array *Grid::getItemArray(
   // Get Item Array
   localrc=this->getItemArrayInternal(staggerloc, item, &array);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
+            ESMCI_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
 
   // return SUCCESS
   if (rcArg != ESMC_NULL_POINTER) *rcArg = ESMF_SUCCESS;  
@@ -1460,7 +1460,7 @@ int Grid::getExclusiveLBound(
 
     // get grid distributed exclusive bounds
     localrc=this->getDistExclusiveLBound(localDEArg, distExLBnd);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) return rc;
 
     // Map from distgrid to grid
     for (int i=0; i<dimCount; i++) {
@@ -1473,7 +1473,7 @@ int Grid::getExclusiveLBound(
  
     // get computational offset
     localrc=this->getLDEStaggerLOffset(staggerlocArg, localDEArg, offsetL);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) return rc;
     
     // subtract offset
     for (int i=0; i<dimCount; i++) {
@@ -1546,7 +1546,7 @@ int Grid::getExclusiveUBound(
   if (decompType == ESMC_GRID_NONARBITRARY) { 
    // get grid distributed exclusive bounds
    localrc=this->getDistExclusiveUBound(localDEArg, distExUBnd);
-   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) return rc;
 
    // Map between distgrid and grid
    for (int i=0; i<dimCount; i++) {
@@ -1559,7 +1559,7 @@ int Grid::getExclusiveUBound(
 
     // get computational offset
     localrc=this->getLDEStaggerUOffset(staggerlocArg, localDEArg, offsetU);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) return rc;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) return rc;
 
     // Add offset
     for (int i=0; i<dimCount; i++) {
@@ -1648,13 +1648,13 @@ int Grid::getDistExclusiveLBound(
       // obtain indexList for this DE and dim
       const int *indexList =
         distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU, &rc))
         return rc;
       
       // make sure this dimension is contiguous         
       const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                ESMF_ERR_PASSTHRU, &rc)) return rc;
+                                                ESMCI_ERR_PASSTHRU, &rc)) return rc;
       if (!contig) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                      "- doesn't handle non-contiguous DEs yet ", &rc);
@@ -1737,13 +1737,13 @@ int Grid::getDistExclusiveUBound(
         // obtain indexList for this DE and dim
         const int *indexList =
           distgrid->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU, &rc))
           return rc;
 
         // make sure is contiguous         
         const int contig=distgrid->getContigFlagPDimPDe(de, i+1, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
+                              ESMCI_ERR_PASSTHRU, &rc)) return rc;
         if (!contig) {
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                      "- doesn't handle non-contiguous DEs yet ", &rc);
@@ -1815,7 +1815,7 @@ void Grid::getCoordInternal(
       
   } else {
      index1D = convertIndex(index);
-     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
      //					       &rc)) return rc;
      for (int c=0; c<dimCount; c++) {
        
@@ -1919,7 +1919,7 @@ int Grid::getCoord(
       
       //// Get pointer to LocalArray data
       localrc=localArray->getData(coordIndex, coord+c);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 						&rc)) return rc; 
     }
       
@@ -1940,7 +1940,7 @@ int Grid::getCoord(
        
        //// Get pointer to LocalArray data
        localrc=localArray->getData(coordIndex, coord+c);
-       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 						&rc)) return rc; 
      }
   }
@@ -2008,7 +2008,7 @@ void Grid::getItemInternal(
   } else {
 #if 0 // Talk to PLi and then fix this
      index1D = convertIndex(index);
-     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
      //					       &rc)) return rc;
        
        //// Get LocalArray cooresponding to staggerloc, coord and localDE
@@ -2119,7 +2119,7 @@ int Grid::getItem(
   } else {
 #if 0 // Talk to PLi and then fix this
      index1D = convertIndex(index);
-     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
      //					       &rc)) return rc;
        
        //// Get LocalArray cooresponding to staggerloc, coord and localDE
@@ -2787,7 +2787,7 @@ int Grid::setCoordArray(
   // Get distgrid for this staggerloc 
   localrc=this->getStaggerDistgrid(staggerloc, &staggerDistgrid);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
   // Make sure that they match
   if (!DistGrid::match(staggerDistgrid, arrayArg->getDistGrid())) {
@@ -2947,7 +2947,7 @@ int Grid::setItemArray(
   // Get distgrid for this staggerloc 
   localrc=this->getStaggerDistgrid(staggerloc, &staggerDistgrid);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;        
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
   // Ensure the passed in array has the correct dimCount
   if (decompType == ESMC_GRID_NONARBITRARY) {
@@ -3359,7 +3359,7 @@ int Grid::constructInternal(
   // boundary in each dimension
   if (decompType != ESMC_GRID_ARBITRARY){
     localrc=_createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid, distgridToGridMap);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
 
@@ -4254,7 +4254,7 @@ int Grid::setItemArrayInternal(
           staggerEdgeLWidthList[staggerloc], staggerEdgeUWidthList[staggerloc], staggerAlignList[staggerloc], 
           staggerEdgeLWidth, staggerEdgeUWidth, staggerAlign);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                           ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                           ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
    
   // Set staggerMemLBound 
@@ -4417,7 +4417,7 @@ int Grid::getStaggerDistgrid(
 						       staggerEdgeUWidthIntInt, 
 						       &indexflag, NULL, 
                                                        &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
 	return rc;
       
       // Get rid of Interface ints
@@ -4553,7 +4553,7 @@ int Grid::serialize(
     // First, serialize the base class,
     localrc = ESMC_Base::ESMC_Serialize(buffer, length, &loffset, attreconflag, inquireflag);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     
     // Since we're not allowing the serialization of 
@@ -4635,7 +4635,7 @@ int Grid::serialize(
            //// Serialize the Array
 	  localrc = coordArrayList[s][c]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
 	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
+				      ESMCI_ERR_PASSTHRU, &rc)) return rc;  
 	}
       }
     }
@@ -4654,7 +4654,7 @@ int Grid::serialize(
            //// Serialize the Array
 	  localrc = itemArrayList[s][i]->serialize(buffer, length, &loffset, attreconflag, inquireflag);
 	  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-				      ESMF_ERR_PASSTHRU, &rc)) return rc;  
+				      ESMCI_ERR_PASSTHRU, &rc)) return rc;  
 	}
       }
     }
@@ -4673,7 +4673,7 @@ int Grid::serialize(
 	//// Serialize the Array
 	localrc = staggerDistgridList[s]->serialize(buffer, length, &loffset, inquireflag);
 	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-						  ESMF_ERR_PASSTHRU, &rc)) return rc;  
+						  ESMCI_ERR_PASSTHRU, &rc)) return rc;  
       }
     }
 
@@ -4684,7 +4684,7 @@ int Grid::serialize(
     if (r!=0) loffset += 8-r;
     // Serialize the DistGrid
     localrc = distgrid->serialize(buffer, length, &loffset, inquireflag);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
      return rc;  
 
     // make sure loffset is aligned correctly
@@ -4785,7 +4785,7 @@ int Grid::deserialize(
 
   // First, deserialize the base class
   localrc = ESMC_Base::ESMC_Deserialize(buffer, &loffset, attreconflag);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // Since we're not allowing the serialization of 
@@ -5155,10 +5155,10 @@ static  void _free3D(Type ****array)
         //// get tile min/max
         const int *tileMin=distgrid->getMinIndexPDimPTile(tile, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                  ESMF_ERR_PASSTHRU, &rc)) return rc;
+                                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;
         const int *tileMax=distgrid->getMaxIndexPDimPTile(tile, &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                  ESMF_ERR_PASSTHRU, &rc)) return rc;
+                                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;
         
         //// Init flags
         isDELBnd[lDE]=0xff;
@@ -5170,7 +5170,7 @@ static  void _free3D(Type ****array)
           ////// make sure is contiguous         
           const int contig=distgrid->getContigFlagPDimPDe(gDE, d+1, &localrc);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                    ESMF_ERR_PASSTHRU, &rc)) return rc;
+                                                    ESMCI_ERR_PASSTHRU, &rc)) return rc;
           if (!contig) {
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                                                   "- doesn't handle non-contiguous DEs yet ", &rc);
@@ -5181,7 +5181,7 @@ static  void _free3D(Type ****array)
           const int *indexList=distgrid->getIndexListPDimPLocalDe(lDE, d+1,
                                                                   &localrc);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                    ESMF_ERR_PASSTHRU, &rc)) return rc;
+                                                    ESMCI_ERR_PASSTHRU, &rc)) return rc;
           
           // if we're not at the min then we're not a lower bound 
           // so turn off the bit
@@ -5254,7 +5254,7 @@ static  void _free3D(Type ****array)
           // if we're not a lower bound turn off the bit
           bool isLBnd=distgrid->isLocalDeOnEdgeL(lDE,d+1,&localrc);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
+                              ESMCI_ERR_PASSTHRU, &rc)) return rc;
           if (!isLBnd) {
             isDELBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
           } 
@@ -5263,7 +5263,7 @@ static  void _free3D(Type ****array)
           // if we're not an upper bound turn off the bit
           bool isUBnd=distgrid->isLocalDeOnEdgeU(lDE,d+1,&localrc);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                              ESMF_ERR_PASSTHRU, &rc)) return rc;
+                              ESMCI_ERR_PASSTHRU, &rc)) return rc;
           if (!isUBnd) {
             isDEUBnd[lDE] &= ~(0x1<<distgridToGridMap[d]);
           }
@@ -5534,7 +5534,7 @@ int construct(
           gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg,
           gridEdgeLWidth, gridEdgeUWidth, gridAlign);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                           ESMF_ERR_PASSTHRU, &rc)) return rc;        
+                           ESMCI_ERR_PASSTHRU, &rc)) return rc;        
 
 
   // Error check gridMemLBound and fill in value
@@ -5747,7 +5747,7 @@ int construct(
 				     minIndex, maxIndex, NULL, 0, 0, 
 				     destroyDistgrid, destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;
         
   // Dellocate temporay arrays
   if (undistUBoundArg != NULL)  delete [] undistLBound;
@@ -6108,7 +6108,7 @@ int construct(
              indexflag, minIndex, maxIndex, localArbIndex, 
 	     localArbIndexCount, arbDimArg, destroyDistgrid, destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;
 
   // Dellocate temporay arrays
   if (undistUBoundArg != NULL)  delete [] undistLBound;
@@ -6189,7 +6189,7 @@ int setGridDefaultsLUA(
                    gridEdgeLWidthDefault, gridEdgeUWidthDefault, gridAlignDefault,
                    gridEdgeLWidthOut, gridEdgeUWidthOut, gridAlignOut);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-            ESMF_ERR_PASSTHRU, &rc)) return rc;
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;
 
   // return success
   return ESMF_SUCCESS;
@@ -8629,7 +8629,7 @@ bool Grid::match(
 	  grid2->coordArrayList[i][j] != ESMC_NULL_POINTER) {
 	bool arraymatch=Array::match(grid1->coordArrayList[i][j], grid2->coordArrayList[i][j],&localrc);
 	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-			        ESMF_ERR_PASSTHRU, rc)) return false;
+			        ESMCI_ERR_PASSTHRU, rc)) return false;
 	if (!arraymatch) {
 	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
 	  return false;
@@ -8702,7 +8702,7 @@ bool Grid::match(
 	  grid2->itemArrayList[i][j] != ESMC_NULL_POINTER) {
 	bool arraymatch=Array::match(grid1->itemArrayList[i][j], grid2->itemArrayList[i][j],&localrc);
 	if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-			        ESMF_ERR_PASSTHRU, rc)) return false;
+			        ESMCI_ERR_PASSTHRU, rc)) return false;
 	if (!arraymatch) {
 	  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
 	  return false;

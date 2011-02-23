@@ -59,7 +59,7 @@ extern "C" {
 
     // call into C++
     localrc=(*grid)->commit();
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -76,7 +76,7 @@ extern "C" {
 
     // call into C++
     *ptr = ESMCI::Grid::create(&localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -129,7 +129,7 @@ extern "C" {
       *coordDimCountArg, *coordDimMapArg,
       *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
       destroyDistgridPtr, destroyDELayoutPtr, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -181,7 +181,7 @@ extern "C" {
       *minIndexArg, *maxIndexArg, *localArbIndexArg, *localArbIndexCount,
       *distDimArg, *arbDim, *coordDimCountArg, *coordDimMapArg,
       destroyDistgridPtr, destroyDELayoutPtr, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -652,7 +652,7 @@ extern "C" {
     // call into C++
     localrc= (*grid)->addCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg, *staggerMemLBoundArg);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -672,7 +672,7 @@ extern "C" {
 
     // call into C++
     localrc= (*grid)->addCoordArrayArb(ESMC_NOT_PRESENT_FILTER(staggerloc));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -699,7 +699,7 @@ extern "C" {
     localrc= (*grid)->addCoordFromArrayList(ESMC_NOT_PRESENT_FILTER(staggerloc),
                     *arrayCount, arrayList, ESMC_NOT_PRESENT_FILTER(docopy),
             *staggerEdgeLWidthArg, *staggerEdgeUWidthArg, *staggerAlignArg);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -732,7 +732,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(item), ESMC_NOT_PRESENT_FILTER(itemTypeKind),
 				   *staggerEdgeLWidthArg, *staggerEdgeUWidthArg,
                                    *staggerAlignArg, *staggerMemLBoundArg);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -753,7 +753,7 @@ extern "C" {
     // call into C++
     localrc= (*grid)->addItemArrayArb(ESMC_NOT_PRESENT_FILTER(staggerloc),
       ESMC_NOT_PRESENT_FILTER(item), ESMC_NOT_PRESENT_FILTER(itemTypeKind));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -775,7 +775,7 @@ extern "C" {
     // call into C++
     localrc= (*grid)->setCoordArray(ESMC_NOT_PRESENT_FILTER(staggerloc),
       ESMC_NOT_PRESENT_FILTER(coord), *array, ESMC_NOT_PRESENT_FILTER(docopy));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -845,7 +845,7 @@ extern "C" {
       *coordDimCountArg, *coordDimMapArg,
       *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
        destroyDistgridPtr, destroyDELayoutPtr);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -872,7 +872,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(item), 
       *array,
       ESMC_NOT_PRESENT_FILTER(docopy));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
@@ -982,11 +982,11 @@ extern "C" {
 
    // get grid exclusive bounds
    localrc=grid->getExclusiveLBound(staggerloc,localDE,gridExLBnd);
-   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
    localrc=grid->getExclusiveUBound(staggerloc,localDE,gridExUBnd);
-   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
    // Get Array
@@ -995,7 +995,7 @@ extern "C" {
      // Get Array    
      docopy=ESMCI::DATA_REF;
      array=grid->getCoordArray(&staggerloc, coord+1, &docopy, &localrc);
-     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
  					    ESMC_NOT_PRESENT_FILTER(_rc))) return;
      // Array undistributed bounds
      arrayUndistLBound=array->getUndistLBound();
@@ -1454,11 +1454,11 @@ extern "C" {
 
    // get grid exclusive bounds
    localrc=grid->getExclusiveLBound(staggerloc,localDE,gridExLBnd);
-   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
    localrc=grid->getExclusiveUBound(staggerloc,localDE,gridExUBnd);
-   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
    // Get Array
@@ -1467,7 +1467,7 @@ extern "C" {
      // Get Array    
      docopy=ESMCI::DATA_REF;
      array=grid->getItemArray(&staggerloc, &item, &docopy, &localrc);
-     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
  					    ESMC_NOT_PRESENT_FILTER(_rc))) return;
    }
 
@@ -1903,11 +1903,11 @@ extern "C" {
 
    // get grid exclusive bounds
    localrc=grid->getExclusiveLBound(staggerloc,localDE,gridExLBnd);
-   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
    localrc=grid->getExclusiveUBound(staggerloc,localDE,gridExUBnd);
-   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                    ESMC_NOT_PRESENT_FILTER(_rc))) return;
 
    // Compute offset if ESMF_INDEX_USER
@@ -2222,7 +2222,7 @@ extern "C" {
    // Get stagger distgrid
    if (ESMC_NOT_PRESENT_FILTER(_staggerDistgrid) != ESMC_NULL_POINTER) {
      localrc=grid->getStaggerDistgrid(staggerloc, _staggerDistgrid);
-     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+     if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 			         ESMC_NOT_PRESENT_FILTER(_rc))) return;
    }
 
@@ -2308,7 +2308,7 @@ extern "C" {
 
     // call into C++
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMCI::Grid::destroy(ptr),
-         ESMF_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc));
+         ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc));
   } 
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -2356,7 +2356,7 @@ extern "C" {
     localrc=setGridDefaultsLUA(*dimCount,
        *gridEdgeLWidthIn, *gridEdgeUWidthIn, *gridAlignIn,
        (*gridEdgeLWidthOut)->array, (*gridEdgeUWidthOut)->array, (*gridAlignOut)->array);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 					  ESMC_NOT_PRESENT_FILTER(rc));
 
 
@@ -2376,7 +2376,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->serialize(
       buf, length, offset, *attreconflag, *inquireflag),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -2391,7 +2391,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*grid)->deserialize(
       buf, offset, *attreconflag),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
@@ -2408,7 +2408,7 @@ extern "C" {
 
     // Check if Grids match
     bool match=ESMCI::Grid::match(*ptr1,*ptr2, &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 					  ESMC_NOT_PRESENT_FILTER(rc));  
 
     // Return result
