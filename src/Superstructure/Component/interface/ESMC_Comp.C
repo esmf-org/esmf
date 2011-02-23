@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.51 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: ESMC_Comp.C,v 1.52 2011/02/23 06:32:06 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.51 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.52 2011/02/23 06:32:06 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -62,7 +62,7 @@ ESMC_GridComp ESMC_GridCompCreate(const char *name, enum ESMC_GridCompType mtype
   
   comp = (void *)
     ESMCI::GridComp::create(name, mtypeArg, configFile, clockp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;  // bail out
   
   // return successfully
@@ -86,7 +86,7 @@ int ESMC_GridCompDestroy(ESMC_GridComp *comp){
 
   // call into ESMCI method  
   localrc = ESMCI::GridComp::destroy(compp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // invalidate pointer
@@ -114,7 +114,7 @@ int ESMC_GridCompSetServices(ESMC_GridComp comp,
 
   // call into ESMCI method  
   localrc = compp->setServices((void(*)(ESMCI::Comp *, int *))func, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -143,7 +143,7 @@ int ESMC_GridCompSetEntryPoint(ESMC_GridComp comp, enum ESMC_Method method,
   localrc = compp->setEntryPoint(methodArg,
     (void(*)(ESMCI::Comp *, ESMCI::State *, ESMCI::State *, ESMCI::Clock **,
     int *))func, phase);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -172,7 +172,7 @@ int ESMC_GridCompInitialize(ESMC_GridComp comp, ESMC_State importState,
   // call into ESMCI method  
   localrc = compp->initialize(importStatep, exportStatep, clockp, phase,
     userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -200,7 +200,7 @@ int ESMC_GridCompRun(ESMC_GridComp comp, ESMC_State importState,
 
   // call into ESMCI method  
   localrc = compp->run(importStatep, exportStatep, clockp, phase, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -228,7 +228,7 @@ int ESMC_GridCompFinalize(ESMC_GridComp comp, ESMC_State importState,
 
   // call into ESMCI method  
   localrc = compp->finalize(importStatep, exportStatep, clockp, phase, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -252,7 +252,7 @@ void *ESMC_GridCompGetInternalState(ESMC_GridComp comp, int *rc){
 
   // call into ESMCI method  
   void *data = compp->getInternalState(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return NULL;  // bail out
   
   // return successfully
@@ -276,7 +276,7 @@ int ESMC_GridCompSetInternalState(ESMC_GridComp comp, void *data){
 
   // call into ESMCI method  
   localrc = compp->setInternalState(data);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -300,7 +300,7 @@ int ESMC_GridCompPrint(ESMC_GridComp comp){
 
   // call into ESMCI method  
   localrc = compp->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -327,7 +327,7 @@ ESMC_CplComp ESMC_CplCompCreate(const char *name, const char *configFile, ESMC_C
   
   comp = (void *)
     ESMCI::CplComp::create(name, configFile, clockp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;  // bail out
   
   // return successfully
@@ -351,7 +351,7 @@ int ESMC_CplCompDestroy(ESMC_CplComp *comp){
 
   // call into ESMCI method  
   localrc = ESMCI::CplComp::destroy(compp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // invalidate pointer
@@ -379,7 +379,7 @@ int ESMC_CplCompSetServices(ESMC_CplComp comp,
 
   // call into ESMCI method  
   localrc = compp->setServices((void(*)(ESMCI::Comp *, int *))func, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -408,7 +408,7 @@ int ESMC_CplCompSetEntryPoint(ESMC_CplComp comp, enum ESMC_Method method,
   localrc = compp->setEntryPoint(methodArg,
     (void(*)(ESMCI::Comp *, ESMCI::State *, ESMCI::State *, ESMCI::Clock **,
     int *))func, phase);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -437,7 +437,7 @@ int ESMC_CplCompInitialize(ESMC_CplComp comp, ESMC_State importState,
   // call into ESMCI method  
   localrc = compp->initialize(importStatep, exportStatep, clockp, phase, 
     userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -465,7 +465,7 @@ int ESMC_CplCompRun(ESMC_CplComp comp, ESMC_State importState,
 
   // call into ESMCI method  
   localrc = compp->run(importStatep, exportStatep, clockp, phase, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -493,7 +493,7 @@ int ESMC_CplCompFinalize(ESMC_CplComp comp, ESMC_State importState,
 
   // call into ESMCI method  
   localrc = compp->finalize(importStatep, exportStatep, clockp, phase, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully
@@ -517,7 +517,7 @@ void *ESMC_CplCompGetInternalState(ESMC_CplComp comp, int *rc){
 
   // call into ESMCI method  
   void *data = compp->getInternalState(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return NULL;  // bail out
   
   // return successfully
@@ -541,7 +541,7 @@ int ESMC_CplCompSetInternalState(ESMC_CplComp comp, void *data){
 
   // call into ESMCI method  
   localrc = compp->setInternalState(data);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -565,7 +565,7 @@ int ESMC_CplCompPrint(ESMC_CplComp comp){
 
   // call into ESMCI method  
   localrc = compp->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
     
   // return successfully

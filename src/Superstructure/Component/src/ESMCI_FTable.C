@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.49 2011/01/13 20:53:38 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.50 2011/02/23 06:27:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.49 2011/01/13 20:53:38 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.50 2011/02/23 06:27:19 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -142,7 +142,7 @@ extern "C" {
       ESMCI::Comp *comp = ftable->component + i;      // component copy
       ESMCI::FTable *ft = **(ESMCI::FTable ***)comp;  // assoc. FTable
       localrc = ft->setFuncArgs(fname, 4, alist);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }
 
@@ -166,7 +166,7 @@ extern "C" {
     //printf("after newtrim, name = '%s'\n", name);
 
     localrc = (**ptr)->setDataPtr(name, data, *dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
 
     delete[] name;  // delete memory that "newtrim" allocated above
@@ -189,7 +189,7 @@ extern "C" {
     //printf("after newtrim, name = '%s'\n", name);
 
     localrc = (**ptr)->getDataPtr(name, data, dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
 
     delete[] name;  // delete memory that "newtrim" allocated above
@@ -204,7 +204,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -243,7 +243,7 @@ extern "C" {
       return;
     }
     ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -256,7 +256,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -295,7 +295,7 @@ extern "C" {
       return;
     }
     ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -317,7 +317,7 @@ extern "C" {
          
     ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
     localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_VOIDP4INTP);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     
     delete[] fname;  // delete memory that "newtrim" allocated above
@@ -347,7 +347,7 @@ extern "C" {
       ESMCI::FTable::newtrim(methodString, slen, &phase, NULL, &fname);
       
       i = tabptr->getEntry(fname, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return; // bail out
       
       delete[] fname;  // delete memory that "newtrim" allocated above
@@ -389,7 +389,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::setDP(ptr, datap, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -402,7 +402,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::getDP(ptr, datap, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -416,7 +416,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::setDP(ptr, datap, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -429,7 +429,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::getDP(ptr, datap, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -443,7 +443,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::setVM(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -456,7 +456,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -482,7 +482,7 @@ extern "C" {
 
     enum ESMCI::dtype dtype = ESMCI::DT_FORTRAN_UDT_POINTER;
     localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
   
     delete[] tbuf;
@@ -511,7 +511,7 @@ extern "C" {
 
     enum ESMCI::dtype dtype;
     localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
   
     delete[] tbuf;
@@ -568,7 +568,7 @@ static void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // put the return codes into cargo 
   cargo->userrc[mytid] = userrc;
   
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &esmfrc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &esmfrc)){
     cargo->esmfrc[mytid] = esmfrc;
     return NULL;
   }
@@ -622,7 +622,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::FTable *ftable = *ptr;               // pointer to function table
   
   int i = ftable->getEntry(name, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return; // bail out
   enum ESMCI::method currentMethod = ESMCI::SETNONE;  // default invalid
   if (i > -1)
@@ -653,7 +653,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return; // bail out
         
   // ... if the child VM uses threads (multi-threading or single-threading) 
@@ -703,7 +703,7 @@ void FTN(c_esmc_compwait)(
   // obtain return codes out of cargo
   //TODO: deal with multiple return codes coming back for multi-threaded VMs
   localrc = cargo->esmfrc[0];
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
   if (userrc) *userrc = cargo->userrc[0];
   
@@ -923,33 +923,33 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
   localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
   // Set callback function and arguments
   ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
   localrc = (tabptr)->setFuncPtr("Register", (void *)func, f90comp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
   // time to startup the VM for this component (if not already started)...
   ESMCI::VM *vm_parent;
   FTN(f_esmf_compgetvmparent)(f90comp, &vm_parent, &localrc); //get vm_parent
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   ESMCI::VMPlan *vmplan_p;
   FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &localrc);    //get vmplan_p
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   void *vm_info;
   FTN(f_esmf_compgetvminfo)(f90comp, &vm_info, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   if (vm_info==NULL){
     // VM for this component has not been started yet
     vm_info = vm_parent->startup(vmplan_p,
       ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
     // keep vm_info in a safe place (in parent component) 'till it's used again
     FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   }
   // ...now the component's VM is started up and placed on hold.
   
@@ -958,12 +958,12 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   enum method reg = SETREGISTER;
   FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
     &vm_cargo, &tabptr, &reg, NULL, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   
   // wait for the register routine to return
   FTN(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, userRc,
     &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -987,18 +987,18 @@ void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
   localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
   // Set callback function and arguments
   ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
   localrc = (tabptr)->setFuncPtr("setVM", (void *)func, f90comp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
   // Call into user code callback function
   localrc = (tabptr)->callVFuncPtr("setVM", NULL, userRc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
   // return successfully
@@ -1322,7 +1322,7 @@ int FTable::setFuncArgs(
     
   // find the "name" entry
   int i = getEntry(name, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc; // bail out
   
   if (i == -1){
@@ -1374,7 +1374,7 @@ int FTable::callVFuncPtr(
 
   // try to find "name" entry in single FTable instance on parent PET
   int i = getEntry(name, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc; // bail out
   
   Comp *comp;       // pointer to PET-local component
@@ -1406,11 +1406,11 @@ int FTable::callVFuncPtr(
         comp = component;   // determine PET-local component
         // make a copy of the component reference
         FTN(f_esmf_comprefcopy)(comp, (Comp *)(func->funcarg[0]), &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
           return rc; // bail out
         // insert child VM
         FTN(f_esmf_compinsertvm)(comp, vm, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
           return rc; // bail out
       }else{
         // slave thread -> replicate component structure, insert child VM
@@ -1419,7 +1419,7 @@ int FTable::callVFuncPtr(
         comp = component + mytid; // determine PET-local component
         FTN(f_esmf_compreplicate)(comp, (Comp *)(func->funcarg[0]), vm,
           &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
           return rc; // bail out
       }
     }else if (i>-1){
@@ -1432,7 +1432,7 @@ int FTable::callVFuncPtr(
       comp = component + mytid; // determine PET-local component
       FTable *ftable = **(FTable ***)comp;  // determine comp's FTable instance
       int j = ftable->getEntry(name, &localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc; // bail out
       if (j == -1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1958,7 +1958,7 @@ extern "C" {
       string label(labelArg, labelLen);
       label.resize(label.find_last_not_of(" ")+1);
       localrc = (*ptr)->add(label, pointer);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
@@ -1968,7 +1968,7 @@ extern "C" {
 
     // debugging---------
 //    localrc = (*ptr)->print();
-//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
 //      return;
     // debugging---------
     
@@ -1992,7 +1992,7 @@ extern "C" {
       string sharedObj(sharedObjArg, sharedObjLen);
       sharedObj.resize(sharedObj.find_last_not_of(" ")+1);
       localrc = (*ptr)->add(label, name, sharedObj);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
@@ -2002,7 +2002,7 @@ extern "C" {
 
     // debugging---------
 //    localrc = (*ptr)->print();
-//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
 //      return;
     // debugging---------
     
@@ -2020,7 +2020,7 @@ extern "C" {
       string labelArg(label, labelLen);
       labelArg.resize(labelArg.find_last_not_of(" ")+1);
       localrc = (*ptr)->remove(labelArg);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
@@ -2030,7 +2030,7 @@ extern "C" {
 
     // debugging---------
 //    localrc = (*ptr)->print();
-//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
 //     return;
     // debugging---------
     
@@ -2049,7 +2049,7 @@ extern "C" {
       string labelArg(label, labelLen);
       labelArg.resize(labelArg.find_last_not_of(" ")+1);
       localrc = (*ptr)->execute(labelArg, object, userRc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
@@ -2059,7 +2059,7 @@ extern "C" {
 
     // debugging---------
 //    localrc = (*ptr)->print();
-//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) 
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
 //      return;
     // debugging---------
     
@@ -2142,7 +2142,7 @@ namespace ESMCI {
     MethodElement *element = table; // initialize
     while (element){
       localrc = element->print();
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc; // bail out
       element = element->nextElement;
     }
@@ -2203,7 +2203,7 @@ namespace ESMCI {
       element = table;
     }
     localrc = element->resolve();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc; // bail out
     // return successfully
     rc = ESMF_SUCCESS;
@@ -2256,7 +2256,7 @@ namespace ESMCI {
       while (element){
         if (element->label == labelArg){
           localrc = element->execute(object, userRc);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
             return rc; // bail out
           // return successfully
           rc = ESMF_SUCCESS;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.18 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: ESMCI_Comp.C,v 1.19 2011/02/23 06:32:06 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.18 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.19 2011/02/23 06:32:06 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -123,7 +123,7 @@ int Comp::setServices(
   }
 
   FTable::setServices(this, (void(*)())func, userRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
@@ -218,7 +218,7 @@ int Comp::setEntryPoint(
   FTable::newtrim(methodString, slen, &phase, NULL, &fname);
   
   localrc = ftable->setFuncPtr(fname, (void *)functionPtr, FT_VOIDP4INTP);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc)) 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) 
     return rc;
 
   delete[] fname;  // delete memory that "newtrim" allocated above
@@ -274,7 +274,7 @@ void *Comp::getInternalState(
   void *data;
   
   localrc = ftable->getDataPtr(name, &data, &dtype);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return NULL;
   
   // return successfully
@@ -327,7 +327,7 @@ int Comp::setInternalState(
   enum dtype dtype = DT_VOIDP;
   
   localrc = ftable->setDataPtr(name, &data, dtype);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
@@ -370,7 +370,7 @@ GridComp *GridComp::create(
   
   FTN(f_esmf_gridcompcreate)(comp, name, &mtype,
     configFile, &clock, &localrc, strlen(name), strlen(configFile));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;
 
   // return successfully
@@ -413,7 +413,7 @@ int GridComp::destroy(
   }
   
   FTN(f_esmf_gridcompdestroy)(comp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   delete comp;
@@ -468,7 +468,7 @@ int GridComp::initialize(
   
   FTN(f_esmf_gridcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   if (userRc) *userRc = localUserRc;
@@ -523,7 +523,7 @@ int GridComp::run(
 
   FTN(f_esmf_gridcomprun)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   if (userRc) *userRc = localUserRc;
@@ -578,7 +578,7 @@ int GridComp::finalize(
   
   FTN(f_esmf_gridcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   if (userRc) *userRc = localUserRc;
@@ -622,7 +622,7 @@ int GridComp::print(
   }
   
   FTN(f_esmf_gridcompprint)(this, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
@@ -664,7 +664,7 @@ CplComp *CplComp::create(
   
   FTN(f_esmf_cplcompcreate)(comp, name, configFile, &clock, &localrc,
     strlen(name), strlen(configFile));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;
 
   // return successfully
@@ -707,7 +707,7 @@ int CplComp::destroy(
   }
   
   FTN(f_esmf_cplcompdestroy)(comp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   delete comp;
@@ -762,7 +762,7 @@ int CplComp::initialize(
 
   FTN(f_esmf_cplcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   if (userRc) *userRc = localUserRc;
@@ -817,7 +817,7 @@ int CplComp::run(
 
   FTN(f_esmf_cplcomprun)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   if (userRc) *userRc = localUserRc;
@@ -872,7 +872,7 @@ int CplComp::finalize(
 
   FTN(f_esmf_cplcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   if (userRc) *userRc = localUserRc;
@@ -916,7 +916,7 @@ int CplComp::print(
   }
   
   FTN(f_esmf_cplcompprint)(this, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
   // return successfully
