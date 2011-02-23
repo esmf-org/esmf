@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.22 2011/01/05 20:05:42 svasquez Exp $
+// $Id: ESMC_Field.C,v 1.23 2011/02/23 05:06:40 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ extern "C" {
     // Invoque the C++ interface
     field = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
       gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return field; // bail out
 
     if(rc) *rc = localrc;
@@ -71,7 +71,7 @@ extern "C" {
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::destroy(fieldp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
     // invalidate pointer
@@ -97,7 +97,7 @@ extern "C" {
 
     // Invoque the C++ interface
     localrc = fieldp->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
     // return successfully
@@ -120,7 +120,7 @@ extern "C" {
 
     // Invoque the C++ interface
     ESMC_Mesh mesh = fieldp->getMesh(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return mesh;
 
     // return successfully
@@ -143,7 +143,7 @@ extern "C" {
 
     // Invoque the C++ interface
     ESMC_Array array = fieldp->getArray(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return array;
 
     // return successfully
@@ -162,11 +162,11 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_Array array = ESMC_FieldGetArray(field, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     rc)) return NULL;  // bail out
 
   void *ptr = ESMC_ArrayGetPtr(array, localDe, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     rc)) return NULL;  // bail out
 
   // return successfully

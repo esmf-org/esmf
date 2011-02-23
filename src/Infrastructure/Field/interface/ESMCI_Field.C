@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.5 2011/01/05 20:05:42 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.6 2011/02/23 05:06:40 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -147,7 +147,7 @@ namespace ESMCI {
     int slen = strlen(name);
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
         delete[] fName;
         return field;
     }
@@ -165,7 +165,7 @@ namespace ESMCI {
         uglb->array, &uglb->extent[0], 
         ugub->array, &ugub->extent[0], 
         fName, &localrc, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
         return field;
     }
   
@@ -240,7 +240,7 @@ namespace ESMCI {
     ESMC_Mesh mesh;
     mesh.ptr = NULL; // initialize
     FTN(f_esmf_fieldget)(this, &(mesh.ptr), &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return mesh;
     
     // return successfully
@@ -275,7 +275,7 @@ namespace ESMCI {
     ESMC_Array array;
     array.ptr = NULL; // initialize
     FTN(f_esmf_fieldgetarray)(this, (ESMCI::Array **)&(array.ptr), &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return array;
     
     // return successfully
@@ -308,7 +308,7 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN(f_esmf_fieldprint)(this, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
     // return successfully
