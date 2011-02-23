@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.33 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.34 2011/02/23 00:46:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -55,7 +55,8 @@
 
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR) :: bname
-    type (dataWrapper) :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
+    type(dataWrapper) :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
+    type(ESMF_Grid) :: grid
 #endif
 
 !-------------------------------------------------------------------------------
@@ -150,7 +151,7 @@
     call ESMF_GridCompGet(comp1, name=bname, rc=rc)
 
     write(failMsg, *) "Returned ESMF_SUCCESS incorrectly"
-    write(name, *) "Getting  a Component name Test"
+    write(name, *) "Getting a Component name Test"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -186,6 +187,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Waiting for a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
@@ -194,21 +196,42 @@
     call ESMF_GridCompGet(comp1, name=bname, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting  a Component name Test"
+    write(name, *) "Getting a Component name Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Verify the name is correct
 
-
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Verifying the correct Component name was returned Test"
     call ESMF_Test((bname.eq."Atmosphere"), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test get a Grid that was not set
+
+    call ESMF_GridCompGet(comp1, grid=grid, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting a Grid that was not set Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Validate returned Grid that was not set
+
+    call ESMF_GridValidate(grid, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
+    write(name, *) "Validate Grid that was not set Test"
+    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
 !   !  Set Internal State
     !EX_UTest
     allocate(wrap1%p)
@@ -238,6 +261,7 @@
     print *, "wrap2%p%testnumber = ", wrap2%p%testnumber
     
 !-------------------------------------------------------------------------
+!   !
 !   !  Set Internal State
     !EX_UTest
     allocate(wrap3%p)
