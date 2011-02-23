@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.16 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.17 2011/02/23 00:41:34 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,16 +29,21 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.16 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.17 2011/02/23 00:41:34 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
 
 MeshCXX::MeshCXX() {
+  meshFreed = 1;
 }
 
 MeshCXX::~MeshCXX(){
-  if (!isMeshFreed())  delete meshPointer;
+  cerr << "MeshCXX::~MeshCXX(): destructor entered" << endl;
+  if (!isMeshFreed()) {
+    cerr << "MeshCXX::~MeshCXX(): meshPointer = " << meshPointer << endl;
+    delete meshPointer;
+  }
 }
 
 
@@ -55,7 +60,7 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
      {
        int localrc;
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
 
@@ -83,6 +88,8 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
     (meshCXXp)->meshPointer = meshp;
 
+    cerr << "MeshCXX::create(): meshp = " << meshp;
+    cerr << ".  Setting meshFreed to 0."  << endl;
     meshCXXp->meshFreed = 0;
 
   } catch(std::exception &x) {
@@ -98,7 +105,7 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
     return (MeshCXX *)NULL;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return (MeshCXX *)NULL;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -131,7 +138,7 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
       // Initialize the parallel environment for mesh (if not already done)
       {
 	ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-	if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+	if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	  throw localrc;  // bail out with exception
       }
       
@@ -149,7 +156,7 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
       }
     }catch(int localrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return localrc;
     } catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -174,7 +181,7 @@ int MeshCXX::addElements(int numElems, int *elemId,
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
      
@@ -312,7 +319,7 @@ int MeshCXX::addElements(int numElems, int *elemId,
     }
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return localrc;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -339,14 +346,14 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
 
 
      // Get petCount for error checking
      int petCount = VM::getCurrent(&localrc)->getPetCount();
-     if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
        throw localrc;  // bail out with exception
      
      // Check node owners
@@ -402,7 +409,7 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
     }
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return localrc;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -470,7 +477,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
      
@@ -496,7 +503,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
        FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
        
        ESMC_LogDefault.MsgFoundError(rc1,
-				     ESMF_ERR_PASSTHRU,
+				     ESMCI_ERR_PASSTHRU,
 				     ESMC_NOT_PRESENT_FILTER(&localrc));
        
      }
@@ -506,7 +513,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
        FTN(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
        
        ESMC_LogDefault.MsgFoundError(rc1,
-				     ESMF_ERR_PASSTHRU,
+				     ESMCI_ERR_PASSTHRU,
 				     ESMC_NOT_PRESENT_FILTER(&localrc));
        
      }
@@ -524,7 +531,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      }
    }catch(int localrc){
      // catch standard ESMF return code
-     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
      return localrc;
    } catch(...){
      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -552,10 +559,12 @@ int MeshCXX::freeMemory(){
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
      
+     cerr << "MeshCXX::freeMemory(): meshPointer = " << meshPointer;
+     cerr << ".  Setting meshFreed to 1." << endl;
      delete meshPointer;
      meshFreed=1;
           
@@ -572,7 +581,7 @@ int MeshCXX::freeMemory(){
      }
    }catch(int localrc){
      // catch standard ESMF return code
-     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
      return localrc;
    } catch(...){
      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -598,7 +607,7 @@ int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
 
@@ -633,7 +642,7 @@ int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
      }
    }catch(int localrc){
      // catch standard ESMF return code
-     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
      return localrc;
    } catch(...){
      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -659,7 +668,7 @@ int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwne
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
 
@@ -695,7 +704,7 @@ int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwne
      }
    }catch(int localrc){
      // catch standard ESMF return code
-     ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
      return localrc;
    } catch(...){
      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -709,6 +718,7 @@ int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwne
 } //MeshVTKBody
 
 int MeshCXX::isMeshFreed(){
+  cerr << "MeshCXX::isMeshFreed(): meshFreed = " << meshFreed << endl;
   return meshFreed;
 }
 
@@ -732,7 +742,7 @@ int MeshCXX::meshWrite(const char* fileName){
      // Initialize the parallel environment for mesh (if not already done)
      {
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-       if (ESMC_LogDefault.MsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
 
@@ -750,7 +760,7 @@ int MeshCXX::meshWrite(const char* fileName){
     }
   }catch(int localrc){
      // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return localrc;
   } catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
