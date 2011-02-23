@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.43 2011/02/23 06:58:59 eschwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.44 2011/02/23 16:01:29 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.43 2011/02/23 06:58:59 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.44 2011/02/23 16:01:29 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1871,7 +1871,7 @@ extern "C" {
   // Create the attribute package on the object
   status = (**base).root.AttPackGet(cconv, cpurp, cobj,
                                     capinamelist, capinamecount);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
   // check if F90 name buffer size is big enough
@@ -1899,7 +1899,7 @@ extern "C" {
     status = ESMC_CtoF90string(const_cast<char*>(capinamelist[i].c_str()), 
                                &attPackInstanceNameList[j], 
                                attPackInstanceNameLens[i]);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     j += attPackInstanceNameLens[i];
   }
