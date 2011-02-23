@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.19 2011/02/22 20:52:05 theurich Exp $
+#  $Id: protex,v 1.20 2011/02/23 00:28:33 theurich Exp $
 #
 #BOP
 #
@@ -279,7 +279,7 @@ LINE:
         
 #       eliminate/replace keywordEnforcer arguments from API
         s/keywordEnforcer, //g;
-        s/^[! \t]*type\(ESMF_KeywordEnforcer\), optional:: keywordEnforcer.*$/-- The following arguments require argument keyword syntax (e.g. rc=rc) on the calling side. --/g;
+        s/^[! \t]*type\(ESMF_KeywordEnforcer\), optional:: keywordEnforcer.*$/-- The following arguments require argument keyword syntax (e.g. rc=rc). --/g;
 
 #       !PARAMETERS: really mean !ARGUMENTS:
 #       ------------------------------------
@@ -556,7 +556,7 @@ LINE:
                  printf "\\end{verbatim}";
                  $verb = 0;
               }
-              printf "\n{\\sf STATUS:\\\\ }\n\n";
+              printf "\n{\\sf STATUS:}";
               next LINE;
 }#         end if
 }#      end if
