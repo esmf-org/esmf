@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.47 2011/02/22 18:59:49 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.48 2011/02/23 13:56:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.47 2011/02/22 18:59:49 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.48 2011/02/23 13:56:28 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -612,8 +612,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ETRUNC = ipxfconst ("ETRUNC")
     EINVAL = ipxfconst ("EINVAL")
 
-    if (present (value)) then
-      call pxfgetarg (argindex, value, locallength, localstat)
+    if (present (argvalue)) then
+      call pxfgetarg (argindex, argvalue, locallength, localstat)
     else
       call pxfgetarg (argindex, localvalue, locallength, localstat)
       if (localstat == ETRUNC) localrc = 0
@@ -631,8 +631,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc = ESMF_RC_VAL_OUTOFRANGE
     end if
  
-    if (present (length)) then
-      length = locallength
+    if (present (arglength)) then
+      arglength = locallength
     end if
      
 #else
@@ -642,17 +642,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call getarg (argindex, localvalue)
 
-! If value is present, use the longer of value and localvalue
+! If argvalue is present, use the longer of value and localvalue
 ! for the buffer.
 
-    if (present (value)) then
-      call getarg (argindex, value)
-      if (len (value) > len (localvalue)) then
-        locallength = len_trim (value)
+    if (present (argvalue)) then
+      call getarg (argindex, argvalue)
+      if (len (argvalue) > len (localvalue)) then
+        locallength = len_trim (argvalue)
       else
         locallength = len_trim (localvalue)
       end if
-      if (len (value) >= locallength) then
+      if (len (argvalue) >= locallength) then
         localrc = ESMF_SUCCESS
       else
         localrc = ESMF_RC_ARG_SIZE
@@ -662,8 +662,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc = ESMF_SUCCESS
     end if
 
-    if (present (length)) then
-      length = locallength
+    if (present (arglength)) then
+      arglength = locallength
     end if
 
 #endif
