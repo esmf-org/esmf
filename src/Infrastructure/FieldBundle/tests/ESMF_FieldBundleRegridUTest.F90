@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.9 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.10 2011/02/23 17:18:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.9 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.10 2011/02/23 17:18:26 w6ws Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -139,12 +139,12 @@ contains
         call ESMF_VMGetGlobal(vm, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
       
         call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                   ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rc)) return
+                  ESMF_CONTEXT, rcToReturn=rc)) return
       
         ! Establish the resolution of the grids
       
@@ -614,12 +614,12 @@ contains
   call ESMF_VMGetGlobal(vm, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
   A_nx = 10

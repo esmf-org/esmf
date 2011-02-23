@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.25 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.26 2011/02/23 17:18:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -134,56 +134,56 @@ contains
                                 regDecomp=(/2,2/), name="landgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         bundle = ESMF_FieldBundleCreate(grid, name='mybundle', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call assemble_bundle(bundle, grid, copyflag, farray1, farray2, farray3, farray4, do_slicing, do_slicing1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call retrieve_bundle_dataptr(bundle, copyflag, do_slicing, do_slicing1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call serialize_bundle(bundle, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
 
         call ESMF_FieldBundleGet(bundle, fieldCount=fieldCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         do i = 1, fieldCount
             call ESMF_FieldBundleGet(bundle, fieldIndex=i, field=field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldDestroy(field, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
         enddo
 
         call ESMF_FieldBundleDestroy(bundle, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_GridDestroy(grid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(farray1, farray2, farray3, farray4)
 
@@ -217,7 +217,7 @@ contains
         call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(farray1(5,10))
         allocate(farray2(5,10))
@@ -242,23 +242,23 @@ contains
                copyflag=copyflag, name='field1', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldBundleAdd(bundle, f1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         f2 = ESMF_FieldCreate(grid, farray2(:,:), ESMF_INDEX_DELOCAL, &
                copyflag=copyflag, name='field2', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldBundleAdd(bundle, f2, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(ldo_slicing) then
 
@@ -266,12 +266,12 @@ contains
                    copyflag=copyflag, name='field3', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldBundleAdd(bundle, f3, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         if(ldo_slicing1) then
@@ -279,23 +279,23 @@ contains
                    copyflag=copyflag, name='field4', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldBundleAdd(bundle, f4, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), ESMF_INDEX_DELOCAL, &
                    copyflag=copyflag, name='field5', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldBundleAdd(bundle, f5, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         
     end subroutine assemble_bundle
@@ -326,22 +326,22 @@ contains
         call ESMF_FieldBundleGet(bundle, 'field1', f1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(f1, localDe=0, farrayPtr=farray1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldBundleGet(bundle, 'field2', f2, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldGet(f2, localDe=0, farrayPtr=farray2, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         do i = 1, 5
             do j = 1, 10
@@ -350,7 +350,7 @@ contains
         enddo
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         do i = 1, 5
             do j = 1, 10
@@ -359,7 +359,7 @@ contains
         enddo
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(ldo_slicing) then
             ! test field3 created from farray3 :, 4:13
@@ -367,12 +367,12 @@ contains
             call ESMF_FieldBundleGet(bundle, 'field3', f3, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(f3, localDe=0, farrayPtr=farray3, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, 5
                 do j = 1, 10
                     if( farray3(i, j) .ne. i + (j+3) * 4) localrc = ESMF_FAILURE
@@ -380,7 +380,7 @@ contains
             enddo
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         if(ldo_slicing1) then
             ! test field4 created from farray4 3:7, 4:13
@@ -388,12 +388,12 @@ contains
             call ESMF_FieldBundleGet(bundle, 'field4', f4, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(f4, localDe=0, farrayPtr=farray4, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, 5
                 do j = 1, 10
                     if( farray4(i, j) .ne. i + 2 + (j+3) * 5) localrc = ESMF_FAILURE
@@ -403,11 +403,11 @@ contains
               ! only DATA_COPY is expected to work correctly
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             else
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) continue
+                    ESMF_CONTEXT, rcToReturn=rc)) continue
               rc = ESMF_SUCCESS ! reset
             endif
 
@@ -416,12 +416,12 @@ contains
             call ESMF_FieldBundleGet(bundle, 'field5', f5, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_FieldGet(f5, localDe=0, farrayPtr=farray5, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             do i = 1, 5
                 do j = 1, 10
                     if( farray5(i, j) .ne. i + 2 + (j*2-1) * 5) localrc = ESMF_FAILURE
@@ -431,11 +431,11 @@ contains
               ! only DATA_COPY is expected to work correctly
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) return
+                    ESMF_CONTEXT, rcToReturn=rc)) return
             else
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rc)) continue
+                    ESMF_CONTEXT, rcToReturn=rc)) continue
               rc = ESMF_SUCCESS ! reset
             endif
         endif
@@ -443,7 +443,7 @@ contains
         call ESMF_FieldBundleGet(bundle, fieldcount=fc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rc)) return
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
     end subroutine retrieve_bundle_dataptr
 
@@ -469,7 +469,7 @@ contains
             inquireflag=ESMF_INQUIREONLY, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate (buffer)
 
 
@@ -481,24 +481,24 @@ contains
         call ESMF_FieldBundleSerialize(bundle, buffer, buff_size, offset, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         offset = 0
 
         bundle1 = ESMF_FieldBundleDeserialize(buffer, offset, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldBundleValidate(bundle1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldBundleDestroy(bundle1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         deallocate(buffer)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.11 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.12 2011/02/23 17:14:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -192,13 +192,13 @@
 
   srcfield = ESMF_FieldCreate(srcgrid, arrayspec2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct = .false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
   ! Set field values
   call ESMF_FieldGet(srcfield, farrayPtr=fptr, computationalLBound=lbnd, &
     computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct = .false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
   print *, myPet, " 3D Source field computational bound", lbnd, ubnd, cnt
   if (cnt(1) .ne. localcount) correct = .false.
@@ -262,7 +262,7 @@
 
   dstfield2D = ESMF_FieldCreate(dstgrid2D, arrayspec1D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct=.false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -287,7 +287,7 @@
 
   dstfield = ESMF_FieldCreate(dstgrid, arrayspec2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct=.false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
@@ -303,18 +303,18 @@
   ! Do a redistStore
   call ESMF_FieldRedistStore(srcfield2D, dstfield2D, rhandle2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct = .false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
   ! Now a redist
   call ESMF_FieldRedist(srcfield2D, dstfield2D, routehandle = rhandle2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct = .false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
   ! Check the destination field
   call ESMF_FieldGet(dstfield2D, localDe=0, farrayPtr=fptr1D, computationalLBound=lbnd1, &
     computationalUBound=ubnd1, computationalCount=cnt1, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct = .false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
 
   print *, myPet, " 2D Destination field computational bound", lbnd1, ubnd1, cnt1
 
@@ -345,18 +345,18 @@
   ! Do a redistStore
   call ESMF_FieldRedistStore(srcfield, dstfield, rhandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct=.false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
   ! Now a redist
   call ESMF_FieldRedist(routehandle = rhandle, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct=.false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
   ! Check the destination field
   call ESMF_FieldGet(dstfield, localDe=0, farrayPtr=fptr, computationalLBound=lbnd, &
     computationalUBound=ubnd, computationalCount=cnt, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) correct=.false.
+            ESMF_CONTEXT, rcToReturn=rc)) correct=.false.
 
   print *, myPet, " 3D Destination field computational bound", lbnd, ubnd, cnt
 
