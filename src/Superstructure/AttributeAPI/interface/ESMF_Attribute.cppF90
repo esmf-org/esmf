@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.78 2011/02/23 19:08:43 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.79 2011/02/23 20:46:37 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.78 2011/02/23 19:08:43 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.79 2011/02/23 20:46:37 w6ws Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2094,8 +2094,8 @@ contains
                 (convention.eq."CIM 1.0".and.purpose.eq."Model Component Simulation Description").or. & @\
                 (convention.eq."CIM 1.0".and.purpose.eq."Inputs Description"))) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & @\
-          "See ESMF Reference Manual for ESMF standard Attribute package convention and purpose values", & @\
-          ESMF_CONTEXT, rc) @\
+          msg="See ESMF Reference Manual for ESMF standard Attribute package convention and purpose values", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -2216,23 +2216,23 @@ contains
  @\
       if (size(nestConvention).ne.size(nestPurpose)) then @\
          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-           "number of items in nestConvention and nestPurpose must be the same", & @\
-           ESMF_CONTEXT, rc) @\
+           msg="number of items in nestConvention and nestPurpose must be the same", & @\
+           ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
       endif @\
  @\
       if (size(nestAttPackInstanceCountList).ne.size(nestConvention)) then @\
          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-           "number of items in nestAttPackInstanceCountList and nestConvention must be the same", & @\
-           ESMF_CONTEXT, rc) @\
+           msg="number of items in nestAttPackInstanceCountList and nestConvention must be the same", & @\
+           ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
       endif @\
  @\
       if (present(nestCount)) then @\
         if (nestCount > size(nestConvention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-            "nestCount cannot be larger than size(nestConvention)", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="nestCount cannot be larger than size(nestConvention)", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         localNestCount = nestCount @\
@@ -2241,8 +2241,8 @@ contains
       end if @\
       if (localNestCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                   "size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
-                    ESMF_CONTEXT, rc) @\
+                   msg="size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
+                    ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -2262,8 +2262,8 @@ contains
  @\
       if (totalInstances.gt.size(nestAttPackInstanceNameList)) then @\
          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-           "size(nestAttPackInstanceNameList) not big enough for the number of instances specified in nestAttPackInstanceCountList", & @\
-           ESMF_CONTEXT, rc) @\
+           msg="size(nestAttPackInstanceNameList) not big enough for the number of instances specified in nestAttPackInstanceCountList", & @\
+           ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
       endif @\
  @\
@@ -2357,14 +2357,14 @@ contains
       if (present(count)) then @\
         if (count > size(attrList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-            "count cannot be larger than size(attrList)", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="count cannot be larger than size(attrList)", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         if (count .le. 0) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-            "count is <= 0", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="count is <= 0", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         localCount = count @\
@@ -2464,14 +2464,14 @@ contains
         if (present(count)) then @\
           if (count > size(attrList)) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-              "count cannot be larger than size(attrList)", & @\
-              ESMF_CONTEXT, rc) @\
+              msg="count cannot be larger than size(attrList)", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
           if (count .lt. 0) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-              "count is negative", & @\
-              ESMF_CONTEXT, rc) @\
+              msg="count is negative", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
           localCount = count @\
@@ -2482,16 +2482,16 @@ contains
  @\
       if (size(nestConvention).ne.size(nestPurpose)) then @\
          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-           "number of items in nestConvention and nestPurpose must be the same", & @\
-           ESMF_CONTEXT, rc) @\
+           msg="number of items in nestConvention and nestPurpose must be the same", & @\
+           ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
       endif @\
  @\
       if (present(nestCount)) then @\
         if (nestCount > size(nestConvention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-            "nestCount cannot be larger than size(nestConvention)", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="nestCount cannot be larger than size(nestConvention)", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         localNestCount = nestCount @\
@@ -2500,8 +2500,8 @@ contains
       end if @\
       if (localNestCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                   "size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
-                    ESMF_CONTEXT, rc) @\
+                   msg="size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
+                    ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -2748,8 +2748,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2784,8 +2784,8 @@ contains
         value = defaultvalue @\
       else  @\
         call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @\
-                     ESMF_CONTEXT, rc) @\
+                    msg="Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       endif @\
@@ -2862,8 +2862,8 @@ contains
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-            "itemCount cannot be larger than size(valueList)", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="itemCount cannot be larger than size(valueList)", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
 	      litemCount = itemCount @\
@@ -2873,8 +2873,8 @@ contains
  @\
       if (litemCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "valueList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -2882,8 +2882,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -2924,8 +2924,8 @@ contains
         endif @\
       else  @\
         call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @\
-                     ESMF_CONTEXT, rc) @\
+                    msg="Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       endif @\
@@ -3008,8 +3008,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3046,8 +3046,8 @@ contains
         value = defaultvalue @\
       else  @\
         call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @\
-                     ESMF_CONTEXT, rc) @\
+                    msg="Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       endif @\
@@ -3127,8 +3127,8 @@ contains
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
       	litemCount = itemCount @\
@@ -3138,8 +3138,8 @@ contains
  @\
       if (litemCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "valueList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -3147,8 +3147,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3189,8 +3189,8 @@ contains
         endif @\
       else  @\
         call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @\
-                     ESMF_CONTEXT, rc) @\
+                    msg="Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       endif @\
@@ -3272,8 +3272,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3304,8 +3304,8 @@ contains
           value = defaultvalue @\
         else  @\
           call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @\
-                     ESMF_CONTEXT, rc) @\
+                    msg="Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
       endif @\
@@ -3386,8 +3386,8 @@ contains
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
       	litemCount = itemCount @\
@@ -3397,8 +3397,8 @@ contains
  @\
       if (litemCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "valueList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -3410,8 +3410,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -3452,8 +3452,8 @@ contains
         endif @\
       else  @\
         call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-                    "Attribute not found, and no default given", & @\
-                     ESMF_CONTEXT, rc) @\
+                    msg="Attribute not found, and no default given", & @\
+                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -4200,8 +4200,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4295,8 +4295,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4386,8 +4386,8 @@ contains
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
       	litemCount = itemCount @\
@@ -4397,8 +4397,8 @@ contains
  @\
       if (litemCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "valueList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -4406,8 +4406,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4496,8 +4496,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4588,8 +4588,8 @@ contains
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
       	litemCount = itemCount @\
@@ -4599,8 +4599,8 @@ contains
  @\
       if (litemCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "valueList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -4608,8 +4608,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4697,8 +4697,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4785,8 +4785,8 @@ contains
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
       	litemCount = itemCount @\
@@ -4796,8 +4796,8 @@ contains
  @\
       if (litemCount .le. 0) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              "valueList is too small", & @\
-                              ESMF_CONTEXT, rc) @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
  @\
@@ -4812,8 +4812,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
@@ -4950,8 +4950,8 @@ contains
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-            "both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rc) @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         attpack = ESMF_TRUE @\
