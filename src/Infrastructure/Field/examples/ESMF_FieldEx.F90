@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.31 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldEx.F90,v 1.32 2011/02/23 22:16:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -60,8 +60,8 @@
     integer                    :: gridToFieldMap(3)    
     integer                    :: ungriddedLBound(3)
     integer                    :: ungriddedUBound(3)
-    integer                    :: totalLWidth(3)
-    integer                    :: totalUWidth(3)
+    integer                    :: totalLWidth(3,1)
+    integer                    :: totalUWidth(3,1)
     integer                    :: fa_shape(3)
     character(len=32)          :: name
 

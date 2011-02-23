@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.74 2011/02/23 20:10:08 w6ws Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.75 2011/02/23 22:16:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2009,8 +2009,8 @@ contains
         integer, dimension(1) :: gridToFieldMap
         integer, dimension(2) :: ungriddedLBound 
         integer, dimension(3) :: ungriddedUBound 
-        integer, dimension(4) :: totalLWidth
-        integer, dimension(5) :: totalUWidth
+        integer, dimension(4,1) :: totalLWidth
+        integer, dimension(5,1) :: totalUWidth
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
@@ -2410,8 +2410,8 @@ contains
         integer, dimension(2) :: lgridToFieldMap
         integer, dimension(2) :: lungriddedLBound 
         integer, dimension(2) :: lungriddedUBound 
-        integer, dimension(2) :: ltotalLWidth
-        integer, dimension(2) :: ltotalUWidth
+        integer, dimension(2,1) :: ltotalLWidth
+        integer, dimension(2,1) :: ltotalUWidth
 
         integer, dimension(:,:), pointer  :: farray
         integer, dimension(:,:), pointer  :: farray1
@@ -2814,8 +2814,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: ltotalLWidth
-        integer, dimension(3) :: ltotalUWidth
+        integer, dimension(3,1) :: ltotalLWidth
+        integer, dimension(3,1) :: ltotalUWidth
 
         real, dimension(:,:,:), allocatable    :: farray
         type(ESMF_VM)                          :: vm
@@ -2969,8 +2969,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: ltotalLWidth
-        integer, dimension(3) :: ltotalUWidth
+        integer, dimension(3,1) :: ltotalLWidth
+        integer, dimension(3,1) :: ltotalUWidth
 
         real, dimension(:,:,:), allocatable    :: farray
         type(ESMF_VM)                          :: vm
@@ -3748,8 +3748,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: ltotalLWidth
-        integer, dimension(3) :: ltotalUWidth
+        integer, dimension(3,1) :: ltotalLWidth
+        integer, dimension(3,1) :: ltotalUWidth
 
         integer, dimension(:,:,:), pointer  :: farray
         integer, dimension(:,:,:), pointer  :: farray1
@@ -4054,8 +4054,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         integer                                     :: ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4225,8 +4225,8 @@ contains
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4454,8 +4454,8 @@ contains
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         integer                                     :: i, ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4692,8 +4692,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         integer                                     :: ii, ij, ik, il, im, io, ip
         integer, dimension(7)                       :: felb, feub, fclb, fcub, ftlb, ftub
@@ -4864,8 +4864,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5104,8 +5104,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5346,8 +5346,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -5572,8 +5572,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -5823,8 +5823,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -6055,8 +6055,8 @@ contains
         integer, dimension(3) :: lgridToFieldMap
         integer, dimension(3) :: lungriddedLBound 
         integer, dimension(3) :: lungriddedUBound 
-        integer, dimension(3) :: ltotalLWidth
-        integer, dimension(3) :: ltotalUWidth
+        integer, dimension(3,1) :: ltotalLWidth
+        integer, dimension(3,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik
@@ -6283,8 +6283,8 @@ contains
         integer, dimension(2) :: lgridToFieldMap
         integer, dimension(2) :: lungriddedLBound 
         integer, dimension(2) :: lungriddedUBound 
-        integer, dimension(2) :: ltotalLWidth
-        integer, dimension(2) :: ltotalUWidth
+        integer, dimension(2,1) :: ltotalLWidth
+        integer, dimension(2,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij
@@ -6507,8 +6507,8 @@ contains
         integer, dimension(7) :: lgridToFieldMap
         integer, dimension(7) :: lungriddedLBound 
         integer, dimension(7) :: lungriddedUBound 
-        integer, dimension(7) :: ltotalLWidth
-        integer, dimension(7) :: ltotalUWidth
+        integer, dimension(7,1) :: ltotalLWidth
+        integer, dimension(7,1) :: ltotalUWidth
 
         ! local arguments used to verify field get
         integer                                     :: i, ii, ij, ik, il, im, io, ip
@@ -6708,7 +6708,7 @@ contains
             endif
             if(present(totalLWidth)) then
                 do i = 1, size(totalLWidth)
-                    if(ltotalLWidth(i) .ne. totalLWidth(i)) localrc = ESMF_FAILURE
+                    if(ltotalLWidth(i,1) .ne. totalLWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -6716,7 +6716,7 @@ contains
             endif
             if(present(totalUWidth)) then
                 do i = 1, size(totalUWidth)
-                    if(ltotalUWidth(i) .ne. totalUWidth(i)) localrc = ESMF_FAILURE
+                    if(ltotalUWidth(i,1) .ne. totalUWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -6796,7 +6796,7 @@ contains
             endif
             if(present(totalLWidth)) then
                 do i = 1, size(totalLWidth)
-                    if(ltotalLWidth(i) .ne. totalLWidth(i)) localrc = ESMF_FAILURE
+                    if(ltotalLWidth(i,1) .ne. totalLWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -6804,7 +6804,7 @@ contains
             endif
             if(present(totalUWidth)) then
                 do i = 1, size(totalUWidth)
-                    if(ltotalUWidth(i) .ne. totalUWidth(i)) localrc = ESMF_FAILURE
+                    if(ltotalUWidth(i,1) .ne. totalUWidth(i)) localrc = ESMF_FAILURE
                 enddo
                 if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &

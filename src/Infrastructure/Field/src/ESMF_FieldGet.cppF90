@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.66 2011/02/23 20:10:08 w6ws Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.67 2011/02/23 22:16:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.66 2011/02/23 20:10:08 w6ws Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.67 2011/02/23 22:16:21 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -115,7 +115,7 @@ contains
     isCommitted, geomtype, grid, mesh, locstream, xgrid, array, typekind, &
     dimCount, rank, staggerloc, meshLocation, xgridSide, gridIndex, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
-	localDeCount, name, rc) 
+  	localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field),      intent(in)            :: field    
@@ -138,8 +138,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: gridToFieldMap(:)    
     integer,               intent(out), optional :: ungriddedLBound(:)
     integer,               intent(out), optional :: ungriddedUBound(:)
-    integer,               intent(out), optional :: totalLWidth(:)
-    integer,               intent(out), optional :: totalUWidth(:)
+    integer,               intent(out), optional :: totalLWidth(:,:)
+    integer,               intent(out), optional :: totalUWidth(:,:)
     integer,               intent(out), optional :: localDeCount
     character(len=*),      intent(out), optional :: name
     integer,               intent(out), optional :: rc     
@@ -237,7 +237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for consistency.  Note that the the ordering of
 !       these ungridded dimensions is the same as their order in the {\tt field}.
 ! \item [{[totalLWidth]}]
-!       Lower bound of halo region.  The size of this array is the number
+!       Lower bound of halo region.  The size of the first dimension of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for totalLWidth are specified they must be reflected in
@@ -246,8 +246,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
 !       implemented, the {\tt minHaloLWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method.
+!       The size of the 2nd dimension of this array is localDeCount.
 ! \item [{[totalUWidth]}]
-!       Upper bound of halo region.  The size of this array is the number
+!       Upper bound of halo region.  The size of the first dimension of this array is the number
 !       of gridded dimensions in the {\tt field}.  However, ordering of the elements
 !       needs to be the same as they appear in the {\tt field}.  Values default
 !       to 0.  If values for totalUWidth are specified they must be reflected in
@@ -256,6 +257,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
 !       implemented, the {\tt totalUWidth} is checked for validity and stored
 !       in preparation for the implementation of the halo method. 
+!       The size of the 2nd dimension of this array is localDeCount.
 ! \item [{[localDeCount]}]
 !       Upon return this holds the number of PET-local DEs defined in
 !       the DELayout associated with the Field object.
@@ -445,11 +447,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(totalLWidth)) then
-        totalLWidth = ftype%totalLWidth(1:size(totalLWidth))
+        !totalLWidth = ftype%totalLWidth(1:size(totalLWidth))
+        call ESMF_ArrayGet(ftype%array, totalLWidth=totalLWidth, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     endif
 
     if (present(totalUWidth)) then
-        totalUWidth = ftype%totalUWidth(1:size(totalUWidth))
+        !totalUWidth = ftype%totalUWidth(1:size(totalUWidth))
+        call ESMF_ArrayGet(ftype%array, totalUWidth=totalUWidth, rc=localrc) 
+        if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     endif
 
     if (present(typekind)) then

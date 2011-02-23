@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.15 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.16 2011/02/23 22:16:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,8 +43,8 @@
     integer, dimension(4) :: lgridToFieldMap
     integer, dimension(1) :: lungriddedLBound 
     integer, dimension(1) :: lungriddedUBound 
-    integer, dimension(2) :: ltotalLWidth
-    integer, dimension(2) :: ltotalUWidth
+    integer, dimension(2,1) :: ltotalLWidth
+    integer, dimension(2,1) :: ltotalUWidth
 
     ! local arguments used to verify field get
     integer                                     :: i, ii, ij, ik
