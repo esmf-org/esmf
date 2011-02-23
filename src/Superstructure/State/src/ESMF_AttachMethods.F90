@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.4 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.5 2011/02/23 20:41:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.4 2011/01/05 20:05:47 svasquez Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.5 2011/02/23 20:41:13 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -130,7 +130,7 @@ module ESMF_AttachMethodsMod
       localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -193,7 +193,7 @@ module ESMF_AttachMethodsMod
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -245,7 +245,7 @@ module ESMF_AttachMethodsMod
       localUserRc, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
@@ -295,7 +295,7 @@ module ESMF_AttachMethodsMod
     call c_ESMC_MethodTableRemove(state%statep%methodTable, label, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
