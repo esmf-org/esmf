@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2010/12/03 05:58:07 theurich Exp $
+! $Id: user_model1.F90,v 1.15 2011/02/23 17:41:08 w6ws Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -76,15 +76,15 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
           userRoutine=user_init, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
           userRoutine=user_run, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
           userRoutine=user_final, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         !print *, "Registered Initialize, Run, and Finalize routines"
 
@@ -118,35 +118,35 @@
         ! Determine petCount
         call ESMF_GridCompGet(comp, vm=vm, rc=rc)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_VMGet(vm, petCount=petCount, rc=rc)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
             regDecomp=(/petCount/), rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         rawdata = ESMF_ArrayCreate(arrayspec, indexflag=ESMF_INDEX_GLOBAL, &
             distgrid=distgrid, name="rawdata", rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_StateAdd(exportState, rawdata, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
   
         sorted_data = ESMF_ArrayCreate(arrayspec, indexflag=ESMF_INDEX_GLOBAL, &
             distgrid=distgrid, name="sorted_data1", rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_StateAdd(exportState, sorted_data, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         rc = status
 
@@ -177,17 +177,17 @@
         print *, "In user 1 run routine"
         call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayGet(rawdata, localDe=0, farrayPtr=rdptr, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
   
         call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! sort the input data locally
         pd => d
@@ -222,25 +222,25 @@
 
         call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayGet(rawdata, distgrid=distgrid, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
   
         call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_ArrayDestroy(rawdata, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArrayDestroy(sorted_data, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_DistGridDestroy(distgrid, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         rc = status
 
