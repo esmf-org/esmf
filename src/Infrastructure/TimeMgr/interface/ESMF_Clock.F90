@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.106 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_Clock.F90,v 1.107 2011/02/23 06:37:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -70,6 +70,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
       public operator(==)
       public operator(/=)
       public ESMF_ClockAdvance
@@ -92,7 +94,9 @@
       public ESMF_ClockValidate
       public ESMF_ClockWriteRestart
       
-      public ESMF_ClockGetInit  ! for ESMF internal purpose
+! - ESMF-internal methods:
+      public ESMF_ClockGetInit
+
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -104,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.106 2011/02/22 15:49:33 rokuingh Exp $'
+      '$Id: ESMF_Clock.F90,v 1.107 2011/02/23 06:37:31 eschwab Exp $'
 
 !==============================================================================
 !
@@ -260,11 +264,12 @@
 ! !IROUTINE: ESMF_ClockAdvance - Advance a Clock's current time by one time step
 
 ! !INTERFACE:
-      subroutine ESMF_ClockAdvance(clock, timeStep, ringingAlarmList, &
-        ringingAlarmCount, rc)
+      subroutine ESMF_ClockAdvance(clock, keywordEnforcer, &
+        timeStep, ringingAlarmList, ringingAlarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(inout)         :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval),        intent(inout), optional :: timeStep
       type(ESMF_Alarm), dimension(:), intent(out), optional :: ringingAlarmList
       integer,                        intent(out), optional :: ringingAlarmCount
@@ -389,8 +394,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
-      function ESMF_ClockCreateNew(timeStep, startTime, stopTime, &
-        runDuration, runTimeStepCount, refTime, name, rc)
+      function ESMF_ClockCreateNew(timeStep, startTime, keywordEnforcer, &
+        stopTime, runDuration, runTimeStepCount, refTime, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateNew
@@ -398,6 +403,7 @@
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeStep
       type(ESMF_Time),         intent(in)            :: startTime
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Time),         intent(in),  optional :: stopTime
       type(ESMF_TimeInterval), intent(in),  optional :: runDuration
       integer,                 intent(in),  optional :: runTimeStepCount
@@ -489,13 +495,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_ClockCreate()
-      function ESMF_ClockCreateCopy(clock, rc)
+      function ESMF_ClockCreateCopy(clock, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreateCopy
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -546,10 +553,11 @@
 ! !IROUTINE: ESMF_ClockDestroy - Release resources associated with a Clock
 !
 ! !INTERFACE:
-      subroutine ESMF_ClockDestroy(clock, rc)
+      subroutine ESMF_ClockDestroy(clock, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout)          :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -612,13 +620,15 @@
 ! !IROUTINE: ESMF_ClockGet - Get a Clock's properties
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGet(clock, timeStep, startTime, stopTime, &
+      subroutine ESMF_ClockGet(clock, keywordEnforcer, &
+        timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, prevTime, &
         currSimTime, prevSimTime, calendar, calendarType, timeZone, &
         advanceCount, alarmCount, direction, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(out), optional :: timeStep
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Time),         intent(out), optional :: stopTime
@@ -760,12 +770,13 @@
 ! !IROUTINE: ESMF_ClockGetAlarm - Get an Alarm in a Clock's Alarm list
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGetAlarm(clock, name, alarm, rc)
+      subroutine ESMF_ClockGetAlarm(clock, name, alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(inout)         :: clock
       character (len=*), intent(in)            :: name
       type(ESMF_Alarm),  intent(out)           :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -816,13 +827,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
-        alarmList, alarmCount, timeStep, rc)
+        alarmList, alarmCount, keywordEnforcer, timeStep, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),               intent(in)            :: clock
       type(ESMF_AlarmListType),       intent(in)            :: alarmListType
       type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
       integer,                        intent(out)           :: alarmCount
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
       integer,                        intent(out), optional :: rc
 !   
@@ -935,11 +947,13 @@
 ! !IROUTINE: ESMF_ClockGetNextTime - Calculate a Clock's next time
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGetNextTime(clock, nextTime, timeStep, rc)
+      subroutine ESMF_ClockGetNextTime(clock, nextTime, keywordEnforcer, &
+        timeStep, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)              :: clock
       type(ESMF_Time),         intent(out)             :: nextTime
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(inout), optional :: timeStep
       integer,                 intent(out), optional   :: rc
     
@@ -990,13 +1004,14 @@
 ! !IROUTINE: ESMF_ClockIsDone - Based on its direction, test if the Clock has reached or exceeded its stop time or start time
 
 ! !INTERFACE:
-      function ESMF_ClockIsDone(clock, rc)
+      function ESMF_ClockIsDone(clock, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_ClockIsDone
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1039,13 +1054,14 @@
 ! !IROUTINE: ESMF_ClockIsReverse - Test if the Clock is in reverse mode
 
 ! !INTERFACE:
-      function ESMF_ClockIsReverse(clock, rc)
+      function ESMF_ClockIsReverse(clock, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_ClockIsReverse
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1088,13 +1104,14 @@
 ! !IROUTINE: ESMF_ClockIsStopTime - Test if the Clock has reached or exceeded its stop time
 
 ! !INTERFACE:
-      function ESMF_ClockIsStopTime(clock, rc)
+      function ESMF_ClockIsStopTime(clock, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_ClockIsStopTime
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1136,13 +1153,14 @@
 ! !IROUTINE: ESMF_ClockIsStopTimeEnabled - Test if the Clock's stop time is enabled
 
 ! !INTERFACE:
-      function ESMF_ClockIsStopTimeEnabled(clock, rc)
+      function ESMF_ClockIsStopTimeEnabled(clock, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_ClockIsStopTimeEnabled
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1184,10 +1202,11 @@
 ! !IROUTINE:  ESMF_ClockPrint - Print the contents of a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockPrint(clock, options, rc)
+      subroutine ESMF_ClockPrint(clock, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1253,13 +1272,14 @@
 ! !IROUTINE: ESMF_ClockReadRestart - Restore the contents of a Clock (not implemented)
 
 ! !INTERFACE:
-      function ESMF_ClockReadRestart(name, rc)
+      function ESMF_ClockReadRestart(name, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockReadRestart
 !
 ! !ARGUMENTS:
       character (len=*), intent(in)            :: name
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1305,12 +1325,14 @@
 ! !IROUTINE: ESMF_ClockSet - Set one or more properties of a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockSet(clock, timeStep, startTime, stopTime, &
+      subroutine ESMF_ClockSet(clock, keywordEnforcer, &
+        timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, advanceCount, &
         direction, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)           :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(inout), optional :: timeStep
       type(ESMF_Time),         intent(inout), optional :: startTime
       type(ESMF_Time),         intent(inout), optional :: stopTime
@@ -1441,10 +1463,11 @@
 ! !IROUTINE: ESMF_ClockStopTimeDisable - Disable a Clock's stop time
 
 ! !INTERFACE:
-      subroutine ESMF_ClockStopTimeDisable(clock, rc)
+      subroutine ESMF_ClockStopTimeDisable(clock, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1486,10 +1509,11 @@
 ! !IROUTINE: ESMF_ClockStopTimeEnable - Enable an Clock's stop time
 
 ! !INTERFACE:
-      subroutine ESMF_ClockStopTimeEnable(clock, stopTime, rc)
+      subroutine ESMF_ClockStopTimeEnable(clock, keywordEnforcer, stopTime, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Time),  intent(in),  optional :: stopTime
       integer,          intent(out), optional :: rc
 
@@ -1534,10 +1558,11 @@
 ! !IROUTINE: ESMF_ClockSyncToRealTime - Set Clock's current time to wall clock time
 
 ! !INTERFACE:
-      subroutine ESMF_ClockSyncToRealTime(clock, rc)
+      subroutine ESMF_ClockSyncToRealTime(clock, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout)         :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -1580,10 +1605,11 @@
 ! !IROUTINE:  ESMF_ClockValidate - Validate a Clock's properties
 
 ! !INTERFACE:
-      subroutine ESMF_ClockValidate(clock, rc)
+      subroutine ESMF_ClockValidate(clock, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(inout)         :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1629,10 +1655,11 @@
 ! !IROUTINE: ESMF_ClockWriteRestart - Save the contents of a Clock (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_ClockWriteRestart(clock, rc)
+      subroutine ESMF_ClockWriteRestart(clock, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(inout)         :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:

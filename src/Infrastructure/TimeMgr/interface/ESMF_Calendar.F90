@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.125 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_Calendar.F90,v 1.126 2011/02/23 06:37:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -102,6 +102,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
       public operator(==)
       public operator(/=)
       public ESMF_CalendarCreate
@@ -116,8 +118,11 @@
       public ESMF_CalendarSetDefault
       public ESMF_CalendarValidate
       public ESMF_CalendarWriteRestart
-      public ESMF_CalendarGetInit       ! For Standardized Initialization
+
+! - ESMF-internal methods:
+      public ESMF_CalendarGetInit
       public ESMF_CalendarSetInitCreated
+
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -142,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.125 2011/02/22 15:49:33 rokuingh Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.126 2011/02/23 06:37:31 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -580,13 +585,15 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
-      function ESMF_CalendarCreateBuiltIn(calendartype, name, rc)
+      function ESMF_CalendarCreateBuiltIn(calendartype, keywordEnforcer, &
+        name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateBuiltIn
 
 ! !ARGUMENTS:
       type(ESMF_CalendarType), intent(in)            :: calendartype
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -659,13 +666,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
-      function ESMF_CalendarCreateCopy(calendar, rc)
+      function ESMF_CalendarCreateCopy(calendar, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateCopy
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(in)            :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -708,13 +716,15 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
-      function ESMF_CalendarCreateCustom(daysPerMonth, secondsPerDay, &
+      function ESMF_CalendarCreateCustom(keywordEnforcer, &
+        daysPerMonth, secondsPerDay, &
         daysPerYear, daysPerYearDn, daysPerYearDd, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateCustom
 
 ! !ARGUMENTS:
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
@@ -822,10 +832,11 @@
 ! !IROUTINE: ESMF_CalendarDestroy - Release resources associated with a Calendar
 !
 ! !INTERFACE:
-      subroutine ESMF_CalendarDestroy(calendar, rc)
+      subroutine ESMF_CalendarDestroy(calendar, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout)          :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -868,9 +879,10 @@
 ! !IROUTINE: ESMF_CalendarFinalize
 !
 ! !INTERFACE:
-      subroutine ESMF_CalendarFinalize(rc)
+      subroutine ESMF_CalendarFinalize(keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -905,12 +917,14 @@
 ! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarGet(calendar, name, calendartype, &
-        daysPerMonth, monthsPerYear, secondsPerDay, secondsPerYear, &
+      subroutine ESMF_CalendarGet(calendar, keywordEnforcer, &
+        name, calendartype, daysPerMonth, monthsPerYear, &
+        secondsPerDay, secondsPerYear, &
         daysPerYear, daysPerYearDn, daysPerYearDd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_CalendarType), intent(out), optional :: calendartype
       integer, dimension(:),   intent(out), optional :: daysPerMonth
       integer,                 intent(out), optional :: monthsPerYear
@@ -1033,9 +1047,10 @@
 ! !IROUTINE: ESMF_CalendarInitialize - Initialize the default Calendar type
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarInitialize(calendartype, rc)
+      subroutine ESMF_CalendarInitialize(keywordEnforcer, calendartype, rc)
 
 ! !ARGUMENTS:
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_CalendarType), intent(in),  optional :: calendartype
       integer,                 intent(out), optional :: rc
 
@@ -1077,7 +1092,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarIsLeapYear()
-      function ESMF_CalendarIsLeapYearI4(calendar, yy, rc)
+      function ESMF_CalendarIsLeapYearI4(calendar, yy, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarIsLeapYearI4
@@ -1085,6 +1100,7 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
       integer(ESMF_KIND_I4), intent(in)            :: yy
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1132,7 +1148,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarIsLeapYear()
-      function ESMF_CalendarIsLeapYearI8(calendar, yy_i8, rc)
+      function ESMF_CalendarIsLeapYearI8(calendar, yy_i8, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarIsLeapYearI8
@@ -1140,6 +1156,7 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
       integer(ESMF_KIND_I8), intent(in)            :: yy_i8
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1185,10 +1202,11 @@
 ! !IROUTINE:  ESMF_CalendarPrint - Print the contents of a Calendar
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarPrint(calendar, options, rc)
+      subroutine ESMF_CalendarPrint(calendar, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout)         :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
 
@@ -1250,13 +1268,14 @@
 ! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
-      function ESMF_CalendarReadRestart(name, rc)
+      function ESMF_CalendarReadRestart(name, keywordEnforcer, rc)
 ! 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarReadRestart
 !
 ! !ARGUMENTS:
       character (len=*),   intent(in)            :: name
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1301,11 +1320,13 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSet()
-      subroutine ESMF_CalendarSetBuiltIn(calendar, calendartype, name, rc)
+      subroutine ESMF_CalendarSetBuiltIn(calendar, calendartype, &
+        keywordEnforcer, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
       type(ESMF_CalendarType), intent(in)            :: calendartype
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
@@ -1377,11 +1398,13 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSet()
-      subroutine ESMF_CalendarSetCustom(calendar, daysPerMonth, &
-        secondsPerDay, daysPerYear, daysPerYearDn, daysPerYearDd, name, rc)
+      subroutine ESMF_CalendarSetCustom(calendar, keywordEnforcer, &
+        daysPerMonth, secondsPerDay, &
+        daysPerYear, daysPerYearDn, daysPerYearDd, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(:), intent(in),  optional :: daysPerMonth
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
@@ -1488,10 +1511,11 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSetDefault()
-      subroutine ESMF_CalendarSetDefaultType(calendartype, rc)
+      subroutine ESMF_CalendarSetDefaultType(calendartype, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_CalendarType), intent(in)            :: calendartype
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1531,10 +1555,11 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSetDefault()
-      subroutine ESMF_CalendarSetDefaultCal(calendar, rc)
+      subroutine ESMF_CalendarSetDefaultCal(calendar, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1576,10 +1601,11 @@
 ! !IROUTINE:  ESMF_CalendarValidate - Validate a Calendar's properties
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarValidate(calendar, rc)
+      subroutine ESMF_CalendarValidate(calendar, keywordEnforcer, rc)
  
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout)         :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1622,10 +1648,11 @@
 ! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarWriteRestart(calendar, rc)
+      subroutine ESMF_CalendarWriteRestart(calendar, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout)         :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:  

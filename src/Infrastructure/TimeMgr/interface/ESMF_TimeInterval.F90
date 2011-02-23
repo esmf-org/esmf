@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.111 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.112 2011/02/23 06:37:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -66,6 +66,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
       public operator(+)
       public operator(-)
       public operator(/)
@@ -80,13 +82,16 @@
       public operator(>=)
       public ESMF_TimeIntervalAbsValue
       public ESMF_TimeIntervalGet
-      public ESMF_TimeIntervalInit
       public ESMF_TimeIntervalNegAbsValue
       public ESMF_TimeIntervalPrint
       public ESMF_TimeIntervalReadRestart
       public ESMF_TimeIntervalSet
       public ESMF_TimeIntervalValidate
       public ESMF_TimeIntervalWriteRestart
+
+! - ESMF-internal methods:
+      public ESMF_TimeIntervalInit
+
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -122,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.111 2011/02/22 15:49:33 rokuingh Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.112 2011/02/23 06:37:32 eschwab Exp $'
 
 !==============================================================================
 !
@@ -909,7 +914,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
-      subroutine ESMF_TimeIntervalGetDur(timeinterval, &
+      subroutine ESMF_TimeIntervalGetDur(timeinterval, keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -924,6 +929,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1130,7 +1136,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
-      subroutine ESMF_TimeIntervalGetDurStart(timeinterval, &
+      subroutine ESMF_TimeIntervalGetDurStart(timeinterval, startTimeIn, &
+        keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -1142,11 +1149,12 @@
         sN, sN_i8, sD, sD_i8, &
         startTime, &
         calendar, calendarType, &
-        startTimeIn, &
         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_Time),         intent(inout)         :: startTimeIn ! Input
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1174,7 +1182,6 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Time),         intent(inout)         :: startTimeIn ! Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1209,6 +1216,11 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query.
+!     \item[startTimeIn]
+!          INPUT argument:  pins a calendar interval to a specific point
+!          in time to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
+!          previously set.  Mutually exclusive with endTimeIn and calendarIn.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).
 !     \item[{[yy\_i8]}]
@@ -1266,11 +1278,6 @@
 !          Associated {\tt Calendar}, if any.
 !     \item[{[calendarType]}]
 !          Associated {\tt CalendarType}, if any.
-!     \item[startTimeIn]
-!          INPUT argument:  pins a calendar interval to a specific point
-!          in time to allow conversion between relative units (yy, mm, d) and
-!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
-!          previously set.  Mutually exclusive with endTimeIn and calendarIn.
 !     \item[{[timeString]}]
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
@@ -1358,7 +1365,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
-      subroutine ESMF_TimeIntervalGetDurCal(timeinterval, &
+      subroutine ESMF_TimeIntervalGetDurCal(timeinterval, calendarIn, &
+        keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -1370,11 +1378,12 @@
         sN, sN_i8, sD, sD_i8, &
         startTime, &
         calendar, calendarType, &
-        calendarIn, &
         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_Calendar),     intent(in)            :: calendarIn ! Input
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1402,7 +1411,6 @@
       type(ESMF_Time),         intent(inout), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Calendar),     intent(in)            :: calendarIn ! Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1437,6 +1445,13 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query.
+!     \item[calendarIn]
+!          INPUT argument:  pins a calendar interval to a specific calendar
+!          to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
+!          and endTimeIn since they contain a calendar.  Alternate to, and
+!          mutually exclusive with, calendarTypeIn below.  Primarily for
+!          specifying a custom calendar type.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).
 !     \item[{[yy\_i8]}]
@@ -1494,13 +1509,6 @@
 !          Associated {\tt Calendar}, if any.
 !     \item[{[calendarType]}]
 !          Associated {\tt CalendarType}, if any.
-!     \item[{[calendarIn]}]
-!          INPUT argument:  pins a calendar interval to a specific calendar
-!          to allow conversion between relative units (yy, mm, d) and
-!          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
-!          and endTimeIn since they contain a calendar.  Alternate to, and
-!          mutually exclusive with, calendarTypeIn below.  Primarily for
-!          specifying a custom calendar type.
 !     \item[[{timeString]}]
 !          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
@@ -1588,7 +1596,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
-      subroutine ESMF_TimeIntervalGetDurCalTyp(timeinterval, &
+      subroutine ESMF_TimeIntervalGetDurCalTyp(timeinterval, calendarTypeIn, &
+        keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -1600,12 +1609,13 @@
         sN, sN_i8, sD, sD_i8, &
         startTime, &
         calendar, calendarType, &
-        calendarTypeIn, &
         timeString, &
         timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_CalendarType), intent(in)            :: calendarTypeIn ! Input
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: mm
@@ -1633,7 +1643,6 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_CalendarType), intent(in)            :: calendarTypeIn !Input
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1668,6 +1677,10 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query.
+!     \item[calendarTypeIn]
+!          INPUT argument:  Alternate to, and mutually exclusive with,
+!          calendarIn above.  More convenient way of specifying a built-in
+!          calendar type.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).
 !     \item[{[yy\_i8]}]
@@ -1725,10 +1738,6 @@
 !          Associated {\tt Calendar}, if any.
 !     \item[{[calendarType]}]
 !          Associated {\tt CalendarType}, if any.
-!     \item[{[calendarTypeIn]}]
-!          INPUT argument:  Alternate to, and mutually exclusive with,
-!          calendarIn above.  More convenient way of specifying a built-in
-!          calendar type.
 !     \item[[{timeString]}]
 !          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
@@ -1852,10 +1861,12 @@
 ! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalPrint(timeinterval, options, rc)
+      subroutine ESMF_TimeIntervalPrint(timeinterval, keywordEnforcer, &
+        options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
@@ -1921,11 +1932,13 @@
 ! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalReadRestart(timeinterval, name, rc)
+      subroutine ESMF_TimeIntervalReadRestart(timeinterval, name, &
+        keywordEnforcer, rc)
 !
 ! !ARGUMENTS:      
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
       character (len=*),       intent(in)            :: name
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1975,7 +1988,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
-      subroutine ESMF_TimeIntervalSetDur(timeinterval, &
+      subroutine ESMF_TimeIntervalSetDur(timeinterval, keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -1988,6 +2001,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: mm
@@ -2121,7 +2135,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
-      subroutine ESMF_TimeIntervalSetDurStart(timeinterval, &
+      subroutine ESMF_TimeIntervalSetDurStart(timeinterval, startTime, &
+        keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -2131,10 +2146,12 @@
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
-        startTime, rc)
+        rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_Time),         intent(in)            :: startTime
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: mm
@@ -2159,7 +2176,6 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sN_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
-      type(ESMF_Time),         intent(in)            :: startTime
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2177,6 +2193,11 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to initialize.
+!     \item[startTime]
+!          Starting time of an absolute calendar interval 
+!          (yy, mm, and/or d); pins a calendar interval to a specific point 
+!          in time.  If not set, and calendar also not set, calendar interval 
+!          "floats" across all calendars and times.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
@@ -2232,11 +2253,6 @@
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
 !          Default = 1
-!     \item[startTime]
-!          Starting time of an absolute calendar interval (yy, mm, and/or d);
-!          pins a calendar interval to a specific point in time.  If not set,
-!          and calendar also not set, calendar interval "floats" across all
-!          calendars and times.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2275,7 +2291,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
-      subroutine ESMF_TimeIntervalSetDurCal(timeinterval, &
+      subroutine ESMF_TimeIntervalSetDurCal(timeinterval, calendar, &
+        keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -2284,10 +2301,12 @@
         ms, us, ns, &
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
-        sN, sN_i8, sD, sD_i8, calendar, rc)
+        sN, sN_i8, sD, sD_i8, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_Calendar),     intent(in)            :: calendar
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: mm
@@ -2312,7 +2331,6 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sN_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
-      type(ESMF_Calendar),     intent(in)            :: calendar
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2330,6 +2348,15 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to initialize.
+!     \item[calendar]
+!          {\tt Calendar} used to give better definition to 
+!          calendar interval (yy, mm, and/or d) for arithmetic, comparison, 
+!          and conversion operations.  Allows calendar interval to "float" 
+!          across all times on a specific calendar.  Default = NULL; 
+!          if startTime also not specified, calendar interval "floats" across 
+!          all calendars and times.  Mutually exclusive with startTime since 
+!          it contains a calendar.  Alternate to, and mutually exclusive with, 
+!          calendarType below.  Primarily for specifying a custom calendar type.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
@@ -2385,16 +2412,6 @@
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
 !          Default = 1
-!     \item[{[calendar]}]
-!          {\tt Calendar} used to give better definition to calendar interval
-!          (yy, mm, and/or d) for arithmetic, comparison, and conversion
-!          operations.  Allows calendar interval to "float" across all times
-!          on a specific calendar.
-!          Default = NULL; if startTime also not specified, calendar
-!          interval "floats" across all calendars and times.
-!          Mutually exclusive with startTime since it contains
-!          a calendar.  Alternate to, and mutually exclusive with, calendarType
-!          below.  Primarily for specifying a custom calendar type.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2434,7 +2451,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
-      subroutine ESMF_TimeIntervalSetDurCalTyp(timeinterval, &
+      subroutine ESMF_TimeIntervalSetDurCalTyp(timeinterval, calendarType, &
+        keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
         d, d_i8, &
@@ -2444,10 +2462,12 @@
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
-        calendarType, rc)
+        rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: mm
@@ -2472,7 +2492,6 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sN_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
-      type(ESMF_CalendarType), intent(in)            :: calendarType
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2490,6 +2509,10 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to initialize.
+!     \item[calendarType]
+!          Alternate to, and mutually exclusive with, 
+!          calendar above.  More convenient way of specifying a built-in 
+!          calendar type.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
@@ -2545,9 +2568,6 @@
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 1
-!     \item[{[calendarType]}]
-!          Alternate to, and mutually exclusive with, calendar above.  More
-!          convenient way of specifying a built-in calendar type.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2585,16 +2605,16 @@
 ! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalValidate(timeinterval, rc)
+      subroutine ESMF_TimeIntervalValidate(timeinterval, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Checks whether a {\tt timeinterval} is valid.
 !     If fractional value, denominator must be non-zero.
-!     The options control the type of validation.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2631,10 +2651,12 @@
 ! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalWriteRestart(timeinterval, rc)
+      subroutine ESMF_TimeIntervalWriteRestart(timeinterval, keywordEnforcer, &
+        rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:  

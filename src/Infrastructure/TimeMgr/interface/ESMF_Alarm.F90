@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.101 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_Alarm.F90,v 1.102 2011/02/23 06:37:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -77,6 +77,8 @@
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
       public operator(==)
       public operator(/=)
       public ESMF_AlarmCreate
@@ -98,6 +100,10 @@
       public ESMF_AlarmWasPrevRinging
       public ESMF_AlarmWillRingNext
       public ESMF_AlarmWriteRestart
+
+! - ESMF-internal methods:
+      public ESMF_AlarmGetInit
+
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -109,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.101 2011/02/22 15:49:33 rokuingh Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.102 2011/02/23 06:37:31 eschwab Exp $'
 
 !==============================================================================
 !
@@ -266,15 +272,16 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_AlarmCreate()
-      function ESMF_AlarmCreateNew(clock, ringTime, ringInterval, &
-        stopTime, ringDuration, ringTimeStepCount, refTime, enabled, &
-        sticky, name, rc)
+      function ESMF_AlarmCreateNew(clock, keywordEnforcer, &
+        ringTime, ringInterval, stopTime, ringDuration, ringTimeStepCount, &
+        refTime, enabled, sticky, name, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmCreateNew
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Time),         intent(in),  optional :: ringTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
       type(ESMF_Time),         intent(in),  optional :: stopTime
@@ -400,13 +407,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_AlarmCreate()
-      function ESMF_AlarmCreateCopy(alarm, rc)
+      function ESMF_AlarmCreateCopy(alarm, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(in)            :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -452,10 +460,11 @@
 ! !IROUTINE: ESMF_AlarmDestroy - Release resources associated with an Alarm
 !
 ! !INTERFACE:
-      subroutine ESMF_AlarmDestroy(alarm, rc)
+      subroutine ESMF_AlarmDestroy(alarm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)          :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
 !     
 ! !DESCRIPTION:
@@ -503,10 +512,11 @@
 ! !IROUTINE: ESMF_AlarmDisable - Disable an Alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmDisable(alarm, rc)
+      subroutine ESMF_AlarmDisable(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -546,10 +556,11 @@
 ! !IROUTINE: ESMF_AlarmEnable - Enable an Alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmEnable(alarm, rc)
+      subroutine ESMF_AlarmEnable(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -589,13 +600,14 @@
 ! !IROUTINE: ESMF_AlarmGet - Get Alarm properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmGet(alarm, clock, ringTime, prevRingTime, &
-        ringInterval, stopTime, ringDuration, ringTimeStepCount, &
-        timeStepRingingCount, ringBegin, ringEnd, refTime, ringing, &
-        ringingOnPrevTimeStep, enabled, sticky, name, rc)
+      subroutine ESMF_AlarmGet(alarm, keywordEnforcer, &
+        clock, ringTime, prevRingTime, ringInterval, stopTime, ringDuration, &
+        ringTimeStepCount, timeStepRingingCount, ringBegin, ringEnd, refTime, &
+        ringing, ringingOnPrevTimeStep, enabled, sticky, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Clock),        intent(out), optional :: clock
       type(ESMF_Time),         intent(out), optional :: ringTime
       type(ESMF_Time),         intent(out), optional :: prevRingTime
@@ -735,13 +747,14 @@
 ! !IROUTINE:  ESMF_AlarmIsEnabled - Check if Alarm is enabled
 
 ! !INTERFACE:
-      function ESMF_AlarmIsEnabled(alarm, rc)
+      function ESMF_AlarmIsEnabled(alarm, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmIsEnabled
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -782,13 +795,14 @@
 ! !IROUTINE:  ESMF_AlarmIsRinging - Check if Alarm is ringing
 
 ! !INTERFACE:
-      function ESMF_AlarmIsRinging(alarm, rc)
+      function ESMF_AlarmIsRinging(alarm, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmIsRinging
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -833,13 +847,14 @@
 ! !IROUTINE:  ESMF_AlarmIsSticky - Check if Alarm is sticky
 
 ! !INTERFACE:
-      function ESMF_AlarmIsSticky(alarm, rc)
+      function ESMF_AlarmIsSticky(alarm, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmIsSticky
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -881,11 +896,12 @@
 
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmNotSticky(alarm, ringDuration, ringTimeStepCount, &
-                 rc)
+      subroutine ESMF_AlarmNotSticky(alarm, keywordEnforcer, &
+        ringDuration, ringTimeStepCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
       integer,                 intent(in),  optional :: ringTimeStepCount
       integer,                 intent(out), optional :: rc
@@ -943,10 +959,11 @@
 ! !IROUTINE:  ESMF_AlarmPrint - Print out an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmPrint(alarm, options, rc)
+      subroutine ESMF_AlarmPrint(alarm, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),  intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1021,13 +1038,14 @@
 ! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm (not implemented)
 
 ! !INTERFACE:
-      function ESMF_AlarmReadRestart(name, rc)
+      function ESMF_AlarmReadRestart(name, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Alarm) :: ESMF_AlarmReadRestart
 !
 ! !ARGUMENTS:
       character (len=*), intent(in)            :: name
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1071,10 +1089,11 @@
 ! !IROUTINE:  ESMF_AlarmRingerOff - Turn off an Alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmRingerOff(alarm, rc)
+      subroutine ESMF_AlarmRingerOff(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -1119,10 +1138,11 @@
 
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmRingerOn(alarm, rc)
+      subroutine ESMF_AlarmRingerOn(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -1164,12 +1184,13 @@
 ! !IROUTINE: ESMF_AlarmSet - Set Alarm properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmSet(alarm, clock, ringTime, ringInterval, &
-        stopTime, ringDuration, ringTimeStepCount, refTime, ringing, &
-        enabled, sticky, name, rc)
+      subroutine ESMF_AlarmSet(alarm, keywordEnforcer, &
+        clock, ringTime, ringInterval, stopTime, ringDuration, &
+        ringTimeStepCount, refTime, ringing, enabled, sticky, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Clock),        intent(in),  optional :: clock
       type(ESMF_Time),         intent(in),  optional :: ringTime
       type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
@@ -1287,10 +1308,11 @@
 
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmSticky(alarm, rc)
+      subroutine ESMF_AlarmSticky(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -1339,10 +1361,11 @@
 ! !IROUTINE:  ESMF_AlarmValidate - Validate an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmValidate(alarm, rc)
+      subroutine ESMF_AlarmValidate(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),  intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1387,13 +1410,14 @@
 ! !IROUTINE:  ESMF_AlarmWasPrevRinging - Check if Alarm was ringing on the previous Clock timestep
 
 ! !INTERFACE:
-      function ESMF_AlarmWasPrevRinging(alarm, rc)
+      function ESMF_AlarmWasPrevRinging(alarm, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmWasPrevRinging
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1439,13 +1463,14 @@
 ! !IROUTINE:  ESMF_AlarmWillRingNext - Check if Alarm will ring upon the next Clock timestep
 
 ! !INTERFACE:
-      function ESMF_AlarmWillRingNext(alarm, timeStep, rc)
+      function ESMF_AlarmWillRingNext(alarm, keywordEnforcer, timeStep, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmWillRingNext
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       integer,                 intent(out), optional :: rc
 
@@ -1496,10 +1521,11 @@
 ! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmWriteRestart(alarm, rc)
+      subroutine ESMF_AlarmWriteRestart(alarm, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),  intent(inout)         :: alarm
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:

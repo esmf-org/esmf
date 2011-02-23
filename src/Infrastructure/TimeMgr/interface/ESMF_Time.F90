@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.121 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_Time.F90,v 1.122 2011/02/23 06:37:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -66,6 +66,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+
+! - ESMF-public methods:
       public operator(+)
       public operator(-)
       public operator(==)
@@ -75,7 +77,6 @@
       public operator(>)
       public operator(>=)
       public ESMF_TimeGet
-      public ESMF_TimeInit
       public ESMF_TimeIsLeapYear
       public ESMF_TimeIsSameCalendar
       public ESMF_TimePrint
@@ -84,6 +85,10 @@
       public ESMF_TimeSyncToRealTime
       public ESMF_TimeValidate
       public ESMF_TimeWriteRestart
+
+! - ESMF-internal methods:
+      public ESMF_TimeInit
+
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
@@ -100,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.121 2011/01/19 02:13:18 svasquez Exp $'
+      '$Id: ESMF_Time.F90,v 1.122 2011/02/23 06:37:31 eschwab Exp $'
 
 !==============================================================================
 !
@@ -500,7 +505,7 @@
 ! !IROUTINE: ESMF_TimeGet - Get a Time value 
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGet(time, &
+      subroutine ESMF_TimeGet(time, keywordEnforcer, &
         yy, yy_i8, &
         mm, dd, &
         d, d_i8, &
@@ -518,6 +523,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(inout)         :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer,                 intent(out), optional :: mm
@@ -787,13 +793,14 @@
 ! !IROUTINE: ESMF_TimeIsLeapYear - Determine if a Time is in a leap year
 
 ! !INTERFACE:
-      function ESMF_TimeIsLeapYear(time, rc)
+      function ESMF_TimeIsLeapYear(time, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       logical :: ESMF_TimeIsLeapYear
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout)         :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -834,7 +841,7 @@
 ! !IROUTINE: ESMF_TimeIsSameCalendar - Compare Calendars of two Times
 
 ! !INTERFACE:
-      function ESMF_TimeIsSameCalendar(time1, time2, rc)
+      function ESMF_TimeIsSameCalendar(time1, time2, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       logical :: ESMF_TimeIsSameCalendar
@@ -842,6 +849,7 @@
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout)         :: time1
       type(ESMF_Time), intent(inout)         :: time2
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -885,10 +893,11 @@
 ! !IROUTINE:  ESMF_TimePrint - Print the contents of a Time 
 
 ! !INTERFACE:
-      subroutine ESMF_TimePrint(time, options, rc)
+      subroutine ESMF_TimePrint(time, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(inout)         :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -956,11 +965,12 @@
 ! !IROUTINE:  ESMF_TimeReadRestart - Restore the contents of a Time (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeReadRestart(time, name, rc)
+      subroutine ESMF_TimeReadRestart(time, name, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(inout)         :: time
       character (len=*), intent(in)            :: name
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1008,7 +1018,7 @@
 ! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSet(time, &
+      subroutine ESMF_TimeSet(time, keywordEnforcer, &
         yy, yy_i8, &
         mm, dd, &
         d, d_i8, &
@@ -1023,6 +1033,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(inout)         :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
       integer,                 intent(in),  optional :: mm
@@ -1217,10 +1228,11 @@
 ! !IROUTINE: ESMF_TimeSyncToRealTime - Get system real time (wall clock time)
 !
 ! !INTERFACE:
-      subroutine ESMF_TimeSyncToRealTime(time, rc)
+      subroutine ESMF_TimeSyncToRealTime(time, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1261,10 +1273,11 @@
 ! !IROUTINE:  ESMF_TimeValidate - Validate a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeValidate(time, options, rc)
+      subroutine ESMF_TimeValidate(time, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(inout)         :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
@@ -1312,10 +1325,11 @@
 ! !IROUTINE:  ESMF_TimeWriteRestart - Save the contents of a Time (not implemented)
 
 ! !INTERFACE:
-      subroutine ESMF_TimeWriteRestart(time, rc)
+      subroutine ESMF_TimeWriteRestart(time, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(inout)         :: time
+      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
