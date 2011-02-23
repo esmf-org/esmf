@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.66 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.67 2011/02/23 06:54:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.66 2011/01/05 20:05:44 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.67 2011/02/23 06:54:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -93,7 +93,7 @@
       print *, "Starting LogErr Tests"
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -581,9 +581,9 @@
       call ESMF_Test((time_diff.ge.zero .and. time_diff.le.one_sec), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, " my_time is "
-      call ESMF_TimePrint(my_time, "string", rc)
+      call ESMF_TimePrint(my_time, options="string", rc=rc)
       print *, " log_time is "
-      call ESMF_TimePrint(log_time, "string", rc)
+      call ESMF_TimePrint(log_time, options="string", rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
