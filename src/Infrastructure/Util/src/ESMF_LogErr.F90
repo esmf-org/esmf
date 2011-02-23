@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.76 2011/02/22 17:37:34 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.77 2011/02/23 19:44:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -586,11 +586,12 @@ end function
 ! !IROUTINE: ESMF_LogClose - Close Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogClose(log, rc)
+      subroutine ESMF_LogClose(log, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Log), intent(inout)	          :: log
-      integer,        intent(out),  optional  :: rc
+      type(ESMF_Log), intent(inout)	     :: log
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,        intent(out),  optional :: rc
 
 ! !DESCRIPTION:
 !      This routine closes the file(s) associated with the {\tt log}.
@@ -675,7 +676,7 @@ end subroutine ESMF_LogClose
         ! Loop through all ESMF_LogTable(*) and close the files
         do k = 1,ESMF_LogTableCount
           log%logTableIndex = k
-          call ESMF_LogClose(log, rc)
+          call ESMF_LogClose(log, rc=rc)
         enddo
 
         call c_ESMC_LogFinalize(rc2)
@@ -687,12 +688,13 @@ end subroutine ESMF_LogFinalize
 ! !IROUTINE: ESMF_LogFlush - Flush the Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogFlush(log,rc)
+      subroutine ESMF_LogFlush(log, keywordEnforcer, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Log), intent(inout), optional  :: log
-      integer,        intent(out),   optional  :: rc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_Log), intent(inout), optional :: log
+      integer,        intent(out),   optional :: rc
 
 ! !DESCRIPTION:
 !      This subroutine flushes the {\tt ESMF\_Log} buffer to its
@@ -821,8 +823,9 @@ end subroutine ESMF_LogFlush
 !            error and write message
 
 ! !INTERFACE: 
-      function ESMF_LogFoundAllocError(statusToCheck,msg,line,file, &
-                                          method,rcToReturn,log)
+      function ESMF_LogFoundAllocError(statusToCheck, keywordEnforcer,  &
+                                       msg,line,file, &
+                                       method,rcToReturn,log)
 !
 ! !RETURN VALUE:
       logical                                    :: ESMF_LogFoundAllocError 
@@ -830,12 +833,13 @@ end subroutine ESMF_LogFlush
 ! !ARGUMENTS:
 !      
       integer,          intent(in)               :: statusToCheck 	      
-      character(len=*), intent(in),    optional  :: msg			      
-      integer,          intent(in),    optional  :: line  		      
-      character(len=*), intent(in),    optional  :: file  		      
-      character(len=*), intent(in),    optional  :: method		      
-      integer,          intent(out),   optional  :: rcToReturn		      
-      type(ESMF_Log),   intent(inout), optional  :: log			      
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*), intent(in),    optional :: msg			      
+      integer,          intent(in),    optional :: line  		      
+      character(len=*), intent(in),    optional :: file  		      
+      character(len=*), intent(in),    optional :: method		      
+      integer,          intent(out),   optional :: rcToReturn		      
+      type(ESMF_Log),   intent(inout), optional :: log			      
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -887,9 +891,11 @@ end subroutine ESMF_LogFlush
         endif
         allocmsg=tempmsg(1:msglen)
         if (present(msg)) then
-          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,method,log)	
+          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)	
         else
-          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
         endif
         ESMF_LogFoundAllocError=.TRUE.
 #ifdef ESMF_SUCCESS_DEFAULT_ON
@@ -908,21 +914,23 @@ end function ESMF_LogFoundAllocError
 !            error and write message
 
 ! !INTERFACE: 
-	function ESMF_LogFoundDeallocError(statusToCheck,msg,line,file, &
-                                            method,rcToReturn,log)
+      function ESMF_LogFoundDeallocError(statusToCheck, keywordEnforcer,  &
+                                         msg,line,file, &
+                                         method,rcToReturn,log)
 !
 ! !RETURN VALUE:
-      logical                                  ::ESMF_LogFoundDeallocError
+      logical ::ESMF_LogFoundDeallocError
 !	
 ! !ARGUMENTS:
 !      
-      integer,          intent(in)               :: statusToCheck 	     	
-      character(len=*), intent(in),    optional  :: msg			     	
-      integer,          intent(in),    optional  :: line  		     	
-      character(len=*), intent(in),    optional  :: file  		     	
-      character(len=*), intent(in),    optional  :: method		     	
-      integer,          intent(out),   optional  :: rcToReturn		     	
-      type(ESMF_Log),   intent(inout), optional  :: log			     	
+      integer,          intent(in)              :: statusToCheck 	     	
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*), intent(in),    optional :: msg			     	
+      integer,          intent(in),    optional :: line  		     	
+      character(len=*), intent(in),    optional :: file  		     	
+      character(len=*), intent(in),    optional :: method		     	
+      integer,          intent(out),   optional :: rcToReturn		     	
+      type(ESMF_Log),   intent(inout), optional :: log			     	
 
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
@@ -974,9 +982,11 @@ end function ESMF_LogFoundAllocError
         endif
         allocmsg=tempmsg(1:msglen)
         if (present(msg)) then
-          call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,method,log)
+          call ESMF_LogWrite(trim(allocmsg)//" - "//msg, ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
         else
-          call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
+          call ESMF_LogWrite(trim(allocmsg), ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
         endif
         ESMF_LogFoundDeallocError=.TRUE.
 #ifdef ESMF_SUCCESS_DEFAULT_ON
@@ -994,21 +1004,23 @@ end function ESMF_LogFoundDeallocError
 ! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error and write message
 
 ! !INTERFACE: 
-	function ESMF_LogFoundError(rcToCheck, msg, line, file, method, &
-                                       rcToReturn, log)
+      function ESMF_LogFoundError(rcToCheck,  keywordEnforcer,  &
+                                  msg, line, file, method, &
+                                  rcToReturn, log)
 !
 ! !RETURN VALUE:
-      logical                                         :: ESMF_LogFoundError
+      logical :: ESMF_LogFoundError
 !
 ! !ARGUMENTS:
 !	
-      integer,          intent(in)               :: rcToCheck
-      character(len=*), intent(in),    optional  :: msg
-      integer,          intent(in),    optional  :: line
-      character(len=*), intent(in),    optional  :: file
-      character(len=*), intent(in),    optional  :: method
-      integer,          intent(out),   optional  :: rcToReturn
-      type(ESMF_Log),   intent(inout), optional  :: log
+      integer,          intent(in)              :: rcToCheck
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*), intent(in),    optional :: msg
+      integer,          intent(in),    optional :: line
+      character(len=*), intent(in),    optional :: file
+      character(len=*), intent(in),    optional :: method
+      integer,          intent(out),   optional :: rcToReturn
+      type(ESMF_Log),   intent(inout), optional :: log
 	
 
 ! !DESCRIPTION:
@@ -1084,11 +1096,11 @@ end function ESMF_LogFoundDeallocError
           call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
           if (present(msg)) then
-            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,&
-              method,log)
+            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
           else
-            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,&
-              method,log)
+            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
           endif
           ESMF_LogFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheck
@@ -1112,7 +1124,7 @@ end function ESMF_LogFoundError
 !
 ! !ARGUMENTS:
 !      
-      type(ESMF_Log),optional            :: log         	
+      type(ESMF_Log),optional, intent(in)        :: log         	
       type(ESMF_Logical), intent(out),optional   :: verbose     	
       type(ESMF_Logical), intent(out),optional   :: flush       	
       type(ESMF_Logical), intent(out),optional   :: rootOnly    	
@@ -1248,7 +1260,7 @@ end subroutine ESMF_LogGet
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LogOpen(ESMF_LogDefault, filename, logtype, rc)
+    call ESMF_LogOpen(ESMF_LogDefault, filename, logtype=logtype, rc=rc)
 
 end subroutine ESMF_LogInitialize
 
@@ -1257,13 +1269,14 @@ end subroutine ESMF_LogInitialize
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(log, filename, logtype, rc)
+    subroutine ESMF_LogOpen(log, filename, keywordEnforcer, logtype, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log),     intent(inout)   	    :: log		   
-    character(len=*),   intent(in)              :: filename	   
-    type(ESMF_LogType), intent(in),   optional  :: logtype 	    
-    integer,            intent(out),  optional	:: rc		   
+    type(ESMF_Log),     intent(inout)          :: log		   
+    character(len=*),   intent(in)             :: filename	   
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_LogType), intent(in),   optional :: logtype 	    
+    integer,            intent(out),  optional :: rc		   
 
 ! !DESCRIPTION:
 !      This routine opens a file with {\tt filename} and associates
@@ -1440,21 +1453,23 @@ end subroutine ESMF_LogOpen
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSet(log,verbose,flush,rootOnly,halt, &
-                               stream,maxElements, msgAllow, errorMask,rc)
+	subroutine ESMF_LogSet(keywordEnforcer, log, verbose, flush, rootOnly,  &
+                               halt, stream, maxElements, msgAllow,  &
+                               errorMask, rc)
 !
 ! !ARGUMENTS:
 !	
-      type(ESMF_Log),      intent(inout), optional  :: log 		   
-      logical,             intent(in),    optional  :: verbose		   
-      logical,             intent(in),    optional  :: flush		   
-      logical,             intent(in),    optional  :: rootOnly		   
-      type(ESMF_HaltType), intent(in),    optional  :: halt		   
-      integer,             intent(in),    optional  :: stream		   
-      integer,             intent(in),    optional  :: maxElements 	   
-      type(ESMF_MsgType),  intent(in),    optional  :: msgAllow(:) 	   
-      integer,             intent(in),    optional  :: errorMask(:)	   
-      integer,             intent(out),   optional  :: rc  		   
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_Log),      intent(inout), optional :: log 		   
+      logical,             intent(in),    optional :: verbose		   
+      logical,             intent(in),    optional :: flush		   
+      logical,             intent(in),    optional :: rootOnly		   
+      type(ESMF_HaltType), intent(in),    optional :: halt		   
+      integer,             intent(in),    optional :: stream		   
+      integer,             intent(in),    optional :: maxElements 	   
+      type(ESMF_MsgType),  intent(in),    optional :: msgAllow(:) 	   
+      integer,             intent(in),    optional :: errorMask(:)	   
+      integer,             intent(out),   optional :: rc  		   
 	
 ! !DESCRIPTION:
 !      This subroutine sets the properties for the Log object.
@@ -1607,18 +1622,20 @@ end subroutine ESMF_LogSet
 ! !IROUTINE: ESMF_LogSetError - Set ESMF return code for error and write msg
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSetError(rcToCheck, msg, line, file, method, &
-                                       rcToReturn, log)
+      subroutine ESMF_LogSetError(rcToCheck, keywordEnforcer,  &
+                                  msg, line, file, method, &
+                                  rcToReturn, log)
 
 ! !ARGUMENTS:
 !	
-      integer,          intent(in)               :: rcToCheck
-      character(len=*), intent(in),    optional  :: msg
-      integer,          intent(in),    optional  :: line
-      character(len=*), intent(in),    optional  :: file
-      character(len=*), intent(in),    optional  :: method
-      integer,          intent(out),   optional  :: rcToReturn
-      type(ESMF_Log),   intent(inout), optional  :: log
+      integer,          intent(in)              :: rcToCheck
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      character(len=*), intent(in),    optional :: msg
+      integer,          intent(in),    optional :: line
+      character(len=*), intent(in),    optional :: file
+      character(len=*), intent(in),    optional :: method
+      integer,          intent(out),   optional :: rcToReturn
+      type(ESMF_Log),   intent(inout), optional :: log
 	
 
 ! !DESCRIPTION:
@@ -1691,11 +1708,11 @@ end subroutine ESMF_LogSet
           call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
           if (present(msg)) then
-            call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,line,file,&
-              method,log)
+            call ESMF_LogWrite(trim(allocmsg)//" - "//msg, ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
           else
-            call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,&
-              method,log)
+            call ESMF_LogWrite(trim(allocmsg), ESMF_LOG_ERROR,  &
+              line=line, file=file, method=method, log=log)
           endif
           if (present(rcToReturn)) rcToReturn = rcToCheck
         endif
@@ -1712,17 +1729,19 @@ end subroutine ESMF_LogSetError
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-      recursive subroutine ESMF_LogWrite(msg,MsgType,line,file,method,log,rc)
+      recursive subroutine ESMF_LogWrite(msg, MsgType, keywordEnforcer,  &
+                                         line, file, method, log, rc)
 !
 !
 ! !ARGUMENTS:
-      character(len=*),   intent(in)               :: msg	    
-      type(ESMF_MsgType), intent(in)               :: msgtype    
-      integer,            intent(in),    optional  :: line	    
-      character(len=*),   intent(in),    optional  :: file	    
-      character(len=*),   intent(in),    optional  :: method     
-      type(ESMF_Log),     intent(inout), optional  :: log	    
-      integer,            intent(out),   optional  :: rc	    
+      character(len=*),   intent(in)              :: msg	    
+      type(ESMF_MsgType), intent(in)              :: msgtype    
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,            intent(in),    optional :: line	    
+      character(len=*),   intent(in),    optional :: file	    
+      character(len=*),   intent(in),    optional :: method     
+      type(ESMF_Log),     intent(inout), optional :: log	    
+      integer,            intent(out),   optional :: rc	    
 
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
