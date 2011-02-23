@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.11 2011/01/05 20:05:46 svasquez Exp $
+ $Id: ESMF_LogMacros.inc,v 1.12 2011/02/23 19:42:11 w6ws Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 #ifndef ESMF_LOGMACROS_INC
 #define ESMF_LOGMACROS_INC
 
-#define ESMF_CONTEXT  __LINE__,ESMF_FILENAME,ESMF_METHOD
+#define ESMF_CONTEXT  line=__LINE__,file=ESMF_FILENAME,method=ESMF_METHOD
 #define ESMC_CONTEXT  __LINE__,ESMC_FILENAME,ESMC_METHOD
 
 #ifndef ESMF_FILENAME
