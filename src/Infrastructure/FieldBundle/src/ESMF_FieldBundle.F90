@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.83 2011/02/22 20:56:45 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.84 2011/02/23 18:23:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -296,7 +296,6 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleGetInfo
-        module procedure ESMF_FieldBundleGetFieldNames
         module procedure ESMF_FieldBundleGetFieldByName
         module procedure ESMF_FieldBundleGetFieldByNum
 
@@ -1295,7 +1294,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
       subroutine ESMF_FieldBundleGetInfo(fieldbundle, keywordEnforcer, &
-        geomtype, grid, mesh, locstream, fieldCount, name, rc)
+        geomtype, grid, mesh, locstream, fieldNameList, fieldCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
@@ -1304,6 +1303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid),        intent(out), optional :: grid
       type(ESMF_Mesh),        intent(out), optional :: mesh
       type(ESMF_LocStream),   intent(out), optional :: locstream
+      character (len = *),    intent(out), optional :: fieldNameList(:)
       integer,                intent(out), optional :: fieldCount
       character (len = *),    intent(out), optional :: name
       integer,                intent(out), optional :: rc
@@ -1328,6 +1328,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The {\tt ESMF\_Mesh} associated with the {\tt fieldbundle}.
 !     \item [{[locstream]}]
 !           The {\tt ESMF\_LocStream} associated with the {\tt fieldbundle}.
+!     \item [fieldNameList]
+!           An array of character strings where each {\tt ESMF\_Field} name
+!           is returned.
 !     \item [{[fieldCount]}]
 !           Number of {\tt ESMF\_Field}s in the {\tt fieldbundle}.
 !     \item [{[name]}]
@@ -1339,7 +1342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 
-      integer :: status                           ! Error status
+      integer :: i, status                           ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
       type(ESMF_GeomType) :: localGeomType
 
@@ -1418,21 +1421,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_CONTEXT, rc)) return
     endif
 
-
-      if (present(fieldCount)) then
-          ! Return Field count
-          fieldCount = fieldbundle%btypep%field_count
+    if (present(fieldNameList)) then
+      if (size(fieldNameList) .lt. fieldbundle%btypep%field_count) then
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+              "nameList too short for number of fields", &
+              ESMF_CONTEXT, rc)
+          return
       endif
 
-      if (present(name)) then
-          call c_ESMC_GetName(btype%base, name, status)
+      do i=1, fieldbundle%btypep%field_count
+          call ESMF_FieldGet(fieldbundle%btypep%flist(i), name=fieldNameList(i), rc=status)
           if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      endif
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rc)) return
+      enddo 
+    endif
 
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_FieldBundleGetInfo
+    if (present(fieldCount)) then
+        ! Return Field count
+        fieldCount = fieldbundle%btypep%field_count
+    endif
+
+    if (present(name)) then
+        call c_ESMC_GetName(btype%base, name, status)
+        if (ESMF_LogFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_FieldBundleGetInfo
 
 
 !------------------------------------------------------------------------------
@@ -1667,16 +1685,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetFieldByName"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGet - Retrieve a Field by name
+! !IROUTINE: ESMF_FieldBundleGet - Retrieve a Field by its name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, name, field, &
+      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, fieldname, field, &
         keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
-      character (len = *),    intent(in)            :: name
+      character (len = *),    intent(in)            :: fieldname
       type(ESMF_Field),       intent(out)           :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
@@ -1690,7 +1708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to query for {\tt ESMF\_Field}.
-!     \item [name]
+!     \item [fieldname]
 !           {\tt ESMF\_Field} name.
 !     \item [field]
 !           Returned {\tt ESMF\_Field}.
@@ -1742,7 +1760,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-       if (name == temp_name) then
+       if (fieldname == temp_name) then
            field = fieldbundle%btypep%flist(i) 
            found = .TRUE.
            ! found match, exit loop early
@@ -1751,7 +1769,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
 
       if (.not. found) then
-        !"Field not found with name ", name
+        !"Field not found with name ", fieldname
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
                                 "Field not found with requested name", &
                                  ESMF_CONTEXT, rc)) return
@@ -1841,75 +1859,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldBundleGetFieldByNum
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetFieldNames"
-!BOP
-! !IROUTINE: ESMF_FieldBundleGet - Return all Field names in a FieldBundle
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldNames(fieldbundle, nameList, &
-        keywordEnforcer, nameCount, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_FieldBundle), intent(in)            :: fieldbundle 
-      character (len = *),    intent(out)           :: nameList(:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: nameCount     
-      integer,                intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Returns an array of {\tt ESMF\_Field} names in an {\tt ESMF\_FieldBundle}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldbundle]
-!           An {\tt ESMF\_FieldBundle} object.
-!     \item [nameList]
-!           An array of character strings where each {\tt ESMF\_Field} name
-!           is returned.  Must be at least as long as {\tt nameCount}.
-!     \item [{[nameCount]}]
-!           A count of how many {\tt ESMF\_Field} names were returned.  Same as
-!           the number of {\tt ESMF\_Field}s in the {\tt ESMF\_FieldBundle}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-      integer :: i, status
-      type(ESMF_FieldBundleType), pointer :: bp
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      status = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
-
-      bp => fieldbundle%btypep
-
-      if (present(nameCount)) nameCount = bp%field_count
-
-      if (size(nameList) .lt. bp%field_count) then
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-                                  "nameList too short for number of fields", &
-                                  ESMF_CONTEXT, rc)
-          return
-      endif
-
-      do i=1, bp%field_count
-          call ESMF_FieldGet(bp%flist(i), name=nameList(i), rc=status)      
-          if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      enddo 
-
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_FieldBundleGetFieldNames
 
 
 !------------------------------------------------------------------------------

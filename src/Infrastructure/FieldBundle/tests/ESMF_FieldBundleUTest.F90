@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.27 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.28 2011/02/23 18:23:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.27 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.28 2011/02/23 18:23:30 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -1491,7 +1491,7 @@
       !This test crashes, bug 1169299 created, commented out
       !  Verify the getting Field names query from an uninitialized FieldBundle is handled
       ! (I think its fixed - Bob 2/12/2007)
-      call ESMF_FieldBundleGet(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle1, fieldnameList=fieldNameList, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field names from an uninitialized FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1527,7 +1527,7 @@
 
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
-      call ESMF_FieldBundleGet(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle1, fieldnameList=fieldNameList, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field names from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1600,7 +1600,7 @@
 
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
-      call ESMF_FieldBundleGet(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle2, fieldnameList=fieldNameList, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field names from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1625,7 +1625,7 @@
 
       !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
-      call ESMF_FieldBundleGet(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      call ESMF_FieldBundleGet(bundle2, fieldnameList=fieldNameList, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field names from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1671,7 +1671,9 @@
 
       !EX_UTest
       !  Verify that the Field count query from an empty FieldBundle is handled properly
+      print *, 'fieldcount = ', fieldcount
       call ESMF_FieldBundleGet(bundle2, fieldCount=fieldcount, rc=rc)
+      print *, 'fieldcount = ', fieldcount
       write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to zero"
       write(name, *) "Getting Field count from an empty FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.0), &
