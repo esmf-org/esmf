@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.54 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.55 2011/02/23 01:42:10 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ wts.Print(Par::Out());
       enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
       FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
                  &num_entries, &iiptr, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMF_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	throw localrc;  // bail out with exception
     }
 
@@ -178,7 +178,7 @@ wts.Print(Par::Out());
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -231,7 +231,7 @@ extern "C" void FTN(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -273,7 +273,7 @@ extern "C" void FTN(c_esmc_regrid_getarea)(Grid **gridpp,
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -323,7 +323,7 @@ extern "C" void FTN(c_esmc_regrid_getfrac)(Grid **gridpp,
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
