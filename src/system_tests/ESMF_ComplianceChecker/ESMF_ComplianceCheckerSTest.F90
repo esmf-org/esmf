@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.6 2010/12/03 05:58:07 theurich Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.7 2011/02/23 14:45:08 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -188,8 +188,8 @@ program ESMF_ComplianceCheckerSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  dummyClock = ESMF_ClockCreate(name="Clock 1", timeStep=timeStep, &
-    startTime=startTime, stopTime=stopTime, rc=rc)
+  dummyClock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+    name="Clock 1", rc=rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.55 2011/02/22 15:49:34 rokuingh Exp $
+! $Id: ESMF_GCompEx.F90,v 1.56 2011/02/23 14:49:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -366,7 +366,8 @@
 
 
     ! initialize the clock with the above values
-    tclock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="top clock", rc=rc)
+    tclock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+                              name="top clock", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
@@ -394,7 +395,7 @@
            finalrc = ESMF_FAILURE
          end if
 
-        call ESMF_ClockAdvance(tclock, timestep)
+        call ESMF_ClockAdvance(tclock, timeStep=timestep)
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
     enddo

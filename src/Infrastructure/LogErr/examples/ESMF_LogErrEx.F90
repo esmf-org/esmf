@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.39 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.40 2011/02/23 14:49:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
                              rcToReturn=rc2)
     ! LogMsgFoundError
     call ESMF_TimeSet(time, calendarType=ESMF_CAL_NOCALENDAR)
-    call ESMF_TimeSyncToRealTime(time, rcToTest)
+    call ESMF_TimeSyncToRealTime(time, rc=rcToTest)
     if (ESMF_LogFoundError(rcToTest, "getting wall clock time", &
                               rcToReturn=rc2)) then
         ! Error getting time. The previous call will have printed the error

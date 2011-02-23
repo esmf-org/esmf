@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.12 2011/02/22 15:49:34 rokuingh Exp $
+! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.13 2011/02/23 14:45:08 eschwab Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -184,7 +184,8 @@
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! initialize the clock with the above values
-    clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=localrc)
+    clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+                             name="Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -243,7 +244,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    do while (.not. ESMF_ClockIsStopTime(clock, rc))
+    do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
 
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
         userRc=userrc, rc=localrc)

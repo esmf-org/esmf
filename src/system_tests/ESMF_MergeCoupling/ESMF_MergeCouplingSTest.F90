@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.24 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.25 2011/02/23 14:45:08 eschwab Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -152,7 +152,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values
-      clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+                               name="Clock 1", rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -199,7 +200,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-      do while (.not. ESMF_ClockIsStopTime(clock, rc))
+      do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
 
         call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10

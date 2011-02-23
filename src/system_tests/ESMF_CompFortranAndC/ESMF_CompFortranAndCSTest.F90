@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.24 2011/02/22 15:49:34 rokuingh Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.25 2011/02/23 14:45:08 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -199,8 +199,8 @@ program ESMF_CompFortranAndC
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
   print *, "Stop Time set"
 
-  clock = ESMF_ClockCreate(timeStep=timeStep, &
-    startTime=startTime, stopTime=stopTime, name="Application Clock", rc=localrc)
+  clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+                           name="Application Clock", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.23 2011/02/22 15:49:34 rokuingh Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.24 2011/02/23 14:45:08 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -274,7 +274,8 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (rc .ne. ESMF_SUCCESS) goto 10
 
   ! initialize the clock with the above values
-  clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
+  clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+                           name="Clock 1", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
@@ -383,10 +384,10 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 !-------------------------------------------------------------------------
 
   print *, "Run Loop Start time"
-  call ESMF_ClockPrint(clock, "currtime string", rc)
+  call ESMF_ClockPrint(clock, options="currtime string", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
-  do while (.not. ESMF_ClockIsStopTime(clock, rc))
+  do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
 
         ! Sequence:  A1, A2, B1, B2 (run concurrently), Coupler, C
   	call ESMF_GridCompRun(compA1, exportState=cA1exp, clock=clock, userRc=localrc)
@@ -424,13 +425,13 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
         ! Advance the time
         call ESMF_ClockAdvance(clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
-        !call ESMF_ClockPrint(clock, "currtime string", rc)
+        !call ESMF_ClockPrint(clock, options="currtime string", rc=rc)
 
   	print *, "Comp Run finished one step returned, rc =", localrc
 
   enddo
   if (localPet==0) print *, "Run Loop End time"
-  if (localPet==0) call ESMF_ClockPrint(clock, "currtime string", rc)
+  if (localPet==0) call ESMF_ClockPrint(clock, options="currtime string", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 
 
