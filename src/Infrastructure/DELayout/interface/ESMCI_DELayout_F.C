@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.12 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.13 2011/02/23 20:32:37 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ extern "C" {
     *ptr = ESMCI::DELayout::create(petMap, *petMapCount,
       ESMC_NOT_PRESENT_FILTER(dePinFlag), 
       opt_vm, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -84,7 +84,7 @@ extern "C" {
       *deGrouping, 
       ESMC_NOT_PRESENT_FILTER(dePinFlag),
       *petList, opt_vm, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -102,7 +102,7 @@ extern "C" {
     // call into C++
     *ptr = ESMCI::DELayout::create(**vm, deCountList, *deCountListCount,
       petList, *petListCount, &cyclic, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -115,7 +115,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.MsgFoundError(ESMCI::DELayout::destroy(ptr),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -227,7 +227,7 @@ extern "C" {
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(deMatchCount),
       deMatchList, *len_deMatchList),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -245,7 +245,7 @@ extern "C" {
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(petMatchCount),
       petMatchList, *len_petMatchList),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -270,7 +270,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(oneToOneFlag), 
       ESMC_NOT_PRESENT_FILTER(logRectFlag),
       deCountPerDim, *len_deCountPerDim),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -288,7 +288,7 @@ extern "C" {
       *DEid, DEcoord, *len_coord, DEcde, *len_cde, DEcw, *len_cw,
       ESMC_NOT_PRESENT_FILTER(nDEc),
       ESMC_NOT_PRESENT_FILTER(pid)), 
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -301,7 +301,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -314,7 +314,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -331,7 +331,7 @@ extern "C" {
     *reply = (*ptr)->serviceOffer(*de, &localrc);
 //TODO: enable LogErr once it is thread-safe
     *rc=localrc;  
-//    ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+//    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 //      ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -345,7 +345,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
     ESMC_LogDefault.MsgFoundError((*ptr)->serviceComplete(*de),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -361,7 +361,7 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(
       (*delayout)->serialize(buf, length, offset,*inquireflag),
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -381,7 +381,7 @@ extern "C" {
     else
       localrc = ESMF_SUCCESS;
     ESMC_LogDefault.MsgFoundError(localrc,
-      ESMF_ERR_PASSTHRU,
+      ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
