@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.51 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_ClockEx.F90,v 1.52 2011/02/23 06:48:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,7 +87,8 @@
 
 !BOC
       ! initialize the clock with the above values
-      clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=rc)
+      clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
+                               name="Clock 1", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -100,13 +101,13 @@
 
 !BOC
       ! time step clock from start time to stop time
-      do while (.not.ESMF_ClockIsStopTime(clock, rc))
+      do while (.not.ESMF_ClockIsStopTime(clock, rc=rc))
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-        call ESMF_ClockPrint(clock, "currTime string", rc)
+        call ESMF_ClockPrint(clock, options="currTime string", rc=rc)
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -165,13 +166,13 @@
 !BOC
       ! time step clock in reverse from stop time back to start time;
       !  note use of ESMF_ClockIsDone() rather than ESMF_ClockIsStopTime()
-      do while (.not.ESMF_ClockIsDone(clock, rc))
+      do while (.not.ESMF_ClockIsDone(clock, rc=rc))
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-        call ESMF_ClockPrint(clock, "currTime string", rc)
+        call ESMF_ClockPrint(clock, options="currTime string", rc=rc)
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -194,7 +195,7 @@
 
 !BOC
       ! destroy clock
-      call ESMF_ClockDestroy(clock, rc)
+      call ESMF_ClockDestroy(clock, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

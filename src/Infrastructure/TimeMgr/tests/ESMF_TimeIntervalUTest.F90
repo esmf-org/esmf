@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.65 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.66 2011/02/23 06:44:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.65 2011/02/22 15:49:33 rokuingh Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.66 2011/02/23 06:44:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2807,10 +2807,10 @@
       ! ----------------------------------------------------------------------------
 
       ! can test with any of these types
-      call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc)
+      call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc=rc)
 
       !EX_UTest
       write(name, *) "Day Calendar Time Interval conversion with s=172800 (2 days) Test"
@@ -2851,7 +2851,7 @@
       !print *, " secs = ", secs
 
       ! ----------------------------------------------------------------------------
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc)
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc=rc)
 
       !EX_UTest
       write(name, *) "No Calendar Time Interval conversion with yy=2, mm=30, d=720 Test"
@@ -3024,10 +3024,10 @@
       !print *, " Days = ", days
 
       ! ----------------------------------------------------------------------------
-      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc)
+      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc=rc)
 
       !EX_UTest
 
@@ -3074,7 +3074,7 @@
       !print *, " Hours = ", hours
 
       ! ----------------------------------------------------------------------------
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc)
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc=rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.43 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.44 2011/02/23 06:44:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.43 2011/02/22 15:49:33 rokuingh Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.44 2011/02/23 06:44:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -533,10 +533,10 @@
       !-------------------!
       ! destroy calendars !
       !-------------------!
-      call ESMF_CalendarDestroy(julianCalendar, rc)
-      call ESMF_CalendarDestroy(gregorianCalendar, rc)
-      call ESMF_CalendarDestroy(julianDayCalendar, rc)
-      call ESMF_CalendarDestroy(modifiedJulianDayCalendar, rc)
+      call ESMF_CalendarDestroy(julianCalendar, rc=rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc=rc)
+      call ESMF_CalendarDestroy(modifiedJulianDayCalendar, rc=rc)
 #endif
 
       ! finalize ESMF framework

@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.29 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.30 2011/02/23 06:48:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@
 
 !BOC
       ! create & initialize the clock with the above values
-      clock = ESMF_ClockCreate(timeStep, startTime, stopTime, &
+      clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
                                name="The Clock", rc=rc)
 !EOC
 
@@ -148,7 +148,7 @@
 
 !BOC
       ! time step clock from start time to stop time
-      do while (.not.ESMF_ClockIsStopTime(clock, rc))
+      do while (.not.ESMF_ClockIsStopTime(clock, rc=rc))
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -162,7 +162,7 @@
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-        call ESMF_ClockPrint(clock, "currTime string", rc)
+        call ESMF_ClockPrint(clock, options="currTime string", rc=rc)
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -173,7 +173,7 @@
           print *, "number of ringing alarms = ", ringingAlarmCount
 
           do i = 1, NUMALARMS
-            if (ESMF_AlarmIsRinging(alarm(i), rc)) then
+            if (ESMF_AlarmIsRinging(alarm(i), rc=rc)) then
 !EOC
 
               if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -187,7 +187,7 @@
 
 !BOC
               ! after processing alarm, turn it off
-              call ESMF_AlarmRingerOff(alarm(i), rc)
+              call ESMF_AlarmRingerOff(alarm(i), rc=rc)
 !EOC
 
               if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

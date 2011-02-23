@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.42 2011/02/22 15:49:33 rokuingh Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.43 2011/02/23 06:48:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -125,13 +125,13 @@
 !EOE
 
 !BOC
-      call ESMF_CalendarDestroy(julianDayCalendar, rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

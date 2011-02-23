@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.45 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.46 2011/02/23 06:48:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
 
 !BOC
       print *, "Time1 = "
-      call ESMF_TimePrint(time1, "string", rc)
+      call ESMF_TimePrint(time1, options="string", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -89,7 +89,7 @@
 
 !BOC
       print *, "Timeinterval1 = "
-      call ESMF_TimeIntervalPrint(timeinterval1, "string", rc)
+      call ESMF_TimeIntervalPrint(timeinterval1, options="string", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
