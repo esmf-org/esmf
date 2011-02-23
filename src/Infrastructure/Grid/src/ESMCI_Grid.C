@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.120 2011/02/23 00:31:55 w6ws Exp $
+// $Id: ESMCI_Grid.C,v 1.121 2011/02/23 18:53:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.120 2011/02/23 00:31:55 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.121 2011/02/23 18:53:49 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -6794,10 +6794,18 @@ int GridIter::getPoleID(
   // if done then leave
   if (done) return 0;
 
-  // check to see if we're on this proc
-  for (int i=0; i<rank; i++) {
-    if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i) && (connL[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1);
-    if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i) && (connU[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1)+1;
+  if (grid->isForceConn()) {
+    // check to see if we're on this proc
+    for (int i=0; i<rank; i++) {
+      if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i) && (connL[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1);
+      if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i) && (connU[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1)+1;
+    }
+  } else {
+    // check to see if we're on this proc
+    for (int i=0; i<rank; i++) {
+      if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i)) return 2*(i+1);
+      if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i)) return 2*(i+1)+1;
+    }
   }
 
   // if we pass the above test then we're not next to a pole node

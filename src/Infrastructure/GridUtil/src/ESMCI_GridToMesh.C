@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.10 2011/02/23 01:07:32 w6ws Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.11 2011/02/23 18:53:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -223,7 +223,8 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        
        node->set_owner(me);  // Set owner to this proc
        
-       UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
+       //       UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
+       UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
        
        // If Shared add to list to use DistDir on
@@ -269,8 +270,9 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
          local_node_num++;
          
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
-         
-         UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
+
+         //         UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets? 
+         UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
          mesh.add_node(node, nodeset);
          
          // Node must be shared
@@ -701,7 +703,6 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
      mesh.HaloFields(fds.size(), &fds[0]);
    }
-
 
    // delete Grid Iters
    delete gni;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Extrapolation.C,v 1.12 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Extrapolation.C,v 1.13 2011/02/23 18:53:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.12 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.13 2011/02/23 18:53:49 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -194,6 +194,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
   } // ki
 
+
   // If there are no elements, go no further
   {
     int nfound = elements.size();
@@ -203,6 +204,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
     if (gnfound == 0) return;
   }
+
 
   // Form the migration comm to send elements to proc 0
   CommReg mig("_rebalance_migration", mesh, mesh);
@@ -232,6 +234,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
   Rebalance(mesh, mig);
 
   } // done with rebalance
+
 
   // So now to the job at hand of meshing on proc zero
 
@@ -275,6 +278,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     } // ki
 
   } // rank = 0
+
 
   // We need to get ids for the pole node and for the new triangles
   std::vector<long> new_ids;
@@ -388,7 +392,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       tri->GetKernel()->Imprint(*tri);
         
     } // for ei
-     
+
     std::set<MeshObj*>::iterator bf_i = nodes.begin(), bf_e = nodes.end();
       
     for (; bf_i != bf_e; ++bf_i) {
@@ -405,7 +409,6 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
         
     }
       
-      
     // Set the coordinates of the pole. ASSUM: pole at (0,0,1)
     double *pole_coord = coords.data(*pnode);
     ThrowRequire(pole_coord); // better be data there!!!
@@ -421,6 +424,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       new_coords[0] += c[0]; new_coords[1] += c[1]; new_coords[2] += c[2];
 
     }
+
 
     UInt nfound = nodes.size();
 
@@ -462,13 +466,13 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
       points_around_pole=nfound;
     }
 
+
     // Put together the constraint
     double val;
     if (points_around_pole != 0) val = 1.0 / points_around_pole;
     else val = 0.0;  // if all nodes around pole are masked, the constraint
                      // shouldn't be used anyways. 
         
-
     // Construct constraint row d
     IWeights::Entry row(pnode->get_id(), 0); 
     std::vector<IWeights::Entry> col;
@@ -490,7 +494,7 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 	
       }
     }
-        
+
     cweights.InsertRow(row, col);
         
     mesh.remove_unused_kernels();

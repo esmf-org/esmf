@@ -947,11 +947,16 @@ extern "C" {
 
     // localDE
     if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
-      localDE=0;
+      if (grid->getDistGrid()->getDELayout()->getLocalDeCount()>1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+         "- Must provide localDE if localDeCount >1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      } else {
+        localDE=0;
+      }
     } else {
       localDE=*_localDE; // already 0 based 
     }
-
 
     // staggerloc
     if (ESMC_NOT_PRESENT_FILTER(_staggerloc) == ESMC_NULL_POINTER) {
@@ -1419,11 +1424,16 @@ extern "C" {
 
     // localDE
     if (ESMC_NOT_PRESENT_FILTER(_localDE) == ESMC_NULL_POINTER) {
-      localDE=0;
+      if (grid->getDistGrid()->getDELayout()->getLocalDeCount()>1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+         "- Must provide localDE if localDeCount >1", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      } else {
+        localDE=0;
+      }
     } else {
       localDE=*_localDE; // already 0 based 
     }
-
 
     // staggerloc
     if (ESMC_NOT_PRESENT_FILTER(_staggerloc) == ESMC_NULL_POINTER) {

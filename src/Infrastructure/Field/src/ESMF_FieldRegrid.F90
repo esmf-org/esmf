@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.58 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.59 2011/02/23 18:53:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.58 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.59 2011/02/23 18:53:48 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -462,7 +462,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! Handle optional pole argument
         if ((lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) .and. &
-            (lregridScheme .ne. ESMF_REGRID_SCHEME_FULLTOREG3D)) then           
+             (lregridScheme .ne. ESMF_REGRID_SCHEME_DCON3DWPOLE) .and. &
+             (lregridScheme .ne. ESMF_REGRID_SCHEME_FULLTOREG3D)) then           
            if (present(regridPoleType)) then
               if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
@@ -534,6 +535,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            dstIsSphere = 1
            dstIsLatLonDeg=.true.
         else if (lregridScheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
+           srcIsSphere = 0
+           srcIsLatLonDeg=.true.
+           dstIsSphere = 0
+           dstIsLatLonDeg=.true.
+        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_DCON3D) then
+           srcIsSphere = 0
+           srcIsLatLonDeg=.true.
+           dstIsSphere = 0
+           dstIsLatLonDeg=.true.
+        else if (lregridScheme .eq. ESMF_REGRID_SCHEME_DCON3DWPOLE) then
            srcIsSphere = 0
            srcIsLatLonDeg=.true.
            dstIsSphere = 0

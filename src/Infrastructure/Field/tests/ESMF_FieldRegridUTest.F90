@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.25 2011/02/23 17:08:09 w6ws Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.26 2011/02/23 18:53:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -284,12 +284,11 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
       !------------------------------------------------------------------------
-      !E_DISREGARD_X_UTest
+      !EX_UTest
       ! Test regrid with distgrid specified sphere
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding Sphere from distgrid create"
+      write(name, *) "Test regridding from distgrid connections"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -300,7 +299,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-#endif
 
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
@@ -7541,7 +7539,8 @@ write(*,*) "LOCALRC=",localrc
         phi = DEG2RAD*(90.-lat)
 
         ! set exact src data
-        farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+        !farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+        farrayPtr(i1,i2) = 1.0
      enddo
      enddo
 
@@ -7603,7 +7602,8 @@ write(*,*) "LOCALRC=",localrc
         phi = DEG2RAD*(90.-lat)
 
         ! set exact dst data
-        xfarrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+        !xfarrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
+        xfarrayPtr(i1,i2) = 1.0
 
         ! initialize destination field
         farrayPtr(i1,i2)=0.0
@@ -7632,7 +7632,7 @@ write(*,*) "LOCALRC=",localrc
 	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
-          regridScheme=ESMF_REGRID_SCHEME_REGION3D, &
+          regridScheme=ESMF_REGRID_SCHEME_DCON3DWPOLE, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE

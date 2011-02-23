@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_Regrid.F90,v 1.158 2011/02/23 18:53:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -59,7 +59,9 @@
                             ESMF_REGRID_SCHEME_NATIVE = 1, &
                             ESMF_REGRID_SCHEME_REGION3D = 2, &
                             ESMF_REGRID_SCHEME_FULLTOREG3D=3, &
-                            ESMF_REGRID_SCHEME_REGTOFULL3D=4
+                            ESMF_REGRID_SCHEME_REGTOFULL3D=4, &
+                            ESMF_REGRID_SCHEME_DCON3D=5, &
+                            ESMF_REGRID_SCHEME_DCON3DWPOLE=6
 
 
       ! temporarily store the weights while F90 arrays are alloc'ed
@@ -77,7 +79,9 @@
               ESMF_REGRID_SCHEME_NATIVE, &
               ESMF_REGRID_SCHEME_REGION3D, &
               ESMF_REGRID_SCHEME_FULLTOREG3D, &
-              ESMF_REGRID_SCHEME_REGTOFULL3D
+              ESMF_REGRID_SCHEME_REGTOFULL3D, &
+              ESMF_REGRID_SCHEME_DCON3D, &
+              ESMF_REGRID_SCHEME_DCON3DWPOLE
 
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -104,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.158 2011/02/23 18:53:49 oehmke Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.22 2011/02/09 22:34:58 ESRL\robert.oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.23 2011/02/23 18:53:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.22 2011/02/09 22:34:58 ESRL\robert.oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.23 2011/02/23 18:53:49 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -209,6 +209,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       Integrate dig(dstmeshcpy);
       dig.clearWeights(dst_iwtscpy);
       if ((regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+          (regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
           (regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
         for (UInt i = 1; i <= 7; ++i)
           dig.AddPoleWeights(dstmeshcpy,i,dst_iwtscpy);
@@ -284,6 +285,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
     if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) { // No poles if conservative
       if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+          (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
           (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
 	if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
 	  for (UInt i = 1; i <= 7; ++i)
@@ -344,6 +346,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
      // Factor out poles if they exist
      if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+          (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
          (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
          wts.GatherToCol(pole_constraints);
@@ -377,6 +380,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // Add weights to meshes before poles
     // so all the weights are on user data points
     if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
         (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
       for (UInt i = 1; i <= 7; ++i) {
         sig.AddPoleWeights(srcmesh,i,src_iwts);
@@ -415,6 +419,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     IWeights pole_constraints, stw;
     UInt constraint_id = dstmesh.DefineContext("pole_constraints");
     if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
         (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
         for (UInt i = 1; i <= 7; ++i)
@@ -480,6 +485,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
      // Factor out poles if they exist
     if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
         (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
         stw.GatherToCol(pole_constraints);
@@ -530,6 +536,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // Add weights to meshes before poles
     // so all the weights are on user data points
     if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
+        (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
         (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
       for (UInt i = 1; i <= 7; ++i)
         ig.AddPoleWeights(mesh,i,iwts);

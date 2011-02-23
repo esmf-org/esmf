@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.20 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.21 2011/02/23 18:53:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.20 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.21 2011/02/23 18:53:49 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -780,7 +780,7 @@ program ESMF_GridArbitraryUTest
   index3(1)=localIndices(10,1)
   index3(2)=localIndices(10,2)
   index3(3)=2
-  call ESMF_GridGetIndCoord(grid, localDE=0, index=index3, coord=coord3, rc=localrc)
+  call ESMF_GridGetCoordInd(grid, localDE=0, index=index3, coord=coord3, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
   if (coord3(1) .ne. index3(1)*ydim+index3(2)) correct=.false.
@@ -830,7 +830,7 @@ program ESMF_GridArbitraryUTest
   index3(2)=localIndices(20,2)
   index3(3)=3
 
-  call ESMF_GridGetIndCoord(grid, localDE=0, index=index3, coord=coord3, rc=localrc)
+  call ESMF_GridGetCoordInd(grid, localDE=0, index=index3, coord=coord3, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
   !print *, 'GridGetIndCoord', index3, coord3 
 
@@ -1040,7 +1040,7 @@ program ESMF_GridArbitraryUTest
   index3(1)=localIndices(1,1)
   index3(2)=2
   index3(3)=localIndices(1,2)
-  call ESMF_GridGetIndCoord(grid, localDE=0, index=index3, coord=coord3, rc=localrc)
+  call ESMF_GridGetCoordInd(grid, localDE=0, index=index3, coord=coord3, rc=localrc)
   !print *,"PET", myPet, "index:", index3, "coord", coord3
   if (coord3(2) .ne. 200) correct = .false.
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
@@ -1229,7 +1229,7 @@ program ESMF_GridArbitraryUTest
   index3(1)=localIndices(1,1)
   index3(2)=2
   index3(3)=localIndices(1,2)
-  call ESMF_GridGetIndCoord(grid, localDE=0,index=index3, coord=coord3, rc=localrc)
+  call ESMF_GridGetCoordInd(grid, localDE=0,index=index3, coord=coord3, rc=localrc)
   !print *,"PET", myPet, "index:", index3, "coord", coord3
   if (coord3(2) .ne. 200) correct = .false.
  
