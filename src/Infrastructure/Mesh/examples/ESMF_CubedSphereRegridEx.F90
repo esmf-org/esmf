@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.12 2011/02/22 18:06:52 w6ws Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.13 2011/02/23 18:37:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -954,7 +954,8 @@ function CheckError (status, module, fileName, lineNo, checkpoint)
     CheckError = status .ne. ESMF_SUCCESS
 
     if (checkpoint) then
-        call ESMF_LogWrite ("Checkpoint", ESMF_LOG_INFO, lineNo, fileName, module)
+        call ESMF_LogWrite (msg="Checkpoint", msgtype=ESMF_LOG_INFO, &
+                            line=lineNo, file=fileName, method=module)
 
         print '("Checkpoint detected in ", A, " near line ", I5, ", pet ", I5, ", (", A, ")")', &
           module, lineNo, petNo, fileName
@@ -962,7 +963,8 @@ function CheckError (status, module, fileName, lineNo, checkpoint)
 
 
     if (CheckError) then
-        call ESMF_LogWrite ("Status Return Error", ESMF_LOG_ERROR, lineNo, fileName, module)
+        call ESMF_LogWrite (msg="Status Return Error", msgtype=ESMF_LOG_ERROR, &
+                            line=lineNo, file=fileName, method=module)
         print '("Error in ", A, " near line ", I5, ", pet ", I5, ", (", A, "), status code = ", I5)', &
           module, lineNo, petNo, fileName, status
     end if
@@ -1059,17 +1061,17 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
 		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
 		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! Set coordinate tables 
     ! Longitude
     call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
 	array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     allocate(coord2D(xdim,ydim))
     if (PetNo == 0) then
@@ -1078,36 +1080,36 @@ subroutine CreateRegGrid (xdim, ydim, coordX, coordY, grid, field, rc)
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     
     ! Latitude
     call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     if (PetNo == 0) then
        coord2D = RESHAPE(coordY,(/xdim, ydim/))
     endif
     call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     if (PetNo == 0)  deallocate(coord2D)
     ! create field
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
     field = ESMF_FieldCreate(grid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! Assign the field values using its latitude values, get the latitude 
     call ESMF_GridGetCoord(grid, localDE=0, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
 	     computationalLBound=lbnd1, computationalUBound=ubnd1, &
 	     farrayPtr = farrayPtr1, rc=status)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, rc=status)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     ! fake the data array to use a linear function of its coordinates
     !!!!!!!
@@ -1164,7 +1166,7 @@ subroutine OutputWeightFile(filename, file1, file2, indices, weights, revflag, &
       allocate(allCounts(PetCnt))
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) goto 90
+        ESMF_CONTEXT, rcToReturn=rc)) goto 90
 
       ! calculate the size of the global weight table
       total = 0
