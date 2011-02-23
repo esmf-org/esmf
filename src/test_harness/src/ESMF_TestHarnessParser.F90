@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.11 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.12 2011/02/23 20:19:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@ logical                       :: checkpoint = .FALSE.
   ! create config handle and load the testing harness config file
   !-----------------------------------------------------------------------------
   localcf = ESMF_ConfigCreate(rc=localrc)
-  if( ESMF_LogFoundError(localrc, "cannot create config object",            &
+  if( ESMF_LogFoundError(localrc, msg="cannot create config object",            &
                             rcToReturn=returnrc) ) return
 
   !call ESMF_ConfigLoadFile(localcf, trim(adjustL(test_harness_name)),          &
@@ -137,19 +137,19 @@ logical                       :: checkpoint = .FALSE.
 
   filename = trim(srcPath) // "/" // trim(configFname)
   call ESMF_ConfigLoadFile (localcf, trim(filename), rc=localrc)
-  if( ESMF_LogFoundError(localrc, "cannot load config file " //             &
+  if( ESMF_LogFoundError(localrc, msg="cannot load config file " //             &
       trim(configFname), rcToReturn=returnrc) ) return
   
   !-----------------------------------------------------------------------------
   ! find and read the test class 
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(adjustL(test_class_name)), rc=localrc) 
-  if( ESMF_LogFoundError(localrc, "cannot find config label " //            &
+  if( ESMF_LogFoundError(localrc, msg="cannot find config label " //            &
       trim(adjustL(test_class_name)),rcToReturn=returnrc) ) return
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc )
   har%testClass = trim(adjustL( ltmp ))
-  if( ESMF_LogFoundError(localrc, "cannot get value for label " //          &
+  if( ESMF_LogFoundError(localrc, msg="cannot get value for label " //          &
       trim(adjustL(test_class_name)),rcToReturn=returnrc) ) return
 
   !-----------------------------------------------------------------------------
@@ -161,7 +161,7 @@ logical                       :: checkpoint = .FALSE.
        trim(adjustL(har%testClass)) /= 'FIELDBUNDLE' .and.                     &
        trim(adjustL(har%testClass)) /= 'GRID'   .and.                          &
        trim(adjustL(har%testClass)) /= 'REGRID' ) then
-     call ESMF_LogSetError( ESMF_FAILURE,"class name not of valid type "//  &
+     call ESMF_LogSetError( ESMF_FAILURE,msg="class name not of valid type "//  &
           trim(adjustL(har%testClass)), rcToReturn=returnrc)
      return
   endif
@@ -171,16 +171,16 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
 
   call ESMF_ConfigFindLabel(localcf,trim(adjustL(setup_report_name)),rc=localrc)
-  if( ESMF_LogFoundError(localrc,"cannot find config label " //             &
+  if( ESMF_LogFoundError(localrc,msg="cannot find config label " //             &
       trim(adjustL(setup_report_name)), rcToReturn=returnrc) ) return
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
   har%setupReportType = trim(adjustL( ltmp ))
-  if( ESMF_LogFoundError(localrc,  "cannot get value for label " //         &
+  if( ESMF_LogFoundError(localrc,  msg="cannot get value for label " //         &
       trim(adjustL(setup_report_name)), rcToReturn=returnrc) ) return
 
   if((har%setupReportType /= "TRUE").and.(har%setupReportType /= "FALSE")) then
-     call ESMF_LogSetError( ESMF_FAILURE, "setup report flag " //           &
+     call ESMF_LogSetError( ESMF_FAILURE, msg="setup report flag " //           &
           "improperly set " // trim(har%setupReportType), rcToReturn=returnrc)
      return
   endif
@@ -193,17 +193,17 @@ logical                       :: checkpoint = .FALSE.
   ! test_report: NONE - no report
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf,trim(adjustL(test_report_name)),rc=localrc )
-  if( ESMF_LogFoundError(localrc, "cannot find config label " //            &
+  if( ESMF_LogFoundError(localrc, msg="cannot find config label " //            &
       trim(adjustL(test_report_name)), rcToReturn=returnrc) ) return
 
   call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc )
   har%reportType = trim(adjustL( ltmp ))
-  if( ESMF_LogFoundError(localrc, "cannot get value for label " //          &
+  if( ESMF_LogFoundError(localrc, msg="cannot get value for label " //          &
       trim(adjustL(test_report_name)), rcToReturn=returnrc) ) return
 
   if ( har%reportType /= "FULL" .and. har%reportType /= "FAILURE" .and.        &
        har%reportType /= "SUCCESS" .and. har%reportType /= "NONE" ) then
-     call ESMF_LogSetError( ESMF_FAILURE, "report flag improperly set" //   &
+     call ESMF_LogSetError( ESMF_FAILURE, msg="report flag improperly set" //   &
           trim(har%reportType), rcToReturn=returnrc) 
      return
   endif
@@ -220,18 +220,18 @@ logical                       :: checkpoint = .FALSE.
   if(localPet == rootPet)  print *, "running nonexhaustive tests"
 !#endif
   call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc )
-  if( ESMF_LogFoundError(localrc, "cannot find config label " //            &
+  if( ESMF_LogFoundError(localrc, msg="cannot find config label " //            &
       trim(adjustL(ltag)), rcToReturn=returnrc) ) return
 
   ! determine the number of entries
   call ESMF_ConfigGetDim(localcf, har%numRecords, ncolumns,                    &
        label=trim(adjustL(ltag)), rc=localrc)
-  if( ESMF_LogFoundError(localrc, "cannot find the size of the table " //   &
+  if( ESMF_LogFoundError(localrc, msg="cannot find the size of the table " //   &
       trim(adjustL(ltag)), rcToReturn=returnrc) ) return
 
   ! if there are no entries post an error
   if ( har%numRecords .le. 0 ) then
-     call ESMF_LogSetError( ESMF_FAILURE, "no problem descriptor files "//  &
+     call ESMF_LogSetError( ESMF_FAILURE, msg="no problem descriptor files "//  &
           "specified", rcToReturn=returnrc)
      return
   endif
@@ -240,7 +240,7 @@ logical                       :: checkpoint = .FALSE.
   ! find the problem descriptor file names and read them
   !-----------------------------------------------------------------------------
   call ESMF_ConfigFindLabel(localcf, trim(adjustL(ltag)), rc=localrc)
-  if( ESMF_LogFoundError(localrc, "cannot find table label of " //          &
+  if( ESMF_LogFoundError(localrc, msg="cannot find table label of " //          &
       trim(adjustL(ltag)), rcToReturn=returnrc) ) return
 
   !-----------------------------------------------------------------------------
@@ -248,7 +248,7 @@ logical                       :: checkpoint = .FALSE.
   ! table extracting the problem descriptor filenames
   !-----------------------------------------------------------------------------
   allocate( har%rcrd(har%numRecords), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "rcrd type "//                 &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="rcrd type "//                 &
      " in Read_TestHarness_Config", rcToReturn=returnrc)) then
   endif
 
@@ -256,12 +256,12 @@ logical                       :: checkpoint = .FALSE.
   do kfile=1,har%numRecords
      ! advance to new line in table
      call ESMF_ConfigNextLine(localcf, tableEnd=flag, rc=localrc)
-     if( ESMF_LogFoundError(localrc, "cannot advance to next line of " //   &
+     if( ESMF_LogFoundError(localrc, msg="cannot advance to next line of " //   &
          "table " // trim(adjustL(ltag)), rcToReturn=returnrc) ) return
  
      ! retrieve the problem descriptor filenames 
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
-     if( ESMF_LogFoundError(localrc, "cannot get descriptor filename in "// &
+     if( ESMF_LogFoundError(localrc, msg="cannot get descriptor filename in "// &
          trim(adjustL(ltag)), rcToReturn=returnrc) ) return
 
      filename = trim(srcPath) // "/" // trim(adjustL(ltmp))
@@ -272,7 +272,7 @@ logical                       :: checkpoint = .FALSE.
   ! clean up CF
   !-----------------------------------------------------------------------------
   call ESMF_ConfigDestroy(localcf, rc=localrc)
-  if( ESMF_LogFoundError(localrc, "cannot destroy config file " //          &
+  if( ESMF_LogFoundError(localrc, msg="cannot destroy config file " //          &
       trim(configFname), rcToReturn=returnrc) ) return
 
   ! if I've gotten this far without an error, then the routine has succeeded.
@@ -333,7 +333,7 @@ logical                       :: checkpoint = .FALSE.
   ! filenames.
   !-----------------------------------------------------------------------------
   call read_descriptor_files(srcPath, har%numRecords,har%rcrd,localrc)
-  if (ESMF_LogFoundError(localrc, "ERROR with read descriptor files",       &
+  if (ESMF_LogFoundError(localrc, msg="ERROR with read descriptor files",       &
      rcToReturn=returnrc)) return
 
   !-----------------------------------------------------------------------------
@@ -349,7 +349,7 @@ logical                       :: checkpoint = .FALSE.
      do kstr=1,har%rcrd(kfile)%numStrings
         call parse_descriptor_string(har%rcrd(kfile)%numStrings,               &
                   har%rcrd(kfile)%str(kstr), localrc)
-        if (ESMF_LogFoundError(localrc," error in problem descriptor file " &
+        if (ESMF_LogFoundError(localrc,msg=" error in problem descriptor file " &
            // trim(adjustL(har%rcrd(kfile)%filename)),                         &
            rcToReturn=returnrc)) return  
 
@@ -360,7 +360,7 @@ logical                       :: checkpoint = .FALSE.
                     har%rcrd(kfile)%str(kstr)%Dfiles(k),                       &
                     har%rcrd(kfile)%str(kstr)%DstMem,                          &
                     har%rcrd(kfile)%str(kstr)%SrcMem, localrc)       
-           if (ESMF_LogFoundError(localrc," error reading dist specifier"   &
+           if (ESMF_LogFoundError(localrc,msg=" error reading dist specifier"   &
               // " file "  //                                                  &
               trim(adjustL(har%rcrd(kfile)%str(kstr)%Dfiles(k)%filename)),     &
               rcToReturn=returnrc)) return
@@ -370,7 +370,7 @@ logical                       :: checkpoint = .FALSE.
         do k=1,har%rcrd(kfile)%str(kstr)%nGfiles
            call read_grid_specification(har%rcrd(kfile)%str(kstr)%Gfiles(k),   &
                     localrc)
-           if (ESMF_LogFoundError(localrc," error reading grid specifier"   &
+           if (ESMF_LogFoundError(localrc,msg=" error reading grid specifier"   &
               // " file "  //                                                  &
               trim(adjustL(har%rcrd(kfile)%str(kstr)%Gfiles(k)%filename)),     &
               rcToReturn=returnrc)) return
@@ -381,7 +381,7 @@ logical                       :: checkpoint = .FALSE.
         nGfiles = har%rcrd(kfile)%str(kstr)%nGfiles
         allocate( har%rcrd(kfile)%str(kstr)%test_record(nDfiles,nGfiles),      &
                   stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "rcrd type "//           &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="rcrd type "//           &
            " in Read_TestHarness_Config", rcToReturn=returnrc)) then
         endif
 
@@ -394,13 +394,13 @@ logical                       :: checkpoint = .FALSE.
            ! allocate work space for test result
            allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%     &
               test_status(nDspec,nGspec), stat=allocRcToTest )
-           if (ESMF_LogFoundAllocError(allocRcToTest, "test status type"//  &
+           if (ESMF_LogFoundAllocError(allocRcToTest, msg="test status type"//  &
               " in Read_TestHarness_Config", rcToReturn=returnrc)) then
            endif
            ! allocate work space for test string
            allocate( har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%     &
               test_string(nDspec,nGspec), stat=allocRcToTest )
-           if (ESMF_LogFoundAllocError(allocRcToTest, "test status type"//  &
+           if (ESMF_LogFoundAllocError(allocRcToTest, msg="test status type"//  &
               " in Read_TestHarness_Config", rcToReturn=returnrc)) then
            endif
 
@@ -533,7 +533,7 @@ logical                       :: checkpoint = .FALSE.
   ! containing the problem descriptor strings and the specifier filenames
   !-----------------------------------------------------------------------------
   allocate( nstrings(numRecords), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer array "//             &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer array "//             &
      " nstrings in read_descriptor_files", rcToReturn=rc)) then
   endif
 
@@ -542,7 +542,7 @@ logical                       :: checkpoint = .FALSE.
     ! create a new config handle for reading problem descriptor strings
     !---------------------------------------------------------------------------
     localcf = ESMF_ConfigCreate(rc=localrc)
-    if( ESMF_LogFoundError(localrc, "cannot create config object",          &
+    if( ESMF_LogFoundError(localrc, msg="cannot create config object",          &
                          rcToReturn=rc) ) return
 
     !---------------------------------------------------------------------------
@@ -574,7 +574,7 @@ logical                       :: checkpoint = .FALSE.
     ! determine that the table has entries before preceeding
     !---------------------------------------------------------------------------
     if( nstrings(kfile) .le. 0 ) then
-      call ESMF_LogSetError( ESMF_FAILURE, "problem descriptor table empty" &
+      call ESMF_LogSetError( ESMF_FAILURE, msg="problem descriptor table empty" &
                // " in file " // trim(adjustL(lfilename)), rcToReturn=rc)
       return
     endif
@@ -588,11 +588,11 @@ logical                       :: checkpoint = .FALSE.
            trim(adjustL(descriptor_label)), rcToReturn=rc) ) return
 
     allocate( ncolumns(nstrings(kfile)), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "integer array "//           &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer array "//           &
        " nstrings in read_descriptor_files", rcToReturn=rc)) then
     endif
     allocate ( ltmpstring(nstrings(kfile)), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                    &
        " ltmpstring in read_descriptor_files", rcToReturn=rc)) then
     endif
 
@@ -605,7 +605,7 @@ logical                       :: checkpoint = .FALSE.
       ncolumns(kstr) = ESMF_ConfigGetLen(localcf, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS .or. ncolumns(kstr) .lt. 1 ) then
         write(lchar,"(i5)")  kstr
-        call ESMF_LogSetError( ESMF_FAILURE, "problem reading line " //     &
+        call ESMF_LogSetError( ESMF_FAILURE, msg="problem reading line " //     &
                  trim(adjustL(lchar)) // " of table in file " //               &
                  trim(adjustL(lfilename)), rcToReturn=rc)
         return
@@ -615,7 +615,7 @@ logical                       :: checkpoint = .FALSE.
       ! allocate tempory storage so that the file needs to be read only once
       !-------------------------------------------------------------------------
       allocate ( ltmpstring(kstr)%tag( ncolumns(kstr) ), stat=allocRcToTest )
-      if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                  &
+      if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                  &
          " ltmpstring in read_descriptor_files", rcToReturn=rc)) then
       endif
       ltmpstring(kstr)%tagsize = ncolumns(kstr)
@@ -657,7 +657,7 @@ logical                       :: checkpoint = .FALSE.
     ncount = 0
     npds = 0
     allocate( pds_flag(nstrings(kfile)), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                    &
        " pdf_flag in read_descriptor_files", rcToReturn=rc)) then
     endif
 
@@ -675,7 +675,7 @@ logical                       :: checkpoint = .FALSE.
       write(lchar,"(i5)")  nstrings(kfile)
       write(lchar1,"(i5)")  npds
       write(lchar2,"(i5)")  ncount
-      call ESMF_LogSetError( ESMF_FAILURE, "number of rows " //             &
+      call ESMF_LogSetError( ESMF_FAILURE, msg="number of rows " //             &
              trim(adjustl(lchar)) // " in the table"  //                       &
              " does not match the sum of strings " // trim(adjustl(lchar1))    &
              // " and continuation lines " //  trim(adjustl(lchar2)) //        &
@@ -690,7 +690,7 @@ logical                       :: checkpoint = .FALSE.
     !---------------------------------------------------------------------------
     k = 0
     allocate( pds_loc(npds), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                    &
        " pds_loc in read_descriptor_files", rcToReturn=rc)) then
     endif
 
@@ -705,7 +705,7 @@ logical                       :: checkpoint = .FALSE.
       write(lchar,"(i5)")  nstrings(kfile)
       write(lchar1,"(i5)")  npds
       write(lchar2,"(i5)")  ncount
-      call ESMF_LogSetError( ESMF_FAILURE, "number of rows " //             &
+      call ESMF_LogSetError( ESMF_FAILURE, msg="number of rows " //             &
              trim(adjustl(lchar)) // " in the table" //                        &
              " does not match the sum of strings "//trim(adjustl(lchar1))      &
              // " and continuation lines " // trim(adjustl(lchar2)) //         &
@@ -721,7 +721,7 @@ logical                       :: checkpoint = .FALSE.
     ! specification.
     !---------------------------------------------------------------------------
     allocate( kcount(npds), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//        &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//        &
        " kcount in read_descriptor_files", rcToReturn=rc)) then
     endif
 
@@ -729,7 +729,7 @@ logical                       :: checkpoint = .FALSE.
       if( trim( ltmpstring( pds_loc(k) )%tag(1)%string ) == "&") then
         write(lchar,"(i5)")   pds_loc(k)
         call ESMF_LogSetError( ESMF_FAILURE,                                &
-                 "no problem descriptor string on line " //                    &
+                 msg="no problem descriptor string on line " //                    &
                  trim(adjustl(lchar)) // " of file " //                        &
                  trim(adjustL(lfilename)),rcToReturn=rc)
         return
@@ -758,13 +758,13 @@ logical                       :: checkpoint = .FALSE.
     ! create reshaped workspace to hold the problem descriptor table contents
     !---------------------------------------------------------------------------
     allocate ( lstring(npds), stat=allocRcToTest )    
-    if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                    &
        " lstring in read_descriptor_files", rcToReturn=rc)) then
     endif
 
     do k=1, npds
       allocate ( lstring(k)%tag(kcount(k)), stat=allocRcToTest )    
-      if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                  &
+      if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                  &
          " lstring tag in read_descriptor_files", rcToReturn=rc)) then
       endif
 
@@ -800,7 +800,7 @@ logical                       :: checkpoint = .FALSE.
     ! mine the table entries for the problem descriptor strings
     !---------------------------------------------------------------------------
     allocate( rcrd(kfile)%str(npds), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                    &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                    &
        " rcrd string in read_descriptor_files", rcToReturn=rc)) then
     endif
     do k=1,npds
@@ -832,7 +832,7 @@ logical                       :: checkpoint = .FALSE.
          case('-c')
          if( cflag ) then
            write(lchar,"(i5)") k
-           call ESMF_LogSetError( ESMF_FAILURE, "the -c specifier flag"  &
+           call ESMF_LogSetError( ESMF_FAILURE, msg="the -c specifier flag"  &
                     // " is used more than once on the " //                 &
                    trim(adjustl(lchar))//"th string of the problem " //     &
                    "descriptor table in file" // trim(lfilename),           &
@@ -856,7 +856,7 @@ logical                       :: checkpoint = .FALSE.
          endif
 
          allocate( rcrd(kfile)%str(k)%classfile%tag(csize), stat=allocRcToTest )
-         if (ESMF_LogFoundAllocError(allocRcToTest, "type "//               &
+         if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//               &
             " rcrd tag in read_descriptor_files", rcToReturn=rc)) then
          endif
 
@@ -873,7 +873,7 @@ logical                       :: checkpoint = .FALSE.
          case('-d')
          if( dflag ) then
            write(lchar,"(i5)") k
-           call ESMF_LogSetError( ESMF_FAILURE, "the -d specifier flag"     &
+           call ESMF_LogSetError( ESMF_FAILURE, msg="the -d specifier flag"     &
                     // " is used more than once on the " //                    &
                    trim(adjustl(lchar))//"th string of the problem " //        &
                    "descriptor table in file" // trim(adjustL(lfilename)),     &
@@ -898,7 +898,7 @@ logical                       :: checkpoint = .FALSE.
          endif
 
          allocate( rcrd(kfile)%str(k)%Dfiles(dsize), stat=allocRcToTest )
-         if (ESMF_LogFoundAllocError(allocRcToTest, "type "//               &
+         if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//               &
             " rcrd Dfiles in read_descriptor_files", rcToReturn=rc)) then
          endif
 
@@ -919,7 +919,7 @@ logical                       :: checkpoint = .FALSE.
          case('-g')
          if( gflag ) then
            write(lchar,"(i5)") k
-           call ESMF_LogSetError( ESMF_FAILURE, "the -g specifier flag" //  &
+           call ESMF_LogSetError( ESMF_FAILURE, msg="the -g specifier flag" //  &
                     " is used more than once on the " // trim(adjustl(lchar))  &
                     //"th string of the problem descriptor table in file " //  &
                     trim(adjustL(lfilename)), rcToReturn=rc)
@@ -943,7 +943,7 @@ logical                       :: checkpoint = .FALSE.
          endif  
 
          allocate( rcrd(kfile)%str(k)%Gfiles(gsize), stat=allocRcToTest )
-         if (ESMF_LogFoundAllocError(allocRcToTest, "type "//               &
+         if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//               &
             " rcrd Gfiles in read_descriptor_files", rcToReturn=rc)) then
          endif
 
@@ -964,7 +964,7 @@ logical                       :: checkpoint = .FALSE.
          case default
          write(lchar,"(i5)")  pds_loc(k)
          call ESMF_LogSetError( ESMF_FAILURE,                               &
-               "no specifier flag on line " // trim(adjustl(lchar)) //         &
+               msg="no specifier flag on line " // trim(adjustl(lchar)) //         &
                " of file " //trim(lfilename), rcToReturn=rc)
          return
 
@@ -1140,7 +1140,7 @@ logical                       :: checkpoint = .FALSE.
         if( (src_mem_rank == 0).or.(dst_mem_rank == 0).or.                     &
             (src_mem_rank /= dst_mem_rank) )  then
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"rank of memory block "       &
+           call ESMF_LogSetError(ESMF_FAILURE,msg="rank of memory block "       &
                     // "symbols not properly paired", rcToReturn=rc)
            return
         endif
@@ -1148,7 +1148,7 @@ logical                       :: checkpoint = .FALSE.
         ! test for common mistake of using commas instead of semicolons
         if( pattern_query(dst_string,',') > 0 ) then
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"syntax error - commas"       &
+           call ESMF_LogSetError(ESMF_FAILURE,msg="syntax error - commas"       &
                     // " are not valid deliminators", rcToReturn=rc)
            return
         endif
@@ -1157,64 +1157,64 @@ logical                       :: checkpoint = .FALSE.
         ! create work space for parsing the source descriptor string
         !-----------------------------------------------------------------------
         allocate( lsrc(src_mem_rank+1), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                &
            " lsrc in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_order(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_type(src_mem_rank), stat=allocRcToTest )      
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " grid_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_HaloL(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_HaloL in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_HaloR(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_HaloR in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_StagLoc(src_mem_rank), stat=allocRcToTest )    
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_StagLoc in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( dist_order(src_mem_rank), stat=allocRcToTest )      
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " dist_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( dist_type(src_mem_rank), stat=allocRcToTest )      
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " dist_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
 
         allocate( pds%SrcMem%GridType(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " GridType in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%SrcMem%DistType(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " DistType in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%SrcMem%GridOrder(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " GridOrder in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%SrcMem%DistOrder(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " DistOrder in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%SrcMem%HaloL(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " HaloL in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%SrcMem%HaloR(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " HaloR in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%SrcMem%StagLoc(src_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " StagLoc in parse_descriptor_string", rcToReturn=rc)) then
         endif
 
@@ -1259,64 +1259,64 @@ logical                       :: checkpoint = .FALSE.
         ! create work space for parsing the destination descriptor string
         !-----------------------------------------------------------------------
         allocate( ldst(dst_mem_rank+1), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                &
            " ldst in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_order(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_type(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " grid_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_HaloL(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_HaloL in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_HaloR(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_HaloR in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( grid_StagLoc(dst_mem_rank), stat=allocRcToTest )    
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_StagLoc in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( dist_order(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " dist_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( dist_type(dst_mem_rank), stat=allocRcToTest )      
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " dist_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
 
         allocate( pds%DstMem%GridOrder(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " GridOrder in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%DstMem%DistOrder(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " DistOrder in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%DstMem%GridType(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " GridType in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%DstMem%DistType(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "char variable "//       &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " DistType in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%DstMem%HaloL(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " HaloL in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%DstMem%HaloR(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " HaloR in parse_descriptor_string", rcToReturn=rc)) then
         endif
         allocate( pds%DstMem%StagLoc(dst_mem_rank), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " StagLoc in parse_descriptor_string", rcToReturn=rc)) then
         endif
 
@@ -1357,7 +1357,7 @@ logical                       :: checkpoint = .FALSE.
         deallocate( dist_order, dist_type )      
      else  ! error does not conform to either single block or multiblock
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE,"syntax error - problem "        &
+        call ESMF_LogSetError(ESMF_FAILURE,msg="syntax error - problem "        &
                  // " descriptor string does not conform to either " //        &
                  "single block syntax or to multiblock syntax",                &
                  rcToReturn=rc)
@@ -1365,7 +1365,7 @@ logical                       :: checkpoint = .FALSE.
      endif
   else   ! error does not conform to either single block or multiblock
      localrc = ESMF_FAILURE
-     call ESMF_LogSetError(ESMF_FAILURE,"syntax error - problem "           &
+     call ESMF_LogSetError(ESMF_FAILURE,msg="syntax error - problem "           &
               // " descriptor string does not conform to either " //           &
               "single block syntax or to multiblock syntax",                   &
               rcToReturn=rc)
@@ -1427,7 +1427,7 @@ logical                       :: checkpoint = .FALSE.
   ! work array
   !-----------------------------------------------------------------------------
   allocate( assoc_grid(nstring), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, " type "//                     &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg=" type "//                     &
      " assoc_grid in interpret descriptor string", rcToReturn=localrc)) then
   endif
   assoc_grid = 0
@@ -1464,7 +1464,7 @@ logical                       :: checkpoint = .FALSE.
               if( itmp /= 1) then
                  !syntax error in halo specification
                  call ESMF_LogSetError( ESMF_FAILURE,                       &
-                         "halo specification missing prefix",                  &
+                         msg="halo specification missing prefix",                  &
                          rcToReturn=localrc)
                  return
               endif
@@ -1474,7 +1474,7 @@ logical                       :: checkpoint = .FALSE.
               if( itmp /= 1) then
                  !syntax error in halo specification
                  call ESMF_LogSetError( ESMF_FAILURE,                       &
-                         "halo specification missing separator",               &
+                         msg="halo specification missing separator",               &
                          rcToReturn=localrc)
                  return
               endif
@@ -1484,7 +1484,7 @@ logical                       :: checkpoint = .FALSE.
               if( itmp /= 1) then
                  !syntax error in halo specification
                  call ESMF_LogSetError( ESMF_FAILURE,                       &
-                         "halo specification missing suffix",                  &
+                         msg="halo specification missing suffix",                  &
                          rcToReturn=localrc)
                  return
               endif
@@ -1501,14 +1501,14 @@ logical                       :: checkpoint = .FALSE.
               if( HaloR(kstring) < 0 .or. HaloL(kstring) < 0 .or.              &
                   HaloL(kstring) /= HaloR(kstring)  )                          &
                   call ESMF_LogSetError( ESMF_FAILURE,                      &
-                      "halo specification "//trim(lstring(kstring)%string) //  &
+                      msg="halo specification "//trim(lstring(kstring)%string) //  &
                       " is not symmetric and/or is negative ",                 &
                       rcToReturn=localrc)
                  return
            else
            ! syntax error for halo specification
               call ESMF_LogSetError( ESMF_FAILURE,                          &
-                      "halo specification "//trim(lstring(kstring)%string),    &
+                      msg="halo specification "//trim(lstring(kstring)%string),    &
                       rcToReturn=localrc)
               return
            endif   ! halo
@@ -1522,7 +1522,7 @@ logical                       :: checkpoint = .FALSE.
            HaloL(kstring) = 0
            HaloR(kstring) = 0
            call ESMF_LogSetError( ESMF_FAILURE,                             &
-                   "halo specification wrong "//trim(lstring(kstring)%string), &
+                   msg="halo specification wrong "//trim(lstring(kstring)%string), &
                    rcToReturn=localrc)
            return
         endif    ! halo
@@ -1530,7 +1530,7 @@ logical                       :: checkpoint = .FALSE.
      else 
      ! error multiple grid specifications for single memory location
         call ESMF_LogSetError( ESMF_FAILURE,                                &
-                "multiple grid specifications for single memory location " //  &
+                msg="multiple grid specifications for single memory location " //  &
                 trim(lstring(kstring)%string), rcToReturn=localrc)
         return
      endif
@@ -1586,7 +1586,7 @@ logical                       :: checkpoint = .FALSE.
            ! identify the separate entries, check that they are not empty,
            ! and read the values
            allocate( sdelim(ndelim), stat=allocRcToTest )
-           if (ESMF_LogFoundAllocError(allocRcToTest, " integer "//         &
+           if (ESMF_LogFoundAllocError(allocRcToTest, msg=" integer "//         &
               "variable sdelim in interpret descriptor string",                &
               rcToReturn=localrc)) then
            endif
@@ -1599,7 +1599,7 @@ logical                       :: checkpoint = .FALSE.
            else
               ! specification empty
               call ESMF_LogSetError( ESMF_FAILURE,                          &
-                      "stagger location specification empty ",                 &
+                      msg="stagger location specification empty ",                 &
                        rcToReturn=localrc)
               return
            endif
@@ -1611,7 +1611,7 @@ logical                       :: checkpoint = .FALSE.
               else
                  ! specification empty
                  call ESMF_LogSetError( ESMF_FAILURE,                       &
-                         "stagger location specification empty ",              &
+                         msg="stagger location specification empty ",              &
                          rcToReturn=localrc)
                  return
               endif
@@ -1624,7 +1624,7 @@ logical                       :: checkpoint = .FALSE.
            else
            ! specification empty
               call ESMF_LogSetError( ESMF_FAILURE,                          &
-                      "stagger location specification empty ",                 &
+                      msg="stagger location specification empty ",                 &
                       rcToReturn=localrc)
               return
            endif
@@ -1634,14 +1634,14 @@ logical                       :: checkpoint = .FALSE.
         else    
         ! wrong number of delimiters for grid rank
            call ESMF_LogSetError( ESMF_FAILURE,                             &
-                   "wrong number of delimiters for grid rank",                 &
+                   msg="wrong number of delimiters for grid rank",                 &
                    rcToReturn=localrc)
            return
         endif    ! number of delimiters
      else
      ! error missing ending delimiter
         call ESMF_LogSetError( ESMF_FAILURE,                                &
-                "missing stagger location ending delimitor from string",       &
+                msg="missing stagger location ending delimitor from string",       &
                    rcToReturn=localrc)
         return
      endif     ! proper ending syntax
@@ -1653,7 +1653,7 @@ logical                       :: checkpoint = .FALSE.
   else
   ! syntax error
      call ESMF_LogSetError( ESMF_FAILURE,                                   &
-             "problem descriptor string syntax error, strings ends with " //   &
+             msg="problem descriptor string syntax error, strings ends with " //   &
              trim(lstring(nstring+1)%string), rcToReturn=localrc)
      return
   endif     ! proper starting syntax
@@ -1665,7 +1665,7 @@ logical                       :: checkpoint = .FALSE.
      if( staggerloc(k) /= 0 .and. staggerloc(k) /= 1 ) then
         ! error invalid staggerlocs
         call ESMF_LogSetError( ESMF_FAILURE,                                &
-                "invalid stagger locations from problem descriptor string",    &
+                msg="invalid stagger locations from problem descriptor string",    &
                  rcToReturn=localrc)
         return
      endif
@@ -1690,7 +1690,7 @@ logical                       :: checkpoint = .FALSE.
      else 
         ! error multiple distribution specifications for single memory location
         call ESMF_LogSetError( ESMF_FAILURE,                                &
-                "multiple distribution specifications in single memory" //     &
+                msg="multiple distribution specifications in single memory" //     &
                 "location", rcToReturn=localrc)
         return
      endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.44 2011/02/22 18:02:54 w6ws Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.45 2011/02/23 20:19:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -332,7 +332,7 @@ contains
                  !--------------------------------------------------------------
                  call array_redist_test(har%rcrd(kfile)%str(kstr),har%failures,&
                                      har%reportType, VM, localrc)
-                 if (ESMF_LogFoundError(localrc," error array redist test", &
+                 if (ESMF_LogFoundError(localrc,msg=" error array redist test", &
                      rcToReturn=returnrc)) return
               else
                  !--------------------------------------------------------------
@@ -364,7 +364,7 @@ contains
                  !--------------------------------------------------------------
                  call field_redist_test(har%rcrd(kfile)%str(kstr),             &
                            har%failures, har%reportType, VM, localrc)
-                 if (ESMF_LogFoundError(localrc," error field redist test", &
+                 if (ESMF_LogFoundError(localrc,msg=" error field redist test", &
                      rcToReturn=returnrc)) return
               else
                  !--------------------------------------------------------------
@@ -372,7 +372,7 @@ contains
                  !--------------------------------------------------------------
                  call field_regrid_test(har%rcrd(kfile)%str(kstr),             &
                            har%failures, har%reportType, VM, localrc)
-                 if (ESMF_LogFoundError(localrc," error field regrid test", &
+                 if (ESMF_LogFoundError(localrc,msg=" error field regrid test", &
                      rcToReturn=returnrc)) return
               endif
            enddo  ! kstr
@@ -383,7 +383,7 @@ contains
 
      case default
      ! error - class unknown
-     call ESMF_LogSetError( ESMF_FAILURE," test class of unknown type",     &
+     call ESMF_LogSetError( ESMF_FAILURE,msg=" test class of unknown type",     &
                rcToReturn=returnrc)
      return
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.60 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.61 2011/02/23 20:19:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -567,7 +567,7 @@ logical                       :: checkpoint = .FALSE.
                  ' while destination units are: ',                             &
                  trim(PDS%Gfiles(iGfile)%dst_grid(iG)%gunits(ix)%string)
 
-                call ESMF_LogSetError( ESMF_FAILURE,"Incompatible grid" //  &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="Incompatible grid" //  &
                        " units.",rcToReturn=localrc)
                 return
            endif
@@ -602,7 +602,7 @@ logical                       :: checkpoint = .FALSE.
                         "store failed", rcToReturn=rc)) return
 #endif
 
-                if(libflag==0) call ESMF_LogSetError( ESMF_FAILURE,"Patch " // &
+                if(libflag==0) call ESMF_LogSetError( ESMF_FAILURE, msg="Patch " // &
                        "regridding requires LAPACK & BLAS libraries. These" // &
                        " libraries appear not to have been set. The "//        &
                        " environment variable ESMF_LAPACK must be set ON," //  &
@@ -610,24 +610,24 @@ logical                       :: checkpoint = .FALSE.
                        " library paths",rcToReturn=localrc)
 
              case( Harness_ConservRegrid )
-                call ESMF_LogSetError( ESMF_FAILURE,"Conservative " //      &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="Conservative " //      &
                        "regridding not currently supported",rcToReturn=localrc)
                 return
              case( Harness_2ndConservRegrid )
-                call ESMF_LogSetError( ESMF_FAILURE,"Conservative " //      &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="Conservative " //      &
                        "regridding not currently supported",rcToReturn=localrc)
                 return
              case( Harness_NearNeighRegrid )
-                call ESMF_LogSetError( ESMF_FAILURE,"Nearest Neighbor " //  &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="Nearest Neighbor " //  &
                        "regridding not currently supported",rcToReturn=localrc)
                 return
              case( Harness_Error )
                ! error - invalid regrid method
-                call ESMF_LogSetError( ESMF_FAILURE,"Invalid regrid " //    &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="Invalid regrid " //    &
                        "method.",rcToReturn=localrc)
              case default
                ! error
-                call ESMF_LogSetError( ESMF_FAILURE,"Invalid regrid " //    &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="Invalid regrid " //    &
                        "method.",rcToReturn=localrc)
           end select
 
@@ -1079,23 +1079,23 @@ logical                       :: checkpoint = .FALSE.
   ! equal to the size of Grid Rank, with any dist missing dimensions set to one.
   !-----------------------------------------------------------------------------
   allocate( BIndx(Memory%GridRank), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
      " BIndx in create_distribution", rcToReturn=rc)) then
   endif
   allocate( EIndx(Memory%GridRank), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
      " EIndx in create_distribution", rcToReturn=rc)) then
   endif
   allocate( decompOrder(Memory%GridRank), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
      " decompOrder in create_distribution", rcToReturn=rc)) then
   endif
   allocate( decompType(Memory%GridRank), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "Type "//                &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="Type "//                &
      " decompType in create_distribution", rcToReturn=rc)) then
   endif
   allocate( connectionList(2*Memory%GridRank+2,1), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
      " connectionList in create_distribution", rcToReturn=rc)) then
   endif
 
@@ -1164,11 +1164,11 @@ logical                       :: checkpoint = .FALSE.
     noconnections = .FALSE. 
     ! workspace
     allocate( positionVector(Memory%memRank), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//        &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//        &
        " positionVector in create_distribution", rcToReturn=rc)) then
     endif
     allocate( orientationVector(Memory%memRank), stat=allocRcToTest )
-    if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//        &
+    if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//        &
        " orientationVector in create_distribution", rcToReturn=rc)) then
     endif
 
@@ -1344,11 +1344,11 @@ logical                       :: checkpoint = .FALSE.
         !-----------------------------------------------------------------------
         tensorsize = Memory%memRank-Memory%GridRank
         allocate( top(tensorsize), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " top in create_array", rcToReturn=rc)) then
         endif
         allocate( bottom(tensorsize), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " bottom in create_array", rcToReturn=rc)) then
         endif
 
@@ -1372,7 +1372,7 @@ logical                       :: checkpoint = .FALSE.
         deallocate( top, bottom )
      else
         print*,'error - Memory Rank < Grid Rank'
-        call ESMF_LogSetError( ESMF_FAILURE,"memory rank < Grid rank not"// &
+        call ESMF_LogSetError( ESMF_FAILURE, msg="memory rank < Grid rank not"// &
                "supported ",rcToReturn=localrc)
         return
      endif
@@ -1383,11 +1383,11 @@ logical                       :: checkpoint = .FALSE.
   ! totalLWith and totalRwidth
   !-----------------------------------------------------------------------------
      allocate( haloL(Memory%memRank), stat=allocRcToTest )
-     if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//       &
+     if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//       &
         " haloL in create_array", rcToReturn=rc)) then
      endif
      allocate( haloR(Memory%memRank), stat=allocRcToTest )
-     if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//       &
+     if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//       &
         " haloR in create_array", rcToReturn=rc)) then
      endif
 
@@ -1428,11 +1428,11 @@ logical                       :: checkpoint = .FALSE.
         !-----------------------------------------------------------------------
         tensorsize = Memory%memRank-Memory%GridRank
         allocate( top(tensorsize), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " top in create_array", rcToReturn=rc)) then
         endif
         allocate( bottom(tensorsize), stat=allocRcToTest )
-        if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//    &
+        if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " bottom in create_array", rcToReturn=rc)) then
         endif
 
@@ -1458,7 +1458,7 @@ logical                       :: checkpoint = .FALSE.
         deallocate( top, bottom )
      else
 !       print*,'error - Memory Rank < Grid Rank'
-        call ESMF_LogSetError( ESMF_FAILURE,"memory rank < Grid rank not"// &
+        call ESMF_LogSetError( ESMF_FAILURE, msg="memory rank < Grid rank not"// &
                "supported ",rcToReturn=localrc)
         return
      endif
@@ -1555,7 +1555,7 @@ logical                       :: checkpoint = .FALSE.
       deallocate( maxI )
 
     case default
-      call ESMF_LogSetError(ESMF_FAILURE,"error in creating grid from distribution - unsupported rank", &
+      call ESMF_LogSetError(ESMF_FAILURE, msg="error in creating grid from distribution - unsupported rank", &
                     rcToReturn=rc)
       return
   end select
@@ -1597,7 +1597,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 1
       !-------------------------------------------------------------------------
       localrc = ESMF_FAILURE
-      call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=1 not supported ",      &
+      call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=1 not supported ",      &
                     rcToReturn=localrc)
       return
 
@@ -1707,7 +1707,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 4
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=4 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=4 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -1716,7 +1716,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 5
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=5 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=5 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -1725,7 +1725,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 6
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=6 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=6 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -1734,7 +1734,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 7
       !-------------------------------------------------------------------------
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=7 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=7 not supported ", &
                     rcToReturn=localrc)
            return
       case default
@@ -1742,7 +1742,7 @@ logical                       :: checkpoint = .FALSE.
       ! error
       !-------------------------------------------------------------------------
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank not between 1 & 7",&
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank not between 1 & 7",&
                     rcToReturn=localrc)
            return
 
@@ -1833,7 +1833,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 1
       !-------------------------------------------------------------------------
       localrc = ESMF_FAILURE
-      call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=1 not supported ",      &
+      call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=1 not supported ",      &
                     rcToReturn=localrc)
       return
 
@@ -1893,7 +1893,7 @@ logical                       :: checkpoint = .FALSE.
 
              case default
                ! error
-                call ESMF_LogSetError( ESMF_FAILURE,"undefined case in select statement",    &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="undefined case in select statement",    &
                        rcToReturn=localrc)
                 return
            end select
@@ -1954,7 +1954,7 @@ logical                       :: checkpoint = .FALSE.
 
              case default
                ! error
-                call ESMF_LogSetError( ESMF_FAILURE,"undefined case in select statement",    &
+                call ESMF_LogSetError( ESMF_FAILURE, msg="undefined case in select statement",    &
                        rcToReturn=localrc)
                 return
            end select
@@ -1971,7 +1971,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 4
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=4 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=4 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -1980,7 +1980,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 5
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=5 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=5 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -1989,7 +1989,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 6
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=6 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=6 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -1998,7 +1998,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 7
       !-------------------------------------------------------------------------
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=7 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=7 not supported ", &
                     rcToReturn=localrc)
            return
       case default
@@ -2006,7 +2006,7 @@ logical                       :: checkpoint = .FALSE.
       ! error
       !-------------------------------------------------------------------------
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank not between 1 & 7",&
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank not between 1 & 7",&
                     rcToReturn=localrc)
            return
 
@@ -2100,7 +2100,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 1
       !-------------------------------------------------------------------------
       localrc = ESMF_FAILURE
-      call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=1 not supported ",      &
+      call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=1 not supported ",      &
                     rcToReturn=localrc)
       return
 
@@ -2273,7 +2273,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 4
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=4 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=4 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -2282,7 +2282,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 5
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=5 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=5 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -2291,7 +2291,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 6
       !-------------------------------------------------------------------------
           localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=6 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=6 not supported ", &
                     rcToReturn=localrc)
            return
 
@@ -2300,7 +2300,7 @@ logical                       :: checkpoint = .FALSE.
       ! grid rank = 7
       !-------------------------------------------------------------------------
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank=7 not supported ", &
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank=7 not supported ", &
                     rcToReturn=localrc)
            return
       case default
@@ -2308,7 +2308,7 @@ logical                       :: checkpoint = .FALSE.
       ! error
       !-------------------------------------------------------------------------
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"Grid rank not between 1 & 7",&
+           call ESMF_LogSetError(ESMF_FAILURE, msg="Grid rank not between 1 & 7",&
                     rcToReturn=localrc)
            return
 
@@ -2384,7 +2384,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   allocate(localDeList(localDeCount), stat=allocRcToTest)
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//          &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//          &
      " localDeList in populate_redist_array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
@@ -2392,7 +2392,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   allocate(larrayList(localDeCount), stat=allocRcToTest)
-  if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                      &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                      &
      " larrayList in populate_redist_array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=localrc)
@@ -2407,11 +2407,11 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
   
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//          &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//          &
      " UBnd in populate_redist_array", rcToReturn=rc)) then
   endif
   allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest )  
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable "//          &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//          &
      " LBnd in populate_redist_array", rcToReturn=rc)) then
   endif
 
@@ -2582,7 +2582,7 @@ logical                       :: checkpoint = .FALSE.
      ! error
      !--------------------------------------------------------------------------
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE,"DimCount inot between 1 and 7", &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount inot between 1 and 7", &
                  rcToReturn=localrc)
         return
      end select
@@ -2593,7 +2593,7 @@ logical                       :: checkpoint = .FALSE.
   elseif( Memory%memRank >  Memory%GridRank ) then
 ! -----------
       localrc = ESMF_FAILURE
-      call ESMF_LogSetError(ESMF_FAILURE,"tensor dimensions not supported",      &
+      call ESMF_LogSetError(ESMF_FAILURE, msg="tensor dimensions not supported",      &
                     rcToReturn=localrc)
       return
 
@@ -2666,7 +2666,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   allocate(localDeList(localDeCount), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " localDeList in populate_array_value", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
@@ -2674,7 +2674,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   allocate(larrayList(localDeCount), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "type "//                      &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                      &
      " larrayList in populate_array_value", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=localrc)
@@ -2689,11 +2689,11 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
   
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest)
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " UBnd in populate_array_value", rcToReturn=rc)) then
   endif
   allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest)  
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " LBnd in populate_array_value", rcToReturn=rc)) then
   endif
 
@@ -2857,7 +2857,7 @@ logical                       :: checkpoint = .FALSE.
      ! error
      !--------------------------------------------------------------------------
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE,"DimCount inot between 1 and 7", &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount inot between 1 and 7", &
                  rcToReturn=localrc)
         return
      end select
@@ -2954,7 +2954,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   allocate(localDeList1(localDeCount1), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " localDeList1 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array1, localDeList=localDeList1, rc=localrc)
@@ -2962,7 +2962,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   allocate(larrayList1(localDeCount1), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "char variable"//              &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable"//              &
      " larrayList1 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array1, localarrayList=larrayList1, rc=localrc)
@@ -2983,13 +2983,13 @@ logical                       :: checkpoint = .FALSE.
   ! check localDeCount for agreement
   if( localDeCount1 /= localDeCount2 ) then
      localrc = ESMF_FAILURE
-     call ESMF_LogSetError(ESMF_FAILURE,"local De Counts do not agree",     &
+     call ESMF_LogSetError(ESMF_FAILURE, msg="local De Counts do not agree",     &
               rcToReturn=localrc)
      return
   endif
 
   allocate(localDeList2(localDeCount2), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " localDeList2 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array2, localDeList=localDeList2, rc=localrc)
@@ -3000,7 +3000,7 @@ logical                       :: checkpoint = .FALSE.
   do de=1, localDeCount2
      if( localDeList2(de) /= localDeList1(de) ) then
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE,"local De lists do not agree",   &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="local De lists do not agree",   &
                  rcToReturn=localrc)
         return
      endif
@@ -3008,7 +3008,7 @@ logical                       :: checkpoint = .FALSE.
 
   ! get local De List
   allocate(larrayList2(localDeCount2), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "char variable"//              &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable"//              &
      " larrayList2 in compare redist array", rcToReturn=rc)) then
   endif
   call ESMF_ArrayGet(array2, localarrayList=larrayList2, rc=localrc)
@@ -3025,7 +3025,7 @@ logical                       :: checkpoint = .FALSE.
   ! check localDeCount for agreement
   if( dimCount1 /= dimCount2 ) then
      localrc = ESMF_FAILURE
-     call ESMF_LogSetError(ESMF_FAILURE,"array 1 and 2 dimCounts disagree", &
+     call ESMF_LogSetError(ESMF_FAILURE, msg="array 1 and 2 dimCounts disagree", &
               rcToReturn=localrc)
      return
   endif
@@ -3034,11 +3034,11 @@ logical                       :: checkpoint = .FALSE.
   ! allocate bound arrays and extract exclusive bounds
   !-----------------------------------------------------------------------------
   allocate(UBnd(dimCount1, localDeCount1), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " UBnd in compare redist array", rcToReturn=rc)) then
   endif
   allocate(LBnd(dimCount1, localDeCount1), stat=allocRcToTest )  
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " LBnd in compare redist array", rcToReturn=rc)) then
   endif
 
@@ -3049,11 +3049,11 @@ logical                       :: checkpoint = .FALSE.
 
 
   allocate(UBnd2(dimCount2, localDeCount2), stat=allocRcToTest )
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " UBnd2 in compare redist array", rcToReturn=rc)) then
   endif
   allocate(LBnd2(dimCount2, localDeCount2), stat=allocRcToTest )  
-  if (ESMF_LogFoundAllocError(allocRcToTest, "integer variable"//           &
+  if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " LBnd2 in compare redist array", rcToReturn=rc)) then
   endif
 
@@ -3070,14 +3070,14 @@ logical                       :: checkpoint = .FALSE.
         if( LBnd(k,de) /= LBnd2(k,de) ) then
            print*,'exclusive Lower bounds disagree',LBnd(k,de),LBnd2(k,de) 
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"exclusive L bounds disagree",&
+           call ESMF_LogSetError(ESMF_FAILURE,msg="exclusive L bounds disagree",&
               rcToReturn=localrc)
            return
         endif
         if( UBnd(k,de) /= UBnd2(k,de) ) then
            print*,'exclusive Upper bounds disagree',UBnd(k,de),UBnd2(k,de) 
            localrc = ESMF_FAILURE
-           call ESMF_LogSetError(ESMF_FAILURE,"exclusive U bounds disagree",&
+           call ESMF_LogSetError(ESMF_FAILURE,msg="exclusive U bounds disagree",&
               rcToReturn=localrc)
            return
         endif
@@ -3321,7 +3321,7 @@ logical                       :: checkpoint = .FALSE.
      case default
         ! error
         localrc = ESMF_FAILURE
-        call ESMF_LogSetError(ESMF_FAILURE,"DimCount not between 1 and 7",  &
+        call ESMF_LogSetError(ESMF_FAILURE, msg="DimCount not between 1 and 7",  &
                  rcToReturn=localrc)
         return
      end select
@@ -3330,7 +3330,7 @@ logical                       :: checkpoint = .FALSE.
   ! Memory Rank > Grid Rank, then there are MemRank-GridRank tensor dimensions
   !-----------------------------------------------------------------------------
   elseif (Memory%memRank >  Memory%GridRank) then
-    call ESMF_LogSetError (ESMF_FAILURE, "tensor dimensions not supported", &
+    call ESMF_LogSetError (ESMF_FAILURE, msg="tensor dimensions not supported", &
          rcToReturn=rc)
     return
 
@@ -3338,7 +3338,7 @@ logical                       :: checkpoint = .FALSE.
   ! Memory Rank < Grid Rank, then parameters don't make sense
   !-----------------------------------------------------------------------------
   else
-    call ESMF_LogSetError (ESMF_FAILURE, "memory rank < grid rank", &
+    call ESMF_LogSetError (ESMF_FAILURE, msg="memory rank < grid rank", &
          rcToReturn=rc)
     return
   endif
@@ -3398,7 +3398,7 @@ logical                       :: checkpoint = .FALSE.
                             grid%grange(axis,1), grid%gsize(axis))
     case default
        print*,'Unsupported grid type',trim(grid%gtype(axis)%string)
-       call ESMF_LogSetError( ESMF_FAILURE,"Unsupported grid type " //       &
+       call ESMF_LogSetError( ESMF_FAILURE, msg="Unsupported grid type " //       &
                trim(grid%gtype(axis)%string), rcToReturn=rc)
        return
 

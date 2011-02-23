@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.17 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.18 2011/02/23 20:19:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@ integer :: rootPet = Harness_rootPet
     if ( nGrid == 0 ) then
        ! syntax error, no grid layout specified
        print*,'Syntax error, no grid layout'
-       call ESMF_LogSetError( ESMF_FAILURE, "syntax error, no grid " //     &
+       call ESMF_LogSetError( ESMF_FAILURE, msg="syntax error, no grid " //     &
                 "layout specified", rcToReturn=localrc)
        return
     endif
@@ -145,7 +145,7 @@ integer :: rootPet = Harness_rootPet
     ! check to see that values is within the acceptable range
     if ( ntemp < 0 .and. ntemp > 9 ) then
        call ESMF_LogSetError( ESMF_FAILURE,                                 &
-                 "character is not a digit between 0 and 9",                   &
+                 msg="character is not a digit between 0 and 9",                   &
                  rcToReturn=localrc)
         return
        char2int = 0
@@ -231,7 +231,7 @@ integer :: rootPet = Harness_rootPet
 
     if ( nDist == 0 ) then
        call ESMF_LogSetError( ESMF_FAILURE,                              &
-                "Syntax Error - no distribution indicated",                 &
+                msg="Syntax Error - no distribution indicated",                 &
                 rcToReturn=localrc)
        return
     endif
@@ -286,14 +286,14 @@ integer :: rootPet = Harness_rootPet
     nEnd = pattern_query(lstring, ']')
 
     if( nMem+1 /=  iRank .and. nEnd /= 1 ) then
-       call ESMF_LogSetError(ESMF_FAILURE, "asserted memory rank does not"  &
+       call ESMF_LogSetError(ESMF_FAILURE, msg="asserted memory rank does not"  &
                 // " agree with actual memory rank", rcToReturn=localrc)
        return
     else
        !------------------------------------------------------------------------
        !------------------------------------------------------------------------
        allocate( MemPos(nMem), stat=allocRcToTest  )
-       if (ESMF_LogFoundAllocError(allocRcToTest, "integer array "//        &
+       if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer array "//        &
           "MemPos in memory_separate", rcToReturn=localrc)) then
        endif
 
@@ -401,7 +401,7 @@ integer :: rootPet = Harness_rootPet
            dstBlock = set_query(lstring(location(2):strlen),'[' )
            dstMulti = set_query(lstring(location(2):strlen),'(' )
        else
-          call ESMF_LogSetError(ESMF_FAILURE,"symbols not properly paired", &
+          call ESMF_LogSetError(ESMF_FAILURE,msg="symbols not properly paired", &
                    rcToReturn=localrc)
           return
        endif
@@ -420,13 +420,13 @@ integer :: rootPet = Harness_rootPet
            dstBlock = set_query(lstring(location(2):strlen),'[' )
 
        else
-          call ESMF_LogSetError(ESMF_FAILURE,"symbols not properly paired", &
+          call ESMF_LogSetError(ESMF_FAILURE,msg="symbols not properly paired", &
                    rcToReturn=localrc)
           return
        endif
 
     else   ! syntax error
-       call ESMF_LogSetError( ESMF_FAILURE, "symbols not paired properly",  &
+       call ESMF_LogSetError( ESMF_FAILURE, msg="symbols not paired properly",  &
                 rcToReturn=localrc)
        return
     endif
@@ -541,7 +541,7 @@ integer :: rootPet = Harness_rootPet
           case default
              ! syntax error - no recognized method specified
              call ESMF_LogSetError( ESMF_FAILURE,                           &
-                      "process symbol not recognized",                         &
+                      msg="process symbol not recognized",                         &
                       rcToReturn=localrc)
              lname = 'ERROR'
              tag  = Harness_Error
@@ -553,7 +553,7 @@ integer :: rootPet = Harness_rootPet
       elseif( (iredist == 0).and.(iregrid == 0) ) then
          ! syntax error - no action
          call ESMF_LogSetError( ESMF_FAILURE,                               &
-               "no process symbol found",                                      &
+               msg="no process symbol found",                                      &
                rcToReturn=localrc)
          lname = 'ERROR'
          tag = Harness_Error
@@ -562,7 +562,7 @@ integer :: rootPet = Harness_rootPet
       elseif( (iredist /= 0).and.(iregrid /= 0) ) then
          ! syntax error - multiple actions
          call ESMF_LogSetError( ESMF_FAILURE,                               &
-                  "more than one process symbol found",                        &
+                  msg="more than one process symbol found",                        &
                   rcToReturn=localrc)
          lname = 'ERROR'
          tag = Harness_Error
@@ -714,11 +714,11 @@ integer :: rootPet = Harness_rootPet
        ! the numbers match, so now check that the order is left to right
        !------------------------------------------------------------------------
        allocate( locL(ntestL), stat=allocRcToTest )
-       if (ESMF_LogFoundAllocError(allocRcToTest, "integer array "//        &
+       if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer array "//        &
           "locL in pattern_match", rcToReturn=rc)) then
        endif
        allocate( locR(ntestR), stat=allocRcToTest )
-       if (ESMF_LogFoundAllocError(allocRcToTest, "integer array "//        &
+       if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer array "//        &
           "locR in pattern_match", rcToReturn=rc)) then
        endif
        call pattern_locate(lstring,trim(adjustL(lcharL)), ntestL, locL )
@@ -903,7 +903,7 @@ integer :: rootPet = Harness_rootPet
      !--------------------------------------------------------------------------
      write(lchar,"(i5)") irow
      if( ESMF_LogFoundError(localrc,                                        &
-         "cannot read row " // trim(adjustL(lchar)) //                         &
+         msg="cannot read row " // trim(adjustL(lchar)) //                         &
          " of table " //trim(descriptor_label) // "in file " //                &
          trim(lfilename), rcToReturn=rc) ) return
          kelements = kelements + 1
@@ -925,7 +925,7 @@ integer :: rootPet = Harness_rootPet
         call ESMF_ConfigNextLine(localcf, tableEnd=flag, rc=localrc)
         write(lchar,"(i5)") irow
         if( ESMF_LogFoundError(localrc,                                     &
-           "cannot read row " // trim(adjustL(lchar)) //                       &
+           msg="cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
 
@@ -935,7 +935,7 @@ integer :: rootPet = Harness_rootPet
         if( debug_flag) print*,' get attribute integer - contin symbol '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogFoundError(localrc,                                     &
-           "cannot read row " // trim(adjustL(lchar)) //                       &
+           msg="cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
 
@@ -945,7 +945,7 @@ integer :: rootPet = Harness_rootPet
         if( debug_flag) print*,' get attribute integer - after contin symbol '
         call ESMF_ConfigGetAttribute(localcf, int_tmp, rc=localrc)
         if( ESMF_LogFoundError(localrc,                                     &
-           "cannot read row " // trim(adjustL(lchar)) //                       &
+           msg="cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
 
@@ -958,7 +958,7 @@ integer :: rootPet = Harness_rootPet
         !-----------------------------------------------------------------------
         write(lchar,"(i5)") irow
         call ESMF_LogSetError( ESMF_FAILURE,                                &
-              "cannot read row " // trim(adjustL(lchar)) //                    &
+              msg="cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc)
         return
@@ -1023,7 +1023,7 @@ integer :: rootPet = Harness_rootPet
      !--------------------------------------------------------------------------
      write(lchar,"(i5)") irow
      if( ESMF_LogFoundError(localrc,                                        &
-         "cannot read row " // trim(adjustL(lchar)) //                         &
+         msg="cannot read row " // trim(adjustL(lchar)) //                         &
          " of table " //trim(descriptor_label) // "in file " //                &
          trim(lfilename), rcToReturn=rc) ) return
          kelements = kelements + 1
@@ -1045,7 +1045,7 @@ integer :: rootPet = Harness_rootPet
         call ESMF_ConfigNextLine(localcf, tableEnd=flag, rc=localrc)
         write(lchar,"(i5)") irow
         if( ESMF_LogFoundError(localrc,                                     &
-           "cannot read row " // trim(adjustL(lchar)) //                       &
+           msg="cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
         !-----------------------------------------------------------------------
@@ -1054,7 +1054,7 @@ integer :: rootPet = Harness_rootPet
         if( debug_flag) print*,' get attribute - contin symbol '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogFoundError(localrc,                                     &
-           "cannot read row " // trim(adjustL(lchar)) //                       &
+           msg="cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
 
@@ -1064,7 +1064,7 @@ integer :: rootPet = Harness_rootPet
         if( debug_flag) print*,' get attribute - real after continuation '
         call ESMF_ConfigGetAttribute(localcf, flt_tmp, rc=localrc)
         if( ESMF_LogFoundError(localrc,                                     &
-           "cannot read row " // trim(adjustL(lchar)) //                       &
+           msg="cannot read row " // trim(adjustL(lchar)) //                       &
            " of table " //trim(descriptor_label) // "in file " //              &
            trim(lfilename), rcToReturn=rc) ) return
 
@@ -1076,7 +1076,7 @@ integer :: rootPet = Harness_rootPet
         ! error continuation line missing, but grid not finished
         !-----------------------------------------------------------------------
         write(lchar,"(i5)") irow
-        call ESMF_LogSetError( ESMF_FAILURE," continuation missing " //     &
+        call ESMF_LogSetError( ESMF_FAILURE,msg=" continuation missing " //     &
               "cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc)
@@ -1142,7 +1142,7 @@ integer :: rootPet = Harness_rootPet
      !--------------------------------------------------------------------------
      write(lchar,"(i5)") irow
      if( ESMF_LogFoundError(localrc,                                        &
-         "cannot read row " // trim(adjustL(lchar)) //                         &
+         msg="cannot read row " // trim(adjustL(lchar)) //                         &
          " of table " //trim(descriptor_label) // "in file " //                &
          trim(lfilename), rcToReturn=rc) ) return
          kelements = kelements + 1
@@ -1164,7 +1164,7 @@ integer :: rootPet = Harness_rootPet
         call ESMF_ConfigNextLine(localcf, tableEnd=flag, rc=localrc)
         write(lchar,"(i5)") irow
         if( ESMF_LogFoundError(localrc,                                     &
-              "cannot read row " // trim(adjustL(lchar)) //                    &
+              msg="cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc) ) return
         !-----------------------------------------------------------------------
@@ -1173,7 +1173,7 @@ integer :: rootPet = Harness_rootPet
         if( debug_flag) print*,' get attribute - read continuation symbol '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogFoundError(localrc,                                     &
-              "cannot read row " // trim(adjustL(lchar)) //                    &
+              msg="cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc) ) return
 
@@ -1183,7 +1183,7 @@ integer :: rootPet = Harness_rootPet
         if( debug_flag)  print*,' get attribute string after continuation '
         call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
         if( ESMF_LogFoundError(localrc,                                     &
-              "cannot read row " // trim(adjustL(lchar)) //                    &
+              msg="cannot read row " // trim(adjustL(lchar)) //                    &
               " of table " //trim(descriptor_label) // "in file " //           &
               trim(lfilename), rcToReturn=rc) ) return
 
@@ -1195,7 +1195,7 @@ integer :: rootPet = Harness_rootPet
         ! error continuation line missing, but grid not finished
         !-----------------------------------------------------------------------
         write(lchar,"(i5)") irow
-        call ESMF_LogSetError( ESMF_FAILURE," continuation missing " //     &
+        call ESMF_LogSetError( ESMF_FAILURE,msg=" continuation missing " //     &
                "cannot read row " // trim(adjustL(lchar)) //                   &
                " of table " //trim(descriptor_label) // "in file " //          &
                trim(lfilename), rcToReturn=rc)
@@ -1233,8 +1233,8 @@ integer :: rootPet = Harness_rootPet
     ! print error message if value rejected because its outside of the minimum tolerance band
     if (.NOT. check_value) then
       if (abs_err .GE. RegridMinNeighborhood) then
-        call ESMF_LogSetError (ESMF_FAILURE, "regrid error - value outside of minimum tolerance band", &
-          __LINE__, __FILE__)
+        call ESMF_LogSetError (ESMF_FAILURE, msg="regrid error - value outside of minimum tolerance band", &
+          line=__LINE__, file=__FILE__)
       end if
     end if
 #endif
@@ -1269,7 +1269,7 @@ integer :: rootPet = Harness_rootPet
 
     rcToReturn = ESMF_SUCCESS
 
-    CheckError = ESMF_LogFoundError (rcValue, msg, rcToReturn=rcToReturn)
+    CheckError = ESMF_LogFoundError (rcValue, msg=msg, rcToReturn=rcToReturn)
 
     if (CheckError) then
       print '("error detected at line ", I5, " in file ", A, " - return code = ", I8)', &
