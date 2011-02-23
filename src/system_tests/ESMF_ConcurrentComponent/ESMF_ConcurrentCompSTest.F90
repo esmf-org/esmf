@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.18 2011/02/22 15:49:34 rokuingh Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.19 2011/02/23 13:48:36 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -212,7 +212,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! initialize the clock with the above values
-    clock = ESMF_ClockCreate(timeStep, startTime, stopTime, name="Clock 1", rc=localrc)
+    clock = ESMF_ClockCreate(timeStep, startTime=startTime, stopTime=stopTime, name="Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
