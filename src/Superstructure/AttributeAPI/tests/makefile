@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2010/09/17 20:50:00 rokuingh Exp $ 
+# $Id: makefile,v 1.10 2011/02/23 07:00:15 eschwab Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,6 +16,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdate2UTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeXMLUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
@@ -31,6 +32,7 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeGridUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
+		RUN_ESMF_AttributeUpdate2UTest \
 		RUN_ESMF_AttributeXMLUTest \
 		RUN_ESMF_AttReadCplCompUTest \
 		RUN_ESMF_AttReadGridCompUTest \
@@ -155,6 +157,9 @@ RUN_ESMF_AttReadGridCompUTestUNI:
 
 RUN_ESMF_AttributeUpdateUTest:
 	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
+
+RUN_ESMF_AttributeUpdate2UTest:
+	$(MAKE) TNAME=AttributeUpdate2 NP=4 ftest
 
 # --- XML
 
