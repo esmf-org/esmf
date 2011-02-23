@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.85 2011/02/23 19:47:42 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.86 2011/02/23 22:39:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.85 2011/02/23 19:47:42 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.86 2011/02/23 22:39:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -208,10 +208,11 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateDefault(deCount, deGrouping, dePinFlag, &
-    petList, vm, rc)
+  function ESMF_DELayoutCreateDefault(keywordEnforcer, deCount, deGrouping, &
+    dePinFlag, petList, vm, rc)
 !
 ! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in), optional  :: deCount
     integer, target,              intent(in), optional  :: deGrouping(:)
     type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
@@ -325,10 +326,12 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateFromPetMap(petMap, dePinFlag, vm, rc)
+  function ESMF_DELayoutCreateFromPetMap(petMap, keywordEnforcer, dePinFlag, &
+    vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: petMap(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -407,15 +410,16 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutCreateHintWeights()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DELayoutCreate - Create DELayout with weight hints
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateHintWeights(deCount, compWeights, &
-    commWeights, deGrouping, dePinFlag, petList, vm, rc)
+  function ESMF_DELayoutCreateHintWeights(keywordEnforcer, deCount, &
+    compWeights, commWeights, deGrouping, dePinFlag, petList, vm, rc)
 !
 ! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in), optional  :: deCount
     integer,                      intent(in)            :: compWeights(:)
     integer,                      intent(in)            :: commWeights(:,:)
@@ -479,7 +483,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DELayout)     :: delayout     ! opaque pointer to new C++ DELayout  
@@ -701,13 +705,14 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutDestroy()"
 !BOP
-! !IROUTINE: ESMF_DELayoutDestroy - Destroy DELayout object
+! !IROUTINE: ESMF_DELayoutDestroy - Release resources associated with DELayout object
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutDestroy(delayout, rc)
+  subroutine ESMF_DELayoutDestroy(delayout, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(inout)           :: delayout
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -758,12 +763,13 @@ contains
 ! !IROUTINE: ESMF_DELayoutGet - Get DELayout internals
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutGet(delayout, vm, deCount, petMap, vasMap, &
-    compCapacity, commCapacity, oneToOneFlag, dePinFlag, &
+  subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
+    vasMap, compCapacity, commCapacity, oneToOneFlag, dePinFlag, &
     localDeCount, localDeList, vasLocalDeCount, vasLocalDeList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)              :: delayout
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),            intent(out),  optional  :: vm
     integer,                  intent(out),  optional  :: deCount
     integer, target,          intent(out),  optional  :: petMap(:)
@@ -1292,11 +1298,11 @@ contains
 ! !IROUTINE: ESMF_DELayoutPrint - Print DELayout internals
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutPrint(delayout, options, rc)
+  subroutine ESMF_DELayoutPrint(delayout, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)              :: delayout
-    character(len=*),     intent(in),   optional  :: options
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -1314,8 +1320,6 @@ contains
 !     \begin{description}
 !     \item[delayout] 
 !          Specified {\tt ESMF\_DELayout} object.
-!     \item[{[options]}] 
-!          Print options are not yet supported.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1330,14 +1334,6 @@ contains
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
-    
-    ! Not implemented features
-    if (present(options)) then
-      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        msg="- options not implemented", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutPrint(delayout, localrc)
@@ -1358,11 +1354,12 @@ contains
 ! !IROUTINE: ESMF_DELayoutServiceComplete - Close service window
 
 ! !INTERFACE:
-  recursive subroutine ESMF_DELayoutServiceComplete(delayout, de, rc)
+  recursive subroutine ESMF_DELayoutServiceComplete(delayout, keywordEnforcer, de, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)              :: delayout
     integer,              intent(in)              :: de
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -1411,11 +1408,12 @@ contains
 ! !IROUTINE: ESMF_DELayoutServiceOffer - Offer service for a DE in DELayout
 
 ! !INTERFACE:
-  recursive function ESMF_DELayoutServiceOffer(delayout, de, rc)
+  recursive function ESMF_DELayoutServiceOffer(delayout, keywordEnforcer, de, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)              :: delayout
     integer,              intent(in)              :: de
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !RETURN VALUE:
@@ -1480,10 +1478,11 @@ contains
 ! !IROUTINE: ESMF_DELayoutValidate - Validate DELayout internals
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutValidate(delayout, rc)
+  subroutine ESMF_DELayoutValidate(delayout, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)              :: delayout
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
