@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.130 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.131 2011/02/23 19:45:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.130 2011/01/19 02:13:18 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.131 2011/02/23 19:45:17 w6ws Exp $"
 
 !==============================================================================
 
@@ -810,8 +810,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -870,8 +870,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -930,8 +930,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1413,8 +1413,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1472,8 +1472,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1531,8 +1531,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1665,8 +1665,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1724,8 +1724,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1781,8 +1781,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1841,8 +1841,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1987,8 +1987,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -2047,8 +2047,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -2107,8 +2107,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -4330,8 +4330,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -4391,8 +4391,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -4452,8 +4452,8 @@ contains
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-          "- non-blocking mode not yet implemented", &
-          ESMF_CONTEXT, rc)
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -7356,8 +7356,8 @@ contains
     ! Not implemented features
     if (.not. blocking) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        "- non-blocking mode not yet implemented", &
-        ESMF_CONTEXT, rc)
+        msg="- non-blocking mode not yet implemented", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.19 2011/02/09 22:53:14 ESRL\robert.oehmke Exp $
+! $Id: ESMF_IOScrip.F90,v 1.20 2011/02/23 19:46:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -200,8 +200,8 @@
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
     return
 #endif
 
@@ -263,8 +263,8 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 #endif
 
     return
@@ -512,8 +512,8 @@ end subroutine ESMF_ScripInqUnits
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
     return
 #endif
     
@@ -599,7 +599,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       allocate(allCounts(PetCnt))
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rc)) return
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! calculate the size of the global weight table
       total = 0
@@ -613,12 +613,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         ! Check if srcFile and dstFile exists
         if (.not. present(srcFile)) then
              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-		  "- The srcFile argument does not exist on PET0 ", ESMF_CONTEXT, rc)
+		  msg="- The srcFile argument does not exist on PET0 ", &
+                  ESMF_CONTEXT, rcToReturn=rc)
 	     return
         endif
         if (.not. present(dstFile)) then
              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-		  "- The dstFile argument does not exist on PET0 ", ESMF_CONTEXT, rc)
+		  msg="- The dstFile argument does not exist on PET0 ",  &
+                  ESMF_CONTEXT, rcToReturn=rc)
 	     return
         endif
         ! Create output file and create dimensions and variables
@@ -1098,7 +1100,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            call ESMF_ScripGetVar(srcFile, grid_center_lon=lonBuffer, &
 	 	grid_center_lat=latBuffer, rc=status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 
 	   ncStatus=nf90_inq_varid(ncid,"xc_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
@@ -1123,7 +1125,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            call ESMF_ScripGetVar(srcFile, grid_corner_lon=lonBuffer2, &
 	 	grid_corner_lat=latBuffer2, rc=status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 
 	   ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
@@ -1147,7 +1149,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            allocate(mask(srcDim))         
            call ESMF_ScripGetVar(srcFile, grid_imask=mask, rc=status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
            ncStatus=nf90_inq_varid(ncid,"mask_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, mask)          
            errmsg = "Variable mask_a in "//trim(wgtfile)
@@ -1209,7 +1211,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
 		latBuffer2, lonBuffer2,status) 
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 
 	   ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
@@ -1263,7 +1265,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          call ESMF_ScripGetVar(dstFile, grid_center_lon=lonBuffer, &
 	 	grid_center_lat=latBuffer, rc=status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 	 ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
          errmsg = "Variable xc_b in "//trim(wgtfile)
@@ -1285,7 +1287,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          call ESMF_ScripGetVar(dstFile, grid_corner_lon=lonBuffer2, &
 	 	grid_corner_lat=latBuffer2, rc=status)
 	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 
 	 ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
@@ -1306,7 +1308,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          allocate(mask(dstDim))         
          call ESMF_ScripGetVar(dstFile, grid_imask=mask, rc=status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
          ncStatus=nf90_inq_varid(ncid,"mask_b",VarId)
          ncStatus=nf90_put_var(ncid,VarId, mask)          
          errmsg = "Variable mask_b in "//trim(wgtfile)
@@ -1363,7 +1365,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
 		latBuffer2, lonBuffer2, status) 
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 
 	   ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
            ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
@@ -1543,10 +1545,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               ! receive the factorList and factorIndexList 
               call ESMF_VMRecv(vm, indexbuf, localCount(1)*2, i-1, rc=status)
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	  ESMF_CONTEXT, rc)) return
+        	  ESMF_CONTEXT, rcToReturn=rc)) return
               call ESMF_VMRecv(vm, weightbuf, localCount(1), i-1, rc=status)
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	  ESMF_CONTEXT, rc)) return
+        	  ESMF_CONTEXT, rcToReturn=rc)) return
 
               ncStatus=nf90_inq_varid(ncid,"col",VarId)
        	      ncStatus=nf90_put_var(ncid,VarId, indexbuf,(/start/),localCount)          
@@ -1585,10 +1587,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          ! a non-root PET, send the results to PET 0
          call ESMF_VMSend(vm, indexbuf, localCount(1)*2, 0, rc=status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
          call ESMF_VMSend(vm, factorList, localCount(1), 0, rc=status)
 	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rc)) return
+        	ESMF_CONTEXT, rcToReturn=rc)) return
        end if
     end if
        
@@ -1607,8 +1609,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 #endif
 
     return
@@ -1712,8 +1714,8 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 #endif
 
     return
@@ -1770,8 +1772,8 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
 #endif
 
     return
@@ -1936,8 +1938,8 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
       rc)) return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
     return
 #endif
 
@@ -2023,8 +2025,8 @@ subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNo
     return
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
     return
 #endif
 end subroutine ESMF_EsmfGetVerts
@@ -2064,8 +2066,8 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
     end if
 #else
     call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 "- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rc) 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
     return
 #endif
 

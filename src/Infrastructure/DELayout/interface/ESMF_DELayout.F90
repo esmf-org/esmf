@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.84 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_DELayout.F90,v 1.85 2011/02/23 19:47:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.84 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.85 2011/02/23 19:47:42 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -667,14 +667,14 @@ contains
     ! Not implemented features
     if (present(connectionWeightDimList)) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        "- connectionWeightDimList not implemented", &
-        ESMF_CONTEXT, rc)
+        msg="- connectionWeightDimList not implemented", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     if (present(cyclicFlagDimList)) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        "- cyclicFlagDimList not implemented", &
-        ESMF_CONTEXT, rc)
+        msg="- cyclicFlagDimList not implemented", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     
@@ -850,14 +850,14 @@ contains
     ! Not implemented features
     if (present(compCapacity)) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        "- compCapacity query not implemented", &
-        ESMF_CONTEXT, rc)
+        msg="- compCapacity query not implemented", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     if (present(commCapacity)) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        "- commCapacity query not implemented", &
-        ESMF_CONTEXT, rc)
+        msg="- commCapacity query not implemented", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     
@@ -1334,8 +1334,8 @@ contains
     ! Not implemented features
     if (present(options)) then
       call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-        "- options not implemented", &
-        ESMF_CONTEXT, rc)
+        msg="- options not implemented", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     
