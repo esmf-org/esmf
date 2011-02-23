@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.21 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMC_Mesh.C,v 1.22 2011/02/23 01:03:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.21 2011/01/05 20:05:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.22 2011/02/23 01:03:19 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -53,7 +53,7 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
 
   // call into ESMCI method
   mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return mesh; // bail out
 
   // return successfully
@@ -79,7 +79,7 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   
   // call into ESMCI method
   localrc = mep->addNodes(nodeCount, nodeIds, nodeCoords, nodeOwners);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   
   // return successfully
@@ -104,7 +104,7 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   
   // call into ESMCI method
   localrc = mep->addElements(elementCount, elementIds, elementTypes, elementConn);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
@@ -130,7 +130,7 @@ int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid,
   // call into ESMCI method
   localrc = mep->createDistGrids(nodeDistGrid, elemDistGrid, num_nodes, 
     num_elements);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
@@ -154,7 +154,7 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
 
   // Do destroy
   localrc= MeshCXX::destroy(&mep);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out    
 
   // Set to NULL
@@ -180,7 +180,7 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
   
   // call into ESMCI method
   localrc = mep->freeMemory();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
@@ -245,7 +245,7 @@ int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
 
   // call into ESMCI method
   localrc = MeshVTKHeader(fname, num_elem, num_node, conn_size);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
@@ -268,7 +268,7 @@ int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
   // call into ESMCI method
   localrc = MeshVTKBody(fname, nodeId, nodeCoord, nodeOwner, elemId, elemType,
     elemConn);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
@@ -292,7 +292,7 @@ int ESMC_MeshWrite(ESMC_Mesh mesh, const char* filename){
   
   // call into ESMCI method
   localrc = mep->meshWrite(filename);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMF_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 
   // return successfully
