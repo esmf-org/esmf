@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.90 2011/02/09 06:59:35 earl.r.schwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.91 2011/02/23 05:27:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.90 2011/02/09 06:59:35 earl.r.schwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.91 2011/02/23 05:27:21 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -282,7 +282,7 @@ int Attribute::count=0;
     if ((convention.compare("GridSpec")==0 ||
          convention.compare("ESMF")==0) && purpose.compare("General")==0) {
       localrc = AttPackCreateCustom("GridSpec", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       // TODO: CongruentTiles & GridType will be at the mosaic level,
       //       others at the tile level
@@ -308,11 +308,11 @@ int Attribute::count=0;
     }
     if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
       localrc = AttPackNest("ESMF", "General", object, "GridSpec", "General");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("RegDecompX", "ESMF", "General", object);
       localrc = AttPackAddAttribute("RegDecompY", "ESMF", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
 
@@ -325,12 +325,12 @@ int Attribute::count=0;
          (convention.compare("CIM 1.0")==0 && purpose.compare("Inputs Description")==0))
     {
       localrc = AttPackCreateCustom("CF", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("LongName", "CF", "General",object);
       localrc = AttPackAddAttribute("ShortName", "CF", "General", object);
       localrc = AttPackAddAttribute("Units", "CF", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (((convention.compare("ESG")==0 ||
@@ -338,26 +338,26 @@ int Attribute::count=0;
          (convention.compare("CF")==0    && purpose.compare("Extended")==0) ||
          (convention.compare("CIM 1.0")==0 && purpose.compare("Inputs Description")==0)) {
       localrc = AttPackNest("CF", "Extended", object, "CF", "General");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("StandardName", "CF", "Extended", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (((convention.compare("ESG")==0 ||
           convention.compare("ESMF")==0) && purpose.compare("General")==0) ||
          (convention.compare("CIM 1.0")==0 && purpose.compare("Inputs Description")==0)) {
       localrc = AttPackNest("ESG", "General", object, "CF", "Extended");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("Intent", "ESG", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if ((convention.compare("ESMF")==0 && purpose.compare("General")==0) ||
         (convention.compare("CIM 1.0")==0 && purpose.compare("Inputs Description")==0)) {
       localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     // CIM inherits (ESMF, General)
@@ -365,7 +365,7 @@ int Attribute::count=0;
         purpose.compare("Inputs Description")==0) {
       localrc = AttPackNest("CIM 1.0", "Inputs Description", object,
                             "ESMF", "General");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("CouplingPurpose", "CIM 1.0",
                             "Inputs Description", object);
@@ -383,17 +383,17 @@ int Attribute::count=0;
                             "Inputs Description", object);
       localrc = AttPackAddAttribute("TimeTransformationType", "CIM 1.0",
                             "Inputs Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     
   } else if (object.compare("state")==0) {
   // State standard Attribute package
     localrc = AttPackCreateCustom("ESMF", "General", object);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     localrc = AttPackAddAttribute("Intent", "ESMF", "General", object);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
 
   } else if (object.compare("comp")==0) {
@@ -401,7 +401,7 @@ int Attribute::count=0;
     if ((convention.compare("ESG")==0 ||
          convention.compare("ESMF")==0) && purpose.compare("General")==0) {
       localrc = AttPackCreateCustom("ESG", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("Agency", "ESG", "General", object);
       localrc = AttPackAddAttribute("Author", "ESG", "General", object);
@@ -413,12 +413,12 @@ int Attribute::count=0;
       localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
       localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
       localrc = AttPackAddAttribute("Version", "ESG", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
       localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (convention.compare("CIM 1.0")==0 &&
@@ -427,22 +427,22 @@ int Attribute::count=0;
       // TODO: uncomment and expand when we have better definition from CIM
       //localrc = AttPackCreateCustom("CIM 1.0",
       //                              "Scientific Property Description", object);
-      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("CIM 1.0",
                                     "Platform Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("ISO 19115",
                                     "Citation Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("ISO 19115",
                                     "Responsible Party Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       vector<string> nestconv, nestpurp;
@@ -462,7 +462,7 @@ int Attribute::count=0;
       localrc = AttPackNest("CIM 1.0",
                             "Model Component Simulation Description", object,
                             nestcount, nestconv, nestpurp);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       string empty="";  // set values initially empty to force writing out empty
@@ -485,7 +485,7 @@ int Attribute::count=0;
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("URL", "CIM 1.0",
                             "Model Component Simulation Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -502,7 +502,7 @@ int Attribute::count=0;
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationStartDate", "CIM 1.0",
                             "Model Component Simulation Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -513,7 +513,7 @@ int Attribute::count=0;
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("PreviousVersionDescription", "CIM 1.0",
                             "Model Component Simulation Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -528,7 +528,7 @@ int Attribute::count=0;
       //                      "Scientific Property Description", object);
       //localrc = AttPackAddAttribute("ScientificPropertyValue", "CIM 1.0",
       //                      "Scientific Property Description", object);
-      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      &localrc)) return localrc;
 
       //
@@ -558,7 +558,7 @@ int Attribute::count=0;
                             "Platform Description", object);
       localrc = AttPackAddAttribute("MachineVendor", "CIM 1.0",
                             "Platform Description", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       //
       // Citation attributes
@@ -582,7 +582,7 @@ int Attribute::count=0;
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                             "Citation Description", object);
 
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -627,7 +627,7 @@ int Attribute::count=0;
          &empty, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
   }
@@ -691,7 +691,7 @@ int Attribute::count=0;
   }
   // ... and attach to *this* attribute node
   localrc = AttPackSet(stdParent);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // populate parent attpack with standard attributes
@@ -707,7 +707,7 @@ int Attribute::count=0;
   localrc = stdParent->AttPackAddAttribute("ReleaseDate");
   localrc = stdParent->AttPackAddAttribute("ShortName");
   localrc = stdParent->AttPackAddAttribute("URL");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   //
@@ -719,7 +719,7 @@ int Attribute::count=0;
   localrc = stdParent->AttPackAddAttribute("SimulationRationale");
   localrc = stdParent->AttPackAddAttribute("SimulationShortName");
   localrc = stdParent->AttPackAddAttribute("SimulationStartDate");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   //
@@ -728,7 +728,7 @@ int Attribute::count=0;
   //
   localrc = stdParent->AttPackAddAttribute("PreviousVersion");
   localrc = stdParent->AttPackAddAttribute("PreviousVersionDescription");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // TODO:  Scientific Property attributes
@@ -747,7 +747,7 @@ int Attribute::count=0;
     return localrc;
   }
   localrc = stdParent->AttPackSet(stdChild);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   //
@@ -766,7 +766,7 @@ int Attribute::count=0;
   localrc = stdChild->AttPackAddAttribute("MachineProcessorType");
   localrc = stdChild->AttPackAddAttribute("MachineSystem");
   localrc = stdChild->AttPackAddAttribute("MachineVendor");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // for each standard nested attpack type ...
@@ -789,7 +789,7 @@ int Attribute::count=0;
         return localrc;
       }
       localrc = stdParent->AttPackSet(stdChild);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       // return the child's unique name (out)
@@ -811,7 +811,7 @@ int Attribute::count=0;
         localrc = stdChild->AttPackAddAttribute("PresentationForm");
         localrc = stdChild->AttPackAddAttribute("ShortTitle");
         localrc = stdChild->AttPackAddAttribute("URL");
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       }
 
@@ -827,7 +827,7 @@ int Attribute::count=0;
         localrc = stdChild->AttributeSet("PhysicalAddress", &empty);
         localrc = stdChild->AttributeSet("ResponsiblePartyRole", &empty);
         localrc = stdChild->AttributeSet("URL", &empty);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       }
     }
@@ -874,7 +874,7 @@ int Attribute::count=0;
 
   // ... and then use the multi-item vector interface
   localrc = AttPackNest(convention, purpose, object, 1, cnconv, cnpurp);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return localrc;
 
@@ -961,7 +961,7 @@ int Attribute::count=0;
   
   // Put the attpack onto nestPack's parent
   localrc = localParent->AttPackSet(attpack);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // Now remove nestpacks from their parent
@@ -984,7 +984,7 @@ int Attribute::count=0;
   // Put nestpacks onto attpack as child nodes
   for (i=0; i<nestCount; i++) {
     localrc = attpack->AttPackSet(nestpack[i]);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   
@@ -1324,7 +1324,7 @@ int Attribute::count=0;
     
   attrparent = attr->parent;
   localrc = attrparent->AttributeRemove(name);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
   
   return ESMF_SUCCESS;
@@ -1387,7 +1387,7 @@ int Attribute::count=0;
 
   // Set the Attribute
   localrc = attr->AttrModifyValue(tk, count, value);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
   
   // return
@@ -1597,7 +1597,7 @@ int Attribute::count=0;
 
   // call local copy on this Attribute 
   localrc = AttributeCopy(source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // copy Attributes and Attribute packages by reference
@@ -1613,10 +1613,10 @@ int Attribute::count=0;
     (attr->attrBase) = (this->attrBase); 
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     localrc = AttributeSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   // copy Attribute packages by reference
@@ -1632,10 +1632,10 @@ int Attribute::count=0;
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.packList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     localrc = AttPackSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   // copy Attribute links by value
@@ -1643,7 +1643,7 @@ int Attribute::count=0;
     attr = source.linkList.at(i);
     ESMC_Logical temp_linkChange = ESMF_TRUE;
     localrc = AttributeLink(attr, &temp_linkChange);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
@@ -1681,7 +1681,7 @@ int Attribute::count=0;
 
   // call local copy on source
   localrc = AttributeCopy(source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // copy base level Attributes by value
@@ -1697,11 +1697,11 @@ int Attribute::count=0;
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // add newly initialized attr to destination
     localrc = AttributeSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   // copy base level Attributes by value
@@ -1717,11 +1717,11 @@ int Attribute::count=0;
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.packList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // add newly initialized attr to destination
     localrc = AttPackSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
@@ -1759,14 +1759,14 @@ int Attribute::count=0;
 
   // call local copy on source
   localrc = AttributeCopy(*source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // copy base level Attributes by value
   for (i=0; i<source->attrList.size(); i++) {
     // add each attr to destination
     localrc = AttributeSet(source->attrList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // now remove this Attribute from source, this is a swap
     source->attrList.erase(source->attrList.begin());
@@ -1775,7 +1775,7 @@ int Attribute::count=0;
   for (i=0; i<source->packList.size(); i++) {
     // add each attr to destination
     localrc = AttPackSet(source->packList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // now remove this Attribute from source, this is a swap
     source->packList.erase(source->packList.begin());
@@ -1785,11 +1785,11 @@ int Attribute::count=0;
   for (i=0; i<source->linkList.size(); i++) {
     // set the links
     localrc = AttributeLink(source->linkList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // now remove the link from source, this is a swap
     localrc = source->AttributeLinkRemove(source->linkList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 */
@@ -1836,7 +1836,7 @@ int Attribute::count=0;
     numattrs = 0;
     objcount++;
     localrc = attpack->AttributeCountTreeAttpack(objcount, numattrs);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
@@ -1844,7 +1844,7 @@ int Attribute::count=0;
   for (i=0; i<linkList.size(); i++) {
     localrc = linkList.at(i)->AttributeCountTree(convention, purpose, object, 
       objcount, numattrs);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -1883,7 +1883,7 @@ int Attribute::count=0;
   // Recurse the hierarchy
   for (i=0; i<packList.size(); i++) {
     localrc = packList.at(i)->AttributeCountTreeAttpack(objcount,numattrs);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -1929,14 +1929,14 @@ int Attribute::count=0;
   if (attpack) {
     index = 0;
     localrc = attpack->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
   // Recurse the hierarchy
   for (i=0; i<linkList.size(); ++i) {
     localrc = linkList.at(i)->AttributeCountTreeLens(convention, purpose, object, attrLens, attrNames);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -2033,7 +2033,7 @@ int Attribute::count=0;
   // Recurse the hierarchy
   for (i=0; i<packList.size(); i++) {
     localrc = packList.at(i)->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -3426,7 +3426,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3470,7 +3470,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3513,7 +3513,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3557,7 +3557,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3600,7 +3600,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3644,7 +3644,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3687,7 +3687,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3731,7 +3731,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3774,7 +3774,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3818,7 +3818,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3861,7 +3861,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3905,7 +3905,7 @@ int Attribute::count=0;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3946,7 +3946,7 @@ int Attribute::count=0;
   if (object.compare(attrList.at(i)->attrObject) == 0 && 
       name.compare(attrList.at(i)->attrName) == 0) {
     localrc = attrList.at(i)->AttrModifyValue(tk, count, value);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   }
@@ -3954,14 +3954,14 @@ int Attribute::count=0;
   // Recurse the hierarchy
   for (i=0; i<packList.size(); i++) {
     localrc = packList.at(i)->AttributeSetObjsInTree(object,name,tk,count,value);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }  
 
   // Recurse the hierarchy
   for (i=0; i<linkList.size(); i++) {
     localrc = linkList.at(i)->AttributeSetObjsInTree(object,name,tk,count,value);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }  
 
@@ -4008,16 +4008,16 @@ int Attribute::count=0;
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // place file-read attributes into.
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, this, &localrc);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   // read the XML file, placing contents into this Attribute node
   localrc = io_xml->read(fileNameLen, fileName, schemaFileNameLen, schemaFileName);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   return rc;
@@ -4318,18 +4318,18 @@ int Attribute::count=0;
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // write from
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, this, &localrc);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   // write the XML file, from this Attribute node
   // TODO:  single call to IO_XML::write(); assumes centralized attribute tree
   //        traversal method, used from IO_XML::write().
   localrc = io_xml->write(fileNameLen, fileName);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   return rc;
@@ -4388,7 +4388,7 @@ int Attribute::count=0;
   string fileName = basename + ".xml";
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, fileName.size(),fileName.c_str(),
                               (ESMCI::Attribute*)this, &localrc);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   // Write ESMF header
   string comment = "Generated with ESMF Version ";
@@ -4399,7 +4399,7 @@ int Attribute::count=0;
     sprintf(msgbuf, "Xerces C++ library (>= v3.1.0) not present");
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, msgbuf, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_RC_LIB_NOT_PRESENT;
   }
 
@@ -4415,7 +4415,7 @@ int Attribute::count=0;
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -4427,7 +4427,7 @@ int Attribute::count=0;
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -4442,7 +4442,7 @@ int Attribute::count=0;
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -4454,7 +4454,7 @@ int Attribute::count=0;
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -4469,7 +4469,7 @@ int Attribute::count=0;
       sprintf(msgbuf, "failed finding an attribute");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -4481,7 +4481,7 @@ int Attribute::count=0;
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -4517,48 +4517,48 @@ int Attribute::count=0;
            "\n  xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
            " xmlns:wtr", "http://www.cuahsi.org/waterML/",
            "\n  xmlns", "http://www.cuahsi.org/waterML/1.0/");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeStartElement("queryInfo", "", 1, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   
     localrc = io_xml->writeElement("creationTime",
                                    "2009-01-08T15:52:17.8495Z", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeStartElement("criteria", "", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeElement("locationParam",
                                    "LittleBearRiver:USU-LBR-Paradise", 3, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeElement("variableParam", "LBR:USU39", 3, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeStartElement("timeParam", "", 3, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeElement("beginDateTime", "2008-04-14T13:00:00", 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeElement("endDateTime", "2008-04-15T12:00:00", 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("timeParam", 3);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("criteria", 2);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeElement("note", "OD Web Service", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("queryInfo", 1);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeStartElement("timeSeries", "", 1, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
                convention.compare("CIM 1.0")==0 &&
@@ -4575,17 +4575,17 @@ int Attribute::count=0;
            "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
            "\n      xmlns", "http://www.earthsystemmodeling.org",
            "\n      xsi:schemaLocation", "http://www.earthsystemmodeling.org file:/esmf_model_component.xsd");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 #if 0
     // TODO:  write as separate elements instead of atts ?
     localrc = io_xml->writeStartElement("model_component", "", 1, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("name", modelcompname, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("full_name", fullname, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("version", version, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 #endif
 
   }
@@ -4596,7 +4596,7 @@ int Attribute::count=0;
     sprintf(msgbuf, "Attribute failed counting fields");
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_FAILURE;
   }
  
@@ -4621,7 +4621,7 @@ int Attribute::count=0;
     sprintf(msgbuf, "Attribute failed recursing in WriteXML");
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -4631,10 +4631,10 @@ int Attribute::count=0;
 
     // write the WaterML footer
     localrc = io_xml->writeEndElement("timeSeries", 1);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("timeSeriesResponse", 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
                convention.compare("CIM 1.0")==0 &&
@@ -4642,12 +4642,12 @@ int Attribute::count=0;
 
     // write the ESMF XML footer
     localrc = io_xml->writeEndElement("model_component", 1);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   
   // destroy the io_xml object, which closes the file
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return localrc;
 
@@ -4706,7 +4706,7 @@ int Attribute::count=0;
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
           "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", &localrc);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
       }
       // get next occurence of this attpack, if any
@@ -4724,21 +4724,21 @@ int Attribute::count=0;
           purpose.compare("TimeSeries")==0)) {
       // write the field header
       localrc = io_xml->writeStartElement("variable_set", "", 2, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     // call the field write buffer method
     localrc = AttributeWriteXMLbufferfield(io_xml, convention, purpose, index, columns);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbufferfield");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
     }
     if (!(convention.compare("WaterML")==0 &&
           purpose.compare("TimeSeries")==0)) {
       // write the field footer
       localrc = io_xml->writeEndElement("variable_set", 2);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     // done with field
     fielddone = true;
@@ -4752,19 +4752,19 @@ int Attribute::count=0;
       // write the grid header
       localrc = io_xml->writeStartElement("GridSpec", "", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
       localrc = io_xml->writeStartElement("Mosaic", "", 1, 1, "name", attpack->attrBase->ESMC_BaseGetName());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
       localrc = attpack->AttributeWriteXMLbuffergrid(io_xml);
       if (localrc != ESMF_SUCCESS) {
         sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffergrid");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         return ESMF_FAILURE;
       }
       // write the grid footer
       localrc = io_xml->writeEndElement("Mosaic", 1);
       localrc = io_xml->writeEndElement("GridSpec", 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       griddone = true;
       return ESMF_SUCCESS;
     }
@@ -4818,45 +4818,45 @@ int Attribute::count=0;
           case ESMC_TYPEKIND_I4:
             outstring << attrList.at(i)->vi; 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
             outstring << attrList.at(i)->vl; 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
             outstring << attrList.at(i)->vf; 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
             outstring << attrList.at(i)->vd; 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
             if (attrList.at(i)->vb == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 2, 0);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             } else if (attrList.at(i)->vb == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 2, 0);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
             localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 2, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           default:
             localrc = io_xml->writeElement(name, "N/A", 2, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
         }
       } else if (attrList.at(i)->items >1) { 
@@ -4913,57 +4913,57 @@ int Attribute::count=0;
         string name = attrList.at(i)->attrName; 
         //localrc = io_xml->writeStartElement(attrPurpose, "", 2, 0);
         //localrc = io_xml->writeStartElement(name+"_set", "", 2, 0);
-        //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ostringstream outstring;
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
             outstring << attrList.at(i)->vi; 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
             outstring << attrList.at(i)->vl; 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
             outstring << attrList.at(i)->vf; 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
             outstring << attrList.at(i)->vd; 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
             if (attrList.at(i)->vb == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 3, 0);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             } else if (attrList.at(i)->vb == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 3, 0);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
             localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 3, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           default:
             localrc = io_xml->writeElement(name, "N/A", 1, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
       }
       //localrc = io_xml->writeEndElement(attrPurpose, 2);
       //localrc = io_xml->writeEndElement(name+"_set", 2);
-      //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrList.at(i)->items >1) {
       sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
@@ -5017,7 +5017,7 @@ int Attribute::count=0;
          "xmlns", "http://metaforclimate.eu/schema/cim/1.5",
          "xsi:schemaLocation",
          "http://metaforclimate.eu/schema/cim/1.5/cim.xsd");
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   
   //
   // write CIM document node <modelComponent>
@@ -5027,7 +5027,7 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Attribute failed recursing in WriteXML", &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -5039,7 +5039,7 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Attribute failed recursing in WriteXML", &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -5051,7 +5051,7 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Attribute failed recursing in WriteXML", &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -5059,7 +5059,7 @@ int Attribute::count=0;
   // Write the CIM 1.0 XML file footer
   //
   localrc = io_xml->writeEndElement("CIMDocumentSet", 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -5103,56 +5103,56 @@ int Attribute::count=0;
   if (attpack == NULL) return ESMF_SUCCESS;  // if package not found, return 
 
   localrc = io_xml->writeStartElement("modelComponent", "", indent++, 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("ShortName")) {
     localrc = attpack->AttributeGet("ShortName", &value);
     localrc = io_xml->writeElement("shortName", value, indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("LongName")) {
     localrc = attpack->AttributeGet("LongName", &value);
     localrc = io_xml->writeElement("longName", value, indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("Description")) {
     localrc = attpack->AttributeGet("Description", &value);
     localrc = io_xml->writeElement("description", value, indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // <componentProperties><componentProperty> nodes
   if (AttPackIsSet("CIM 1.0", "Inputs Description", "field")) {
     localrc = io_xml->writeStartElement("componentProperties", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = AttributeWriteCIMCP(io_xml, indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
  
     localrc = io_xml->writeEndElement("componentProperties", indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // TODO: uncomment and expand when we have better definition from CIM
   //localrc = io_xml->writeElement("numericalProperties", "", indent, 0);
-  //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   //
   //localrc = io_xml->writeElement("scientificProperties", "", indent, 0);
-  //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   // <responsibleParty> nodes
   localrc = attpack->AttributeWriteCIMRP(io_xml, indent);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
  
   if (attpack->AttributeIsSet("ReleaseDate")) {
     localrc = attpack->AttributeGet("ReleaseDate", &value);
     localrc = io_xml->writeElement("releaseDate", value, indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // <citation> nodes
   localrc = attpack->AttributeWriteCIMcitation(io_xml, indent);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
  
   // <onlineResource>
   if (attpack->AttributeIsSet("URL")) {
@@ -5162,19 +5162,19 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0); 
     localrc = io_xml->writeEndElement("gmd:linkage", --indent); 
     localrc = io_xml->writeEndElement("onlineResource", --indent); 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // <composition><coupling> (all fields, written only in top-level component)
   if (callCount == 1) {
     localrc = io_xml->writeStartElement("composition", "", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = AttributeWriteCIMcomposition(io_xml);
 
     localrc = io_xml->writeElement("description", "", 3, 0);
     localrc = io_xml->writeEndElement("composition", 2);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // <childComponent> tree
@@ -5189,11 +5189,11 @@ int Attribute::count=0;
       } else {
         // recurse through child CIM components
         localrc = io_xml->writeStartElement("childComponent", "", indent, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = linkList.at(i)->AttributeWriteCIMmodelComp(io_xml, ++indent);
 
         localrc = io_xml->writeEndElement("childComponent", --indent);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
     }
   }
@@ -5210,7 +5210,7 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("documentVersion", "1", indent, 0);
     localrc = io_xml->writeElement("documentCreationDate", 
                                    "2010-09-30T11:13:22Z", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // <documentGenealogy>
@@ -5224,7 +5224,7 @@ int Attribute::count=0;
                                         "type", "laterVersionOf");
       // type: {'similarTo', 'other', 'laterVersionOf', 'fixedVersionOf'}
     localrc = io_xml->writeElement("description", value, ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("PreviousVersion")) {
     localrc = attpack->AttributeGet("PreviousVersion", &value);
@@ -5236,11 +5236,11 @@ int Attribute::count=0;
     localrc = io_xml->writeEndElement("documentRelationship", --indent);
     localrc = io_xml->writeEndElement("relationship", --indent);
     localrc = io_xml->writeEndElement("documentGenealogy", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   localrc = io_xml->writeEndElement("modelComponent", --indent);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -5280,22 +5280,22 @@ int Attribute::count=0;
   if (attpack == NULL) return ESMF_SUCCESS;
 
   localrc = io_xml->writeStartElement("simulationRun", "", 1, 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("SimulationRationale")) {
     localrc = attpack->AttributeGet("SimulationRationale", &value);
     localrc = io_xml->writeElement("rationale", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationShortName")) {
     localrc = attpack->AttributeGet("SimulationShortName", &value);
     localrc = io_xml->writeElement("shortName", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationLongName")) {
     localrc = attpack->AttributeGet("SimulationLongName", &value);
     localrc = io_xml->writeElement("longName", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // TODO: required elements in CIM 1.5; need atts defined in package ?
@@ -5313,17 +5313,17 @@ int Attribute::count=0;
   localrc = io_xml->writeEndElement("spinupDateRange", 2);
   localrc = io_xml->writeElement("spinupSimulation", "", 2, 0);
   localrc = io_xml->writeElement("controlSimulation", "", 2, 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("SimulationStartDate")) {
     localrc = attpack->AttributeGet("SimulationStartDate", &value);
     localrc = io_xml->writeElement("startPoint", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationDuration")) {
     localrc = attpack->AttributeGet("SimulationDuration", &value);
     localrc = io_xml->writeElement("duration", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   // TODO: required elements in CIM 1.5; need atts defined in package ?
@@ -5335,10 +5335,10 @@ int Attribute::count=0;
   localrc = io_xml->writeElement("documentVersion", "1", 2, 0);
   localrc = io_xml->writeElement("documentCreationDate", 
                                  "2010-09-30T11:13:22Z", 2, 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeEndElement("simulationRun", 1);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -5376,7 +5376,7 @@ int Attribute::count=0;
   if (attpack == NULL) return ESMF_SUCCESS;
 
   localrc = io_xml->writeStartElement("platform", "", 1, 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("MachineName") &&
       attpack->AttributeIsSet("CompilerName")) {
@@ -5385,12 +5385,12 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("shortName", machineName + compilerName, 2, 0);
     localrc = io_xml->writeElement("longName", "Machine " + machineName +
                                    " and compiler " + compilerName, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineDescription")) {
     localrc = attpack->AttributeGet("MachineDescription", &value);
     localrc = io_xml->writeElement("description", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   localrc = io_xml->writeStartElement("unit", "", 2, 0);
@@ -5399,12 +5399,12 @@ int Attribute::count=0;
   if (attpack->AttributeIsSet("MachineName")) {
     localrc = attpack->AttributeGet("MachineName", &value);
     localrc = io_xml->writeElement("machineName", value, 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineSystem")) {
     localrc = attpack->AttributeGet("MachineSystem", &value);
     localrc = io_xml->writeElement("machineSystem", value, 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineOperatingSystem")) {
     localrc = attpack->AttributeGet("MachineOperatingSystem", &value);
@@ -5412,7 +5412,7 @@ int Attribute::count=0;
                                    "cv", "true",
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineVendor")) {
     localrc = attpack->AttributeGet("MachineVendor", &value);
@@ -5420,7 +5420,7 @@ int Attribute::count=0;
                                    "cv", "true",
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineInterconnectType")) {
     localrc = attpack->AttributeGet("MachineInterconnectType", &value);
@@ -5428,17 +5428,17 @@ int Attribute::count=0;
                                    "cv", "true",
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineMaximumProcessors")) {
     localrc = attpack->AttributeGet("MachineMaximumProcessors", &value);
     localrc = io_xml->writeElement("machineMaximumProcessors", value, 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineCoresPerProcessor")) {
     localrc = attpack->AttributeGet("MachineCoresPerProcessor", &value);
     localrc = io_xml->writeElement("machineCoresPerProcessor", value, 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineProcessorType")) {
     localrc = attpack->AttributeGet("MachineProcessorType", &value);
@@ -5446,7 +5446,7 @@ int Attribute::count=0;
                                    "cv", "true",
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   localrc = io_xml->writeEndElement("machine", 3);
@@ -5455,13 +5455,13 @@ int Attribute::count=0;
     localrc = attpack->AttributeGet("CompilerName", &value);
     localrc = io_xml->writeStartElement("compiler", "", 3, 0);
     localrc = io_xml->writeElement("compilerName", value, 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("CompilerVersion")) {
     localrc = attpack->AttributeGet("CompilerVersion", &value);
     localrc = io_xml->writeElement("compilerVersion", value, 4, 0);
     localrc = io_xml->writeEndElement("compiler", 3);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   localrc = io_xml->writeEndElement("unit", 2);
@@ -5471,17 +5471,17 @@ int Attribute::count=0;
   //localrc = io_xml->writeStartElement("contact", "", 2, 0);
   //localrc = attpack->AttributeWriteCIMRP(io_xml, 3);
   //localrc = io_xml->writeEndElement("contact", 2);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
   localrc = io_xml->writeElement("documentVersion", "1", 2, 0);
   localrc = io_xml->writeElement("documentCreationDate", 
                                    "2010-09-30T11:13:22Z", 2, 0);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeEndElement("platform", 1);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -5522,7 +5522,7 @@ int Attribute::count=0;
 
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
       localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
@@ -5531,112 +5531,112 @@ int Attribute::count=0;
         if (attpack->AttributeIsSet("Name")) {
           localrc = attpack->AttributeGet("Name", &value);
           localrc = io_xml->writeStartElement("gmd:organisationName", "", indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("gmd:organisationName", --indent);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       } else if (value == "PI" || value == "author" || value == "contact") {
         if (attpack->AttributeIsSet("Name")) {
           localrc = attpack->AttributeGet("Name", &value);
           localrc = io_xml->writeStartElement("gmd:individualName", "", indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("gmd:individualName", --indent);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       }
     }
 
     // contactInfo header
     localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // address header
     localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:deliveryPoint", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("PhysicalAddress")) {
       localrc = attpack->AttributeGet("PhysicalAddress", &value);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else { // output empty tag (required)
       localrc = io_xml->writeElement("gco:CharacterString", "", ++indent, 0);
     }
 
     // address middle
     localrc = io_xml->writeEndElement("gmd:deliveryPoint", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:electronicMailAddress", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("EmailAddress")) {
       localrc = attpack->AttributeGet("EmailAddress", &value);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else {  // output empty tag (required)
       localrc = io_xml->writeElement("gco:CharacterString", "", ++indent, 0);
     }
 
     // address footer
     localrc = io_xml->writeEndElement("gmd:electronicMailAddress", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeEndElement("gmd:CI_Address", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeEndElement("gmd:address", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // url header
     localrc = io_xml->writeStartElement("gmd:onlineResource", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:CI_OnlineResource", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("URL")) {
       localrc = attpack->AttributeGet("URL", &value);
       localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else { // output empty tag (required)
       localrc = io_xml->writeElement("gmd:URL", "", ++indent, 0);
     }
 
     // url footer
     localrc = io_xml->writeEndElement("gmd:linkage", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeEndElement("gmd:CI_OnlineResource", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeEndElement("gmd:onlineResource", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // contact footer
     localrc = io_xml->writeEndElement("gmd:CI_Contact", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeEndElement("gmd:contactInfo", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
       localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
       if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
       if (value == "center") value = "centre";
       localrc = io_xml->writeStartElement("gmd:role", "", indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_RoleCode", "", ++indent, 2,
                                      "codeList", "",
                                      "codeListValue",
                                      value.c_str());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:role", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
 
     // get initials from IndividualName
@@ -5652,12 +5652,12 @@ int Attribute::count=0;
       }
       abbr[i] = '\0';
       localrc = io_xml->writeElement("abbreviation", abbr, indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
 
     // responsibleParty footer
     localrc = io_xml->writeEndElement("responsibleParty", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } // end for each nested package
 
@@ -5717,23 +5717,23 @@ int Attribute::count=0;
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             2, "intent", value.c_str(), 
                                             "represented", "true");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             1, "represented", "true");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
            (ap->parent->AttributeIsSet("ShortName"))) {
         localrc = ap->parent->AttributeGet("ShortName", &value);
         localrc = io_xml->writeElement("shortName", value, indent+2, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
            (ap->parent->AttributeIsSet("LongName"))) {
         localrc = ap->parent->AttributeGet("LongName", &value);
         localrc = io_xml->writeElement("longName", value, indent+2, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
            (ap->parent->AttributeIsSet("Units"))) {
@@ -5741,7 +5741,7 @@ int Attribute::count=0;
         localrc = io_xml->writeElement("units", "", indent+2, 3,
                                        "cv", "true", "open", "true", 
                                        "value", value.c_str());
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
            (ap->parent->AttributeIsSet("StandardName"))) {
@@ -5749,10 +5749,10 @@ int Attribute::count=0;
         localrc = io_xml->writeElement("standardName", "", indent+2, 3,
                                        "cv", "true", "open", "true", 
                                        "value", value.c_str());
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       localrc = io_xml->writeEndElement("componentProperty", indent+1);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
   }
 
@@ -5805,77 +5805,77 @@ int Attribute::count=0;
 
     // citation header
     localrc = io_xml->writeStartElement("citation", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ShortTitle")) {
       localrc = attpack->AttributeGet("ShortTitle", &value);
       localrc = io_xml->writeStartElement("gmd:title", "", ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:title", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("Date")) {
       localrc = attpack->AttributeGet("Date", &value);
       localrc = io_xml->writeStartElement("gmd:date", "", indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeStartElement("gmd:CI_Date", "", ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeStartElement("gmd:date", "", ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:Date", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:date", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeStartElement("gmd:dateType", "", indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_DateTypeCode", "", 
                                      ++indent, 2,
                                      "codeList", "",
                                      "codeListValue", "");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:dateType", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:CI_Date", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:date", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("PresentationForm")) {
       localrc = attpack->AttributeGet("PresentationForm", &value);
       localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", value,
                                      ++indent,
                                      2, "codeList", "",
                                      "codeListValue", "");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("DOI")) {
       localrc = attpack->AttributeGet("DOI", &value);
       localrc = io_xml->writeStartElement("gmd:otherCitationDetails", "", 
                                           indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("LongTitle")) {
       localrc = attpack->AttributeGet("LongTitle", &value);
       localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:collectiveTitle", --indent);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     // citation footer
     localrc = io_xml->writeEndElement("citation", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } // end for each nested package
 
@@ -5922,7 +5922,7 @@ int Attribute::count=0;
           localrc = attpack->AttributeGet("CouplingPurpose", &value);
           localrc = io_xml->writeStartElement("coupling", "", 3, 2,
                        "fullySpecified", "false", "purpose", value.c_str());
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
         if (attpack->AttributeIsSet("Frequency")) {
           localrc = attpack->AttributeGet("Frequency", &value);
@@ -5944,7 +5944,7 @@ int Attribute::count=0;
                                       "units", units, "variableRate", "false");
           localrc = io_xml->writeElement("rate", freq, 5, 0);
           localrc = io_xml->writeEndElement("timeProfile", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
         if (attpack->AttributeIsSet("SpatialRegriddingMethod") &&
             attpack->AttributeIsSet("SpatialRegriddingDimension")) {
@@ -6003,7 +6003,7 @@ int Attribute::count=0;
         }
 
         localrc = io_xml->writeEndElement("coupling", 3);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
     }
     // recurse through ESMF objects
@@ -6051,7 +6051,7 @@ int Attribute::count=0;
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
         "AttributeWriteCIMtraverse failed AttributeWriteCIMbuffer", &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     return ESMF_FAILURE;
     }
 
@@ -6118,7 +6118,7 @@ int Attribute::count=0;
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLbufferfield failed AttributeWriteXMLbufferfieldT");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
     }
   }
@@ -6168,12 +6168,12 @@ int Attribute::count=0;
     for (i=0; i<attrList.size(); i++) { 
       if (index == 0) {
         localrc = io_xml->writeStartElement("variable", "", 3, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       string name = attrList.at(i)->attrName; 
       if (attrList.at(i)->items == 0) {
         localrc = io_xml->writeElement(name, "", 4, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else if (attrList.at(i)->items == 1) {
         ostringstream outstring;
         switch (attrList.at(i)->tk)
@@ -6181,45 +6181,45 @@ int Attribute::count=0;
           case ESMC_TYPEKIND_I4:
             outstring << attrList.at(i)->vi; 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
             outstring << attrList.at(i)->vl; 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
             outstring << attrList.at(i)->vf; 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
             outstring << attrList.at(i)->vd; 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
             if (attrList.at(i)->vb == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 4, 0);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             } else if (attrList.at(i)->vb == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 4, 0);
-              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
             localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           default:
             localrc = io_xml->writeElement(name, "N/A", 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
         }
 
@@ -6234,7 +6234,7 @@ int Attribute::count=0;
       ++index;
       if (index == columns) {
         localrc = io_xml->writeEndElement("variable", 3);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
     }
 
@@ -6315,10 +6315,10 @@ int Attribute::count=0;
     if (attrPurpose.compare("sourceInfo")==0) {
       localrc = io_xml->writeStartElement("sourceInfo", "", 2, 1,
                                           "xsi:type", "SiteInfoType");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrPurpose.compare("variable")==0) {
       localrc = io_xml->writeStartElement("variable", "", 2, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
 
     // print each attribute in attpack
@@ -6333,48 +6333,48 @@ int Attribute::count=0;
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 3, 2,
                                   "network", "LittleBearRiver", "siteID", "2");
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("latitude")==0) {
           localrc = io_xml->writeStartElement("geoLocation", "", 3, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeStartElement("geogLocation", "", 4, 2,
                             "xsi:type", "LatLonPointType", "srs", "EPSG:4269");
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 5, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("longitude")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 5, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("geogLocation", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("X")==0) {
           localrc = io_xml->writeStartElement("localSiteXY", "", 4, 1,
                             "projectionInformation", " NAD83 / UTM zone 12N");
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 5, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("Y")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 5, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("localSiteXY", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("geoLocation", 3);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("County")==0 ||
                    attrList.at(i)->attrName.compare("State")==0  ||
                    attrList.at(i)->attrName.compare("Site Comments")==0) {
           localrc = io_xml->writeElement("note", attrList.at(i)->vcp, 3, 1,
                             "title", attrList.at(i)->attrName.c_str());
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else { // siteName or verticalDatum
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 3, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       } else if (attrPurpose.compare("variable")==0) {
         if (attrList.at(i)->attrName.compare("variableCode")==0) {
@@ -6382,22 +6382,22 @@ int Attribute::count=0;
                                          attrList.at(i)->vcp, 3, 3,
                             "vocabulary", "LBR", "default", "true",
                             "variableID", "39");
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("units")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName, 
                                          attrList.at(i)->vcp, 3, 2,
                             "unitsAbbreviation", "mg/L", "unitsCode", "199");
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("timeSupport")==0) {
           localrc = io_xml->writeStartElement(attrList.at(i)->attrName, "", 3, 1,
                             "isRegular", (attrList.at(i)->vcp).c_str());
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement(attrList.at(i)->attrName, 3);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 3, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       } else if (attrPurpose.compare("values")==0) {
         // collect attr names, values to output at end of loop
@@ -6420,41 +6420,41 @@ int Attribute::count=0;
           localrc = io_xml->writeStartElement(attrPurpose, "", 3, 1,
                         attrList.at(i)->attrName.c_str(),
                         attrList.at(i)->vcp.c_str());
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 4, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement(attrPurpose, 3);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       } else if (attrPurpose.compare("source")==0) {
         if (attrList.at(i)->attrName.compare("sourceID")==0) {
           localrc = io_xml->writeStartElement(attrPurpose, "", 3, 1,
                         attrList.at(i)->attrName.c_str(),
                         attrList.at(i)->vcp.c_str());
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcp, 4, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           if (attrList.at(i)->attrName.compare("SourceDescription")==0) {
             localrc = io_xml->writeStartElement("ContactInformation", "", 4, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             localrc = io_xml->writeElement("ContactName", "Amber Spackman", 5, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             localrc = io_xml->writeElement("TypeOfContact", "main", 5, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             localrc = io_xml->writeElement("Phone", "1-435-797-0045", 5, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             localrc = io_xml->writeElement("Email", "amber.s@aggiemail.usu.edu", 5, 0);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             localrc = io_xml->writeElement("Address", 
                              "8200 Old Main Hill, Logan, Utah 84322-8200", 5, 1,
                              "xsi:type", "xsd:string");
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             localrc = io_xml->writeEndElement("ContactInformation", 4);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           }
         }
       }
@@ -6465,7 +6465,7 @@ int Attribute::count=0;
          xmlAttName[0].c_str(), xmlAttVal[0].c_str(),
          xmlAttName[1].c_str(), xmlAttVal[1].c_str(),
          xmlAttName[2].c_str(), xmlAttVal[2].c_str());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrPurpose.compare((attrPurpose.size()-2),2,".1")==0) {
       // <value>
       ostringstream outstring;
@@ -6477,20 +6477,20 @@ int Attribute::count=0;
          xmlAttName[3].c_str(), xmlAttVal[3].c_str(),
          xmlAttName[4].c_str(), xmlAttVal[4].c_str(),
          xmlAttName[5].c_str(), xmlAttVal[5].c_str());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrPurpose.compare("source")==0) {
       localrc = io_xml->writeEndElement("source", 3);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("values", 2);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     // attpack footer
     else if (attrPurpose.compare("sourceInfo")==0) {
       localrc = io_xml->writeEndElement("sourceInfo", 2);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrPurpose.compare("variable")==0) {
       localrc = io_xml->writeEndElement("variable", 2);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
 
   } // end if not TimeSeries attpack wrapper
@@ -7106,7 +7106,7 @@ int Attribute::count=0;
   localrc = ESMC_RC_NOT_IMPL;
 
   localrc = AttributeCopyValue(source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) delete this;
 
   return (*this);
@@ -7306,10 +7306,10 @@ int Attribute::count=0;
       attr->setBase(attrBase);
       attr->parent = this;
       localrc = attr->ESMC_Deserialize(buffer,&loffset);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttributeSet(attr);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
       
@@ -7321,10 +7321,10 @@ int Attribute::count=0;
       attr->setBase(attrBase);
       attr->parent = this;
       localrc = attr->ESMC_Deserialize(buffer,&loffset);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackSet(attr);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
       
@@ -7373,12 +7373,12 @@ int Attribute::count=0;
     localrc = ESMC_RC_NOT_IMPL;
     cc = false;
     localrc = ESMC_SerializeCC(buffer,length,loffset,cc,inquireflag);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     if (inquireflag != ESMF_INQUIREONLY) {
       cc = true;
       localrc = ESMC_SerializeCC(buffer,length,*offset,cc,inquireflag);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     } else
       *offset = loffset;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.41 2011/02/09 06:59:35 earl.r.schwab Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.42 2011/02/23 05:29:13 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.41 2011/02/09 06:59:35 earl.r.schwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.42 2011/02/23 05:29:13 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -164,7 +164,7 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackAddAttribute(cname, cconv, cpurp, cobj);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackaddattribute
@@ -263,7 +263,7 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackCreateCustom(cconv, cpurp, cobj);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackcreatecustom
@@ -362,7 +362,7 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackcreatestandard
@@ -543,7 +543,7 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttPackNest(cconv, cpurp, cobj,
                                      *nestCount, cnconv, cnpurp);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacknest
@@ -765,7 +765,7 @@ extern "C" {
                                                *nestCount,
                                                cnapinamelist,
                                                cnapinamecount);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
   // return number of attpack instance names
@@ -781,7 +781,7 @@ extern "C" {
     status = ESMC_CtoF90string(const_cast<char*>(cnapinamelist[i].c_str()), 
                                &nestAttPackInstanceNameList[j], 
                                nestAttPackInstanceNameLens[i]);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     j += nestAttPackInstanceNameLens[i];
   }
@@ -895,7 +895,7 @@ extern "C" {
 
   // Remove the attribute package from the object.
   status = (**base).root.AttPackRemove(cconv, cpurp, cobj, capname);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackremove
@@ -1028,7 +1028,7 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttPackRemoveAttribute(cname, cconv, cpurp, cobj,
                                                 capname);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackremoveattribute
@@ -1189,7 +1189,7 @@ extern "C" {
 
   // get length of the attribute
   status = attpack->AttributeGet(cname, llens, 1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     ESMC_LogDefault.Write("failed getting item char* lengths", ESMC_LOG_INFO);
     delete [] llens;
@@ -1209,7 +1209,7 @@ extern "C" {
 
   string cvalue;
   status = attpack->AttributeGet(cname, &cvalue);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     ESMC_LogDefault.Write("failed getting Attribute value", ESMC_LOG_INFO);
     delete [] llens;
@@ -1217,7 +1217,7 @@ extern "C" {
   }
 
   status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
   delete [] llens;
@@ -1381,7 +1381,7 @@ extern "C" {
 
   // get type of the Attribute from the attpack
   status = attpack->AttributeGet(cname, &attrTypeKind, NULL);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
   
   if (attrTypeKind != *tk) {
@@ -1407,7 +1407,7 @@ extern "C" {
   
   //  use llens to get the lengths of all items on this attribute
   status = attpack->AttributeGet(cname, llens, lcount);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
     return;
@@ -1430,7 +1430,7 @@ extern "C" {
 
   // next we get all the strings into the char**
   status = attpack->AttributeGet(cname, &lcvalue);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
     return;
@@ -1442,7 +1442,7 @@ extern "C" {
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), 
       &valueList[j], (lcvalue[i]).size());
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) {
       delete [] llens;
       return;
@@ -1607,7 +1607,7 @@ extern "C" {
 
   // get type of the Attribute from the attpack
   status = attpack->AttributeGet(cname, &attrTk, &attrCount);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
 
   if (attrTk != *tk) {
@@ -1826,7 +1826,7 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttPackIsPresent(cname, cconv, cpurp, cobj, capname, 
                                           present);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
   
 }  // end c_esmc_attpackispresent
@@ -1874,7 +1874,7 @@ extern "C" {
   }
 
   status = (**destination).root.AttributeMove(&((**source).root));
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeMove
@@ -1997,7 +1997,7 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj,
                                     capname);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacksetchar
@@ -2134,7 +2134,7 @@ extern "C" {
   // Set the attribute on the object.
   status = (**base).root.AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp,
                                     cobj, capname);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpacksetcharlist
@@ -2472,7 +2472,7 @@ extern "C" {
   // Write the attributes from the object.
   status = (**base).root.AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
     (*base)->ESMC_Base::ESMC_BaseGetName());
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributewritetab
@@ -2591,7 +2591,7 @@ extern "C" {
   // Write the attributes from the object.
   status = (**base).root.AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
     (*base)->ESMC_Base::ESMC_BaseGetName());
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackwritexml
@@ -2656,17 +2656,17 @@ extern "C" {
   
   if (*attcopyflag == ESMC_ATTCOPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
       status = (**destination).root.AttributeCopyValue((**source).root);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }
   else if (*attcopyflag == ESMC_ATTCOPY_HYBRID) {
       status = (**destination).root.AttributeCopyHybrid((**source).root);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }
   else if (*attcopyflag == ESMC_ATTCOPY_REFERENCE) {
       status = (**destination).root.AttributeMove(&((**source).root));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }
   else {
@@ -2742,7 +2742,7 @@ extern "C" {
   
   //  use llens to get the lengths of all items on this attribute
   status = (**base).root.AttributeGet(cname, llens, 1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     ESMC_LogDefault.Write("failed getting item char* lengths", ESMC_LOG_INFO);
     delete [] llens;
@@ -2770,7 +2770,7 @@ extern "C" {
   }
 
   status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
     
   delete [] llens;
@@ -2843,7 +2843,7 @@ extern "C" {
 
   // check the typekind, do not return error (default value possible)
   status = (**base).root.AttributeGet(cname, &attrTypeKind, NULL);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
   
   if (attrTypeKind != *tk) {
@@ -2869,7 +2869,7 @@ extern "C" {
   
   //  use llens to get the lengths of all items on this attribute
   status = (**base).root.AttributeGet(cname, llens, lcount);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
     return;
@@ -2894,7 +2894,7 @@ extern "C" {
 
   // next we get all the strings into the char**
   status = (**base).root.AttributeGet(cname, &cvalue);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
     return;
@@ -2905,7 +2905,7 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (cvalue[i].c_str()), &valueList[j], lens[i]);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
     return;
@@ -2977,7 +2977,7 @@ extern "C" {
   }
 
   status = (**base).root.AttributeGet(cname, &attrTk, &attrItems);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
 
   if (attrTk != *tk) {
@@ -3140,7 +3140,7 @@ extern "C" {
   }
 
   status = (**base).root.AttributeGet(cname, tk, count);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeGetInfoName
@@ -3211,7 +3211,7 @@ extern "C" {
   string cname;
 
   status = (**base).root.AttributeGet((*num)-1, &cname, tk, count);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
   if (cname.empty()) {
@@ -3222,7 +3222,7 @@ extern "C" {
   }
 
   status = ESMC_CtoF90string(const_cast<char*> (cname.c_str()), name, nlen);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeGetInfoNum
@@ -3360,7 +3360,7 @@ extern "C" {
   
   // Set the attribute on the object.
   status = (**base).root.AttributeIsPresent(cname, present);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributeispresent
@@ -3417,7 +3417,7 @@ extern "C" {
 
   // Set the attribute link on the object.
   status = (**source).root.AttributeLink(&(**destination).root, linkChange);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeLink
@@ -3474,7 +3474,7 @@ extern "C" {
 
   // Set the attribute link on the object.
   status = (**source).root.AttributeLinkRemove(&(**destination).root, linkChange);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeLinkRemove
@@ -3535,7 +3535,7 @@ extern "C" {
   
   // Set the attribute on the object.
   status = (**base).root.AttributeRemove(cname);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributeremove
@@ -3609,7 +3609,7 @@ extern "C" {
   
   // Set the attribute on the object
   status = (**base).root.AttributeSet(cname, &cvalue);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetChar
@@ -3697,7 +3697,7 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttributeSet(cname, cvalue.size(), &cvalue);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetCharList
@@ -3892,7 +3892,7 @@ extern "C" {
   count = 1;
   FTN(c_esmc_attributesetobjsintree)(base, object, name, 
       &tk, &count, (void *)&cvalue, &status, olen, nlen); 
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetObjChrInTree
@@ -3974,7 +3974,7 @@ extern "C" {
 
   // Set the attribute on the object.
   status = (**base).root.AttributeSetObjsInTree(cname,cobject,*tk,*count,value);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetObjsInTree
@@ -4020,7 +4020,7 @@ extern "C" {
   //check the VM
   if (*vm == ESMC_NULL_POINTER){
     *vm = ESMCI::VM::getCurrent(&status);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
@@ -4031,7 +4031,7 @@ extern "C" {
 
   // Update the Attribute
   status = (**base).root.AttributeUpdate(*vm, rootListl);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeUpdate
@@ -4072,7 +4072,7 @@ extern "C" {
   
   // Update the Attribute
   status = (**base).root.AttributeUpdateReset();
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMF_ERR_PASSTHRU,
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeUpdate
