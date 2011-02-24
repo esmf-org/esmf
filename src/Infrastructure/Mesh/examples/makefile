@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2010/10/14 23:32:24 svasquez Exp $
+# $Id: makefile,v 1.23 2011/02/24 18:34:26 theurich Exp $
 
 ALL: build_examples
 run: run_examples
@@ -11,16 +11,10 @@ LOCDIR	  = src/Infrastructure/Mesh/examples
 
 
 EXAMPLES_BUILD    = \
+                      $(ESMF_EXDIR)/ESMF_MeshEx \
                       $(ESMF_EXDIR)/ESMC_RendEx \
                       $(ESMF_EXDIR)/ESMC_DCatEx \
                       $(ESMF_EXDIR)/ESMC_RefineEx \
-                      $(ESMF_EXDIR)/ESMC_RegridWgtGenEx \
-                      $(ESMF_EXDIR)/ESMF_MeshEx \
-                      $(ESMF_EXDIR)/ESMF_CubedSphereRegridEx
-#                      $(ESMF_EXDIR)/ESMC_BreckEx \
-
-ESMF_EXAMPLE_CubedSphereRegrid_OBJS = convertSCRIP.o
-ESMF_CubedSphereRegridEx.o: $(ESMF_EXAMPLE_CubedSphereRegrid_OBJS)
 
 EXAMPLES_RUN      = run_ESMF_MeshEx 
 
