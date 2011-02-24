@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_CubedSphereRegridEx.F90,v 1.13 2011/02/23 18:37:48 w6ws Exp $
+! $Id: ESMF_CubedSphereRegridEx.F90,v 1.14 2011/02/24 16:52:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -884,8 +884,9 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
     if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
     if (totaldims /= 2) then
-	call ESMF_LogSetError(ESMF_RC_ARG_RANK,"- The grip has to be 2D", &
-	ESMF_CONTEXT, status)
+	call ESMF_LogSetError(ESMF_RC_ARG_RANK,  &
+          msg="- The grip has to be 2D", &
+	  ESMF_CONTEXT, rcToReturn=status)
 	return
     endif
 
@@ -896,8 +897,9 @@ subroutine ReadRegGrid(filename, dims, coordX, coordY, status)
     if (CDFCheckError (ncStatus, ESMF_METHOD, ESMF_SRCLINE, checkpoint)) goto 90
 
     if (dims(1)*dims(2) /= totalpoints) then
-	call ESMF_LogSetError(ESMF_RC_ARG_SIZE,"- The grid_dims does not match with the grid_size", &
-	ESMF_CONTEXT, status)
+	call ESMF_LogSetError(ESMF_RC_ARG_SIZE,  &
+          msg="- The grid_dims does not match with the grid_size", &
+	  ESMF_CONTEXT, rcToReturn=status)
 	return
     endif
 
@@ -991,7 +993,8 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, checkpoint)
     CDFCheckError = ncStatus .ne. nf_noerror
 
     if (checkpoint) then
-        call ESMF_LogWrite ("netCDF Checkpoint", ESMF_LOG_INFO, lineNo, fileName, module)
+        call ESMF_LogWrite (msg="netCDF Checkpoint", msgtype=ESMF_LOG_INFO,  &
+          line=lineNo, file=fileName, method=module)
 
         print '("CDF Checkpoint detected in ", A, " near line ", I5, ", pet ", I5, ", (", A, ")")', &
           module, lineNo, petNo, fileName
@@ -999,7 +1002,9 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, checkpoint)
 
 
     if (CDFCheckError) then
-        call ESMF_LogWrite ("netCDF Status Return Error", ESMF_LOG_ERROR, lineNo, fileName, module)
+        call ESMF_LogWrite (  &
+          msg="netCDF Status Return Error", msgtype=ESMF_LOG_ERROR, &
+          line=lineNo, file=fileName, method=module)
         print '("NetCDF Error in ", A, " near line ", I5, ", pet ", I5, ", (", A, "), error msg: ", A)', &
           module, lineNo, petNo, fileName, trim(nf90_strerror(ncStatus))
     end if
@@ -1178,12 +1183,14 @@ subroutine OutputWeightFile(filename, file1, file2, indices, weights, revflag, &
       if (PetNo == 0) then
          if (.not. (present(SrcVertexCoords))) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-            "- SrcVertexCoords has to be present in PET 0", ESMF_CONTEXT, status)
+              msg="- SrcVertexCoords has to be present in PET 0", &
+              ESMF_CONTEXT, rcToReturn=status)
             return
          endif
          if ((.not. present(coordX)) .or. (.not. present(coordY))) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
-            "- DstVertexCoords has to be present in PET 0", ESMF_CONTEXT, status)
+              msg="- DstVertexCoords has to be present in PET 0", &
+              ESMF_CONTEXT, rcToReturn=status)
             return
          endif
         
