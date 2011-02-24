@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.81 2011/02/24 20:55:17 w6ws Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.82 2011/02/24 21:31:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.81 2011/02/24 20:55:17 w6ws Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.82 2011/02/24 21:31:53 theurich Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -730,8 +730,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested
-!     Attribute Packages or modify an existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested Attribute Packages or modify an existing Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -798,8 +797,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single
-!  nested Atrribute package, or modify an existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package, or modify an existing Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd() 
@@ -2086,7 +2084,7 @@ contains
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (.not.((convention.eq."ESG" .and.purpose.eq."General").or. & @\
                 (convention.eq."ESMF".and.purpose.eq."General").or. & @\
@@ -2354,7 +2352,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(count)) then @\
         if (count > size(attrList)) then @\
@@ -2459,7 +2457,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       localCount = 0 @\
       if (present(attrList)) then @\
@@ -2600,7 +2598,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       nestConvString(1) = nestConvention @\
       nestPurpString(1) = nestPurpose @\
@@ -3124,7 +3122,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
@@ -3383,7 +3381,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
@@ -3591,7 +3589,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
         localTk, litemCount, localrc) @\
@@ -3660,7 +3658,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       call c_ESMC_AttributeGetInfoNum(mthisfield, attributeIndex, & @\
         localName, localTk, litemCount, localrc) @\
@@ -3913,8 +3911,8 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(ESMF_StateGetInit,mthis1,rc) @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis2,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,mthis1,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis2,rc) @\
  @\
       linkChange = ESMF_TRUE @\
       call c_ESMC_AttributeLink(mthisfield1, mthisfield2, linkChange, localrc) @\
@@ -3987,10 +3985,10 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis2,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass1##GetInit,mthis1,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
  @\
       ! check input variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass2##GetInit,mthis2,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
       linkChange = ESMF_TRUE @\
       call c_ESMC_AttributeLinkRemove(mthisfield1, mthisfield2, linkChange, localrc) @\
@@ -4585,7 +4583,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass2##GetInit,mthis2,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
@@ -4782,7 +4780,7 @@ ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
-ESMF_INIT_CHECK_DEEP_SHORT(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.90 2011/02/23 20:10:08 w6ws Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.91 2011/02/24 21:31:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.90 2011/02/23 20:10:08 w6ws Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.91 2011/02/24 21:31:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -384,16 +384,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(ftype, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_FieldInitialize(ftype, rc=localrc) 
     if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call field construction method
     call ESMF_FieldConstructEmpty(ftype, name, localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return values.
     ESMF_FieldCreateEmpty%ftypep => ftype
@@ -406,8 +406,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_FieldValidate(ESMF_FieldCreateEmpty, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -464,14 +464,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Destruct all field internals and then free field memory.
     call ESMF_FieldDestruct(field%ftypep, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! mark object invalid
     call ESMF_BaseSetStatus(field%ftypep%base, ESMF_STATUS_INVALID, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(field)
 
@@ -596,21 +596,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     call ESMF_GeomBaseGet(geombase, distgrid=distgrid, dimCount=gridDimCount, &
-                      indexflag=indexflag, rc=localrc)
+                 indexflag=indexflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     grid_repdimcount = 0
     if (present(gridToFieldMap)) then
@@ -628,19 +628,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_DistGridGet(distgrid, dimCount=distgridDimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(distgridDimCount) , stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToArrayMap", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return   
+      ESMF_CONTEXT, rcToReturn=rc)) return   
 
     ! allocate undistributed Bounds
     allocate(arrayLBound(ungriddedDimCount) , stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridLBound", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return   
+      ESMF_CONTEXT, rcToReturn=rc)) return   
     allocate(arrayUBound(ungriddedDimCount) , stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridUBound", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return   
+      ESMF_CONTEXT, rcToReturn=rc)) return   
 
     ! Get dimmap and undistibuted bounds
     call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
@@ -652,7 +652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                             undistUBound=arrayUBound,   &
                             rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! create Array
     ! For arbitrary grid:  distgridDim is different from gridDimCount and 
@@ -668,7 +668,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               name=name, &
               rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Default of gridToFieldMap should be {1,2,3...}
     if (.not. present(gridToFieldMap)) then
@@ -695,8 +695,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ftype%gridstatus = ESMF_STATUS_READY
     call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
 
     ! cleanup
@@ -827,20 +827,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Construct a default name if one is not given
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the array is a valid object first.
     call ESMF_ArrayValidate(array, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, &
                       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                      ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
 
     grid_repdimcount = 0
     do i = 1, size(gridToFieldMap)
@@ -887,8 +887,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
         newarray = ESMF_ArrayCreate(array, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
         ftype%array = newarray
         ftype%array_internal = .true.
     endif
@@ -898,8 +898,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ftype%gridstatus = ESMF_STATUS_READY
     call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     ftype%dimCount = gridDimCount_norep + ungriddedDimCount
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -948,8 +948,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Construct a default name if one is not given
     call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Initialize field contents
     ftypep%gridstatus = ESMF_STATUS_UNINIT
@@ -957,8 +957,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_BaseSetStatus(ftypep%base, ESMF_STATUS_READY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1009,16 +1009,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ftype%datastatus .eq. ESMF_STATUS_READY) then
           call ESMF_ArrayDestroy(ftype%array, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
                                 
           ftype%datastatus = ESMF_STATUS_INVALID  ! mark invalid
           
           ! mark invalid
           call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
     endif
@@ -1198,9 +1198,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
         if (size(gridToFieldMap) .ne. gridDimCount) then  
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-              msg="- gridToFieldMap size must equal to grid_rank", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
+           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+             msg="- gridToFieldMap size must equal to grid_rank", &  
+             ESMF_CONTEXT, rcToReturn=rc)   
             return  
         endif  
     endif  
@@ -1252,8 +1252,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     if (distgridToGridMap(j) .ne. i) then
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then
                             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-                                msg="- Arb. grid dimensions have to be either all replicated or not replicated", &  
-                                ESMF_CONTEXT, rcToReturn=rc)
+  msg="- Arb. grid dimensions have to be either all replicated or not replicated", &  
+  ESMF_CONTEXT, rcToReturn=rc)
                             return
                         endif
                     endif
@@ -1269,18 +1269,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if(fieldDimCount .lt. gridDimCount_norep) then  
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-             msg="- Field rank must be greater than or equal to its gridded rank", &  
-               ESMF_CONTEXT, rcToReturn=rc)   
-        return
+      call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+        msg="- Field rank must be greater than or equal to its gridded rank", &  
+        ESMF_CONTEXT, rcToReturn=rc)   
+      return
     endif  
 
     if(fieldDimCount .gt. gridDimCount_norep) then
       if( (.not. present(ungriddedLBound)) .or. &
           (.not. present(ungriddedUBound)) ) then
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-         msg="- ungridded bounds must be present when Field has ungridded dimension(s)", &
-           ESMF_CONTEXT, rcToReturn=rc)
+          msg="- ungridded bounds must be present when Field has ungridded dimension(s)", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
@@ -1334,16 +1334,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if(localGridToFieldMap(i) .lt. 0 .and. &
          localGridToFieldMap(i) .gt. fieldDimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-                 msg="- gridToFieldMap element must be within range 0...array rank", &
-                   ESMF_CONTEXT, rcToReturn=rc)
+             msg="- gridToFieldMap element must be within range 0...array rank", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
        endif
        if(localGridToFieldMap(i) /= 0) then
            if(flipflop(localGridToFieldMap(i))) then
-               call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-                     msg="- gridToFieldMap element must be unique", &
-                       ESMF_CONTEXT, rcToReturn=rc)
-               return
+             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+               msg="- gridToFieldMap element must be unique", &
+               ESMF_CONTEXT, rcToReturn=rc)
+             return
            endif
            flipflop(localGridToFieldMap(i)) = .true.
        endif
@@ -1366,12 +1366,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! allocate Fieldtype
     allocate(ftype, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-                                msg="Allocating Field Type", &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      msg="Allocating Field Type", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldInitialize(ftype, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call construction method to allocate and initialize field internals.
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then
@@ -1381,16 +1381,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 localMaxHaloUWidth(1:gridDimCount_norep), name, &
                                 rc=localrc)
        if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
     else 
           call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
                                 localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                                 ungriddedUBound, name=name, &
                                 rc=localrc)
        if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
    
     ! Set return values.
@@ -1405,8 +1405,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_FieldValidate(ESMF_FieldCreateGBArraySpec, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) then
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
       return
     endif
@@ -1596,7 +1596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (size(gridToFieldMap) .ne. gridDimCount) then  
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               msg="- gridToFieldMap size must equal to grid_rank", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
+              ESMF_CONTEXT, rcToReturn=rc)   
             return  
         endif  
     endif  
@@ -1648,8 +1648,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     if (distgridToGridMap(j) .ne. i) then
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then
                             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-                                msg="- Arb. grid dimensions have to be either all replicated or not replicated", &  
-                                ESMF_CONTEXT, rcToReturn=rc)
+  msg="- Arb. grid dimensions have to be either all replicated or not replicated", &  
+  ESMF_CONTEXT, rcToReturn=rc)
                             return
                         endif
                     endif
@@ -1666,8 +1666,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(fieldDimCount .lt. gridDimCount_norep) then  
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-             msg="- Field rank must be greater than or equal to its gridded rank", &  
-               ESMF_CONTEXT, rcToReturn=rc)   
+          msg="- Field rank must be greater than or equal to its gridded rank", &  
+          ESMF_CONTEXT, rcToReturn=rc)   
         return
     endif  
 
@@ -1689,7 +1689,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (size(gridToFieldMap) .ne. gridDimCount) then  
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               msg="- gridToFieldMap size must equal to grid_rank", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
+              ESMF_CONTEXT, rcToReturn=rc)   
             return  
         endif  
     endif  
@@ -1697,8 +1697,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ungriddedLBound)) then   
        if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-               msg="- ungriddedLBound size must equal to array_rank-grid_rank", &  
-               ESMF_CONTEXT, rcToReturn=rc)   
+            msg="- ungriddedLBound size must equal to array_rank-grid_rank", &  
+            ESMF_CONTEXT, rcToReturn=rc)   
           return  
        endif  
     endif  
@@ -1706,8 +1706,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ungriddedUBound)) then   
        if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then  
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
-                 msg="- ungriddedUBound size must equal to array_rank-grid_rank", &  
-                 ESMF_CONTEXT, rcToReturn=rc)   
+            msg="- ungriddedUBound size must equal to array_rank-grid_rank", &  
+            ESMF_CONTEXT, rcToReturn=rc)   
           return  
        endif  
     endif  
@@ -1716,7 +1716,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (size(totalLWidth) .ne. gridDimCount_norep) then  
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               msg="- totalLWidth must equal to grid dimCount", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
+              ESMF_CONTEXT, rcToReturn=rc)   
             return  
         endif  
     endif  
@@ -1725,15 +1725,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (size(totalUWidth) .ne. gridDimCount_norep) then  
            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
               msg="- totalUWidth must equal to grid dimCount", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
+              ESMF_CONTEXT, rcToReturn=rc)   
            return  
        endif  
     endif  
  
     if (.not.(arrayIndexFlag .eq. gridIndexFlag)) then
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-         msg="- Array indexflag must be the same as the Grid indexflag", &
-           ESMF_CONTEXT, rcToReturn=rc)
+          msg="- Array indexflag must be the same as the Grid indexflag", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
 
@@ -1753,15 +1753,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if(localGridToFieldMap(i) .lt. 0 .and. &
          localGridToFieldMap(i) .gt. fieldDimCount) then
            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-                 msg="- gridToFieldMap element must be within range 0...array rank", &
-                   ESMF_CONTEXT, rcToReturn=rc)
+             msg="- gridToFieldMap element must be within range 0...array rank", &
+             ESMF_CONTEXT, rcToReturn=rc)
            return
        endif
        if(localGridToFieldMap(i) /= 0) then
            if(flipflop(localGridToFieldMap(i))) then
                call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-                     msg="- gridToFieldMap element must be unique", &
-                       ESMF_CONTEXT, rcToReturn=rc)
+                 msg="- gridToFieldMap element must be unique", &
+                 ESMF_CONTEXT, rcToReturn=rc)
                return
            endif
            flipflop(localGridToFieldMap(i)) = .true.
@@ -1770,10 +1770,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(ftype, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_FieldInitialize(ftype, rc=localrc) 
     if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then
         ! Call construction method to allocate and initialize field internals.
@@ -1785,8 +1785,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                          totalUWidth=totalUWidth, &
                                          name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     else
             ! Call construction method to allocate and initialize field internals.
         call ESMF_FieldConstructIANewArray(ftype, geombase, array, l_copyflag, &
@@ -1795,8 +1795,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                          ungriddedUBound=ungriddedUBound, &
                                          name=name, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Set return values.
@@ -1810,8 +1810,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_FieldValidate(ESMF_FieldCreateGBArray, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) then
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
       return
     endif
@@ -2509,7 +2509,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Grid
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateGridArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
@@ -2517,14 +2517,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ungriddedLBound, ungriddedUBound, &
         totalLWidth, totalUWidth, name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     !  link the Attribute hierarchies
     linkChange = ESMF_TRUE 
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArraySpec%ftypep%base, &
                               grid, linkChange, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
+      ESMF_CONTEXT, rcToReturn=rc))  return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -2699,7 +2699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Grid
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateGridArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
@@ -2714,7 +2714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_ESMC_AttributeLink(ESMF_FieldCreateGridArray%ftypep%base, &
                               grid, linkChange, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
+      ESMF_CONTEXT, rcToReturn=rc))  return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2908,8 +2908,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if ((present(totalLWidth)) .or. (present(totalUWidth))) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
-                 msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
-                 ESMF_CONTEXT, rcToReturn=rc)  @\
+            msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
+            ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
         endif @\
     endif @\
@@ -2931,7 +2931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Grid@\
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateGridData##mrank##D##mtypekind = & @\
@@ -2952,7 +2952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_FieldCreateGridData##mrank##D##mtypekind%ftypep%base, & @\
       grid, linkChange, localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
+      ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridData##mrank##D##mtypekind  @\
@@ -3120,8 +3120,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if ((present(totalLWidth)) .or. (present(totalUWidth))) then @\
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
-                 msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
-                 ESMF_CONTEXT, rcToReturn=rc)  @\
+            msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
+            ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
         endif @\
     endif @\
@@ -3130,8 +3130,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
-                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
-                 ESMF_CONTEXT, rcToReturn=rc)  @\
+             msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
+             ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
 	 else @\
 	    localStaggerloc=staggerloc @\
@@ -3143,7 +3143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Grid@\
     geombase=ESMF_GeomBaseCreate(grid,localstaggerloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind = & @\
@@ -3162,7 +3162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind%ftypep%base, & @\
       grid, linkChange, localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-                    ESMF_CONTEXT, rcToReturn=rc))  return @\
+       ESMF_CONTEXT, rcToReturn=rc))  return @\
 @\
     if (present(rc)) rc = ESMF_SUCCESS @\
   end function ESMF_FieldCreateGridDataPtr##mrank##D##mtypekind  @\
@@ -3404,7 +3404,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateLSArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
@@ -3412,7 +3412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ungriddedLBound, ungriddedUBound, &
         name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -3526,7 +3526,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateLSArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
@@ -3534,7 +3534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     name=name, rc=localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+       ESMF_CONTEXT, rcToReturn=rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3681,7 +3681,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from LocStream@\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateLSData##mrank##D##mtypekind = & @\
@@ -3816,7 +3816,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from LocStream@\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind = & @\
@@ -4083,7 +4083,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateMeshArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
@@ -4091,7 +4091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ungriddedLBound, ungriddedUBound, &
         name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -4212,7 +4212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateMeshArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
@@ -4220,7 +4220,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     name=name, rc=localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4373,7 +4373,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh@\
     geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateMeshData##mrank##D##mtypekind = & @\
@@ -4514,7 +4514,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh@\
     geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind = & @\
@@ -4785,7 +4785,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Xgrid
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateXGArraySpec=ESMF_FieldCreateGBArraySpec(geombase, &
@@ -4793,7 +4793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ungriddedLBound, ungriddedUBound, &
         name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -4916,7 +4916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Field from GeomBase
     ESMF_FieldCreateXGArray=ESMF_FieldCreateGBArray(geombase, array, copyflag, &
@@ -4924,7 +4924,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     name=name, rc=localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -5081,7 +5081,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Xgrid@\
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex ,rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateXGData##mrank##D##mtypekind = & @\
@@ -5224,7 +5224,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create GeomBase from Xgrid@\
     geombase=ESMF_GeomBaseCreate(xgrid,xgridSide,gridIndex,rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
-                                     ESMF_CONTEXT, rcToReturn=rc)) return@\
+      ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
 @\
        ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind = & @\

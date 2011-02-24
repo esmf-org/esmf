@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.90 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.91 2011/02/24 21:31:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.90 2011/02/24 17:50:31 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.91 2011/02/24 21:31:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1255,8 +1255,8 @@ itemloop:  do k=attreconstart, si%theircount
             call c_ESMC_AttributeLinkRemove(stypep%base, stypep%datalist(i)%datap%spp%base, &
               linkChange, localrc)
            if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 !print *, "gjt: zap empty nest in State"
         endif

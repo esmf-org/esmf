@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.13 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_WebServ.F90,v 1.14 2011/02/24 21:31:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -142,7 +142,8 @@ contains
               call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       msg="Error while sending message to non-root pet", &
-                      ESMF_CONTEXT, rcToReturn=localrc)
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
           endif
 
        enddo
@@ -223,7 +224,8 @@ contains
            call ESMF_LogSetError( &
                    ESMF_RC_NOT_VALID, &
                    msg="Error while receiving message from root pet", &
-                   ESMF_CONTEXT, rcToReturn=localrc)
+                   ESMF_CONTEXT, &
+                   rcToReturn=localrc)
 
            rc = localrc
            return
@@ -243,7 +245,8 @@ contains
               call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       msg="Error while calling ESMF Initialize.", &
-                      ESMF_CONTEXT, rcToReturn=localrc)
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
 
               rc = localrc
               return
@@ -260,7 +263,8 @@ contains
               call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       msg="Error while calling ESMF Run.", &
-                      ESMF_CONTEXT, rcToReturn=localrc)
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
 
               rc = localrc
               return
@@ -277,7 +281,8 @@ contains
               call ESMF_LogSetError( &
                       ESMF_RC_NOT_VALID, &
                       msg="Error while calling ESMF Finalize.", &
-                      ESMF_CONTEXT, rcToReturn=localrc)
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
 
               rc = localrc
               return
@@ -594,22 +599,30 @@ contains
        if (portNum <= 0) then
           call ESMF_WebServGetPortNum(portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
        endif
 
        call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
 
        call ESMF_WebServSvcLoop(comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
              blockingFlag=blockingFlag, phase=phase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
 
        call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
 
     else
 
@@ -617,7 +630,9 @@ contains
              exportState=exportState, clock=clock, blockingFlag=blockingFlag, &
              phase=phase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
 
     end if
 

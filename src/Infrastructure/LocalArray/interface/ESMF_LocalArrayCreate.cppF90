@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.37 2011/02/24 17:42:52 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.38 2011/02/24 21:31:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.37 2011/02/24 17:42:52 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.38 2011/02/24 21:31:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1490,8 +1490,8 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
         endif @\
         allocate(newp(mrng), stat=localrc) @\
         if (ESMF_LogFoundAllocError(localrc, & @\
-                             msg="LocalArray data space", & @\
-                             ESMF_CONTEXT, rcToReturn=rc)) return @\
+          msg="LocalArray data space", & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
  @\
     if (willcopy) then @\
@@ -1511,16 +1511,16 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
-                             ESMF_ERR_PASSTHRU, & @\
-                             ESMF_CONTEXT, rcToReturn=rc)) return @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
     else @\
       call c_ESMC_LocalArraySetInfo(array, wrap, & @\
                              ESMF_NULL_POINTER, counts, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
-                             ESMF_ERR_PASSTHRU, & @\
-                             ESMF_CONTEXT, rcToReturn=rc)) return @\
+        ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
     endif @\
  @\
     if (present(rc)) rc = localrc @\
@@ -1614,9 +1614,9 @@ AllocDeallocateMacro(integer, I1, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I1, 7, COL7, LEN7, RNG7, LOC7)       
 ^endif
               case default
-                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported rank", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rank", & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
             end select
 ^endif
 ^ifndef ESMF_NO_INTEGER_2_BYTE
@@ -1640,9 +1640,9 @@ AllocDeallocateMacro(integer, I2, 7, COL7, LEN7, RNG7, LOC7)
 
 ^endif
               case default
-                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported rank", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+               if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                 msg="Unsupported rank", & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
             end select
 ^endif
           case (ESMF_TYPEKIND_I4%dkind) 
@@ -1664,9 +1664,9 @@ AllocDeallocateMacro(integer, I4, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I4, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported rank", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rank", & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
             end select
           case (ESMF_TYPEKIND_I8%dkind) 
 	    select case(rank)
@@ -1687,9 +1687,9 @@ AllocDeallocateMacro(integer, I8, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(integer, I8, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported rank", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rank", & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
             end select
           case (ESMF_TYPEKIND_R4%dkind)            
 	    select case(rank)
@@ -1710,9 +1710,9 @@ AllocDeallocateMacro(real, R4, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(real, R4, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported rank", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rank", & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
             end select
           case (ESMF_TYPEKIND_R8%dkind)            
 	    select case(rank)
@@ -1733,14 +1733,14 @@ AllocDeallocateMacro(real, R8, 6, COL6, LEN6, RNG6, LOC6)
 AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ^endif
               case default
-                    if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported rank", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+                  msg="Unsupported rank", & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
             end select
           case default
-                if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                                msg="Unsupported kind", & 
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+              msg="Unsupported kind", & 
+              ESMF_CONTEXT, rcToReturn=rc)) return
         end select
 
 

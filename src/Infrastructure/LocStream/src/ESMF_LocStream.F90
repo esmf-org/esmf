@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.49 2011/02/24 20:02:26 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.50 2011/02/24 21:31:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.49 2011/02/24 20:02:26 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.50 2011/02/24 21:31:53 theurich Exp $'
 
 !==============================================================================
 !
@@ -1368,8 +1368,8 @@ contains
                                 ESMF_CONTEXT, rcToReturn=rc)) return
       if (dimCount .ne. 1) then
          if (ESMF_LogFoundError(ESMF_RC_ARG_RANK, &
-                           msg=" - DistGrid must be 1D", &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
+           msg=" - DistGrid must be 1D", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! Set defaults
@@ -2240,7 +2240,7 @@ contains
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
  !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
  !! Get localDECount
@@ -2559,7 +2559,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
  
  ! Set Defaults
@@ -2725,7 +2725,7 @@ end subroutine ESMF_LocStreamGetKeyI4
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
  
  ! Set Defaults
@@ -2892,7 +2892,7 @@ end subroutine ESMF_LocStreamGetKeyR4
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
  
  ! Set Defaults
@@ -3030,7 +3030,7 @@ end subroutine ESMF_LocStreamGetKeyR8
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
 
  !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
  !! Get localDECount

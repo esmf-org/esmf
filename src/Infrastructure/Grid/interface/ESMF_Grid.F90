@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.198 2011/02/23 19:58:36 w6ws Exp $
+! $Id: ESMF_Grid.F90,v 1.199 2011/02/24 21:31:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.198 2011/02/23 19:58:36 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.199 2011/02/24 21:31:52 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -14533,18 +14533,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Copy vales for countsPerDEDim --------------------------------------------
     allocate(countsPerDEDim1Local(size(countsPerDEDim1)), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim1Local=countsPerDEDim1
 
     allocate(countsPerDEDim2Local(size(countsPerDEDim2)), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     countsPerDEDim2Local=countsPerDEDim2
 
     if (dimCount > 2) then
        allocate(countsPerDEDim3Local(size(countsPerDEDim3)), stat=localrc)
        if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
        countsPerDEDim3Local=countsPerDEDim3
     endif
 
@@ -14554,7 +14554,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set default for minIndex 
     allocate(minIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating minIndexLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(minIndex)) then
        minIndexLocal(:)=minIndex(:)
@@ -14633,13 +14633,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Make alterations to size due to GridEdgeWidths ----------------------------
     allocate(gridEdgeLWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeLWidthLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridEdgeUWidthLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridEdgeUWidthLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(gridAlignLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridAlignLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridLUADefault(dimCount, &
                              gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
@@ -14684,7 +14684,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set default for maxIndex 
     allocate(maxIndexLocal(dimCount), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating maxIndexLocal", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     maxIndexLocal(1)=sum(countsPerDEDim1Local)+minIndexLocal(1)-1
     maxIndexLocal(2)=sum(countsPerDEDim2Local)+minIndexLocal(2)-1
@@ -14695,7 +14695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    allocate(distgridToGridMap(dimCount), stat=localrc)
    if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToGridMap", &
-               ESMF_CONTEXT, rcToReturn=rc)) return
+     ESMF_CONTEXT, rcToReturn=rc)) return
    do i=1,dimCount
      distgridToGridMap(i)=i
    enddo    

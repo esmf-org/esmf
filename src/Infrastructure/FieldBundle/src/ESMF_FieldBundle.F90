@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.85 2011/02/23 20:13:06 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.86 2011/02/24 21:31:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -624,15 +624,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
     
       call ESMF_FieldBundleTypeAddList(btype, 1, temp_list, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       !  link the Attribute hierarchies
       linkChange = ESMF_TRUE
@@ -643,8 +643,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! this resets the congruent flag as a side effect
       dummy = ESMF_FieldBundleIsCongruent(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldBundleAddOneField
@@ -715,15 +715,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
     
       call ESMF_FieldBundleTypeAddList(btype, fieldCount, fieldList, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! link the Attribute hierarchies
       linkChange = ESMF_TRUE
@@ -731,14 +731,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          call c_ESMC_AttributeLink(btype%base, &
           fieldList(i)%ftypep%base, linkChange, status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
+           ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
 
       ! this resets the congruent flag as a side effect
       dummy = ESMF_FieldBundleIsCongruent(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_FieldBundleAddFieldList
@@ -828,17 +828,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       allocate(btypep,  stat=status)
       if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to initialize fieldbundle internals.
       call ESMF_FieldBundleConstructNew(btypep, fieldCount, fieldList, &
                                    packflag, &
                                    name, status)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) then
-          deallocate(btypep, stat=status)
-          return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate(btypep, stat=status)
+        return
       endif
 
       ! link the Attribute hierarchies
@@ -921,13 +921,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       allocate(btypep, stat=status)
       if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Set return values.
@@ -999,20 +999,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       allocate(btypep, stat=status)
       if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Set the Grid.  All Fields added to this FieldBundle
       !  must be based on this same Grid.
           call ESMF_GridValidate(grid, rc=status)
           if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
           ! because the stagger won't really matter in this case
@@ -1099,13 +1099,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       allocate(btypep, stat=status)
       if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Set the Mesh.  All Fields added to this FieldBundle
       !  must be based on this same Mesh.
@@ -1187,13 +1187,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       allocate(btypep, stat=status)
       if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Call construction method to allocate and initialize fieldbundle internals.
       call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Set the LocStream.  All Fields added to this FieldBundle
       !  must be based on this same LocStream.
@@ -1269,15 +1269,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Destruct all fieldbundle internals and then free field memory.
       call ESMF_FieldBundleDestruct(fieldbundle%btypep, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! mark object invalid
       call ESMF_BaseSetStatus(fieldbundle%btypep%base, ESMF_STATUS_INVALID, &
         rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
                                 
       ESMF_INIT_SET_DELETED(fieldbundle)
 
@@ -1362,8 +1362,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
 
@@ -1371,54 +1371,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(geomtype)) then
         if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                            msg="No Grid or Mesh or LocStream attached to FieldBundle", &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+              msg="No Grid or Mesh or LocStream attached to FieldBundle", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
         call ESMF_GeomBaseGet(btype%geombase, geomtype=localGeomType, rc=status)
         if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
         geomType = localGeomType
     endif
 
     if (present(grid)) then
         if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                            msg="No Grid or invalid Grid attached to FieldBundle", &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+              msg="No Grid or invalid Grid attached to FieldBundle", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         call ESMF_GeomBaseGet(btype%geombase, &
                   grid=grid, rc=status)
         if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(mesh)) then
         if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                            msg="No Mesh or invalid Mesh attached to FieldBundle", &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+              msg="No Mesh or invalid Mesh attached to FieldBundle", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         call ESMF_GeomBaseGet(btype%geombase, &
                   mesh=mesh, rc=status)
         if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(locstream)) then
         if (btype%gridstatus /= ESMF_STATUS_READY) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                            msg="No LocStream or invalid LocStream attached to FieldBundle", &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+              msg="No LocStream or invalid LocStream attached to FieldBundle", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         call ESMF_GeomBaseGet(btype%geombase, &
                   locstream=locstream, rc=status)
         if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(fieldNameList)) then
@@ -1445,8 +1445,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(name)) then
         call c_ESMC_GetName(btype%base, name, status)
         if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1501,8 +1501,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
 
@@ -1511,8 +1511,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           nitems = size(fieldList)
           if (nitems .lt. btype%field_count) then
               if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-                       msg="More Fields in FieldBundle than space in fieldList array", &
-                                        ESMF_CONTEXT, rcToReturn=rc)) return
+                msg="More Fields in FieldBundle than space in fieldList array", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif
 
           fieldList(1:btype%field_count) = btype%flist(1:btype%field_count)
@@ -1590,8 +1590,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
 
@@ -1739,16 +1739,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
 
       ! Check for an empty FieldBundle first
       if(btype%field_count == 0) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="Empty FieldBundle", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            msg="Empty FieldBundle", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! Check each field for a match
@@ -1757,8 +1757,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_FieldGet(btype%flist(i), name=temp_name, rc=status)
        ! "Error getting Field name from Field ", i
        if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
        if (fieldname == temp_name) then
            field = fieldbundle%btypep%flist(i) 
@@ -1771,8 +1771,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (.not. found) then
         !"Field not found with name ", fieldname
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="Field not found with requested name", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            msg="Field not found with requested name", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1831,16 +1831,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
 
       ! Check for an empty FieldBundle first
       if(btype%field_count == 0) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="Empty FieldBundle", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+           msg="Empty FieldBundle", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! Check for out of range index number
@@ -1848,8 +1848,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! "ERROR in ESMF_FieldBundleGetField: fieldIndex ", fieldIndex, &
         !                "out of range. Min=1, max=", btype%field_count
         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                                msg="Index out of range", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+          msg="Index out of range", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
         return
       endif
 
@@ -1932,8 +1932,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! pli: print attributes 
       call c_ESMC_BasePrint(btype%base, 0, defaultopts, status)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
     
     !jw  write (msgbuf, *)  "  Field count = ", btype%field_count
     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -1945,8 +1945,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        !call ESMF_FieldPrint(btype%flist(i),rc=status)  
        !call ESMF_FieldGet(btype%flist(i), name=fname, rc=status)
        if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
      !jw  write (msgbuf, *)  "    Field", i, "name = ", trim(fname)
      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
@@ -2280,8 +2280,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
    
@@ -2289,15 +2289,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there is not one already associated with it.  
       if (btype%gridstatus == ESMF_STATUS_READY) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="FieldBundle is already associated with a Grid", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+          msg="FieldBundle is already associated with a Grid", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! OK to set grid, but validate it first
        call ESMF_GridValidate(grid, rc=status)
        if (ESMF_LogFoundError(status, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
        ! because the stagger won't really matter in this case
@@ -2374,8 +2374,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
    
@@ -2456,8 +2456,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Validate fieldbundle before going further
       call ESMF_FieldBundleValidate(fieldbundle, rc=status)
       if (ESMF_LogFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       btype => fieldbundle%btypep
    
@@ -2465,8 +2465,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there is not one already associated with it.  
       if (btype%gridstatus == ESMF_STATUS_READY) then
         if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="FieldBundle is already associated with a geometry", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+           msg="FieldBundle is already associated with a geometry", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
        ! Create the geombase around the locstream
@@ -2528,8 +2528,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (.not.associated(fieldbundle%btypep)) then 
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="Uninitialized or already destroyed FieldBundle", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            msg="Uninitialized or already destroyed FieldBundle", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif 
 
       call ESMF_BaseGetStatus(fieldbundle%btypep%base, fieldbundlestatus, rc=localrc)
@@ -2539,8 +2539,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           
       if (fieldbundlestatus /= ESMF_STATUS_READY) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                msg="Uninitialized or already destroyed FieldBundle", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+           msg="Uninitialized or already destroyed FieldBundle", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       endif 
 
       ! TODO: add more code here
@@ -2809,16 +2809,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! early exit.
       if (fieldCount .le. 0) then
          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                 msg="called with no Fields", &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+           msg="called with no Fields", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
       ! validate fields before moving ahead
       do i=1, fieldCount
          call ESMF_FieldValidate(fields(i), rc=status)
          if (ESMF_LogFoundError(status, &
-                        msg="Invalid Field found when trying to add into FieldBundle", &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+           msg="Invalid Field found when trying to add into FieldBundle", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
       ! consistency checking.  logic is: 
@@ -2835,15 +2835,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! determine if a Field is committed and has a Grid associated with it
             call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
             if (ESMF_LogFoundError(status, &
-                        msg="Invalid Field found when trying to access Field", &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
+              msg="Invalid Field found when trying to access Field", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
             if(.not.isCommitted) cycle
 
             ! Get geomtype
             call ESMF_FieldGet(fields(i), geomtype=geomtype, rc=status)
             if (ESMF_LogFoundError(status, &
-                        msg="Invalid Field found when trying to access Field", &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
+              msg="Invalid Field found when trying to access Field", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             ! Get geom based on geomtype
             if (geomtype==ESMF_GEOMTYPE_GRID) then
@@ -3043,7 +3043,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           allocate(btype%flist(fieldCount), stat=status)
           if (ESMF_LogFoundAllocError(status, msg="Fieldlist allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
          
           ! now add the fields to the new list
           do i=1, fieldCount
@@ -3058,7 +3058,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! make a list the right length
           allocate(temp_flist(btype%field_count + fieldCount), stat=status)
           if (ESMF_LogFoundAllocError(status, msg="temp Fieldlist allocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! preserve old contents
           do i = 1, btype%field_count
@@ -3073,7 +3073,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! delete old list
           deallocate(btype%flist, stat=status)
           if (ESMF_LogFoundAllocError(status, msg="Fieldlist deallocate", &
-                                       ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! and now make this the permanent list
           btype%flist => temp_flist
@@ -3209,15 +3209,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize the derived type contents.
       call ESMF_FieldBundleConstructEmpty(btype, name, status)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! If specified, set packflag and interleave
       if(present(packflag)) then
         if(packflag==ESMF_PACKED_DATA) then
           call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-                                 msg="Packed data option not implemented", &
-                                 ESMF_CONTEXT, rcToReturn=rc) 
+            msg="Packed data option not implemented", &
+            ESMF_CONTEXT, rcToReturn=rc) 
           return
         else
           btype%pack_flag = packflag
@@ -3227,8 +3227,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Add the fields in the list, checking for consistency.
       call ESMF_FieldBundleTypeAddList(btype, fieldCount, fields, status)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -3278,8 +3278,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       btype%base%this = ESMF_NULL_POINTER
       call ESMF_BaseCreate(btype%base, "FieldBundle", name, 0, status)
       if (ESMF_LogFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
    
       ! Initialize fieldbundle contents.  An empty FieldBundle starts out with the
@@ -3350,7 +3350,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (associated(btype%flist)) then
           deallocate(btype%flist, stat=localrc)
           if (ESMF_LogFoundAllocError(localrc, msg="FieldBundle deallocate", &
-                                         ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
         endif
       endif
@@ -3446,8 +3446,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_BaseSerialize(bp%base, buffer, length, offset, &
                                  lattreconflag, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_ESMC_FieldBundleSerialize(bp%gridstatus, &
                                  bp%iostatus, &
@@ -3455,16 +3455,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  bp%isCongruent, bp%hasPattern, &
                                  buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (bp%gridstatus == ESMF_STATUS_READY) then
           call ESMF_GeomBaseSerialize(bp%geombase, buffer, length, offset, &
                                   attreconflag=lattreconflag, &
                                   inquireflag=linquireflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       ! TODO: decide if these need to be sent before or after
@@ -3473,8 +3473,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   attreconflag=lattreconflag, &
                                   inquireflag=linquireflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
       if  (present(rc)) rc = ESMF_SUCCESS
@@ -3552,20 +3552,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! shortcut to internals
       allocate(bp, stat=status)
       if (ESMF_LogFoundAllocError(status, &
-                                     msg="space for new FieldBundle object", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        msg="space for new FieldBundle object", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
 
       ! Deserialize Base
       call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, lattreconflag, localrc)
       if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_BaseSetInitCreated(bp%base, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize other FieldBundle members
       
@@ -3575,34 +3575,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  bp%isCongruent, bp%hasPattern, &
                                  buffer(1), offset, localrc)
       if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (bp%gridstatus == ESMF_STATUS_READY) then
           bp%geombase = ESMF_GeomBaseDeserialize(buffer, offset, &
                                       attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
           !  here we relink the FieldBundle Attribute hierarchies to the
           !  Grid Attribute hierarchy, as they were before
           if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
 	    call ESMF_GeomBaseGet(bp%geombase,geomtype=geomtype,rc=localrc)            
             if (ESMF_LogFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
             if (geomtype == ESMF_GEOMTYPE_GRID) then
        	       call ESMF_GeomBaseGet(bp%geombase,grid=grid,rc=localrc)            
                if (ESMF_LogFoundError(localrc, &
-                                         ESMF_ERR_PASSTHRU, &
-                                         ESMF_CONTEXT, rcToReturn=rc)) return
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 
                call c_ESMC_AttributeLink(bp%base, grid, linkChange, localrc)
                if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) return
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 	    endif
          endif
       endif
@@ -3610,17 +3610,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! TODO: decide if these need to be sent before or after
       allocate(bp%flist(bp%field_count), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, &
-                                     msg="Field list", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        msg="Field list", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i = 1, bp%field_count
           bp%flist(i) = ESMF_FieldDeserialize(buffer, offset, &
                                       attreconflag=lattreconflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) then
-              deallocate(bp%flist)
-              return
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) then
+            deallocate(bp%flist)
+            return
           endif
           !  here we relink the Field Attribute hierarchies to the FieldBundle
           !  Attribute hierarchies, as they were before
@@ -3628,8 +3628,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call c_ESMC_AttributeLink(bp%base, bp%flist(i)%ftypep%base, &
               linkChange, localrc)
             if (ESMF_LogFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rcToReturn=rc)) then
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) then
               deallocate(bp%flist)
               return
             endif
