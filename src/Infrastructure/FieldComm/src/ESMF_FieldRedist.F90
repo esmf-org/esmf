@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.31 2011/02/23 20:11:21 w6ws Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.32 2011/02/24 20:28:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.31 2011/02/23 20:11:21 w6ws Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.32 2011/02/24 20:28:16 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -366,8 +366,8 @@ contains
 
         ! check variable: focus on field and farray 
         ! rely on ArrayRedist to check the sanity of other variables 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
@@ -423,8 +423,8 @@ contains
 
         ! check variable: focus on field and farray 
         ! rely on ArrayRedist to check the sanity of other variables 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
@@ -480,8 +480,8 @@ contains
 
         ! check variable: focus on field and farray 
         ! rely on ArrayRedist to check the sanity of other variables 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
@@ -537,8 +537,8 @@ contains
 
         ! check variable: focus on field and farray 
         ! rely on ArrayRedist to check the sanity of other variables 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
@@ -693,8 +693,8 @@ contains
 
         ! check variable: focus on field and farray 
         ! rely on ArrayRedist to check the sanity of other variables 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, srcField, rc) 
+  ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit, dstField, rc) 
 
         ! Retrieve source and destination arrays. 
         call ESMF_FieldGet(srcField, array=srcArray, rc=localrc) 
