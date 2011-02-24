@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_coupler.F90,v 1.6 2011/02/24 22:55:59 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -184,7 +184,7 @@
       print *, "User Coupler Final starting"
    
       ! Release resources stored for the SMM
-      call ESMF_FieldSMMRelease(routehandle, rc)
+      call ESMF_FieldSMMRelease(routehandle, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
       print *, "User Coupler Final returning"
