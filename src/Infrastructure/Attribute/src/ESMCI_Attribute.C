@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.92 2011/02/23 06:58:59 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.93 2011/02/24 14:39:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.92 2011/02/23 06:58:59 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.93 2011/02/24 14:39:04 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5069,9 +5069,9 @@ int Attribute::count=0;
          "xmlns:xlink", "http://www.w3.org/1999/xlink",
          "xmlns:gco", "http://www.isotc211.org/2005/gco",
          "xmlns:gmd", "http://www.isotc211.org/2005/gmd",
-         "xmlns", "http://metaforclimate.eu/schema/cim/1.5",
+         "xmlns", "http://metafor.eu/cim/schemas/1.5",
          "xsi:schemaLocation",
-         "http://metaforclimate.eu/schema/cim/1.5/cim.xsd");
+         "http://metafor.eu/cim/schemas/1.5/cim.xsd");
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   
   //
@@ -5370,16 +5370,20 @@ int Attribute::count=0;
   localrc = io_xml->writeElement("controlSimulation", "", 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  if (attpack->AttributeIsSet("SimulationStartDate")) {
-    localrc = attpack->AttributeGet("SimulationStartDate", &value);
-    localrc = io_xml->writeElement("startPoint", value, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-  }
+  localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
+  localrc = io_xml->writeStartElement("openDateRange", "", 3, 0);
   if (attpack->AttributeIsSet("SimulationDuration")) {
     localrc = attpack->AttributeGet("SimulationDuration", &value);
-    localrc = io_xml->writeElement("duration", value, 2, 0);
+    localrc = io_xml->writeElement("duration", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
+  if (attpack->AttributeIsSet("SimulationStartDate")) {
+    localrc = attpack->AttributeGet("SimulationStartDate", &value);
+    localrc = io_xml->writeElement("startDate", value, 4, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  }
+  localrc = io_xml->writeEndElement("openDateRange", 3);
+  localrc = io_xml->writeEndElement("dateRange", 2);
 
   // TODO: required elements in CIM 1.5; need atts defined in package ?
   localrc = io_xml->writeStartElement("model", "", 2, 0);
