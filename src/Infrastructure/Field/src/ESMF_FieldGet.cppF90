@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.67 2011/02/23 22:16:21 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.68 2011/02/24 03:14:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.67 2011/02/23 22:16:21 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.68 2011/02/24 03:14:43 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -451,7 +451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArrayGet(ftype%array, totalLWidth=totalLWidth, rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(totalUWidth)) then
@@ -459,7 +459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArrayGet(ftype%array, totalUWidth=totalUWidth, rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(typekind)) then
