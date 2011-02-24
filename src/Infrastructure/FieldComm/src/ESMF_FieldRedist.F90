@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.32 2011/02/24 20:28:16 w6ws Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.33 2011/02/24 23:11:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.32 2011/02/24 20:28:16 w6ws Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.33 2011/02/24 23:11:53 w6ws Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -78,12 +78,14 @@ contains
 ! !IROUTINE: ESMF_FieldRedist - Execute a Field redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldRedist(srcField, dstField, routehandle, checkflag, rc)
+  subroutine ESMF_FieldRedist(srcField, dstField, routehandle, keywordEnforcer,  &
+    checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_Field),       intent(inout),optional  :: srcField
         type(ESMF_Field),       intent(inout),optional  :: dstField
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
@@ -188,10 +190,11 @@ contains
 ! !IROUTINE: ESMF_FieldRedistRelease - Release resources associated with Field redistribution
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldRedistRelease(routehandle, rc)
+  subroutine ESMF_FieldRedistRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -233,13 +236,14 @@ contains
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 
 ! subroutine ESMF_FieldRedistStore<type><kind>(srcField, dstField, & 
-!        routehandle, factor, srcToDstTransposeMap, rc) 
+!        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(inout)        :: srcField  
 !   type(ESMF_Field),         intent(inout)        :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)        :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)           :: factor 
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in), optional :: srcToDstTransposeMap(:) 
 !   integer,                  intent(out), optional :: rc 
 ! 
@@ -343,13 +347,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreI4(srcField, dstField, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(inout)         :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I4),  intent(in)            :: factor
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
         integer,                intent(out), optional :: rc 
 
@@ -400,13 +405,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreI8(srcField, dstField, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(inout)         :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I8),  intent(in)            :: factor
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
         integer,                intent(out), optional :: rc 
 
@@ -457,13 +463,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreR4(srcField, dstField, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(inout)         :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R4),     intent(in)            :: factor
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
         integer,                intent(out), optional :: rc 
 
@@ -514,13 +521,14 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreR8(srcField, dstField, & 
-        routehandle, factor, srcToDstTransposeMap, rc) 
+        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(inout)         :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R8),     intent(in)            :: factor
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
         integer,                intent(out), optional :: rc 
 
@@ -569,12 +577,13 @@ contains
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldRedistStore() 
 ! subroutine ESMF_FieldRedistStoreNF(srcField, dstField, & 
-!        routehandle, srcToDstTransposeMap, rc) 
+!        routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),       intent(inout)         :: srcField  
 !   type(ESMF_Field),       intent(inout)         :: dstField  
 !   type(ESMF_RouteHandle), intent(inout)         :: routehandle
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(in),  optional :: srcToDstTransposeMap(:) 
 !   integer,                intent(out), optional :: rc 
 ! 
@@ -671,12 +680,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldRedistStore()
     subroutine ESMF_FieldRedistStoreNF(srcField, dstField, & 
-        routehandle, srcToDstTransposeMap, rc) 
+        routehandle, keywordEnforcer, srcToDstTransposeMap, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(inout)         :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
         integer,                intent(in), optional  :: srcToDstTransposeMap(:) 
         integer,                intent(out), optional :: rc 
 

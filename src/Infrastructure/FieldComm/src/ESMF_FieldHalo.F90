@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.8 2011/01/05 23:26:30 svasquez Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.9 2011/02/24 23:11:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.8 2011/01/05 23:26:30 svasquez Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.9 2011/02/24 23:11:53 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -99,12 +99,13 @@ contains
 ! !IROUTINE: ESMF_FieldHalo - Execute a FieldHalo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldHalo(field, routehandle, commflag, &
-    finishedflag, checkflag, rc)
+  subroutine ESMF_FieldHalo(field, routehandle, keywordEnforcer,  &
+                            commflag, finishedflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(inout)           :: field
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(in),   optional  :: checkflag
@@ -194,10 +195,11 @@ contains
 ! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated with a Field halo operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldHaloRelease(routehandle, rc)
+  subroutine ESMF_FieldHaloRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -241,14 +243,15 @@ contains
 ! !IROUTINE: ESMF_FieldHaloStore - Store a FieldHalo operation
 !
 ! !INTERFACE:
-    subroutine ESMF_FieldHaloStore(field, routehandle, halostartregionflag, &
-      haloLDepth, haloUDepth, rc)
+    subroutine ESMF_FieldHaloStore(field, routehandle, keywordEnforcer,  &
+      halostartregionflag, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(inout)                :: field
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
     type(ESMF_HaloStartRegionFlag), intent(in), &
                             optional :: halostartregionflag
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
