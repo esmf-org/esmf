@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.86 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.87 2011/02/24 23:31:31 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -287,7 +287,7 @@ endif
 
    ! Create a 2D Arbitrarily distributed Grid
    grid2D=ESMF_GridCreateShapeTile(maxIndex=(/5,5/), & 
-         localArbIndex=localArbIndex, localArbIndexCount=5, rc=rc)   
+         arbIndexList=localArbIndex, arbIndexCount=5, rc=rc)   
 !EOC
 
 !BOE
@@ -299,7 +299,7 @@ endif
 !BOC
    ! Create a 3D Grid with the 1st and 3rd dimension arbitrarily distributed
    grid3D=ESMF_GridCreateShapeTile(maxIndex=(/5,6,5/), & 
-         localArbIndex=localArbIndex, localArbIndexCount=5, &
+         arbIndexList=localArbIndex, arbIndexCount=5, &
          distDim=(/1,3/), rc=rc)   
 !EOC
 
@@ -925,8 +925,8 @@ endif
    !-------------------------------------------------------------------
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localArbIndex = localArbIndex, &
-            localArbIndexCount = localArbIndexCount, &
+            arbIndexList = localArbIndex, &
+            arbIndexCount = localArbIndexCount, &
             rc=rc)
 
    !-------------------------------------------------------------------
@@ -1291,8 +1291,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOC
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localArbIndex = localArbIndex, &
-            localArbIndexCount = localArbIndexCount,	 &
+            arbIndexList = localArbIndex, &
+            arbIndexCount = localArbIndexCount,	 &
  	    coordDep1 = (/ESMF_GRID_ARBDIM/), &
 	    coordDep2 = (/ESMF_GRID_ARBDIM/), &
 	    coordDep3 = (/3/), &
@@ -1314,8 +1314,8 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !BOC
    grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localArbIndex = localArbIndex, &
-            localArbIndexCount = localArbIndexCount,	 &
+            arbIndexList = localArbIndex, &
+            arbIndexCount = localArbIndexCount,	 &
  	    coordDep1 = (/ESMF_GRID_ARBDIM, 3/), &
 	    coordDep2 = (/ESMF_GRID_ARBDIM, 3/), &
 	    coordDep3 = (/ESMF_GRID_ARBDIM, 3/), &
@@ -1349,7 +1349,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, &
-         staggerdistgrid=staggerdistgrid, rc=rc)
+         distgrid=staggerdistgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_ArraySpecSet(arrayspec2D,rank=2,typekind=ESMF_TYPEKIND_R8)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1521,7 +1521,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, &
-         staggerdistgrid=staggerdistgrid, rc=rc)
+         distgrid=staggerdistgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
    call ESMF_ArraySpecSet(arrayspec2D,rank=2,typekind=ESMF_TYPEKIND_I4)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1781,7 +1781,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! As described in the previous section there are three types of bounds the user can 
 ! get: exclusive bounds, computational bounds, 
 ! and total bounds. The bounds
-! provided by {\tt ESMF\_GridGetCoord} are for both distributed
+! provided by {\tt ESMF\_GridGetCoordBounds} are for both distributed
 ! and undistributed dimensions and are ordered according to the
 ! order of dimensions in the  coordinate. This means that the bounds
 !  provided should be usable
@@ -1810,7 +1810,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   if (localDECount .gt. 0) then 
 !BOC
-   call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0,  &
+   call ESMF_GridGetCoordBounds(grid2D, coordDim=1, localDE=0,  &
           staggerLoc=ESMF_STAGGERLOC_CORNER,                         &
           exclusiveLBound=elbnd, exclusiveUBound=eubnd,              &
           computationalLBound=clbnd, computationalUBound=cubnd,      & 
@@ -1897,10 +1897,8 @@ endif
 !
 ! \begin{sloppypar}
 ! The information currently available from a stagger
-! location is the {\tt staggerDistgrid}  and
-! {\tt minIndex} and {\tt maxIndex}. The {\tt staggerDistgrid} gives the 
+! location is the {\tt distgrid}. The {\tt distgrid} gives the 
 ! distgrid which describes the size and distribution of the elements in the stagger location.
-! The {\tt minIndex} and {\tt maxIndex} describe the lower and upper bounds of the stagger location.
 ! \end{sloppypar}
 !
 ! The following is an example of retrieving information for localDE 0
@@ -1921,8 +1919,7 @@ endif
 !BOC
     ! Get info about staggerloc
     call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER,  &
-           staggerDistgrid=staggerDistgrid, &
-           minIndex=minIndex, maxIndex=maxIndex, &
+           distgrid=staggerDistgrid, &
            rc=rc)
 
 !EOC
@@ -1977,7 +1974,7 @@ endif
 
     ! Get info about staggerloc
     call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-           staggerDistgrid=staggerDistgrid, &
+           distgrid=staggerDistgrid, &
            rc=rc)
 
     ! construct ArraySpec
@@ -2018,8 +2015,8 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
     grid3D=ESMF_GridCreateShapeTile( &
 	    maxIndex = (/xdim, ydim, zdim/), &
-            localArbIndex = localArbIndex, &
-            localArbIndexCount = localArbIndexCount, &
+            arbIndexList = localArbIndex, &
+            arbIndexCount = localArbIndexCount, &
             rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
  
@@ -2860,7 +2857,7 @@ endif
 !EOE
 
 !BOC
-   call ESMF_GridGet(grid2D, minIndex=minIndex, maxIndex=maxIndex, &
+   call ESMF_GridGet(grid2D, tile=1, minIndex=minIndex, maxIndex=maxIndex, &
      staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
    print *, "minIndex(1), minIndex(2) = ", minIndex(1), minIndex(2)
    print *, "maxIndex(1), maxIndex(2) = ", maxIndex(1), maxIndex(2)
