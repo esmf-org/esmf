@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBroadcastUTest.F90,v 1.14 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMBroadcastUTest.F90,v 1.15 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBroadcastUTest.F90,v 1.14 2011/02/24 06:47:11 theurich Exp $'
+      '$Id: ESMF_VMBroadcastUTest.F90,v 1.15 2011/02/24 17:50:31 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -123,7 +123,7 @@
       ! Broadcast data from the root processor
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Broadcasting  data Test"
-      call ESMF_VMBroadcast(vm, bcstData=localData, count=count, root=root, &
+      call ESMF_VMBroadcast(vm, bcstData=localData, count=count, rootPet=root, &
                             rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -147,7 +147,7 @@
       ! Broadcast local data from root processor
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Broadcasting local data Test"
-      call ESMF_VMBroadcast(vm, bcstData=r4_localData, count=count, root=root, &
+      call ESMF_VMBroadcast(vm, bcstData=r4_localData, count=count, rootPet=root, &
                             rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -174,7 +174,7 @@
       ! Broadcast  data from root
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Broadcasting local data Test"
-      call ESMF_VMBroadcast(vm, bcstData=r8_localData, count=count, root=root, &
+      call ESMF_VMBroadcast(vm, bcstData=r8_localData, count=count, rootPet=root, &
                             rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -200,7 +200,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Broadcasting local data Test"
       call ESMF_VMBroadcast(vm, bcstData=local_logical, count=count, &
-                            root=root, rc=rc)
+        rootPet=root, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

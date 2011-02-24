@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.30 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.31 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.30 2011/02/24 06:47:11 theurich Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.31 2011/02/24 17:50:31 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -143,7 +143,7 @@
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      call ESMF_VMSend(vm, sendData=localData, count=count, dst=dst, rc=rc)
+      call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -153,7 +153,7 @@
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      call ESMF_VMRecv(vm, recvData=localData, count=count, src=src, rc=rc)
+      call ESMF_VMRecv(vm, recvData=localData, count=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -173,7 +173,7 @@
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      call ESMF_VMSend(vm, sendData=r4_localData, count=count, dst=dst, rc=rc)
+      call ESMF_VMSend(vm, sendData=r4_localData, count=count, dstPet=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -183,7 +183,7 @@
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      call ESMF_VMRecv(vm, recvData=r4_localData, count=count, src=src, rc=rc)
+      call ESMF_VMRecv(vm, recvData=r4_localData, count=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -204,7 +204,7 @@
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      call ESMF_VMSend(vm, sendData=r8_localData, count=count, dst=dst, rc=rc)
+      call ESMF_VMSend(vm, sendData=r8_localData, count=count, dstPet=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -214,7 +214,7 @@
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      call ESMF_VMRecv(vm, recvData=r8_localData, count=count, src=src, rc=rc)
+      call ESMF_VMRecv(vm, recvData=r8_localData, count=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -235,7 +235,7 @@
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      call ESMF_VMSend(vm, sendData=local_logical, count=count, dst=dst, rc=rc)
+      call ESMF_VMSend(vm, sendData=local_logical, count=count, dstPet=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -248,7 +248,7 @@
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      call ESMF_VMRecv(vm, recvData=local_logical, count=count, src=src, rc=rc)
+      call ESMF_VMRecv(vm, recvData=local_logical, count=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -281,7 +281,7 @@ call ESMF_VMBarrier (vm)
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local character string data Test"
       lchars = local_chars(1)
-      call ESMF_VMSend(vm, sendData=lchars, count=len(lchars), dst=dst, rc=rc)
+      call ESMF_VMSend(vm, sendData=lchars, count=len(lchars), dstPet=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 call ESMF_UtilIOUnitFlush (6)
@@ -294,7 +294,7 @@ call ESMF_VMBarrier (vm)
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      call ESMF_VMRecv(vm, recvData=lchars, count=len(lchars), src=src, rc=rc)
+      call ESMF_VMRecv(vm, recvData=lchars, count=len(lchars), srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 call ESMF_UtilIOUnitFlush (6)
@@ -318,7 +318,8 @@ call ESMF_VMBarrier (vm)
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local character array data Test"
-      call ESMF_VMSend(vm, sendData=local_chars, count=count*len(local_chars), dst=dst, rc=rc)
+      call ESMF_VMSend(vm, sendData=local_chars, count=count*len(local_chars), &
+        dstPet=dst, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -333,7 +334,8 @@ call ESMF_VMBarrier (vm)
       ! dst receives local data from src
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local data Test"
-      call ESMF_VMRecv(vm, recvData=local_chars, count=count*len(local_chars), src=src, rc=rc)
+      call ESMF_VMRecv(vm, recvData=local_chars, count=count*len(local_chars), &
+        srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 call ESMF_UtilIOUnitFlush (6)

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.39 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMUTest.F90,v 1.40 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -185,7 +185,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_SUM Test"
       call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
-                                count=nsize, reduceflag=ESMF_SUM, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_SUM, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -221,7 +221,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_SUM Test: ESMF_KIND_R8"
       call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
-                                count=nsize, reduceflag=ESMF_SUM, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_SUM, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -261,7 +261,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_SUM Test: ESMF_KIND_R4"
       call ESMF_VMReduce(vm, sendData=f4array1, recvData=f4array4, &
-                                count=nsize, reduceflag=ESMF_SUM, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_SUM, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -307,7 +307,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_MIN Test"
       call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
-                                count=nsize, reduceflag=ESMF_MIN, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_MIN, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -339,7 +339,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_MIN Test: ESMF_KIND_R8"
       call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
-                                count=nsize, reduceflag=ESMF_MIN, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_MIN, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -375,7 +375,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_MIN Test: ESMF_KIND_R4"
       call ESMF_VMReduce(vm, sendData=f4array1, recvData=f4array4, &
-                                count=nsize, reduceflag=ESMF_MIN, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_MIN, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -424,7 +424,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_MAX Test"
       call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
-                                count=nsize, reduceflag=ESMF_MAX, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_MAX, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -460,7 +460,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_MAX Test: ESMF_KIND_R8"
       call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
-                                count=nsize, reduceflag=ESMF_MAX, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_MAX, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -500,7 +500,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_MAX Test: ESMF_KIND_R4"
       call ESMF_VMReduce(vm, sendData=f4array1, recvData=f4array4, &
-                                count=nsize, reduceflag=ESMF_MAX, root=rootPet, rc=rc)
+        count=nsize, reduceflag=ESMF_MAX, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! print the result
@@ -1058,7 +1058,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.39 2011/02/24 06:47:11 theurich Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.40 2011/02/24 17:50:31 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------

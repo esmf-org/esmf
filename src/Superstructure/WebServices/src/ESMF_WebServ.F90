@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.12 2011/02/23 20:18:17 w6ws Exp $
+! $Id: ESMF_WebServ.F90,v 1.13 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@ contains
 
           print *, "In do loop: ", thread_cntr
           print *, "Before MPI Send: ", procType
-          call ESMF_VMSend(vm, sendData=outmsg, count=1, dst=thread_cntr, &
+          call ESMF_VMSend(vm, sendData=outmsg, count=1, dstPet=thread_cntr, &
                            rc=localrc)
 
           ! Check return code to make sure send went out ok
@@ -217,7 +217,7 @@ contains
        print *, "Waiting for request: ", localPet
        inmsg(1) = 'A'
 
-       call ESMF_VMRecv(vm, recvData=inmsg, count=count, src=0, &
+       call ESMF_VMRecv(vm, recvData=inmsg, count=count, srcPet=0, &
                         blockingflag=ESMF_BLOCKING, rc=localrc)
        if (localrc /= ESMF_SUCCESS) then
            call ESMF_LogSetError( &

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvUTest.F90,v 1.15 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMSendRecvUTest.F90,v 1.16 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvUTest.F90,v 1.15 2011/02/24 06:47:11 theurich Exp $'
+      '$Id: ESMF_VMSendRecvUTest.F90,v 1.16 2011/02/24 17:50:31 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -146,8 +146,8 @@
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      call ESMF_VMSendRecv(vm, sendData=localData, sendCount=count, dst=dst, &
-      &       recvData=i_recvData, recvCount=count, src=src, rc=rc)
+      call ESMF_VMSendRecv(vm, sendData=localData, sendCount=count, dstPet=dst, &
+        recvData=i_recvData, recvCount=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -157,7 +157,7 @@
       write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify local data after receive Test"
       print *,localPet, " After rcv i_recvData is ", i_recvData(1), &
-    &        i_recvData(2),"( should be ",soln(1),soln(2)," )"
+        i_recvData(2),"( should be ",soln(1),soln(2)," )"
       isum=isum+ (i_recvData(1) - soln(1)) + (i_recvData(2) - soln(2))
       call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
@@ -167,8 +167,8 @@
       ! Send local data to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      call ESMF_VMSendRecv(vm, sendData=r4_localData, sendCount=count,  &
-      &         dst=dst, recvData=r4_recvData, recvCount=count, src=src, rc=rc)
+      call ESMF_VMSendRecv(vm, sendData=r4_localData, sendCount=count, &
+        dstPet=dst, recvData=r4_recvData, recvCount=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -178,7 +178,7 @@
       write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify local data after receive Test"
       print *,localPet, "After recv r4_recvData is ", r4_recvData(1), &
-     &        r4_recvData(2),"( should be ", r4_soln(1), r4_soln(2)," )"
+        r4_recvData(2),"( should be ", r4_soln(1), r4_soln(2)," )"
       R4Sum=(r4_recvData(1) - r4_soln(1)) +  &
             (r4_recvData(2) - r4_soln(2))
       call ESMF_Test( (R4Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
@@ -190,7 +190,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
       call ESMF_VMSendRecv(vm, sendData=r8_localData, sendCount=count, &
-      &          dst=dst, recvData=r8_recvData, recvCount=count,src=src, rc=rc)
+        dstPet=dst, recvData=r8_recvData, recvCount=count,srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -200,7 +200,7 @@
       write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify local data after receive Test"
       print *,localPet, "After recv r8_recvData is ", r8_recvData(1), &
-     &       r8_recvData(2),"( Should be ", r8_soln(1), r8_soln(2)," )"
+        r8_recvData(2),"( Should be ", r8_soln(1), r8_soln(2)," )"
       R8Sum=(r8_recvData(1) - r8_soln(1)) +  &
             (r8_recvData(2) - r8_soln(2))
       call ESMF_Test( (R8Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
@@ -212,7 +212,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
       call ESMF_VMSendRecv(vm, sendData=local_logical, sendCount=count,  &
-      &        dst=dst, recvData=recv_logical, recvCount=count, src=src, rc=rc)
+        dstPet=dst, recvData=recv_logical, recvCount=count, srcPet=src, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

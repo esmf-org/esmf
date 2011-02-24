@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.89 2011/02/23 20:14:48 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.90 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.89 2011/02/23 20:14:48 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.90 2011/02/24 17:50:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -829,7 +829,7 @@ petloop:  &
        comm_ints(1) = myOrigCount
        comm_ints(2) = size (si%blindsend, dim=1)
        call ESMF_VMBroadcast (vm, comm_ints, count=size (comm_ints), &
-                      root=j, rc=localrc)
+                      rootPet=j, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
                       ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -843,13 +843,13 @@ petloop:  &
 
            ! Broadcast the local object IDs
            if (i_send) then
-               call ESMF_VMBroadcast (vm, si%idsend, count=myOrigCount, root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%idsend, count=myOrigCount, rootPet=j, rc=localrc)
            else
                allocate(si%idrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Allocating buffer for local ID list", &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-               call ESMF_VMBroadcast (vm, si%idrecv, count=si%theircount, root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%idrecv, count=si%theircount, rootPet=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
@@ -858,13 +858,13 @@ petloop:  &
 
            ! Broadcast the object types
            if (i_send) then
-               call ESMF_VMBroadcast (vm, si%objsend, count=myOrigCount, root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%objsend, count=myOrigCount, rootPet=j, rc=localrc)
            else
                allocate(si%objrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Allocating buffer for local obj list", &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-               call ESMF_VMBroadcast (vm, si%objrecv, count=si%theircount, root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%objrecv, count=si%theircount, rootPet=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
@@ -874,7 +874,7 @@ petloop:  &
            ! Broadcast VMIds
            if (i_send) then
                call ESMF_VMBcastVMId(vm, si%vmidsend, count=myOrigCount, &
-                   root=j, rc=localrc)
+                   rootPet=j, rc=localrc)
            else
 	       allocate(si%vmidrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
@@ -884,7 +884,7 @@ petloop:  &
                    call ESMF_VMIdCreate (si%vmidrecv(k))
                enddo                              
                call ESMF_VMBcastVMId(vm, si%vmidrecv, count=size (si%vmidrecv), &
-                   root=j, rc=localrc)
+                   rootPet=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &
@@ -892,13 +892,13 @@ petloop:  &
 
            ! Broadcast serialized object buffers
            if (i_send) then
-               call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*myOrigCount, root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*myOrigCount, rootPet=j, rc=localrc)
 	   else
                allocate(si%blindrecv(bsbufsize, si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Allocating buffer for local buf list", &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-               call ESMF_VMBroadcast (vm, si%blindrecv, size (si%blindrecv), root=j, rc=localrc)
+               call ESMF_VMBroadcast (vm, si%blindrecv, size (si%blindrecv), rootPet=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
                           ESMF_ERR_PASSTHRU, &

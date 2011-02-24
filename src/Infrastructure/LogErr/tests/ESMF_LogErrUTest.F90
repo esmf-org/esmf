@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.68 2011/02/23 16:50:20 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.69 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.68 2011/02/23 16:50:20 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.69 2011/02/24 17:50:31 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -451,10 +451,10 @@
         if (my_pet == i-1) then
           datetime_commbuf = my_v
           call ESMF_VMSend (vm,  &
-            datetime_commbuf, count=size (datetime_commbuf), dst=i)
+            datetime_commbuf, count=size (datetime_commbuf), dstPet=i)
         else if (my_pet == i) then
           call ESMF_VMRecv (vm,  &
-            datetime_commbuf, count=size (datetime_commbuf), src=i-1)
+            datetime_commbuf, count=size (datetime_commbuf), srcPet=i-1)
           do
             call date_and_time (values=my_v, date=todays_date, time=todays_time)
             if (datetime_commbuf(7) /= my_v(7)) exit

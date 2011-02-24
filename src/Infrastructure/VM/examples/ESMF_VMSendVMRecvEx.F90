@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.19 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.20 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,12 +61,12 @@ program ESMF_VMSendVMRecvEx
   dst = petCount - 1
 !BOC
   if (localPet==src) &
-    call ESMF_VMSend(vm, sendData=localData, count=count, dst=dst, rc=rc)
+    call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   if (localPet==dst) &
-    call ESMF_VMRecv(vm, recvData=localData, count=count, src=src, rc=rc)
+    call ESMF_VMRecv(vm, recvData=localData, count=count, srcPet=src, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

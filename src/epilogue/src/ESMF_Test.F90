@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.16 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_Test.F90,v 1.17 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.16 2011/01/05 20:05:48 svasquez Exp $'
+      '$Id: ESMF_Test.F90,v 1.17 2011/02/24 17:50:31 theurich Exp $'
 
 !==============================================================================
 
@@ -522,7 +522,7 @@
 
       ! Gather test results
       call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=1, &
-      root=gatherRoot, rc=localrc)
+      rootPet=gatherRoot, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) " FAIL  ESMF_VMGather failed.  Error code ", localrc
           print *, trim(msg)

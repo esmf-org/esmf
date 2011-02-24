@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGatherUTest.F90,v 1.15 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMGatherUTest.F90,v 1.16 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_VMGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMGatherUTest.F90,v 1.15 2011/02/24 06:47:11 theurich Exp $'
+    '$Id: ESMF_VMGatherUTest.F90,v 1.16 2011/02/24 17:50:31 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -104,7 +104,7 @@ program ESMF_VMGatherUTest
   write(name, *) "Gather() Test for Integer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=nsize, &
-    root=gatherRoot, rc=rc)
+    rootPet=gatherRoot, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -149,7 +149,7 @@ program ESMF_VMGatherUTest
   write(name, *) "Gather() Test for ESMF_KIND_R8"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGather(vm, sendData=farray2, recvData=farray1, count=nsize, &
-    root=gatherRoot, rc=rc)
+    rootPet=gatherRoot, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -199,7 +199,7 @@ program ESMF_VMGatherUTest
   write(name, *) "Gather() Test for ESMF_KIND_R4"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGather(vm, sendData=f4array2, recvData=f4array1, count=nsize, &
-    root=gatherRoot, rc=rc)
+    rootPet=gatherRoot, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -280,7 +280,7 @@ program ESMF_VMGatherUTest
   write(name, *) "GatherV() Test for Integer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGatherV(vm, sendData=array2, sendCount=nsize, recvData=array1, &
-    recvCounts=recvCounts, recvOffsets=recvOffsets, root=gatherRoot, rc=rc)
+    recvCounts=recvCounts, recvOffsets=recvOffsets, rootPet=gatherRoot, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -325,7 +325,7 @@ program ESMF_VMGatherUTest
   write(name, *) "GatherV() Test for ESMF_KIND_R8"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGatherV(vm, sendData=farray2, sendCount=nsize, recvData=farray1, &
-    recvCounts=recvCounts, recvOffsets=recvOffsets, root=gatherRoot, rc=rc)
+    recvCounts=recvCounts, recvOffsets=recvOffsets, rootPet=gatherRoot, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -375,7 +375,7 @@ program ESMF_VMGatherUTest
   write(name, *) "GatherV() Test for ESMF_KIND_R4"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_VMGatherV(vm, sendData=f4array2, sendCount=nsize, recvData=f4array1,&
-    recvCounts=recvCounts, recvOffsets=recvOffsets, root=gatherRoot, rc=rc)
+    recvCounts=recvCounts, recvOffsets=recvOffsets, rootPet=gatherRoot, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------

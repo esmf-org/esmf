@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.16 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.17 2011/02/24 17:50:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -73,13 +73,13 @@ program ESMF_VMScatterVMGatherEx
   ! Scatter/Gather
 !BOC
   call ESMF_VMScatter(vm, sendData=array1, recvData=array2, count=nsize, &
-    root=scatterRoot, rc=rc)
+    rootPet=scatterRoot, rc=rc)
   ! Both sendData and recvData must be 1-d arrays.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=nsize, &
-    root=gatherRoot, rc=rc)
+    rootPet=gatherRoot, rc=rc)
   ! Both sendData and recvData must be 1-d arrays.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
