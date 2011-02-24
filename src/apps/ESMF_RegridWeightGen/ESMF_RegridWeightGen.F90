@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.25 2011/02/24 20:19:29 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.26 2011/02/24 21:52:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -767,7 +767,7 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
 
 
   ! Get size of Grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return
@@ -1143,7 +1143,7 @@ subroutine gatherFracFieldGrid(grid, fracField, petNo, frac, rc)
 
 
   ! Get size of Grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return

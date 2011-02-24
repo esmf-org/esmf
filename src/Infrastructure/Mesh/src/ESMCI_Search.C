@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.17 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Search.C,v 1.18 2011/02/24 21:52:21 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.17 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.18 2011/02/24 21:52:21 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -264,7 +264,11 @@ static int found_func(void *c, void *y) {
     // If we're masked and we already have someone then continue
     // NOTE: if we ever care about finding the lowest gid masked elem
     //       will have to change this
-    if (elem_masked && si.is_in) return 0; 
+    // if (elem_masked && si.is_in) return 0; 
+
+    // Instead of the above, if this element is masked then skip altogether
+    // this prevents problems with bad coords in masked elements
+    if (elem_masked) return 0; 
 
     // Do the is_in calculation
   const MappingBase &map = GetMapping(elem);

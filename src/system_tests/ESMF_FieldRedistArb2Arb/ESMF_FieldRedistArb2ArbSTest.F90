@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.23 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldRedistArb2ArbSTest.F90,v 1.24 2011/02/24 21:52:22 oehmke Exp $
 !
 ! System test FieldRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -122,7 +122,7 @@
 
      grid1 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices1,localArbIndexCount=localCount, &
+       arbIndexList=myIndices1,arbIndexCount=localCount, &
        name="source grid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
      call ESMF_GridAddCoord(grid1, rc=status)
@@ -148,7 +148,7 @@
 
      grid2 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices2,localArbIndexCount=localCount, &
+       arbIndexList=myIndices2,arbIndexCount=localCount, &
        name="dest grid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 

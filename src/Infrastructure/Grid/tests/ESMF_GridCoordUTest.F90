@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.48 2011/02/23 18:53:49 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.49 2011/02/24 21:52:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.48 2011/02/23 18:53:49 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.49 2011/02/24 21:52:21 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -325,7 +325,7 @@ program ESMF_GridCoordUTest
 
 
   ! get distgrid 
-  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid,rc=localrc)
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, distgrid=tmpDistGrid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
  
 
@@ -517,7 +517,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get distgrid 
-  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid,rc=localrc)
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, distgrid=tmpDistGrid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
  
   ! First make bad Array and make sure it fails
@@ -583,7 +583,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get distgrid 
-  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid,rc=localrc)
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_CORNER, distgrid=tmpDistGrid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array 
@@ -639,7 +639,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get distgrid 
-  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, staggerdistgrid=tmpDistGrid,rc=localrc)
+  call ESMF_GridGet(grid2D, staggerloc=ESMF_STAGGERLOC_EDGE1, distgrid=tmpDistGrid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array with extra space
@@ -2816,7 +2816,7 @@ program ESMF_GridCoordUTest
         t=index(1)+index(2)+index(3)
 
         ! get coords for index location
-        call ESMF_GridGetCoordInd(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+        call ESMF_GridGetCoord(grid2D, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
                               index=index, coord=coord, rc=localrc)
         if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE    
 

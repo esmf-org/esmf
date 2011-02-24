@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.13 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.13 2011/01/24 23:04:59 rokuingh Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -288,7 +288,7 @@ program ESMF_GridItemUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get distgrid
-  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid, rc=localrc)
+  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, distgrid=tmpDistGrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array 
@@ -388,7 +388,7 @@ program ESMF_GridItemUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get distgrid
-  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, staggerdistgrid=tmpDistGrid, rc=localrc)
+  call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, distgrid=tmpDistGrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array 

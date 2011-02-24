@@ -195,8 +195,6 @@ extern "C" {
                            int *_staggerLocCount, 
 			   ESMCI::InterfaceInt **_distgridToGridMap, 
 			   ESMCI::InterfaceInt **_coordDimCount,
-			   int *_localArbIndexCount,			
-			   ESMCI::InterfaceInt **_localArbIndex,
 			   int *_arbDim,
 			   int *_rank,
 			   int *_arbDimCount,
@@ -346,46 +344,10 @@ extern "C" {
       } 
     }
 
-    // get localArbIndexCount
-    if (ESMC_NOT_PRESENT_FILTER(_localArbIndexCount) != ESMC_NULL_POINTER) {
-      *_localArbIndexCount = grid->getLocalIndexCount();
-    }
 
     // find number of dimensions distributed arbitrarily
     dimCount1 = grid->getDistGrid()->getDimCount();
     distDimCount = dimCount - dimCount1 + 1;
-
-    // get localArbIndex
-    if (*_localArbIndex != NULL) {
-      localArbIndexCount = grid->getLocalIndexCount();
-      if ((*_localArbIndex)->dimCount != 2) {
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-	    "- localArbIndex array must be of rank 2", ESMC_NOT_PRESENT_FILTER(_rc));
-	return;
-      }
-      if ((*_localArbIndex)->extent[0] < localArbIndexCount){
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-	      "- 1st dimension of localArbIndex array must be of size = localArbIndexCount", ESMC_NOT_PRESENT_FILTER(_rc));
-	return;
-      }
-
-      if ((*_localArbIndex)->extent[1] < distDimCount){
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
-	      "- 2nd dimension of localArbIndex array must match the arbitrarily distributed dimensions", ESMC_NOT_PRESENT_FILTER(_rc));
-	return;
-      }
-     
-      // fill in localArbIndex		
-      int **localArbIndex = grid->getLocalIndices();
-      int k=0;
-      for (int j=0; j<distDimCount; j++) {
-	for (int i=0; i<localArbIndexCount; i++) {
-           // Note: order of i,j is reversed because of F vs. C array ordering
-	  (*_localArbIndex)->array[k]=localArbIndex[i][j]; 
-	  k++;
-	}
-      } 
-    }
 
     // get arbDim
     if (ESMC_NOT_PRESENT_FILTER(_arbDim) != ESMC_NULL_POINTER) {
@@ -2082,6 +2044,8 @@ extern "C" {
 				   int *_dimCount,
                                    int *_isLBound,
                                    int *_isUBound,
+                                   int *_localArbIndexCount,			
+                                   ESMCI::InterfaceInt **_localArbIndex,
                                    int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetplocaldepsloc()"
@@ -2089,6 +2053,7 @@ extern "C" {
     int dimCount;
     int localDE,staggerloc;
     ESMCI::Grid *grid;
+
 
     // Get Grid pointer
     grid=*_grid;
@@ -2120,12 +2085,6 @@ extern "C" {
         return;
     }
 
-
-   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
-          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
-        return;
-   }
   
   // Get Grid DimCount
   dimCount=grid->getDimCount();
@@ -2137,14 +2096,61 @@ extern "C" {
     return;
   }
   
-  // Fill in the output arrays
-  for (int i=0; i<dimCount; i++) {
-    if (grid->isLBndNT(localDE,i)) _isLBound[i]=1;
-    else  _isLBound[i]=0;
-    if (grid->isUBndNT(localDE,i)) _isUBound[i]=1;
-    else  _isUBound[i]=0;
-  }
+    // get some useful info
+    ESMC_GridDecompType decompType = grid->getDecompType();
+
+    if (decompType == ESMC_GRID_NONARBITRARY) {
+      // Fill in the output arrays
+      for (int i=0; i<dimCount; i++) {
+        if (grid->isLBndNT(localDE,i)) _isLBound[i]=1;
+        else  _isLBound[i]=0;
+        if (grid->isUBndNT(localDE,i)) _isUBound[i]=1;
+        else  _isUBound[i]=0;
+      }
+    }
   
+
+  // get localArbIndexCount
+  if (ESMC_NOT_PRESENT_FILTER(_localArbIndexCount) != ESMC_NULL_POINTER) {
+      *_localArbIndexCount = grid->getLocalIndexCount();
+  }
+
+    // find number of dimensions distributed arbitrarily
+    int dimCount1 = grid->getDistGrid()->getDimCount();
+    int distDimCount = dimCount - dimCount1 + 1;
+
+    // get localArbIndex
+    if (*_localArbIndex != NULL) {
+      int localArbIndexCount = grid->getLocalIndexCount();
+      if ((*_localArbIndex)->dimCount != 2) {
+	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+	    "- localArbIndex array must be of rank 2", ESMC_NOT_PRESENT_FILTER(_rc));
+	return;
+      }
+      if ((*_localArbIndex)->extent[0] < localArbIndexCount){
+	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+	      "- 1st dimension of localArbIndex array must be of size = localArbIndexCount", ESMC_NOT_PRESENT_FILTER(_rc));
+	return;
+      }
+
+      if ((*_localArbIndex)->extent[1] < distDimCount){
+	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+	      "- 2nd dimension of localArbIndex array must match the arbitrarily distributed dimensions", ESMC_NOT_PRESENT_FILTER(_rc));
+	return;
+      }
+     
+      // fill in localArbIndex		
+      int **localArbIndex = grid->getLocalIndices();
+      int k=0;
+      for (int j=0; j<distDimCount; j++) {
+	for (int i=0; i<localArbIndexCount; i++) {
+           // Note: order of i,j is reversed because of F vs. C array ordering
+	  (*_localArbIndex)->array[k]=localArbIndex[i][j]; 
+	  k++;
+	}
+      } 
+    }
+
   // return successfully
   if (_rc!=NULL) *_rc = ESMF_SUCCESS;
   
@@ -2158,26 +2164,16 @@ extern "C" {
   
   void FTN(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
 				int *_staggerloc,  
-   			        ESMCI::DistGrid **_staggerDistgrid,
-                                ESMCI::InterfaceInt **_minIndex,
-                                ESMCI::InterfaceInt **_maxIndex,
+   			        ESMCI::DistGrid **_staggerdistgrid,
                                 int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetpsloc()"
     int localrc;
     int distDimCount,dimCount;
     int staggerloc;
-    const int *staggerEdgeLWidth,*staggerEdgeUWidth;
-    const int *gridEdgeLWidth,*gridEdgeUWidth;
-    int *gridMapDim;
     ESMCI::Grid *grid;
     const ESMCI::DistGrid *distgrid;
-    int offsetL[ESMF_MAXDIM];
-    int offsetU[ESMF_MAXDIM];
-    int gridExLBnd[ESMF_MAXDIM];
-    int gridExUBnd[ESMF_MAXDIM];
     ESMC_GridDecompType decompType;   
-    const int *minIndex, *maxIndex;
 
     // Get Grid pointer
     grid=*_grid;
@@ -2193,20 +2189,15 @@ extern "C" {
         return;
     }
 
-    // get some useful info
-    dimCount = grid->getDimCount();
-    distgrid = grid->getDistGrid();
-    decompType = grid->getDecompType();
-    minIndex = grid->getMinIndex(0);
-    maxIndex = grid->getMaxIndex(0);
-    gridMapDim =grid->getGridMapDim();
-
     // staggerloc
     if (ESMC_NOT_PRESENT_FILTER(_staggerloc) == ESMC_NULL_POINTER) {
       staggerloc=0;
     } else {
       staggerloc=*_staggerloc; // already 0-based
     }
+
+    // get some useful info
+    decompType = grid->getDecompType();
 
     if (decompType == ESMC_GRID_NONARBITRARY) {
       if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
@@ -2230,15 +2221,114 @@ extern "C" {
 
 
    // Get stagger distgrid
-   if (ESMC_NOT_PRESENT_FILTER(_staggerDistgrid) != ESMC_NULL_POINTER) {
-     localrc=grid->getStaggerDistgrid(staggerloc, _staggerDistgrid);
+   if (ESMC_NOT_PRESENT_FILTER(_staggerdistgrid) != ESMC_NULL_POINTER) {
+     localrc=grid->getStaggerDistgrid(staggerloc, _staggerdistgrid);
      if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
 			         ESMC_NOT_PRESENT_FILTER(_rc))) return;
    }
+  
+    // return successfully
+    if (_rc!=NULL) *_rc = ESMF_SUCCESS;
+  
+  }
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
+  
+  void FTN(c_esmc_gridgetpslocptile)(ESMCI::Grid **_grid, 
+                                int *_tile,
+				int *_staggerloc,  
+                                ESMCI::InterfaceInt **_minIndex,
+                                ESMCI::InterfaceInt **_maxIndex,
+                                int *_rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridgetpslocptile()"
+    int localrc;
+    int distDimCount,dimCount;
+    int staggerloc;
+    const int *staggerEdgeLWidth,*staggerEdgeUWidth;
+    const int *gridEdgeLWidth,*gridEdgeUWidth;
+    int *gridMapDim;
+    ESMCI::Grid *grid;
+    ESMCI::DistGrid *staggerdistgrid;
+    int offsetL[ESMF_MAXDIM];
+    int offsetU[ESMF_MAXDIM];
+    int gridExLBnd[ESMF_MAXDIM];
+    int gridExUBnd[ESMF_MAXDIM];
+    ESMC_GridDecompType decompType;   
+    const int *minIndex, *maxIndex;
+    int tile0b;
+
+    // Get Grid pointer
+    grid=*_grid;
+
+
+    //Initialize return code
+    localrc = ESMC_RC_NOT_IMPL;
+    if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
+
+    // Check grid status
+   if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
+          "- grid not ready for this operation ", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+
+    // get some useful info
+    dimCount = grid->getDimCount();
+    decompType = grid->getDecompType();
+    minIndex = grid->getMinIndex(0);
+    maxIndex = grid->getMaxIndex(0);
+    gridMapDim =grid->getGridMapDim();
+
+    // staggerloc
+    if (ESMC_NOT_PRESENT_FILTER(_staggerloc) == ESMC_NULL_POINTER) {
+      staggerloc=0;
+    } else {
+      staggerloc=*_staggerloc; // already 0-based
+    }
+
+
+    if (decompType == ESMC_GRID_NONARBITRARY) {
+      if ((staggerloc < 0) || (staggerloc >=  grid->getStaggerLocCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+	      "- staggerloc outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+    } else {
+      if (staggerloc != 0) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+	      "- arbitrary grid only supports center staggerloc", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+      }
+    }
+
+
+    // tile
+    if (ESMC_NOT_PRESENT_FILTER(_tile) == ESMC_NULL_POINTER) {
+      tile0b=0;
+    } else {
+      tile0b=*_tile-1; 
+    }
+
+
+
+    // Check tile
+    if ((tile0b < 0) || (tile0b >=grid->getTileCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+       "- tile outside of range for grid", ESMC_NOT_PRESENT_FILTER(_rc));
+        return;
+    }
+    
+    
+    // Get stagger distgrid
+    localrc=grid->getStaggerDistgrid(staggerloc, &staggerdistgrid);
+    if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                             ESMC_NOT_PRESENT_FILTER(_rc))) return;
+
 
    // fill minIndex
    if (*_minIndex != NULL){
-     // computationalEdgeLWidth was provided -> do some error checking
      if ((*_minIndex)->dimCount != 1){
        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
           "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
@@ -2251,16 +2341,13 @@ extern "C" {
      }
 
      if (decompType == ESMC_GRID_NONARBITRARY) {
-       // Get stagger width
-       staggerEdgeLWidth=grid->getStaggerEdgeLWidth(staggerloc);
-
-       // get the minIndex of the first tile
-       const int *minIndexDG=distgrid->getMinIndexPDimPTile();
+       // get the minIndex of the tile
+       const int *minIndexDG=staggerdistgrid->getMinIndexPDimPTile()+tile0b*dimCount;
 
 
        // Fill in the output array
        for (int i=0; i<dimCount; i++) {
-	   (*_minIndex)->array[i]=minIndexDG[gridMapDim[i]]-staggerEdgeLWidth[i];
+         (*_minIndex)->array[i]=minIndexDG[gridMapDim[i]];
        }
 
      } else {
@@ -2272,7 +2359,6 @@ extern "C" {
 
     // fill maxIndex
     if (*_maxIndex != NULL){
-      // computationalEdgeLWidth was provided -> do some error checking
       if ((*_maxIndex)->dimCount != 1){
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
           "- minIndex array must be of dimCount 1", ESMC_NOT_PRESENT_FILTER(_rc));
@@ -2285,15 +2371,13 @@ extern "C" {
       }
 
       if (decompType == ESMC_GRID_NONARBITRARY) {
-	// Get stagger width
-	staggerEdgeUWidth=grid->getStaggerEdgeUWidth(staggerloc);
 
-	// get the minIndex of the first tile
-	const int *maxIndexDG=distgrid->getMaxIndexPDimPTile();
+	// get the minIndex of the tile
+	const int *maxIndexDG=staggerdistgrid->getMaxIndexPDimPTile()+tile0b*dimCount;
 
 	// Fill in the output array
 	for (int i=0; i<dimCount; i++) {
-	  (*_maxIndex)->array[i]=maxIndexDG[gridMapDim[i]]+staggerEdgeUWidth[i];
+	  (*_maxIndex)->array[i]=maxIndexDG[gridMapDim[i]];
 	}
       } else {
 	for (int i=0; i<dimCount; i++) {
@@ -2306,6 +2390,8 @@ extern "C" {
     if (_rc!=NULL) *_rc = ESMF_SUCCESS;
   
   }
+
+
    
   ///////////////////////////////////////////////////////////////////////////////////
   

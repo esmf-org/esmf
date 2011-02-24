@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.75 2011/02/23 22:16:21 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.76 2011/02/24 21:52:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -6550,13 +6550,13 @@ contains
         ! get distgrid for staggerloc
         if (present(staggerloc)) then
            call ESMF_GridGet(grid,staggerloc, &
-                  staggerdistgrid=staggerdistgrid,rc=localrc)
+                  distgrid=staggerdistgrid,rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
         else 
            call ESMF_GridGet(grid,ESMF_STAGGERLOC_CENTER, &
-                  staggerdistgrid=staggerdistgrid,rc=localrc)
+                  distgrid=staggerdistgrid,rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return

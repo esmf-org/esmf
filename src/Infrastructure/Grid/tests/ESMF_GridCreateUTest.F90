@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.109 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.110 2011/02/24 21:52:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.109 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.110 2011/02/24 21:52:21 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1152,7 +1152,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1164,7 +1164,7 @@ program ESMF_GridCreateUTest
   if (maxIndex(2) .ne. 3)  correct=.false.
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CORNER, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1176,7 +1176,7 @@ program ESMF_GridCreateUTest
   if (maxIndex(2) .ne. 4)  correct=.false.
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_EDGE1, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1188,7 +1188,7 @@ program ESMF_GridCreateUTest
   if (maxIndex(2) .ne. 3)  correct=.false.
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_EDGE2, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1224,7 +1224,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1238,7 +1238,7 @@ program ESMF_GridCreateUTest
   if (maxIndex(3) .ne. 6)  correct=.false.
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER_VFACE, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1252,7 +1252,7 @@ program ESMF_GridCreateUTest
   if (maxIndex(3) .ne. 6)  correct=.false.
 
   ! get info back from grid
-  call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_EDGE1_VFACE, &
            minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1813,7 +1813,7 @@ program ESMF_GridCreateUTest
   call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_GridGet(grid2, minIndex=minIndex, maxIndex=maxIndex, &
+  call ESMF_GridGet(grid2, tile=1, minIndex=minIndex, maxIndex=maxIndex, &
     staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

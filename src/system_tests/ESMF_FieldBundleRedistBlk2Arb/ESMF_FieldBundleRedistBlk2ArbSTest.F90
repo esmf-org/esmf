@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.13 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -142,7 +142,7 @@ program Blk2ArbBunRedist
 
      grid2 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
-       localArbIndex=myIndices,localArbIndexCount=localCount, &
+       arbIndexList=myIndices,arbIndexCount=localCount, &
        name="arbgrid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
