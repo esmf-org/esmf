@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.19 2011/02/22 21:35:57 w6ws Exp $
+// $Id: ESMCI_Clock.C,v 1.20 2011/02/24 04:46:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.19 2011/02/22 21:35:57 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.20 2011/02/24 04:46:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -990,12 +990,12 @@ int Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int          nameLen,   // in  - the length of the alarm name
-      char        *name,      // in  - the alarm "name" to get
+      int          alarmnameLen,   // in  - the length of the alarm name
+      char        *alarmname,      // in  - the alarm "name" to get
       Alarm **alarm) {   // out - the alarm named "name"
 //
 // !DESCRIPTION:
-//     Retrieve's the clock's alarm named "name" from the alarm list
+//     Retrieve's the clock's alarm named "alarmname" from the alarm list
 //
 //EOP
 // !REQUIREMENTS:  TMG x.x
@@ -1011,18 +1011,18 @@ int Clock::count=0;
       return(rc);
     }
 
-    if (nameLen >= ESMF_MAXSTR) {
+    if (alarmnameLen >= ESMF_MAXSTR) {
       char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "For alarm name %s, length >= ESMF_MAXSTR, "
-                      "truncated.", name);
+      sprintf(logMsg, "For alarmname %s, length >= ESMF_MAXSTR, "
+                      "truncated.", alarmname);
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       // TODO: return ESMF_WARNING when defined
     }
 
     // TODO: use inherited methods from ESMC_Base
     char alarmName[ESMF_MAXSTR];
-    strncpy(alarmName, name, nameLen);
-    alarmName[nameLen] = '\0';  // null terminate
+    strncpy(alarmName, alarmname, alarmnameLen);
+    alarmName[alarmnameLen] = '\0';  // null terminate
 
     // linear search for alarm name
     for(int i=0; i<alarmCount; i++) {

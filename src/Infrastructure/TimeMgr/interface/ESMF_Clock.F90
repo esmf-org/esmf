@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.107 2011/02/23 06:37:31 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.108 2011/02/24 04:46:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.107 2011/02/23 06:37:31 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.108 2011/02/24 04:46:25 eschwab Exp $'
 
 !==============================================================================
 !
@@ -770,24 +770,25 @@
 ! !IROUTINE: ESMF_ClockGetAlarm - Get an Alarm in a Clock's Alarm list
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGetAlarm(clock, name, alarm, keywordEnforcer, rc)
+      subroutine ESMF_ClockGetAlarm(clock, alarmname, alarm, &
+        keywordEnforcer, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(inout)         :: clock
-      character (len=*), intent(in)            :: name
+      character (len=*), intent(in)            :: alarmname
       type(ESMF_Alarm),  intent(out)           :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets the {\tt alarm} whose name is the value of name in the {\tt clock}'s
-!     {\tt ESMF\_Alarm} list.
+!     Gets the {\tt alarm} whose name is the value of alarmname in the 
+!     {\tt clock}'s {\tt ESMF\_Alarm} list.
 !   
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to get the {\tt ESMF\_Alarm} from.
-!     \item[name]
+!     \item[alarmname]
 !          The name of the desired {\tt ESMF\_Alarm}.
 !     \item[alarm]
 !          The desired alarm.
@@ -800,16 +801,16 @@
 !     TMGx.x
 
       ! get length of given name for C++ validation
-      integer :: nameLen, localrc
+      integer :: alarmnameLen, localrc
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      nameLen = len_trim(name)
+      alarmnameLen = len_trim(alarmname)
 
 !     invoke C to C++ entry point
-      call c_ESMC_ClockGetAlarm(clock, nameLen, name, alarm, localrc)
+      call c_ESMC_ClockGetAlarm(clock, alarmnameLen, alarmname, alarm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
    

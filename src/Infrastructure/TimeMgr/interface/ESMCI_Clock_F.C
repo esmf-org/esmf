@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock_F.C,v 1.6 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Clock_F.C,v 1.7 2011/02/24 04:46:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -265,13 +265,13 @@ extern "C" {
        }
 
        void FTN(c_esmc_clockgetalarm)(Clock **ptr,
-                                      int *nameLen,
-                                      char *name,
+                                      int *alarmnameLen,
+                                      char *alarmname,
                                       Alarm **alarm,
                                       int *status,
                                       ESMCI_FortranStrLenArg name_l) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::getAlarm(*nameLen, name, alarm);
+          int rc = (*ptr)->Clock::getAlarm(*alarmnameLen, alarmname, alarm);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
