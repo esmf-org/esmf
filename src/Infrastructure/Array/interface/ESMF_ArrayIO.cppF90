@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.37 2011/01/13 16:34:32 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.38 2011/02/24 01:17:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.37 2011/01/13 16:34:32 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.38 2011/02/24 01:17:10 w6ws Exp $'
 
 !==============================================================================
 
@@ -355,8 +355,8 @@ contains
      case(ESMF_TYPEKIND_R8%dkind) @\
        basepiotype=PIO_double @\
      case default @\
-       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
-              ESMF_CONTEXT, rc) @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported typekind", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
        return @\
     end select @\
 @\
@@ -375,8 +375,8 @@ contains
      case('nc4c') @\
        fmtiotype = PIO_iotype_netcdf4c @\
      case default @\
-       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported IO format", & @\
-              ESMF_CONTEXT, rc) @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported IO format", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
        return @\
     end select @\
 @\
@@ -658,8 +658,8 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
      case(ESMF_TYPEKIND_R8%dkind) @\
        basepiotype=PIO_double @\
      case default @\
-       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", & @\
-              ESMF_CONTEXT, rc) @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported typekind", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
        return @\
     end select @\
 @\
@@ -678,8 +678,8 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
      case('nc4c') @\
        fmtiotype = PIO_iotype_netcdf4c @\
      case default @\
-       call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported IO format", & @\
-              ESMF_CONTEXT, rc) @\
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported IO format", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
        return @\
     end select @\
 @\
@@ -702,7 +702,8 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
         pioerr = PIO_inq_dimlen(FileObj, dimid_time, time_len) @\
         if(time .gt. time_len) then @\
           call ESMF_LogSetError(ESMF_RC_NOT_VALID, & @\
-             "Timeframe is greater than that in file", ESMF_CONTEXT, rc) @\
+             msg="Timeframe is greater than that in file", & @\
+             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\    
         frame = time @\
