@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.48 2011/02/23 20:02:53 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.49 2011/02/24 20:02:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.48 2011/02/23 20:02:53 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.49 2011/02/24 20:02:26 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1259,12 +1259,12 @@ contains
       ! Allocate memory for points
       allocate(pntList(pntDim*pntCount), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return   
+        ESMF_CONTEXT, rcToReturn=rc)) return   
 
       ! Allocate memory for pets
       allocate(petList(pntCount), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return   
+        ESMF_CONTEXT, rcToReturn=rc)) return   
 
       ! Get Points 
       call ESMF_LocStreamGetPntList(locstream, coordKeyNames, pntDim, &
@@ -2240,7 +2240,7 @@ contains
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
 
  !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
  !! Get localDECount
@@ -2559,7 +2559,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
 
  
  ! Set Defaults
@@ -2725,7 +2725,7 @@ end subroutine ESMF_LocStreamGetKeyI4
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
 
  
  ! Set Defaults
@@ -2892,7 +2892,7 @@ end subroutine ESMF_LocStreamGetKeyR4
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
 
  
  ! Set Defaults
@@ -3030,7 +3030,7 @@ end subroutine ESMF_LocStreamGetKeyR8
  if (present(rc)) rc = ESMF_RC_NOT_IMPL 
 
  ! Check init status of arguments 
- ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit, locstream, rc) 
+ ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc) 
 
  !!!!! REMOVE THESE BECAUSE IT'S DONE IN THE C++ CALLS
  !! Get localDECount
@@ -5098,7 +5098,7 @@ end subroutine ESMF_LocStreamGetBounds
      ! Allocate space for seqInd
      allocate(seqInd(petListCount), stat=localrc)
      if (ESMF_LogFoundAllocError(localrc, msg="Allocating pntList", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return         
+       ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
      ! Get number of localDEs
@@ -5157,7 +5157,7 @@ end subroutine ESMF_LocStreamGetBounds
      ! Allocate sndSeqInd
      allocate(sndSeqInd(petListCount), stat=localrc)
      if (ESMF_LogFoundAllocError(localrc, msg="Allocating sndSeqInd", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return         
+       ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
      ! Reset positions
@@ -5189,7 +5189,7 @@ end subroutine ESMF_LocStreamGetBounds
      ! Allocate rcvSeqInd
      allocate(rcvSeqInd(newCount), stat=localrc)
      if (ESMF_LogFoundAllocError(localrc, msg="Allocating rcvSeqInd", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return         
+       ESMF_CONTEXT, rcToReturn=rc)) return         
 
 
 
