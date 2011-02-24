@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.44 2011/02/23 19:50:41 w6ws Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.45 2011/02/24 18:48:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.44 2011/02/23 19:50:41 w6ws Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.45 2011/02/24 18:48:18 theurich Exp $'
 
 !==============================================================================
 
@@ -159,6 +159,8 @@ module ESMF_ArraySpecMod
 
 !==============================================================================
 
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecGet"
 !BOP
@@ -169,28 +171,28 @@ module ESMF_ArraySpecMod
 !
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rank
     type(ESMF_TypeKind),  intent(out), optional :: typekind
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Returns information about the contents of an {\tt ESMF\_ArraySpec}.
+!   Returns information about the contents of an {\tt ESMF\_ArraySpec}.
 !
-! The arguments are:
-! \begin{description}
-! \item[arrayspec]
-!   The {\tt ESMF\_ArraySpec} to query.
-! \item[rank]
-!   Array rank (dimensionality -- 1D, 2D, etc). Maximum possible is 7D.
-! \item[typekind]
-!   Array typekind.  See section \ref{opt:typekind} for valid values.
-! \item[[rc]]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[arrayspec]
+!     The {\tt ESMF\_ArraySpec} to query.
+!   \item[{[rank]}]
+!     Array rank (dimensionality -- 1D, 2D, etc). Maximum possible is 7D.
+!   \item[{[typekind]}]
+!     Array typekind.  See section \ref{opt:typekind} for valid values.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     ! Local vars
     integer :: status ! local error status
     logical :: rcpresent ! did user specify rc?
@@ -221,8 +223,10 @@ module ESMF_ArraySpecMod
     if (rcpresent) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySpecGet
-
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecSet"
 !BOP
@@ -235,27 +239,27 @@ module ESMF_ArraySpecMod
     type(ESMF_ArraySpec), intent(inout)         :: arrayspec
     integer,              intent(in)            :: rank
     type(ESMF_TypeKind),  intent(in)            :: typekind
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Creates a description of the data -- the typekind, the rank,
-! and the dimensionality.
+!   Creates a description of the data -- the typekind, the rank,
+!   and the dimensionality.
 !
-! The arguments are:
-! \begin{description}
-! \item[arrayspec]
-!   The {\tt ESMF\_ArraySpec} to set.
-! \item[rank]
-!   Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
-! \item[typekind]
-!   Array typekind.  See section \ref{opt:typekind} for valid values.
-! \item[{[rc]}]
-!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[arrayspec]
+!     The {\tt ESMF\_ArraySpec} to set.
+!   \item[rank]
+!     Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
+!   \item[typekind]
+!     Array typekind.  See section \ref{opt:typekind} for valid values.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-
+!------------------------------------------------------------------------------
     ! Local vars
     integer :: status ! local error status
     logical :: rcpresent ! did user specify rc?
@@ -295,6 +299,7 @@ module ESMF_ArraySpecMod
     if (rcpresent) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySpecSet
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -307,25 +312,24 @@ module ESMF_ArraySpecMod
   subroutine ESMF_ArraySpecValidate(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)              :: arrayspec
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ArraySpec), intent(inout)           :: arrayspec
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt arrayspec} is internally consistent.
-!      The method returns an error code if problems are found.  
+!   Validates that the {\tt arrayspec} is internally consistent.
+!   The method returns an error code if problems are found.  
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[arrayspec] 
-!          Specified {\tt ESMF\_ArraySpec} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[arrayspec] 
+!     Specified {\tt ESMF\_ArraySpec} object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
@@ -379,7 +383,6 @@ module ESMF_ArraySpecMod
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     arrayspec%status = ESMF_ARRAYSPEC_STATUS_NOTSET 
 
@@ -413,7 +416,7 @@ module ESMF_ArraySpecMod
 !     \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     if (present(arrayspec)) then
       ESMF_ArraySpecGetInit = ESMF_INIT_GET(arrayspec)
     else
@@ -423,7 +426,8 @@ module ESMF_ArraySpecMod
   end function ESMF_ArraySpecGetInit
 !------------------------------------------------------------------------------
 
-!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecStatusEqual"
 !BOPI
@@ -452,13 +456,15 @@ module ESMF_ArraySpecMod
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
+!------------------------------------------------------------------------------
       ESMF_ArraySpecStatusEqual = (ArraySpecStatus1%status == &
                               ArraySpecStatus2%status)
 
       end function ESMF_ArraySpecStatusEqual
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecStatusNotEqual"
 !BOPI
@@ -487,13 +493,15 @@ module ESMF_ArraySpecMod
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
+!------------------------------------------------------------------------------
       ESMF_ArraySpecStatusNotEqual = (ArraySpecStatus1%status /= &
                                  ArraySpecStatus2%status)
 
       end function ESMF_ArraySpecStatusNotEqual
+!------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecStatusPrint"
 !BOPI
@@ -522,14 +530,16 @@ module ESMF_ArraySpecMod
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     write(*, *) "ArraySpecStatus Print Begins =====>"
     write(*, *) "   status = ", arrayspecstatus%status
     write(*, *) "ArraySpecStatus Print Ends   =====>"
     
   end subroutine ESMF_ArraySpecStatusPrint
+!------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecPrint"
 !BOP
@@ -539,8 +549,8 @@ module ESMF_ArraySpecMod
   subroutine ESMF_ArraySpecPrint(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in)              :: arrayspec
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ArraySpec), intent(inout)           :: arrayspec
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional   :: rc
 !         
 !
