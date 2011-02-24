@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2011/02/23 07:00:15 eschwab Exp $ 
+# $Id: makefile,v 1.11 2011/02/24 04:34:40 eschwab Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -159,7 +159,7 @@ RUN_ESMF_AttributeUpdateUTest:
 	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
 
 RUN_ESMF_AttributeUpdate2UTest:
-	$(MAKE) TNAME=AttributeUpdate2 NP=4 ftest
+	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
 
 # --- XML
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.1 2011/02/23 07:00:15 eschwab Exp $
+! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.2 2011/02/24 04:34:40 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -456,7 +456,7 @@ program ESMF_AttributeUpdate2UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.1 2011/02/23 07:00:15 eschwab Exp $'
+    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.2 2011/02/24 04:34:40 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -499,14 +499,15 @@ program ESMF_AttributeUpdate2UTest
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+    ! run components on interleaving and overlapping Pets
     gridcomp1 = ESMF_GridCompCreate(name="gridcomp1", &
-      petList=(/0,1/), rc=rc)
+      petList=(/0,2,4,5/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
-      petList=(/2,3/), rc=rc)
+      petList=(/1,3,4,5/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     cplcomp = ESMF_CplCompCreate(name="cplcomp", &
-      petList=(/0,1,2,3/), rc=rc)
+      petList=(/0,1,2,3,4,5/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc=rc)
@@ -539,7 +540,8 @@ program ESMF_AttributeUpdate2UTest
 
     ! call AttributeUpdate to get a VM wide view of the
     ! metadata set on comp1 in comp1initialize
-    call ESMF_AttributeUpdate(gridcomp1, vm, rootList=(/0,1/), rc=rc)
+    call ESMF_AttributeUpdate(gridcomp1, vm, &
+      rootList=(/0,2,4,5/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
     convCIM = 'CIM 1.0'
