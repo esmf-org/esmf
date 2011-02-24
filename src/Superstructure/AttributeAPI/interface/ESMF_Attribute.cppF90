@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.79 2011/02/23 20:46:37 w6ws Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.80 2011/02/24 04:37:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.79 2011/02/23 20:46:37 w6ws Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.80 2011/02/24 04:37:56 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1255,7 +1255,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
 !     subroutine ESMF_AttributeGetAPinstNames(<object>, convention, purpose, &
-!                         attPackInstanceNameList, attPackInstanceNameCount, rc)
+!       attPackInstanceNameList, attPackInstanceNameCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
@@ -1266,7 +1266,7 @@ contains
 !     integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Get the Attribute Package instance names of the specified convention 
+!     Get the Attribute package instance names of the specified convention 
 !     and purpose.  Also get the number of such names.
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.
@@ -3685,7 +3685,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetAPinstNames(mthis, convention, purpose, & @\
-      attPackInstanceNameList, attPackInstanceNameCount, rc) @\
+        attPackInstanceNameList, attPackInstanceNameCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
