@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.18 2011/02/22 21:35:57 w6ws Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.19 2011/02/24 04:54:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.18 2011/02/22 21:35:57 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.19 2011/02/24 04:54:29 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -987,10 +987,10 @@ namespace ESMCI{
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  TimeInterval::negAbsValue - Get a Time Interval's negative absolute value
+// !IROUTINE:  TimeInterval::absValueNeg - Get a Time Interval's negative absolute value
 //
 // !INTERFACE:
-      TimeInterval TimeInterval::negAbsValue(void) const {
+      TimeInterval TimeInterval::absValueNeg(void) const {
 //
 // !RETURN VALUE:
 //    TimeInterval result
@@ -1006,7 +1006,7 @@ namespace ESMCI{
 
    return(TimeInterval::absValue(ESMC_NEGATIVE_ABS));
 
- }  // end TimeInterval::negAbsValue
+ }  // end TimeInterval::absValueNeg
 
 //-------------------------------------------------------------------------
 //BOPI

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.66 2011/02/23 06:44:59 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.67 2011/02/24 04:54:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.66 2011/02/23 06:44:59 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.67 2011/02/24 04:54:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -812,7 +812,7 @@
       write(failMsg, *) " Did not return mm=-32, d=-10 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-4, d=10, &
                                 calendar=gregorianCalendar, rc=rc)
-      timeStep2 = ESMF_TimeIntervalNegAbsValue(timeStep)
+      timeStep2 = ESMF_TimeIntervalAbsValueNeg(timeStep)
       call ESMF_TimeIntervalGet(timeStep2, mm=months, d=days, rc=rc)
       call ESMF_Test((months==-32 .and. days==-10 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2075,7 +2075,7 @@
       write(failMsg, *) " Did not return mm=-32, d=-10 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-4, d=10, &
                                 calendar=julianCalendar, rc=rc)
-      timeStep2 = ESMF_TimeIntervalNegAbsValue(timeStep)
+      timeStep2 = ESMF_TimeIntervalAbsValueNeg(timeStep)
       call ESMF_TimeIntervalGet(timeStep2, mm=months, d=days, rc=rc)
       call ESMF_Test((months==-32 .and. days==-10 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -3172,7 +3172,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      absoluteTime=ESMF_TimeIntervalNegAbsValue(timeStep)
+      absoluteTime=ESMF_TimeIntervalAbsValueNeg(timeStep)
       !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Neg. Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -3289,7 +3289,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      absoluteTime=ESMF_TimeIntervalNegAbsValue(timeStep)
+      absoluteTime=ESMF_TimeIntervalAbsValueNeg(timeStep)
       !call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
       write(name, *) "Print Neg. Absolute Time Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
