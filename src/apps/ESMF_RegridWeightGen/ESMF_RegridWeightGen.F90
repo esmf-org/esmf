@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.24 2011/02/23 17:33:29 w6ws Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.25 2011/02/24 20:19:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -873,7 +873,7 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
 
   ! Get List of counts
   localCount(1)=localElemCount
-  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=localrc)
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return
@@ -908,7 +908,7 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   ! Gather all areas
   call ESMF_VMGatherV(vm,sendData=localArea, sendCount=localElemCount,&
          recvData=area,recvCounts=globalCount,recvOffsets=globalDispl,&
-         root=0, rc=localrc)
+         rootPet=0, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return
@@ -972,7 +972,7 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
 
   ! Get List of counts
   localCount(1)=count
-  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=rc)
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=rc)
   if (rc /=ESMF_SUCCESS) then
       return
   endif
@@ -1006,7 +1006,7 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   ! Gather all areas
   call ESMF_VMGatherV(vm,sendData=buffer, sendCount=localCount(1),&
          recvData=buffer1,recvCounts=globalCount,recvOffsets=globalDispl,&
-         root=0, rc=rc)
+         rootPet=0, rc=rc)
   if (rc /=ESMF_SUCCESS) then
       return
   endif  
@@ -1076,7 +1076,7 @@ subroutine computeFracMesh(mesh, vm, indices, frac, rc)
   
   ! Get List of counts
   localCount(1)=count
-  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=rc)
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=rc)
   if (rc /=ESMF_SUCCESS) then
       return
   endif
@@ -1111,7 +1111,7 @@ subroutine computeFracMesh(mesh, vm, indices, frac, rc)
   ! Gather all areas
   call ESMF_VMGatherV(vm,sendData=buffer, sendCount=localCount(1),&
          recvData=buffer1,recvCounts=globalCount,recvOffsets=globalDispl,&
-         root=0, rc=rc)
+         rootPet=0, rc=rc)
   if (rc /=ESMF_SUCCESS) then
       return
   endif  
@@ -1248,7 +1248,7 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
 
   ! Get List of counts
   localCount(1)=localElemCount
-  call ESMF_VMGather(vm,localCount,globalCount,count=1,root=0,rc=localrc)
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=localrc
      return
@@ -1283,7 +1283,7 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
   ! Gather all areas
   call ESMF_VMGatherV(vm,sendData=localFrac, sendCount=localElemCount,&
        recvData=frac,recvCounts=globalCount,recvOffsets=globalDispl,&
-       root=0, rc=localrc)
+       rootPet=0, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
      rc=localrc
      return
