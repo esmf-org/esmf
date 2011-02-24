@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.32 2011/02/23 20:10:08 w6ws Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.33 2011/02/24 20:17:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.32 2011/02/23 20:10:08 w6ws Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.33 2011/02/24 20:17:46 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -637,8 +637,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL @\
 @\
     ! make sure field, locstream, farray are properly initialized @\
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
-    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit,locstream,rc) @\
 @\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -757,8 +757,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL @\
 @\
     ! make sure field, locstream, farrayPtr are properly initialized @\
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
-    ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit,locstream,rc) @\
 @\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2046,8 +2046,8 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
     localrc = ESMF_RC_NOT_IMPL @\
 @\
     ! make sure field, grid, farrayPtr are properly initialized @\
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
-    ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit,geombase,rc) @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\
