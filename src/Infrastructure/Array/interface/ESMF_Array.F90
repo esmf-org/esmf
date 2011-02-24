@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.144 2011/02/23 19:56:16 w6ws Exp $
+! $Id: ESMF_Array.F90,v 1.145 2011/02/24 04:09:57 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.144 2011/02/23 19:56:16 w6ws Exp $'
+    '$Id: ESMF_Array.F90,v 1.145 2011/02/24 04:09:57 samsoncheung Exp $'
 
 !==============================================================================
 ! 
@@ -1370,7 +1370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
-        "ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
+      msg="ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
 #endif
@@ -1381,7 +1381,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       piofmt = "nc4p"  ! parallel read/write of NETCDF4 (HDF5) files 
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
-        "ESMF must be compiled with NETCDF support for this format choice", &
+      msg= "ESMF must be compiled with NETCDF support for this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
 #endif
@@ -1393,7 +1393,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                        ! files with data compression
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
-        "ESMF must be compiled with NETCDF support for this format choice", &
+      msg="ESMF must be compiled with NETCDF support for this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
 #endif
@@ -1405,19 +1405,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       piofmt = "bin"
       if (present(variableName)) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          "The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
+        msg="The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       if (present(timeslice)) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          "The input argument timeslice cannot be sepcified in ESMF_IOFMT_BIN mode",  &
+        msg="The input argument timeslice cannot be sepcified in ESMF_IOFMT_BIN mode",  &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
-        "ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
+      msg="ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
 #endif
@@ -1426,7 +1426,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! format option that is not supported
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
-        "this format is not currently supported by the ESMF IO layer", &
+      msg="this format is not currently supported by the ESMF IO layer", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
 
@@ -1482,7 +1482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported rank", &
               ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
@@ -1511,7 +1511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported rank", &
               ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
@@ -1540,13 +1540,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported rank", &
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported rank", &
               ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
 
       case default
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, "Unsupported typekind", &
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported typekind", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
 
