@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.22 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.23 2011/02/24 22:58:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.22 2011/02/24 21:52:21 oehmke Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.23 2011/02/24 22:58:13 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -415,7 +415,7 @@ program ESMF_GridArbitraryUTest
     farrayPtr1D(i) = (localIndices(i,1)-1)*(360/xdim)
   enddo
 
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, &
+  call ESMF_GridGetCoordBounds(grid, localDE=0, coordDim=2, &
 	computationalLbound=lowbound, computationalUBound=upbound, rc=localrc)
 
   call ESMF_GridGetCoord(grid, localDE=0, coordDim=2, farrayPtr=farrayPtr1D, rc=localrc)
@@ -423,7 +423,7 @@ program ESMF_GridArbitraryUTest
     farrayPtr1D(i) = (localIndices(i,2)-1)*(180/ydim)-90.0
   enddo
 
-  call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, &
+  call ESMF_GridGetCoordBounds(grid, localDE=0, coordDim=3, &
 	computationalLbound=lowbound, computationalUBound=upbound, rc=localrc)
 
   call ESMF_GridGetCoord(grid, localDE=0, coordDim=3, farrayPtr=farrayPtr1D, rc=localrc)

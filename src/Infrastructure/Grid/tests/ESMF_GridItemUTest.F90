@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.15 2011/02/24 22:58:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.15 2011/02/24 22:58:13 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -805,7 +805,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetItem(grid, localDE=0, &
+      call ESMF_GridGetItemBounds(grid, localDE=0, &
              staggerLoc=staggerloc, item=item,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd, exclusiveCount=ecnt,       &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
@@ -835,7 +835,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
  
       ! check DE 1
-      call ESMF_GridGetItem(grid, localDE=1, &
+      call ESMF_GridGetItemBounds(grid, localDE=1, &
              staggerLoc=staggerloc, item=item,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
@@ -863,7 +863,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
      if (ccnt(3) .ne. ieubnd1(3)-ielbnd1(3)+1+iloff1(3)+iuoff1(3)) correct=.false.
 
       ! check DE 2
-      call ESMF_GridGetItem(grid, localDE=2, &
+      call ESMF_GridGetItemBounds(grid, localDE=2, &
              staggerLoc=staggerloc, item=item,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd, exclusiveCount=ecnt,   &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
@@ -892,7 +892,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
      if (ccnt(3) .ne. ieubnd2(3)-ielbnd2(3)+1+iloff2(3)+iuoff2(3)) correct=.false.
 
       ! check DE 3
-      call ESMF_GridGetItem(grid, localDE=3, &
+      call ESMF_GridGetItemBounds(grid, localDE=3, &
              staggerLoc=staggerloc, item=item,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
@@ -920,7 +920,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
      if (ccnt(3) .ne. ieubnd3(3)-ielbnd3(3)+1+iloff3(3)+iuoff3(3)) correct=.false.
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetItem(grid, localDE=0, &
+      call ESMF_GridGetItemBounds(grid, localDE=0, &
              staggerLoc=staggerloc, item=item,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)

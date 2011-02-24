@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.200 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.201 2011/02/24 22:58:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -192,7 +192,10 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 
   public ESMF_GridGet
   public ESMF_GridGetCoord
+  public ESMF_GridGetCoordBounds
   public ESMF_GridGetStatus
+
+
 
 !  public ESMF_GridGetCoordInd ! HOPEFULLY TEMPORARY SEPARATE INTERFACE
   public ESMF_GridGetDecompType
@@ -203,6 +206,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridAddItem
   public ESMF_GridGetItem
   public ESMF_GridSetItem
+  public ESMF_GridGetItemBounds
 
   public ESMF_GridSetCommitShapeTile
   public ESMF_GridSerialize
@@ -229,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.200 2011/02/24 21:52:21 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.201 2011/02/24 22:58:13 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -358,7 +362,6 @@ interface ESMF_GridGetCoord
       module procedure ESMF_GridGetCoord1DR8
       module procedure ESMF_GridGetCoord2DR8
       module procedure ESMF_GridGetCoord3DR8
-      module procedure ESMF_GridGetCoordBounds
       module procedure ESMF_GridGetCoordIntoArray
       module procedure ESMF_GridGetCoordR8
       module procedure ESMF_GridGetCoordR4
@@ -387,7 +390,6 @@ interface ESMF_GridGetItem
       module procedure ESMF_GridGetItem1DR8
       module procedure ESMF_GridGetItem2DR8
       module procedure ESMF_GridGetItem3DR8
-      module procedure ESMF_GridGetItemBounds
       module procedure ESMF_GridGetItemIntoArray
       
 ! !DESCRIPTION: 
@@ -9905,10 +9907,9 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordBounds"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord -  Get Grid coordinate bounds
+! !IROUTINE: ESMF_GridGetCoordBounds -  Get Grid coordinate bounds
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoordBounds(grid, coordDim, keywordEnforcer,   &
         staggerloc, localDE, exclusiveLBound, exclusiveUBound, &
         exclusiveCount, computationalLBound, computationalUBound , & 
@@ -10372,7 +10373,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetItem - Get Grid coordinate bounds and an F90 pointer to coordinate data
+! !IROUTINE: ESMF_GridGetItem - Get Grid Item bounds and an F90 pointer to item data
 
 ! !INTERFACE:
 !      subroutine ESMF_GridGetItem(grid, item, keywordEnforcer, &
@@ -12836,10 +12837,10 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemBounds"
 !BOP
-! !IROUTINE: ESMF_GridGetItem -  Get Grid item bounds
+! !IROUTINE: ESMF_GridGetItemBounds -  Get Grid item bounds
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridGetItem()
+  ! Private name; call using ESMF_GridGetItemBounds()
       subroutine ESMF_GridGetItemBounds(grid, item, keywordEnforcer, &
         staggerloc, localDE, &
         exclusiveLBound, exclusiveUBound, exclusiveCount, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.49 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.50 2011/02/24 22:58:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.49 2011/02/24 21:52:21 oehmke Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.50 2011/02/24 22:58:13 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -3381,7 +3381,7 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd, exclusiveCount=ecnt,       &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,     &
@@ -3428,7 +3428,7 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 
 
       ! check DE 1
-      call ESMF_GridGetCoord(grid2D, coordDim=coordDim, localDE=1, &
+      call ESMF_GridGetCoordBounds(grid2D, coordDim=coordDim, localDE=1, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,          &
@@ -3472,7 +3472,7 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      if (tcnt(2) .ne. ieubnd1(2)-ielbnd1(2)+1+iloff1(2)+iuoff1(2)) correct=.false.
 
       ! check DE 2
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=2, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=2, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,          &
@@ -3514,7 +3514,7 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      if (tcnt(2) .ne. ieubnd2(2)-ielbnd2(2)+1+iloff2(2)+iuoff2(2)) correct=.false.
 
       ! check DE 3
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=3, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=3, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd, exclusiveCount=ecnt,       &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,          &
@@ -3557,7 +3557,7 @@ subroutine check2DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,          &
@@ -3706,7 +3706,7 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd,  computationalCount=ccnt,     &
@@ -3742,7 +3742,7 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 
 
       ! check DE 1
-      call ESMF_GridGetCoord(grid2D, coordDim=coordDim, localDE=1, &
+      call ESMF_GridGetCoordBounds(grid2D, coordDim=coordDim, localDE=1, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,   exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,  &
@@ -3777,7 +3777,7 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      if (tcnt(1) .ne. ieubnd1(1)-ielbnd1(1)+1+iloff1(1)+iuoff1(1)) correct=.false.
 
       ! check DE 2
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=2, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=2, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,   exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,   &
@@ -3812,7 +3812,7 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
 
 
       ! check DE 3
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=3, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=3, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,   exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt,   &
@@ -3845,7 +3845,7 @@ subroutine check1DBnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      if (tcnt(1) .ne. ieubnd3(1)-ielbnd3(1)+1+iloff3(1)+iuoff3(1)) correct=.false.
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, &
@@ -3961,7 +3961,7 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
       ! probably have to change also. 
 
       ! check DE 0
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              exclusiveCount=ecnt, &
@@ -4035,7 +4035,7 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      endif
 
       ! check DE 1
-      call ESMF_GridGetCoord(grid2D, coordDim=coordDim, localDE=1, &
+      call ESMF_GridGetCoordBounds(grid2D, coordDim=coordDim, localDE=1, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              exclusiveCount=ecnt, &
@@ -4109,7 +4109,7 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      endif
 
       ! check DE 2
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=2, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=2, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              exclusiveCount=ecnt, &
@@ -4182,7 +4182,7 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      endif
 
       ! check DE 3
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=3, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=3, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              exclusiveCount=ecnt, &
@@ -4254,7 +4254,7 @@ subroutine check2DP1Bnds2x2(grid, coordDim, staggerloc, localPet, petCount, &
      endif
 
   else  if (petCount .eq. 4) then
-      call ESMF_GridGetCoord(grid, coordDim=coordDim, localDE=0, &
+      call ESMF_GridGetCoordBounds(grid, coordDim=coordDim, localDE=0, &
              staggerLoc=staggerloc,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,       &
              exclusiveCount=ecnt, &
