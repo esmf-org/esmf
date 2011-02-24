@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.17 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.18 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -525,7 +525,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.17 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.18 2011/02/24 06:47:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -551,7 +551,7 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Global Test"
-      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -565,7 +565,7 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM print Test"
-      call ESMF_VMPrint(vm, rc)
+      call ESMF_VMPrint(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -574,7 +574,7 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, localPet, petCount=npets, rc=rc)
+      call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.13 2011/02/24 05:55:30 theurich Exp $
+! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.14 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.13 2011/02/24 05:55:30 theurich Exp $'
+      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.14 2011/02/24 06:47:11 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -88,7 +88,7 @@
 
       ! Get count of PETs and which PET number we are
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
+      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
       ! Allocate localData
       count = 2
@@ -257,7 +257,7 @@
       ! Wait on integer recv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for I4 RecvNb"
-      call ESMF_VMCommWait(vm, commhandleI4r, rc)
+      call ESMF_VMCommWait(vm, commhandleI4r, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -277,7 +277,7 @@
       ! Wait on R4 recv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for R4 RecvNb"
-      call ESMF_VMCommWait(vm, commhandleR4r, rc)
+      call ESMF_VMCommWait(vm, commhandleR4r, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -298,7 +298,7 @@
       ! Wait on R8 recv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for R8 RecvNb"
-      call ESMF_VMCommWait(vm, commhandleR8r, rc)
+      call ESMF_VMCommWait(vm, commhandleR8r, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -319,7 +319,7 @@
       ! Wait on LOGICAL recv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for LOGICAL RecvNb"
-      call ESMF_VMCommWait(vm, commhandleLOGICALr, rc)
+      call ESMF_VMCommWait(vm, commhandleLOGICALr, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

@@ -70,7 +70,7 @@
         print*, "*****'call ESMF_Initialize' failed"
       endif
   
-      call ESMF_VMGetGlobal(vm, rc)               ! Establish the VM
+      call ESMF_VMGetGlobal(vm, rc=rc)               ! Establish the VM
 
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE

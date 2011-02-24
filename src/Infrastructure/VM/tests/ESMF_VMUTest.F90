@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.38 2011/01/14 01:10:36 rokuingh Exp $
+! $Id: ESMF_VMUTest.F90,v 1.39 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
-      call ESMF_VMGet(test_vm, test_localPet, petCount=test_npets, rc=rc)
+      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1058,7 +1058,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.38 2011/01/14 01:10:36 rokuingh Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.39 2011/02/24 06:47:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -1084,14 +1084,14 @@
       !NEX_UTest
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "VM validate Test before valid VM"
-      call ESMF_VMValidate(vm, rc)
+      call ESMF_VMValidate(vm, rc=rc)
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Global Test"
-      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1105,14 +1105,14 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM print Test"
-      call ESMF_VMPrint(vm, rc)
+      call ESMF_VMPrint(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM validate Test"
-      call ESMF_VMValidate(vm, rc)
+      call ESMF_VMValidate(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
@@ -1121,7 +1121,7 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, localPet, petCount=npets, rc=rc)
+      call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.23 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.24 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -80,7 +80,7 @@ module ESMF_VMComponentEx_gcomp_mod
     ! the VM object contains information about the execution environment of
     ! the Component
 
-    call ESMF_VMPrint(vm, rc)
+    call ESMF_VMPrint(vm, rc=rc)
     
     rc = 0
   end subroutine !--------------------------------------------------------------
@@ -101,7 +101,7 @@ module ESMF_VMComponentEx_gcomp_mod
     ! the VM object contains information about the execution environment of
     ! the Component
 
-    call ESMF_VMPrint(vm, rc)
+    call ESMF_VMPrint(vm, rc=rc)
     
     rc = 0
   end subroutine !--------------------------------------------------------------
@@ -121,7 +121,7 @@ module ESMF_VMComponentEx_gcomp_mod
     ! the VM object contains information about the execution environment of
     ! the Component
 
-    call ESMF_VMPrint(vm, rc)
+    call ESMF_VMPrint(vm, rc=rc)
     
     rc = 0
   end subroutine !--------------------------------------------------------------

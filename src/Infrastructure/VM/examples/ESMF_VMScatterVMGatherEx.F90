@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.16 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ program ESMF_VMScatterVMGatherEx
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
  
-  call ESMF_VMGet(vm, localPet, petCount, rc=rc)
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   scatterRoot = 0

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.13 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.14 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.13 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.14 2011/02/24 06:47:11 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -85,7 +85,7 @@
 
       ! Get count of PETs and which PET number we are
       call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
+      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
       ! Allocate localData
       count = 2
@@ -208,7 +208,7 @@
       ! Wait on integer sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for I4 SendRecvNb"
-      call ESMF_VMCommWait(vm, commhandleI4, rc)
+      call ESMF_VMCommWait(vm, commhandleI4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -229,7 +229,7 @@
       ! Wait on R4 sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for R4 SendRecvNb"
-      call ESMF_VMCommWait(vm, commhandleR4, rc)
+      call ESMF_VMCommWait(vm, commhandleR4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -251,7 +251,7 @@
       ! Wait on R8 sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for R8 SendRecvNb"
-      call ESMF_VMCommWait(vm, commhandleR8, rc)
+      call ESMF_VMCommWait(vm, commhandleR8, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -273,7 +273,7 @@
       ! Wait on LOGICAL sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for LOGICAL SendRecvNb"
-      call ESMF_VMCommWait(vm, commhandleLOGICAL, rc)
+      call ESMF_VMCommWait(vm, commhandleLOGICAL, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -300,7 +300,7 @@
 !===============================================================================
 ! Second round of tests don't use commhandles but rely on ESMF's internal
 ! request queue. After all of the non-blocking calls are queued and before
-! testing the received values a call to ESMF_VMCommQueueWait() waits on _all_
+! testing the received values a call to ESMF_VMCommWaitAll() waits on _all_
 ! outstanding non-blocking communication calls for the current VM.
 !===============================================================================
 
@@ -374,14 +374,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-     !Test the VMCommQueueWait function to wait on all outstanding nb comms for VM
+     !Test the VMCommWaitAll function to wait on all outstanding nb comms for VM
      !===========================     
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Wait on integer sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for all queued non-blocking comms in VM"
-      call ESMF_VMCommQueueWait(vm, rc)
+      call ESMF_VMCommWaitAll(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.14 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.15 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_VMAllFullReduceEx
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-  call ESMF_VMGet(vm, localPet, rc=rc)
+  call ESMF_VMGet(vm, localPet=localPet, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
   ! allocate data arrays

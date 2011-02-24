@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.18 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.19 2011/02/24 06:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.18 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.19 2011/02/24 06:47:11 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -92,13 +92,13 @@
         call ESMF_VMWTime(t_a)  ! t_a is start time for each PET
 
         ! double barrier construct
-        call ESMF_VMBarrier(vm, rc)
+        call ESMF_VMBarrier(vm, rc=rc)
         if (localPet==i) then
           ! delay PET i by delay_time
           dt = delay_time + 4*dt_prec ! 4*dt_prec compensates for 4x taking time
           call ESMF_VMWTimeDelay(dt)
         endif
-        call ESMF_VMBarrier(vm, rc)
+        call ESMF_VMBarrier(vm, rc=rc)
 
         call ESMF_VMWTime(t_b)  ! t_b is end time for each PET
 
