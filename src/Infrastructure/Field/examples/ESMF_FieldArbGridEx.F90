@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.17 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.18 2011/02/24 23:32:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
     ! and arbitrarily distributed
     grid3d = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
       minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
-      localArbIndex=localArbIndex,localArbIndexCount=localArbIndexCount, &
+      arbIndexList=localArbIndex,arbIndexCount=localArbIndexCount, &
       name="arb3dgrid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
