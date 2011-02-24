@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.24 2011/02/24 04:09:58 samsoncheung Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.25 2011/02/24 17:44:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.24 2011/02/24 04:09:58 samsoncheung Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.25 2011/02/24 17:44:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -913,13 +913,13 @@ contains
 !   routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),       intent(in)            :: srcArray
-!   type(ESMF_Array),       intent(inout)         :: dstArray
-!   type(ESMF_RouteHandle), intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)          :: factor
+!   type(ESMF_Array),         intent(in)            :: srcArray
+!   type(ESMF_Array),         intent(inout)         :: dstArray
+!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,               intent(in),  optional  :: srcToDstTransposeMap(:)
-!   integer,               intent(out), optional  :: rc
+!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
+!   integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! \label{ArrayRedistStoreTK}
@@ -990,7 +990,7 @@ contains
 !   \item [routehandle]
 !     Handle to the precomputed Route.
 !   \item [factor]
-!     Factor by which to multipy source data. Default is 1.
+!     Factor by which to multipy source data.
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in {\tt srcArray}. Each
 !     entry maps the corresponding {\tt srcArray} dimension against the 

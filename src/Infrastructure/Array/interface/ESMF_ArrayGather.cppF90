@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.24 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.25 2011/02/24 17:44:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.24 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.25 2011/02/24 17:44:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -121,18 +121,16 @@ contains
 ! !IROUTINE: ESMF_ArrayGather - Gather a Fortran array from an ESMF_Array @\
 ! @\
 ! !INTERFACE: @\
-! Private name; call using ESMF_ArrayGather() @\
-! subroutine ESMF_ArrayGather<rank><type><kind>(array, farray, tile, & @\
-!   rootPet, keywordEnforcer, vm, rc) @\
+! subroutine ESMF_ArrayGather(array, farray, tile, rootPet, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Array),           intent(inout)           :: array @\
-!   <type> (ESMF_KIND_<kind>),dimension(<rank>),intent(in),target :: farray @\
-!   integer,                    intent(in),   optional  :: tile @\
-!   integer,                    intent(in)              :: rootPet @\
+!   type(ESMF_Array),                           intent(in)            :: array @\
+!   <type>(ESMF_KIND_<kind>),dimension(<rank>), intent(out),target    :: farray @\
+!   integer,                                    intent(in)            :: rootPet @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_VM),              intent(in),   optional  :: vm @\
-!   integer,                    intent(out),  optional  :: rc @\
+!   integer,                                    intent(in),  optional :: tile @\
+!   type(ESMF_VM),                              intent(in),  optional :: vm @\
+!   integer,                                    intent(out), optional :: rc @\
 ! @\
 ! @\
 ! !DESCRIPTION: @\
@@ -155,9 +153,10 @@ contains
 !   \begin{description} @\
 !   \item[array] @\
 !     The {\tt ESMF\_Array} object from which data will be gathered. @\
-!   \item[{[farray]}] @\
+!   \item[\{farray\}] @\
 !     The Fortran array into which to gather data. Only root @\
-!     must provide a valid {\tt farray}. @\
+!     must provide a valid {\tt farray}, the other PETs may treat @\
+!     {\tt farray} as an optional argument. @\
 !   \item[{[tile]}] @\
 !     The DistGrid tile in {\tt array} from which to gather {\tt farray}. @\
 !     By default {\tt farray} will be gathered from tile 1. @\
@@ -177,14 +176,14 @@ contains
 ! -------------------------- ESMF-public method ----------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_ArrayGather" @\
-  subroutine ESMF_ArrayGather##mrank##D##mtypekind(array, farray, tile, & @\
-    rootPet, keywordEnforcer, vm, rc) @\
+  subroutine ESMF_ArrayGather##mrank##D##mtypekind(array, farray, rootPet, & @\
+    keywordEnforcer, tile, vm, rc) @\
 @\
-    type(ESMF_Array),           intent(inout)           :: array @\
-    mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
-    integer,                    intent(in),   optional  :: tile @\
+    type(ESMF_Array),           intent(in)              :: array @\
+    mtype (ESMF_KIND_##mtypekind),dimension(mdim), intent(out),target :: farray @\
     integer,                    intent(in)              :: rootPet @\
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    integer,                    intent(in),   optional  :: tile @\
     type(ESMF_VM),              intent(in),   optional  :: vm @\
     integer,                    intent(out),  optional  :: rc @\
 @\
@@ -275,12 +274,13 @@ TypeKindRankDeclarationMacro(ArrayGather)
 ! -------------------------- ESMF-public method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGather"
-  subroutine ESMF_ArrayGatherNotRoot(array, tile, rootPet, keywordEnforcer, vm, rc)
+  subroutine ESMF_ArrayGatherNotRoot(array, rootPet, keywordEnforcer, tile, &
+    vm, rc)
 
-    type(ESMF_Array),           intent(inout)           :: array
-    integer,                    intent(in),   optional  :: tile
+    type(ESMF_Array),           intent(in)              :: array
     integer,                    intent(in)              :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(in),   optional  :: tile
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc
 
