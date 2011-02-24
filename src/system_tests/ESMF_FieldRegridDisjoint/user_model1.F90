@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2011/01/24 23:05:00 rokuingh Exp $
+! $Id: user_model1.F90,v 1.7 2011/02/24 05:15:21 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -152,7 +152,7 @@
         type(ESMF_grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
-        integer :: i, j, i1, j1, haloWidth, haloUWidth(2), counts(2), tlb(2), tub(2)
+        integer :: i, j, i1, j1, haloWidth, haloUWidth(2,1), counts(2), tlb(2), tub(2)
 
         rc = ESMF_SUCCESS
         print *, "User Comp Run starting"
@@ -176,7 +176,7 @@
         call ESMF_FieldGet(humidity, grid=grid, &
                            totalUWidth=haloUWidth, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
-        haloWidth = haloUWidth(1)
+        haloWidth = haloUWidth(1,1)
         call ESMF_GridGetCoord(grid, localDE=0, coordDim=1, &
                            farrayPtr=coordX, computationalLBound=tlb, computationalUBound=tub, rc=rc)
         if(rc/=ESMF_SUCCESS) return

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
+! $Id: user_model1.F90,v 1.5 2011/02/24 05:15:21 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -222,7 +222,7 @@
         type(ESMF_grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
-        integer :: i, j, i1, j1, haloWidth, haloUWidth(2), counts(2), tlb(2), tub(2)
+        integer :: i, j, i1, j1
 
         rc = ESMF_SUCCESS
         print *, "User Comp Run starting"
