@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.131 2011/02/23 19:45:17 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.132 2011/02/24 05:55:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ module ESMF_VMMod
   public ESMF_VMBarrier
   public ESMF_VMBroadcast
   public ESMF_VMCommWait
-  public ESMF_VMCommQueueWait
+  public ESMF_VMCommWaitAll
   public ESMF_VMGather
   public ESMF_VMGatherV
   public ESMF_VMGet
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.131 2011/02/23 19:45:17 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.132 2011/02/24 05:55:30 theurich Exp $"
 
 !==============================================================================
 
@@ -700,19 +700,19 @@ contains
 ! !IROUTINE: ESMF_VMAllFullReduce - Fully reduce data across VM, result on all PETs
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMAllFullReduce()
-!  subroutine ESMF_VMAllFullReduce<type><kind>(vm, sendData, recvData, &
-!    count, reduceflaV,  blockingflag, commhandle, rc)
+!  subroutine ESMF_VMAllFullReduce(vm, sendData, recvData, &
+!    count, reduceflag,  blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,    intent(in)   :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), intent(out)             :: recvData
-!    integer,                  intent(in)              :: count
-!    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    <type>(ESMF_KIND_<kind>),         intent(out)           :: recvData
+!    integer,                          intent(in)            :: count
+!    type(ESMF_ReduceFlag),            intent(in)            :: reduceflag
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
@@ -761,7 +761,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -780,17 +780,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllFullReduce()
   subroutine ESMF_VMAllFullReduceI4(vm, sendData, recvData, count, &
-    reduceflag,  blockingflag, commhandle, rc)
+    reduceflag, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,    intent(in)      :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I4),         intent(out)           :: recvData
+    integer,                       intent(in)            :: count
+    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -840,17 +841,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllFullReduce()
   subroutine ESMF_VMAllFullReduceR4(vm, sendData, recvData, count, &
-    reduceflag, blockingflag, commhandle, rc)
+    reduceflag, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R4),         intent(out)           :: recvData
+    integer,                    intent(in)            :: count
+    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -900,17 +902,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllFullReduce()
   subroutine ESMF_VMAllFullReduceR8(vm, sendData, recvData, count, &
-    reduceflag, blockingflag, commhandle, rc)
+    reduceflag, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R8),         intent(out)           :: recvData
+    integer,                    intent(in)            :: count
+    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -956,18 +959,18 @@ contains
 ! !IROUTINE: ESMF_VMAllGather - Gather data across VM, result on all PETs
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMAllGather()
-!  subroutine ESMF_VMAllGather<type><kind>(vm, sendData, recvData, count, &
+!  subroutine ESMF_VMAllGather(vm, sendData, recvData, count, &
 !    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: count
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: count
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
@@ -1008,7 +1011,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1027,16 +1030,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherI4(vm, sendData, recvData, count, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1096,16 +1100,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherR4(vm, sendData, recvData, count, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1165,16 +1170,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherR8(vm, sendData, recvData, count, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1234,16 +1240,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherLogical(vm, sendData, recvData, count, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(in)       :: sendData(:)
-    type(ESMF_Logical), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1299,20 +1306,20 @@ contains
 ! !IROUTINE: ESMF_VMAllGatherV - GatherV data across VM, result on all PETs
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMAllGatherV()
-!  subroutine ESMF_VMAllGatherV<type><kind>(vm, sendData, sendCount, &
+!  subroutine ESMF_VMAllGatherV(vm, sendData, sendCount, &
 !    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    integer,                  intent(in)              :: sendCount
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: recvCounts(:)
-!    integer,                  intent(in)              :: recvOffsets(:)
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    integer,                          intent(in)            :: sendCount
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: recvCounts(:)
+!    integer,                          intent(in)            :: recvOffsets(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
@@ -1363,7 +1370,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1382,18 +1389,19 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVI4(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCount
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1441,18 +1449,19 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVR4(vm, sendData, sendCount, recvData, &
-    recvCounts,  recvOffsets, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCount
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1500,18 +1509,19 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVR8(vm, sendData, sendCount, recvData, &
-    recvCounts,  recvOffsets, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCount
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1555,19 +1565,19 @@ contains
 ! !IROUTINE: ESMF_VMAllReduce - Reduce data across VM, result on all PETs
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMAllReduce()
-!  subroutine ESMF_VMAllReduce<type><kind>(vm, sendData, recvData, count, &
+!  subroutine ESMF_VMAllReduce(vm, sendData, recvData, count, &
 !    reduceflag, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: count
-!    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: count
+!    type(ESMF_ReduceFlag),            intent(in)            :: reduceflag
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
@@ -1616,7 +1626,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1635,17 +1645,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceflag, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1695,16 +1706,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceI4S(vm, sendData, recvData, reduceflag, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData
+    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1751,17 +1763,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceR4(vm, sendData, recvData, count, reduceflag, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1811,17 +1824,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceR8(vm, sendData, recvData, count, reduceflag, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -1867,22 +1881,22 @@ contains
 ! !IROUTINE: ESMF_VMAllToAllV - AllToAllV communications across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMAllToAllV()
-!  subroutine ESMF_VMAllToAllV<type><kind>(vm, sendData, sendCounts, &
+!  subroutine ESMF_VMAllToAllV(vm, sendData, sendCounts, &
 !    sendOffsets, recvData, recvCounts, recvOffsets, blockingflag, &
 !    commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    integer,                  intent(in)              :: sendCounts(:)
-!    integer,                  intent(in)              :: sendOffsets(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: recvCounts(:)
-!    integer,                  intent(in)              :: recvOffsets(:)
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    integer,                          intent(in)            :: sendCounts(:)
+!    integer,                          intent(in)            :: sendOffsets(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: recvCounts(:)
+!    integer,                          intent(in)            :: recvOffsets(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
@@ -1936,7 +1950,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1955,19 +1969,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllToAllV()
   subroutine ESMF_VMAllToAllVI4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+    recvData, recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCounts(:)
+    integer,                       intent(in)            :: sendOffsets(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2015,19 +2030,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllToAllV()
   subroutine ESMF_VMAllToAllVR4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+    recvData, recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCounts(:)
+    integer,                    intent(in)            :: sendOffsets(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2075,19 +2091,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllToAllV()
   subroutine ESMF_VMAllToAllVR8(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+    recvData, recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCounts(:)
+    integer,                    intent(in)            :: sendOffsets(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2133,11 +2150,12 @@ contains
 ! !IROUTINE: ESMF_VMBarrier - VM wide barrier
 
 ! !INTERFACE:
-  subroutine ESMF_VMBarrier(vm, rc)
+  subroutine ESMF_VMBarrier(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)              :: vm
-    integer,        intent(out),  optional  :: rc           
+    type(ESMF_VM),  intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,        intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that blocks calling PET until
@@ -2179,18 +2197,18 @@ contains
 ! !IROUTINE: ESMF_VMBroadcast - Broadcast data across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMBroadcast()
-!  subroutine ESMF_VMBroadcast<type><kind>(vm, bcstData, count, root, &
+!  subroutine ESMF_VMBroadcast(vm, bcstData, count, root, &
 !    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(inout) :: bcstData(:)
-!    integer,                  intent(in)              :: count
-!    integer,                  intent(in)              :: root
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(inout)         :: bcstData(:)
+!    integer,                          intent(in)            :: count
+!    integer,                          intent(in)            :: root
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
@@ -2234,7 +2252,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2253,16 +2271,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastI4(vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(inout)    :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(inout)         :: bcstData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2324,16 +2343,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastR4(vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(inout)    :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(inout)         :: bcstData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2396,16 +2416,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastR8(vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(inout)    :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(inout)         :: bcstData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2466,16 +2487,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastLogical(vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(inout)    :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(inout)         :: bcstData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2536,17 +2558,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastChar (vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+  subroutine ESMF_VMBroadcastChar(vm, bcstData, count, root, &
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*), target,     intent(inout)           :: bcstData
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),           intent(in)             :: vm
+    character(*), target,    intent(inout)          :: bcstData
+    integer,                 intent(in)             :: count
+    integer,                 intent(in)             :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2606,17 +2629,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastCharArray (vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+  subroutine ESMF_VMBroadcastCharArray(vm, bcstData, count, root, &
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*), target,     intent(inout)           :: bcstData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),           intent(in)             :: vm
+    character(*), target,    intent(inout)          :: bcstData(:)
+    integer,                 intent(in)             :: count
+    integer,                 intent(in)             :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2676,17 +2700,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastCharArray2D (vm, bcstData, count, root, &
-    blockingflag, commhandle, rc)
+  subroutine ESMF_VMBroadcastCharArray2D(vm, bcstData, count, root, &
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*), target,     intent(inout)           :: bcstData(:,:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),           intent(in)             :: vm
+    character(*), target,    intent(inout)          :: bcstData(:,:)
+    integer,                 intent(in)             :: count
+    integer,                 intent(in)             :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2740,23 +2765,128 @@ contains
 
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMCommWait()"
+!BOP
+! !IROUTINE: ESMF_VMCommWait - Wait for non-blocking VM communication to complete
+
+! !INTERFACE:
+  subroutine ESMF_VMCommWait(vm, commhandle, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),         intent(in)            :: vm
+    type(ESMF_CommHandle), intent(in)            :: commhandle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,               intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!   Wait for non-blocking VM communication specified by the {\tt commhandle} to
+!   complete.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[commhandle] 
+!        Handle specifying a previously issued non-blocking communication 
+!        request.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_CommHandleGetInit, commhandle, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_VMCommWait(vm, commhandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMCommWait
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMCommWaitAll()"
+!BOP
+! !IROUTINE: ESMF_VMCommWaitAll - Wait for all non-blocking VM comms to complete
+
+! !INTERFACE:
+  subroutine ESMF_VMCommWaitAll(vm, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,       intent(out), optional :: rc
+!         
+!
+! !DESCRIPTION:
+!   Wait for {\em all} pending non-blocking VM communication within the 
+!   specified VM context to complete.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_VMCommQueueWait(vm, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMCommWaitAll
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 !BOP
 ! !IROUTINE: ESMF_VMGather - Gather data from across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMGather()
-!  subroutine ESMF_VMGather<type><kind>(vm, sendData, recvData, count, root, &
+!  subroutine ESMF_VMGather(vm, sendData, recvData, count, root, &
 !    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: count
-!    integer,                  intent(in)              :: root
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: count
+!    integer,                          intent(in)            :: root
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
@@ -2800,7 +2930,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2819,17 +2949,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherI4(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2889,17 +3020,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR4(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -2959,17 +3091,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR8(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -3029,17 +3162,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherLogical(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(in)       :: sendData(:)
-    type(ESMF_Logical), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -3095,19 +3229,19 @@ contains
 ! !IROUTINE: ESMF_VMGatherV - GatherV data from across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMGatherV()
-!  subroutine ESMF_VMGatherV<type><kind>(vm, sendData, sendCount, recvData, &
+!  subroutine ESMF_VMGatherV(vm, sendData, sendCount, recvData, &
 !    recvCounts, recvOffsets, root, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    integer,                  intent(in)              :: sendCount
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: recvCounts(:)
-!    integer,                  intent(in)              :: recvOffsets(:)
-!    integer,                  intent(in)              :: root
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    integer,                          intent(in)            :: sendCount
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: recvCounts(:)
+!    integer,                          intent(in)            :: recvOffsets(:)
+!    integer,                          intent(in)            :: root
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
@@ -3162,17 +3296,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGatherV()
   subroutine ESMF_VMGatherVI4(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, root, rc)
+    recvCounts, recvOffsets, root, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCount
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+    integer,                       intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -3207,17 +3342,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGatherV()
   subroutine ESMF_VMGatherVR4(vm, sendData, sendCount, recvData, &
-    recvCounts,  recvOffsets, root, rc)
+    recvCounts, recvOffsets, root, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)             :: vm
+    real(ESMF_KIND_R4), target, intent(in)             :: sendData(:)
+    integer,                    intent(in)             :: sendCount
+    real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)
+    integer,                    intent(in)             :: recvCounts(:)
+    integer,                    intent(in)             :: recvOffsets(:)
+    integer,                    intent(in)             :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -3252,17 +3388,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGatherV()
   subroutine ESMF_VMGatherVR8(vm, sendData, sendCount, recvData, &
-    recvCounts,  recvOffsets, root, rc)
+    recvCounts, recvOffsets, root, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCount
-    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCounts(:)
-    integer,                  intent(in)              :: recvOffsets(:)
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)             :: vm
+    real(ESMF_KIND_R8), target, intent(in)             :: sendData(:)
+    integer,                    intent(in)             :: sendCount
+    real(ESMF_KIND_R8), target, intent(out)            :: recvData(:)
+    integer,                    intent(in)             :: recvCounts(:)
+    integer,                    intent(in)             :: recvOffsets(:)
+    integer,                    intent(in)             :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -3295,11 +3432,12 @@ contains
 ! !IROUTINE: ESMF_VMGet - Get VM internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-    pthreadsEnabledFlag, openMPEnabledFlag, rc)
+  subroutine ESMF_VMGet(vm, keywordEnforcer, localPet, petCount, peCount, &
+    mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),  optional  :: localPet
     integer,            intent(out),  optional  :: petCount
     integer,            intent(out),  optional  :: peCount
@@ -3382,10 +3520,11 @@ contains
 ! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetGlobal(vm, rc)
+  subroutine ESMF_VMGetGlobal(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(out)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -3438,11 +3577,12 @@ contains
 ! !IROUTINE: ESMF_VMGetCurrent - Get Current VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetCurrent(vm, rc)
+  subroutine ESMF_VMGetCurrent(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(out)            :: vm
-    integer,       intent(out), optional  :: rc           
+    type(ESMF_VM), intent(out)           :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,       intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -3511,8 +3651,8 @@ contains
   subroutine ESMF_VMGetCurrentID(vmId, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VMId), intent(out)            :: vmId
-    integer,         intent(out), optional  :: rc           
+    type(ESMF_VMId), intent(out)           :: vmId
+    integer,         intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Get the {\tt ESMF\_VMId} of the current execution context.\newline
@@ -3553,9 +3693,9 @@ contains
   subroutine ESMF_VMGetVMId(vm, vmId, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),   intent(in)             :: vm
-    type(ESMF_VMId), intent(out)            :: vmId
-    integer,         intent(out), optional  :: rc           
+    type(ESMF_VM),   intent(in)            :: vm
+    type(ESMF_VMId), intent(out)           :: vmId
+    integer,         intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Get the {\tt ESMF\_VMId} of the {\tt ESMF\_VM} object.\newline
@@ -3600,18 +3740,19 @@ contains
 ! !IROUTINE: ESMF_VMGetPETLocalInfo - Get VM PET local internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
-    threadId, vas, rc)
+  subroutine ESMF_VMGetPETLocalInfo(vm, pet, keywordEnforcer, peCount, ssiId, &
+    threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)              :: vm
-    integer,        intent(in)              :: pet
-    integer,        intent(out),  optional  :: peCount
-    integer,        intent(out),  optional  :: ssiId
-    integer,        intent(out),  optional  :: threadCount
-    integer,        intent(out),  optional  :: threadId
-    integer,        intent(out),  optional  :: vas
-    integer,        intent(out),  optional  :: rc
+    type(ESMF_VM), intent(in)             :: vm
+    integer,       intent(in)             :: pet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,       intent(out), optional :: peCount
+    integer,       intent(out), optional :: ssiId
+    integer,       intent(out), optional :: threadCount
+    integer,       intent(out), optional :: threadId
+    integer,       intent(out), optional :: vas
+    integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get internal information about a specific PET within an {\tt ESMF\_VM} 
@@ -3672,11 +3813,12 @@ contains
 ! !IROUTINE: ESMF_VMPrint - Print VM internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMPrint(vm, rc)
+  subroutine ESMF_VMPrint(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)              :: vm
-    integer,        intent(out),  optional  :: rc           
+    type(ESMF_VM),  intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,        intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Print internal information about the specified {\tt ESMF\_VM} to
@@ -3724,18 +3866,18 @@ contains
 ! !IROUTINE: ESMF_VMRecv - Receive data from src PET
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMRecv()
-!  subroutine ESMF_VMRecv<type><kind>(vm, recvData, count, src, &
+!  subroutine ESMF_VMRecv(vm, recvData, count, src, &
 !    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
-!    integer,                  intent(in)              :: count
-!    integer,                  intent(in)              :: src
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc           
+!    type(ESMF_VM),                 intent(in)            :: vm
+!    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)  
+!    integer,                       intent(in)            :: count
+!    integer,                       intent(in)            :: src
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+!    integer,                       intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Receive contiguous data from {\tt src} PET within the same {\tt ESMF\_VM} 
@@ -3775,7 +3917,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3793,17 +3935,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvI4(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMRecvI4(vm, recvData, count, src, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),                 intent(in)             :: vm
+    integer(ESMF_KIND_I4), target, intent(out)            :: recvData(:)  
+    integer,                       intent(in)             :: count
+    integer,                       intent(in)             :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -3864,17 +4007,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR4(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMRecvR4(vm, recvData, count, src, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)             :: vm
+    real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)  
+    integer,                    intent(in)             :: count
+    integer,                    intent(in)             :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -3935,17 +4079,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR8(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMRecvR8(vm, recvData, count, src, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)  
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -4006,17 +4151,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvLogical(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMRecvLogical(vm, recvData, count, src, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)  
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -4077,17 +4223,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvChar(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMRecvChar(vm, recvData, count, src, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*),             intent(out)             :: recvData
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*),            intent(out)           :: recvData
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -4148,17 +4295,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvCharArray(vm, recvData, count, src, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMRecvCharArray(vm, recvData, count, src, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*),             intent(out)             :: recvData(*)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*),            intent(out)           :: recvData(*)
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -4216,20 +4364,20 @@ contains
 ! !IROUTINE: ESMF_VMReduce - Reduce data from across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMReduce()
-!  subroutine ESMF_VMReduce<type><kind>(vm, sendData, recvData, count, &
+!  subroutine ESMF_VMReduce(vm, sendData, recvData, count, &
 !    reduceflag, root, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: count
-!    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-!    integer,                  intent(in)              :: root
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)             :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)             :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)            :: recvData(:)
+!    integer,                          intent(in)             :: count
+!    type(ESMF_ReduceFlag),            intent(in)             :: reduceflag
+!    integer,                          intent(in)             :: root
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
@@ -4280,7 +4428,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4299,18 +4447,19 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMReduce()
   subroutine ESMF_VMReduceI4(vm, sendData, recvData, count, reduceflag, &
-    root, blockingflag, commhandle, rc)
+    root, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+    integer,                       intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4360,18 +4509,19 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMReduce()
   subroutine ESMF_VMReduceR4(vm, sendData, recvData, count, reduceflag, &
-    root, blockingflag, commhandle, rc)
+    root, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)             :: vm
+    real(ESMF_KIND_R4), target, intent(in)             :: sendData(:)
+    real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)
+    integer,                    intent(in)             :: count
+    type(ESMF_ReduceFlag),      intent(in)             :: reduceflag
+    integer,                    intent(in)             :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4421,18 +4571,19 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMReduce()
   subroutine ESMF_VMReduceR8(vm, sendData, recvData, count, reduceflag, &
-    root, blockingflag, commhandle, rc)
+    root, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4478,19 +4629,19 @@ contains
 ! !IROUTINE: ESMF_VMScatter - Scatter data across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMScatter()
-!  subroutine ESMF_VMScatter<type><kind>(vm, sendData, recvData, count, &
+!  subroutine ESMF_VMScatter(vm, sendData, recvData, count, &
 !    root, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)
-!    integer,                  intent(in)              :: count
-!    integer,                  intent(in)              :: root
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: count
+!    integer,                          intent(in)            :: root
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
@@ -4534,7 +4685,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4553,17 +4704,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterI4(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4623,17 +4775,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR4(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4693,17 +4846,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR8(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4763,17 +4917,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterLogical(vm, sendData, recvData, count, root, &
-    blockingflag, commhandle, rc)
+    keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(in)       :: sendData(:)
-    type(ESMF_Logical), target,      intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4829,19 +4984,19 @@ contains
 ! !IROUTINE: ESMF_VMScatterV - ScatterV across VM
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMScatterV()
-!  subroutine ESMF_VMScatterV<type><kind>(vm, sendData, sendCounts, &
+!  subroutine ESMF_VMScatterV(vm, sendData, sendCounts, &
 !    sendOffsets, recvData, recvCount, root, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)       :: sendData(:)
-!    integer,                  intent(in)              :: sendCounts(:)
-!    integer,                  intent(in)              :: sendOffsets(:)
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)      :: recvData(:)
-!    integer,                  intent(in)              :: recvCount
-!    integer,                  intent(in)              :: root
-!    integer,                  intent(out),  optional  :: rc
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    integer,                          intent(in)            :: sendCounts(:)
+!    integer,                          intent(in)            :: sendOffsets(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: recvCount
+!    integer,                          intent(in)            :: root
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,                          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
@@ -4891,17 +5046,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatterV()
   subroutine ESMF_VMScatterVI4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCount, root, rc)
+    recvData, recvCount, root, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCounts(:)
+    integer,                       intent(in)            :: sendOffsets(:)
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCount
+    integer,                       intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4936,17 +5092,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatterV()
   subroutine ESMF_VMScatterVR4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCount, root, rc)
+    recvData, recvCount, root, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    real(ESMF_KIND_R4), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCounts(:)
+    integer,                    intent(in)            :: sendOffsets(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCount
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -4981,17 +5138,18 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatterV()
   subroutine ESMF_VMScatterVR8(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCount, root, rc)
+    recvData, recvCount, root, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,   intent(in)          :: sendData(:)
-    integer,                  intent(in)              :: sendCounts(:)
-    integer,                  intent(in)              :: sendOffsets(:)
-    real(ESMF_KIND_R8), target,   intent(out)         :: recvData(:)
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: root
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCounts(:)
+    integer,                    intent(in)            :: sendOffsets(:)
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCount
+    integer,                    intent(in)            :: root
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(out), optional :: rc
 !         
 !EOPI
 !------------------------------------------------------------------------------
@@ -5022,18 +5180,18 @@ contains
 ! !IROUTINE: ESMF_VMSend - Send data to dst PET
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMSend()
-!  subroutine ESMF_VMSend<type><kind>(vm, sendData, count, dst, &
+!  subroutine ESMF_VMSend(vm, sendData, count, dst, &
 !    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)  
-!    integer,                  intent(in)              :: count
-!    integer,                  intent(in)              :: dst
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc           
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)  
+!    integer,                          intent(in)            :: count
+!    integer,                          intent(in)            :: dst
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Send contiguous data to {\tt dst} PET within the same {\tt ESMF\_VM} object.
@@ -5063,7 +5221,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5081,17 +5239,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendI4(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMSendI4(vm, sendData, count, dst, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)  
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc           
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
@@ -5151,17 +5310,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR4(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMSendR4(vm, sendData, count, dst, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)  
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5222,17 +5382,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR8(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMSendR8(vm, sendData, count, dst, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)  
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5293,17 +5454,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendLogical(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMSendLogical(vm, sendData, count, dst, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)  
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5364,17 +5526,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendChar(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMSendChar(vm, sendData, count, dst, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*),             intent(in)              :: sendData
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*),            intent(in)            :: sendData
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5435,17 +5598,18 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendCharArray(vm, sendData, count, dst, blockingflag, &
-    commhandle, rc)
+  subroutine ESMF_VMSendCharArray(vm, sendData, count, dst, keywordEnforcer, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*),             intent(in)              :: sendData(*)
-    integer,                  intent(in)              :: count
-    integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*),            intent(in)            :: sendData(*)
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: dst
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5503,21 +5667,21 @@ contains
 ! !IROUTINE: ESMF_VMSendRecv - Send and Recv data to and from PETs
 !
 ! !INTERFACE:
-!  ! Private name; call using ESMF_VMSendRecv()
-!  subroutine ESMF_VMSendRecv<type><kind>(vm, sendData, sendCount, dst, &
+!  subroutine ESMF_VMSendRecv(vm, sendData, sendCount, dst, &
 !    recvData, recvCount, src, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),            intent(in)              :: vm
-!    <type>(ESMF_KIND_<kind>), target,   intent(in)    :: sendData(:)  
-!    integer,                  intent(in)              :: sendCount
-!    integer,                  intent(in)              :: dst
-!    <type>(ESMF_KIND_<kind>), target,   intent(out)   :: recvData(:)  
-!    integer,                  intent(in)              :: recvCount
-!    integer,                  intent(in)              :: src
-!    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-!    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-!    integer,                  intent(out),  optional  :: rc           
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)  
+!    integer,                          intent(in)            :: sendCount
+!    integer,                          intent(in)            :: dst
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)  
+!    integer,                          intent(in)            :: recvCount
+!    integer,                          intent(in)            :: src
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Send contiguous data to {\tt dst} PET within the same {\tt ESMF\_VM} object
@@ -5564,7 +5728,7 @@ contains
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
-!        {\tt ESMF\_VMCommQueueWait()} may be used to block on all currently queued
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
 !        communication calls of the VM context.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5583,19 +5747,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvI4(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingflag, commhandle, rc)
+    recvData, recvCount, src, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4), target,   intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: sendCount
-    integer,                  intent(in)              :: dst
-    integer(ESMF_KIND_I4), target,   intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)  
+    integer,                       intent(in)            :: sendCount
+    integer,                       intent(in)            :: dst
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)  
+    integer,                       intent(in)            :: recvCount
+    integer,                       intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5658,19 +5823,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvR4(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingflag, commhandle, rc)
+    recvData, recvCount, src, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4), target,      intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: sendCount
-    integer,                  intent(in)              :: dst
-    real(ESMF_KIND_R4), target,      intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)  
+    integer,                    intent(in)            :: sendCount
+    integer,                    intent(in)            :: dst
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)  
+    integer,                    intent(in)            :: recvCount
+    integer,                    intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5733,19 +5899,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvR8(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingflag, commhandle, rc)
+    recvData, recvCount, src, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8), target,      intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: sendCount
-    integer,                  intent(in)              :: dst
-    real(ESMF_KIND_R8), target,      intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)  
+    integer,                    intent(in)            :: sendCount
+    integer,                    intent(in)            :: dst
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)  
+    integer,                    intent(in)            :: recvCount
+    integer,                    intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5808,19 +5975,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvLogical(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingflag, commhandle, rc)
+    recvData, recvCount, src, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical), target,      intent(in)       :: sendData(:)  
-    integer,                  intent(in)              :: sendCount
-    integer,                  intent(in)              :: dst
-    type(ESMF_Logical), target,      intent(out)      :: recvData(:)  
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_Logical), target, intent(in)            :: sendData(:)  
+    integer,                    intent(in)            :: sendCount
+    integer,                    intent(in)            :: dst
+    type(ESMF_Logical), target, intent(out)           :: recvData(:)  
+    integer,                    intent(in)            :: recvCount
+    integer,                    intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5883,19 +6051,20 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvChar(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingflag, commhandle, rc)
+    recvData, recvCount, src, keywordEnforcer, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    character(*),             intent(in)              :: sendData
-    integer,                  intent(in)              :: sendCount
-    integer,                  intent(in)              :: dst
-    character(*),             intent(out)             :: recvData
-    integer,                  intent(in)              :: recvCount
-    integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
-    integer,                  intent(out),  optional  :: rc           
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*),            intent(in)            :: sendData
+    integer,                 intent(in)            :: sendCount
+    integer,                 intent(in)            :: dst
+    character(*),            intent(out)           :: recvData
+    integer,                 intent(in)            :: recvCount
+    integer,                 intent(in)            :: src
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_CommHandle),   intent(out), optional :: commhandle
+    integer,                 intent(out), optional :: rc           
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -5956,11 +6125,12 @@ contains
 ! !IROUTINE: ESMF_VMThreadBarrier - PET thread group wide barrier
 
 ! !INTERFACE:
-  subroutine ESMF_VMThreadBarrier(vm, rc)
+  subroutine ESMF_VMThreadBarrier(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)              :: vm
-    integer,        intent(out),  optional  :: rc           
+    type(ESMF_VM), intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,       intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Partially collective {\tt ESMF\_VM} communication call that blocks calling
@@ -6005,11 +6175,12 @@ contains
 ! !IROUTINE: ESMF_VMValidate - Validate VM internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMValidate(vm, rc)
+  subroutine ESMF_VMValidate(vm, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),  intent(in)              :: vm
-    integer,        intent(out),  optional  :: rc  
+    type(ESMF_VM), intent(in)            :: vm
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,       intent(out), optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -6049,119 +6220,17 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMCommWait()"
-!BOP
-! !IROUTINE: ESMF_VMCommWait - Wait for non-blocking VM communication to complete
-
-! !INTERFACE:
-  subroutine ESMF_VMCommWait(vm, commhandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),          intent(in)              :: vm
-    type(ESMF_CommHandle),  intent(in)              :: commhandle
-    integer,                intent(out),  optional  :: rc
-!         
-!
-! !DESCRIPTION:
-!   Wait for non-blocking VM communication specified by the {\tt commhandle} to
-!   complete.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[commhandle] 
-!        Handle specifying a previously issued non-blocking communication 
-!        request.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_CommHandleGetInit, commhandle, rc)
-
-    ! Call into the C++ interface
-    call c_ESMC_VMCommWait(vm, commhandle, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_VMCommWait
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMCommQueueWait()"
-!BOP
-! !IROUTINE: ESMF_VMCommQueueWait - Wait for all non-blocking VM comms to complete
-
-! !INTERFACE:
-  subroutine ESMF_VMCommQueueWait(vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),          intent(in)              :: vm
-    integer,                intent(out),  optional  :: rc
-!         
-!
-! !DESCRIPTION:
-!   Wait for {\em all} pending non-blocking VM communication within the 
-!   specified VM context to complete.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-
-    ! Call into the C++ interface
-    call c_ESMC_VMCommQueueWait(vm, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_VMCommQueueWait
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMWtime()"
 !BOP
 ! !IROUTINE: ESMF_VMWtime - Get floating-point number of seconds
 
 ! !INTERFACE:
-  subroutine ESMF_VMWtime(time, rc)
+  subroutine ESMF_VMWtime(time, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    real(ESMF_KIND_R8),     intent(out)             :: time
-    integer,                intent(out),  optional  :: rc
+    real(ESMF_KIND_R8), intent(out)           :: time
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
@@ -6203,11 +6272,12 @@ contains
 ! !IROUTINE: ESMF_VMWtimeDelay - Delay execution
 
 ! !INTERFACE:
-  subroutine ESMF_VMWtimeDelay(delay, rc)
+  subroutine ESMF_VMWtimeDelay(delay, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    real(ESMF_KIND_R8),     intent(in)              :: delay
-    integer,                intent(out),  optional  :: rc
+    real(ESMF_KIND_R8), intent(in)            :: delay
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:
@@ -6248,11 +6318,12 @@ contains
 ! !IROUTINE: ESMF_VMWtimePrec - Timer precision as floating-point number of seconds
 
 ! !INTERFACE:
-  subroutine ESMF_VMWtimePrec(prec, rc)
+  subroutine ESMF_VMWtimePrec(prec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    real(ESMF_KIND_R8),     intent(out)             :: prec
-    integer,                intent(out),  optional  :: rc
+    real(ESMF_KIND_R8), intent(out)           :: prec
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
 !         
 !
 ! !DESCRIPTION:

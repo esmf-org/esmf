@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.12 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.13 2011/02/24 05:55:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.12 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.13 2011/02/24 05:55:30 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -345,7 +345,7 @@
 !===============================================================================
 ! Second round of tests don't use commhandles but rely on ESMF's internal
 ! request queue. After all of the non-blocking calls are queued and before
-! testing the received values a call to ESMF_VMCommQueueWait() waits on _all_
+! testing the received values a call to ESMF_VMCommWaitAll() waits on _all_
 ! outstanding non-blocking communication calls for the current VM.
 !===============================================================================
 
@@ -466,14 +466,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-     !Test the VMCommQueueWait function to wait on all outstanding nb comms for VM
+     !Test the VMCommWaitAll function to wait on all outstanding nb comms for VM
      !===========================     
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Wait on integer sendrecv
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Waiting for all queued non-blocking comms in VM"
-      call ESMF_VMCommQueueWait(vm, rc)
+      call ESMF_VMCommWaitAll(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
