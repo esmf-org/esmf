@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.87 2011/02/23 22:44:48 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.88 2011/02/24 05:11:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.87 2011/02/23 22:44:48 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.88 2011/02/24 05:11:12 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -867,7 +867,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
 !        msg="- commCapacity query not implemented", &
 !        ESMF_CONTEXT, rcToReturn=rc)
-1      return
+!      return
 !    endif
     
     ! Deal with (optional) array arguments
