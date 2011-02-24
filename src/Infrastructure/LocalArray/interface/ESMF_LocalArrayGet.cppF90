@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.22 2011/02/23 19:53:02 w6ws Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.23 2011/02/24 17:42:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,13 +35,13 @@ module ESMF_LocalArrayGetMod
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayGet() @\
 ! subroutine ESMF_LocalArrayGetData<rank><type><kind>(localarray, farrayPtr, & @\
-!   keywordEnforcer, docopy, rc) @\
+!   keywordEnforcer, doCopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_LocalArray) :: localarray @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+!   type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
 !   integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -54,7 +54,7 @@ module ESMF_LocalArrayGetMod
 !   The {\tt ESMF\_LocalArray} to get the value from. @\
 ! \item[farrayPtr] @\
 !   An unassociated or associated Fortran pointer correctly allocated.@\
-! \item[{[docopy]}] @\
+! \item[{[doCopy]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
 !   See section \ref{opt:copyflag} for a list of possible values. @\
@@ -72,12 +72,12 @@ module ESMF_LocalArrayGetMod
 !define ESMF_METHOD "ESMF_LocalArrayGetData##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrayGetData" @\
     subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(localarray, & @\
-      farrayPtr, keywordEnforcer, docopy, rc) @\
+      farrayPtr, keywordEnforcer, doCopy, rc) @\
  @\
       type(ESMF_LocalArray) :: localarray @\
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-      type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
       integer, intent(out), optional :: rc @\
  @\
       ! Local variables @\
@@ -94,10 +94,10 @@ module ESMF_LocalArrayGetMod
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
-      ! Check docopy argument and set copyreq @\
+      ! Check doCopy argument and set copyreq @\
       copyreq = .FALSE. ! default do not copy but return by reference @\
-      if (present(docopy)) then @\
-        if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
+      if (present(doCopy)) then @\
+        if (doCopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
       endif @\
  @\
       ! Check tkr matching between localarray and farrayPtr @\
@@ -207,7 +207,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.22 2011/02/23 19:53:02 w6ws Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.23 2011/02/24 17:42:52 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -266,7 +266,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
   subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
-    typekind, rank, counts, lbounds, ubounds, base, name, rc)
+    typekind, rank, counts, lbounds, ubounds, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
@@ -276,7 +276,6 @@ contains
     integer,                    intent(out), optional :: counts(:)
     integer,                    intent(out), optional :: lbounds(:)
     integer,                    intent(out), optional :: ubounds(:)
-    type(ESMF_Pointer),         intent(out), optional :: base
     character(len=*), intent(out), optional :: name
     integer,                    intent(out), optional :: rc             
 !
@@ -297,8 +296,6 @@ contains
 !     Lower bound per dimension.
 !   \item[{[ubounds]}]
 !     Upper bound per dimension.
-!   \item[{[base]}]
-!     Base class object.
 !   \item[{[name]}]
 !     Name of the LocalArray object.
 !   \item[{[rc]}]
@@ -367,13 +364,6 @@ contains
         return
       endif
       call c_ESMC_LocalArrayGetUbounds(localarray, ubounds, localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    if (present(base)) then
-      call c_ESMC_LocalArrayGetBaseAddr(localarray, base, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
