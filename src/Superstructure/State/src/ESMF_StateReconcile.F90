@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.91 2011/02/24 21:31:53 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.92 2011/02/25 01:23:29 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.91 2011/02/24 21:31:53 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.92 2011/02/25 01:23:29 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -142,7 +142,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_State),            intent(inout)         :: state
-      type(ESMF_VM),               intent(in),  optional :: vm
+      type(ESMF_VM),               intent(in)            :: vm
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
       type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
       integer,                     intent(out), optional :: rc               
@@ -167,7 +167,7 @@
 !     \item[state]
 !       {\tt ESMF\_State} to reconcile.
 !     \item[vm]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  Default is the current vm.
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  Should be set to the current vm.
 !     \item[{[attreconflag]}]
 !       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !     \item[{[rc]}]
@@ -194,19 +194,17 @@
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ! It is no longer necessary for a caller to provide vm.  In case
-    ! it is present, make sure it is correct.
+    ! We currently require a user-supplied vm for historical
+    ! reasons.  Ensure it is the same as the 'current' vm. 
     call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
 			   ESMF_ERR_PASSTHRU, &
 			   ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (present (vm)) then
-      if (localvm /= vm) then
-      if (ESMF_LogFoundError(localrc, &
-                     	     msg="vm passed to StateReconcile is not current", &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
+    if (localvm /= vm) then
+    if (ESMF_LogFoundError(localrc, &
+                     	   msg="user-supplied vm is not current vm", &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
     end if
       
       
