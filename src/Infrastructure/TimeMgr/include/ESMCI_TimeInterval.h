@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.21 2011/02/24 04:54:29 eschwab Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.22 2011/02/25 23:20:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -158,7 +158,7 @@ class TimeInterval : public BaseTime {
     TimeInterval absValue(void) const;
 
     // return negative value (TMG 1.5.8)
-    TimeInterval absValueNeg(void) const;
+    TimeInterval negAbsValue(void) const;
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
     TimeInterval  operator/ (const ESMC_I4 &) const;

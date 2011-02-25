@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval_F.C,v 1.8 2011/02/24 04:54:29 eschwab Exp $
+// $Id: ESMCI_TimeInterval_F.C,v 1.9 2011/02/25 23:20:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -504,9 +504,9 @@ extern "C" {
            *timeintervalAbsValue = (ptr)->TimeInterval::absValue();
        }
 
-       void FTN(c_esmc_timeintervalabsvalueneg)(TimeInterval *ptr,
-                                  TimeInterval *timeintervalAbsValueNeg) {
-           *timeintervalAbsValueNeg = (ptr)->TimeInterval::absValueNeg();
+       void FTN(c_esmc_timeintervalnegabsvalue)(TimeInterval *ptr,
+                                  TimeInterval *timeintervalNegAbsValue) {
+           *timeintervalNegAbsValue = (ptr)->TimeInterval::negAbsValue();
        }
 
        void FTN(c_esmc_timeintervalrquot)(TimeInterval *timeinterval1,

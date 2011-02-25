@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.113 2011/02/24 04:54:29 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.114 2011/02/25 23:20:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@
       public operator(>=)
       public ESMF_TimeIntervalAbsValue
       public ESMF_TimeIntervalGet
-      public ESMF_TimeIntervalAbsValueNeg
+      public ESMF_TimeIntervalNegAbsValue
       public ESMF_TimeIntervalPrint
       public ESMF_TimeIntervalReadRestart
       public ESMF_TimeIntervalSet
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.113 2011/02/24 04:54:29 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.114 2011/02/25 23:20:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1819,15 +1819,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_TimeIntervalGetAbsValueNeg()"
+#define ESMF_METHOD "ESMF_TimeIntervalNegAbsValue()"
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalAbsValueNeg - Get the negative absolute value of a TimeInterval
+! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Return the negative absolute value of a TimeInterval
 
 ! !INTERFACE:
-      function ESMF_TimeIntervalAbsValueNeg(timeinterval)
+      function ESMF_TimeIntervalNegAbsValue(timeinterval)
 
 ! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalAbsValueNeg
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalNegAbsValue
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
@@ -1847,12 +1847,12 @@
 !     TMG1.5.8
 
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
-      call ESMF_TimeIntervalInit(ESMF_TimeIntervalAbsValueNeg)
+      call ESMF_TimeIntervalInit(ESMF_TimeIntervalNegAbsValue)
     
-      call c_ESMC_TimeIntervalAbsValueNeg(timeinterval, &
-                                          ESMF_TimeIntervalAbsValueNeg)
+      call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
+                                          ESMF_TimeIntervalNegAbsValue)
 
-      end function ESMF_TimeIntervalAbsValueNeg
+      end function ESMF_TimeIntervalNegAbsValue
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
