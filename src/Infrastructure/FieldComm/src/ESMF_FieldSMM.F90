@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.25 2011/02/24 23:11:53 w6ws Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.26 2011/02/25 19:47:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.25 2011/02/24 23:11:53 w6ws Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.26 2011/02/25 19:47:59 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -85,7 +85,7 @@ contains
         type(ESMF_Field),       intent(inout),optional  :: srcField
         type(ESMF_Field),       intent(inout),optional  :: dstField
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
@@ -212,7 +212,7 @@ contains
 !
 ! !ARGUMENTS:
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -385,7 +385,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -444,7 +444,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -503,7 +503,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -562,7 +562,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -705,7 +705,7 @@ contains
         type(ESMF_Field),       intent(inout)         :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out), optional :: rc 
 
 !EOPI

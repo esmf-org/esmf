@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.9 2011/02/24 23:11:53 w6ws Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.10 2011/02/25 19:47:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.9 2011/02/24 23:11:53 w6ws Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.10 2011/02/25 19:47:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -105,7 +105,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(inout)           :: field
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(in),   optional  :: checkflag
@@ -199,7 +199,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
@@ -251,7 +251,7 @@ contains
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
     type(ESMF_HaloStartRegionFlag), intent(in), &
                             optional :: halostartregionflag
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
