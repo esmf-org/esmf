@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.11 2011/02/23 18:53:49 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.12 2011/02/25 19:05:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -320,42 +320,64 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Allocate vector to hold nodes for translation
    std::vector<MeshObj*> nodes(ctopo->num_nodes);
 
+   // Allocate vector to hold nodes for translation
+   std::vector<int> uniq_node_ids(ctopo->num_nodes);
+
    // Loop Cells of the grid. 
    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);
 
    for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
+     
+     // Get Local Ids of Corners
+     int cnrCount;
+     int cnrList[16]; // ONLY WORKS FOR UP TO 4D
+     gci->getCornersCellNodeLocalID(&cnrCount, cnrList);
+     ThrowRequire(cnrCount == ctopo->num_nodes);
+     
+     // Get Nodes via Local IDs
+     for (UInt n = 0; n < ctopo->num_nodes; ++n) {
+       nodes[n] = nodemap[cnrList[n]];
+     } // n
+
+     // If cell is degenerate then don't create. 
+     // If there are less than 3 unique nodes
+     // then it's just a line
+     int num_uniq_node_ids=0;
+     for (UInt n = 0; n < ctopo->num_nodes; ++n) {
+       bool is_uniq=true;
+       for (int i=0; i<num_uniq_node_ids; i++) {
+         if (nodes[n]->get_id()==uniq_node_ids[i]) {
+           is_uniq=false;
+         }
+       }
+
+       if (is_uniq) {
+         uniq_node_ids[num_uniq_node_ids]=nodes[n]->get_id();
+         num_uniq_node_ids++;
+       }
+     } // n
+
+     // TODO: Make the number depend on the parametric dimension
+     // TOD0: If the number of nodes is smaller than ctopo->num_nodes make a different topo? 
+     if (num_uniq_node_ids<3) {
+       continue;
+     }
+     
+     // Create Cell
      MeshObj *cell = new MeshObj(MeshObj::ELEMENT,     // Mesh equivalent of Cell
                                  gci->getGlobalID(),   // unique global id
                                  local_elem_num++
                                  );
 
 #ifdef G2M_DBG
-Par::Out() << "Cell:" << cell->get_id() << " uses nodes:";
+     Par::Out() << "Cell:" << cell->get_id() << " uses nodes:";
 #endif
-  
+     
      // Set Owner
      cell->set_owner(me);
-   
-     // Get Local Ids of Corners
-     int cnrCount;
-     int cnrList[16]; // ONLY WORKS FOR UP TO 4D
-     gci->getCornersCellNodeLocalID(&cnrCount, cnrList);
-     ThrowRequire(cnrCount == ctopo->num_nodes);
-
-     // Get Nodes via Local IDs
-     for (UInt n = 0; n < ctopo->num_nodes; ++n) {
-       nodes[n] = nodemap[cnrList[n]];
-#ifdef G2M_DBG
-Par::Out() << nodes[n]->get_id() << " ";
-#endif
-     } // n
-#ifdef G2M_DBG
-Par::Out() << std::endl;
-#endif
-
-
+     
      UInt block_id = 1;  // Any reason to use different sets for cells?
-
+     
      mesh.add_element(cell, nodes, block_id, ctopo);
      
    } // ci
