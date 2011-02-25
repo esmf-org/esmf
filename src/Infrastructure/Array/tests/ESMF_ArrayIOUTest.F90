@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.29 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.30 2011/02/25 05:02:21 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -571,7 +571,7 @@ program ESMF_ArrayIOUTest
    enddo
    enddo
   endif
-  call ESMF_VMBroadcast(vm, r8Max, count=1, root=0, rc=rc)
+  call ESMF_VMBroadcast(vm, r8Max, count=1, rootPet=0, rc=rc)
   write(*,*)"Maximum Error (different distgrid) = ", r8Max(1)
   call ESMF_Test((r8Max(1) .lt. 1.e-14), name, failMsg, result,ESMF_SRCLINE)
 #else
