@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.18 2011/02/24 21:52:21 oehmke Exp $
+// $Id: ESMCI_Search.C,v 1.19 2011/02/25 19:05:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -19,6 +19,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
  
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <iterator>
 
@@ -34,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.18 2011/02/24 21:52:21 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.19 2011/02/25 19:05:05 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -283,7 +284,12 @@ static int found_func(void *c, void *y) {
       
   GatherElemData<>(cme, *si.src_cfield, elem, &node_coord[0]);
     
+
+  //  printf("B elem=%d\n",elem.get_id());
+
   bool in = map.is_in_cell(&node_coord[0], si.coords, &pcoord[0], &dist);
+
+  // printf("A elem=%d\n",elem.get_id());
 
   // if we're too far away don't even consider this as a fall back candidate
   if (!in && (dist > 1.0E-10)) return 0;

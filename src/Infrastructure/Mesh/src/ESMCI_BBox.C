@@ -1,4 +1,4 @@
-// $Id: ESMCI_BBox.C,v 1.6 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_BBox.C,v 1.7 2011/02/25 19:05:05 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -26,7 +26,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_BBox.C,v 1.6 2011/01/05 20:05:44 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_BBox.C,v 1.7 2011/02/25 19:05:05 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -84,8 +84,14 @@ BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
     mp->normal(1,&cd[0], &pc[0], &nr[0]);
    
     double ns = std::sqrt(nr[0]*nr[0]+nr[1]*nr[1]+nr[2]*nr[2]);
-    
-    nr[0] /= ns; nr[1] /= ns; nr[2] /= ns;
+
+    // Only normalize if bigger than 0.0
+    if (ns >1.0E-19) {
+       nr[0] /= ns; nr[1] /= ns; nr[2] /= ns;
+    } else {
+      nr[0] =0.0; nr[1] =0.0; nr[2] =0.0;
+    }
+
     /*
     if (obj.get_id() == 2426) {
       std::cout << "elem 2426 coords:";
