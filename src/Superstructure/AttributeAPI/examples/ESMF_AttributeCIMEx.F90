@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.24 2011/02/09 06:59:35 earl.r.schwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.25 2011/02/25 06:59:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -126,7 +126,11 @@ program ESMF_AttributeCIMEx
 !EOC
 
 !BOE
-!    Now add CIM Attribute packages to all of the Components and Fields.
+!    Now add CIM Attribute packages to all of the Components and Fields.  For 
+!    the top-level Coupler Component, add a CIM package with 2 Responsible 
+!    Party sub-packages and 1 Citation sub-package.  For the Gridded Components,
+!    add a CIM package for each, with the default of 1 Responsible Party 
+!    sub-package and 1 Citation sub-package.
 !EOE
 
 !BOC 
@@ -145,15 +149,26 @@ program ESMF_AttributeCIMEx
       nestConv(2) = convISO
       nestPurp(2) = purpCitation
 
-      ! Add CIM Attribute package to Components
+      ! Add CIM Attribute package to Components, containing a variable number
+      !   of Responsible Party and Citation sub-packages
       !   convention = 'CIM 1.0'
       !   purpose    = 'Model Component Simulation Description'
+      !   nestConvention(1) = 'ISO 19115'
+      !   nestPurpose(1)    = 'Responsible Party Description'
+      !   nestConvention(2) = 'ISO 19115'
+      !   nestPurpose(2)    = 'Citation Description'
+
+      ! Specify the top-level Coupler Component to have 2 Responsible Party
+      !   sub-packages and 1 Citation sub-package
       nameCount = 0
       call ESMF_AttributeAdd(cplcomp, convention=convCIM, &
         purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
         nestAttPackInstanceCountList=(/2,1/), &
         nestAttPackInstanceNameList=nestAttPackName, &
         nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
+
+      ! Specify the Gridded Components to have the default of 1 Responsible
+      !   Party sub-package and 1 Citation sub-package
       call ESMF_AttributeAdd(gridcomp1, convention=convCIM, &
         purpose=purpComp, rc=rc)
       call ESMF_AttributeAdd(gridcomp2, convention=convCIM, &
@@ -279,7 +294,14 @@ convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineProcessorType', &
        'AMD X86_64', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
+!EOC
 
+!BOE
+!    Set the values of the 2 Responsible Party sub-packages, created above
+!    for the Coupler Component in the ESMF_AttributeAdd(cplcomp, ...) call.
+!EOE
+
+!BOC 
       ! Responsible party attributes (for Principal Investigator)
       call ESMF_AttributeSet(cplcomp, 'Name', &
        'Gerard Devine', &
@@ -318,7 +340,14 @@ convention=convISO, purpose=purpRP, rc=rc)
        'www.epcc.ed.ac.uk', &
         convention=convISO, purpose=purpRP, &
         attPackInstanceName=nestAttPackName(2),rc=rc)
+!EOC
 
+!BOE
+!    Set the values of the 1 Citation sub-package, created above
+!    for the Coupler Component in the ESMF_AttributeAdd(cplcomp, ...) call.
+!EOE
+
+!BOC 
       ! Citation attributes
       call ESMF_AttributeSet(cplcomp, 'ShortTitle', &
        'Shaffrey_2009', &
