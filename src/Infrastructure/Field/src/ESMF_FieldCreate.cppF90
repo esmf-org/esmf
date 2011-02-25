@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.91 2011/02/24 21:31:52 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.92 2011/02/25 23:28:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.91 2011/02/24 21:31:52 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.92 2011/02/25 23:28:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -559,9 +559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the Field.  However, ordering of the elements
@@ -569,9 +567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method. 
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -795,9 +791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of dimensions in the {\tt grid}.  However, ordering of the elements
@@ -805,9 +799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method. 
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -1107,9 +1099,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the Field.  However, ordering of the elements
@@ -1117,9 +1107,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method. 
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -1501,9 +1489,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the Field.  However, ordering of the elements
@@ -1511,9 +1497,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method. 
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -1912,9 +1896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
 !       {\tt farray} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the Field.  However, ordering of the elements @\
@@ -1922,9 +1904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
 !       {\tt farray} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
 ! \item [{[rc]}]  @\
@@ -2069,9 +2049,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt farrayPtr}.  That is, for each gridded dimension the @\
 !       {\tt farrayPtr} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the Field.  However, ordering of the elements @\
@@ -2079,9 +2057,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt farrayPtr}.  That is, for each gridded dimension the @\
 !       {\tt farrayPtr} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
 ! \item [{[rc]}]  @\
@@ -2251,9 +2227,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the Field.  However, ordering of the elements
@@ -2261,9 +2235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method. 
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -2424,9 +2396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the Field.  However, ordering of the elements
@@ -2434,9 +2404,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -2629,9 +2597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should be max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method.
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[totalUWidth]}]
 !       Upper bound of halo region.  The size of this array is the number
 !       of gridded dimensions in the Field.  However, ordering of the elements
@@ -2639,9 +2605,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not
-!       implemented, the {\tt totalUWidth} is checked for validity and stored
-!       in preparation for the implementation of the halo method. 
+!       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[name]}] 
 !       Field name. 
 ! \item [{[rc]}] 
@@ -2833,9 +2797,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
 !       {\tt farray} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the Field.  However, ordering of the elements @\
@@ -2843,9 +2805,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt farray}.  That is, for each gridded dimension the @\
 !       {\tt farray} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
 ! \item [{[rc]}]  @\
@@ -3049,9 +3009,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !       to 0.  If values for totalLWidth are specified they must be reflected in @\
 !       the size of the {\tt farrayPtr}.  That is, for each gridded dimension the @\
 !       {\tt farrayPtr} size should be max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ). Although the halo operation is not @\
-!       implemented, the {\tt minHaloLWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[totalUWidth]}] @\
 !       Upper bound of halo region.  The size of this array is the number @\
 !       of gridded dimensions in the Field.  However, ordering of the elements @\
@@ -3059,9 +3017,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !       to 0.  If values for totalUWidth are specified they must be reflected in @\
 !       the size of the {\tt farrayPtr}.  That is, for each gridded dimension the @\
 !       {\tt farrayPtr} size should max( {\tt totalLWidth} + {\tt totalUWidth} @\
-!       + {\tt computationalCount}, {\tt exclusiveCount} ).  Although the halo operation is not @\
-!       implemented, the {\tt totalUWidth} is checked for validity and stored @\
-!       in preparation for the implementation of the halo method. @\
+!       + {\tt computationalCount}, {\tt exclusiveCount} ). @\
 ! \item [{[name]}]  @\
 !       Field name.  @\
 ! \item [{[rc]}]  @\
