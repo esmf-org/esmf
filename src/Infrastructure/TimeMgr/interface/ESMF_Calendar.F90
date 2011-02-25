@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.127 2011/02/25 06:45:30 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.128 2011/02/25 19:48:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.127 2011/02/25 06:45:30 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.128 2011/02/25 19:48:00 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -949,8 +949,6 @@
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to query.
-!     \item[{[name]}]
-!          The name of this calendar.
 !     \item[{[calendartype]}]
 !          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN,
 !          etc.
@@ -979,6 +977,8 @@
 !     \item[{[daysPerYearDd]}]
 !          Integer fractional number of days per year (denominator).  See
 !          daysPerYearDn above.  (Not implemented yet).
+!     \item[{[name]}]
+!          The name of this calendar.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
