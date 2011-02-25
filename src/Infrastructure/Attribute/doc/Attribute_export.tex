@@ -1,4 +1,4 @@
-% $Id: Attribute_export.tex,v 1.5 2011/01/13 23:20:39 svasquez Exp $
+% $Id: Attribute_export.tex,v 1.6 2011/02/25 07:01:02 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -19,11 +19,11 @@ There are three primary ways of exporting Attributes:
    \item CIM XML
 \end{enumerate}
 
-The flag that is used in the {\tt ESMF\_AttributeWrite()} interface to determine which format for writing the Attribute packages is called the {\tt ESMF\_AttWriteFlag}.  The resulting file will be placed in the execution directory after it is written and closed.
+The flag that is used in the {\tt ESMF\_AttributeWrite()} interface to determine which format for writing the Attribute packages is called the {\tt ESMF\_AttWriteFlag}, with values as described below.  The resulting file will be placed in the execution directory after it is written and closed.
 
 \subsubsection{Tab-delimited ASCII}
 
-When {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_TAB} (the default), a tab-delimites ascii file containing name-value pairs of attributes in the packages will be written.  The file will be named for the name of the ESMF object from which {\tt ESMF\_AttributeWrite()} is called. The suffix will be .stdout.
+When {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_TAB} (the default), a tab-delimited ascii file containing name-value pairs of attributes in the packages will be written.  The file will be named for the name of the ESMF object from which {\tt ESMF\_AttributeWrite()} is called. The suffix will be .stdout.
 
 
 \subsubsection{Simple XML}

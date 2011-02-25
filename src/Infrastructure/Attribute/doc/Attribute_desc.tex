@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.43 2011/01/05 20:05:40 svasquez Exp $
+% $Id: Attribute_desc.tex,v 1.44 2011/02/25 07:01:02 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,6 +51,6 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 \item ArrayBundle
 \end{itemize}
 
-The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\it VariableIntent} Attribute that is part of the ESMF supplied standard Attribute package for Field when that Field is added to the State.  {\tt VariableIntent} will be set to either {\tt Export} or {\tt Import}.
+The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\tt VariableIntent} Attribute that is part of the ESMF supplied standard Attribute package for Field when that Field is added to the State.  {\tt VariableIntent} will be set to either {\tt Export} or {\tt Import}.
 
 Attribute hierarchies are linked in a "shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  

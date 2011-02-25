@@ -1,4 +1,4 @@
-% $Id: Attribute_pack_nest.tex,v 1.5 2011/01/05 20:05:41 svasquez Exp $
+% $Id: Attribute_pack_nest.tex,v 1.6 2011/02/25 07:01:02 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,23 +20,23 @@ Several of the ESMF pre-defined packages, when added to an ESMF object, are crea
 CIM Main -- Component package -- is a nest with three child packages:
 \begin{enumerate}
    \item CIM Platform
-   \item CIM Responsible Party
-   \item CIM Citation
+   \item CIM Responsible Party (one or more -- user specifiable)
+   \item CIM Citation (one or more -- user specifiable)
+\end{enumerate}
+
+CIM Inputs -- Field package -- is a nest with one child package:
+\begin{enumerate}
+   \item ESG (or ESMF) General (with CF Extended and CF General packages nested within it)
+\end{enumerate}
+
+ESG (or ESMF) General -- Field package -- is a nest with one child package:
+\begin{enumerate}
+   \item CF Extended (with a CF General package nested within it)
 \end{enumerate}
 
 CF Extended -- Field package -- is a nest with one child package:
 \begin{enumerate}
    \item CF General
-\end{enumerate}
-
-CIM Inputs -- Field package -- is a nest with one child package:
-\begin{enumerate}
-   \item CF Extended (with a CF General package nested within it)
-\end{enumerate}
-
-ESG General -- Field package -- is a nest with one child package:
-\begin{enumerate}
-   \item CF Extended (with a CF General package nested within it)
 \end{enumerate}
 
 ESMF General -- Grid package -- is a nest with one child package:
