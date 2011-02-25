@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.201 2011/02/24 22:58:13 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.202 2011/02/25 23:27:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.201 2011/02/24 22:58:13 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.202 2011/02/25 23:27:26 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -8037,7 +8037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get Grid coordinate bounds and a Fortran pointer to coordinate data
+! !IROUTINE: ESMF_GridGetCoord - Get a Fortran pointer to Grid coord data and coord bounds
 !
 ! !INTERFACE:
 !      subroutine ESMF_GridGetCoord(grid, coordDim, keywordEnforcer,    &
@@ -9905,6 +9905,267 @@ endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
+!BOP
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetCoord()
+      subroutine ESMF_GridGetCoordIntoArray(grid, coordDim, staggerloc, &
+        array, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      integer,                intent(in)            :: coordDim
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type(ESMF_Array),       intent(out)           :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method allows the user to get access to the ESMF Array holding
+!    coordinate data at a particular stagger location. This is useful, for example, 
+!    to set the coordinate values. To have an Array to access, the coordinate Arrays
+!    must have already been allocated, for example by {\tt ESMF\_GridAddCoord} or
+!    {\tt ESMF\_GridSetCoord}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          The grid to get the coord array from. 
+!     \item[{coordDim}]
+!          The coordinate dimension to get the data from (e.g. 1=x).
+!     \item[{staggerloc}]
+!          The stagger location from which to get the arrays. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{array}]
+!          An array into which to put the coordinate infomation. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+    type(ESMF_GridDecompType) :: decompType
+    type(ESMF_CopyFlag) :: docopy
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
+	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
+          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+           return
+	else
+       	   tmp_staggerloc=staggerloc%staggerloc
+	endif
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+  
+    ! Init docopy
+    docopy=ESMF_DATA_REF
+
+    ! Call C++ Subroutine to do the create
+    call c_ESMC_gridgetcoordintoarray(grid%this,tmp_staggerloc, coordDim, &
+      array, docopy, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Set Array as created
+    call ESMF_ArraySetInitCreated(array,localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCoordIntoArray
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoordR4"
+!BOP
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetCoord()
+      subroutine ESMF_GridGetCoordR4(grid, staggerloc, localDe, &
+        index, coord, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in),  optional :: localDE
+      integer,                intent(in)            :: index(:)
+      real(ESMF_KIND_R4),     intent(out)           :: coord(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given a specific index location in a Grid, this method returns the full set
+!   of coordinates from that index location. This method will eventually be overloaded
+!   to support the full complement of types supported by the Grid. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{index}]
+!          This array holds the index location to be queried in the Grid. This array must
+!          at least be of the size Grid rank.
+!     \item[{coord}]
+!          This array will be filled with the coordinate data. This array must
+!          at least be of the size Grid rank.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+ ! Local variables 
+ integer :: localrc
+ integer :: tmp_staggerloc
+
+   ! Initialize return code 
+   localrc = ESMF_RC_NOT_IMPL 
+   if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+   ! Check init status of arguments 
+   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+   ! Have default option for staggerloc
+   if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+   else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+   endif
+
+   ! NOTE THERE IS NO INPUT VALUE CHECKING HERE BECAUSE IT'S DONE IN 
+   ! THE C++ VERSION. 
+
+   ! Call into the C++ interface
+   call c_esmc_gridgetcoordr4(grid, localDE, tmp_staggerloc, &  
+                              index, coord, localrc)
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetCoordR4
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoordR8"
+!BOP
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetCoord()
+      subroutine ESMF_GridGetCoordR8(grid, staggerloc, localDE, &
+        index, coord, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in),  optional :: localDE
+      integer,                intent(in)            :: index(:)
+      real(ESMF_KIND_R8),     intent(out)           :: coord(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Given a specific index location in a Grid, this method returns the full set
+!   of coordinates from that index location. This method will eventually be overloaded
+!   to support the full complement of types supported by the Grid. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{grid}]
+!          Grid to get the information from.
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{staggerloc}]
+!          The stagger location to get the information for. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to
+!          ESMF\_STAGGERLOC\_CENTER.
+!     \item[{index}]
+!          This array holds the index location to be queried in the Grid. This array must
+!          at least be of the size Grid rank.
+!     \item[{coord}]
+!          This array will be filled with the coordinate data. This array must
+!          at least be of the size Grid rank.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+
+ ! Local variables 
+ integer :: localrc
+ integer :: tmp_staggerloc
+
+   ! Initialize return code 
+   localrc = ESMF_RC_NOT_IMPL 
+   if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+
+   ! Check init status of arguments 
+   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
+
+   ! Have default option for staggerloc
+   if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+   else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
+   endif
+
+   ! NOTE THERE IS NO INPUT VALUE CHECKING HERE BECAUSE IT'S DONE IN 
+   ! THE C++ VERSION. 
+
+   ! Call into the C++ interface
+   call c_esmc_gridgetcoordr8(grid, localDE, tmp_staggerloc, &  
+                              index, coord, localrc)
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Return successfully 
+    if (present(rc)) rc = ESMF_SUCCESS 
+
+    end subroutine ESMF_GridGetCoordR8
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordBounds"
 !BOP
 ! !IROUTINE: ESMF_GridGetCoordBounds -  Get Grid coordinate bounds
@@ -10109,271 +10370,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_GridGetCoordBounds
 
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
-!BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an Array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridGetCoord()
-      subroutine ESMF_GridGetCoordIntoArray(grid, coordDim, staggerloc, &
-        array, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in)            :: coordDim
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      type(ESMF_Array),       intent(out)           :: array
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    This method allows the user to get access to the ESMF Array holding
-!    coordinate data at a particular stagger location. This is useful, for example, 
-!    to set the coordinate values. To have an Array to access, the coordinate Arrays
-!    must have already been allocated, for example by {\tt ESMF\_GridAddCoord} or
-!    {\tt ESMF\_GridSetCoord}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          The grid to get the coord array from. 
-!     \item[{coordDim}]
-!          The coordinate dimension to get the data from (e.g. 1=x).
-!     \item[{staggerloc}]
-!          The stagger location from which to get the arrays. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
-!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{array}]
-!          An array into which to put the coordinate infomation. 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-    integer :: tmp_staggerloc
-    integer :: localrc ! local error status
-    type(ESMF_GridDecompType) :: decompType
-    type(ESMF_CopyFlag) :: docopy
-
-    ! Initialize return code; assume failure until success is certain
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
-
-    call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! handle staggerloc
-    if (present(staggerloc)) then
-       if ((decompType == ESMF_GRID_ARBITRARY) .and. &
-	  (staggerloc /= ESMF_STAGGERLOC_CENTER)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-           return
-	else
-       	   tmp_staggerloc=staggerloc%staggerloc
-	endif
-    else
-       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
-    endif
-  
-    ! Init docopy
-    docopy=ESMF_DATA_REF
-
-    ! Call C++ Subroutine to do the create
-    call c_ESMC_gridgetcoordintoarray(grid%this,tmp_staggerloc, coordDim, &
-      array, docopy, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Set Array as created
-    call ESMF_ArraySetInitCreated(array,localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridGetCoordIntoArray
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetCoordR4"
-!BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridGetIndCoord()
-      subroutine ESMF_GridGetCoordR4(grid, staggerloc, localDe, &
-        index, coord, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      integer,                intent(in),  optional :: localDE
-      integer,                intent(in)            :: index(:)
-      real(ESMF_KIND_R4),     intent(out)           :: coord(:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a specific index location in a Grid, this method returns the full set
-!   of coordinates from that index location. This method will eventually be overloaded
-!   to support the full complement of types supported by the Grid. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{staggerloc}]
-!          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
-!          of predefined stagger locations. If not present, defaults to
-!          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{index}]
-!          This array holds the index location to be queried in the Grid. This array must
-!          at least be of the size Grid rank.
-!     \item[{coord}]
-!          This array will be filled with the coordinate data. This array must
-!          at least be of the size Grid rank.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-
-
- ! Local variables 
- integer :: localrc
- integer :: tmp_staggerloc
-
-   ! Initialize return code 
-   localrc = ESMF_RC_NOT_IMPL 
-   if (present(rc)) rc = ESMF_RC_NOT_IMPL 
-
-   ! Check init status of arguments 
-   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
-
-   ! Have default option for staggerloc
-   if (present(staggerloc)) then
-       tmp_staggerloc=staggerloc%staggerloc
-   else
-       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
-   endif
-
-   ! NOTE THERE IS NO INPUT VALUE CHECKING HERE BECAUSE IT'S DONE IN 
-   ! THE C++ VERSION. 
-
-   ! Call into the C++ interface
-   call c_esmc_gridgetcoordr4(grid, localDE, tmp_staggerloc, &  
-                              index, coord, localrc)
-   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Return successfully 
-    if (present(rc)) rc = ESMF_SUCCESS 
-
-    end subroutine ESMF_GridGetCoordR4
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetCoordR8"
-!BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridGetICoord()
-      subroutine ESMF_GridGetCoordR8(grid, staggerloc, localDE, &
-        index, coord, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      integer,                intent(in),  optional :: localDE
-      integer,                intent(in)            :: index(:)
-      real(ESMF_KIND_R8),     intent(out)           :: coord(:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a specific index location in a Grid, this method returns the full set
-!   of coordinates from that index location. This method will eventually be overloaded
-!   to support the full complement of types supported by the Grid. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{grid}]
-!          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{staggerloc}]
-!          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
-!          of predefined stagger locations. If not present, defaults to
-!          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{index}]
-!          This array holds the index location to be queried in the Grid. This array must
-!          at least be of the size Grid rank.
-!     \item[{coord}]
-!          This array will be filled with the coordinate data. This array must
-!          at least be of the size Grid rank.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-
-
- ! Local variables 
- integer :: localrc
- integer :: tmp_staggerloc
-
-   ! Initialize return code 
-   localrc = ESMF_RC_NOT_IMPL 
-   if (present(rc)) rc = ESMF_RC_NOT_IMPL 
-
-   ! Check init status of arguments 
-   ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc) 
-
-   ! Have default option for staggerloc
-   if (present(staggerloc)) then
-       tmp_staggerloc=staggerloc%staggerloc
-   else
-       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc  ! default
-   endif
-
-   ! NOTE THERE IS NO INPUT VALUE CHECKING HERE BECAUSE IT'S DONE IN 
-   ! THE C++ VERSION. 
-
-   ! Call into the C++ interface
-   call c_esmc_gridgetcoordr8(grid, localDE, tmp_staggerloc, &  
-                              index, coord, localrc)
-   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Return successfully 
-    if (present(rc)) rc = ESMF_SUCCESS 
-
-    end subroutine ESMF_GridGetCoordR8
-
-
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetItem - Get Grid Item bounds and an F90 pointer to item data
+! !IROUTINE: ESMF_GridGetItem - Get a Fortran pointer to Grid item data and item bounds
 
 ! !INTERFACE:
 !      subroutine ESMF_GridGetItem(grid, item, keywordEnforcer, &
@@ -12833,6 +12832,88 @@ endif
     end subroutine ESMF_GridGetItem3DR8
 
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetItemIntoArray"
+!BOP
+! !IROUTINE: ESMF_GridGetItem - Get item and put into an Array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridGetItem()
+      subroutine ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+        keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      type(ESMF_Array),       intent(out)           :: array
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!    This method allows the user to get access to the ESMF Array holding
+!    item data at a particular stagger location. This is useful, for example, 
+!    to set the item values. To have an Array to access, the item Array
+!    must have already been allocated, for example by {\tt ESMF\_GridAddItem} or
+!    {\tt ESMF\_GridSetItem}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{item}]
+!          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
+!          list of valid items.  
+!     \item[{staggerloc}]
+!          The stagger location from which to get the arrays. 
+!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
+!     \item[{array}]
+!          An array into which to put the item infomation. 
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+    integer :: tmp_staggerloc
+    integer :: localrc ! local error status
+    type(ESMF_CopyFlag) :: docopy
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
+
+    ! handle staggerloc
+    if (present(staggerloc)) then
+       tmp_staggerloc=staggerloc%staggerloc
+    else
+       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
+    endif
+
+    ! Init docopy
+    docopy=ESMF_DATA_REF
+
+    ! Call C++ Subroutine
+    call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, item, &
+      array, docopy, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Set Array as created
+    call ESMF_ArraySetInitCreated(array,localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetItemIntoArray
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemBounds"
@@ -12840,7 +12921,6 @@ endif
 ! !IROUTINE: ESMF_GridGetItemBounds -  Get Grid item bounds
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_GridGetItemBounds()
       subroutine ESMF_GridGetItemBounds(grid, item, keywordEnforcer, &
         staggerloc, localDE, &
         exclusiveLBound, exclusiveUBound, exclusiveCount, &
@@ -13041,88 +13121,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetItemBounds
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetItemIntoArray"
-!BOP
-! !IROUTINE: ESMF_GridGetItem - Get item and put into an Array
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
-        keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      type(ESMF_Array),       intent(out)           :: array
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!    This method allows the user to get access to the ESMF Array holding
-!    item data at a particular stagger location. This is useful, for example, 
-!    to set the item values. To have an Array to access, the item Array
-!    must have already been allocated, for example by {\tt ESMF\_GridAddItem} or
-!    {\tt ESMF\_GridSetItem}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{item}]
-!          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
-!          list of valid items.  
-!     \item[{staggerloc}]
-!          The stagger location from which to get the arrays. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
-!          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{array}]
-!          An array into which to put the item infomation. 
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-    integer :: tmp_staggerloc
-    integer :: localrc ! local error status
-    type(ESMF_CopyFlag) :: docopy
-
-    ! Initialize return code; assume failure until success is certain
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
-
-    ! handle staggerloc
-    if (present(staggerloc)) then
-       tmp_staggerloc=staggerloc%staggerloc
-    else
-       tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
-    endif
-
-    ! Init docopy
-    docopy=ESMF_DATA_REF
-
-    ! Call C++ Subroutine
-    call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, item, &
-      array, docopy, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Set Array as created
-    call ESMF_ArraySetInitCreated(array,localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridGetItemIntoArray
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
