@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.28 2011/02/24 17:44:54 theurich Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.29 2011/02/25 23:30:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.28 2011/02/24 17:44:54 theurich Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.29 2011/02/25 23:30:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -157,15 +157,15 @@ contains
 !   \begin{description} @\
 !   \item[array] @\
 !     The {\tt ESMF\_Array} object across which data will be scattered. @\
-!   \item[{[farray]}] @\
+!   \item[\{farray\}] @\
 !     The Fortran array that is to be scattered. Only root @\
 !     must provide a valid {\tt farray}, the other PETs may treat @\
 !     {\tt farray} as an optional argument. @\
-!   \item[\{tile\}] @\
-!     The DistGrid tile in {\tt array} into which to scatter {\tt farray}. @\
-!     By default {\tt farray} will be scattered into tile 1. @\
 !   \item[rootPet] @\
 !     PET that holds the valid data in {\tt farray}. @\
+!   \item[{[tile]}] @\
+!     The DistGrid tile in {\tt array} into which to scatter {\tt farray}. @\
+!     By default {\tt farray} will be scattered into tile 1. @\
 !   \item[{[vm]}] @\
 !     Optional {\tt ESMF\_VM} object of the current context. Providing the @\
 !     VM of the current context will lower the method|s overhead. @\
