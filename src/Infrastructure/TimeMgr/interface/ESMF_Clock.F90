@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.108 2011/02/24 04:46:25 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.109 2011/02/25 06:45:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.108 2011/02/24 04:46:25 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.109 2011/02/25 06:45:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -169,11 +169,16 @@
 !     type(ESMF_Clock), intent(in) :: clock2
 !
 ! !DESCRIPTION:
-!     Test whether {\tt clock1} and {\tt clock2} are valid aliases to the same
-!     {\tt ESMF\_Clock} object in memory. For a more general comparison of two 
-!     {\tt ESMF\_Clock}s, going beyond the simple alias test, the 
-!     {\tt ESMF\_ClockMatch()} function (not yet implemented) must be used.
-
+!     Overloads the (==) operator for the {\tt ESMF\_Clock} class.
+!     Compare two clocks for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on IDs, which are distinct
+!     for newly created clocks and identical for clocks created as copies.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both
+!     sides are in the {\em same} status, and {\tt .false.} otherwise.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock1]
@@ -211,10 +216,15 @@
 !     type(ESMF_Clock), intent(in) :: clock2
 !
 ! !DESCRIPTION:
-!     Test whether {\tt clock1} and {\tt clock2} are {\it not} valid aliases
-!     to the same {\tt ESMF\_Clock} object in memory. For a more general 
-!     comparison of two {\tt ESMF\_Clock}s, going beyond the simple alias test,
-!     the {\tt ESMF\_ClockMatch()} function (not yet implemented) must be used.
+!     Overloads the (/=) operator for the {\tt ESMF\_Clock} class.
+!     Compare two clocks for inequality; return {\tt .true.} if not equal,
+!     {\tt .false.} otherwise. Comparison is based on IDs, which are distinct
+!     for newly created clocks and identical for clocks created as copies.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both sides
+!     are {\em not} in the {\em same} status, and {\tt .false.} otherwise. 
 !
 !     The arguments are:
 !     \begin{description}

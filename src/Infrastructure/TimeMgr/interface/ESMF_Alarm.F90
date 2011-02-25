@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.102 2011/02/23 06:37:31 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.103 2011/02/25 06:45:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.102 2011/02/23 06:37:31 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.103 2011/02/25 06:45:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -176,10 +176,15 @@
 !     type(ESMF_Alarm), intent(in) :: alarm2
 !
 ! !DESCRIPTION:
-!     Test whether {\tt alarm1} and {\tt alarm2} are valid aliases to the same
-!     {\tt ESMF\_Alarm} object in memory. For a more general comparison of two 
-!     {\tt ESMF\_Alarm}s, going beyond the simple alias test, the 
-!     {\tt ESMF\_AlarmMatch()} function (not yet implemented) must be used.
+!     Overloads the (==) operator for the {\tt ESMF\_Alarm} class.
+!     Compare two alarms for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on IDs, which are distinct
+!     for newly created alarms and identical for alarms created as copies.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both
+!     sides are in the {\em same} status, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -218,10 +223,15 @@
 !     type(ESMF_Alarm), intent(in) :: alarm2
 !
 ! !DESCRIPTION:
-!     Test whether {\tt alarm1} and {\tt alarm2} are {\it not} valid aliases
-!     to the same {\tt ESMF\_Alarm} object in memory. For a more general 
-!     comparison of two {\tt ESMF\_Alarm}s, going beyond the simple alias test,
-!     the {\tt ESMF\_AlarmMatch()} function (not yet implemented) must be used.
+!     Overloads the (/=) operator for the {\tt ESMF\_Alarm} class.
+!     Compare two alarms for inequality; return {\tt .true.} if not equal,
+!     {\tt .false.} otherwise. Comparison is based on IDs, which are distinct
+!     for newly created alarms and identical for alarms created as copies.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both sides
+!     are {\em not} in the {\em same} status, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.126 2011/02/23 06:37:31 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.127 2011/02/25 06:45:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.126 2011/02/23 06:37:31 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.127 2011/02/25 06:45:30 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -208,13 +208,16 @@
 !     type(ESMF_Calendar), intent(in) :: calendar2
 !
 ! !DESCRIPTION:
-!     \begin{sloppypar}
-!     Test whether {\tt calendar1} and {\tt calendar2} are valid aliases to 
-!     the same {\tt ESMF\_Calendar} object in memory. For a more general 
-!     comparison of two {\tt ESMF\_Calendar}s, going beyond the simple alias 
-!     test, the {\tt ESMF\_CalendarMatch()} function (not yet implemented) 
-!     must be used.
-!     \end{sloppypar}
+!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
+!     Compare two calendar objects for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on the calendar type,
+!     unless both calendars are of type {\tt ESMF\_CAL\_CUSTOM}, in which case
+!     all the calendar's properties, except name, are compared.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both
+!     sides are in the {\em same} status, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}   
@@ -327,13 +330,16 @@
 !     type(ESMF_Calendar), intent(in) :: calendar2
 !
 ! !DESCRIPTION:
-!     \begin{sloppypar}
-!     Test whether {\tt calendar1} and {\tt calendar2} are {\it not} valid 
-!     aliases to the same {\tt ESMF\_Calendar} object in memory. For a more 
-!     general comparison of two {\tt ESMF\_Calendar}s, going beyond the simple 
-!     alias test, the {\tt ESMF\_CalendarMatch()} function (not yet 
-!     implemented) must be used.
-!     \end{sloppypar}
+!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
+!     Compare two calendar objects for inequality; return {\tt .true.} if not
+!     equal, {\tt .false.} otherwise. Comparison is based on the calendar type,
+!     unless both calendars are of type {\tt ESMF\_CAL\_CUSTOM}, in which case
+!     all the calendar's properties, except name, are compared.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both sides
+!     are {\em not} in the {\em same} status, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}   
