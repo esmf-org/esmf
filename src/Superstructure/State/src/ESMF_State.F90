@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.246 2011/02/24 21:31:53 theurich Exp $
+! $Id: ESMF_State.F90,v 1.247 2011/02/25 20:00:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.246 2011/02/24 21:31:53 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.247 2011/02/25 20:00:02 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2379,19 +2379,19 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetInfo(state,  &
-            keywordEnforcer, itemSearch, nestedFlag, name, statetype,  &
-            itemCount, itemNameList, itemtypeList, rc)
+            keywordEnforcer, itemSearch, nestedFlag, statetype,  &
+            itemCount, itemNameList, itemtypeList, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),         intent(in)            :: state
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),        intent(in),  optional :: itemSearch
       logical,                  intent(in),  optional :: nestedFlag
-      character (len=*),        intent(out), optional :: name
       type(ESMF_StateType),     intent(out), optional :: statetype
       integer,                  intent(out), optional :: itemCount
       character (len=*),        intent(out), optional :: itemNameList(:)
       type(ESMF_StateItemType), intent(out), optional :: itemtypeList(:)
+      character (len=*),        intent(out), optional :: name
       integer,                  intent(out), optional :: rc             
 
 !
@@ -2414,8 +2414,6 @@ contains
 !       State level only (default)
 !       When set to {\tt .true.}, additionally returns information from
 !       nested States
-!     \item[{[name]}]
-!       Returns the name of this {\tt ESMF\_State}.
 !     \item[{[statetype]}]
 !       Returns the type, e.g., Import or Export, of this {\tt ESMF\_State}.
 !       Possible values are listed in Section~\ref{opt:statetype}.
@@ -2439,6 +2437,8 @@ contains
 !       States.  When using {\tt itemSearch}, it will return the types of
 !       items matching the specified name. Must be at least {\tt itemCount}
 !       long.  Return values are listed in Section~\ref{opt:stateitemtype}.
+!     \item[{[name]}]
+!       Returns the name of this {\tt ESMF\_State}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
