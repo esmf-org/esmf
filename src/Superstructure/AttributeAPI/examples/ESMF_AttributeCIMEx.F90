@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.25 2011/02/25 06:59:57 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.26 2011/02/25 19:31:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -298,7 +298,7 @@ convention=convCIM, purpose=purpPlatform, rc=rc)
 
 !BOE
 !    Set the values of the 2 Responsible Party sub-packages, created above
-!    for the Coupler Component in the ESMF_AttributeAdd(cplcomp, ...) call.
+!    for the Coupler Component in the ESMF\_AttributeAdd(cplcomp, ...) call.
 !EOE
 
 !BOC 
@@ -344,7 +344,7 @@ convention=convISO, purpose=purpRP, rc=rc)
 
 !BOE
 !    Set the values of the 1 Citation sub-package, created above
-!    for the Coupler Component in the ESMF_AttributeAdd(cplcomp, ...) call.
+!    for the Coupler Component in the ESMF\_AttributeAdd(cplcomp, ...) call.
 !EOE
 
 !BOC 
