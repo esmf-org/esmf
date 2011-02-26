@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.71 2011/02/26 00:20:34 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.72 2011/02/26 00:45:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.71 2011/02/26 00:20:34 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.72 2011/02/26 00:45:14 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -398,10 +398,9 @@ contains
 ! !RETURN VALUE: @\
 !   type(ESMF_Array) :: ESMF_ArrayCreateDataPtr<rank><type><kind> @\
 ! @\
-!
-! !STATUS:
-! \apiStatusCompatible
-!
+! !STATUS: @\
+! \apiStatusCompatible @\
+! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
 ! arrays with pointer attribute, according to distgrid. Besides @\
@@ -622,10 +621,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ! !RETURN VALUE: @\
 !   type(ESMF_Array) :: ESMF_ArrayCreateDataPtrArb<rank><type><kind> @\
 ! @\
-!
-! !STATUS:
-! \apiStatusCompatible
-!
+! !STATUS: @\
+! \apiStatusCompatible @\
+! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
 ! arrays with pointer attribute, according to distgrid. Besides @\
@@ -819,10 +817,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! !RETURN VALUE: @\
 !   type(ESMF_Array) :: ESMF_ArrayCreateDataAssmdShape<rank><type><kind> @\
 ! @\
-!
-! !STATUS:
-! \apiStatusCompatible
-!
+! !STATUS: @\
+! \apiStatusCompatible @\
+! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from an existing local native Fortran @\
 ! array according to distgrid. Besides {\tt farray} each PET must issue this @\

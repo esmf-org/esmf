@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.58 2011/02/26 00:20:34 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.59 2011/02/26 00:41:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.58 2011/02/26 00:20:34 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.59 2011/02/26 00:41:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -715,10 +715,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   integer,                    intent(out), optional   :: rc  @\
 ! @\
-!
-! !STATUS:
-! \apiStatusCompatible
-!
+! !STATUS: @\
+! \apiStatusCompatible @\
+! @\
 ! !DESCRIPTION: @\
 !   Access Fortran array pointer to the specified DE-local memory allocation of @\
 !   the Array object. @\
