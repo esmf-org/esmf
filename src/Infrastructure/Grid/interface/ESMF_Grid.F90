@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.203 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.204 2011/02/26 00:57:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.203 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.204 2011/02/26 00:57:51 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -12903,6 +12903,9 @@ endif
       type(ESMF_Array),       intent(out)           :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !    This method allows the user to get access to the ESMF Array holding
