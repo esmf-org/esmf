@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.26 2011/02/25 19:47:59 theurich Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.27 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.26 2011/02/25 19:47:59 theurich Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.27 2011/02/26 00:20:35 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -89,6 +89,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -215,6 +219,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with a Field sparse matrix multiplication. After this call
 !   {\tt routehandle} becomes invalid.
@@ -265,6 +273,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional :: rc 
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 ! 
 ! \begin{sloppypar}
@@ -620,6 +632,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional :: rc 
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 !
 ! \begin{sloppypar}

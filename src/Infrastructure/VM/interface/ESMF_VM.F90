@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.133 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.134 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.133 2011/02/24 17:50:31 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.134 2011/02/26 00:20:35 rokuingh Exp $"
 
 !==============================================================================
 
@@ -500,6 +500,10 @@ module ESMF_VMMod
 !   type(ESMF_VM) :: vm2
 !
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign vm1 as an alias to the same ESMF VM object in memory
 !   as vm2. If vm2 is invalid, then vm1 will be equally invalid after
@@ -533,6 +537,10 @@ module ESMF_VMMod
 !   type(ESMF_VM), intent(in) :: vm1
 !   type(ESMF_VM), intent(in) :: vm2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether vm1 and vm2 are valid aliases to the same ESMF
@@ -573,6 +581,10 @@ module ESMF_VMMod
 !   type(ESMF_VM), intent(in) :: vm1
 !   type(ESMF_VM), intent(in) :: vm2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether vm1 and vm2 are {\it not} valid aliases to the
@@ -713,6 +725,10 @@ contains
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
@@ -971,6 +987,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
@@ -1321,6 +1341,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
@@ -1579,6 +1603,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !         
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of the
@@ -1898,6 +1926,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
 !   operation, sending pieces of the contiguous data buffer {\tt semdData} to
@@ -2157,6 +2189,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        intent(out), optional :: rc           
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that blocks calling PET until
 !   all PETs of the VM context have issued the call.\newline
@@ -2209,6 +2245,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
@@ -2780,6 +2820,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc
 !         
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Wait for non-blocking VM communication specified by the {\tt commhandle} to
 !   complete.\newline
@@ -2834,6 +2877,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc
 !         
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Wait for {\em all} pending non-blocking VM communication within the 
 !   specified VM context to complete.\newline
@@ -2887,6 +2933,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
@@ -3243,6 +3293,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on rootPet.
@@ -3446,6 +3500,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out),  optional  :: openMPEnabledFlag
     integer,            intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Get internal information about the specified {\tt ESMF\_VM} object.\newline
 !
@@ -3527,6 +3585,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional  :: rc           
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   \begin{sloppypar}
 !   Get the global {\tt ESMF\_VM} object. This is the VM object
@@ -3583,6 +3645,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM), intent(out)           :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc           
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -3754,6 +3820,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: vas
     integer,       intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Get internal information about a specific PET within an {\tt ESMF\_VM} 
 !   object.\newline
@@ -3820,6 +3890,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        intent(out), optional :: rc           
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Print internal information about the specified {\tt ESMF\_VM} to
 !   {\tt stdout}.\newline
@@ -3878,6 +3952,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),         intent(out), optional :: commhandle
 !    integer,                       intent(out), optional :: rc           
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Receive contiguous data from {\tt srcPet} within the same {\tt ESMF\_VM} 
@@ -4379,6 +4457,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that reduces a contiguous data 
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of 
@@ -4642,6 +4724,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
@@ -4998,6 +5084,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
@@ -5192,6 +5282,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Send contiguous data to {\tt dstPet} within the same {\tt ESMF\_VM} object.
@@ -5682,6 +5776,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Send contiguous data to {\tt dstPet} within the same {\tt ESMF\_VM} object
@@ -6183,6 +6281,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Validates that the {\tt vm} is internally consistent.
 !      The method returns an error code if problems are found.  
@@ -6233,6 +6335,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Get floating-point number of seconds of elapsed wall-clock time since some
 !   time in the past.\newline
@@ -6280,6 +6386,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Delay execution for amount of seconds.\newline
 !
@@ -6325,6 +6435,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Get a run-time estimate of the timer precision as floating-point number 

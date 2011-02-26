@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.136 2011/02/24 00:45:03 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.137 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.136 2011/02/24 00:45:03 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.137 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -129,6 +129,9 @@ module ESMF_CplCompMod
 !   type(ESMF_CplComp) :: cplcomp2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign cplcomp1 as an alias to the same ESMF CplComp object in memory
 !   as cplcomp2. If cplcomp2 is invalid, then cplcomp1 will be equally invalid after
@@ -162,6 +165,9 @@ module ESMF_CplCompMod
 !   type(ESMF_CplComp), intent(in) :: cplcomp1
 !   type(ESMF_CplComp), intent(in) :: cplcomp2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether cplcomp1 and cplcomp2 are valid aliases to the same ESMF
@@ -202,6 +208,9 @@ module ESMF_CplCompMod
 !   type(ESMF_CplComp), intent(in) :: cplcomp1
 !   type(ESMF_CplComp), intent(in) :: cplcomp2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether cplcomp1 and cplcomp2 are {\it not} valid aliases to the
@@ -336,6 +345,9 @@ contains
 ! !RETURN VALUE:
     type(ESMF_CplComp) :: ESMF_CplCompCreate
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Config),      intent(in),  optional :: config
@@ -464,6 +476,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),  optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Releases all resources associated with this {\tt ESMF\_CplComp}.  This
 ! includes any States, Clocks, or Attributes that are associated with
@@ -539,6 +554,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user-supplied finalization routine for 
@@ -631,6 +649,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_CplCompFinalize} but no redirection through the
 ! Interface Component method, instead directly call into the actual method.
@@ -684,6 +705,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(out), optional :: name
     integer,                intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Returns information about an {\tt ESMF\_CplComp}.
@@ -759,6 +783,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(wrapper)                     :: wrappedDataPointer
 !   integer,            intent(out)   :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_CplComp} at any time after 
 ! {\tt ESMF\_CplCompSetInternalState} has been called.
@@ -828,6 +855,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user initialization code for a CplComp.
@@ -963,6 +993,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Inquire if this {\tt ESMF\_CplComp} object is to execute on the calling PET.
 !
@@ -1018,6 +1051,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CplComp), intent(in)            :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Prints information about an {\tt ESMF\_CplComp} to {\tt stdout}. \\
@@ -1079,6 +1115,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user read restart code for an {\tt ESMF\_CplComp}.
@@ -1170,6 +1209,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user run code for an {\tt ESMF\_CplComp}.
@@ -1307,6 +1349,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),   optional :: rc
 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Sets or resets information about an {\tt ESMF\_CplComp}.
 ! The caller can set individual values by specifying
@@ -1390,6 +1435,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional  :: phase
     integer,            intent(out), optional  :: rc 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
 ! predefined Component {\tt method}s. After this call the {\tt userRoutine}
@@ -1455,6 +1503,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(wrapper)                     :: wrappedDataPointer
 !   integer,            intent(out)   :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_CplComp} at any time, but 
 ! expected to be
@@ -1517,6 +1568,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: userRc
     integer,            intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
@@ -1587,6 +1641,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
@@ -1685,6 +1742,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional    :: userRc
     integer, intent(out), optional    :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
 ! for setting Component's VM properties. 
@@ -1751,6 +1811,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
@@ -2050,6 +2113,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Currently all this method does is to check that the {\tt cplcomp} exists.
 !
@@ -2098,6 +2164,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! When executing asychronously, wait for an {\tt ESMF\_CplComp} to return.
@@ -2160,6 +2229,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user write restart code for an {\tt ESMF\_CplComp}.

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.25 2011/02/24 17:44:54 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.26 2011/02/26 00:20:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.25 2011/02/24 17:44:54 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.26 2011/02/26 00:20:34 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -133,6 +133,10 @@ contains
     logical,                intent(out),  optional  :: cancelledflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Execute a precomputed Array halo operation for {\tt array}. The {\tt array}
@@ -245,6 +249,10 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with an Array halo operation. 
 !   After this call {\tt routehandle} becomes invalid.
@@ -297,6 +305,10 @@ contains
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Store an Array halo operation over the data in {\tt array}. By default,
@@ -424,6 +436,10 @@ contains
     integer,          intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Print internal information of the specified {\tt ESMF\_Array} object. \\
 !
@@ -483,6 +499,7 @@ contains
     integer,              intent(in),  optional  :: timeslice
     type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
     integer,              intent(out), optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !   Read Array data from file and put it into an {\tt ESMF\_Array} object.
@@ -734,6 +751,10 @@ contains
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Execute a precomputed Array redistribution from {\tt srcArray} to
 !   {\tt dstArray}. Both {\tt srcArray} and {\tt dstArray} must be
@@ -869,6 +890,10 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with an Array redistribution. After this call
 !   {\tt routehandle} becomes invalid.
@@ -920,6 +945,10 @@ contains
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
 !   integer,                  intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! \label{ArrayRedistStoreTK}
@@ -1270,6 +1299,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! \label{ArrayRedistStoreNF}

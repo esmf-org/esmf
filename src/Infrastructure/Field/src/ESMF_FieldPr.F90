@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.39 2011/02/23 20:10:08 w6ws Exp $
+! $Id: ESMF_FieldPr.F90,v 1.40 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -89,6 +89,9 @@ contains
       type(ESMF_Field), intent(inout)         :: field 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt field} to {\tt stdout}.

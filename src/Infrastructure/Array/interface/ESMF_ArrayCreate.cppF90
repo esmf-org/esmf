@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.70 2011/02/23 19:56:16 w6ws Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.71 2011/02/26 00:20:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.70 2011/02/23 19:56:16 w6ws Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.71 2011/02/26 00:20:34 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -156,6 +156,10 @@ module ESMF_ArrayCreateMod
 !   type(ESMF_Array) :: array2
 !
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign array1 as an alias to the same ESMF Array object in memory
 !   as array2. If array2 is invalid, then array1 will be equally invalid after
@@ -189,6 +193,10 @@ module ESMF_ArrayCreateMod
 !   type(ESMF_Array), intent(in) :: array1
 !   type(ESMF_Array), intent(in) :: array2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether array1 and array2 are valid aliases to the same ESMF
@@ -229,6 +237,10 @@ module ESMF_ArrayCreateMod
 !   type(ESMF_Array), intent(in) :: array1
 !   type(ESMF_Array), intent(in) :: array2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether array1 and array2 are {\it not} valid aliases to the
@@ -386,6 +398,10 @@ contains
 ! !RETURN VALUE: @\
 !   type(ESMF_Array) :: ESMF_ArrayCreateDataPtr<rank><type><kind> @\
 ! @\
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
 ! arrays with pointer attribute, according to distgrid. Besides @\
@@ -606,6 +622,10 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ! !RETURN VALUE: @\
 !   type(ESMF_Array) :: ESMF_ArrayCreateDataPtrArb<rank><type><kind> @\
 ! @\
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
 ! arrays with pointer attribute, according to distgrid. Besides @\
@@ -799,6 +819,10 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! !RETURN VALUE: @\
 !   type(ESMF_Array) :: ESMF_ArrayCreateDataAssmdShape<rank><type><kind> @\
 ! @\
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from an existing local native Fortran @\
 ! array according to distgrid. Besides {\tt farray} each PET must issue this @\
@@ -1050,6 +1074,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !     
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateLocalArray
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
@@ -1354,6 +1382,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateLocalArrayArb
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
 ! objects according to distgrid. Each PET must issue this call in unison 
@@ -1517,6 +1549,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !     
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocate
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
@@ -1688,6 +1724,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateArb
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
 ! according to typekind and distgrid. The Array rank is indirectly determined
@@ -1824,6 +1864,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !     
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateAS
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
@@ -2073,6 +2117,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateASArb
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
 ! according to arrayspec and distgrid. Each PET must issue this call in unison
@@ -2204,6 +2252,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateCopy
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object as the copy of an existing Array. 
 !
@@ -2261,6 +2313,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Destroy an {\tt ESMF\_Array} object.

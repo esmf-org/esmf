@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.157 2011/02/23 23:37:42 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.158 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.157 2011/02/23 23:37:42 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.158 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -131,6 +131,9 @@ module ESMF_GridCompMod
 !   type(ESMF_GridComp) :: gridcomp2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign gridcomp1 as an alias to the same ESMF GridComp object in memory
 !   as gridcomp2. If gridcomp2 is invalid, then gridcomp1 will be equally invalid after
@@ -164,6 +167,9 @@ module ESMF_GridCompMod
 !   type(ESMF_GridComp), intent(in) :: gridcomp1
 !   type(ESMF_GridComp), intent(in) :: gridcomp2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether gridcomp1 and gridcomp2 are valid aliases to the same ESMF
@@ -204,6 +210,9 @@ module ESMF_GridCompMod
 !   type(ESMF_GridComp), intent(in) :: gridcomp1
 !   type(ESMF_GridComp), intent(in) :: gridcomp2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether gridcomp1 and gridcomp2 are {\it not} valid aliases to the
@@ -253,6 +262,7 @@ contains
     type(ESMF_GridComp), intent(in) :: gridcomp1
     type(ESMF_GridComp), intent(in) :: gridcomp2
 
+!
 ! !DESCRIPTION:
 !   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp 
 !   object.
@@ -304,6 +314,7 @@ contains
     type(ESMF_GridComp), intent(in) :: gridcomp1
     type(ESMF_GridComp), intent(in) :: gridcomp2
 
+!
 ! !DESCRIPTION:
 !   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp 
 !   object.
@@ -350,7 +361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out),   optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible\\
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! This interface creates an {\tt ESMF\_GridComp} object. By default, a
@@ -479,7 +490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out),  optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible\\
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Releases all resources associated with this {\tt ESMF\_GridComp}.  This
@@ -555,6 +566,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user-supplied finalization code for 
@@ -704,6 +718,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: rc
 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Returns information about an {\tt ESMF\_GridComp}.
 ! For queries where the caller
@@ -837,6 +854,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(wrapper)                     :: wrappedDataPointer
 !   integer,            intent(out)   :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_GridComp} at any time after 
 ! {\tt ESMF\_GridCompSetInternalState} has been called.
@@ -905,6 +925,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user initialization code for a GridComp.
@@ -1039,6 +1062,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Inquire if this {\tt ESMF\_GridComp} object is to execute on the calling PET.
 !
@@ -1094,6 +1120,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GridComp), intent(in)            :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Prints information about an {\tt ESMF\_GridComp} to {\tt stdout}. \\
@@ -1155,6 +1184,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user read restart code for an {\tt ESMF\_GridComp}.
@@ -1247,6 +1279,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user run code for an {\tt ESMF\_GridComp}.
@@ -1385,6 +1420,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out),  optional :: rc
 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Sets or resets information about an {\tt ESMF\_GridComp}.
 ! The caller can set individual values by specifying
@@ -1471,6 +1509,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: phase
     integer,              intent(out), optional :: rc 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
 ! predefined Component {\tt method}s. After this call the {\tt userRoutine}
@@ -1536,6 +1577,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(wrapper)                     :: wrappedDataPointer
 !   integer,            intent(out)   :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Available to be called by an {\tt ESMF\_GridComp} at any time, but 
 ! expected to be
@@ -1598,6 +1642,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional  :: userRc
     integer,             intent(out), optional  :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
@@ -1668,6 +1715,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
@@ -1766,6 +1816,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
 ! for setting Component's VM properties.
@@ -1833,6 +1886,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
@@ -2132,6 +2188,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Currently all this method does is to check that the {\tt gridcomp} exists.
 !
@@ -2180,6 +2239,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! When executing asychronously, wait for an {\tt ESMF\_GridComp} to return.
@@ -2242,6 +2304,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Call the associated user write restart code for an {\tt ESMF\_GridComp}.

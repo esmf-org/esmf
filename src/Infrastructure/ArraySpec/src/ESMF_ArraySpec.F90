@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.45 2011/02/24 18:48:18 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.46 2011/02/26 00:20:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.45 2011/02/24 18:48:18 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.46 2011/02/26 00:20:34 rokuingh Exp $'
 
 !==============================================================================
 
@@ -175,6 +175,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rank
     type(ESMF_TypeKind),  intent(out), optional :: typekind
     integer,              intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Returns information about the contents of an {\tt ESMF\_ArraySpec}.
@@ -241,6 +245,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TypeKind),  intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Creates a description of the data -- the typekind, the rank,
@@ -316,6 +324,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Validates that the {\tt arrayspec} is internally consistent.
@@ -553,6 +565,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional   :: rc
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Print ArraySpec internals. \\

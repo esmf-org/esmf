@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.44 2011/02/23 19:57:28 w6ws Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.45 2011/02/26 00:20:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.44 2011/02/23 19:57:28 w6ws Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.45 2011/02/26 00:20:34 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -168,6 +168,10 @@ module ESMF_ArrayBundleMod
 !   type(ESMF_ArrayBundle) :: arraybundle2
 !
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign arraybundle1 as an alias to the same ESMF ArrayBundle object in memory
 !   as arraybundle2. If arraybundle2 is invalid, then arraybundle1 will be equally invalid after
@@ -201,6 +205,10 @@ module ESMF_ArrayBundleMod
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle1
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -243,6 +251,10 @@ module ESMF_ArrayBundleMod
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle1
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -386,6 +398,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_ArrayBundle) :: ESMF_ArrayBundleCreate
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_ArrayBundle} object from a list of Arrays.
 !
@@ -508,6 +524,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Destroy an {\tt ESMF\_ArrayBundle} object. The member Arrays are not
 ! touched by this operation and remain valid objects that need to be 
@@ -568,6 +588,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array),       intent(inout),  optional :: arrayList(:)
     character(len=*),       intent(out),    optional :: name
     integer,                intent(out),    optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Get the list of Arrays bundled in an ArrayBundle.
@@ -667,6 +691,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Execute a precomputed ArrayBundle halo operation for the Arrays in
 !   {\tt arrayBundle}.
@@ -735,6 +763,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with an ArrayBundle halo operation.
 !   After this call {\tt routehandle} becomes invalid.
@@ -787,6 +819,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -917,6 +953,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
 !
@@ -976,6 +1016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
 !         
+!
 !
 ! !DESCRIPTION:
 !   Read Array data to an ArrayBundle object from file(s).
@@ -1099,6 +1140,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),     optional  :: checkflag
     integer,                intent(out),    optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   \begin{sloppypar}
 !   Execute a precomputed ArrayBundle redistribution from the Arrays in
@@ -1185,6 +1230,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with an ArrayBundle redistribution.
 !   After this call {\tt routehandle} becomes invalid.
@@ -1236,6 +1285,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
 !   integer,                  intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
@@ -1569,6 +1622,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: srcToDstTransposeMap(:)
     integer,                intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Store an ArrayBundle redistribution operation from
 !   {\tt srcArrayBundle} to {\tt dstArrayBundle}. The redistribution
@@ -1685,6 +1742,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),    optional  :: checkflag
     integer,                intent(out),   optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Execute a precomputed ArrayBundle sparse matrix multiplication from the
 !   Arrays in {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
@@ -1783,6 +1844,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with an ArrayBundle sparse matrix multiplication. 
 !   After this call {\tt routehandle} becomes invalid.
@@ -1834,6 +1899,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                          intent(in)            :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                          intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Store an ArrayBundle sparse matrix multiplication operation from
@@ -2212,6 +2281,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Store an ArrayBundle sparse matrix multiplication operation from
 !   {\tt srcArrayBundle} to {\tt dstArrayBundle}. The sparse matrix
@@ -2365,6 +2438,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
     integer,                intent(out),  optional  :: rc  
 !         
+!
 !
 ! !DESCRIPTION:
 !   Write the Arrays into a file. For this API to be functional,

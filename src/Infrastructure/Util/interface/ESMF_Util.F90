@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.48 2011/02/23 13:56:28 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.49 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.48 2011/02/23 13:56:28 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.49 2011/02/26 00:20:35 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -460,6 +460,10 @@
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! This method returns the number of command line arguments specified
 ! when the process was started.
@@ -526,6 +530,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*), intent(out), optional :: argvalue
     integer,      intent(out), optional :: arglength
     integer,      intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! This method returns a copy of a command line argument specified
@@ -692,6 +700,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,      intent(out), optional :: argindex
     integer,      intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! This method searches for, and returns the index of a desired command

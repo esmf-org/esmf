@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.88 2011/02/24 05:11:12 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.89 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.88 2011/02/24 05:11:12 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.89 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -222,6 +222,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DELayout} object on the basis of optionally provided
@@ -339,6 +343,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DELayout} with exactly specified DE to PET mapping.
 !
@@ -431,6 +439,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateHintWeights
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DELayout} on the basis of computational and 
@@ -716,6 +728,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Destroy an {\tt ESMF\_DELayout} object.
 !
@@ -782,6 +798,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,          intent(out),  optional  :: vasLocalDeList(:)
     integer,                  intent(out),  optional  :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Access to DELayout information.
@@ -1309,6 +1329,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints internal information about the specified {\tt ESMF\_DELayout} 
 !     object to {\tt stdout}. \\
@@ -1366,6 +1390,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   The PET who's service offer was accepted for {\tt de} must use 
 !   {\tt ESMF\_DELayoutServiceComplete} to close the service window.
@@ -1421,6 +1449,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayoutServiceReply) :: ESMF_DELayoutServiceOffer
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1488,6 +1520,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt delayout} is internally consistent.

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.77 2011/02/23 19:44:03 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.78 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -593,6 +593,10 @@ end function
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        intent(out),  optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This routine closes the file(s) associated with the {\tt log}.
 !
@@ -696,6 +700,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Log), intent(inout), optional :: log
       integer,        intent(out),   optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This subroutine flushes the {\tt ESMF\_Log} buffer to its
 !      associated file.
@@ -841,6 +849,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),   optional :: rcToReturn		      
       type(ESMF_Log),   intent(inout), optional :: log			      
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
 !      returned from a memory allocation indicates an allocation error.
@@ -932,6 +944,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),   optional :: rcToReturn		     	
       type(ESMF_Log),   intent(inout), optional :: log			     	
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This function returns a logical true when a Fortran status code
 !      returned from a memory deallocation indicates an deallocation error.
@@ -1023,6 +1039,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Log),   intent(inout), optional :: log
 	
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This function returns a logical true for ESMF return codes that indicate
 !      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
@@ -1278,6 +1298,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LogType), intent(in),   optional :: logtype 	    
     integer,            intent(out),  optional :: rc		   
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This routine opens a file with {\tt filename} and associates
 !      it with the {\tt ESMF\_Log}.  This is only
@@ -1471,6 +1495,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(in),    optional :: errorMask(:)	   
       integer,             intent(out),   optional :: rc  		   
 	
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This subroutine sets the properties for the Log object.
 !
@@ -1638,6 +1666,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Log),   intent(inout), optional :: log
 	
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This subroutine sets the {\tt rcToReturn} value to {\tt rcToCheck} if
 !      {\tt rcToReturn} is present and writes this error code to the {\tt ESMF\_Log}
@@ -1743,6 +1775,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Log),     intent(inout), optional :: log	    
       integer,            intent(out),   optional :: rc	    
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
 !      A message is passed in along with the {\tt msgtype}, {\tt line}, 

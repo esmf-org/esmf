@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.109 2011/02/25 06:45:30 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.110 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.109 2011/02/25 06:45:30 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.110 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -126,6 +126,10 @@
 !     type(ESMF_Clock) :: clock1
 !     type(ESMF_Clock) :: clock2
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Assign {\tt clock1} as an alias to the same {\tt ESMF\_Clock} object in 
 !     memory as {\tt clock2}. If {\tt clock2} is invalid, then {\tt clock1} 
@@ -167,6 +171,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Clock), intent(in) :: clock1
 !     type(ESMF_Clock), intent(in) :: clock2
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Clock} class.
@@ -214,6 +219,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Clock), intent(in) :: clock1
 !     type(ESMF_Clock), intent(in) :: clock2
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Clock} class.
@@ -285,6 +291,10 @@
       integer,                        intent(out), optional :: ringingAlarmCount
       integer,                        intent(out), optional :: rc
 !   
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Advances the {\tt clock}'s current time by one time step:  either the
@@ -421,6 +431,10 @@
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Clock}.    
 !
@@ -515,6 +529,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Creates a deep copy of a given {\tt ESMF\_Clock}, but does not copy its
 !     list of {\tt ESMF\_Alarm}s (pointers), since an {\tt ESMF\_Alarm} can only
@@ -570,6 +588,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
 !     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Releases resources associated with this {\tt ESMF\_Clock}.  This releases
@@ -658,6 +680,10 @@
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets one or more of the properties of an {\tt ESMF\_Clock}.
 !     
@@ -790,6 +816,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the {\tt alarm} whose name is the value of alarmname in the 
 !     {\tt clock}'s {\tt ESMF\_Alarm} list.
@@ -849,6 +879,10 @@
       type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
       integer,                        intent(out), optional :: rc
 !   
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the {\tt clock}'s list of alarms.
 !  
@@ -968,6 +1002,10 @@
       type(ESMF_TimeInterval), intent(inout), optional :: timeStep
       integer,                 intent(out), optional   :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Calculates what the next time of the {\tt clock} will be, based on
 !     the {\tt clock}'s current time step or an optionally passed-in
@@ -1025,6 +1063,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns true if currentTime is greater than or equal to stopTime
 !     in {\tt ESMF\_MODE\_FORWARD}, or if currentTime is less than or equal to
@@ -1075,6 +1117,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns true if clock is in {\tt ESMF\_MODE\_REVERSE}, and false if in
 !     {\tt ESMF\_MODE\_FORWARD}.  Allows convenient use in "if" and "do while"
@@ -1125,6 +1171,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns true if the {\tt clock} has reached or exceeded its stop time,
 !     and false otherwise.
@@ -1174,6 +1224,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns true if the {\tt clock}'s stop time is set and enabled,
 !     and false otherwise.
@@ -1221,6 +1275,10 @@
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints out an {\tt ESMF\_Clock}'s properties to {\tt stdout}, in
 !     support of testing and debugging.  The options control the type of
@@ -1356,6 +1414,10 @@
       character (len=*),       intent(in),    optional :: name
       integer,                 intent(out),   optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Sets/resets one or more of the properties of an {\tt ESMF\_Clock} that
@@ -1481,6 +1543,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Disables a {\tt ESMF\_Clock}'s stop time; {\tt ESMF\_ClockIsStopTime()}
 !     will always return false, allowing a clock to run past its stopTime.
@@ -1528,6 +1594,10 @@
       type(ESMF_Time),  intent(in),  optional :: stopTime
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Enables a {\tt ESMF\_Clock}'s stop time, allowing
 !     {\tt ESMF\_ClockIsStopTime()} to respect the stopTime.
@@ -1576,6 +1646,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets a {\tt clock}'s current time to the wall clock time.  It is
 !     accurate to the nearest second.
@@ -1623,6 +1697,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Checks whether a {\tt clock} is valid.  
 !     Must have a valid startTime and timeStep.  If {\tt clock} has a

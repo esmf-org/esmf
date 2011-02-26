@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.146 2011/02/24 17:44:54 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.147 2011/02/26 00:20:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.146 2011/02/24 17:44:54 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.147 2011/02/26 00:20:34 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -380,6 +380,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),  optional  :: rc
 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets adjustable settings in an {\tt ESMF\_Array} object. Arrays with
 !     tensor dimensions will set values for {\em all} tensor components.
@@ -478,6 +482,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),  optional  :: rc
 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets adjustable settings in an {\tt ESMF\_Array} object for a specific
 !     localDe.
@@ -535,6 +543,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -691,6 +703,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with an Array sparse matrix multiplication. 
 !   After this call {\tt routehandle} becomes invalid.
@@ -742,6 +758,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(in)              :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! \label{ArraySMMStoreTK}
@@ -1130,6 +1150,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! \label{ArraySMMStoreNF}
 ! {\tt ESMF\_ArraySMMStore()} is a collective method across all PETs of the
@@ -1237,6 +1261,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Validates that the {\tt Array} is internally consistent.
 !      The method returns an error code if problems are found.  
@@ -1292,6 +1320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional  :: timeslice
     type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
     integer,              intent(out), optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !   Write Array data into a file. For this API to be functional, the 

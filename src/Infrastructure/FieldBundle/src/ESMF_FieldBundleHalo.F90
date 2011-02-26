@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.12 2011/02/23 13:18:35 feiliu Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.13 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.12 2011/02/23 13:18:35 feiliu Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.13 2011/02/26 00:20:35 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -83,6 +83,10 @@ contains
         type(ESMF_KeywordEnforcer),           optional  :: keywordEnforcer ! must use keywords below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -180,6 +184,10 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with a FieldBundle halo operation. After this call
 !   {\tt routehandle} becomes invalid.
@@ -227,6 +235,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),   optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. By 

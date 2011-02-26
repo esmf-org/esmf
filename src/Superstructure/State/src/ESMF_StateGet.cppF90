@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cppF90,v 1.11 2011/01/26 05:30:29 w6ws Exp $
+! $Id: ESMF_StateGet.cppF90,v 1.12 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ module ESMF_StateGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateGet.cppF90,v 1.11 2011/01/26 05:30:29 w6ws Exp $'
+    '$Id: ESMF_StateGet.cppF90,v 1.12 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -110,6 +110,10 @@ contains
 !      character(len=*), intent(in), optional :: nestedStateName @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: @\
 ! Retrieves data from a state, returning a direct Fortran pointer to @\
 ! the data array.  @\

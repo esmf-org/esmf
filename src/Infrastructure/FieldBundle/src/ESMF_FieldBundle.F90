@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.86 2011/02/24 21:31:52 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.87 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -352,6 +352,10 @@ end interface
 !   type(ESMF_FieldBundle) :: fieldbundle2
 !
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   \begin{sloppypar}
 !   Assign fieldbundle1 as an alias to the same ESMF FieldBundle object in memory
@@ -387,6 +391,10 @@ end interface
 !   type(ESMF_FieldBundle), intent(in) :: fieldbundle1
 !   type(ESMF_FieldBundle), intent(in) :: fieldbundle2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -429,6 +437,10 @@ end interface
 !   type(ESMF_FieldBundle), intent(in) :: fieldbundle1
 !   type(ESMF_FieldBundle), intent(in) :: fieldbundle2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -586,6 +598,10 @@ end function
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Adds a single {\tt field} to an existing {\tt fieldbundle}.  The
 !      {\tt field} must be associated with the same geometry (i.e. ESMF\_Grid, ESMF\_Mesh, or ESMF\_LocStream) 
@@ -667,6 +683,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field), dimension(:), intent(inout)         :: fieldList
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(out), optional :: rc          
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Adds a {\tt fieldList} to an existing {\tt ESMF\_FieldBundle}.  
@@ -766,6 +786,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *),            intent(in),  optional :: name 
       integer,                        intent(out), optional :: rc             
 
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Creates an {\tt ESMF\_FieldBundle} from a list of existing
@@ -892,6 +916,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc             
 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
 !
@@ -962,6 +990,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in),  optional :: name 
       integer,             intent(out), optional :: rc             
 
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
@@ -1064,6 +1096,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc             
 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
 !
@@ -1152,6 +1188,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(out), optional :: rc             
 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
 !
@@ -1232,6 +1272,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out),  optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Releases resources associated with the {\tt fieldbundle}.  This
 !     method does not destroy the {\tt ESMF\_Field}s that the
@@ -1307,6 +1351,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: fieldCount
       character (len = *),    intent(out), optional :: name
       integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Returns information about the {\tt fieldbundle}.  
@@ -1699,6 +1747,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Returns a {\tt field} from a {\tt fieldbundle} using
 !      the {\tt field}'s {\tt name}.
@@ -1797,6 +1849,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Returns a {\tt field} from a {\tt fieldbundle} by index number.
 !
@@ -1874,6 +1930,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints diagnostic information about the {\tt fieldbundle}
@@ -1976,6 +2036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),   optional  :: singleFile
       type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
       integer,                intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !     Read Field data to a FieldBundle object from file(s).
@@ -2497,6 +2558,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Validates that the {\tt fieldbundle} is internally consistent.
 !      Currently this method determines if the {\tt fieldbundle} is uninitialized 
@@ -2569,6 +2634,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
       integer,                intent(out), optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !      Write the Fields into a file. For this API to be functional, 

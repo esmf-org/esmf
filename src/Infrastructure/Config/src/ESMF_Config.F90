@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.73 2011/02/23 22:49:04 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.74 2011/02/26 00:20:35 rokuingh Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -453,6 +453,10 @@
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      integer,intent(out), optional              :: rc 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 !   Instantiates an {\tt ESMF\_Config} object for use in subsequent calls.
 !
@@ -513,6 +517,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out),  optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 !    Destroys the {\tt config} object.
 !
@@ -570,6 +578,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out),  optional  :: rc 
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
 !
 !   Since the search is done by looking for a string, possibly multi-worded,
@@ -652,6 +664,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      character(len=*),  intent(in),  optional :: default 
 !      integer,           intent(out), optional :: rc     
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 !      Gets a value from the {\tt config} object.  When the
 !      value is a sequence of characters
@@ -697,6 +713,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      character(len=*),  intent(in),  optional :: label 
 !      character(len=*),  intent(in),  optional :: default 
 !      integer,           intent(out), optional :: rc     
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Gets a list of values from the {\tt config} object.  
@@ -1827,6 +1847,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character,         intent(in),  optional :: default
       integer,           intent(out), optional :: rc    
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 !  Gets a character {\tt value} from the {\tt config} object.
 !
@@ -1904,6 +1928,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),  intent(in),  optional :: label
       integer,           intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION: 
 !  Returns the number of lines in the table in {\tt lineCount} and 
@@ -1993,6 +2021,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),  intent(in),   optional :: label
       integer,           intent(out),  optional :: rc         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 ! Gets the length of the line in words by counting words
 ! disregarding types.  Returns the word count as an integer.
@@ -2068,6 +2100,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_DELayout), intent(in),  optional :: delayout 
       logical,             intent(in),  optional :: unique 
       integer,             intent(out), optional :: rc         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION: 
 !  Resource file with {\tt filename} is loaded into memory.
@@ -2240,6 +2276,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,           intent(out),  optional :: tableEnd
       integer,           intent(out),  optional :: rc 
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION: 
 !   Selects the next line (for tables).
@@ -2429,6 +2469,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     character(len=*),  intent(in),   optional  :: label 
 !     integer,           intent(out),  optional  :: rc   
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION: 
 !  Sets a value in the {\tt config} object.
@@ -2677,6 +2721,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),   optional :: options
       integer,           intent(out),  optional :: rc 
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION: 
 !   Checks whether a {\tt config} object is valid.

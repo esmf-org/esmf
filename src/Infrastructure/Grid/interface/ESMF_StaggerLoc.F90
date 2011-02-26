@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.22 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.23 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.22 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.23 2011/02/26 00:20:35 rokuingh Exp $'
 
 
 !==============================================================================
@@ -247,6 +247,9 @@ end interface
       integer, intent(in) :: loc(:)
       integer, optional :: rc 
 
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !    Sets a custom {\tt staggerloc} to a position in a cell by using the array
 !    {\tt loc}. The values in the array should only be 0,1. If loc(i) is 0 it 
@@ -306,6 +309,9 @@ end interface
       integer, intent(in) :: dim,loc
       integer, optional :: rc 
 
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Sets a particular dimension of a custom {\tt staggerloc} to a position in a cell 
 !    by using the variable {\tt loc}. The variable {\tt loc} should only be 0,1. 
@@ -361,6 +367,9 @@ end interface
       type(ESMF_StaggerLoc), intent(in) :: staggerloc
       character (len = *), intent(out) :: string
       integer, intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Return an {\tt ESMF\_StaggerLoc} as a printable string.
@@ -618,6 +627,9 @@ end interface
       type (ESMF_StaggerLoc), intent(in) :: staggerloc
       integer, intent(out), optional     :: rc 
 
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Print the internal data members of an {\tt ESMF\_StaggerLoc} object. \\
 !

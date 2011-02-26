@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.202 2011/02/25 23:27:26 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.203 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.202 2011/02/25 23:27:26 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.203 2011/02/26 00:20:35 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -665,6 +665,9 @@ end interface
 !   type(ESMF_Grid) :: grid2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign grid1 as an alias to the same ESMF Grid object in memory
 !   as grid2. If grid2 is invalid, then grid1 will be equally invalid after
@@ -698,6 +701,9 @@ end interface
 !   type(ESMF_Grid), intent(in) :: grid1
 !   type(ESMF_Grid), intent(in) :: grid2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether grid1 and grid2 are valid aliases to the same ESMF
@@ -738,6 +744,9 @@ end interface
 !   type(ESMF_Grid), intent(in) :: grid1
 !   type(ESMF_Grid), intent(in) :: grid2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether grid1 and grid2 are {\it not} valid aliases to the
@@ -886,6 +895,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in), optional :: totalLWidth(:) !N. IMP
       integer,                intent(in), optional :: totalUWidth(:) !N. IMP
       integer,                intent(out),optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! 
@@ -1227,6 +1239,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in), optional :: totalLWidth(:) ! N. IMP
       integer,                intent(in), optional :: totalUWidth(:) ! N. IMP
       integer,                intent(out),optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! 
@@ -2725,6 +2740,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !
@@ -7187,13 +7205,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_Grid} object and related internal structures. This call
-!    does destroy internally created DistGrid and DELayout classes, for example those created by 
-!    {\tt ESMF\_GridCreateShapeTile()}. It also destroys internally created coordinate/item Arrays,
-!    for example those created by {\tt ESMF\_GridAddCoord()}. However, if the user uses an externally 
-!    created class, for example creating an Array and setting it using {\tt ESMF\_GridSetCoord()}, then
-!    that class is not destroyed by this method.
+! Destroys an {\tt ESMF\_Grid} object and related internal structures. 
+! This call does destroy internally created DistGrid and DELayout classes, 
+! for example those created by {\tt ESMF\_GridCreateShapeTile()}. It also 
+! destroys internally created coordinate/item Arrays, for example those 
+! created by {\tt ESMF\_GridAddCoord()}. However, if the user uses an 
+! externally created class, for example creating an Array and setting it 
+! using {\tt ESMF\_GridSetCoord()}, then that class is not destroyed by 
+! this method.
 !
 !     The arguments are:
 !     \begin{description}
@@ -7266,6 +7289,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
       character (len=*),     intent(out), optional :: name
       integer,               intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !    Gets various types of information about a grid. 
@@ -7553,6 +7579,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: arbIndexList(:,:)
       integer,                intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! This call gets information about a particular local DE in a Grid. 
 !
@@ -7700,6 +7729,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: computationalUBound(:)
       integer,        target, intent(out), optional :: computationalCount(:)
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  This method gets information about the range of index space which a 
@@ -7862,6 +7894,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_DistGrid),    intent(out), optional :: distgrid
       integer,                intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !  This method gets information about a particular stagger location. 
 !  This information is useful for creating an ESMF Array to hold
@@ -7935,6 +7970,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: minIndex(:)
       integer,        target, intent(out), optional :: maxIndex(:)
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  This method gets information about a particular stagger location. 
@@ -8065,6 +8103,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,                intent(out), optional :: totalCount(:)
 !     type(ESMF_CopyFlag),    intent(in),  optional :: docopy
 !     integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     This method gets a Fortran pointer to the piece of memory which holds the 
@@ -9922,6 +9963,9 @@ endif
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !    This method allows the user to get access to the ESMF Array holding
 !    coordinate data at a particular stagger location. This is useful, for example, 
@@ -10019,6 +10063,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Given a specific index location in a Grid, this method returns the full set
 !   of coordinates from that index location. This method will eventually be overloaded
@@ -10100,6 +10147,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       real(ESMF_KIND_R8),     intent(out)           :: coord(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Given a specific index location in a Grid, this method returns the full set
@@ -10373,7 +10423,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridGetItem - Get a Fortran pointer to Grid item data and item bounds
-
 ! !INTERFACE:
 !      subroutine ESMF_GridGetItem(grid, item, keywordEnforcer, &
 !        staggerloc, localDE, <pointer argument>, 
@@ -10400,6 +10449,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,                intent(out), optional :: totalCount(:)
 !     type(ESMF_CopyFlag),    intent(in),  optional :: docopy
 !     integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     This method gets a Fortran pointer to the piece of memory which holds the 
@@ -12944,6 +12996,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  This method gets information about the range of index space which a particular
@@ -16369,6 +16424,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out),  optional  :: rc  
 !         
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt Grid} is internally consistent.

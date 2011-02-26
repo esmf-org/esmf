@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.92 2011/02/25 23:28:49 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.93 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.92 2011/02/25 23:28:49 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.93 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -140,6 +140,9 @@ module ESMF_FieldCreateMod
 !   type(ESMF_Field) :: field2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign field1 as an alias to the same ESMF Field object in memory
 !   as field2. If field2 is invalid, then field1 will be equally invalid after
@@ -173,6 +176,9 @@ module ESMF_FieldCreateMod
 !   type(ESMF_Field), intent(in) :: field1
 !   type(ESMF_Field), intent(in) :: field2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether field1 and field2 are valid aliases to the same ESMF
@@ -213,6 +219,9 @@ module ESMF_FieldCreateMod
 !   type(ESMF_Field), intent(in) :: field1
 !   type(ESMF_Field), intent(in) :: field2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether field1 and field2 are {\it not} valid aliases to the
@@ -426,6 +435,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field), intent(inout)          :: field       
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc     
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Releases all resources associated with the {\tt ESMF\_Field}.  If an 
@@ -2157,6 +2169,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character (len=*),     intent(in),  optional :: name 
     integer,               intent(out), optional :: rc              
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
@@ -2325,6 +2340,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(in),  optional :: totalUWidth(:)
     character (len=*),     intent(in),  optional :: name 
     integer,               intent(out), optional :: rc              
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -2529,6 +2547,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character (len = *),   intent(in),  optional :: name   
     integer,               intent(out), optional :: rc                
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field}.  This version of creation
 ! assumes the data exists already and is being
@@ -2715,6 +2736,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,               intent(in),  optional :: totalUWidth(:) @\
 !   character (len=*),     intent(in),  optional :: name  @\
 !   integer,               intent(out), optional :: rc                @\
+! @\
+! !STATUS: @\
+! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
@@ -2946,6 +2970,9 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !   integer,               intent(in),  optional :: totalUWidth(:) @\
 !   character (len=*),     intent(in),  optional :: name  @\
 !   integer,               intent(out), optional :: rc                @\
+! @\
+! !STATUS: @\
+! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Grid}. @\

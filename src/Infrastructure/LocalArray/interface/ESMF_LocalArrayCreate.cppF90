@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.38 2011/02/24 21:31:53 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.39 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.38 2011/02/24 21:31:53 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.39 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -228,6 +228,10 @@ end interface
 !   type(ESMF_LocalArray) :: localarray2
 !
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign localarray1 as an alias to the same ESMF LocalArray object in memory
 !   as localarray2. If localarray2 is invalid, then localarray1 will be equally invalid after
@@ -261,6 +265,10 @@ end interface
 !   type(ESMF_LocalArray), intent(in) :: localarray1
 !   type(ESMF_LocalArray), intent(in) :: localarray2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether localarray1 and localarray2 are valid aliases to the same ESMF
@@ -303,6 +311,10 @@ end interface
 !   type(ESMF_LocalArray), intent(in) :: localarray1
 !   type(ESMF_LocalArray), intent(in) :: localarray2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether localarray1 and localarray2 are {\it not} valid aliases to the
@@ -473,6 +485,10 @@ end function
     integer,              intent(in),  optional :: ubounds(:)
     integer,              intent(out), optional :: rc 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
 !  uninitialized.  The return value is a new LocalArray.
@@ -625,6 +641,10 @@ end function
     integer,              intent(in),  optional :: ubounds(:)
     integer,              intent(out), optional :: rc 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
 !  uninitialized. The return value is a new LocalArray.
@@ -703,6 +723,10 @@ end function
     integer,               intent(out), optional :: rc 
 
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !  Perform a deep copy of an existing {\tt ESMF\_LocalArray} object. The return
 !  value is a new LocalArray.
@@ -766,6 +790,10 @@ end function
 !   integer, intent(in), optional :: lbounds(:) @\
 !   integer, intent(in), optional :: ubounds(:) @\
 !   integer, intent(out), optional :: rc   @\
+! @\
+! @\
+! !STATUS: @\
+! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on a Fortran array pointer. @\
@@ -1000,6 +1028,10 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     type(ESMF_LocalArray),  intent(inout)           :: localarray
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Releases all resources associated with this {\tt ESMF\_LocalArray} object.

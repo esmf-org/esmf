@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.128 2011/02/25 19:48:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.129 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.128 2011/02/25 19:48:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.129 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -165,6 +165,10 @@
 !     type(ESMF_Calendar) :: calendar1
 !     type(ESMF_Calendar) :: calendar2
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Assign {\tt calendar1} as an alias to the same {\tt ESMF\_Calendar} 
 !     object in memory as {\tt calendar2}. If {\tt calendar2} is invalid, then 
@@ -206,6 +210,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Calendar), intent(in) :: calendar1
 !     type(ESMF_Calendar), intent(in) :: calendar2
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
@@ -251,6 +256,7 @@
 !     type(ESMF_CalendarType), intent(in) :: calendartype1
 !     type(ESMF_CalendarType), intent(in) :: calendartype2
 !
+!
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
 !     Compare two calendar types for equality; return {\tt .true.} if equal,
@@ -288,6 +294,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Calendar),     intent(in) :: calendar
 !     type(ESMF_CalendarType), intent(in) :: calendartype
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
@@ -328,6 +335,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Calendar), intent(in) :: calendar1
 !     type(ESMF_Calendar), intent(in) :: calendar2
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
@@ -372,6 +380,7 @@
 !     type(ESMF_CalendarType), intent(in) :: calendartype1
 !     type(ESMF_CalendarType), intent(in) :: calendartype2
 !
+!
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
 !     Compare two calendar types for inequality; return {\tt .true.} if not 
@@ -409,6 +418,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Calendar),     intent(in) :: calendar
 !     type(ESMF_CalendarType), intent(in) :: calendartype
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
@@ -603,6 +613,10 @@
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Creates and sets a {\tt calendar} to the given built-in
 !     {\tt ESMF\_CalendarType}. 
@@ -682,6 +696,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Creates a complete (deep) copy of a given {\tt ESMF\_Calendar}.
 !
@@ -739,6 +757,7 @@
       character (len=*),     intent(in),  optional :: name
       integer,               intent(out), optional :: rc
 
+!
 ! !DESCRIPTION:
 !     Creates a custom {\tt ESMF\_Calendar} and sets its properties.
 !
@@ -845,6 +864,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out),  optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Releases resources associated with this {\tt ESMF\_Calendar}.
 !
@@ -942,6 +965,10 @@
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets one or more of an {\tt ESMF\_Calendar}'s properties.
 !
@@ -1109,6 +1136,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns true if the given year is a leap year within the given calendar,
@@ -1165,6 +1196,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns true if the given year is a leap year within the given calendar,
@@ -1216,6 +1251,10 @@
       character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints out an {\tt ESMF\_Calendar}'s properties to {\tt stdio}, 
 !     in support of testing and debugging.  The options control the 
@@ -1336,6 +1375,10 @@
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets {\tt calendar} to the given built-in {\tt ESMF\_CalendarType}. 
 !
@@ -1419,6 +1462,10 @@
       character (len=*),     intent(in),  optional :: name
       integer,               intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets properties in a custom {\tt ESMF\_Calendar}.
 !
@@ -1524,6 +1571,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets the default {\tt calendar} to the given type.  Subsequent Time
 !     Manager operations requiring a calendar where one isn't specified will
@@ -1568,6 +1619,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets the default {\tt calendar} to the one given.  Subsequent Time
 !     Manager operations requiring a calendar where one isn't specified will
@@ -1614,6 +1669,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Checks whether a {\tt calendar} is valid.  
 !     Must be one of the defined calendar types.  daysPerMonth, daysPerYear,

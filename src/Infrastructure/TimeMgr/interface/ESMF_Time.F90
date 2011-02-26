@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.122 2011/02/23 06:37:31 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.123 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.122 2011/02/23 06:37:31 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.123 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -123,6 +123,10 @@
 !     type(ESMF_Time) :: time1
 !     type(ESMF_Time) :: time2
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Set {\tt time1} equal to {\tt time2}.  This is the default Fortran
 !     assignment, which creates a complete, independent copy of {\tt time2} 
@@ -163,6 +167,10 @@
 !     type(ESMF_Time),         intent(in) :: time1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_Time} class to increment
 !     {\tt time1} with {\tt timeinterval} and return the result as an
@@ -200,6 +208,10 @@
 !     type(ESMF_Time),         intent(in) :: time1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_Time} class to decrement
 !     {\tt time1} with {\tt timeinterval}, and return the result as an
@@ -235,6 +247,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_Time),         intent(in) :: time1
 !     type(ESMF_Time),         intent(in) :: time2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_Time} class to return the
@@ -277,6 +293,10 @@
 !     type(ESMF_Time), intent(in) :: time1
 !     type(ESMF_Time), intent(in) :: time2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Time} class to return 
 !     {\tt .true.} if {\tt time1} and {\tt time2} represent the same instant 
@@ -315,6 +335,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
 !     type(ESMF_Time), intent(in) :: time2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Time} class to return 
@@ -355,6 +379,10 @@
 !     type(ESMF_Time), intent(in) :: time1
 !     type(ESMF_Time), intent(in) :: time2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_Time} class to return 
 !     {\tt .true.} if {\tt time1} is earlier in time than {\tt time2}, and 
@@ -393,6 +421,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
 !     type(ESMF_Time), intent(in) :: time2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_Time} class to return 
@@ -433,6 +465,10 @@
 !     type(ESMF_Time), intent(in) :: time1
 !     type(ESMF_Time), intent(in) :: time2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (>) operator for the {\tt ESMF\_Time} class to return 
 !     {\tt .true.} if {\tt time1} is later in time than {\tt time2}, and 
@@ -471,6 +507,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_Time), intent(in) :: time1
 !     type(ESMF_Time), intent(in) :: time2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Overloads the (>=) operator for the {\tt ESMF\_Time} class to return 
@@ -560,6 +600,10 @@
       type(ESMF_TimeInterval), intent(out), optional :: dayOfYear_intvl
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the value of {\tt time} in units specified by the user
 !     via Fortran optional arguments.  See {\tt ESMF\_TimeSet()} above for a
@@ -803,6 +847,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns true if given time is in a leap year, and false otherwise.
 !     See also {\tt ESMF\_CalendarIsLeapYear()}.
@@ -852,6 +900,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns true if the Calendars in these Times are
 !     the same, false otherwise.
@@ -901,6 +953,10 @@
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints out the contents of an {\tt ESMF\_Time} to {\tt stdout}, in
 !     support of testing and debugging.  The options control the type of
@@ -1063,6 +1119,10 @@
       integer,                 intent(in),  optional :: timeZone ! not imp
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Initializes an {\tt ESMF\_Time} with a set of user-specified units
 !     via Fortran optional arguments.
@@ -1235,6 +1295,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(out), optional :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the system real time (wall clock time), and returns it as an
 !     {\tt ESMF\_Time}.  Accurate to the nearest second.
@@ -1281,6 +1345,10 @@
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Checks whether an {\tt ESMF\_Time} is valid.
 !     Must be a valid date/time on a valid calendar.

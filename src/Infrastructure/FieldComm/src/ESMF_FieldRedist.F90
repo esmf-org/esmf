@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.34 2011/02/25 19:47:59 theurich Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.35 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.34 2011/02/25 19:47:59 theurich Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.35 2011/02/26 00:20:35 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -88,6 +88,10 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Execute a precomputed Field redistribution from {\tt srcField} to
@@ -197,6 +201,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with a Field redistribution. After this call
 !   {\tt routehandle} becomes invalid.
@@ -247,6 +255,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in), optional :: srcToDstTransposeMap(:) 
 !   integer,                  intent(out), optional :: rc 
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 ! \label{FieldRedistStoreTK}
 ! {\tt ESMF\_FieldRedistStore()} is a collective method across all PETs of the
@@ -587,6 +599,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(in),  optional :: srcToDstTransposeMap(:) 
 !   integer,                intent(out), optional :: rc 
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: 
 ! 
 ! \label{FieldRedistStoreNF}

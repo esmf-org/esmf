@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.20 2011/02/25 19:47:58 theurich Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.21 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.20 2011/02/25 19:47:58 theurich Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.21 2011/02/26 00:20:35 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -85,6 +85,10 @@ contains
 !   type(ESMF_VM),              intent(in),   optional  :: vm @\
 !   integer,                    intent(out),  optional  :: rc @\
 ! @\
+! @\
+! @\
+! !STATUS: @\
+! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
 !   Gather the data of an {ESMF\_Field} object into the {\tt farray} located on @\

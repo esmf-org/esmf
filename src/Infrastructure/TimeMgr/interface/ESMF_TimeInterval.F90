@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.114 2011/02/25 23:20:47 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.115 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.114 2011/02/25 23:20:47 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.115 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -145,6 +145,10 @@
 !     type(ESMF_TimeInterval) :: timeinterval1
 !     type(ESMF_TimeInterval) :: timeinterval2
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Set {\tt timeinterval1} equal to {\tt timeinterval2}.  This is the default
@@ -187,6 +191,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_TimeInterval} class to
 !     add {\tt timeinterval1} to {\tt timeinterval2} and return the
@@ -224,6 +232,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
@@ -260,6 +272,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
 !     perform unary negation on {\tt timeinterval} and return the result.
@@ -293,6 +309,10 @@
 ! !ARGUMENTS: 
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -330,6 +350,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     integer(ESMF_KIND_I4),   intent(in) :: divisor
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
@@ -452,6 +476,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Overloads the Fortran intrinsic MOD() function for the
 !     {\tt ESMF\_TimeInterval} class to return the remainder of 
@@ -491,6 +519,10 @@
 ! !ARGUMENTS:
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval
 !     integer(ESMF_KIND_I4),   intent(in) :: multiplier
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
@@ -612,6 +644,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_TimeInterval} class to
 !     return {\tt .true.} if {\tt timeinterval1} and {\tt timeinterval2} 
@@ -650,6 +686,10 @@
 ! !ARGUMENTS:     
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_TimeInterval} class to
@@ -690,6 +730,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
 !     return {\tt .true.} if {\tt timeinterval1} is a lesser duration of time 
@@ -728,6 +772,10 @@
 ! !ARGUMENTS:     
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
@@ -768,6 +816,10 @@
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 !DESCRIPTION:
 !     Overloads the (>) operator for the {\tt ESMF\_TimeInterval} class to
 !     return {\tt .true.} if {\tt timeinterval1} is a greater duration of time 
@@ -806,6 +858,10 @@
 ! !ARGUMENTS:     
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval1
 !     type(ESMF_TimeInterval), intent(in) :: timeinterval2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 !DESCRIPTION:
 !     Overloads the (>=) operator for the {\tt ESMF\_TimeInterval} class to
@@ -887,6 +943,10 @@
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeinterval
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns the absolute value of {\tt timeinterval}.
 !
@@ -961,6 +1021,10 @@
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
 !     user via Fortran optional arguments.
@@ -1186,6 +1250,10 @@
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
 !     user via Fortran optional arguments.
@@ -1415,6 +1483,10 @@
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
 !     user via Fortran optional arguments.
@@ -1647,6 +1719,10 @@
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
 !     user via Fortran optional arguments.
@@ -1832,6 +1908,10 @@
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns the negative absolute value of {\tt timeinterval}.
 !
@@ -1870,6 +1950,10 @@
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints out the contents of an {\tt ESMF\_TimeInterval} to {\tt stdout},
 !     in support of testing and debugging.  The options control the type of
@@ -2028,6 +2112,10 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
 !     the user via Fortran optional arguments.
@@ -2178,6 +2266,10 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
 !     the user via Fortran optional arguments.
@@ -2333,6 +2425,10 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
 !     the user via Fortran optional arguments.
@@ -2494,6 +2590,10 @@
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
 !     the user via Fortran optional arguments.
@@ -2612,6 +2712,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Checks whether a {\tt timeinterval} is valid.
 !     If fractional value, denominator must be non-zero.

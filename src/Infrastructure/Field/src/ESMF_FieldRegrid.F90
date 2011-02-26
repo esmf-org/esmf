@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.60 2011/02/23 20:10:08 w6ws Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.61 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.60 2011/02/23 20:10:08 w6ws Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.61 2011/02/26 00:20:35 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -113,6 +113,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegionFlag),  intent(in),    optional :: zeroflag
       logical,                intent(in),    optional :: checkflag
       integer,                intent(out),   optional :: rc 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Execute the precomputed regrid operation stored in {\tt routehandle} to 
@@ -241,6 +244,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Free resources used by regrid objec

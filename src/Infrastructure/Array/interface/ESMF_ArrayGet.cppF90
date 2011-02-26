@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.57 2011/02/23 19:56:16 w6ws Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.58 2011/02/26 00:20:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.57 2011/02/23 19:56:16 w6ws Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.58 2011/02/26 00:20:34 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -176,6 +176,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),              intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Get internal information.
@@ -557,6 +561,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Get internal information per local DE, per dim.
 !
@@ -707,6 +715,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   <type> (ESMF_KIND_<kind>),dimension(<rank>),pointer :: farrayPtr @\
 !   integer,                    intent(out), optional   :: rc  @\
 ! @\
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION: @\
 !   Access Fortran array pointer to the specified DE-local memory allocation of @\
 !   the Array object. @\
@@ -811,6 +823,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocalArray),  intent(inout)         :: localarray
     integer,                intent(out), optional :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Provide access to {\tt ESMF\_LocalArray} object that holds data for

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.70 2011/02/25 23:28:50 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.71 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.70 2011/02/25 23:28:50 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.71 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -143,6 +143,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: localDeCount
     character(len=*),      intent(out), optional :: name
     integer,               intent(out), optional :: rc     
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Query an {\tt ESMF\_Field} for various things.  All arguments after
@@ -609,6 +612,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,          intent(out), optional :: totalCount(:) @\
 !   integer,          intent(out), optional :: rc @\
 ! @\
+! !STATUS: @\
+! \apiStatusCompatible @\
+! @\
 ! !DESCRIPTION: @\
 ! Get a Fortran pointer to DE-local memory allocation within {\tt field}. @\
 ! For convenience DE-local bounds can be queried at the same time. @\
@@ -784,6 +790,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out), optional :: totalCount(:)
     integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! This method returns the bounds information of a field that consists of a
 ! internal grid and a internal array. The exclusive and computational bounds
@@ -1159,6 +1169,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: totalCount(:)
     integer,               intent(out), optional :: rc     
 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Compute the lower and upper bounds of Fortran data array that can later

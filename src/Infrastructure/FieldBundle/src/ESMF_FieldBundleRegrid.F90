@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.18 2011/02/23 20:13:06 w6ws Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.19 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.18 2011/02/23 20:13:06 w6ws Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.19 2011/02/26 00:20:35 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -89,6 +89,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -180,6 +184,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Release resouces associated with a FieldBundle regrid operation. After this call
 !   {\tt routehandle} becomes invalid.
@@ -239,6 +247,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_UnmappedAction), intent(in),    optional :: unmappedDstAction
     type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
     integer,                   intent(out),   optional :: rc
+!
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and

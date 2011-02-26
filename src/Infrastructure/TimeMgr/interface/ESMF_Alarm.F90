@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.103 2011/02/25 06:45:30 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.104 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.103 2011/02/25 06:45:30 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.104 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -133,6 +133,10 @@
 !     type(ESMF_Alarm) :: alarm1
 !     type(ESMF_Alarm) :: alarm2
 ! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Assign {\tt alarm1} as an alias to the same {\tt ESMF\_Alarm} object in 
 !     memory as {\tt alarm2}. If {\tt alarm2} is invalid, then {\tt alarm1} 
@@ -174,6 +178,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Alarm), intent(in) :: alarm1
 !     type(ESMF_Alarm), intent(in) :: alarm2
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Alarm} class.
@@ -221,6 +226,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Alarm), intent(in) :: alarm1
 !     type(ESMF_Alarm), intent(in) :: alarm2
+!
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Alarm} class.
@@ -303,6 +309,10 @@
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Alarm}.
 !
@@ -427,6 +437,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Creates a complete (deep) copy of a given {\tt ESMF\_Alarm}.
 !     The returned {\tt ESMF\_Alarm} copy is associated with the same
@@ -477,6 +491,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
 !     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Releases resources associated with this {\tt ESMF\_Alarm}.  Also
@@ -529,6 +547,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Disables an {\tt ESMF\_Alarm}.
 !
@@ -573,6 +595,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Enables an {\tt ESMF\_Alarm} to function.
 !
@@ -636,6 +662,10 @@
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Gets one or more of an {\tt ESMF\_Alarm}'s properties.
 !
@@ -767,6 +797,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} is enabled.
 !
@@ -815,6 +849,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} is ringing.
 !
@@ -867,6 +905,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Check if {\tt alarm} is sticky.
 !
@@ -916,6 +958,10 @@
       integer,                 intent(in),  optional :: ringTimeStepCount
       integer,                 intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Unset an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
 !     it turns itself off after ringDuration.
@@ -977,6 +1023,10 @@
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints out an {\tt ESMF\_Alarm}'s properties to {\tt stdout}, in support
 !     of testing and debugging.  The options control the type of information
@@ -1106,6 +1156,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Turn off an {\tt ESMF\_Alarm}; unsets ringing state.  For a sticky
 !     alarm, this method must be called to turn off its ringing state.
@@ -1155,6 +1209,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Turn on an {\tt ESMF\_Alarm}; sets ringing state.
 !
@@ -1214,6 +1272,10 @@
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Sets/resets one or more of the properties of an {\tt ESMF\_Alarm} that
@@ -1325,6 +1387,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Set an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
 !     it remains ringing until {\tt ESMF\_AlarmRingerOff()} is called.
@@ -1378,6 +1444,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Performs a validation check on an {\tt ESMF\_Alarm}'s properties.
 !     Must have a valid ringTime, set either directly or indirectly via
@@ -1430,6 +1500,10 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} was ringing on the previous clock timestep.
 !
@@ -1484,6 +1558,10 @@
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} will ring on the next clock timestep, either
 !     the current clock timestep or a passed-in timestep.

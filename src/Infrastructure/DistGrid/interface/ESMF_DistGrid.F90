@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.75 2011/02/23 20:35:23 w6ws Exp $
+! $Id: ESMF_DistGrid.F90,v 1.76 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.75 2011/02/23 20:35:23 w6ws Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.76 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -190,6 +190,10 @@ module ESMF_DistGridMod
 !   type(ESMF_DistGrid) :: distgrid2
 !
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign distgrid1 as an alias to the same ESMF DistGrid object in memory
 !   as distgrid2. If distgrid2 is invalid, then distgrid1 will be equally invalid after
@@ -223,6 +227,10 @@ module ESMF_DistGridMod
 !   type(ESMF_DistGrid), intent(in) :: distgrid1
 !   type(ESMF_DistGrid), intent(in) :: distgrid2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether distgrid1 and distgrid2 are valid aliases to the same ESMF
@@ -263,6 +271,10 @@ module ESMF_DistGridMod
 !   type(ESMF_DistGrid), intent(in) :: distgrid1
 !   type(ESMF_DistGrid), intent(in) :: distgrid2
 !
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether distgrid1 and distgrid2 are {\it not} valid aliases to the
@@ -407,6 +419,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
 !     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
@@ -540,6 +556,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGP
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
 !     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
@@ -658,6 +678,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -857,6 +881,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1386,6 +1414,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
@@ -2072,6 +2104,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} 1 from a PET-local list
 !     of sequence indices. The PET-local size of the {\tt arbSeqIndexList}
@@ -2192,6 +2228,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} $1+n$, where 
@@ -2368,6 +2408,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Destroy an {\tt ESMF\_DistGrid} object.
 !
@@ -2439,6 +2483,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(out), optional :: regDecompFlag
     integer,                intent(out), optional :: rc
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Get internal DistGrid information.
@@ -2690,6 +2738,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Get internal DistGrid information.
 !
@@ -2777,6 +2829,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Get internal DistGrid information.
 !
@@ -2846,6 +2902,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
 !
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Prints internal information about the specified {\tt ESMF\_DistGrid} 
 !     object to {\tt stdout}. \\
@@ -2905,6 +2965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
+!
 !
 ! !DESCRIPTION:
 !      Check if {\tt distgrid1} and {\tt distgrid2} match. Returns
@@ -3028,6 +3089,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt distgrid} is internally consistent.
@@ -3159,6 +3224,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: orientationVector(:)
     integer,                intent(out), optional :: rc
 !         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     This call helps to construct a DistGrid connection,

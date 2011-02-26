@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.247 2011/02/25 20:00:02 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.248 2011/02/26 00:20:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.247 2011/02/25 20:00:02 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.248 2011/02/26 00:20:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -223,6 +223,9 @@ module ESMF_StateMod
 !   type(ESMF_State) :: state2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign state1 as an alias to the same ESMF State object in memory
 !   as state2. If state2 is invalid, then state1 will be equally invalid after
@@ -256,6 +259,9 @@ module ESMF_StateMod
 !   type(ESMF_State), intent(in) :: state1
 !   type(ESMF_State), intent(in) :: state2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether state1 and state2 are valid aliases to the same ESMF
@@ -296,6 +302,9 @@ module ESMF_StateMod
 !   type(ESMF_State), intent(in) :: state1
 !   type(ESMF_State), intent(in) :: state2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether state1 and state2 are {\it not} valid aliases to the
@@ -432,6 +441,9 @@ contains
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,          intent(out),  optional :: rc
 !     
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Add a reference to a single <item> to an existing 
 !      {\tt state}.  Any of the supported <item>s can
@@ -1340,6 +1352,9 @@ contains
 !    integer,          intent(in),   optional :: count
 !    integer,          intent(out),  optional :: rc     
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Add a list of items to an {\tt ESMF\_State}.
 !    
@@ -2155,6 +2170,9 @@ contains
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !ARGUMENTS:
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_StateType),   intent(in),  optional :: statetype
@@ -2316,6 +2334,9 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Releases all resources associated with this {\tt ESMF\_State}. Actual
 !     objects added to {\tt ESMF\_State}s will not be destroyed, it
@@ -2394,6 +2415,9 @@ contains
       character (len=*),        intent(out), optional :: name
       integer,                  intent(out), optional :: rc             
 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Returns the requested information about this {\tt ESMF\_State}.
@@ -2614,6 +2638,9 @@ contains
 !      character (len=*),     intent(in),  optional :: nestedStateName
 !      integer,               intent(out), optional :: rc             
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      \begin{sloppypar}
@@ -3229,6 +3256,9 @@ contains
       integer,           intent(out), optional :: rc             
 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !     Returns the type for the item named
 !     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
@@ -3313,6 +3343,9 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc             
 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      Returns the status of the {\tt neededflag} for the data item
@@ -3605,6 +3638,9 @@ contains
       integer,           intent(out), optional :: rc             
 
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Returns true if the status of the {\tt needed} flag for the data item
 !      named by {\tt itemName} in the {\tt ESMF\_State} is 
@@ -3783,6 +3819,9 @@ contains
       character (len = *), intent(in),  optional :: options
       logical,             intent(in),  optional :: nestedFlag
       integer,             intent(out), optional :: rc 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt state} to {\tt stdout}. \\
@@ -4082,6 +4121,9 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc
 !     
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Remove an existing reference to an item from a {\tt State}.
 !
@@ -4221,6 +4263,9 @@ contains
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,          intent(out),  optional :: rc
 !     
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !      Replace an existing reference to a single <item> to an existing 
 !      {\tt state}.  The name of the <item> must be unique within the
