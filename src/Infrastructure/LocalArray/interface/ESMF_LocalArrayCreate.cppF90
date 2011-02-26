@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.39 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.40 2011/02/26 01:25:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.39 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.40 2011/02/26 01:25:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -486,9 +486,6 @@ end function
     integer,              intent(out), optional :: rc 
 !
 !
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
 !  uninitialized.  The return value is a new LocalArray.
@@ -642,9 +639,6 @@ end function
     integer,              intent(out), optional :: rc 
 !
 !
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
 !  uninitialized. The return value is a new LocalArray.
@@ -790,10 +784,6 @@ end function
 !   integer, intent(in), optional :: lbounds(:) @\
 !   integer, intent(in), optional :: ubounds(:) @\
 !   integer, intent(out), optional :: rc   @\
-! @\
-! @\
-! !STATUS: @\
-! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on a Fortran array pointer. @\
