@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.45 2011/02/26 00:20:34 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.46 2011/02/26 01:50:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.45 2011/02/26 00:20:34 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.46 2011/02/26 01:50:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -167,8 +167,6 @@ module ESMF_ArrayBundleMod
 !   type(ESMF_ArrayBundle) :: arraybundle1
 !   type(ESMF_ArrayBundle) :: arraybundle2
 !
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -204,8 +202,6 @@ module ESMF_ArrayBundleMod
 ! !ARGUMENTS:
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle1
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -250,8 +246,6 @@ module ESMF_ArrayBundleMod
 ! !ARGUMENTS:
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle1
 !   type(ESMF_ArrayBundle), intent(in) :: arraybundle2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -398,10 +392,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_ArrayBundle) :: ESMF_ArrayBundleCreate
 !
-!
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_ArrayBundle} object from a list of Arrays.
 !
@@ -523,8 +513,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -691,7 +679,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -763,7 +750,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -819,7 +805,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
