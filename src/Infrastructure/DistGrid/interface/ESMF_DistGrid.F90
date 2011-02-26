@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.76 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.77 2011/02/26 01:40:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.76 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.77 2011/02/26 01:40:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -189,8 +189,6 @@ module ESMF_DistGridMod
 !   type(ESMF_DistGrid) :: distgrid1
 !   type(ESMF_DistGrid) :: distgrid2
 !
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -226,8 +224,6 @@ module ESMF_DistGridMod
 ! !ARGUMENTS:
 !   type(ESMF_DistGrid), intent(in) :: distgrid1
 !   type(ESMF_DistGrid), intent(in) :: distgrid2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -270,8 +266,6 @@ module ESMF_DistGridMod
 ! !ARGUMENTS:
 !   type(ESMF_DistGrid), intent(in) :: distgrid1
 !   type(ESMF_DistGrid), intent(in) :: distgrid2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -419,7 +413,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -556,7 +549,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGP
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -678,7 +670,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -881,7 +872,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1414,7 +1404,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2104,7 +2093,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2228,7 +2216,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2407,8 +2394,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out),  optional  :: rc  
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2483,11 +2468,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(out), optional :: regDecompFlag
     integer,                intent(out), optional :: rc
 !         
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 !   Get internal DistGrid information.
 !
@@ -2737,8 +2717,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: elementCount
     integer,                intent(out), optional :: rc
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2828,8 +2806,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2901,8 +2877,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -3089,8 +3063,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -3224,8 +3196,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: orientationVector(:)
     integer,                intent(out), optional :: rc
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
