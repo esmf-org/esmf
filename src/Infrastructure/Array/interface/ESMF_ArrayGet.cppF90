@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.59 2011/02/26 00:41:07 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.60 2011/02/26 01:34:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.59 2011/02/26 00:41:07 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.60 2011/02/26 01:34:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -176,11 +176,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),              intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
 !         
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 !     Get internal information.
 !
@@ -560,8 +555,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: indexList(:)
     integer,                       intent(out), optional :: rc  
 !         
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
