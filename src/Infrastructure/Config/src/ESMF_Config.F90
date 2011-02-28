@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.74 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Config.F90,v 1.75 2011/02/28 20:08:29 rokuingh Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1916,12 +1916,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ConfigGetDim - Get table sizes
 !
 ! !INTERFACE:
-
     subroutine ESMF_ConfigGetDim(config, lineCount, columnCount, &
       keywordEnforcer, label, rc)
 
-      implicit none
-
+! !ARGUMENTS:
       type(ESMF_Config), intent(inout)         :: config
       integer,           intent(out)           :: lineCount
       integer,           intent(out)           :: columnCount
