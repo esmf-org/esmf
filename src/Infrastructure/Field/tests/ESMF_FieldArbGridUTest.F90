@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.18 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.19 2011/03/01 20:48:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -152,12 +152,14 @@
 
   field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -175,7 +177,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -215,7 +218,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -236,7 +240,8 @@
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -255,7 +260,8 @@
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -330,12 +336,14 @@
 
   field = ESMF_FieldCreate(grid3d, arrayspec1D, gridToFieldMap =(/1,2,0/),rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -355,7 +363,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -376,7 +385,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -395,7 +405,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -416,7 +427,8 @@
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -435,7 +447,8 @@
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -506,12 +519,14 @@
 
   field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -529,7 +544,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -550,7 +566,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -569,7 +586,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -590,7 +608,8 @@
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -609,7 +628,8 @@
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -680,12 +700,14 @@
   field = ESMF_FieldCreate(grid3d, arrayspec3D, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
@@ -705,7 +727,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
@@ -727,7 +750,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
@@ -747,7 +771,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 3) correct = .false.
   if (dimCount .ne. 4) correct = .false.  
@@ -799,12 +824,14 @@
   field = ESMF_FieldCreate(grid3d, arrayspec2D, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), gridToFieldMap=(/1,2,0/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -824,7 +851,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -847,7 +875,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -868,7 +897,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 3) correct = .false.  
@@ -919,12 +949,14 @@
 
   field = ESMF_FieldCreate(grid3d, arrayspec1D,gridToFieldMap=(/0,0,1/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
@@ -943,7 +975,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
@@ -965,7 +998,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
@@ -985,7 +1019,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
@@ -1007,7 +1042,8 @@
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
@@ -1027,7 +1063,8 @@
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 1) correct = .false.  
@@ -1095,12 +1132,14 @@
   field = ESMF_FieldCreate(grid3d, arrayspec2D,gridToFieldMap=(/0,0,1/), &
           ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -1120,7 +1159,8 @@
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -1143,7 +1183,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -1164,7 +1205,8 @@
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 2) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
@@ -1232,7 +1274,8 @@
 
   field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1246,7 +1289,8 @@
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) correct = .false.
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) correct = .false.
 
   if (rank .ne. 1) correct = .false.
   if (dimCount .ne. 2) correct = .false.  
