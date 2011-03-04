@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.87 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.88 2011/03/04 19:00:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -240,10 +240,10 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldBundleCreateNew
-        module procedure ESMF_FieldBundleCreateNFNone
-        module procedure ESMF_FieldBundleCreateNFGrid
-        module procedure ESMF_FieldBundleCreateNFLS
-        module procedure ESMF_FieldBundleCreateNFMesh
+        !module procedure ESMF_FieldBundleCreateNFNone
+        !module procedure ESMF_FieldBundleCreateNFGrid
+        !module procedure ESMF_FieldBundleCreateNFLS
+        !module procedure ESMF_FieldBundleCreateNFMesh
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -674,13 +674,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleAdd()
-      subroutine ESMF_FieldBundleAddFieldList(fieldbundle, fieldCount, &
+      subroutine ESMF_FieldBundleAddFieldList(fieldbundle, &
           fieldList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle),         intent(inout)         :: fieldbundle        
-      integer,                        intent(in)            :: fieldCount
-      type(ESMF_Field), dimension(:), intent(inout)         :: fieldList
+      type(ESMF_Field),               intent(inout)         :: fieldList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(out), optional :: rc          
 !
@@ -700,14 +699,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [fieldbundle]
 !           {\tt ESMF\_FieldBundle} to add {\tt ESMF\_Field}s to.
-!     \item [fieldCount]
-!           Number of {\tt ESMF\_Field}s to be added to the 
-!           {\tt ESMF\_FieldBundle}; must be equal to or less than the 
-!           number of items in the {\tt fieldList}.
 !     \item [fieldList]
 !           \begin{sloppypar}
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_FieldBundle}.
+!           Array of existing {\tt ESMF\_Field}s to be added 
+!           to the {\tt ESMF\_FieldBundle}.
 !           \end{sloppypar}
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -718,7 +713,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: status                                ! Error status
       logical :: dummy
       type(ESMF_FieldBundleType), pointer :: btype
-      integer :: i
+      integer :: i, fieldCount
       type(ESMF_Logical) :: linkChange
 
       ! Initialize return code in case we return early.
@@ -728,6 +723,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+      fieldCount = size(fieldList)
+      if(fieldCount .lt. 1) then
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          msg=" - Input fieldList is empty", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
       do i=1,fieldCount
          ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
       enddo
@@ -772,17 +774,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNew(fieldCount, fieldList, &
-        keywordEnforcer, packflag, name, rc)
+      function ESMF_FieldBundleCreateNew(keywordEnforcer, fieldList, &
+        name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNew
 !
 ! !ARGUMENTS:
-      integer,                        intent(in)            :: fieldCount           
-      type(ESMF_Field), dimension (:)                       :: fieldList
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_PackFlag),            intent(in),  optional :: packflag 
+      type(ESMF_Field),               intent(in),  optional :: fieldList(:)
       character (len = *),            intent(in),  optional :: name 
       integer,                        intent(out), optional :: rc             
 
@@ -800,26 +800,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [fieldCount]
-!      Number of fields to be added to the new {\tt ESMF\_FieldBundle}.
-!      Must be equal to or less than the number of 
-!      {\tt ESMF\_Field}s in the {\tt fieldList}.
 !   \item [fieldList]
 !      \begin{sloppypar}
 !      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
 !      items will be added to the new {\tt ESMF\_FieldBundle}.
-!      \end{sloppypar}
-!   \item [{[packflag]}]
-!      \begin{sloppypar}
-!      The packing option is not yet implemented.  
-!      See Section~\ref{sec:bundlerest}
-!      for a description of packing, and Section~\ref{opt:packflag} for 
-!      anticipated values.  The current implementation corresponds to the
-!      value {\tt ESMF\_NO\_PACKED\_DATA}, which means that every 
-!      {\tt ESMF\_Field} is referenced separately rather 
-!      than being copied into a single contiguous buffer.  
-!      This is the case no matter what value, if any, is passed in for
-!      this argument.
 !      \end{sloppypar}
 !   \item [{[name]}]
 !      {\tt ESMF\_FieldBundle} name.  A default name is generated if
@@ -834,12 +818,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldBundleType), pointer :: btypep         ! Pointer to new fieldbundle
       logical :: dummy
       integer :: status                                ! Error status
-      integer :: i      
+      integer :: i, fieldCount  
       type(ESMF_Logical) :: linkChange
 
       ! Initialize return code in case we return early.
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       status = ESMF_RC_NOT_IMPL
+
+      ! Shortcut to CreateNFNone if user didn't supply fieldList
+      if(.not. present(fieldList)) then
+        ESMF_FieldBundleCreateNew = ESMF_FieldBundleCreateNFNone(name=name, rc=status)
+        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+        if(present(rc)) rc = ESMF_SUCCESS
+        return
+      else
+        fieldCount = size(fieldList)
+        print *, 'size of the FieldList: ', fieldCount
+      endif
 
       ! check variables
       do i=1,fieldCount
@@ -856,7 +852,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Call construction method to initialize fieldbundle internals.
       call ESMF_FieldBundleConstructNew(btypep, fieldCount, fieldList, &
-                                   packflag, &
                                    name, status)
       if (ESMF_LogFoundError(status, &
         ESMF_ERR_PASSTHRU, &
@@ -900,7 +895,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreateNFNone"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields and no Grid
 !
 ! !INTERFACE:
@@ -933,7 +928,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOP
+!EOPI
 
 
       type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
@@ -970,293 +965,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldBundleCreateNFNone
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreateNFGrid"
-!BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields but a Grid
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFGrid(grid, keywordEnforcer, name, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFGrid
-!
-! !ARGUMENTS:
-      type(ESMF_Grid),     intent(in)            :: grid
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character (len = *), intent(in),  optional :: name 
-      integer,             intent(out), optional :: rc             
-
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item [grid]
-!       The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
-!       {\tt ESMF\_FieldBundle} must be associated with. 
-!   \item [{[name]}]
-!       {\tt ESMF\_FieldBundle} name.  A default name is generated if
-!       one is not specified.
-!   \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!
-!EOP
-
-
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
-      integer :: status                          ! Error status
-      type(ESMF_Logical) :: linkChange
-
-      ! Initialize pointers
-      status = ESMF_RC_NOT_IMPL
-      nullify(btypep)
-      nullify(ESMF_FieldBundleCreateNFGrid%btypep)
-
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check inputs 
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      allocate(btypep, stat=status)
-      if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
-      if (ESMF_LogFoundError(status, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Set the Grid.  All Fields added to this FieldBundle
-      !  must be based on this same Grid.
-          call ESMF_GridValidate(grid, rc=status)
-          if (ESMF_LogFoundError(status, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-          ! Create the geombase around the grid, use the center stagger as a generic stagger here, 
-          ! because the stagger won't really matter in this case
-          btypep%geombase=ESMF_GeomBaseCreate(grid,ESMF_STAGGERLOC_CENTER,rc=status)
-          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-          btypep%gridstatus = ESMF_STATUS_READY
-
-          !  link the Attribute hierarchies
-          linkChange = ESMF_TRUE
-          call c_ESMC_AttributeLink(btypep%base, grid, linkChange, status)
-          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-
-      ! Set return values.
-      ESMF_FieldBundleCreateNFGrid%btypep => btypep
-      ! Add reference to this object into ESMF garbage collection table
-      ! Only call this in those Create() methods that call Construct()
-      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFGrid, &
-        ESMF_ID_FIELDBUNDLE%objectID)
-
-      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFGrid)
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldBundleCreateNFGrid
-
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreateNFMesh"
-!BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields but a Mesh
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFMesh(mesh, keywordEnforcer, name, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFMesh
-!
-! !ARGUMENTS:
-      type(ESMF_Mesh),     intent(in)            :: mesh
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character (len = *), intent(in),  optional :: name 
-      integer,             intent(out), optional :: rc             
-
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item [mesh]
-!       The {\tt ESMF\_Mesh} which all {\tt ESMF\_Field}s added to this
-!       {\tt ESMF\_FieldBundle} must be associated with. 
-!   \item [{[name]}]
-!       {\tt ESMF\_FieldBundle} name.  A default name is generated if
-!       one is not specified.
-!   \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!
-!EOP
-
-
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
-      integer :: status                          ! Error status
-
-      ! Initialize pointers
-      status = ESMF_RC_NOT_IMPL
-      nullify(btypep)
-      nullify(ESMF_FieldBundleCreateNFMesh%btypep)
-
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check inputs 
-      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
-
-      allocate(btypep, stat=status)
-      if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
-      if (ESMF_LogFoundError(status, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Set the Mesh.  All Fields added to this FieldBundle
-      !  must be based on this same Mesh.
-
-          ! Create the geombase around the mesh
-          btypep%geombase=ESMF_GeomBaseCreate(mesh,rc=status)
-          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-          btypep%gridstatus = ESMF_STATUS_READY
-
-      ! Set return values.
-      ESMF_FieldBundleCreateNFMesh%btypep => btypep
-
-      ! Add reference to this object into ESMF garbage collection table
-      ! Only call this in those Create() methods that call Construct()
-      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFMesh, &
-        ESMF_ID_FIELDBUNDLE%objectID)
-
-      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFMesh)
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldBundleCreateNFMesh
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreateNFLS"
-!BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle with no Fields but a LocStream
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNFLS(locstream, keywordEnforcer, name, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNFLS
-!
-! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in)            :: locstream
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character (len = *),  intent(in),  optional :: name 
-      integer,              intent(out), optional :: rc             
-
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!   Creates an {\tt ESMF\_FieldBundle} with no associated {\tt ESMF\_Fields}.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item [locstream]
-!       The {\tt ESMF\_LocStream} which all {\tt ESMF\_Field}s added to this
-!       {\tt ESMF\_FieldBundle} must be associated with. 
-!   \item [{[name]}]
-!       {\tt ESMF\_FieldBundle} name.  A default name is generated if
-!       one is not specified.
-!   \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!
-!EOP
-
-
-      type(ESMF_FieldBundleType), pointer :: btypep   ! Pointer to new fieldbundle
-      integer :: status                          ! Error status
-
-      ! Initialize pointers
-      status = ESMF_RC_NOT_IMPL
-      nullify(btypep)
-      nullify(ESMF_FieldBundleCreateNFLS%btypep)
-
-      ! Initialize return code
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check inputs 
-      ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
-
-      allocate(btypep, stat=status)
-      if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Call construction method to allocate and initialize fieldbundle internals.
-      call ESMF_FieldBundleConstructEmpty(btypep, name, rc)
-      if (ESMF_LogFoundError(status, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Set the LocStream.  All Fields added to this FieldBundle
-      !  must be based on this same LocStream.
-
-          ! Create the geombase around the mesh
-          btypep%geombase=ESMF_GeomBaseCreate(locstream,rc=status)
-          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-          btypep%gridstatus = ESMF_STATUS_READY
-
-      ! Set return values.
-      ESMF_FieldBundleCreateNFLS%btypep => btypep
-      ! Add reference to this object into ESMF garbage collection table
-      ! Only call this in those Create() methods that call Construct()
-      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNFLS, &
-        ESMF_ID_FIELDBUNDLE%objectID)
-
-      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNFLS)
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end function ESMF_FieldBundleCreateNFLS
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3216,14 +2924,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       subroutine ESMF_FieldBundleConstructNew(btype, fieldCount, fields, &
-                                         packflag, &
                                          name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundleType), pointer :: btype 
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
-      type(ESMF_PackFlag), intent(in), optional :: packflag 
        character (len = *), intent(in), optional :: name 
       integer, intent(out), optional :: rc
 !
@@ -3246,11 +2952,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [fields]
 !      Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !      items will be added to the {\tt ESMF\_FieldBundle}.
-!   \item [{[packflag]}]
-!      If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!      data in individual {\tt ESMF\_Array}s will be collected
-!      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_FieldBundle}.
-!      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
 !   \item [{[name]}]
 !      {\tt ESMF\_FieldBundle} name.  A default name will be generated if
 !      one is not specified.
@@ -3278,24 +2979,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! If specified, set packflag and interleave
-      if(present(packflag)) then
-        if(packflag==ESMF_PACKED_DATA) then
-          call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
-            msg="Packed data option not implemented", &
-            ESMF_CONTEXT, rcToReturn=rc) 
-          return
-        else
-          btype%pack_flag = packflag
-        endif
-      endif  
- 
       ! Add the fields in the list, checking for consistency.
       call ESMF_FieldBundleTypeAddList(btype, fieldCount, fields, status)
       if (ESMF_LogFoundError(status, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-
 
       if (present(rc)) rc = ESMF_SUCCESS
 

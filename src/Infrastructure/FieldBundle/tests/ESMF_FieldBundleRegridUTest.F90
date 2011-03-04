@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.10 2011/02/23 17:18:26 w6ws Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.11 2011/03/04 19:00:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.10 2011/02/23 17:18:26 w6ws Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.11 2011/03/04 19:00:38 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -209,17 +209,17 @@ contains
             endif
         enddo 
 
-        srcFieldBundle360 = ESMF_FieldBundleCreate(6, srcField360, rc=localrc)        
+        srcFieldBundle360 = ESMF_FieldBundleCreate(fieldList=srcField360, rc=localrc)        
         if (localrc /=ESMF_SUCCESS) then
           rc=ESMF_FAILURE
           return
         endif
-        dstFieldBundle360 = ESMF_FieldBundleCreate(6, dstField360, rc=localrc)
+        dstFieldBundle360 = ESMF_FieldBundleCreate(fieldList=dstField360, rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
           rc=ESMF_FAILURE
           return
         endif
-        fieldBundle180 = ESMF_FieldBundleCreate(6, field180, rc=localrc)
+        fieldBundle180 = ESMF_FieldBundleCreate(fieldList=field180, rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
           rc=ESMF_FAILURE
           return
@@ -704,14 +704,14 @@ contains
 
 
    ! Make FieldBundles
-   fieldBundleA = ESMF_FieldBundleCreate(numFields,fieldA, rc=localrc)        
+   fieldBundleA = ESMF_FieldBundleCreate(fieldList=fieldA, rc=localrc)        
         if (localrc /=ESMF_SUCCESS) then
           rc=ESMF_FAILURE
           return
         endif
 
    ! Make FieldBundles
-   fieldBundleB = ESMF_FieldBundleCreate(numFields,fieldB, rc=localrc)        
+   fieldBundleB = ESMF_FieldBundleCreate(fieldList=fieldB, rc=localrc)        
         if (localrc /=ESMF_SUCCESS) then
           rc=ESMF_FAILURE
           return

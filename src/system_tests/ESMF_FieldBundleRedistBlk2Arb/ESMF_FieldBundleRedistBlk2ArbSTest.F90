@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.15 2011/03/04 19:00:43 feiliu Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -155,13 +155,13 @@ program Blk2ArbBunRedist
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create bundles
-     bundle1 = ESMF_FieldBundleCreate(grid1, name='FieldBundle1', rc=status)
+     bundle1 = ESMF_FieldBundleCreate(name='FieldBundle1', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     bundle2 = ESMF_FieldBundleCreate(grid2, name='FieldBundle2', rc=status)
+     bundle2 = ESMF_FieldBundleCreate(name='FieldBundle2', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
-     bundle3 = ESMF_FieldBundleCreate(grid1, name='FieldBundle3', rc=status)
+     bundle3 = ESMF_FieldBundleCreate(name='FieldBundle3', rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! Create the field and have it create the array internally for each grid

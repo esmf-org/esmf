@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.28 2011/02/23 18:23:30 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.29 2011/03/04 19:00:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.28 2011/02/23 18:23:30 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.29 2011/03/04 19:00:38 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -227,7 +227,7 @@
 
       ! Try creating a bundle of these
       ! SHOULD WORK BECAUSE ON SAME LOCSTREAM
-      bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=localrc)      
+      bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Destroy FieldBundle
@@ -276,7 +276,7 @@
 
       ! Try creating a bundle of these
       ! SHOULD FAIL BECAUSE ON DIFFERENT LocStreams
-      bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=localrc)      
+      bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=localrc)      
       if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
 
       ! Destroy Fields
@@ -327,7 +327,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Add fields
-      call ESMF_FieldBundleAdd(bundleTst, 2,fieldTst,rc=localrc)      
+      call ESMF_FieldBundleAdd(bundleTst,fieldTst,rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Destroy FieldBundle
@@ -587,7 +587,7 @@
 
       ! Try creating a bundle of these
       ! SHOULD WORK BECAUSE ON SAME MESHES
-      bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=localrc)      
+      bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Destroy FieldBundle
@@ -1068,7 +1068,7 @@
 
       ! Create FieldBundle
       ! SHOULD FAIL BECAUSE ON DIFFERENT Meshes
-      bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=localrc)      
+      bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=localrc)      
       if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
 
 
@@ -1337,7 +1337,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Add fields
-      call ESMF_FieldBundleAdd(bundleTst, 2,fieldTst,rc=localrc)      
+      call ESMF_FieldBundleAdd(bundleTst, fieldTst,rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Destroy FieldBundle
@@ -1507,22 +1507,23 @@
       fields(1) = ESMF_FieldCreateEmpty(name="pressure", rc=rc)
       fields(2) = ESMF_FieldCreateEmpty(name="temperature", rc=rc)
       fields(3) = ESMF_FieldCreateEmpty(name="heat flux", rc=rc)
-      bundle1 = ESMF_FieldBundleCreate(3, fields, name="atmosphere data", rc=rc)
+      bundle1 = ESMF_FieldBundleCreate(fieldList=fields(1:3), name="atmosphere data", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating FieldBundle with 3 No Data Fields Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !E-X_UTest
       ! Test Requirement Creating a FieldBundle with ESMF_PACKED_DATA option
       ! The ESMF_PACKED_DATA option is not implemented and until it is, it
       ! is correct for the method to return ESMF_RC_NOT_IMPL when it is used.
-      write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
-      bundle4 = ESMF_FieldBundleCreate(3, fields, packflag=ESMF_PACKED_DATA, &
-            name="atmosphere data", rc=rc)
-      write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
-      call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
-      print *, "rc = ", rc
+      ! Fei: disabled until packing is implemented
+      !write(failMsg, *) "Did not return ESMF_RC_NOT_IMPL"
+      !bundle4 = ESMF_FieldBundleCreate(fieldList=fields(1:3), &
+      !      name="atmosphere data", rc=rc)
+      !write(name, *) "Creating FieldBundle with ESMF_PACKED_DATA"
+      !call ESMF_Test((rc.eq.ESMF_RC_NOT_IMPL), name, failMsg, result, ESMF_SRCLINE)
+      !print *, "rc = ", rc
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1715,7 +1716,7 @@
    
       !EX_UTest
       !  Verify that multiple Fields can be added to a FieldBundle 
-      call ESMF_FieldBundleAdd(bundle3, 3, fields, rc=rc)
+      call ESMF_FieldBundleAdd(bundle3, fields(1:3), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Fields to a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

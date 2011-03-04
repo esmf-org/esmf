@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_model1.F90,v 1.10 2011/03/04 19:00:46 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -126,7 +126,7 @@ module user_model1
         if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     enddo
 
-    fieldbundle = ESMF_FieldBundleCreate(fieldCount=3, fieldList=field, &
+    fieldbundle = ESMF_FieldBundleCreate(fieldList=field, &
         name="fieldbundle data", rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 

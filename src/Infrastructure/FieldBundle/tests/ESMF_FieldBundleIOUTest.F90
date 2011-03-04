@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Try creating a bundle of these fields
-  bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=rc)      
+  bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=rc)      
   write(failMsg, *) ""
   write(name, *) "Create a bundle from 2 fields "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -191,7 +191,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Try creating a bundle of these fields
-  bundleRd=ESMF_FieldBundleCreate(2,fieldRd,rc=rc)
+  bundleRd=ESMF_FieldBundleCreate(fieldList=fieldRd,rc=rc)
   write(failMsg, *) ""
   write(name, *) "Create a bundle from 2 fields "
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

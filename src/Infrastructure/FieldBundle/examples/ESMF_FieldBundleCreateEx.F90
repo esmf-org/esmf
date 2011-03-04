@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.10 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.11 2011/03/04 19:00:34 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -82,7 +82,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    bundle1 = ESMF_FieldBundleCreate(3, field, name="atmosphere data", rc=rc)
+    bundle1 = ESMF_FieldBundleCreate(fieldList=field(1:3), name="atmosphere data", rc=rc)
 
     print *, "FieldBundle example 1 returned"
 !EOC
@@ -131,7 +131,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_FieldBundleAdd(bundle3, 3, field, rc=rc)
+    call ESMF_FieldBundleAdd(bundle3, field(1:3), rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

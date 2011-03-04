@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.13 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.14 2011/03/04 19:00:45 feiliu Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -177,7 +177,7 @@ program Blk2BlkBunRedist
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
     ! create src and dst fieldbundles
-    fieldbundle1 = ESMF_FieldBundleCreate(grid1, name="fieldbundle1", rc=localrc)
+    fieldbundle1 = ESMF_FieldBundleCreate(name="fieldbundle1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -186,7 +186,7 @@ program Blk2BlkBunRedist
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    fieldbundle3 = ESMF_FieldBundleCreate(grid1, name="fieldbundle3", rc=localrc)
+    fieldbundle3 = ESMF_FieldBundleCreate(name="fieldbundle3", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
@@ -195,7 +195,7 @@ program Blk2BlkBunRedist
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
-    fieldbundle2 = ESMF_FieldBundleCreate(grid2, name="fieldbundle2", rc=localrc)
+    fieldbundle2 = ESMF_FieldBundleCreate(name="fieldbundle2", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)

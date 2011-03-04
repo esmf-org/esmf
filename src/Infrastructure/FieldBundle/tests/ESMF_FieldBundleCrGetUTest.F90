@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.26 2011/02/23 17:18:26 w6ws Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.27 2011/03/04 19:00:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-        bundle = ESMF_FieldBundleCreate(grid, name='mybundle', rc=localrc)
+        bundle = ESMF_FieldBundleCreate(name='mybundle', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

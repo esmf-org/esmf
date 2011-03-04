@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.15 2011/02/23 17:18:26 w6ws Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.16 2011/03/04 19:00:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.15 2011/02/23 17:18:26 w6ws Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.16 2011/03/04 19:00:38 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -140,12 +140,12 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field bundles and fields
-        srcFieldBundle = ESMF_FieldBundleCreate(grid, rc=localrc)
+        srcFieldBundle = ESMF_FieldBundleCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        dstFieldBundle = ESMF_FieldBundleCreate(grid, rc=localrc)
+        dstFieldBundle = ESMF_FieldBundleCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -307,22 +307,22 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field bundles and fields
-        srcFieldBundle = ESMF_FieldBundleCreate(grid, rc=localrc)
+        srcFieldBundle = ESMF_FieldBundleCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        dstFieldBundle = ESMF_FieldBundleCreate(grid, rc=localrc)
+        dstFieldBundle = ESMF_FieldBundleCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        srcFieldBundleA = ESMF_FieldBundleCreate(grid, rc=localrc)
+        srcFieldBundleA = ESMF_FieldBundleCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        dstFieldBundleA = ESMF_FieldBundleCreate(grid, rc=localrc)
+        dstFieldBundleA = ESMF_FieldBundleCreate(rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
