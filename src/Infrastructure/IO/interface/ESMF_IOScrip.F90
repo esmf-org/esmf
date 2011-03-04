@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.21 2011/02/23 22:56:25 w6ws Exp $
+! $Id: ESMF_IOScrip.F90,v 1.22 2011/03/04 01:00:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-#define ESMF_FILENAME "ESMF_IO_Scrip.F90"
+#define ESMF_FILENAME "ESMF_IOScrip.F90"
 !
 !     ESMF IOScrip Module
       module ESMF_IOScripMod
@@ -1230,8 +1230,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
            allocate(mask(srcDim))         
-           ! Write mask_b
-           allocate(mask(dstDim))         
            ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
 	   if (ncStatus /= nf90_noerror) then
 	     print *, "elementMask does not exit"
@@ -1749,8 +1747,8 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
       ESMF_METHOD, &
       ESMF_SRCLINE, trim(filename),rc)) return
 
-    ncStatus = nf90_inq_varid (ncid, "vert_coords", VarId)
-    errmsg = "Variable vert_coords in "//trim(filename)
+    ncStatus = nf90_inq_varid (ncid, "nodeCoords", VarId)
+    errmsg = "Variable nodeCoords in "//trim(filename)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,errmsg,&
