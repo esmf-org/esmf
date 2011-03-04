@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.88 2011/03/04 19:00:36 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.89 2011/03/04 19:08:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -679,7 +679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle),         intent(inout)         :: fieldbundle        
-      type(ESMF_Field),               intent(inout)         :: fieldList(:)
+      type(ESMF_Field),               intent(in)            :: fieldList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                        intent(out), optional :: rc          
 !
@@ -2525,7 +2525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
       type(ESMF_FieldBundleType), pointer :: btype        
       integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(inout) :: fields
+      type(ESMF_Field), dimension(:), intent(in) :: fields
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
