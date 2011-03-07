@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29.2.11 2008/12/03 00:35:51 theurich Exp $
+# $Id: build_rules.mk,v 1.29.2.12 2011/03/07 20:11:27 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -138,12 +138,12 @@ ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgC
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lrt -lstd -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER))
+ESMF_F90LINKLIBS += -pgcpplibs
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -pgf90libs
 
 ############################################################
 # Blank out shared library options
