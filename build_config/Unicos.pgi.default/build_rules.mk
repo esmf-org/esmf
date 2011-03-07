@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4.2.2 2010/04/23 05:47:29 theurich Exp $
+# $Id: build_rules.mk,v 1.4.2.3 2011/03/07 20:06:14 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -84,26 +84,30 @@ ESMF_F90COMPILEFREENOCPP = -Mfreeform
 ESMF_F90COMPILEFIXCPP    = -Mpreprocess -Mnofreeform
 
 ############################################################
+# Blank out variables to prevent rpath encoding
+#
+ESMF_F90LINKRPATHS      =
+ESMF_CXXLINKRPATHS      =
+
+############################################################
 # Determine where pgf90's libraries are located
 #
 ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
-ESMF_CXXLINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
 
 ############################################################
 # Determine where pgCC's libraries are located
 #
 ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
-ESMF_F90LINKRPATHS += $(ESMF_RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lstd -lrt -lC -ldl
+ESMF_F90LINKLIBS += -pgcpplibs
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -pgf90libs
 
 ############################################################
 # Blank out shared library options
