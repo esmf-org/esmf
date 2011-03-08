@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.59 2011/03/08 06:15:19 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.60 2011/03/08 13:31:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.59 2011/03/08 06:15:19 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.60 2011/03/08 13:31:40 w6ws Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -195,7 +195,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.59 2011/03/08 06:15:19 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.60 2011/03/08 13:31:40 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -826,7 +826,7 @@ contains
     integer,            intent(in)            :: parametricDim
     integer,            intent(in)            :: spatialDim
     integer,            intent(in)            :: nodeIds(:)
-    real(ESMF_KIND_R8), intent(in)            :: nodeCoords
+    real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
     integer,            intent(in) 	      :: nodeOwners(:)
     integer,            intent(in) 	      :: elementIds(:)
     integer,            intent(in) 	      :: elementTypes(:)
