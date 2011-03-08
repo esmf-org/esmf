@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.90 2011/03/04 19:00:40 feiliu Exp $
+! $Id: ESMF_StateUTest.F90,v 1.91 2011/03/08 16:26:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.90 2011/03/04 19:00:40 feiliu Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.91 2011/03/08 16:26:44 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -206,7 +206,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from an empty import State 
-      call ESMF_StateGet(state1, itemName="FieldBundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="FieldBundle1", itemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting item info from an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -229,7 +229,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from destroyed import State 
-      call ESMF_StateGet(state1, itemName="FieldBundle1", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="FieldBundle1", itemtype=stateItemType, rc=rc)
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Getting item info from destroyed State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -298,7 +298,7 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test Get Item Info from State 
-      call ESMF_StateGet(state1, itemName="Temperature", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="Temperature", itemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting FieldBundle item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -390,7 +390,7 @@
 
       !EX_UTest 
       ! Test Get Item Info from State 
-      call ESMF_StateGet(state1, itemName="Humidity", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="Humidity", itemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Field item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -408,7 +408,7 @@
 
       !EX_UTest 
       ! Test Get Unknown Item Info from State 
-      call ESMF_StateGet(state1, itemName="Humanity", stateitemtype=stateItemType, rc=rc)
+      call ESMF_StateGet(state1, itemName="Humanity", itemtype=stateItemType, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting unknown item info from State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -455,7 +455,7 @@
   !------------------------------------------------------------------------
   !EX_UTest 
   ! Test Get Item Info from State 
-  call ESMF_StateGet(state1, itemName="testArray", stateitemtype=stateItemType, rc=rc)
+  call ESMF_StateGet(state1, itemName="testArray", itemtype=stateItemType, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Getting Array item info from State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &

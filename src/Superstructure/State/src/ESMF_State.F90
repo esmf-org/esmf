@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.248 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_State.F90,v 1.249 2011/03/08 16:26:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.248 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_State.F90,v 1.249 2011/03/08 16:26:42 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3246,12 +3246,12 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetItemInfo(state, itemName, stateitemtype, keywordEnforcer, rc)
+      subroutine ESMF_StateGetItemInfo(state, itemName, itemtype, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),  intent(in) :: state
       character (len=*), intent(in) :: itemName
-      type(ESMF_StateItemType),    intent(out) :: stateitemtype
+      type(ESMF_StateItemType),    intent(out) :: itemtype
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc             
 
@@ -3275,7 +3275,7 @@ contains
 !        {\tt ESMF\_State} to be queried.
 !      \item[itemName]
 !        Name of the item to return information about.
-!      \item[stateitemtype]
+!      \item[itemtype]
 !        Returned item types for the item with the given name, including 
 !        placeholder names.  Options are
 !        listed in Section~\ref{opt:stateitemtype}.  If no item with the
@@ -3311,13 +3311,13 @@ contains
       ! the log file, possibly an 'exit on error' condition.   It should be
       ! benign to query for a name which is not there - it might not be
       ! expected to exist yet.
-      stateitemtype = ESMF_STATEITEM_NOTFOUND
+      itemtype = ESMF_STATEITEM_NOTFOUND
 
       ! Find the object which matches this name
       do i=1, stypep%datacount
           nextitem => stypep%datalist(i)
           if (trim(itemName) .eq. trim(nextitem%namep)) then
-              stateitemtype = nextitem%otype
+              itemtype = nextitem%otype
               exit    ! jump out of the do loop here
           endif
       enddo
