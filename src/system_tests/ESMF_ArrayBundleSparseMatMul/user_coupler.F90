@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.11 2010/11/03 22:48:48 theurich Exp $
+! $Id: user_coupler.F90,v 1.12 2011/03/08 22:18:18 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -51,9 +51,12 @@ module user_coupler
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
       call ESMF_CplCompSetVMMinThreads(comp, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
 #endif
 
