@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.14 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.15 2011/03/08 23:12:47 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -49,7 +49,7 @@ program ESMF_ArrayRedist3DSTest
   implicit none
 
   ! Local variables
-  integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
+  integer :: localPet, petCount, userrc, localrc, rc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
   type(ESMF_VM):: vm
   type(ESMF_State) :: c1exp, c2imp
@@ -232,21 +232,32 @@ program ESMF_ArrayRedist3DSTest
 !-------------------------------------------------------------------------
 
   call ESMF_CplCompFinalize(cpl, importState=c1exp, &
-    exportState=c2imp, rc=localrc)
+    exportState=c2imp, userRc=userrc, rc=localrc)
   print *, "Coupler Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompFinalize(comp1, exportState=c1exp, rc=localrc)
+  call ESMF_GridCompFinalize(comp1, exportState=c1exp, &
+    userRc=userrc, rc=localrc)
   print *, "Comp 1 Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompFinalize(comp2, importState=c2imp, rc=localrc)
+  call ESMF_GridCompFinalize(comp2, importState=c2imp, &
+    userRc=userrc, rc=localrc)
   print *, "Comp 2 Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
