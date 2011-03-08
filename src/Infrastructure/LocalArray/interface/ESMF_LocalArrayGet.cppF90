@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.24 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.25 2011/03/08 05:41:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,11 +38,11 @@ module ESMF_LocalArrayGetMod
 !   keywordEnforcer, doCopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_LocalArray) :: localarray @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_LocalArray)                      :: localarray @\
+!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
-!   integer, intent(out), optional :: rc @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: doCopy @\
+!   integer,             intent(out), optional :: rc @\
 ! @\
 ! @\
 ! !STATUS: @\
@@ -211,7 +211,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.24 2011/02/26 00:20:35 rokuingh Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.25 2011/03/08 05:41:40 w6ws Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:

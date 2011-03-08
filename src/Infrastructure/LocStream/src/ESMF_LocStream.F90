@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.50 2011/02/24 21:31:53 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.51 2011/03/08 05:45:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.50 2011/02/24 21:31:53 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.51 2011/03/08 05:45:10 w6ws Exp $'
 
 !==============================================================================
 !
@@ -711,9 +711,9 @@ contains
 !
 !    Supported values for <farray> are:
 !    \begin{description}
-!    \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: farray
-!    \item real(ESMF\_KIND\_R4), dimension(:), intent(in) :: farray
-!    \item real(ESMF\_KIND\_R8), dimension(:), intent(in) :: farray
+!    \item integer(ESMF\_KIND\_I4), intent(in) :: farray(:)
+!    \item real(ESMF\_KIND\_R4),    intent(in) :: farray(:)
+!    \item real(ESMF\_KIND\_R8),    intent(in) :: farray(:)
 !    \end{description}
 !
 !    The arguments are:

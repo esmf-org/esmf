@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.40 2011/02/26 01:25:38 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.41 2011/03/08 05:41:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.40 2011/02/26 01:25:38 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.41 2011/03/08 05:41:40 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -777,13 +777,13 @@ end function
 !   type(ESMF_LocalArray) :: ESMF_LocalArrCreateByPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
-!   integer, intent(in), optional :: counts(:) @\
-!   integer, intent(in), optional :: lbounds(:) @\
-!   integer, intent(in), optional :: ubounds(:) @\
-!   integer, intent(out), optional :: rc   @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: doCopy @\
+!   integer,             intent(in),  optional :: counts(:) @\
+!   integer,             intent(in),  optional :: lbounds(:) @\
+!   integer,             intent(in),  optional :: ubounds(:) @\
+!   integer,             intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on a Fortran array pointer. @\
