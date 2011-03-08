@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.82 2011/02/24 21:31:53 theurich Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.83 2011/03/08 16:23:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.82 2011/02/24 21:31:53 theurich Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.83 2011/03/08 16:23:43 w6ws Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -614,15 +614,15 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in) :: convention
-!     character (len = *), intent(in) :: purpose
-!     character (len = *), dimension(:), intent(in) :: nestConvention
-!     character (len = *), dimension(:), intent(in) :: nestPurpose
-!     integer, dimension(:), intent(in) :: nestAttPackInstanceCountList
-!     character (len = *), dimension(:), intent(out) :: nestAttPackInstanceNameList
-!     integer, intent(in), optional :: nestCount
-!     integer, intent(out), optional :: nestAttPackInstanceNameCount
-!     integer, intent(out), optional :: rc
+!     character (len = *), intent(in)  :: convention
+!     character (len = *), intent(in)  :: purpose
+!     character (len = *), intent(in)  :: nestConvention(:)
+!     character (len = *), intent(in)  :: nestPurpose(:)
+!     integer,             intent(in)  :: nestAttPackInstanceCountList(:)
+!     character (len = *), intent(out) :: nestAttPackInstanceNameList(:)
+!     integer,             intent(in),  optional :: nestCount
+!     integer,             intent(out), optional :: nestAttPackInstanceNameCount
+!     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add an ESMF standard Attribute package which contains a user-specified
@@ -686,11 +686,11 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
-!     character (len = *), intent(in) :: convention
-!     character (len = *), intent(in) :: purpose
-!     character (len=*), dimension(:), intent(in) :: attrList
-!     integer, intent(in), optional :: count
-!     integer, intent(out), optional :: rc   
+!     character (len = *), intent(in)            :: convention
+!     character (len = *), intent(in)            :: purpose
+!     character (len=*),   intent(in)            :: attrList(:)
+!     integer,             intent(in),  optional :: count
+!     integer,             intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package to <object>.  
@@ -739,14 +739,14 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
-!     character (len = *), intent(in) :: convention
-!     character (len = *), intent(in) :: purpose
-!     character (len=*), dimension(:), intent(in), optional :: attrList
-!     integer, intent(in), optional :: count
-!     character (len = *), dimension(:), intent(in) :: nestConvention
-!     character (len = *), dimension(:), intent(in) :: nestPurpose
-!     integer, intent(in), optional :: nestCount
-!     integer, intent(out), optional :: rc   
+!     character (len = *), intent(in)            :: convention
+!     character (len = *), intent(in)            :: purpose
+!     character (len=*),   intent(in),  optional :: attrList(:)
+!     integer,             intent(in),  optional :: count
+!     character (len = *), intent(in)            :: nestConvention(:)
+!     character (len = *), intent(in)            :: nestPurpose(:)
+!     integer,             intent(in),  optional :: nestCount
+!     integer,             intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package, with one or more nested Attribute
@@ -806,13 +806,13 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
-!     character (len = *), intent(in) :: convention
-!     character (len = *), intent(in) :: purpose
-!     character (len=*), dimension(:), intent(in), optional :: attrList
-!     integer, intent(in), optional :: count
-!     character (len = *), intent(in) :: nestConvention
-!     character (len = *), intent(in) :: nestPurpose
-!     integer, intent(out), optional :: rc   
+!     character (len=*), intent(in)            :: convention
+!     character (len=*), intent(in)            :: purpose
+!     character (len=*), intent(in),  optional :: attrList(:)
+!     integer,           intent(in),  optional :: count
+!     character (len=*), intent(in)            :: nestConvention
+!     character (len=*), intent(in)            :: nestPurpose
+!     integer,           intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package, with a single nested Attribute
@@ -936,13 +936,13 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
-!     character (len = *), intent(in) :: name
+!     character (len = *), intent(in)            :: name
 !     <value argument>, see below for supported values
 !     <defaultvalue argument>, see below for supported values   
-!     character (len = *), intent(in), optional :: convention
-!     character (len = *), intent(in), optional :: purpose
-!     character (len = *), intent(in), optional :: attPackInstanceName
-!     integer, intent(out), optional :: rc   
+!     character (len = *), intent(in),  optional :: convention
+!     character (len = *), intent(in),  optional :: purpose
+!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     integer,             intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute 
@@ -1050,21 +1050,21 @@ contains
 !     \end{description}
 !     Supported values for <value argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out) :: valueList
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out) :: valueList
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out) :: valueList
-!     \item logical, dimension(:), intent(out) :: valueList
-!     \item character (len = *), dimension(count), intent(out) :: valueList
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8), intent(out) :: valueList(:)
+!     \item logical, intent(out) :: valueList(:)
+!     \item character (len = *), intent(out) :: valueList(:)
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(out), optional :: defaultvalueList
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(out), optional :: defaultvalueList
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(out), optional :: defaultvalueList
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(out), optional :: defaultvalueList
-!     \item logical, dimension(:), intent(out), optional :: defaultvalueList
-!     \item character (len = *), dimension(:), intent(out), optional :: defaultvalueList
+!     \item integer(ESMF\_KIND\_I4), intent(out), optional :: defaultvalueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(out), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R4), intent(out), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8), intent(out), optional :: defaultvalueList(:)
+!     \item logical,  intent(out), optional :: defaultvalueList(:)
+!     \item character (len = *), intent(out), optional :: defaultvalueList(:)
 !     \end{description}
 !
 !     The arguments are:
@@ -1261,7 +1261,7 @@ contains
 !     <object>, see below for supported values  
 !     character (len = *), intent(in), optional :: convention
 !     character (len = *), intent(in), optional :: purpose
-!     character (len = *), dimension(:), intent(out) :: attPackInstanceNameList
+!     character (len = *), intent(out) :: attPackInstanceNameList(:)
 !     integer, intent(out) :: attPackInstanceNameCount
 !     integer, intent(out), optional :: rc   
 !
@@ -1874,12 +1874,12 @@ contains
 !     \end{description}
 !     Supported values for the <value argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), dimension(:), intent(in) :: valueList
-!     \item integer(ESMF\_KIND\_I8), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R4), dimension(:), intent(in) :: valueList
-!     \item real (ESMF\_KIND\_R8), dimension(:), intent(in) :: valueList
-!     \item logical, dimension(:), intent(in) :: valueList
-!     \item character (len = *), dimension(:), intent(in), :: valueList
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: valueList(:)
+!     \item logical,                 intent(in) :: valueList(:)
+!     \item character (len = *),     intent(in) :: valueList(:)
 !     \end{description}
 ! 
 !     The arguments are:
@@ -1915,9 +1915,9 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values  
-!     type(ESMF_VM), intent(in) :: vm
-!     integer, dimension(:), intent(in) :: rootList
-!     integer, intent(out), optional :: rc   
+!     type(ESMF_VM), intent(in)            :: vm
+!     integer,       intent(in)            :: rootList(:)
+!     integer,       intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
 !     Update an Attribute hierarchy during runtime.  

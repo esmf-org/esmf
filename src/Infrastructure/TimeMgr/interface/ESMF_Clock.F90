@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.110 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Clock.F90,v 1.111 2011/03/08 16:23:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.110 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_Clock.F90,v 1.111 2011/03/08 16:23:00 w6ws Exp $'
 
 !==============================================================================
 !
@@ -284,12 +284,12 @@
         timeStep, ringingAlarmList, ringingAlarmCount, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),               intent(inout)         :: clock
+      type(ESMF_Clock),        intent(inout)           :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TimeInterval),        intent(inout), optional :: timeStep
-      type(ESMF_Alarm), dimension(:), intent(out), optional :: ringingAlarmList
-      integer,                        intent(out), optional :: ringingAlarmCount
-      integer,                        intent(out), optional :: rc
+      type(ESMF_TimeInterval), intent(inout), optional :: timeStep
+      type(ESMF_Alarm),        intent(out),   optional :: ringingAlarmList(:)
+      integer,                 intent(out),   optional :: ringingAlarmCount
+      integer,                 intent(out),   optional :: rc
 !   
 !
 ! !STATUS:
@@ -871,13 +871,13 @@
         alarmList, alarmCount, keywordEnforcer, timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),               intent(in)            :: clock
-      type(ESMF_AlarmListType),       intent(in)            :: alarmListType
-      type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
-      integer,                        intent(out)           :: alarmCount
+      type(ESMF_Clock),         intent(in)            :: clock
+      type(ESMF_AlarmListType), intent(in)            :: alarmListType
+      type(ESMF_Alarm),         intent(out)           :: alarmList(:)
+      integer,                  intent(out)           :: alarmCount
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
-      integer,                        intent(out), optional :: rc
+      type(ESMF_TimeInterval),  intent(in),  optional :: timeStep
+      integer,                  intent(out), optional :: rc
 !   
 !
 ! !STATUS:

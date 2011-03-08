@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.129 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Calendar.F90,v 1.130 2011/03/08 16:23:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.129 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.130 2011/03/08 16:23:00 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -749,7 +749,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer, dimension(:), intent(in),  optional :: daysPerMonth
+      integer,               intent(in),  optional :: daysPerMonth(:)
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
@@ -955,7 +955,7 @@
       type(ESMF_Calendar),     intent(inout)         :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_CalendarType), intent(out), optional :: calendartype
-      integer, dimension(:),   intent(out), optional :: daysPerMonth
+      integer,                 intent(out), optional :: daysPerMonth(:)
       integer,                 intent(out), optional :: monthsPerYear
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerDay
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerYear
@@ -1454,7 +1454,7 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer, dimension(:), intent(in),  optional :: daysPerMonth
+      integer,               intent(in),  optional :: daysPerMonth(:)
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
       integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
