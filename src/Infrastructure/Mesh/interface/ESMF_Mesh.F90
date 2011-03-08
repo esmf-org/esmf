@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.58 2011/02/23 20:00:04 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.59 2011/03/08 06:15:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.58 2011/02/23 20:00:04 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.59 2011/03/08 06:15:19 w6ws Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -195,7 +195,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.58 2011/02/23 20:00:04 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.59 2011/03/08 06:15:19 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -500,11 +500,11 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                :: mesh
-    integer, dimension(:), intent(in)             :: elementIds
-    integer, dimension(:), intent(in)             :: elementTypes
-    integer, dimension(:), intent(in)             :: elementConn
-    integer, intent(out), optional                :: rc
+    type(ESMF_Mesh), intent(inout)         :: mesh
+    integer,         intent(in) 	   :: elementIds(:)
+    integer,         intent(in) 	   :: elementTypes(:)
+    integer,         intent(in) 	   :: elementConn(:)
+    integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This call is the third and last part of the three part mesh create
@@ -646,11 +646,11 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                :: mesh
-    integer, dimension(:), intent(in)             :: nodeIds
-    real(ESMF_KIND_R8), dimension(:), intent(in)  :: nodeCoords
-    integer, dimension(:), intent(in)             :: nodeOwners
-    integer,                intent(out), optional :: rc
+    type(ESMF_Mesh),    intent(inout)         :: mesh
+    integer,            intent(in)            :: nodeIds(:)
+    real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
+    integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This call is the second part of the three part mesh create
@@ -821,17 +821,17 @@ contains
 !
 !
 ! !RETURN VALUE:
-    type(ESMF_Mesh)         :: ESMF_MeshCreate1Part
+    type(ESMF_Mesh)                           :: ESMF_MeshCreate1Part
 ! !ARGUMENTS:
-    integer,                intent(in)            :: parametricDim
-    integer,                intent(in)            :: spatialDim
-    integer, dimension(:), intent(in)             :: nodeIds
-    real(ESMF_KIND_R8), dimension(:), intent(in)  :: nodeCoords
-    integer, dimension(:), intent(in)             :: nodeOwners
-    integer, dimension(:), intent(in)             :: elementIds
-    integer, dimension(:), intent(in)             :: elementTypes
-    integer, dimension(:), intent(in)             :: elementConn
-    integer,                intent(out), optional :: rc
+    integer,            intent(in)            :: parametricDim
+    integer,            intent(in)            :: spatialDim
+    integer,            intent(in)            :: nodeIds(:)
+    real(ESMF_KIND_R8), intent(in)            :: nodeCoords
+    integer,            intent(in) 	      :: nodeOwners(:)
+    integer,            intent(in) 	      :: elementIds(:)
+    integer,            intent(in) 	      :: elementTypes(:)
+    integer,            intent(in) 	      :: elementConn(:)
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Create a Mesh object in one step. After this call the Mesh is usable, for
@@ -1714,16 +1714,16 @@ end function ESMF_MeshCreateFromScrip
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)                          :: mesh
-    integer,             intent(out), optional              :: parametricDim
-    integer,             intent(out), optional              :: spatialDim
-    type(ESMF_DistGrid), intent(out), optional              :: nodalDistgrid
-    type(ESMF_DistGrid), intent(out), optional              :: elementDistgrid
-    integer,             intent(out), optional              :: numOwnedNodes
-    real(ESMF_KIND_R8), dimension(:), intent(out), optional :: ownedNodeCoords
-    integer,             intent(out), optional              :: numOwnedElements
-    logical,             intent(out), optional              :: isMemFreed
-    integer,             intent(out), optional              :: rc
+    type(ESMF_Mesh),     intent(inout)         :: mesh
+    integer,             intent(out), optional :: parametricDim
+    integer,             intent(out), optional :: spatialDim
+    type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
+    type(ESMF_DistGrid), intent(out), optional :: elementDistgrid
+    integer,             intent(out), optional :: numOwnedNodes
+    real(ESMF_KIND_R8),  intent(out), optional :: ownedNodeCoords(:)
+    integer,             intent(out), optional :: numOwnedElements
+    logical,             intent(out), optional :: isMemFreed
+    integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get various information from a mesh.
