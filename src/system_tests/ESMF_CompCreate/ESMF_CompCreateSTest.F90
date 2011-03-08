@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.36 2011/02/23 23:37:42 theurich Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.37 2011/03/08 23:55:12 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -26,7 +26,7 @@
     implicit none
 
 !   Local variables
-    integer :: my_pet, rc
+    integer :: my_pet, rc, userrc
     type(ESMF_VM):: vm
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
@@ -137,8 +137,8 @@
 !     Print result
 
       call ESMF_GridCompFinalize(comp1, importState=imp, &
-        exportState=exp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+        exportState=exp, userRc=userrc, rc=rc)
+      if ( (rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS) ) goto 10
 
 
       print *, "-----------------------------------------------------------------"
