@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.93 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.94 2011/03/08 01:48:34 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.93 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.94 2011/03/08 01:48:34 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2724,7 +2724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Grid),       intent(in)            :: grid                  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
+!   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -2961,7 +2961,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Grid),       intent(in)            :: grid                  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
 !   type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc  @\
@@ -3541,7 +3541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_LocStream),  intent(in)           :: locstream                  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
+!   <type> (ESMF_KIND_<kind>), target           :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -3701,13 +3701,13 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 !   type(ESMF_Field) :: ESMF_FieldCreateLSDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_LocStream), intent(in) :: locstream                  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_LocStream), intent(in)           :: locstream                  @\
+!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   integer, intent(in), optional :: gridToFieldMap(:)     @\
-!   character (len=*), intent(in), optional :: name  @\
-!   integer, intent(out), optional :: rc                @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
+!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
+!   character (len=*),   intent(in),  optional :: name  @\
+!   integer,             intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
@@ -4226,17 +4226,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Mesh), intent(in) :: mesh                  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
-!   type(ESMF_MeshLoc), intent(in), optional   :: location @\
-!   type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+!   type(ESMF_Mesh),     intent(in)            :: mesh                  @\
+!   <type> (ESMF_KIND_<kind>), target          :: farray(<rank>) @\
+!   type(ESMF_MeshLoc),  intent(in),  optional :: location @\
+!   type(ESMF_IndexFlag), intent(in)           :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   integer, intent(in), optional :: gridToFieldMap(:)     @\
-!   integer, intent(in), optional :: ungriddedLBound(:) @\
-!   integer, intent(in), optional :: ungriddedUBound(:) @\
-!   character (len=*), intent(in), optional :: name  @\
-!   integer, intent(out), optional :: rc                @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
+!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
+!   integer,             intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,             intent(in),  optional :: ungriddedUBound(:) @\
+!   character (len=*),   intent(in),  optional :: name  @\
+!   integer,             intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
@@ -4393,14 +4393,14 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Mesh), intent(in) :: mesh                  @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_Mesh),     intent(in)            :: mesh                  @\
+!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_MeshLoc), intent(in), optional :: location @\
-!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   integer, intent(in), optional :: gridToFieldMap(:)     @\
-!   character (len=*), intent(in), optional :: name  @\
-!   integer, intent(out), optional :: rc                @\
+!   type(ESMF_MeshLoc),  intent(in),  optional :: location @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
+!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
+!   character (len=*),   intent(in),  optional :: name  @\
+!   integer,             intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Mesh}. @\
@@ -4931,18 +4931,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field) :: ESMF_FieldCreateXGData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_XGrid), intent(in) :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
-!   integer, intent(in), optional               :: gridIndex @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
-!   type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+!   type(ESMF_XGrid),     intent(in)           :: xgrid @\
+!   type(ESMF_XGridSide), intent(in), optional :: xgridSide @\
+!   integer,              intent(in), optional :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), target          :: farray(<rank>) @\
+!   type(ESMF_IndexFlag), intent(in)           :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   integer, intent(in), optional :: gridToFieldMap(:)     @\
-!   integer, intent(in), optional :: ungriddedLBound(:) @\
-!   integer, intent(in), optional :: ungriddedUBound(:) @\
-!   character (len=*), intent(in), optional :: name  @\
-!   integer, intent(out), optional :: rc                @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
+!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
+!   integer,             intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,             intent(in),  optional :: ungriddedUBound(:) @\
+!   character (len=*),   intent(in),  optional :: name  @\
+!   integer,             intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Xgrid}. @\
@@ -5101,14 +5101,14 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_XGrid), intent(in) :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
-!   integer, intent(in), optional               :: gridIndex @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: farrayPtr @\
+!   type(ESMF_XGridSide), intent(in), optional :: xgridSide @\
+!   integer,              intent(in), optional :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-!   integer, intent(in), optional :: gridToFieldMap(:)     @\
-!   character (len=*), intent(in), optional :: name  @\
-!   integer, intent(out), optional :: rc                @\
+!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
+!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
+!   character (len=*),   intent(in),  optional :: name  @\
+!   integer,             intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Xgrid}. @\
