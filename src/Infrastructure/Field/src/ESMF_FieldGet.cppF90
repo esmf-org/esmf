@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.71 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.72 2011/03/08 05:20:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.71 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.72 2011/03/08 05:20:53 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -599,7 +599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
 !   integer,          intent(in),  optional :: localDe @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer      :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\

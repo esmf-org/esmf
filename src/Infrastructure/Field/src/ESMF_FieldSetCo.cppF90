@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.34 2011/02/25 23:28:50 theurich Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.35 2011/03/08 05:20:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.34 2011/02/25 23:28:50 theurich Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.35 2011/03/08 05:20:53 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -121,7 +121,7 @@ contains
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_Grid),       intent(in)            :: grid @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -333,7 +333,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_Grid),       intent(in)            :: grid @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
 !   type(ESMF_STAGGERLOC), intent(in),  optional :: staggerloc @\
@@ -520,7 +520,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_LocStream),  intent(in)            :: locstream @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -667,7 +667,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_LocStream),  intent(in)            :: locstream @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
@@ -787,7 +787,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_Mesh),       intent(in)            :: mesh @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
@@ -942,7 +942,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_Mesh),       intent(in)            :: mesh @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -1072,7 +1072,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !   type(ESMF_XGrid),      intent(in)            :: xgrid @\
 !   type(ESMF_XGridSide),  intent(in),  optional :: xgridSide @\
 !   integer,               intent(in),  optional :: gridIndex @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
+!   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -1232,7 +1232,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 !   type(ESMF_XGrid),      intent(in)            :: xgrid @\
 !   type(ESMF_XGridSide),  intent(in),  optional :: xgridSide @\
 !   integer,               intent(in),  optional :: gridIndex @\
-!   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
+!   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
