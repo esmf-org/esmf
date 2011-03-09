@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.67 2011/02/25 20:12:37 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.68 2011/03/09 23:16:56 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,11 +94,12 @@
 ! !IROUTINE:  ESMF_Initialize - Initialize ESMF
 !
 ! !INTERFACE:
-      subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
+      subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalendar, &
         defaultLogFileName, defaultLogType, mpiCommunicator,  &
         ioUnitLBound, ioUnitUBound, vm, rc)
 !
 ! !ARGUMENTS:
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar
       character(len=*),        intent(in),  optional :: defaultLogFileName
@@ -421,9 +422,10 @@
 ! !IROUTINE:  ESMF_Finalize - Clean up and close ESMF
 !
 ! !INTERFACE:
-      subroutine ESMF_Finalize(terminationflag, rc)
+      subroutine ESMF_Finalize(keywordEnforcer, terminationflag, rc)
 !
 ! !ARGUMENTS:
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
       type(ESMF_TerminationFlag), intent(in), optional  :: terminationflag
       integer, intent(out), optional                    :: rc
 
