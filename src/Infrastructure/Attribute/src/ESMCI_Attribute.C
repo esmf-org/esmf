@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.93 2011/02/24 14:39:04 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.94 2011/03/09 16:19:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.93 2011/02/24 14:39:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.94 2011/03/09 16:19:01 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1251,7 +1251,7 @@ int Attribute::count=0;
         continue; // look for attPacks of the specified type
       }
       // found specified attpack, now check if any of its attributes are set
-      for(int k=0; j<attpack->attrList.size(); k++) { 
+      for(int k=0; k<attpack->attrList.size(); k++) { 
         string name = attpack->attrList.at(k)->attrName;
         if (((ap = attpack->AttPackGetAttribute(name)) != NULL) &&
              (ap->parent->AttributeIsSet(name))) return true;
