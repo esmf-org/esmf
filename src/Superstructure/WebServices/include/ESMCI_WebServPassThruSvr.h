@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServPassThruSvr.h,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServPassThruSvr.h,v 1.5 2011/03/09 14:16:32 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -82,6 +82,7 @@ namespace ESMCI
 	  int   processFiles();
 	  int   processGetData();
 	  int   processEnd();
+	  int   processExit();
 	  int   processPing();
 
      // internal data access methods

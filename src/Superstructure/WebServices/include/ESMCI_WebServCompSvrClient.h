@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServCompSvrClient.h,v 1.4 2011/03/09 14:16:32 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -73,6 +73,7 @@ namespace ESMCI
      int  state();
      vector<string>  files();
      int  end();
+     int  killServer();
    
      // low-level communications methods
 	  int  sendRequest(int    request,

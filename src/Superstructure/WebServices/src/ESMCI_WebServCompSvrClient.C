@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServCompSvrClient.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1194,6 +1194,74 @@ int  ESMCI_WebServCompSvrClient::end(
 	disconnect();
 
 	return status;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServCompSvrClient::killServer()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServCompSvrClient::killServer()
+//
+// !INTERFACE:
+int  ESMCI_WebServCompSvrClient::killServer(
+//
+// !RETURN VALUE:
+//   int  ESMF_SUCCESS if the request is successfully sent;
+//        ESMF_FAILURE if an error occurs
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Connects to the component server, makes a request to kill the component
+//    server process.  Nothing is expected in return.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+	int	status = 0;
+	int	bufSize = 0;
+   char  buf[1024];
+
+   //***
+   // Connect to the component service
+   //***
+	if (connect() < 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   //***
+   // Send the "Exit" request... along with the client identifier
+   //***
+	unsigned int	netClientId = htonl(theClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_EXIT, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending end client request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+
+   //***
+   // Disconnect from the component service
+   //***
+	disconnect();
+
+	return ESMF_SUCCESS;
 }
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.7 2011/01/26 04:53:28 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.8 2011/03/09 14:16:37 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.7 2011/01/26 04:53:28 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.8 2011/03/09 14:16:37 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -310,6 +310,7 @@ int  ESMCI_WebServComponentSvr::requestLoop(
 	do
 	{
 		request = getNextRequest();
+//printf("Request ID: %d\n", request);
 
 		if (request == ESMF_FAILURE)
 		{
@@ -360,7 +361,7 @@ int  ESMCI_WebServComponentSvr::getNextRequest(
    //***
    // Wait for client requests
    //***
-	if (theSocket.accept() != ESMF_SUCCESS)
+	if (theSocket.accept() < 0)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
@@ -452,6 +453,10 @@ int  ESMCI_WebServComponentSvr::serviceRequest(
 		processEnd();
 		break;
 
+	case NET_ESMF_EXIT: 
+		printf("Exiting Component Server\n");
+		break;
+
 	default:
 		break;
 	}
@@ -495,6 +500,7 @@ int  ESMCI_WebServComponentSvr::getRequestId(
 	if (strcmp(request, "FILES") == 0)	return NET_ESMF_FILES;
 	if (strcmp(request, "DATA")  == 0)	return NET_ESMF_DATA;
 	if (strcmp(request, "END")   == 0)	return NET_ESMF_END;
+	if (strcmp(request, "EXIT")  == 0)	return NET_ESMF_EXIT;
 
 	return ESMF_FAILURE;
 }
@@ -535,6 +541,7 @@ char*  ESMCI_WebServComponentSvr::getRequestFromId(
 	case NET_ESMF_FILES:	return (char*)"FILES";
 	case NET_ESMF_DATA:	return (char*)"DATA";
 	case NET_ESMF_END:	return (char*)"END";
+	case NET_ESMF_EXIT:	return (char*)"EXIT";
 	default:					return (char*)"UNKN";
 	}
 

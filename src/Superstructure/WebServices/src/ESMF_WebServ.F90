@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.14 2011/02/24 21:31:53 theurich Exp $
+! $Id: ESMF_WebServ.F90,v 1.15 2011/03/09 14:16:37 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -289,6 +289,13 @@ contains
           endif
           print *, "Done Execute GridCompFinalize: ", localPet
 
+       ! 'E' = exit
+       else if (inmsg(1) == 'E') then
+
+          print *, "Exit Component Service: ", localPet
+          rc = ESMF_SUCCESS
+          return
+
        endif
 
     end do
@@ -578,8 +585,7 @@ contains
        importState = ESMF_StateCreate(name="Import", &
                                       statetype=ESMF_STATE_IMPORT, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, &
-	 rcToReturn=rc)) &
+         ESMF_CONTEXT, rcToReturn=rc)) &
           return
 
        exportState = ESMF_StateCreate(name="Export", &
@@ -606,9 +612,8 @@ contains
 
        call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, &
-             rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) &
+             print *, "Unable to Register Service... continuing"
 
        call ESMF_WebServSvcLoop(comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
@@ -618,11 +623,16 @@ contains
              ESMF_CONTEXT, &
              rcToReturn=rc)) return
 
+       print *, "KDS: Exited Service Loop"
+
+       call ESMF_WebServProcessRequest(comp, &
+             importState=importState, exportState=exportState, &
+             clock=clock, phase=phase, procType="E", rc=localrc)
+
        call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, &
-             rcToReturn=rc)) return
+             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) &
+             print *, "Unable to Unregister Service... continuing"
 
     else
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServPassThruSvr.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServPassThruSvr.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -343,6 +343,10 @@ int  ESMCI_WebServPassThruSvr::serviceRequest(
 
 	case NET_ESMF_PING: 
 		processPing();
+		break;
+
+	case NET_ESMF_EXIT: 
+		processExit();
 		break;
 
 	default:
@@ -1543,6 +1547,97 @@ int  ESMCI_WebServPassThruSvr::processEnd(
 
       return localrc;
    }
+
+	return ESMF_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServPassThruSvr::processExit()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServPassThruSvr::processExit()
+//
+// !INTERFACE:
+int  ESMCI_WebServPassThruSvr::processExit(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to exit the service.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	//printf("\n\nSERVER: processing End\n");
+
+	int	localrc = 0;
+	int	status = NET_ESMF_STAT_IDLE;
+
+	//***
+	// Get the client id 
+	//***
+	int	bytesRead = 0;
+	char	buf[1024];
+
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+   int	clientId = ntohl(*((unsigned int*)buf));
+	//printf("Client ID: %d\n", clientId);
+
+	//***
+	// Now that everything's been read off the socket, lookup the client info
+	// based on the client id.  If the client can't be found, then send back
+	// an error
+	//***
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
+
+	if ((iter = theClients.find(clientId)) == theClients.end())
+	{
+		status = NET_ESMF_STAT_ERROR;
+		unsigned int	netStatus = htonl(status);
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
+	}
+
+	clientInfo = iter->second;
+	//clientInfo->print();
+	status = clientInfo->status();
+
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
+
+	client.killServer();
 
 	return ESMF_SUCCESS;
 }
