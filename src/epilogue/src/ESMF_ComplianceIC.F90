@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.18 2011/02/19 00:05:06 w6ws Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.19 2011/03/10 04:59:22 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -62,7 +62,8 @@ module ESMF_ComplianceICMod
 
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
-    integer                 :: phaseCount
+    integer                 :: phaseCount, phase
+    logical                 :: phaseZeroFlag
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -87,14 +88,29 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     !---------------------------------------------------------------------------
-    ! Start Compliance Checking
+    ! Start Compliance Checking and IC method Registration
     
     ! check Initialize registration
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETINIT, phaseCount, rc)
+    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETINIT, phaseCount, &
+      phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    if (phaseZeroFlag) then
+      call ESMF_LogWrite(trim(prefix)//" phase Zero for Initialize registered.",&
+        ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, &
+        userRoutine=ic_init, phase=0, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
     if (phaseCount == 0) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Initialize method registered!", &
         ESMF_LOG_WARNING, rc=rc)
@@ -109,14 +125,37 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
+      do phase=1, phaseCount
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, &
+          userRoutine=ic_init, phase=phase, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      enddo
     endif
     
     ! check Run registration
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETRUN, phaseCount, rc)
+    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETRUN, phaseCount, &
+      phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    if (phaseZeroFlag) then
+      call ESMF_LogWrite(trim(prefix)//" phase Zero for Run registered.",&
+        ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUNIC, &
+        userRoutine=ic_run, phase=0, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
     if (phaseCount == 0) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Run method registered!", &
         ESMF_LOG_WARNING, rc=rc)
@@ -131,14 +170,37 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
+      do phase=1, phaseCount
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUNIC, &
+          userRoutine=ic_run, phase=phase, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      enddo
     endif
 
     ! check Finalize registration
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETFINAL, phaseCount, rc)
+    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETFINAL, phaseCount, &
+      phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
+    if (phaseZeroFlag) then
+      call ESMF_LogWrite(trim(prefix)//" phase Zero for Finalize registered.",&
+        ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINALIC, &
+        userRoutine=ic_final, phase=0, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    endif
     if (phaseCount == 0) then
       call ESMF_LogWrite(trim(prefix)//" ==> No Finalize method registered!", &
         ESMF_LOG_WARNING, rc=rc)
@@ -153,30 +215,18 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
+      do phase=1, phaseCount
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINALIC, &
+          userRoutine=ic_final, phase=phase, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      enddo
     endif
 
     ! Stop Compliance Checking
     !---------------------------------------------------------------------------
-
-    ! Register the IC callback routines.
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, userRoutine=ic_init, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUNIC, userRoutine=ic_run, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINALIC, userRoutine=ic_final, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 
     call ESMF_LogWrite(trim(prefix)//"Stop register compliance check.", &
       ESMF_LOG_INFO, rc=rc)
@@ -202,6 +252,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
+    integer                 :: phase
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -212,10 +263,17 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
+    call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializePrologue
     
-    call ESMF_LogWrite(trim(prefix)//"Start InitializePrologue.", &
+    write(output,*) "Start InitializePrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -245,7 +303,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_LogWrite(trim(prefix)//"Stop InitializePrologue.", &
+    write(output,*) "Stop InitializePrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -257,8 +316,7 @@ module ESMF_ComplianceICMod
     ccfDepth = ccfDepth + 1
 
     call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
-      userRc=userrc, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+      phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -272,7 +330,8 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializeEpilogue
     
-    call ESMF_LogWrite(trim(prefix)//"Start InitializeEpilogue.", &
+    write(output,*) "Start InitializeEpilogue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -327,7 +386,8 @@ module ESMF_ComplianceICMod
 !      return  ! bail out
     
     
-    call ESMF_LogWrite(trim(prefix)//"Stop InitializeEpilogue.", &
+    write(output,*) "Stop InitializeEpilogue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -355,6 +415,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
+    integer                 :: phase
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -365,10 +426,17 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
+    call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunPrologue
     
-    call ESMF_LogWrite(trim(prefix)//"Start RunPrologue.", &
+    write(output,*) "Start RunPrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -398,7 +466,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_LogWrite(trim(prefix)//"Stop RunPrologue.", &
+    write(output,*) "Stop RunPrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -410,7 +479,7 @@ module ESMF_ComplianceICMod
     ccfDepth = ccfDepth + 1
 
     call ESMF_GridCompRunAct(comp, importState, exportState, clock, &
-      userRc=userrc, rc=rc)
+      phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -424,7 +493,8 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunEpilogue
     
-    call ESMF_LogWrite(trim(prefix)//"Start RunEpilogue.", &
+    write(output,*) "Start RunEpilogue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -462,7 +532,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    call ESMF_LogWrite(trim(prefix)//"Stop RunEpilogue.", &
+    write(output,*) "Stop RunEpilogue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -490,6 +561,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: prefix
     character(ESMF_MAXSTR)  :: output
     type(ESMF_Clock)        :: clockCopy
+    integer                 :: phase
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
@@ -500,10 +572,17 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
+    call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizePrologue
     
-    call ESMF_LogWrite(trim(prefix)//"Start FinalizePrologue.", &
+    write(output,*) "Start FinalizePrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -533,7 +612,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    call ESMF_LogWrite(trim(prefix)//"Stop FinalizePrologue.", &
+    write(output,*) "Stop FinalizePrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -545,7 +625,7 @@ module ESMF_ComplianceICMod
     ccfDepth = ccfDepth + 1
 
     call ESMF_GridCompFinalizeAct(comp, importState, exportState, clock, &
-      userRc=userrc, rc=rc)
+      phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -559,7 +639,8 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizeEpilogue
     
-    call ESMF_LogWrite(trim(prefix)//"Start FinalizeEpilogue.", &
+    write(output,*) "Start FinalizeEpilogue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -597,7 +678,8 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    call ESMF_LogWrite(trim(prefix)//"Stop FinalizeEpilogue.", &
+    write(output,*) "Stop FinalizeEpilogue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -686,6 +768,8 @@ module ESMF_ComplianceICMod
         tempString = "ESMF_STATE_IMPORT"
       else if (statetype==ESMF_STATE_EXPORT) then
         tempString = "ESMF_STATE_EXPORT"
+      else if (statetype==ESMF_STATE_UNSPECIFIED) then
+        tempString = "ESMF_STATE_UNSPECIFIED"
       else
         tempString = "ESMF_STATE_INVALID"
       endif
