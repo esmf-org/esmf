@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2011/03/05 00:08:47 theurich Exp $
+# $Id: build_rules.mk,v 1.13 2011/03/10 00:41:42 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -46,6 +46,18 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
+
+############################################################
+# Determine PGI version
+#
+ESMF_PGIVERSION_MAJOR = $(shell $(ESMF_DIR)/scripts/version.pgi 1 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MAJOR=$(ESMF_PGIVERSION_MAJOR)
+
+ESMF_PGIVERSION_MINOR = $(shell $(ESMF_DIR)/scripts/version.pgi 2 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
+
+ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
 
 ############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)
@@ -107,13 +119,20 @@ ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPIL
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
+ifeq ($(ESMF_PGIVERSION_MAJOR),7)
+ESMF_F90LINKLIBS += -lstd -lrt -lC -ldl
+else
 ESMF_F90LINKLIBS += -pgcpplibs
+endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
+ifeq ($(ESMF_PGIVERSION_MAJOR),7)
+ESMF_CXXLINKLIBS += -lrt -ldl
+else
 ESMF_CXXLINKLIBS += -pgf90libs
-
+endif
 ############################################################
 # Blank out shared library options
 #

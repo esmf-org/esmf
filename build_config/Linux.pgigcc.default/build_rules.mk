@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2010/11/11 00:48:35 theurich Exp $
+# $Id: build_rules.mk,v 1.23 2011/03/10 00:41:40 theurich Exp $
 #
 # Linux.pgigcc.default
 #
@@ -76,6 +76,17 @@ endif
 ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPILER)
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
+############################################################
+# Determine PGI version
+#
+ESMF_PGIVERSION_MAJOR = $(shell $(ESMF_DIR)/scripts/version.pgi 1 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MAJOR=$(ESMF_PGIVERSION_MAJOR)
+
+ESMF_PGIVERSION_MINOR = $(shell $(ESMF_DIR)/scripts/version.pgi 2 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
+
+ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
 
 ############################################################
 # Construct the ABISTRING

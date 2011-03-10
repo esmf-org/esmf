@@ -1,0 +1,19 @@
+#!/bin/sh
+# this script expects as input argument the a command (with options) that
+# returns the version of the PGI compiler. The output then of this script is
+# the numeric version number triplet.
+VIND=$1
+shift 1
+VNUM=`$* 2>&1 | grep "pgf90 " | awk '{ print $2} ' | sed 's/\./ /g' | sed 's/-/ /g' `
+V1=`echo $VNUM | awk '{ print $1}' `
+V2=`echo $VNUM | awk '{ print $2}' `
+V3=`echo $VNUM | awk '{ print $3}' `
+if [ $VIND = 1 ]; then
+echo $V1
+fi
+if [ $VIND = 2 ]; then
+echo $V2
+fi
+if [ $VIND = 3 ]; then
+echo $V3
+fi

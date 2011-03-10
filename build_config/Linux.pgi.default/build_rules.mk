@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.58 2011/03/05 00:10:04 theurich Exp $
+# $Id: build_rules.mk,v 1.59 2011/03/10 00:41:38 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -101,6 +101,18 @@ ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPIL
 ESMF_CXXCOMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgCC $(ESMF_CXXCOMPILER)
 
 ############################################################
+# Determine PGI version
+#
+ESMF_PGIVERSION_MAJOR = $(shell $(ESMF_DIR)/scripts/version.pgi 1 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MAJOR=$(ESMF_PGIVERSION_MAJOR)
+
+ESMF_PGIVERSION_MINOR = $(shell $(ESMF_DIR)/scripts/version.pgi 2 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
+
+ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMPILER_VERSION))
+ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
+
+############################################################
 # Construct the ABISTRING
 #
 ifeq ($(ESMF_MACHINE),x86_64)
@@ -171,12 +183,20 @@ ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
+ifeq ($(ESMF_PGIVERSION_MAJOR),7)
+ESMF_F90LINKLIBS += -lrt -lstd -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER)) -ldl
+else
 ESMF_F90LINKLIBS += -pgcpplibs
+endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
+ifeq ($(ESMF_PGIVERSION_MAJOR),7)
+ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER)) -ldl
+else
 ESMF_CXXLINKLIBS += -pgf90libs
+endif
 
 ############################################################
 # Shared library options
