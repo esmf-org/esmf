@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.204 2011/02/26 00:57:51 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.205 2011/03/10 22:03:23 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.204 2011/02/26 00:57:51 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.205 2011/03/10 22:03:23 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3917,9 +3917,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: ncStatus
     integer :: totalpoints,totaldims
     integer, pointer :: dims(:)
-    character(len=80) :: units
     integer :: DimId, VarId
-    real(ESMF_KIND_R8) :: rad2deg
     real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
     integer, allocatable:: imask(:), mask2D(:,:)
     type(ESMF_Grid)  :: grid
@@ -4353,9 +4351,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: ncStatus
     integer :: totalpoints,totaldims
     integer, pointer :: dims(:)
-    character(len=80) :: units
     integer :: DimId, VarId
-    real(ESMF_KIND_R8) :: rad2deg
     real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
     integer, allocatable:: imask(:), mask2D(:,:)
     real(ESMF_KIND_R8),  allocatable:: cornerX2D(:,:),cornerY2D(:,:)
@@ -4471,8 +4467,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
                  grid_center_lat=coordY, grid_corner_lon=cornerX2D, &
                  grid_corner_lat=cornerY2D, grid_imask=imask,  &
-		convertToDeg=.TRUE., rc=rc)
-
+		convertToDeg=.TRUE., rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          
           ! Calc Corner Dims
           if (localIsSphere) then
              cornerDims(1)=dims(1)
@@ -4495,7 +4493,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           allocate(imask(totalpoints))
           call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
                  grid_center_lat=coordY, grid_imask=imask,  &
-		convertToDeg=.TRUE., rc=rc)
+		convertToDeg=.TRUE., rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
 
