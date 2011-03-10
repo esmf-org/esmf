@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2011/03/10 00:41:42 theurich Exp $
+# $Id: build_rules.mk,v 1.14 2011/03/10 04:33:56 w6ws Exp $
 #
 # Unicos.pgi.default
 #
@@ -122,7 +122,7 @@ ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPIL
 ifeq ($(ESMF_PGIVERSION_MAJOR),7)
 ESMF_F90LINKLIBS += -lstd -lrt -lC -ldl
 else
-ESMF_F90LINKLIBS += -pgcpplibs
+ESMF_F90LINKLIBS += -pgcpplibs -ldl
 endif
 
 ############################################################
@@ -131,7 +131,7 @@ endif
 ifeq ($(ESMF_PGIVERSION_MAJOR),7)
 ESMF_CXXLINKLIBS += -lrt -ldl
 else
-ESMF_CXXLINKLIBS += -pgf90libs
+ESMF_CXXLINKLIBS += -pgf90libs -ldl
 endif
 ############################################################
 # Blank out shared library options
