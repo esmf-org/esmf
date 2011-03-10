@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.22 2011/03/04 01:00:28 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.23 2011/03/10 22:05:53 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,6 +35,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod   
+      use ESMF_UtilMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
@@ -225,7 +226,7 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
 
     integer:: localrc, ncStatus
     integer :: ncid, VarId, len
-    character(len=80) :: buffer
+    character(len=80) :: buffer, buffer1
     character(len=256) :: errmsg
 
 #ifdef ESMF_NETCDF
@@ -258,7 +259,18 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
+    
     units = buffer(1:len)
+    ! if len != 7, something is wrong, check the value.  If it starts 
+    ! with Degrees/degrees/Radians/radians, ignore the garbage after the
+    ! word.  Otherwise, return the whole thing
+    call ESMF_StringLowerCase(buffer(1:len))
+    if ((len > 7) .and. (buffer(1:7) .eq. 'degrees' .or.  &
+      buffer(1:7) .eq. 'radians')) then
+      units = buffer(1:7)
+    else
+      units = buffer(1:len)
+    endif
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -340,9 +352,17 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
         errmsg,&
         rc)) return
-      ! if units is "radians", convert it to degree
+      ! if units is not "degrees" or "radians" return errors
+      call ESMF_StringLowerCase(units(1:len))
+      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+          call ESMF_LogSetError(ESMF_FAILURE, & 
+                 msg="- units attribute is not degrees or radians", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return
+      endif
+      ! if units is "radians", convert it to degrees
       if (convertToDegLocal) then
-         if (units(1:len) .eq. "radians") then
+         if (units(1:7) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
   !         print *, 'Convert radians to degree ', rad2deg
             grid_center_lon(:) = grid_center_lon(:)*rad2deg
@@ -377,9 +397,17 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
+      ! if units is not "degrees" or "radians" return errors
+      call ESMF_StringLowerCase(units(1:len))
+      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+          call ESMF_LogSetError(ESMF_FAILURE, & 
+                 msg="- units attribute is not degrees or radians", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return
+      endif
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (units(1:len) .eq. "radians") then
+         if (units(1:7) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             grid_center_lat(:) = grid_center_lat(:)*rad2deg
          endif
@@ -431,9 +459,17 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
+      ! if units is not "degrees" or "radians" return errors
+      call ESMF_StringLowerCase(units(1:len))
+      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+          call ESMF_LogSetError(ESMF_FAILURE, & 
+                 msg="- units attribute is not degrees or radians", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return
+      endif
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (units(1:len) .eq. "radians") then
+         if (units(1:7) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
 !            print *, 'Convert radians to degree ', rad2deg
             grid_corner_lon(:,:) = grid_corner_lon(:,:)*rad2deg
@@ -468,9 +504,17 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
         errmsg,&
         rc)) return
+      ! if units is not "degrees" or "radians" return errors
+      call ESMF_StringLowerCase(units(1:len))
+      if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
+          call ESMF_LogSetError(ESMF_FAILURE, & 
+                 msg="- units attribute is not degrees or radians", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return
+      endif
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
-         if (units(1:len) .eq. "radians") then
+         if (units(1:7) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
             grid_corner_lat(:,:) = grid_corner_lat(:,:)*rad2deg
          endif
@@ -1765,7 +1809,16 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
         ESMF_METHOD, &
         ESMF_SRCLINE,errmsg,&
         rc)) return
-    units = buffer(1:len)
+    ! if len != 7, something is wrong, check the value.  If it starts 
+    ! with Degrees/degrees/Radians/radians, ignore the garbage after the
+    ! word.  Otherwise, return the whole thing
+    call ESMF_StringLowerCase(buffer(1:len))
+    if ((len > 7) .and. (buffer(1:7) .eq. 'degrees' .or.  &
+      buffer(1:7) .eq. 'radians')) then
+      units = buffer(1:7)
+    else
+      units = buffer(1:len)
+    endif
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else

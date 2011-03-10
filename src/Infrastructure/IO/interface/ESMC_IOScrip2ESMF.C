@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.5 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.6 2011/03/10 22:07:11 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,6 +17,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
@@ -348,7 +349,7 @@ void FTN(c_convertscrip)(
   if (status != NC_NOERR) handle_error(status);
 
   if (grdim > 1) {
-    fprintf(stderr, "grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n");
+    fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
     *rc = -1;
     return; // bail out
   }
@@ -363,7 +364,7 @@ void FTN(c_convertscrip)(
   if (status != NC_NOERR) nocenter = 1;
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
-    fprintf(stderr, "Either grid_center_lat or grid_center_lon does not exist.\n");
+    fprintf(stderr, "%s: Either grid_center_lat or grid_center_lon does not exist.\n",c_infile);
     *rc = -1;
     return; // bail out
   }
@@ -390,6 +391,14 @@ void FTN(c_convertscrip)(
   units[len] = '\0';
 
   // convert radian to degree
+  for (i=0; i<len; i++) {
+    units[i]=tolower(units[i]);
+  }
+  if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
+    fprintf(stderr, "%s: The units attribute for grid_corner_lon is not degrees nor radians.\n",c_infile);
+    *rc = -1;
+    return;
+  }
   if (!strncmp(units, "radians", 7)) {
     isRadian=1;
     for (i = 0; i < gcdim*gsdim; i++) {
@@ -598,6 +607,15 @@ void FTN(c_convertscrip)(
       status = nc_get_att_text(ncid1, ctlonid, "units", units);
       if (status != NC_NOERR) handle_error(status);
       units[len] = '\0';
+      // convert radian to degree
+      for (i=0; i<len; i++) {
+        units[i]=tolower(units[i]);
+      }
+      if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
+          fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
+          *rc = -1;
+          return;
+      }
       if (!strncmp(units, "radians", 7)) {
 	for (i=0; i<gsdim*2; i++) {
 	  inbuf1[i] *= rad2deg;
@@ -667,6 +685,15 @@ void FTN(c_convertscrip)(
   status = nc_get_att_text(ncid1, ctlonid, "units", units);
   if (status != NC_NOERR) handle_error(status);
   units[len]='\0';
+  // convert radian to degree
+  for (i=0; i<len; i++) {
+    units[i]=tolower(units[i]);
+  }
+  if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
+    fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
+    *rc = -1;
+    return;
+  }
   if (!strncmp(units, "radians", 7)) {
     for (i=0; i<gsdim*2; i++) {
       inbuf1[i] *= rad2deg;
