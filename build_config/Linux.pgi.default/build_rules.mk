@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.59 2011/03/10 00:41:38 theurich Exp $
+# $Id: build_rules.mk,v 1.60 2011/03/10 04:29:43 w6ws Exp $
 #
 # Linux.pgi.default
 #
@@ -186,7 +186,7 @@ ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.
 ifeq ($(ESMF_PGIVERSION_MAJOR),7)
 ESMF_F90LINKLIBS += -lrt -lstd -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER)) -ldl
 else
-ESMF_F90LINKLIBS += -pgcpplibs
+ESMF_F90LINKLIBS += -pgcpplibs -ldl
 endif
 
 ############################################################
@@ -195,7 +195,7 @@ endif
 ifeq ($(ESMF_PGIVERSION_MAJOR),7)
 ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER)) -ldl
 else
-ESMF_CXXLINKLIBS += -pgf90libs
+ESMF_CXXLINKLIBS += -pgf90libs -ldl
 endif
 
 ############################################################
