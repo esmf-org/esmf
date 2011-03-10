@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.158 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.159 2011/03/10 04:55:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.158 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.159 2011/03/10 04:55:47 theurich Exp $'
 
 !==============================================================================
 !
@@ -796,12 +796,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompGetEPPhaseCount - Get number of phases of an entry point
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompGetEPPhaseCount(gridcomp, method, phaseCount, rc)
+  subroutine ESMF_GridCompGetEPPhaseCount(gridcomp, method, phaseCount, &
+    phaseZeroFlag, rc)
 
 ! !ARGUMENTS:
     type(ESMF_GridComp),  intent(in)            :: gridcomp
     type(ESMF_Method),    intent(in)            :: method
     integer,              intent(out)           :: phaseCount
+    logical,              intent(out)           :: phaseZeroFlag
     integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -816,7 +818,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method} 
 !   for a complete list of valid method options.
 ! \item[phaseCount]
-!   The number of phases for {\tt method}.
+!   The number of phases for {\tt method}. The method has 1..phaseCount phases.
+! \item[phaseZeroFlag]
+!   Return .true. if a "zero" phase was registered for {\tt method}. Otherwise
+!   return .false..
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -824,6 +829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    type(ESMF_Logical)::  phaseZeroFlagHelp
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -831,10 +837,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
   
-    call c_ESMC_GetEntryPointPhaseCount(gridcomp, method, phaseCount, localrc)
+    call c_ESMC_GetEntryPointPhaseCount(gridcomp, method, phaseCount, &
+      phaseZeroFlagHelp, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! translate ESMF_Logical -> logical
+    phaseZeroFlag = phaseZeroFlagHelp
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

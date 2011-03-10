@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.50 2011/02/23 06:27:19 w6ws Exp $
+// $Id: ESMCI_FTable.C,v 1.51 2011/03/10 04:55:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.50 2011/02/23 06:27:19 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.51 2011/03/10 04:55:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -329,7 +329,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_getentrypointphasecount"
   void FTN(c_esmc_getentrypointphasecount)(void *ptr,
-    enum ESMCI::method *method, int *phaseCount, int *rc){
+    enum ESMCI::method *method, int *phaseCount, ESMC_Logical *phaseZeroFlag,
+    int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     
@@ -340,10 +341,20 @@ extern "C" {
     int slen = strlen(methodString);
     int phase = 0;  // initialize
     int i;
+    
+    *phaseZeroFlag = ESMF_FALSE; // initialize
+    
+    char *fname;
+    ESMCI::FTable::newtrim(methodString, slen, &phase, NULL, &fname);
+    i = tabptr->getEntry(fname, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
+      return; // bail out
+    delete[] fname;  // delete memory that "newtrim" allocated above
+    if (i != -1)   
+      *phaseZeroFlag = ESMF_TRUE;  // set the flag
 
     do{
       ++phase;
-      char *fname;
       ESMCI::FTable::newtrim(methodString, slen, &phase, NULL, &fname);
       
       i = tabptr->getEntry(fname, &localrc);
@@ -1787,7 +1798,7 @@ void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
 
   // warning - on the intel compiler, optional args come in
   // as -1, not 0.  check for both before dereferencing.
-  if ((phase != NULL) && (phase != (int *)-1) && (*phase > 0))  {
+  if ((phase != NULL) && (phase != (int *)-1) && (*phase >= 0))  {
     pad = MAXPAD;
     hasphase++;
   }
