@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 #define _FILE_ "piolib_mod.f90"
 #define debug_rearr 0
 #ifdef BGP

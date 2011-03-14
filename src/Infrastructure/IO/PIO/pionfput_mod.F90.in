@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 #define _FILE_ "pionfput_mod.F90"
 module pionfput_mod
   !pl  This file is input to the perl program genf90.pl which generates  

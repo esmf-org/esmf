@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 #define _FILE_ "pionfatt_mod.F90"
 module pionfatt_mod
   use pio_kinds, only : r4, r8, i4

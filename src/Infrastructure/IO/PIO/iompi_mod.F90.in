@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 #define _FILE_ "iompi_mod.F90"
 module iompi_mod
 

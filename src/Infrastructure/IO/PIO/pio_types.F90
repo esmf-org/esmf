@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 #define _FILE_ "pio_types.F90"
 module pio_types
     use pio_kinds

@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 #define _FILE_ "ionf_mod.F90"
 module ionf_mod
 #ifdef TIMING

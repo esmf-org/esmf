@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 ! Not a module - this line is required by genf90.pl
 
 #define TYPETEXT 100
@@ -6,7 +7,7 @@
 #define TYPEINT 103
 
 subroutine string_handler_for_var1(file, varid, index, ndims, strlen, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : file_desc_t, pio_get_var, pio_put_var
   use pio_msg_mod, only : pio_msg_getvar1
   implicit none
   type(file_desc_t) :: file
@@ -23,7 +24,7 @@ subroutine string_handler_for_var1(file, varid, index, ndims, strlen, msg)
 end subroutine string_handler_for_var1
 
 subroutine var1_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
   use pio_kinds, only : i4, r4, r8, pio_offset
   use pio_msg_mod, only : lookupfile, pio_msg_getvar1
   use pio_support, only : debugAsync
@@ -78,7 +79,7 @@ end subroutine var1_handler
 
 ! DIMS 1,2,3,4,5
 subroutine vara_{DIMS}d_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
   use pio_kinds, only : i4, r4, r8, pio_offset
   use pio_msg_mod, only : lookupfile, pio_msg_getvara_{DIMS}d
   use pio_support, only : debugAsync
@@ -171,7 +172,7 @@ subroutine vara_{DIMS}d_handler(ios, msg)
 end subroutine vara_{DIMS}d_handler
 
 subroutine string_handler_for_var_0d(file, varid, strlen, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : file_desc_t, pio_get_var, pio_put_var
   use pio_msg_mod, only : PIO_MSG_GETVAR_0D
   implicit none
   type(file_desc_t) :: file
@@ -187,7 +188,7 @@ subroutine string_handler_for_var_0d(file, varid, strlen, msg)
 end subroutine string_handler_for_var_0d
   
 subroutine var_0d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
   use pio_kinds, only : i4, r4, r8, pio_offset
   use pio_msg_mod, only : lookupfile, pio_msg_getvar_0d 
   use pio_support, only : debugAsync, piodie
@@ -236,7 +237,7 @@ end subroutine var_0d_handler
 
 ! DIMS 1,2,3,4,5
 subroutine string_handler_for_var_{DIMS}d (file, varid, strlen, dims, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : file_desc_t, pio_get_var, pio_put_var
   use pio_msg_mod, only : pio_msg_getvar_{DIMS}D
   implicit none
   type(file_desc_t) :: file
@@ -268,7 +269,7 @@ end subroutine string_handler_for_var_{DIMS}d
 ! DIMS 1,2,3,4,5
 subroutine string_handler_for_vara_{DIMS}d (file, varid, start, count, strlen, dims, msg)
   use pio_msg_mod, only : pio_msg_getvara_{DIMS}d
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : file_desc_t, pio_get_var, pio_put_var
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, start({DIMS}), count({DIMS}), dims({DIMS}), msg
@@ -300,7 +301,7 @@ end subroutine string_handler_for_vara_{DIMS}d
 
 ! DIMS 1,2,3,4,5
 subroutine var_{DIMS}d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
   use pio_kinds, only : i4, r4, r8, pio_offset
   use pio_msg_mod, only : lookupfile, pio_msg_getvar_{DIMS}d
   use pio_support, only : debugAsync

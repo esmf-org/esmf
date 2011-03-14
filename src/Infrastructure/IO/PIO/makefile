@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2011/02/19 01:44:43 samsoncheung Exp $
+# $Id: makefile,v 1.11 2011/03/14 23:33:11 samsoncheung Exp $
 
 # locally disable parallel build:
 .NOTPARALLEL:
@@ -31,7 +31,7 @@ SOURCEF	  = pio_kinds.F90 pio_types.F90 pio_support.F90 alloc_mod.F90 \
             pionfwrite_mod.F90 pio_mpi_utils.F90 iompi_mod.F90 \
             pio_quicksort.F90 mct_rearrange.F90 pio_spmd_utils.F90 \
             box_rearrange.F90 rearrange.F90 piolib_mod.F90 piodarray.F90 \
-            pionfatt_mod.F90 pionfput_mod.F90 pionfget_mod.F90 pio.F90 \
+            pionfatt_mod.F90 pionfput_mod.F90 pionfget_mod.F90 ESMFPIO.F90 \
             pio_nf_utils.F90 pio_msg_callbacks.F90 pio_msg_getput_callbacks.F90
 else
 SOURCEC	  = 

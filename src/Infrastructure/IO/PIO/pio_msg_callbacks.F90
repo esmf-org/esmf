@@ -1,6 +1,7 @@
+#include "ESMFPIO.h"
 #include "dtypes.h"
 subroutine pio_callback_handler(iosystem, msg)
-  use pio
+  use ESMFPIOMod
   use pio_msg_mod
   use pio_support, only : debugAsync, piodie
   implicit none
@@ -70,7 +71,7 @@ subroutine pio_callback_handler(iosystem, msg)
 end subroutine pio_callback_handler
 
 subroutine create_file_handler(iosystem)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_createfile
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_createfile
   use pio_kinds, only : char_len
   use pio_msg_mod, only : add_to_file_list
   use pio_support, only : debugAsync
@@ -100,7 +101,7 @@ subroutine create_file_handler(iosystem)
 end subroutine create_file_handler
 
 subroutine open_file_handler(iosystem)
-  use pio
+  use ESMFPIOMod
   use piolib_mod
   use pio_kinds
   use pio_msg_mod
@@ -133,7 +134,7 @@ end subroutine open_file_handler
 
 subroutine initdecomp_dof_handler(iosystem)
 
-  use pio
+  use ESMFPIOMod
   use pio_kinds
   use pio_msg_mod
   use pio_support, only : debugAsync
@@ -166,7 +167,7 @@ subroutine initdecomp_dof_handler(iosystem)
 end subroutine initdecomp_dof_handler
 
 subroutine writedarray_handler(iosystem)
-  use pio
+  use ESMFPIOMod
   use pio_kinds
   use pio_msg_mod
   use pio_support, only : debugAsync
@@ -225,7 +226,7 @@ end subroutine writedarray_handler
 
 
 subroutine readdarray_handler(iosystem)
-  use pio
+  use ESMFPIOMod
   use pio_kinds
   use pio_msg_mod
   use pio_support, only : debugAsync
@@ -267,7 +268,7 @@ subroutine readdarray_handler(iosystem)
 end subroutine readdarray_handler
 
 subroutine seterrorhandling_handler(ios)
-  use pio, only : iosystem_desc_t, pio_seterrorhandling
+  use ESMFPIOMod, only : iosystem_desc_t, pio_seterrorhandling
   implicit none
   include 'mpif.h' !_EXTERNAL
   type(iosystem_desc_t), intent(inout) :: ios
@@ -281,7 +282,7 @@ end subroutine seterrorhandling_handler
 
 subroutine string_handler_for_att(file, varid, name, strlen, msg)
   use pio_msg_mod, only : pio_msg_getatt
-  use pio, only : file_desc_t, pio_get_att, pio_put_att
+  use ESMFPIOMod, only : file_desc_t, pio_get_att, pio_put_att
   use pio_support, only : debugasync
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, msg
@@ -298,7 +299,7 @@ end subroutine string_handler_for_att
 
 subroutine att_handler(ios, msg)
   
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
   use pio_kinds, only : i4, r4, r8
   use pio_msg_mod, only : lookupfile, pio_msg_putatt, pio_msg_getatt
   use pio_support, only : debugAsync, piodie
@@ -356,7 +357,7 @@ end subroutine att_handler
 
 subroutine att_1d_handler(ios, msg)
   
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
+  use ESMFPIOMod, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
   use pio_kinds, only : i4, r4, r8
   use pio_msg_mod, only : lookupfile, pio_msg_getatt_1d, pio_msg_putatt_1d
   use pio_support, only : debugAsync, piodie
@@ -412,7 +413,7 @@ end subroutine att_1d_handler
 
 
 subroutine finalize_handler(iosystem)
-  use pio, only : iosystem_desc_t, pio_finalize
+  use ESMFPIOMod, only : iosystem_desc_t, pio_finalize
   use pio_support, only : debugAsync
   implicit none
   type(iosystem_desc_t) :: iosystem

@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 module pio_utils
   use pio_types, only : file_desc_t, var_desc_t
   use pio_types, only : pio_int, pio_real, pio_double, pio_char

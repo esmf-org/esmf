@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
  module pio_kinds
@@ -10,7 +11,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.2 2011/02/19 01:44:43 samsoncheung Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.3 2011/03/14 23:33:12 samsoncheung Exp $
 !  CVS:$Name:  $
 
 ! !USES:

@@ -1,3 +1,4 @@
+#include "ESMFPIO.h"
 module pio_msg_mod
   use pio_kinds
   use pio_types
