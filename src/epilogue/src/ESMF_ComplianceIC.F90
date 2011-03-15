@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.19 2011/03/10 04:59:22 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.20 2011/03/15 22:39:40 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -40,13 +40,13 @@ module ESMF_ComplianceICMod
     ! Initialize user return code
     rc = ESMF_SUCCESS
     
-    print *, "start setvmIC"
+    print *, ">START setvmIC"
 
     ! This code is being executed _after_ the actual Component SetVM call
     
     !TODO: currently the setvmIC() is _not_ hooked into the ESMF callback 
 
-    print *, "stop setvmIC"
+    print *, ">STOP setvmIC"
 
   end subroutine
 
@@ -80,7 +80,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    call ESMF_LogWrite(trim(prefix)//"Start register compliance check.", &
+    call ESMF_LogWrite(trim(prefix)//">START register compliance check.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -228,7 +228,7 @@ module ESMF_ComplianceICMod
     ! Stop Compliance Checking
     !---------------------------------------------------------------------------
 
-    call ESMF_LogWrite(trim(prefix)//"Stop register compliance check.", &
+    call ESMF_LogWrite(trim(prefix)//">STOP register compliance check.", &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -272,7 +272,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializePrologue
     
-    write(output,*) "Start InitializePrologue for phase=", phase
+    write(output,*) ">START InitializePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -303,7 +303,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    write(output,*) "Stop InitializePrologue for phase=", phase
+    write(output,*) ">STOP InitializePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -330,7 +330,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializeEpilogue
     
-    write(output,*) "Start InitializeEpilogue for phase=", phase
+    write(output,*) ">START InitializeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -386,7 +386,7 @@ module ESMF_ComplianceICMod
 !      return  ! bail out
     
     
-    write(output,*) "Stop InitializeEpilogue for phase=", phase
+    write(output,*) ">STOP InitializeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -435,7 +435,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunPrologue
     
-    write(output,*) "Start RunPrologue for phase=", phase
+    write(output,*) ">START RunPrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -466,7 +466,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    write(output,*) "Stop RunPrologue for phase=", phase
+    write(output,*) ">STOP RunPrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -493,7 +493,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunEpilogue
     
-    write(output,*) "Start RunEpilogue for phase=", phase
+    write(output,*) ">START RunEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -532,7 +532,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    write(output,*) "Stop RunEpilogue for phase=", phase
+    write(output,*) ">STOP RunEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -581,7 +581,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizePrologue
     
-    write(output,*) "Start FinalizePrologue for phase=", phase
+    write(output,*) ">START FinalizePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -612,7 +612,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    write(output,*) "Stop FinalizePrologue for phase=", phase
+    write(output,*) ">STOP FinalizePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -639,7 +639,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizeEpilogue
     
-    write(output,*) "Start FinalizeEpilogue for phase=", phase
+    write(output,*) ">START FinalizeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -678,7 +678,7 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
-    write(output,*) "Stop FinalizeEpilogue for phase=", phase
+    write(output,*) ">STOP FinalizeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -914,172 +914,209 @@ module ESMF_ComplianceICMod
       
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! skip the metadata check if this is not a Gridded Component
+    ! get Component type and branch on it
     call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    if (comptype /= ESMF_COMPTYPE_GRID) return
+      
+    if (comptype == ESMF_COMPTYPE_GRID) then
     
-    ! set CIM convention and purpose specifiers
-    convention = "CIM 1.0"
-    purpose = "Model Component Simulation Description"
+      ! set CIM convention and purpose specifiers
+      convention = "CIM 1.0"
+      purpose = "Model Component Simulation Description"
     
-    call ESMF_LogWrite(trim(prefix)//" Component level attribute check: "// &
-      "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-      ESMF_LOG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
+        "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+        ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
 
-    attributeName = "ShortName"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
+      attributeName = "ShortName"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "LongName"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "Description"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
       return  ! bail out
       
-    attributeName = "LongName"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      attributeName = "ModelType"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "ReleaseDate"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "PreviousVersion"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
       
-    attributeName = "Description"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "ModelType"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "ReleaseDate"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "PreviousVersion"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
 #if 0
 ! skip Citation* attributes as per Cecelia 10/05/10      
-    attributeName = "ShortTitle"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      attributeName = "ShortTitle"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "LongTitle"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
       
-    attributeName = "LongTitle"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      attributeName = "Date"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
       
-    attributeName = "Date"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      attributeName = "PresentationForm"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
       
-    attributeName = "PresentationForm"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "DOI"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      attributeName = "DOI"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
 #endif
 
-    attributeName = "ResponsiblePartyRole"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "Name"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "EmailAddress"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "PhysicalAddress"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
-    attributeName = "URL"
-    call checkComponentAttribute(prefix, comp=comp, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+      attributeName = "ResponsiblePartyRole"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "Name"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "EmailAddress"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "PhysicalAddress"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "URL"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+    elseif (comptype == ESMF_COMPTYPE_CPL) then
+
+      ! set CIM convention and purpose specifiers
+      convention = "NUOPC"
+      purpose = "General"
+    
+      call ESMF_LogWrite(trim(prefix)//" CplComp level attribute check: "// &
+        "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
+        ESMF_LOG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+
+      attributeName = "LongName"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+      attributeName = "CplList"
+      call checkComponentAttributeL(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+        
+    else
+      ! currently there is no other type by GridComp or CplComp
+    endif
       
   end subroutine
     
@@ -1115,7 +1152,7 @@ module ESMF_ComplianceICMod
     else if (len_trim(value) == 0) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> is NOT set!", ESMF_LOG_WARNING, rc=rc)
+        trim(attributeName)//"> is present but NOT set!", ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1123,12 +1160,73 @@ module ESMF_ComplianceICMod
     else
       ! attribute present and set
       call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-        trim(attributeName)//"> is present and set.", ESMF_LOG_INFO, rc=rc)
+        trim(attributeName)//"> is present and set: "//trim(value), &
+        ESMF_LOG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
     endif
+    
+  end subroutine
+
+  recursive subroutine checkComponentAttributeL(prefix, comp, attributeName, &
+    convention, purpose, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_GridComp)                   :: comp
+    character(*), intent(in)              :: attributeName
+    character(*), intent(in)              :: convention
+    character(*), intent(in)              :: purpose
+    integer,      intent(out), optional   :: rc
+    
+    integer, parameter                    :: itemCountMax=10
+    integer                               :: itemCount, i
+    character(10*ESMF_MAXSTR)             :: valueList(itemCountMax)
+    character(ESMF_MAXSTR)                :: defaultvalueList(itemCountMax)
+    character(ESMF_MAXSTR)                :: iStr
+
+    defaultvalueList = "ComplianceICdefault"
+
+    itemCount = itemCountMax ! initialize
+    call ESMF_AttributeGet(comp, name=attributeName, valueList=valueList, &
+      defaultvalueList=defaultvalueList, itemCount=itemCount, &
+      convention=convention, purpose=purpose, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    do i=1, itemCount
+      write(iStr,*) i
+      if (trim(valueList(i)) == trim(defaultvalueList(i))) then
+        ! attribute not present
+        call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+          trim(attributeName)//">["//trim(adjustl(iStr))//"] is NOT present!", &
+          ESMF_LOG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      else if (len_trim(valueList(i)) == 0) then
+        ! attribute present but not set
+        call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
+          trim(attributeName)//">["//trim(adjustl(iStr))//"] is present but NOT set!", &
+          ESMF_LOG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      else
+        ! attribute present and set
+        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+          trim(attributeName)//">["//trim(adjustl(iStr))//"] is present and set: "// &
+          trim(valueList(i)), &
+          ESMF_LOG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      endif
+    enddo
     
   end subroutine
 
@@ -1236,7 +1334,7 @@ module ESMF_ComplianceICMod
     else if (len_trim(value) == 0) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> is NOT set!", ESMF_LOG_WARNING, rc=rc)
+        trim(attributeName)//"> is present but NOT set!", ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
@@ -1244,7 +1342,8 @@ module ESMF_ComplianceICMod
     else
       ! attribute present and set
       call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-        trim(attributeName)//"> is present and set.", ESMF_LOG_INFO, rc=rc)
+        trim(attributeName)//"> is present and set: "//trim(value), &
+        ESMF_LOG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
