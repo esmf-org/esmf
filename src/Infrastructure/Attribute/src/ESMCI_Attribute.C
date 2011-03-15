@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.94 2011/03/09 16:19:01 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.95 2011/03/15 21:26:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.94 2011/03/09 16:19:01 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.95 2011/03/15 21:26:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3022,12 +3022,10 @@ int Attribute::count=0;
   }
   
   // find the lengths of the strings on this Attribute
-  for (i=0; i<count; i++) {
-    if (attr->items == 1)
-      lens[i] = (attr->vcp).size();
-    else if (attr->items > 1)
-      lens[i] = (attr->vcpp[i]).size();
-  }
+  if (!(attr->vcpp).empty()) {
+  for (i=0; i<count; i++) 
+    lens[i] = (attr->vcpp[i]).size();
+  } else if (!(attr->vcp).empty()) lens[i] = (attr->vcp).size();
 
   return ESMF_SUCCESS;
 
@@ -3473,7 +3471,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_I4, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3560,7 +3558,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_I8, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3647,7 +3645,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_R4, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3734,7 +3732,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_R8, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3821,7 +3819,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3908,7 +3906,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -6951,7 +6949,7 @@ int Attribute::count=0;
         void *datap) {             // generic pointer to values
 //
 // !DESCRIPTION:
-//   Initialize an {\tt Attribute}, and make a copy of the data if items > 1.
+//   Initialize an {\tt Attribute}, and make a copy of the data - multi item case
 //
 //EOPI
   unsigned int i;
@@ -6990,24 +6988,7 @@ int Attribute::count=0;
   vb = ESMF_FALSE;
   vbp.reserve(0);
  
-  if (items == 1) {
-      if (datap) {
-            if (tk == ESMC_TYPEKIND_I4)
-                vi = *(static_cast<ESMC_I4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_I8)
-                vl = *(static_cast<ESMC_I8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R4)
-                vf = *(static_cast<ESMC_R4*> (datap));  
-            else if (tk == ESMC_TYPEKIND_R8)
-                vd = *(static_cast<ESMC_R8*> (datap));  
-            else if (tk == ESMC_TYPEKIND_LOGICAL)
-                vb = *(static_cast<ESMC_Logical*> (datap));  
-            else if (tk == ESMC_TYPEKIND_CHARACTER)
-                vcp = *(static_cast<string*> (datap));
-      }
-
-  } else if (items > 1) {
-    // items > 1, alloc space for a list and do the copy
+    // alloc space for a list and do the copy
         if (tk == ESMC_TYPEKIND_I4) {
             vip.reserve(items);      
             if (datap) 
@@ -7040,7 +7021,81 @@ int Attribute::count=0;
                 vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
             }
         }
-  }
+
+  id = ++count;  // TODO: inherit from ESMC_Base class?
+
+ } // end Attribute
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "Attribute()"
+//BOPI
+// !IROUTINE:  Attribute - native C++ constructor for Attribute class
+//
+// !INTERFACE:
+      Attribute::Attribute(
+//
+// !RETURN VALUE:
+//    {\tt Attribute} object
+//
+// !ARGUMENTS:
+        const string &name,                // Attribute name
+        const ESMC_TypeKind &typekind,    // typekind
+        void *datap) {             // generic pointer to values
+//
+// !DESCRIPTION:
+//   Initialize an {\tt Attribute}, and make a copy of the data - 1 item case
+//
+//EOPI
+  unsigned int i;
+
+  attrName = name;
+  tk = typekind;
+  items = 1;
+  attrRoot = ESMF_FALSE;
+   
+  attrConvention = "";
+  attrPurpose = "";
+  attrObject = "";
+  attrPack = ESMF_FALSE;
+  attrPackHead = ESMF_FALSE;
+  attrNested = ESMF_FALSE;
+
+  linkChange = ESMF_FALSE;
+  structChange = ESMF_TRUE;
+  valueChange = ESMF_FALSE;
+
+  attrBase = ESMC_NULL_POINTER;
+  parent = ESMC_NULL_POINTER;
+  
+  attrList.reserve(0);
+  packList.reserve(0);
+  linkList.reserve(0);
+  
+  vi = 0;
+  vip.reserve(0);
+  vl = 0;
+  vlp.reserve(0);
+  vf = 0;
+  vfp.reserve(0);
+  vd = 0;
+  vdp.reserve(0);
+  vb = ESMF_FALSE;
+  vbp.reserve(0);
+ 
+  if (datap) {
+    if (tk == ESMC_TYPEKIND_I4)
+      vi = *(static_cast<ESMC_I4*> (datap));  
+    else if (tk == ESMC_TYPEKIND_I8)
+      vl = *(static_cast<ESMC_I8*> (datap));  
+    else if (tk == ESMC_TYPEKIND_R4)
+       vf = *(static_cast<ESMC_R4*> (datap));  
+    else if (tk == ESMC_TYPEKIND_R8)
+       vd = *(static_cast<ESMC_R8*> (datap));  
+    else if (tk == ESMC_TYPEKIND_LOGICAL)
+       vb = *(static_cast<ESMC_Logical*> (datap));  
+    else if (tk == ESMC_TYPEKIND_CHARACTER)
+       vcp = *(static_cast<string*> (datap));
+   }
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
 

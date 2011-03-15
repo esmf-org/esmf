@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.33 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.34 2011/03/15 21:26:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.33 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.34 2011/03/15 21:26:07 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -596,7 +596,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Set a char list Attribute on a Array Test
       call ESMF_AttributeSet(array, name="Charl", &
-        valueList=InCharl, rc=rc)
+        valueList=InCharl(1:1), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute char list on an Array test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -608,9 +608,14 @@ program ESMF_AttributeArrayUTest
         valueList=OutCharl, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list from an Array test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl==OutCharl), &
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl(1:1)==OutCharl(1:1)), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+print *, "inCharl"
+print *, inCharl(1:1)
+print *, "outCharl"
+print *, outChar(1:1)
 
       !EX_UTest
       ! Remove an Attribute on an Array Test

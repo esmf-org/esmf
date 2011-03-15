@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.26 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.27 2011/03/15 21:26:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -684,6 +684,9 @@ program ESMF_RegridWeightGen
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          endif
       endif
+print *, "HERE!!!111"
+print *, "HERE!!!111"
+print *, "HERE!!!111"
 	 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
@@ -693,16 +696,25 @@ program ESMF_RegridWeightGen
 	           dstIsScrip=dstIsScrip, method = methodStr, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-          else
+         else
             call ESMF_OutputScripWeightFile(wgtfile, weights, indicies,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodStr, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-	  endif
-      else 
-	 call ESMF_OutputScripWeightFile(wgtfile, weights, indicies, rc=rc)
-         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         endif
+      else
+        call ESMF_OutputScripWeightFile(wgtfile, weights, indicies, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
+
+      ! Write the grids in vtk format
+  call ESMF_MeshIO(vm, srcGrid, ESMF_STAGGERLOC_CENTER, &
+               "srcgrid", spherical=1, rc=rc)
+  call ESMF_MeshIO(vm, dstGrid, ESMF_STAGGERLOC_CENTER, &
+               "dstgrid", spherical=1, rc=rc)        
+print *, "HERE!!!"
+print *, "HERE!!!"
+print *, "HERE!!!"
 
       !call ESMF_VMBarrier(vm)
       !call ESMF_VMWtime(endtime, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.43 2011/02/23 06:58:59 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.44 2011/03/15 21:26:01 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -309,6 +309,8 @@ class Attribute
       const string &obj);
     Attribute(void);
     Attribute(const ESMC_Logical &attributeRoot);
+    Attribute(const string &name, const ESMC_TypeKind &typekind, 
+      void *datap);
     Attribute(const string &name, const ESMC_TypeKind &typekind, 
       int numitems, void *datap);
     int AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 

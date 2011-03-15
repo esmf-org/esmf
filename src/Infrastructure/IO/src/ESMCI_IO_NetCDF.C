@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.13 2011/02/22 21:17:11 w6ws Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.14 2011/03/15 21:26:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.13 2011/02/22 21:17:11 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.14 2011/03/15 21:26:05 rokuingh Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -777,7 +777,6 @@ void IO_NetCDF::destruct(void) {
 
       Attribute* esmfAtt = new Attribute(thisAtt->name(),
                                          attType,
-                                         1,
                                          valueBase);
       thisArray->root.AttributeSet(esmfAtt);
       //thisArray->root.ESMC_Print();
