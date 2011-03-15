@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.51 2011/03/10 04:55:47 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.52 2011/03/15 22:41:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.51 2011/03/10 04:55:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.52 2011/03/15 22:41:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -933,7 +933,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   // TODO: shouldn't need to expand the table here - should be done inside
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
-  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
+  localrc = (tabptr)->extend(32, 2); // room for 8 funcs, 2 data
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
@@ -997,7 +997,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
   // TODO: shouldn't need to expand the table here - should be done inside
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
-  localrc = (tabptr)->extend(8, 2); // room for 8 funcs, 2 data
+  localrc = (tabptr)->extend(32, 2); // room for 8 funcs, 2 data
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
