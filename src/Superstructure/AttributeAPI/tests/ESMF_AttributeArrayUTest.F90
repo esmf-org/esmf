@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.34 2011/03/15 21:26:07 rokuingh Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.35 2011/03/15 21:30:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.34 2011/03/15 21:26:07 rokuingh Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.35 2011/03/15 21:30:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -611,11 +611,6 @@ program ESMF_AttributeArrayUTest
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (InCharl(1:1)==OutCharl(1:1)), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
-print *, "inCharl"
-print *, inCharl(1:1)
-print *, "outCharl"
-print *, outChar(1:1)
 
       !EX_UTest
       ! Remove an Attribute on an Array Test
