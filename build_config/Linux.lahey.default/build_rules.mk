@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.32 2010/11/11 00:48:35 theurich Exp $
+# $Id: build_rules.mk,v 1.33 2011/03/16 18:36:48 theurich Exp $
 #
 # Linux.lahey.default
 #
@@ -67,6 +67,7 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKERDEFAULT   = mpicxx
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += -lmpi_f77
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else

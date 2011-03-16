@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2010/12/16 06:17:35 w6ws Exp $
+# $Id: build_rules.mk,v 1.16 2011/03/16 18:36:25 theurich Exp $
 #
 # Cygwin.g95.default
 #
@@ -56,6 +56,7 @@ ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lmpi_cxx
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += -lmpi_f77
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else

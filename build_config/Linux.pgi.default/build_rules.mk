@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.60 2011/03/10 04:29:43 w6ws Exp $
+# $Id: build_rules.mk,v 1.61 2011/03/16 18:36:54 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -77,6 +77,7 @@ ifeq ($(ESMF_COMM),openmpi)
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += -lmpi_f77
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2010/11/11 00:48:35 theurich Exp $
+# $Id: build_rules.mk,v 1.21 2011/03/16 18:36:42 theurich Exp $
 #
 # Linux.absoftintel.default
 #
@@ -54,6 +54,7 @@ ifeq ($(ESMF_COMM),openmpi)
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
+ESMF_CXXLINKLIBS       += -lmpi_f77
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
