@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.95 2011/03/15 21:26:03 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.96 2011/03/16 00:34:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.95 2011/03/15 21:26:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.96 2011/03/16 00:34:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3025,7 +3025,8 @@ int Attribute::count=0;
   if (!(attr->vcpp).empty()) {
   for (i=0; i<count; i++) 
     lens[i] = (attr->vcpp[i]).size();
-  } else if (!(attr->vcp).empty()) lens[i] = (attr->vcp).size();
+  } else if (!(attr->vcp).empty()) lens[0] = (attr->vcp).size();
+  else lens[0] = 0;
 
   return ESMF_SUCCESS;
 
