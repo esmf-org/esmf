@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.330 2011/02/10 17:44:56 gerhard.j.theurich Exp $
+#  $Id: common.mk,v 1.331 2011/03/17 22:20:40 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -555,6 +555,7 @@ DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) 
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
 DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
+DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
 
 # C specific variables
@@ -1594,9 +1595,9 @@ ALLTEST_TARGETS_UNI = $(TEST_TARGETS_UNI) \
 # the user setting if it already has a value.
 check: info
 	@if [ $(ESMF_COMM) = "mpiuni" ] ; then \
-	  $(MAKE) clean_check $(TEST_TARGETS_UNI) ;\
+	  $(MAKE) clean_check $(TEST_TARGETS_UNI) results_ck_summary ;\
 	else \
-	  $(MAKE) clean_check $(TEST_TARGETS) ;\
+	  $(MAKE) clean_check $(TEST_TARGETS) results_ck_summary ;\
         fi
 
 
@@ -2695,6 +2696,8 @@ check_results: check_unit_tests check_examples check_system_tests
 results_summary:
 	@$(DO_SUM_RESULTS)
 
+results_ck_summary:
+	@$(DO_CK_SUM_RESULTS)
 
 #-------------------------------------------------------------------------------
 # Quickstart targets
