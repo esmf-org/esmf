@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.15 2011/03/09 14:16:37 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.16 2011/03/17 17:38:00 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -585,13 +585,15 @@ contains
        importState = ESMF_StateCreate(name="Import", &
                                       statetype=ESMF_STATE_IMPORT, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) &
+         ESMF_CONTEXT, &
+         rcToReturn=rc)) &
           return
 
        exportState = ESMF_StateCreate(name="Export", &
                                       statetype=ESMF_STATE_EXPORT, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) &
+         ESMF_CONTEXT, &
+         rcToReturn=rc)) &
          return
 
        ! Initialize clock in the ComponentInitialize function??  
@@ -612,7 +614,9 @@ contains
 
        call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) &
              print *, "Unable to Register Service... continuing"
 
        call ESMF_WebServSvcLoop(comp, portNum=portNum, &
@@ -631,7 +635,9 @@ contains
 
        call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-             ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) &
              print *, "Unable to Unregister Service... continuing"
 
     else
