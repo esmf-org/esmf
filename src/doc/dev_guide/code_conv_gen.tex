@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.25 2011/01/05 20:05:48 svasquez Exp $
+% CVS $Id: code_conv_gen.tex,v 1.26 2011/03/18 18:18:08 w6ws Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -355,6 +355,24 @@ the Fortran {\tt logical} data type in the public ESMF API.  The {\tt ESMF\_Logi
 derived type shall only be used in Fortran code internally, for example when passing
 logical values between Fortran and C++ code.
 
+\subsubsection{Arguments which are Arrays}
+Arguments which are arrays shall use the Fortran assumed-shape passing style.
+This allows the procedure to use intrinsic functions such as {\tt size},
+{\tt lbound}, and {\tt ubound} within the method to determine array
+dimension sizes.  Also, ESMF convention is to place the array specification
+following the variable name, rather than by using the {\tt dimension}
+attribute or a separate {\tt dimension} statement.  For example:
+\begin{verbatim}
+    type(ESMF_Field), intent(in) :: fieldList(:)
+\end{verbatim}
+
+\subsubsection{Arguments which are Pointers}
+Arguments which are pointers may point to either scalar or array targets.
+Pointers are typically used when an object must be allocated within the method
+and returned to the caller.  A second use is when the original array bounds
+must be maintained.  No {\tt intent} attributes are currently used with
+pointers because they are not part of Fortran-90 or Fortran-95.
+
 \subsection{Code: File Rules} 
 
 \subsubsection{Version Identification} 
@@ -362,14 +380,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX\ 
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.25 2011/01/05 20:05:48 svasquez Exp $ 
+% $Id: code_conv_gen.tex,v 1.26 2011/03/18 18:18:08 w6ws Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.25 2011/01/05 20:05:48 svasquez Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.26 2011/03/18 18:18:08 w6ws Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
