@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.83 2011/03/08 16:23:43 w6ws Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.84 2011/03/18 22:22:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.83 2011/03/08 16:23:43 w6ws Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.84 2011/03/18 22:22:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2734,6 +2734,7 @@ contains
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: present_flag, attpack @\
+      integer :: count @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -2743,6 +2744,8 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      count = 1 @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -2762,7 +2765,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_##mtypekind, 1, value, & @\
+            ESMF_TYPEKIND_##mtypekind, count, value, & @\
             convention, purpose, fobject, attPackInstanceName, localrc) @\
         endif @\
       else @\
@@ -2773,7 +2776,7 @@ contains
  @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
+            ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
         endif @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -2994,15 +2997,19 @@ contains
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: localvalue, present_flag, attpack @\
- @\
+       integer :: count @\
+@\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       present_flag = ESMF_FALSE @\
       attpack = ESMF_FALSE @\
+ @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      count = 1 @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -3022,7 +3029,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
+            ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
             convention, purpose, fobject, attPackInstanceName, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -3034,7 +3041,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
           call c_ESMC_AttributeGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
+            ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue @\
@@ -3258,6 +3265,8 @@ contains
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: present_flag, attpack @\
+      integer, dimension(1) :: lens @\
+      integer :: count @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3267,7 +3276,10 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\
+@\
+      lens(1) = len(value) @\
+      count = 1 @\
+@\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
@@ -3285,7 +3297,10 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+!          call c_ESMC_AttPackGetChar(mthisfield, name, value, & @\
+!            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
+            ESMF_TYPEKIND_CHARACTER, count, lens, value, & @\
             convention, purpose, fobject, attPackInstanceName, localrc) @\
         end if @\
       else @\
@@ -3293,7 +3308,9 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (present_flag == ESMF_TRUE) then @\
-          call c_ESMC_AttributeGetChar(mthisfield, name, value, localrc) @\
+!          call c_ESMC_AttributeGetChar(mthisfield, name, value, localrc) @\
+          call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+            count, lens, value, localrc) @\
         endif @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -4282,7 +4299,8 @@ contains
       integer :: localrc  @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
- @\
+      integer :: count @\
+@\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       attpack = ESMF_FALSE @\
@@ -4290,6 +4308,8 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      count = 1 @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -4304,11 +4324,11 @@ contains
  @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_##mtypekind, 1, value, & @\
+          ESMF_TYPEKIND_##mtypekind, count, value, & @\
           convention, purpose, fobject, attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_##mtypekind, 1, value, localrc) @\
+          ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -4483,6 +4503,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: localvalue @\
       type(ESMF_Logical) :: attpack @\
+      integer :: count @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4491,6 +4512,8 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      count = 1 @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -4506,11 +4529,11 @@ contains
       localvalue = value @\
       if (attpack == ESMF_TRUE) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_LOGICAL, 1, localvalue, & @\
+          ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
           convention, purpose, fobject, attPackInstanceName, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_LOGICAL, 1, localvalue, localrc) @\
+          ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -4683,7 +4706,9 @@ contains
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
+      integer, dimension(1) :: lens @\
       type(ESMF_Logical) :: attpack @\
+      integer :: count @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4692,6 +4717,9 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      lens(1) = len_trim(value) @\
+      count = 1 @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -4705,11 +4733,16 @@ contains
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, & @\
+!        call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+!          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, & @\
+!          attPackInstanceName, localrc) @\
+        call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          count, value, lens, convention, purpose, fobject, & @\
           attPackInstanceName, localrc) @\
       else @\
-        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
+!        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
+        call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          count, value, lens, localrc) @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.44 2011/02/23 16:01:29 w6ws Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.45 2011/03/18 22:22:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.44 2011/02/23 16:01:29 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.45 2011/03/18 22:22:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1067,7 +1067,7 @@ extern "C" {
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackremoveattribute
-
+/*
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_esmc_attpackgetchar - get attribute from an attpack
@@ -1257,7 +1257,7 @@ extern "C" {
 
   delete [] llens;
   
-}  // end c_esmc_attpackgetchar
+}  // end c_esmc_attpackgetchar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1419,12 +1419,15 @@ extern "C" {
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
   
-  if (attrTypeKind != *tk) {
+// take this out because an attribute that is not set will not yet have a typekind,
+// so if you are getting an attribute which was not set the call will fail here...
+/*  if (attrTypeKind != *tk) {
+printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, attrTypeKind);
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind does not match this Attribute", &status);
     if (rc) *rc = status;
     return;
-  }
+  }*/
 
   // we need to get the count first 
   lcount = attpack->AttributeGetItemCount(cname);
@@ -1458,7 +1461,9 @@ extern "C" {
       if (rc) *rc = status;
       return;
     }
-    lens[i] = llens[i];
+    // this was causing problems with the CtoF90string call below - have to pass
+    // in the length of the F90 string, not the length of the C string!
+    //lens[i] = llens[i];
   }
   
   vector<string> lcvalue;
@@ -1476,7 +1481,7 @@ extern "C" {
   for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), 
-      &valueList[j], (lcvalue[i]).size());
+      &valueList[j], lens[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) {
       delete [] llens;
@@ -1660,7 +1665,7 @@ extern "C" {
   }
 
   if (value) {
-    if (*count == 1) {
+/*    if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
         status = attpack->AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
@@ -1678,7 +1683,7 @@ extern "C" {
         return;
       }
     }
-    else if (*count > 1) {
+    else if (*count > 1) {*/
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
@@ -1720,13 +1725,13 @@ extern "C" {
         if (rc) *rc = status;
         return;
       }
-    }
+/*    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }
+    }*/
   }
 
   if (rc) *rc = status;
@@ -2089,7 +2094,7 @@ extern "C" {
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeMove
-*/
+*//*
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_esmc_attpacksetchar - Set attributes in the attribute package
@@ -2211,7 +2216,7 @@ extern "C" {
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
-}  // end c_esmc_attpacksetchar
+}  // end c_esmc_attpacksetchar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2457,7 +2462,7 @@ extern "C" {
   capname.resize(capname.find_last_not_of(" ")+1);
 
   if (value) {
-    if (*count == 1) {
+/*    if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
         status = (**base).root.AttPackSet(cname, *tk, *count,
           (static_cast<ESMC_I4*> (value)), cconv, cpurp, cobj, capname);
@@ -2480,7 +2485,7 @@ extern "C" {
         return;
       }
     }
-    else if (*count > 1) {
+    else if (*count > 1) {*/
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
@@ -2527,13 +2532,13 @@ extern "C" {
         if (rc) *rc = status;
         return;
       }
-    }
+/*    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }
+    }*/
   }
 
   if (rc) *rc = status;
@@ -2888,7 +2893,7 @@ extern "C" {
   }
 
 }  // end c_ESMC_AttributeCopy
-
+/*
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
@@ -2986,7 +2991,7 @@ extern "C" {
     
   delete [] llens;
   
-}  // end c_ESMC_AttributeGetChar
+}  // end c_ESMC_AttributeGetChar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -3057,12 +3062,14 @@ extern "C" {
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc))) return;
   
-  if (attrTypeKind != *tk) {
+// take this out because an attribute that is not set will not yet have a typekind,
+// so if you are getting an attribute which was not set the call will fail here...
+/*  if (attrTypeKind != *tk) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
                          "typekind is inappropriate for this routine", &status);
     if (rc) *rc = status;
     return;
-  }
+  }*/
 
   // get the number of items on the attribute, compare to the buffer size
   lcount = (**base).root.AttributeGetItemCount(cname);
@@ -3096,7 +3103,9 @@ extern "C" {
       if (rc) *rc = status;
       return;
     }
-    lens[i] = llens[i];
+    // this was causing problems with the CtoF90string call below - have to pass
+    // in the length of the F90 string, not the length of the C string!
+    //lens[i] = llens[i];
   }
   
   // allocate all char**s and string vector
@@ -3114,6 +3123,8 @@ extern "C" {
   // finally we convert them all to f90 and pack them into char*
   j = 0;
   for (i=0; i<lcount; i++) {
+//printf("lens = %d\n", lens[i]);
+//printf("strlen = %d\n", strlen(cvalue[i].c_str()));
     // convert strings to F90 using F90 length
     status = ESMC_CtoF90string(const_cast<char*> (cvalue[i].c_str()), &valueList[j], lens[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
@@ -3206,7 +3217,7 @@ extern "C" {
   }
   
   if (value) {
-    if (*items == 1) {
+/*    if (*items == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
         status = (**base).root.AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
@@ -3224,7 +3235,7 @@ extern "C" {
         return;
       }
     }
-    else if (*items > 1) {
+    else if (*items > 1) {*/
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*items);
@@ -3266,13 +3277,13 @@ extern "C" {
         if (rc) *rc = status;
         return;
       }
-    }
+/*    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }
+    }*/
   }
 
   if (rc) *rc = status;
@@ -3750,7 +3761,7 @@ extern "C" {
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributeremove
-
+/*
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
@@ -3823,7 +3834,7 @@ extern "C" {
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 
-}  // end c_ESMC_AttributeSetChar
+}  // end c_ESMC_AttributeSetChar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -3847,7 +3858,7 @@ extern "C" {
       int *lens,                // in - lengths
       int *rc,                  // in - return code
       ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg vllen) { // hidden/in - strlen count for valueList
+      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for valueList
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any object type in the system.
@@ -3889,10 +3900,18 @@ extern "C" {
   vector<string> cvalue;
   cvalue.reserve(*count);
 
+  // check that valueList is allocated
+  if (!valueList) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute value", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
   for (unsigned int i=0; i<(*count); i++) {
-    if (!(valueList[j])) {
+    if (j > vlen) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
       if (rc) *rc = status;
@@ -3972,7 +3991,7 @@ extern "C" {
   }
 
   if (value) {
-    if (*count == 1) {
+/*    if (*count == 1) {
       if (*tk == ESMC_TYPEKIND_I4)
         status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_I4*> (value)));  
       else if (*tk == ESMC_TYPEKIND_I8)
@@ -3990,7 +4009,7 @@ extern "C" {
         return;
       }
     }
-    else if (*count > 1) {
+    else if (*count > 1) { */
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
@@ -4032,13 +4051,13 @@ extern "C" {
         if (rc) *rc = status;
         return;
       }
-    }
+/*    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }
+    }*/
   }
     
   if (rc) *rc = status;

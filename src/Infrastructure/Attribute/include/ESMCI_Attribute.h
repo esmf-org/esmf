@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.44 2011/03/15 21:26:01 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.45 2011/03/18 22:22:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -82,18 +82,18 @@ class Attribute
     vector<Attribute*>  linkList;  // attributes - array of pointers
 
     // Attribute values
-    ESMC_I4               vi;       // integer, or
+//ESMC_I4               vi;       // integer, or
     vector<ESMC_I4>       vip;       // pointer to integer list, or
-    ESMC_I8               vl;       // long, or
+//ESMC_I8               vl;       // long, or
                             //  ^  TODO: change back to vl when Cray X1 compiler fixed
     vector<ESMC_I8>       vlp;       // pointer to long list, or
-    ESMC_R4               vf;       // float (real*4), or
+//ESMC_R4               vf;       // float (real*4), or
     vector<ESMC_R4>       vfp;       // pointer to float (real*4) list, or
-    ESMC_R8               vd;       // double (real*8), or
+//ESMC_R8               vd;       // double (real*8), or
     vector<ESMC_R8>       vdp;       // pointer to double (real*8) list, or
-    ESMC_Logical          vb;       // boolean (logical), or
+//ESMC_Logical          vb;       // boolean (logical), or
     vector<ESMC_Logical>  vbp;       // pointer to boolean (logical) list, or
-    string                vcp;       // pointer to a NULL term character string, or
+//string                vcp;       // pointer to a NULL term character string, or
     vector<string>        vcpp;
 
     int        id;         // unique identifier. used to generate unique 
@@ -177,17 +177,17 @@ class Attribute
       vector<string> &attrNames) const;
     
     // attribute methods - get
-    int AttributeGet(const string &name, ESMC_I4 *value) const;
+//    int AttributeGet(const string &name, ESMC_I4 *value) const;
     int AttributeGet(const string &name, int *count, vector<ESMC_I4> *value) const;
-    int AttributeGet(const string &name, ESMC_I8 *value) const;
+//    int AttributeGet(const string &name, ESMC_I8 *value) const;
     int AttributeGet(const string &name, int *count, vector<ESMC_I8> *value) const;
-    int AttributeGet(const string &name, ESMC_R4 *value) const;
+//    int AttributeGet(const string &name, ESMC_R4 *value) const;
     int AttributeGet(const string &name, int *count, vector<ESMC_R4> *value) const;
-    int AttributeGet(const string &name, ESMC_R8 *value) const;
+//    int AttributeGet(const string &name, ESMC_R8 *value) const;
     int AttributeGet(const string &name, int *count, vector<ESMC_R8> *value) const;
-    int AttributeGet(const string &name, ESMC_Logical *value) const;
+//    int AttributeGet(const string &name, ESMC_Logical *value) const;
     int AttributeGet(const string &name, int *count, vector<ESMC_Logical> *value) const;
-    int AttributeGet(const string &name, string *value) const;
+//    int AttributeGet(const string &name, string *value) const;
     int AttributeGet(const string &name, vector<string> *value) const;
 
     // getting either by name or number directly return attribute ptr
@@ -224,17 +224,17 @@ class Attribute
     int AttributeSet(Attribute *attr);
 
     // attribute methods - set
-    int AttributeSet(const string &name, ESMC_I4 value);
+//    int AttributeSet(const string &name, ESMC_I4 value);
     int AttributeSet(const string &name, int count, vector<ESMC_I4> *value);
-    int AttributeSet(const string &name, ESMC_I8 value);
+//    int AttributeSet(const string &name, ESMC_I8 value);
     int AttributeSet(const string &name, int count, vector<ESMC_I8> *value);
-    int AttributeSet(const string &name, ESMC_R4 value);
+//    int AttributeSet(const string &name, ESMC_R4 value);
     int AttributeSet(const string &name, int count, vector<ESMC_R4> *value);
-    int AttributeSet(const string &name, ESMC_R8 value);
+//    int AttributeSet(const string &name, ESMC_R8 value);
     int AttributeSet(const string &name, int count, vector<ESMC_R8> *value);
-    int AttributeSet(const string &name, ESMC_Logical value);
+//    int AttributeSet(const string &name, ESMC_Logical value);
     int AttributeSet(const string &name, int count, vector<ESMC_Logical> *value);
-    int AttributeSet(const string &name, string *value);
+//    int AttributeSet(const string &name, string *value);
     int AttributeSet(const string &name, int count, vector<string> *value);
 //    int AttributeSet(const string &name, const ESMC_TypeKind &tk, 
 //      int count, void *value);
@@ -309,8 +309,8 @@ class Attribute
       const string &obj);
     Attribute(void);
     Attribute(const ESMC_Logical &attributeRoot);
-    Attribute(const string &name, const ESMC_TypeKind &typekind, 
-      void *datap);
+/*    Attribute(const string &name, const ESMC_TypeKind &typekind, 
+      void *datap);*/
     Attribute(const string &name, const ESMC_TypeKind &typekind, 
       int numitems, void *datap);
     int AttrModifyValue(const ESMC_TypeKind &typekind, int numitems, 
@@ -383,7 +383,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg clen, 
                                   ESMCI_FortranStrLenArg plen, 
                                   ESMCI_FortranStrLenArg olen);
-  void FTN(c_esmc_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
+/*  void FTN(c_esmc_attpackgetchar)(ESMC_Base **base, char *name, char *value, 
                                   char *convention, char *purpose,
                                   char *object,
                                   char *attPackInstanceName, int *rc, 
@@ -392,7 +392,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg clen, 
                                   ESMCI_FortranStrLenArg plen, 
                                   ESMCI_FortranStrLenArg olen,
-                                  ESMCI_FortranStrLenArg alen);
+                                  ESMCI_FortranStrLenArg alen);*/
   void FTN(c_esmc_attpackgetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind *tk, int *count,
                                   int *lens, char *valueList,
@@ -457,7 +457,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg plen,
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
-  void FTN(c_esmc_attpacksetchar)(ESMC_Base **base, char *name, char *value,
+/*  void FTN(c_esmc_attpacksetchar)(ESMC_Base **base, char *name, char *value,
                                   ESMC_TypeKind *tk, 
                                   char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
@@ -467,7 +467,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg clen, 
                                   ESMCI_FortranStrLenArg plen, 
                                   ESMCI_FortranStrLenArg olen,
-                                  ESMCI_FortranStrLenArg alen);
+                                  ESMCI_FortranStrLenArg alen);*/
   void FTN(c_esmc_attpacksetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind *tk, int *count,
                                   char *valueList, int *lens,
@@ -519,10 +519,10 @@ extern "C" {
                                   char *name,
                                   ESMC_TypeKind *tk, int *count, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
-  void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
+/*  void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, 
                                   int *rc, 
                                   ESMCI_FortranStrLenArg nlen, 
-                                  ESMCI_FortranStrLenArg vlen);
+                                  ESMCI_FortranStrLenArg vlen);*/
   void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
                                   ESMC_TypeKind *tk,
                                   int *count, void *value, int *rc, 
@@ -538,10 +538,10 @@ extern "C" {
                                   int *rc);
   void FTN(c_esmc_attributemove)(ESMC_Base **source,
                                   ESMC_Base **destination, int *rc);
-  void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
+/*  void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, 
                                   int *rc, 
                                   ESMCI_FortranStrLenArg nlen, 
-                                  ESMCI_FortranStrLenArg vlen);
+                                  ESMCI_FortranStrLenArg vlen);*/
   void FTN(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name,
                                   ESMC_TypeKind *tk,
                                   int *count, char *valueList, int *lens,

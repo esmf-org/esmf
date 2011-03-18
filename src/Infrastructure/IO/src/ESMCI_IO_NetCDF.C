@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.14 2011/03/15 21:26:05 rokuingh Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.15 2011/03/18 22:22:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.14 2011/03/15 21:26:05 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.15 2011/03/18 22:22:36 rokuingh Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -732,15 +732,24 @@ void IO_NetCDF::destruct(void) {
 
       void* valueBase;
       string attValString;
+      vector<string> attValStringVector;
+      attValStringVector.reserve(1);
       int attValInt;
+      vector<int> attValIntVector;
+      attValIntVector.reserve(1);
       float attValFloat;
+      vector<float> attValFloatVector;
+      attValFloatVector.reserve(1);
       double attValDouble;
+      vector<double> attValDoubleVector;
+      attValDoubleVector.reserve(1);
 
       switch (thisAtt->type())
       {
       case NC_CHAR:
          attValString = string(thisAtt->values()->as_string(0));
-         valueBase = (void*) (&attValString);
+         attValStringVector.push_back(attValString);
+         valueBase = (void*) (&attValStringVector);
          //printf("(ncChar)\n");
          //printf("     nc att value[%d]: %s\n", j, attValString.c_str());
          
@@ -748,21 +757,24 @@ void IO_NetCDF::destruct(void) {
 
       case NC_INT:
          attValInt = thisAtt->values()->as_int(0);
-         valueBase = (void*) (&attValInt);
+         attValIntVector.push_back(attValInt);
+         valueBase = (void*) (&attValIntVector);
          //printf("(ncInt)\n");
          //printf("     nc att value[%d]: %d\n", j, attValInt);
         break;
 
       case NC_FLOAT:
          attValFloat = thisAtt->values()->as_float(0);
-         valueBase = (void*) (&attValFloat);
+         attValFloatVector.push_back(attValFloat);
+         valueBase = (void*) (&attValFloatVector);
          //printf("(ncFloat)\n");
          //printf("     nc att value[%d]: %f\n", j, attValFloat);
         break;
 
       case NC_DOUBLE:
          attValDouble = thisAtt->values()->as_double(0);
-         valueBase = (void*) (&attValDouble);
+         attValDoubleVector.push_back(attValDouble);
+         valueBase = (void*) (&attValDoubleVector);
          //printf("(ncDouble)\n");
          //printf("     nc att value[%d]: %g\n", j, attValDouble);
         break;
@@ -776,7 +788,7 @@ void IO_NetCDF::destruct(void) {
       //                                      ESMC_TypeKindString(attType));
 
       Attribute* esmfAtt = new Attribute(thisAtt->name(),
-                                         attType,
+                                         attType, 1,
                                          valueBase);
       thisArray->root.AttributeSet(esmfAtt);
       //thisArray->root.ESMC_Print();
@@ -863,8 +875,15 @@ void IO_NetCDF::destruct(void) {
       case NC_CHAR:
         {
           string  attVal;
-          thisArray->root.AttributeGet(attName, &attVal);
-          thisVar->add_att(attName.c_str(), attVal.c_str());
+		  vector<string> attValVector;
+          thisArray->root.AttributeGet(attName, &attValVector);
+          if (numAttValues == 1) {
+            attVal = attValVector.at(0);
+            thisVar->add_att(attName.c_str(), attVal.c_str());
+          } else {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", &rc);
+            return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %s\n", i, attVal.c_str());
         }
@@ -873,8 +892,15 @@ void IO_NetCDF::destruct(void) {
       case NC_INT:
         {
           int  attVal;
-          thisArray->root.AttributeGet(attName, &attVal);
+          vector<int> attValVector;
+          thisArray->root.AttributeGet(attName, &numAttValues, &attValVector);
+          if (numAttValues == 1) {
+            attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
+          } else {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", &rc);
+            return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %d\n", i, attVal);
         }
@@ -883,8 +909,15 @@ void IO_NetCDF::destruct(void) {
       case NC_FLOAT:
         {
           float  attVal;
-          thisArray->root.AttributeGet(attName, &attVal);
+          vector<float> attValVector;
+          thisArray->root.AttributeGet(attName, &numAttValues, &attValVector);
+          if (numAttValues == 1) {
+            attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
+          } else {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", &rc);
+            return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %f\n", i, attVal);
         }
@@ -893,8 +926,15 @@ void IO_NetCDF::destruct(void) {
       case NC_DOUBLE:
         {
           double  attVal;
-          thisArray->root.AttributeGet(attName, &attVal);
+          vector<double> attValVector;
+          thisArray->root.AttributeGet(attName, &numAttValues, &attValVector);
+          if (numAttValues == 1) {
+            attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
+          } else {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", &rc);
+            return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %g\n", i, attVal);
         }

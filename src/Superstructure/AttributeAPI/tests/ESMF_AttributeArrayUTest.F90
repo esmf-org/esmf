@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.35 2011/03/15 21:30:12 rokuingh Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.36 2011/03/18 22:22:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.35 2011/03/15 21:30:12 rokuingh Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.36 2011/03/18 22:22:39 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1072,13 +1072,38 @@ program ESMF_AttributeArrayUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  Attribute package - custom - setget one element section of list to attpack attribute
+    !-------------------------------------------------------------------------
+
       attrname = "Character_namelist"
       !EX_UTest
+      ! Set a one element char list Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeSet(array, name=attrname, &
+        valueList=attpackList(1:1), convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting a one element char list Attribute in an Attribute package on an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Set a char list Attribute in an Attribute package on an Array Test
+      call ESMF_AttributeGet(array, name=attrname, &
+        valueList=outCharl, convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting a one element char list Attribute in an Attribute package on an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList(1:1)==OutCharl(1:1)), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Reset a char list Attribute in an Attribute package on an Array Test
+      ! If this goes it should fail in below in the 'Get a char list attribute 
+      ! in an Attribute package on an Array Test'
       call ESMF_AttributeSet(array, name=attrname, &
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Setting a char list Attribute in an Attribute package on an Array Test"
+      write(name, *) "Resetting a char list Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.96 2011/03/16 00:34:55 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.97 2011/03/18 22:22:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.96 2011/03/16 00:34:55 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.97 2011/03/18 22:22:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -277,6 +277,12 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+  string empty="";  // set values initially empty to force writing out empty
+                    // containing XML tree structure(s) as per CIM standard
+  vector<string> cvalue;
+  cvalue.reserve(1);
+  cvalue.push_back(empty);
+
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
     if ((convention.compare("GridSpec")==0 ||
@@ -464,9 +470,6 @@ int Attribute::count=0;
                             nestcount, nestconv, nestpurp);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-
-      string empty="";  // set values initially empty to force writing out empty
-                        // containing XML tree structure(s) as per CIM standard
  
       //
       // Model Component attributes
@@ -594,37 +597,37 @@ int Attribute::count=0;
                                       "Responsible Party Description", object);
       localrc = AttPackSet("Abbreviation",
          ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
+         &cvalue, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
       localrc = AttPackAddAttribute("EmailAddress", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("EmailAddress", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
+         &cvalue, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
       localrc = AttPackAddAttribute("Name", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("Name", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
+         &cvalue, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("PhysicalAddress", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
+         &cvalue, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
       localrc = AttPackAddAttribute("ResponsiblePartyRole", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
+         &cvalue, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                                       "Responsible Party Description", object);
       localrc = AttPackSet("URL", ESMC_TYPEKIND_CHARACTER, 1,
-         &empty, "ISO 19115", "Responsible Party Description",
+         &cvalue, "ISO 19115", "Responsible Party Description",
          object, attPackInstanceName);
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -671,8 +674,12 @@ int Attribute::count=0;
   int localrc;
   unsigned int i,j;
   Attribute *stdParent, *stdChild;
+
   string empty="";  // set values initially empty to force writing out empty
                     // containing XML tree structure(s) as per CIM standard
+  vector<string> cvalue;
+  cvalue.reserve(1);
+  cvalue.push_back(empty);
 
   if (convention.compare("CIM 1.0")!=0 ||
       purpose.compare("Model Component Simulation Description")!=0) {
@@ -821,12 +828,12 @@ int Attribute::count=0;
       //
       if (nestConvention[i].compare("ISO 19115") == 0 &&
           nestPurpose[i].compare("Responsible Party Description") == 0) {
-        localrc = stdChild->AttributeSet("Abbreviation", &empty);
-        localrc = stdChild->AttributeSet("EmailAddress", &empty);
-        localrc = stdChild->AttributeSet("Name", &empty);
-        localrc = stdChild->AttributeSet("PhysicalAddress", &empty);
-        localrc = stdChild->AttributeSet("ResponsiblePartyRole", &empty);
-        localrc = stdChild->AttributeSet("URL", &empty);
+        localrc = stdChild->AttributeSet("Abbreviation", cvalue.size(), &cvalue);
+        localrc = stdChild->AttributeSet("EmailAddress", cvalue.size(), &cvalue);
+        localrc = stdChild->AttributeSet("Name", cvalue.size(), &cvalue);
+        localrc = stdChild->AttributeSet("PhysicalAddress", cvalue.size(), &cvalue);
+        localrc = stdChild->AttributeSet("ResponsiblePartyRole", cvalue.size(), &cvalue);
+        localrc = stdChild->AttributeSet("URL", cvalue.size(), &cvalue);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       }
@@ -1554,17 +1561,17 @@ int Attribute::count=0;
   // TODO: should check for self copy!!!
 
   // first clear destinations value arguments
-  vi = 0;
+//  vi = 0;
   vip.clear();
-  vl = 0;
+//  vl = 0;
   vlp.clear();
-  vf = 0;
+//  vf = 0;
   vfp.clear();
-  vd = 0;
+//  vd = 0;
   vdp.clear();
-  vb = ESMF_FALSE;
+//  vb = ESMF_FALSE;
   vbp.clear();
-  vcp = "";
+//  vcp = "";
   vcpp.clear();
   
   // now reset all Attribute info
@@ -1582,7 +1589,7 @@ int Attribute::count=0;
 
   valueChange = ESMF_TRUE;
 
-  if (source.items == 1) {
+/*  if (source.items == 1) {
         if (source.tk == ESMC_TYPEKIND_I4)
             vi = source.vi;  
         else if (source.tk == ESMC_TYPEKIND_I8)
@@ -1595,7 +1602,7 @@ int Attribute::count=0;
             vb = source.vb;
         else if (source.tk == ESMC_TYPEKIND_CHARACTER)
             vcp = source.vcp;
-  } else if (source.items > 1) {
+  } else if (source.items > 1) {*/
     // items > 1, alloc space for a list and do the copy
           if (source.tk == ESMC_TYPEKIND_I4) {
               vip.reserve(source.items);
@@ -1616,7 +1623,7 @@ int Attribute::count=0;
               vcpp.reserve(source.items);
               vcpp = source.vcpp;
           }
-  }
+//}
 
   return ESMF_SUCCESS;
 
@@ -2050,8 +2057,8 @@ int Attribute::count=0;
         if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL)
           attrLens[index] = 8;
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER) {
-          if ((attrList.at(i)->vcp.size()+3) > attrLens[index])
-            attrLens[index] = (attrList.at(i)->vcp.size()+3);
+          if ((attrList.at(i)->vcpp[0].size()+3) > attrLens[index])
+            attrLens[index] = (attrList.at(i)->vcpp[0].size()+3);
         } else {
             attr = attrList.at(i);
             if (attr->tk == ESMC_TYPEKIND_I4) {
@@ -2095,7 +2102,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeCountTreeLensAttpack
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
 //BOPI
@@ -2151,7 +2158,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(int)
+}  // end AttributeGet(int)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2207,7 +2214,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeGet(int *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
 //BOPI
@@ -2263,7 +2270,7 @@ int Attribute::count=0;
   
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_I8)
+}  // end AttributeGet(ESMC_I8)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2319,7 +2326,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeGet(ESMC_I8 *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
 //BOPI
@@ -2375,7 +2382,7 @@ int Attribute::count=0;
   
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_R4)
+}  // end AttributeGet(ESMC_R4)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2431,7 +2438,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeGet(ESMC_R4 *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
 //BOPI
@@ -2487,7 +2494,7 @@ int Attribute::count=0;
   
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_R8)
+}  // end AttributeGet(ESMC_R8)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2543,7 +2550,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeGet(ESMC_R8 *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
 //BOPI
@@ -2599,7 +2606,7 @@ int Attribute::count=0;
   
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(ESMC_Logical)
+}  // end AttributeGet(ESMC_Logical)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2655,7 +2662,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeGet(ESMC_Logical *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
 //BOPI
@@ -2720,7 +2727,7 @@ int Attribute::count=0;
   
   return ESMF_SUCCESS;
 
-}  // end AttributeGet(char)
+}  // end AttributeGet(char)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGet"
@@ -2755,11 +2762,16 @@ int Attribute::count=0;
   if (!attr) {
     ESMC_LogDefault.Write(
       "Attribute not found, using default value if present", ESMC_LOG_INFO);
-    return localrc;
+// took this out because i think it should return success if not an error.. 
+//    return localrc;
   }
   else {
     // simple sanity checks
-    if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
+    if (attr->tk == ESMF_NOKIND) {
+      ESMC_LogDefault.Write(
+        "Attribute not set, will return empty vector", ESMC_LOG_INFO);
+    }
+    else if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind CHARACTER", &localrc);
       return localrc;
@@ -3025,7 +3037,7 @@ int Attribute::count=0;
   if (!(attr->vcpp).empty()) {
   for (i=0; i<count; i++) 
     lens[i] = (attr->vcpp[i]).size();
-  } else if (!(attr->vcp).empty()) lens[0] = (attr->vcp).size();
+  } //else if (!(attr->vcp).empty()) lens[0] = (attr->vcp).size();
   else lens[0] = 0;
 
   return ESMF_SUCCESS;
@@ -3443,7 +3455,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeSet
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
 //BOPI
@@ -3472,7 +3484,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_I4, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_I4, 1, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3485,7 +3497,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeSet(int)
+}  // end AttributeSet(int)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
@@ -3530,7 +3542,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeSet(int *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
 //BOPI
@@ -3559,7 +3571,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_I8, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_I8, 1, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3572,7 +3584,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeSet(ESMC_I8)
+}  // end AttributeSet(ESMC_I8)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
@@ -3617,7 +3629,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeSet(ESMC_I8 *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
 //BOPI
@@ -3646,7 +3658,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_R4, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_R4, 1, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3659,7 +3671,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeSet(ESMC_R4)
+}  // end AttributeSet(ESMC_R4)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
@@ -3704,7 +3716,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeSet(ESMC_R4 *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
 //BOPI
@@ -3733,7 +3745,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_R8, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_R8, 1, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3746,7 +3758,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeSet(ESMC_R8)
+}  // end AttributeSet(ESMC_R8)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
@@ -3791,7 +3803,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeSet(ESMC_R8 *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
 //BOPI
@@ -3820,7 +3832,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, &value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, 1, &value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3833,7 +3845,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeSet(ESMC_Logical)
+}  // end AttributeSet(ESMC_Logical)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
@@ -3878,7 +3890,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
 
 }  // end AttributeSet(ESMC_Logical *)
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
 //BOPI
@@ -3907,7 +3919,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, value);  
+  attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, 1, value);  
   if (!attr) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
@@ -3920,7 +3932,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
-}  // end AttributeSet(char)
+}  // end AttributeSet(char)*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeSet"
@@ -4299,21 +4311,21 @@ int Attribute::count=0;
         fprintf(tab,"%s",msgbuf);
       } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
-          sprintf(msgbuf, "%-*d\t",tlen,attrList.at(i)->vi);
+          sprintf(msgbuf, "%-*d\t",tlen,attrList.at(i)->vip.at(0));
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8) 
-          sprintf(msgbuf, "%-*lld\t",tlen,attrList.at(i)->vl); 
+          sprintf(msgbuf, "%-*lld\t",tlen,attrList.at(i)->vlp.at(0)); 
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4) 
-          sprintf(msgbuf, "%-*f\t",tlen,attrList.at(i)->vf);  
+          sprintf(msgbuf, "%-*f\t",tlen,attrList.at(i)->vfp.at(0));  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8) 
-          sprintf(msgbuf, "%-*g\t",tlen,attrList.at(i)->vd);  
+          sprintf(msgbuf, "%-*g\t",tlen,attrList.at(i)->vdp.at(0));  
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL) {
-          if (attrList.at(i)->vb == ESMF_TRUE) 
+          if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) 
             sprintf(msgbuf, "%-*s\t",tlen,"true");
-          else if (attrList.at(i)->vb == ESMF_FALSE)
+          else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE)
             sprintf(msgbuf, "%-*s\t",tlen,"false");
         }
         else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
-          sprintf(msgbuf, "%-*s\t",tlen,attrList.at(i)->vcp.c_str());
+          sprintf(msgbuf, "%-*s\t",tlen,attrList.at(i)->vcpp.at(0).c_str());
         else
           sprintf(msgbuf, "%-*s\t",tlen,"N/A");
         fprintf(tab,"%s",msgbuf);
@@ -4476,7 +4488,7 @@ int Attribute::count=0;
       string attPackInstanceName;
       attr = (AttPackGet(convention, purpose, object,attPackInstanceName)->AttPackGetAttribute("ComponentShortName"));
       if (attr != NULL) {
-        modelcompname = attr->vcp;
+        modelcompname = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4503,7 +4515,7 @@ int Attribute::count=0;
       string attPackInstanceName;
       attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("ComponentLongName"));
       if (attr != NULL) {
-        fullname = attr->vcp;
+        fullname = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4530,7 +4542,7 @@ int Attribute::count=0;
       string attPackInstanceName;
       attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("Version"));
       if (attr != NULL) {
-        version = attr->vcp;
+        version = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4870,41 +4882,41 @@ int Attribute::count=0;
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
-            outstring << attrList.at(i)->vi; 
+            outstring << attrList.at(i)->vip.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
-            outstring << attrList.at(i)->vl; 
+            outstring << attrList.at(i)->vlp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
-            outstring << attrList.at(i)->vf; 
+            outstring << attrList.at(i)->vfp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
-            outstring << attrList.at(i)->vd; 
+            outstring << attrList.at(i)->vdp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
-            if (attrList.at(i)->vb == ESMF_TRUE) {
+            if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 2, 0);
               ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-            } else if (attrList.at(i)->vb == ESMF_FALSE) {
+            } else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 2, 0);
               ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
-            localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 2, 0);
+            localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 2, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
@@ -4972,41 +4984,41 @@ int Attribute::count=0;
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
-            outstring << attrList.at(i)->vi; 
+            outstring << attrList.at(i)->vip.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
-            outstring << attrList.at(i)->vl; 
+            outstring << attrList.at(i)->vlp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
-            outstring << attrList.at(i)->vf; 
+            outstring << attrList.at(i)->vfp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
-            outstring << attrList.at(i)->vd; 
+            outstring << attrList.at(i)->vdp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
-            if (attrList.at(i)->vb == ESMF_TRUE) {
+            if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 3, 0);
               ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-            } else if (attrList.at(i)->vb == ESMF_FALSE) {
+            } else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 3, 0);
               ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
-            localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 3, 0);
+            localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 3, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
@@ -5142,8 +5154,10 @@ int Attribute::count=0;
 
   int localrc;
   Attribute *attpack = NULL;
-  string value;
   static int callCount=0;
+
+  vector<string> valuevector;
+  string value;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -5160,17 +5174,32 @@ int Attribute::count=0;
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("ShortName")) {
-    localrc = attpack->AttributeGet("ShortName", &value);
+    localrc = attpack->AttributeGet("ShortName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("shortName", value, indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("LongName")) {
-    localrc = attpack->AttributeGet("LongName", &value);
+    localrc = attpack->AttributeGet("LongName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("longName", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("Description")) {
-    localrc = attpack->AttributeGet("Description", &value);
+    localrc = attpack->AttributeGet("Description", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("description", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5199,7 +5228,12 @@ int Attribute::count=0;
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
  
   if (attpack->AttributeIsSet("ReleaseDate")) {
-    localrc = attpack->AttributeGet("ReleaseDate", &value);
+    localrc = attpack->AttributeGet("ReleaseDate", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("releaseDate", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5210,7 +5244,12 @@ int Attribute::count=0;
  
   // <onlineResource>
   if (attpack->AttributeIsSet("URL")) {
-    localrc = attpack->AttributeGet("URL", &value);
+    localrc = attpack->AttributeGet("URL", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeStartElement("onlineResource", "", indent, 0); 
     localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0); 
     localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0); 
@@ -5253,7 +5292,12 @@ int Attribute::count=0;
   }
 
   if (attpack->AttributeIsSet("ModelType")) {
-    localrc = attpack->AttributeGet("ModelType", &value);
+    localrc = attpack->AttributeGet("ModelType", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("type", "", indent, 3,
                                    "cv", "true", 
                                    "open", "true", 
@@ -5269,7 +5313,12 @@ int Attribute::count=0;
 
   // <documentGenealogy>
   if (attpack->AttributeIsSet("PreviousVersionDescription")) {
-    localrc = attpack->AttributeGet("PreviousVersionDescription", &value);
+    localrc = attpack->AttributeGet("PreviousVersionDescription", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeStartElement("documentGenealogy", "", indent, 0);
     localrc = io_xml->writeStartElement("relationship", "", ++indent, 0);
     localrc = io_xml->writeStartElement("documentRelationship", "", ++indent, 2,
@@ -5281,7 +5330,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("PreviousVersion")) {
-    localrc = attpack->AttributeGet("PreviousVersion", &value);
+    localrc = attpack->AttributeGet("PreviousVersion", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeStartElement("target", "", indent, 0);
     localrc = io_xml->writeStartElement("reference", "", ++indent, 0);
     localrc = io_xml->writeElement("name", value, ++indent, 0);
@@ -5323,6 +5377,8 @@ int Attribute::count=0;
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL;
+
+  vector<string> valuevector;
   string value;
 
   // Initialize local return code; assume routine not implemented
@@ -5337,17 +5393,32 @@ int Attribute::count=0;
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("SimulationRationale")) {
-    localrc = attpack->AttributeGet("SimulationRationale", &value);
+    localrc = attpack->AttributeGet("SimulationRationale", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("rationale", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationShortName")) {
-    localrc = attpack->AttributeGet("SimulationShortName", &value);
+    localrc = attpack->AttributeGet("SimulationShortName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("shortName", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationLongName")) {
-    localrc = attpack->AttributeGet("SimulationLongName", &value);
+    localrc = attpack->AttributeGet("SimulationLongName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("longName", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5372,12 +5443,22 @@ int Attribute::count=0;
   localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
   localrc = io_xml->writeStartElement("openDateRange", "", 3, 0);
   if (attpack->AttributeIsSet("SimulationDuration")) {
-    localrc = attpack->AttributeGet("SimulationDuration", &value);
+    localrc = attpack->AttributeGet("SimulationDuration", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("duration", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationStartDate")) {
-    localrc = attpack->AttributeGet("SimulationStartDate", &value);
+    localrc = attpack->AttributeGet("SimulationStartDate", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("startDate", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5423,6 +5504,8 @@ int Attribute::count=0;
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL;
+
+  vector<string> valuevector, machineNameVector, compilerNameVector;
   string value, machineName, compilerName;
 
   // Initialize local return code; assume routine not implemented
@@ -5438,15 +5521,30 @@ int Attribute::count=0;
 
   if (attpack->AttributeIsSet("MachineName") &&
       attpack->AttributeIsSet("CompilerName")) {
-    localrc = attpack->AttributeGet("MachineName", &machineName);
-    localrc = attpack->AttributeGet("CompilerName", &compilerName);
+    localrc = attpack->AttributeGet("MachineName", &machineNameVector);
+    if (machineNameVector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    machineName = machineNameVector.at(0);
+    localrc = attpack->AttributeGet("CompilerName", &compilerNameVector);
+    if (compilerNameVector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    compilerName = compilerNameVector.at(0);
     localrc = io_xml->writeElement("shortName", machineName + compilerName, 2, 0);
     localrc = io_xml->writeElement("longName", "Machine " + machineName +
                                    " and compiler " + compilerName, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineDescription")) {
-    localrc = attpack->AttributeGet("MachineDescription", &value);
+    localrc = attpack->AttributeGet("MachineDescription", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("description", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5455,17 +5553,32 @@ int Attribute::count=0;
   localrc = io_xml->writeStartElement("machine", "", 3, 0);
 
   if (attpack->AttributeIsSet("MachineName")) {
-    localrc = attpack->AttributeGet("MachineName", &value);
+    localrc = attpack->AttributeGet("MachineName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineName", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineSystem")) {
-    localrc = attpack->AttributeGet("MachineSystem", &value);
+    localrc = attpack->AttributeGet("MachineSystem", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineSystem", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineOperatingSystem")) {
-    localrc = attpack->AttributeGet("MachineOperatingSystem", &value);
+    localrc = attpack->AttributeGet("MachineOperatingSystem", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineOperatingSystem", "", 4, 3,
                                    "cv", "true",
                                    "open", "true",
@@ -5473,7 +5586,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineVendor")) {
-    localrc = attpack->AttributeGet("MachineVendor", &value);
+    localrc = attpack->AttributeGet("MachineVendor", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineVendor", "", 4, 3,
                                    "cv", "true",
                                    "open", "true",
@@ -5481,7 +5599,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineInterconnectType")) {
-    localrc = attpack->AttributeGet("MachineInterconnectType", &value);
+    localrc = attpack->AttributeGet("MachineInterconnectType", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineInterconnect", "", 4, 3,
                                    "cv", "true",
                                    "open", "true",
@@ -5489,17 +5612,32 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineMaximumProcessors")) {
-    localrc = attpack->AttributeGet("MachineMaximumProcessors", &value);
+    localrc = attpack->AttributeGet("MachineMaximumProcessors", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineMaximumProcessors", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineCoresPerProcessor")) {
-    localrc = attpack->AttributeGet("MachineCoresPerProcessor", &value);
+    localrc = attpack->AttributeGet("MachineCoresPerProcessor", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineCoresPerProcessor", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineProcessorType")) {
-    localrc = attpack->AttributeGet("MachineProcessorType", &value);
+    localrc = attpack->AttributeGet("MachineProcessorType", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("machineProcessorType", "", 4, 3,
                                    "cv", "true",
                                    "open", "true",
@@ -5510,13 +5648,23 @@ int Attribute::count=0;
   localrc = io_xml->writeEndElement("machine", 3);
 
   if (attpack->AttributeIsSet("CompilerName")) {
-    localrc = attpack->AttributeGet("CompilerName", &value);
+    localrc = attpack->AttributeGet("CompilerName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeStartElement("compiler", "", 3, 0);
     localrc = io_xml->writeElement("compilerName", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("CompilerVersion")) {
-    localrc = attpack->AttributeGet("CompilerVersion", &value);
+    localrc = attpack->AttributeGet("CompilerVersion", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
     localrc = io_xml->writeElement("compilerVersion", value, 4, 0);
     localrc = io_xml->writeEndElement("compiler", 3);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -5566,6 +5714,8 @@ int Attribute::count=0;
 
   int localrc;
   Attribute *attpack = NULL;
+
+  vector<string> valuevector;
   string value;
 
   // Initialize local return code; assume routine not implemented
@@ -5583,11 +5733,21 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
-      localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
+      localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
       if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
       if (value == "center" || value == "funder") {
         if (attpack->AttributeIsSet("Name")) {
-          localrc = attpack->AttributeGet("Name", &value);
+          localrc = attpack->AttributeGet("Name", &valuevector);
+          if (valuevector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value = valuevector.at(0);
           localrc = io_xml->writeStartElement("gmd:organisationName", "", indent, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -5597,7 +5757,12 @@ int Attribute::count=0;
         }
       } else if (value == "PI" || value == "author" || value == "contact") {
         if (attpack->AttributeIsSet("Name")) {
-          localrc = attpack->AttributeGet("Name", &value);
+          localrc = attpack->AttributeGet("Name", &valuevector);
+          if (valuevector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value = valuevector.at(0);
           localrc = io_xml->writeStartElement("gmd:individualName", "", indent, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -5623,7 +5788,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("PhysicalAddress")) {
-      localrc = attpack->AttributeGet("PhysicalAddress", &value);
+      localrc = attpack->AttributeGet("PhysicalAddress", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else { // output empty tag (required)
@@ -5637,7 +5807,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("EmailAddress")) {
-      localrc = attpack->AttributeGet("EmailAddress", &value);
+      localrc = attpack->AttributeGet("EmailAddress", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else {  // output empty tag (required)
@@ -5661,7 +5836,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("URL")) {
-      localrc = attpack->AttributeGet("URL", &value);
+      localrc = attpack->AttributeGet("URL", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else { // output empty tag (required)
@@ -5683,7 +5863,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
-      localrc = attpack->AttributeGet("ResponsiblePartyRole", &value);
+      localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
       if (value == "center") value = "centre";
       localrc = io_xml->writeStartElement("gmd:role", "", indent, 0);
@@ -5699,7 +5884,12 @@ int Attribute::count=0;
 
     // get initials from IndividualName
     if (attpack->AttributeIsSet("Name")) {
-      localrc = attpack->AttributeGet("Name", &value);
+      localrc = attpack->AttributeGet("Name", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       char s[2*ESMF_MAXSTR], abbr[ESMF_MAXSTR], *p;
       int i;
       strcpy(s, value.c_str());
@@ -5744,6 +5934,8 @@ int Attribute::count=0;
 
   int localrc;
   Attribute *attpack = NULL, *ap;
+
+  vector<string> valuevector;
   string value;
 
   // Initialize local return code; assume routine not implemented
@@ -5771,7 +5963,12 @@ int Attribute::count=0;
       // found CIM/Inputs package, now write its set attributes
       if (((ap = attpack->AttPackGetAttribute("Intent")) != NULL) &&
            (ap->parent->AttributeIsSet("Intent"))) {
-        localrc = ap->parent->AttributeGet("Intent", &value);
+        localrc = ap->parent->AttributeGet("Intent", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             2, "intent", value.c_str(), 
                                             "represented", "true");
@@ -5783,19 +5980,34 @@ int Attribute::count=0;
       }
       if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
            (ap->parent->AttributeIsSet("ShortName"))) {
-        localrc = ap->parent->AttributeGet("ShortName", &value);
+        localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
         localrc = io_xml->writeElement("shortName", value, indent+2, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
            (ap->parent->AttributeIsSet("LongName"))) {
-        localrc = ap->parent->AttributeGet("LongName", &value);
+        localrc = ap->parent->AttributeGet("LongName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
         localrc = io_xml->writeElement("longName", value, indent+2, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
            (ap->parent->AttributeIsSet("Units"))) {
-        localrc = ap->parent->AttributeGet("Units", &value);
+        localrc = ap->parent->AttributeGet("Units", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
         localrc = io_xml->writeElement("units", "", indent+2, 3,
                                        "cv", "true", "open", "true", 
                                        "value", value.c_str());
@@ -5803,7 +6015,12 @@ int Attribute::count=0;
       }
       if (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
            (ap->parent->AttributeIsSet("StandardName"))) {
-        localrc = ap->parent->AttributeGet("StandardName", &value);
+        localrc = ap->parent->AttributeGet("StandardName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
         localrc = io_xml->writeElement("standardName", "", indent+2, 3,
                                        "cv", "true", "open", "true", 
                                        "value", value.c_str());
@@ -5839,6 +6056,8 @@ int Attribute::count=0;
 
   int localrc;
   Attribute *attpack = NULL;
+
+  vector<string> valuevector;
   string value;
 
   // Initialize local return code; assume routine not implemented
@@ -5866,7 +6085,12 @@ int Attribute::count=0;
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ShortTitle")) {
-      localrc = attpack->AttributeGet("ShortTitle", &value);
+      localrc = attpack->AttributeGet("ShortTitle", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:title", "", ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -5875,7 +6099,12 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("Date")) {
-      localrc = attpack->AttributeGet("Date", &value);
+      localrc = attpack->AttributeGet("Date", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:date", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeStartElement("gmd:CI_Date", "", ++indent, 0);
@@ -5901,7 +6130,12 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("PresentationForm")) {
-      localrc = attpack->AttributeGet("PresentationForm", &value);
+      localrc = attpack->AttributeGet("PresentationForm", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", value,
@@ -5913,7 +6147,12 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("DOI")) {
-      localrc = attpack->AttributeGet("DOI", &value);
+      localrc = attpack->AttributeGet("DOI", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:otherCitationDetails", "", 
                                           indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -5923,7 +6162,12 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (attpack->AttributeIsSet("LongTitle")) {
-      localrc = attpack->AttributeGet("LongTitle", &value);
+      localrc = attpack->AttributeGet("LongTitle", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -5962,6 +6206,8 @@ int Attribute::count=0;
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL, *ap;
+
+  vector<string> valuevector, value2vector;
   string value, value2;
 
   // Initialize local return code; assume routine not implemented
@@ -5977,13 +6223,23 @@ int Attribute::count=0;
         continue; // skip non-CIM fields
       } else {
         if (attpack->AttributeIsSet("CouplingPurpose")) {
-          localrc = attpack->AttributeGet("CouplingPurpose", &value);
+          localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
           localrc = io_xml->writeStartElement("coupling", "", 3, 2,
                        "fullySpecified", "false", "purpose", value.c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
         if (attpack->AttributeIsSet("Frequency")) {
-          localrc = attpack->AttributeGet("Frequency", &value);
+          localrc = attpack->AttributeGet("Frequency", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
           char s[2*ESMF_MAXSTR], *freq, *units;
           strcpy(s, value.c_str());
           freq = strtok(s, " ");
@@ -6006,8 +6262,18 @@ int Attribute::count=0;
         }
         if (attpack->AttributeIsSet("SpatialRegriddingMethod") &&
             attpack->AttributeIsSet("SpatialRegriddingDimension")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value);
-          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&value2);
+          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&value2vector);
+    if (value2vector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value2 = value2vector.at(0);
           transform(value.begin(), value.end(), value.begin(), ::tolower);
           transform(value2.begin(), value2.end(), value2.begin(), ::toupper);
           localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
@@ -6019,7 +6285,12 @@ int Attribute::count=0;
           localrc = io_xml->writeEndElement("spatialRegridding", 4);
         }
         if (attpack->AttributeIsSet("TimeTransformationType")) {
-          localrc = attpack->AttributeGet("TimeTransformationType", &value);
+          localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
           localrc = io_xml->writeStartElement("timeTransformation", "", 4, 0);
           localrc = io_xml->writeElement("mappingType", "", 5, 3,
                                          "cv", "true", 
@@ -6028,7 +6299,12 @@ int Attribute::count=0;
           localrc = io_xml->writeEndElement("timeTransformation", 4);
         }
         if (attpack->AttributeIsSet("CouplingSource")) {
-          localrc = attpack->AttributeGet("CouplingSource", &value);
+          localrc = attpack->AttributeGet("CouplingSource", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
           localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
           localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
           localrc = io_xml->writeStartElement("reference", "", 6, 0);
@@ -6038,7 +6314,12 @@ int Attribute::count=0;
           localrc = io_xml->writeEndElement("couplingSource", 4);
         }
         if (attpack->AttributeIsSet("CouplingTarget")) {
-          localrc = attpack->AttributeGet("CouplingTarget", &value);
+          localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
           localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
           localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
           localrc = io_xml->writeStartElement("reference", "", 6, 0);
@@ -6048,7 +6329,12 @@ int Attribute::count=0;
           localrc = io_xml->writeEndElement("couplingTarget", 4);
         }
         if ((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) {
-          localrc = ap->parent->AttributeGet("ShortName", &value);
+          localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
           localrc = io_xml->writeStartElement("connection", "", 4, 0);
           localrc = io_xml->writeStartElement("connectionTarget", "", 5, 0);
           localrc = io_xml->writeStartElement("dataSource", "", 6, 0);
@@ -6237,41 +6523,41 @@ int Attribute::count=0;
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
-            outstring << attrList.at(i)->vi; 
+            outstring << attrList.at(i)->vip.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
-            outstring << attrList.at(i)->vl; 
+            outstring << attrList.at(i)->vlp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
-            outstring << attrList.at(i)->vf; 
+            outstring << attrList.at(i)->vfp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
-            outstring << attrList.at(i)->vd; 
+            outstring << attrList.at(i)->vdp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
-            if (attrList.at(i)->vb == ESMF_TRUE) {
+            if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 4, 0);
               ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-            } else if (attrList.at(i)->vb == ESMF_FALSE) {
+            } else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 4, 0);
               ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
-            localrc = io_xml->writeElement(name, attrList.at(i)->vcp, 4, 0);
+            localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 4, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
 
@@ -6389,7 +6675,7 @@ int Attribute::count=0;
       if (attrPurpose.compare("sourceInfo")==0) {
         if (attrList.at(i)->attrName.compare("siteCode")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 3, 2,
+                                         attrList.at(i)->vcpp.at(0), 3, 2,
                                   "network", "LittleBearRiver", "siteID", "2");
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("latitude")==0) {
@@ -6399,11 +6685,11 @@ int Attribute::count=0;
                             "xsi:type", "LatLonPointType", "srs", "EPSG:4269");
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 5, 0);
+                                         attrList.at(i)->vcpp.at(0), 5, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("longitude")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 5, 0);
+                                         attrList.at(i)->vcpp.at(0), 5, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("geogLocation", 4);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -6413,11 +6699,11 @@ int Attribute::count=0;
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 5, 0);
+                                         attrList.at(i)->vcpp.at(0), 5, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("Y")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 5, 0);
+                                         attrList.at(i)->vcpp.at(0), 5, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement("localSiteXY", 4);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -6426,47 +6712,47 @@ int Attribute::count=0;
         } else if (attrList.at(i)->attrName.compare("County")==0 ||
                    attrList.at(i)->attrName.compare("State")==0  ||
                    attrList.at(i)->attrName.compare("Site Comments")==0) {
-          localrc = io_xml->writeElement("note", attrList.at(i)->vcp, 3, 1,
+          localrc = io_xml->writeElement("note", attrList.at(i)->vcpp.at(0), 3, 1,
                             "title", attrList.at(i)->attrName.c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else { // siteName or verticalDatum
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 3, 0);
+                                         attrList.at(i)->vcpp.at(0), 3, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       } else if (attrPurpose.compare("variable")==0) {
         if (attrList.at(i)->attrName.compare("variableCode")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 3, 3,
+                                         attrList.at(i)->vcpp.at(0), 3, 3,
                             "vocabulary", "LBR", "default", "true",
                             "variableID", "39");
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("units")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName, 
-                                         attrList.at(i)->vcp, 3, 2,
+                                         attrList.at(i)->vcpp.at(0), 3, 2,
                             "unitsAbbreviation", "mg/L", "unitsCode", "199");
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else if (attrList.at(i)->attrName.compare("timeSupport")==0) {
           localrc = io_xml->writeStartElement(attrList.at(i)->attrName, "", 3, 1,
-                            "isRegular", (attrList.at(i)->vcp).c_str());
+                            "isRegular", (attrList.at(i)->vcpp.at(0)).c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement(attrList.at(i)->attrName, 3);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 3, 0);
+                                         attrList.at(i)->vcpp.at(0), 3, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
       } else if (attrPurpose.compare("values")==0) {
         // collect attr names, values to output at end of loop
         xmlAttName[xmlAttCount] = attrList.at(i)->attrName;
-        xmlAttVal[xmlAttCount]  = attrList.at(i)->vcp;
+        xmlAttVal[xmlAttCount]  = attrList.at(i)->vcpp.at(0);
         xmlAttCount++;
       } else if (attrPurpose.compare((attrPurpose.size()-2),2,".1")==0) {
         // <value>
         // collect attr names, values to output at end of loop
         xmlAttName[xmlAttCount] = attrList.at(i)->attrName;
-        xmlAttVal[xmlAttCount]  = attrList.at(i)->vcp;
+        xmlAttVal[xmlAttCount]  = attrList.at(i)->vcpp.at(0);
         xmlAttCount++;
         if (attrList.at(i)->attrName.compare("sampleID")==0) {
           // TODO: get value from array here
@@ -6477,11 +6763,11 @@ int Attribute::count=0;
         if (attrList.at(i)->attrName.compare("methodID")==0) {
           localrc = io_xml->writeStartElement(attrPurpose, "", 3, 1,
                         attrList.at(i)->attrName.c_str(),
-                        attrList.at(i)->vcp.c_str());
+                        attrList.at(i)->vcpp.at(0).c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 4, 0);
+                                         attrList.at(i)->vcpp.at(0), 4, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeEndElement(attrPurpose, 3);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -6490,11 +6776,11 @@ int Attribute::count=0;
         if (attrList.at(i)->attrName.compare("sourceID")==0) {
           localrc = io_xml->writeStartElement(attrPurpose, "", 3, 1,
                         attrList.at(i)->attrName.c_str(),
-                        attrList.at(i)->vcp.c_str());
+                        attrList.at(i)->vcpp.at(0).c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
-                                         attrList.at(i)->vcp, 4, 0);
+                                         attrList.at(i)->vcpp.at(0), 4, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           if (attrList.at(i)->attrName.compare("SourceDescription")==0) {
             localrc = io_xml->writeStartElement("ContactInformation", "", 4, 0);
@@ -6608,17 +6894,17 @@ int Attribute::count=0;
       printf("%s",msgbuf);
       ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
              if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
-                 sprintf(msgbuf, "%d\n", attrList.at(i)->vi); 
+                 sprintf(msgbuf, "%d\n", attrList.at(i)->vip.at(0)); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8)
-                 sprintf(msgbuf, "%lld\n", attrList.at(i)->vl); 
+                 sprintf(msgbuf, "%lld\n", attrList.at(i)->vlp.at(0)); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_R4)
-                 sprintf(msgbuf, "%f\n", attrList.at(i)->vf); 
+                 sprintf(msgbuf, "%f\n", attrList.at(i)->vfp.at(0)); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_R8)
-                 sprintf(msgbuf, "%g\n", attrList.at(i)->vd); 
+                 sprintf(msgbuf, "%g\n", attrList.at(i)->vdp.at(0)); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL)
-                 sprintf(msgbuf, "%s\n", ESMC_LogicalString(attrList.at(i)->vb)); 
+                 sprintf(msgbuf, "%s\n", ESMC_LogicalString(attrList.at(i)->vbp.at(0))); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER)
-                 sprintf(msgbuf, "%s\n", attrList.at(i)->vcp.c_str());
+                 sprintf(msgbuf, "%s\n", attrList.at(i)->vcpp.at(0).c_str());
              else{ 
                  sprintf(msgbuf, "unknown value");
                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, msgbuf, &localrc);
@@ -6738,15 +7024,15 @@ int Attribute::count=0;
   packList.reserve(0);
   linkList.reserve(0);
 
-  vi = 0;
+//vi = 0;
   vip.reserve(0);
-  vl = 0;
+//vl = 0;
   vlp.reserve(0);
-  vf = 0;
+//vf = 0;
   vfp.reserve(0);
-  vd = 0;
+//vd = 0;
   vdp.reserve(0);
-  vb = ESMF_FALSE;
+//vb = ESMF_FALSE;
   vbp.reserve(0);
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
@@ -6803,15 +7089,15 @@ int Attribute::count=0;
   packList.reserve(0);
   linkList.reserve(0);
 
-  vi = 0;
+//vi = 0;
   vip.reserve(0);
-  vl = 0;
+//vl = 0;
   vlp.reserve(0);
-  vf = 0;
+//vf = 0;
   vfp.reserve(0);
-  vd = 0;
+//vd = 0;
   vdp.reserve(0);
-  vb = ESMF_FALSE;
+//vb = ESMF_FALSE;
   vbp.reserve(0);
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
@@ -6860,15 +7146,15 @@ int Attribute::count=0;
   packList.reserve(0);
   linkList.reserve(0);
 
-  vi = 0;
+//vi = 0;
   vip.reserve(0);
-  vl = 0;
+//vl = 0;
   vlp.reserve(0);
-  vf = 0;
+//vf = 0;
   vfp.reserve(0);
-  vd = 0;
+//vd = 0;
   vdp.reserve(0);
-  vb = ESMF_FALSE;
+//vb = ESMF_FALSE;
   vbp.reserve(0);
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
@@ -6917,15 +7203,15 @@ int Attribute::count=0;
   packList.reserve(0);
   linkList.reserve(0);
 
-  vi = 0;
+//vi = 0;
   vip.reserve(0);
-  vl = 0;
+//vl = 0;
   vlp.reserve(0);
-  vf = 0;
+//vf = 0;
   vfp.reserve(0);
-  vd = 0;
+//vd = 0;
   vdp.reserve(0);
-  vb = ESMF_FALSE;
+//vb = ESMF_FALSE;
   vbp.reserve(0);
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
@@ -6978,15 +7264,15 @@ int Attribute::count=0;
   packList.reserve(0);
   linkList.reserve(0);
   
-  vi = 0;
+//vi = 0;
   vip.reserve(0);
-  vl = 0;
+//vl = 0;
   vlp.reserve(0);
-  vf = 0;
+//vf = 0;
   vfp.reserve(0);
-  vd = 0;
+//vd = 0;
   vdp.reserve(0);
-  vb = ESMF_FALSE;
+//vb = ESMF_FALSE;
   vbp.reserve(0);
  
     // alloc space for a list and do the copy
@@ -7026,7 +7312,7 @@ int Attribute::count=0;
   id = ++count;  // TODO: inherit from ESMC_Base class?
 
  } // end Attribute
-//-----------------------------------------------------------------------------
+/*//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "Attribute()"
 //BOPI
@@ -7100,7 +7386,7 @@ int Attribute::count=0;
 
   id = ++count;  // TODO: inherit from ESMC_Base class?
 
- } // end Attribute
+ } // end Attribute*/
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttrModifyValue()"
@@ -7128,7 +7414,7 @@ int Attribute::count=0;
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  if (numitems == 1) {
+/*  if (numitems == 1) {
       if (datap) {
             if (typekind == ESMC_TYPEKIND_I4)
                 vi = *(static_cast<ESMC_I4*> (datap));  
@@ -7144,7 +7430,7 @@ int Attribute::count=0;
                 vcp = *(static_cast<string*> (datap));
       }
 
-   } else if (numitems > 1) {
+   } else if (numitems > 1) {*/
         if (typekind == ESMC_TYPEKIND_I4) {
             vip.clear();
             vip.reserve(numitems);      
@@ -7183,7 +7469,7 @@ int Attribute::count=0;
                 vcpp.push_back((*(static_cast<vector<string>*> (datap)))[i]);
             }
         }
-  }
+//}
  
   // if a change was made, note the new values
   if (numitems >= 1) {
@@ -7252,14 +7538,14 @@ int Attribute::count=0;
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
 
-  if (items > 1) {
+//if (items > 1) {
         if (tk == ESMC_TYPEKIND_I4) vip.clear();
         else if (tk == ESMC_TYPEKIND_I8) vlp.clear();
         else if (tk == ESMC_TYPEKIND_R4) vfp.clear();
         else if (tk == ESMC_TYPEKIND_R8) vdp.clear();  
         else if (tk == ESMC_TYPEKIND_LOGICAL) vbp.clear();
         else if (tk == ESMC_TYPEKIND_CHARACTER) vcpp.clear();
-  }
+//}
 
   for (i=0; i<attrList.size(); i++)
     delete attrList.at(i);
@@ -7340,7 +7626,7 @@ int Attribute::count=0;
     packList.reserve(packCount);
 //    linkList.reserve(linkCount);
 
-    if (items == 1) {
+/*    if (items == 1) {
       if (tk == ESMC_TYPEKIND_I4) {
         DESERIALIZE_VAR(buffer,loffset,vi,ESMC_I4); }
       else if (tk == ESMC_TYPEKIND_I8) {
@@ -7356,7 +7642,7 @@ int Attribute::count=0;
         DESERIALIZE_VARC(buffer,loffset,vcp,temp5,chars); 
       }
     }
-    if (items > 1) { 
+    if (items > 1) { */
       if (tk == ESMC_TYPEKIND_I4) {
         vip.reserve(items);
         for (i=0; i<items; i++) {
@@ -7406,7 +7692,7 @@ int Attribute::count=0;
             vcpp.push_back(vcppTemp);
           }
         }
-    }
+ //}
 
     // make sure loffset is aligned correctly
     nbytes=loffset%8;
@@ -7564,7 +7850,7 @@ int Attribute::count=0;
       SERIALIZE_VAR(cc,buffer,offset,packList.size(),int);
 //      SERIALIZE_VAR(cc,buffer,offset,linkList.size(),int);
 
-      if (items == 1) {
+/*      if (items == 1) {
         if (tk == ESMC_TYPEKIND_I4) {
           SERIALIZE_VAR(cc,buffer,offset,vi,ESMC_I4); }
         else if (tk == ESMC_TYPEKIND_I8) {
@@ -7580,7 +7866,7 @@ int Attribute::count=0;
           SERIALIZE_VARC(cc,buffer,offset,vcp,(vcp.size()));
         }
       }
-      if (items > 1) { 
+      if (items > 1) { */
         if (tk == ESMC_TYPEKIND_I4) {
           for (i=0; i<items; i++) {
             SERIALIZE_VAR(cc,buffer,offset,vip[i],ESMC_I4);
@@ -7607,7 +7893,7 @@ int Attribute::count=0;
             SERIALIZE_VARC(cc,buffer,offset,vcpp[i],(vcpp[i].size())); 
           }
         }
-      }
+//}
 
       // make sure offset is aligned correctly
       nbytes=offset%8;

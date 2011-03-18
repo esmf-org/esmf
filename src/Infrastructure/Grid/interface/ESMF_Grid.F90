@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.205 2011/03/10 22:03:23 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.206 2011/03/18 22:22:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.205 2011/03/10 22:03:23 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.206 2011/03/18 22:22:34 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3713,7 +3713,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     type(ESMF_Grid) :: grid 
-    character(ESMF_MAXSTR) :: attrvalue, attPackInstanceName
+    integer, dimension(1) :: lens
+    character(ESMF_MAXSTR) :: attrName, attrValue, attPackInstanceName
     integer :: maxIndex(2), regDecomp(2)  ! TODO: allow more dimensions
     integer :: fileNameLen, localrc
     logical :: xercesPresent
@@ -3770,8 +3771,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! use C calls rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
     attPackInstancename = ""  ! get the 1st AttPack of type (conv, purp) on 'grid'
-    call c_ESMC_AttPackGetChar(grid, 'NX', attrValue, &
-                               'GridSpec', 'General', 'grid', &
+    attrName = "NX"
+    lens(1) = len(attrName)
+    call c_ESMC_AttPackGetCharList(grid, attrName, ESMF_TYPEKIND_CHARACTER, 1, lens, &
+                               attrValue, 'GridSpec', 'General', 'grid', &
                                attPackInstanceName, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
@@ -3788,8 +3791,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     end if
 
-    call c_ESMC_AttPackGetChar(grid, 'NY', attrValue, &
-                               'GridSpec', 'General', 'grid', &
+    attrName = "NY"
+    lens(1) = len(attrName)
+    call c_ESMC_AttPackGetCharList(grid, 'NY', ESMF_TYPEKIND_CHARACTER, 1, lens, &
+                               attrValue, 'GridSpec', 'General', 'grid', &
                                attPackInstanceName, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
@@ -3810,7 +3815,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! TODO:  make optional
     ! use C calls rather than F90, to circumvent mutually dependency
     ! between Grid and Attribute
-    call c_ESMC_AttributeGetChar(grid, 'RegDecompX', attrValue, localrc)
+    attrName = 'RegDecompX'
+    lens(1) = len(attrName)
+    call c_ESMC_AttributeGetCharList(grid, attrName, ESMF_TYPEKIND_CHARACTER, &
+            1, lens, attrValue, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
@@ -3826,7 +3834,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     end if
 
-    call c_ESMC_AttributeGetChar(grid, 'RegDecompY', attrValue, localrc)
+    attrName = 'RegDecompY'
+    lens(1) = len(attrName)
+    call c_ESMC_AttributeGetCharList(grid, attrName, ESMF_TYPEKIND_CHARACTER, &
+            1, lens, attrValue, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
