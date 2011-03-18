@@ -1,7 +1,8 @@
-# $Id: makefile,v 1.20 2008/09/26 21:11:38 cdeluca Exp $ 
+# $Id: makefile,v 1.21 2011/03/18 20:16:38 theurich Exp $ 
 
-ALL:  build_unit_tests
-run:  run_unit_tests
+ALL:     build_unit_tests
+run:     run_unit_tests
+run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/LogErr/tests
 
