@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.69 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.70 2011/03/18 20:20:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.69 2011/02/24 17:50:31 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.70 2011/03/18 20:20:52 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,7 +64,7 @@
       character(80) :: filename
       integer :: num_pets, my_pet, input_status, ran_num, rc2, k, i
       integer :: datetime_commbuf(8)
-      integer, pointer :: rndseed(:)
+      integer, allocatable :: rndseed(:)  ! cannot be pointer b/c absoft bug
       type(ESMF_Log) :: log2, log4, log6, log8
       character (5) :: random_chars
       character (9) :: msg_string, random_string
