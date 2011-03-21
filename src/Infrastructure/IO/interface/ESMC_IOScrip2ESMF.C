@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.6 2011/03/10 22:07:11 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.7 2011/03/21 18:01:18 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -299,7 +299,8 @@ void FTN(c_convertscrip)(
   int i,i1, j, k, totalnodes, count, fillvalue;
   FIELD *curr, *tmppt;
   int noarea, nocenter, nomask;
-  char *strbuf;
+  const char *strbuf;
+  char *strbuf2;
   size_t starts[2], counts[2];
   time_t tloc;
   int maxconnection;
@@ -565,9 +566,9 @@ void FTN(c_convertscrip)(
     status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
     if (status != NC_NOERR) handle_error(status);
     time(&tloc);
-    strbuf = ctime(&tloc);
-    strbuf[strlen(strbuf)-1] = '\0';
-    status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf), strbuf);
+    strbuf2 = ctime(&tloc);
+    strbuf2[strlen(strbuf2)-1] = '\0';
+    status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
     if (status != NC_NOERR) handle_error(status);
     
     status=nc_enddef(ncid2);
@@ -794,9 +795,9 @@ void FTN(c_convertscrip)(
   status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   time(&tloc);
-  strbuf = ctime(&tloc);
-  strbuf[strlen(strbuf)-1] = '\0';
-  status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf), strbuf);
+  strbuf2 = ctime(&tloc);
+  strbuf2[strlen(strbuf2)-1] = '\0';
+  status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
   if (status != NC_NOERR) handle_error(status);
 
   nc_enddef(ncid2);
