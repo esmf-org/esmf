@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.22 2011/01/12 23:28:42 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.23 2011/03/21 21:43:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,10 +39,10 @@ program ESMF_ArrayFarrayEx
 ! automatic from the user's perspective and the details of the allocation 
 ! (static or dynamic, heap or stack) are left to the compiler. (Compiler flags
 ! may be used to control some of the details). In the second case, i.e. for 
-! deferred-shape actual objects, the array definition must include the pointer 
-! or allocatable attribute and it is the user's responsibility to allocate 
+! deferred-shape actual objects, the array definition must include the {\tt pointer} 
+! or {\tt allocatable} attribute and it is the user's responsibility to allocate 
 ! memory. While it is also the user's responsibility to deallocate memory for
-! arrays with pointer attribute the compiler will automatically deallocate
+! arrays with the {\tt pointer} attribute the compiler will automatically deallocate
 ! allocatable arrays under certain circumstances defined by the Fortran
 ! standard.
 !
@@ -61,7 +61,7 @@ program ESMF_ArrayFarrayEx
 ! an error if its memory references have been invalidated. 
 
 ! The easiest, portable way to provide safe native Fortran memory allocations
-! to Array create is to use arrays with the pointer attribute. Memory allocated
+! to Array create is to use arrays with the {\tt pointer} attribute. Memory allocated
 ! for an array pointer will not be deallocated automatically. However, in this
 ! case the possibility of memory leaks becomes an issue of concern. The 
 ! deallocation of memory provided to an Array in form of a native Fortran
