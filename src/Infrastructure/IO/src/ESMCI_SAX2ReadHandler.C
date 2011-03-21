@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.8 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.9 2011/03/21 21:12:12 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ using std::exception;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.8 2011/01/05 20:05:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.9 2011/03/21 21:12:12 rokuingh Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -104,6 +104,8 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       string cvalue(value, strlen(value));
       cname.resize(cname.find_last_not_of(" ")+1);
       cvalue.resize(cvalue.find_last_not_of(" ")+1);
+      vector<string> valueVector;
+      valueVector.push_back(cvalue);
 
       if (cname.empty()) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -130,14 +132,14 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
         if (!this->convention.empty() && !this->purpose.empty()) {
           string attPackInstanceName;
           status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
-                                          &cvalue, this->convention,
+                                          &valueVector, this->convention,
                                                    this->purpose, 
                                                    this->object,
                                                    attPackInstanceName); 
           //cout << "setting xml attribute into AttPack" << endl;
         } else {
           // TODO:  handle one or the other (xor) of conv, purp (error) ?
-          status = this->attr->AttributeSet(cname, &cvalue);
+          status = this->attr->AttributeSet(cname, valueVector.size(), &valueVector);
           //cout << "setting xml loose attribute" << endl;
         }
         if (status != ESMF_SUCCESS) {
@@ -187,6 +189,8 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
 
       string cvalue(msg, length);
       cvalue.resize(cvalue.find_last_not_of(" ")+1);
+      vector<string> valueVector;
+      valueVector.push_back(cvalue);
 
       if (this->qname.empty()) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -205,14 +209,14 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
       if (!this->convention.empty() && !this->purpose.empty()) {
         string attPackInstanceName;
         status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
-                                        &cvalue, this->convention,
+                                        &valueVector, this->convention,
                                                  this->purpose, 
                                                  this->object,
                                                  attPackInstanceName); 
         //cout << "set xml element on AttPack" << endl;
       } else {
         // TODO:  handle one or the other (xor) of conv, purp (error) ?
-        status = this->attr->AttributeSet(this->qname, &cvalue);
+        status = this->attr->AttributeSet(this->qname, valueVector.size(), &valueVector);
         //cout << "set loose xml element, " << this->qname << "=" << cvalue << endl;
       }
       if (status != ESMF_SUCCESS) {

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.97 2011/03/18 22:22:32 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.98 2011/03/21 21:12:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.97 2011/03/18 22:22:32 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.98 2011/03/21 21:12:09 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4488,7 +4488,8 @@ int Attribute::count=0;
       string attPackInstanceName;
       attr = (AttPackGet(convention, purpose, object,attPackInstanceName)->AttPackGetAttribute("ComponentShortName"));
       if (attr != NULL) {
-        modelcompname = attr->vcpp.at(0);
+        if (attr->vcpp.empty()) modelcompname = "N/A";
+        else modelcompname = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4515,7 +4516,8 @@ int Attribute::count=0;
       string attPackInstanceName;
       attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("ComponentLongName"));
       if (attr != NULL) {
-        fullname = attr->vcpp.at(0);
+        if (attr->vcpp.empty()) fullname = "N/A";
+        else fullname = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -4542,7 +4544,8 @@ int Attribute::count=0;
       string attPackInstanceName;
       attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("Version"));
       if (attr != NULL) {
-        version = attr->vcpp.at(0);
+        if (attr->vcpp.empty()) version = "N/A";
+        else version = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
