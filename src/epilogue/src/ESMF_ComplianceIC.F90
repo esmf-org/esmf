@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.20 2011/03/15 22:39:40 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.21 2011/03/21 16:43:59 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -370,7 +370,7 @@ module ESMF_ComplianceICMod
 
     ! compliance check internal Clock
     call checkInternalClock(prefix, comp=comp, clock=clock, &
-      mustReachStop=.false., rc=rc)
+      mustMatchCurr=.false., mustReachStop=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -474,6 +474,14 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
       
+    ! compliance check internal Clock
+    call checkInternalClock(prefix, comp=comp, clock=clock, &
+      mustMatchCurr=.true., mustReachStop=.false., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    
     ! Stop Compliance Checking: RunPrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
@@ -526,7 +534,7 @@ module ESMF_ComplianceICMod
 
     ! compliance check internal Clock
     call checkInternalClock(prefix, comp=comp, clock=clock, &
-      mustReachStop=.true., rc=rc)
+      mustMatchCurr=.false., mustReachStop=.true., rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -670,14 +678,6 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    ! compliance check internal Clock
-    call checkInternalClock(prefix, comp=comp, clock=clock, &
-      mustReachStop=.true., rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    
     write(output,*) ">STOP FinalizeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOG_INFO, rc=rc)
@@ -1474,11 +1474,12 @@ module ESMF_ComplianceICMod
     
 !-------------------------------------------------------------------------
 
-  recursive subroutine checkInternalClock(prefix, comp, clock, mustReachStop, &
-    rc)
+  recursive subroutine checkInternalClock(prefix, comp, clock, mustMatchCurr, &
+    mustReachStop, rc)
     character(*), intent(in)                :: prefix
     type(ESMF_GridComp)                     :: comp
     type(ESMF_Clock), intent(in)            :: clock
+    logical,          intent(in)            :: mustMatchCurr
     logical,          intent(in)            :: mustReachStop
     integer,          intent(out), optional :: rc
     
@@ -1565,15 +1566,17 @@ module ESMF_ComplianceICMod
         return  ! bail out
       clockMatch = .false.
     endif
-      
-    if (stopTimeInt /= stopTime) then
-      call ESMF_LogWrite(trim(prefix)//" ==> stopTime of internal Clock does not match Clock!", &
-        ESMF_LOG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-      clockMatch = .false.
+    
+    if (mustMatchCurr) then
+      if (currTimeInt /= currTime) then
+        call ESMF_LogWrite(trim(prefix)//" ==> currTime of internal Clock does not match Clock!", &
+          ESMF_LOG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        clockMatch = .false.
+      endif
     endif
         
     if (clockMatch) then
