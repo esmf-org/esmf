@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.60 2010/11/03 22:48:48 theurich Exp $
+! $Id: user_model1.F90,v 1.61 2011/03/21 23:18:01 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -51,9 +51,12 @@ module user_model1
 
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
       call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
     endif
 #endif
 
