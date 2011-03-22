@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.14 2011/02/23 14:45:08 eschwab Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.15 2011/03/22 21:49:56 svasquez Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -289,7 +289,7 @@
 
     call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Comp 1 Finalize finished, rc =", rc
+    print *, "Comp 1 Finalize finished, rc =", rc, userrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -299,7 +299,7 @@
 
     call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Comp 2 Finalize finished, rc =", rc
+    print *, "Comp 2 Finalize finished, rc =", rc, userrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -310,7 +310,7 @@
     call ESMF_CplCompFinalize(cpl, importState=c1exp, &
       exportState=c2imp, clock=clock, &
       userRc=userrc, rc=localrc)
-    print *, "Coupler Finalize finished, rc =", rc
+    print *, "Coupler Finalize finished, rc =", rc, userrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
