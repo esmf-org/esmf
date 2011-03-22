@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.15 2011/03/08 22:42:49 svasquez Exp $
+! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.16 2011/03/22 19:46:56 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -242,7 +242,7 @@ program ESMF_ArrayBundleSparseMMSTest
 
   call ESMF_CplCompFinalize(cpl, importState=c1exp, &
     exportState=c2imp, userRc=userrc, rc=localrc)
-  print *, "Coupler Finalize finished, rc =", localrc
+  print *, "Coupler Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -252,7 +252,7 @@ program ESMF_ArrayBundleSparseMMSTest
 
   call ESMF_GridCompFinalize(comp1, exportState=c1exp, &
       userRc=userrc, rc=localrc)
-  print *, "Comp 1 Finalize finished, rc =", localrc
+  print *, "Comp 1 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -262,7 +262,7 @@ program ESMF_ArrayBundleSparseMMSTest
 
   call ESMF_GridCompFinalize(comp2, importState=c2imp, &
     userRc=userrc, rc=localrc)
-  print *, "Comp 2 Finalize finished, rc =", localrc
+  print *, "Comp 2 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

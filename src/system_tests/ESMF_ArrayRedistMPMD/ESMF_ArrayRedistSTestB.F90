@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestB.F90,v 1.17 2011/03/08 23:21:48 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTestB.F90,v 1.18 2011/03/22 19:47:01 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 ! ESMF_ArrayRedistSTestA.F90 sets string used by test script to count system tests.
@@ -267,7 +267,7 @@ program ESMF_ArrayRedistSTest
 
   call ESMF_CplCompFinalize(cpl, importState=c1exp, &
     exportState=c2imp, userRc=userrc, rc=localrc)
-  print *, "Coupler Finalize finished, rc =", localrc
+  print *, "Coupler Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -278,7 +278,7 @@ program ESMF_ArrayRedistSTest
 #ifdef MODEL1
   call ESMF_GridCompFinalize(comp1, exportState=c1exp, &
     userRc=userrc, rc=localrc)
-  print *, "Comp 1 Finalize finished, rc =", localrc
+  print *, "Comp 1 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -290,7 +290,7 @@ program ESMF_ArrayRedistSTest
 #ifdef MODEL2
   call ESMF_GridCompFinalize(comp2, importState=c2imp, &
     userRc=userrc, rc=localrc)
-  print *, "Comp 2 Finalize finished, rc =", localrc
+  print *, "Comp 2 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
