@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.14 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.15 2011/03/22 21:19:08 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -113,7 +113,7 @@ program ESMF_DirectCouplingSTest
   implicit none
 
   ! Local variables
-  integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
+  integer :: localPet, petCount, userrc, localrc, rc=ESMF_SUCCESS
   type(ESMF_VM):: vm
   type(ESMF_GridComp) :: ioComp, modelComp
   type(ESMF_CplComp) :: cplComp
@@ -297,29 +297,41 @@ program ESMF_DirectCouplingSTest
 
   ! ioComp->modelComp coupling
   call ESMF_CplCompFinalize(cplComp, importState=ioExp, &
-    exportState=modelImp, phase=1, rc=localrc)
+    exportState=modelImp, phase=1, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! modelComp->ioComp coupling
   call ESMF_CplCompFinalize(cplComp, importState=modelExp, &
-    exportState=ioImp, phase=2, rc=localrc)
+    exportState=ioImp, phase=2, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! ioComp
   call ESMF_GridCompFinalize(ioComp, importState=ioImp, exportState=ioExp, &
-    rc=localrc)
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! modelComp
   call ESMF_GridCompFinalize(modelComp, importState=modelImp, &
-    exportState=modelExp, rc=localrc)
+    exportState=modelExp, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
