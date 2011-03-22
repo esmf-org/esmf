@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.13 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.14 2011/03/22 22:05:38 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -52,7 +52,7 @@ program ESMF_RecursiveComponentSTest
   implicit none
 
   ! Local variables
-  integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS
+  integer :: localPet, petCount, userrc, localrc, rc=ESMF_SUCCESS
   type(ESMF_VM):: vm
   type(ESMF_GridComp) :: component
   type(ESMF_State) :: import, export
@@ -163,8 +163,11 @@ program ESMF_RecursiveComponentSTest
 !-------------------------------------------------------------------------
 
   call ESMF_GridCompFinalize(component, importState=import, &
-    exportState=export, rc=localrc)
+    exportState=export, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
