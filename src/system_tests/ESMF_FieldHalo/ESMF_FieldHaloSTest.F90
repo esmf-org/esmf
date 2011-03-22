@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.62 2011/03/22 21:33:24 svasquez Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.63 2011/03/22 21:39:06 svasquez Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -110,7 +110,7 @@
 !     Finalize section
 
     call ESMF_GridCompFinalize(comp1, importState=import, userRc=userrc, rc=rc)
-    if (rc .ne. ESMF_SUCCESS .or. userrc .ne ESMF_SUCCESS) goto 10
+    if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne ESMF_SUCCESS)) goto 10
 
     print *, "Comp Finalize returned without error"
 
