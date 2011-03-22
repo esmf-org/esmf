@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.61 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.62 2011/03/22 21:33:24 svasquez Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -32,7 +32,7 @@
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: npets, my_id, rc
+    integer :: npets, my_id, rc, userrc
 
     ! width of halo region - moved to "shared" module
     !integer, parameter :: halo_width = 2
@@ -109,8 +109,8 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompFinalize(comp1, importState=import, userRc=userrc, rc=rc)
+    if (rc .ne. ESMF_SUCCESS .or. userrc .ne ESMF_SUCCESS) goto 10
 
     print *, "Comp Finalize returned without error"
 
