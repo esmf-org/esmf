@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.17 2011/03/22 20:04:12 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.18 2011/03/22 20:26:40 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -270,7 +270,7 @@ program ESMF_ArrayScatterGatherSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompFinalize(comp1, importState=exportState, &
-    exportState=importState, rc=localrc)
+    exportState=importState, userRc=userrc, rc=localrc)
   print *, "Comp 1 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -280,7 +280,7 @@ program ESMF_ArrayScatterGatherSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompFinalize(comp2, importState=exportState, &
-    exportState=exportState, rc=localrc)
+    exportState=exportState, userRc=userrc, rc=localrc)
   print *, "Comp 2 Finalize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
