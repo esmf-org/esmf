@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.57 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.58 2011/03/22 21:39:49 svasquez Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -57,7 +57,7 @@
     integer :: pe_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: rc
+    integer :: rc, userrc
 
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -128,8 +128,8 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompFinalize(comp1, importState=import, userRc=userrc, rc=rc)
+    if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
 
     if (verbose) print *, "Comp Finalize returned without error"
 
