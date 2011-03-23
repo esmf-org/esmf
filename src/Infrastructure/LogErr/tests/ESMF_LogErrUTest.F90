@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.70 2011/03/18 20:20:52 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.71 2011/03/23 18:24:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -13,8 +13,7 @@
       program ESMF_LogErrUTest
 
 !------------------------------------------------------------------------------
- 
-#include "ESMF_Macros.inc"
+
 #include "ESMF.h"
 
 !==============================================================================
@@ -37,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.70 2011/03/18 20:20:52 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.71 2011/03/23 18:24:07 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -170,7 +169,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test Log Close of never pened file
+      ! Test Log Close of never opened file
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_LogClose(log4, rc=rc)
       write(name, *) "Close Log File of never opened file Test"
@@ -213,9 +212,18 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Test turning on tracing for a while
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogSet trace flag set to .true."
+      call ESMF_LogSet (trace=.true., rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundError(ESMF_SUCCESS, msg="hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundError(ESMF_SUCCESS, msg="hello",  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -223,7 +231,8 @@
       !EX_UTest
       ! Test Log Found Alloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -239,7 +248,8 @@
       !EX_UTest
       ! Test Error Msg Found Alloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE, msg="hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE, msg="hello",  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -255,7 +265,8 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS, msg="hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS, msg="hello",  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -263,7 +274,8 @@
       !EX_UTest
       ! Test Log Found Alloc Error
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -280,7 +292,8 @@
       ! Test Log Found Alloc Error
       write(failMsg, *) "Did not return .FALSE."
       rc2 = ESMF_FAILURE
-      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS,rcToReturn=rc2)
+      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS,  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -297,7 +310,8 @@
       !EX_UTest
       ! Test Log Found Dealloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -313,7 +327,8 @@
       !EX_UTest
       ! Test Error Msg Found Dealloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE, msg="hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE, msg="hello",  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -329,7 +344,8 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS, msg="hello",rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS, msg="hello",  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -337,7 +353,8 @@
       !EX_UTest
       ! Test Log Found Dealloc Error
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -354,7 +371,8 @@
       ! Test Log Found Dealloc Error
       write(failMsg, *) "Did not return .FALSE."
       rc2 = ESMF_FAILURE
-      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS,rcToReturn=rc2)
+      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS,  &
+          file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Dealloc Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
@@ -366,6 +384,14 @@
       write(name, *) " Verify rcToReturn Value Test"
       call ESMF_Test((rc2.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test turning off tracing
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogSet trace flag set to .true."
+      call ESMF_LogSet (trace=.false., rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !-----------------------------------------------------------------------
       !EX_UTest
@@ -470,7 +496,7 @@
       call random_seed()
       call random_seed(size=k)
       print *, "size of random seed = ", k
-      allocate(rndseed(k))
+      allocate(rndseed(k+10))
       call date_and_time(values=my_v)
       do i=1,k
         rndseed(i)=i*(my_v(6)+my_v(7))
@@ -535,7 +561,7 @@
       write(failMsg, *) "open() returned failure"
       filename = my_pet_char // ".Log_Test_File_2"
       open (unit=1, file = filename, action = "read", &
-            form = "formatted", iostat = input_status)
+            form = "formatted", status='old', iostat = input_status)
       call ESMF_Test((input_status.eq.0), name, failMsg, result, ESMF_SRCLINE)
       print *, " filename = ", filename
       print *, " input_status = ", input_status
@@ -584,6 +610,7 @@
       call ESMF_TimePrint(my_time, options="string", rc=rc)
       print *, " log_time is "
       call ESMF_TimePrint(log_time, options="string", rc=rc)
+if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
