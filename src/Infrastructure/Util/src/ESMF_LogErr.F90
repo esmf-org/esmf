@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.78 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.79 2011/03/23 18:22:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,7 +69,16 @@ end type
 type(ESMF_MsgType), parameter           :: &
     ESMF_LOG_INFO  =   ESMF_MsgType(1), &
     ESMF_LOG_WARNING = ESMF_MsgType(2), &
-    ESMF_LOG_ERROR =   ESMF_MsgType(3)
+    ESMF_LOG_ERROR =   ESMF_MsgType(3), &
+    ESMF_LOG_TRACE =   ESMF_MsgType(4)
+
+character(8), parameter ::  &
+    ESMF_MsgTypeString(4) = (/ &
+      'INFO    ', &
+      'WARNING ', &
+      'ERROR   ', &
+      'TRACE   '  &
+    /)
 
 type(ESMF_MsgType), parameter           :: &
     ESMF_LOG_ALL(3) = (/ &
@@ -161,6 +170,7 @@ type ESMF_LogPrivate
 #endif                                          
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
+    logical                                         ::  traceFlag
     ESMF_INIT_DECLARE    
 end type ESMF_LogPrivate
 
@@ -236,7 +246,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogGetInit"
+#define ESMF_METHOD "ESMF_LogGetInit()"
 !BOPI
 ! !IROUTINE:  ESMF_LogGetInit - Get initialization status.
 
@@ -270,7 +280,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogInit"
+#define ESMF_METHOD "ESMF_LogInit()"
 !BOPI
 ! !IROUTINE:  ESMF_LogInit - Initialize Log
 
@@ -296,7 +306,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogValidate"
+#define ESMF_METHOD "ESMF_LogValidate()"
 !BOPI
 ! !IROUTINE:  ESMF_LogValidate - Check validity of a Log
 
@@ -337,7 +347,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogPrivateGetInit"
+#define ESMF_METHOD "ESMF_LogPrivateGetInit()"
 !BOPI
 ! !IROUTINE:  ESMF_LogPrivateGetInit - Get initialization status.
 
@@ -371,7 +381,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogPrivateInit"
+#define ESMF_METHOD "ESMF_LogPrivateInit()"
 !BOPI
 ! !IROUTINE:  ESMF_LogPrivateInit - Initialize Log
 
@@ -402,7 +412,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogPrivateValidate"
+#define ESMF_METHOD "ESMF_LogPrivateValidate()"
 !BOPI
 ! !IROUTINE:  ESMF_LogPrivateValidate - Check validity of a LogPrivate
 
@@ -444,7 +454,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogEntryGetInit"
+#define ESMF_METHOD "ESMF_LogEntryGetInit()"
 !BOPI
 ! !IROUTINE:  ESMF_LogEntryGetInit - Get initialization status.
 
@@ -478,7 +488,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogEntryInit"
+#define ESMF_METHOD "ESMF_LogEntryInit()"
 !BOPI
 ! !IROUTINE:  ESMF_LogEntryInit - Initialize LogEntry
 
@@ -503,7 +513,7 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LogEntryValidate"
+#define ESMF_METHOD "ESMF_LogEntryValidate()"
 !BOPI
 ! !IROUTINE:  ESMF_LogEntryValidate - Check validity of a LogEntry
 
@@ -582,6 +592,8 @@ end function
 
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogClose()"
 !BOP
 ! !IROUTINE: ESMF_LogClose - Close Log file(s)
 
@@ -647,6 +659,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_LogClose
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFinalize()"
 !BOPI
 ! !IROUTINE: ESMF_LogFinalize - Finalize Log file(s)
 
@@ -688,6 +702,8 @@ end subroutine ESMF_LogClose
 end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFlush()"
 !BOP
 ! !IROUTINE: ESMF_LogFlush - Flush the Log file(s)
 
@@ -722,6 +738,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer 			    :: j
     type(ESMF_LogPrivate),pointer   :: alog
     integer                         :: localrc
+    logical                         :: spaceflag
    
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
@@ -749,68 +766,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
       if ((alog%FileIsOpen == ESMF_TRUE) .AND. &
-        (alog%flushed == ESMF_FALSE) .AND. &
-	(alog%dirty == ESMF_TRUE))  then	
-	    do j=1, alog%fIndex-1
-    	        if (alog%LOG_ENTRY(j)%lineflag) then
-    	            if (alog%LOG_ENTRY(j)%methodflag) then
-    		        WRITE(alog%unitNumber,122) &
-                              alog%LOG_ENTRY(j)%d, " ", &
-                              alog%LOG_ENTRY(j)%h, &
-                              alog%LOG_ENTRY(j)%m, &
-                              alog%LOG_ENTRY(j)%s, ".", &
-                              alog%LOG_ENTRY(j)%ms, " ", &
-                              alog%LOG_ENTRY(j)%lt, " ", &
-			      trim(alog%petNumLabel), " ", &
-                              trim(alog%LOG_ENTRY(j)%file) , " ", &
-                              alog%LOG_ENTRY(j)%line, " ", &
-                              trim(alog%LOG_ENTRY(j)%method), " ", &
-                              trim(alog%LOG_ENTRY(j)%msg)
-    		    else
-    		        WRITE(alog%unitNumber,123) &
-                              alog%LOG_ENTRY(j)%d, " ", &
-                              alog%LOG_ENTRY(j)%h, &
-                              alog%LOG_ENTRY(j)%m, &
-                              alog%LOG_ENTRY(j)%s, ".", &
-                              alog%LOG_ENTRY(j)%ms, " ", &
-                              alog%LOG_ENTRY(j)%lt, " ", &
-			      trim(alog%petNumLabel), " ", &
-                              trim(alog%LOG_ENTRY(j)%file), " ", &
-                              alog%LOG_ENTRY(j)%line, " ", &
-                              trim(alog%LOG_ENTRY(j)%msg)
-    		    endif
-                else
-    		    if (alog%LOG_ENTRY(j)%methodflag) then
-    		        WRITE(alog%unitNumber,132) &
-                              alog%LOG_ENTRY(j)%d, " ", &
-                              alog%LOG_ENTRY(j)%h, &
-                              alog%LOG_ENTRY(j)%m, &
-                              alog%LOG_ENTRY(j)%s, ".", &
-                              alog%LOG_ENTRY(j)%ms, " ", &
-                              alog%LOG_ENTRY(j)%lt, " ", &
-		              trim(alog%petNumLabel), " ", &
-    			      trim(alog%LOG_ENTRY(j)%method), " ", &
-                              trim(alog%LOG_ENTRY(j)%msg)
-    		    else
-    		        WRITE(alog%unitNumber,133) &
-                              alog%LOG_ENTRY(j)%d, " ", &
-                              alog%LOG_ENTRY(j)%h, &
-                              alog%LOG_ENTRY(j)%m, &
-                              alog%LOG_ENTRY(j)%s , ".", &
-                              alog%LOG_ENTRY(j)%ms , " ", &
-                              alog%LOG_ENTRY(j)%lt, " ", &
-			      trim(alog%petNumLabel), " ", &
-                              trim(alog%LOG_ENTRY(j)%msg)
-    		    endif
-    	        endif
-	    enddo
-      endif
+          (alog%flushed == ESMF_FALSE) .AND. &
+	  (alog%dirty == ESMF_TRUE))  then	
+	do j=1, alog%fIndex-1
+          write (alog%unitNumber, '(2a,3i2.2,a,i6.6,6a)', advance='no')  &
+              alog%LOG_ENTRY(j)%d, " ", &
+              alog%LOG_ENTRY(j)%h, &
+              alog%LOG_ENTRY(j)%m, &
+              alog%LOG_ENTRY(j)%s, ".", &
+              alog%LOG_ENTRY(j)%ms, " ", &
+              alog%LOG_ENTRY(j)%lt, " ", &
+              trim(alog%petNumLabel), " "
+
+          spaceflag = .false.
+          if (alog%LOG_ENTRY(j)%fileflag) then
+            write (alog%unitNumber, '(a)',  advance='no')  &
+                trim(alog%LOG_ENTRY(j)%file)
+            spaceflag = .true.
+          end if
+          if (alog%LOG_ENTRY(j)%lineflag) then
+            write (alog%unitNumber, '(a,i0)',  advance='no')  &
+                ':', alog%LOG_ENTRY(j)%line
+            spaceflag = .true.
+          end if
+          if (alog%LOG_ENTRY(j)%methodflag) then
+            write (alog%unitNumber, '(a)',  advance='no')  &
+                trim(alog%LOG_ENTRY(j)%method)
+            spaceflag = .true.
+          end if
+          if (spaceflag) then
+            write (alog%unitNumber, '(a)',  advance='no') ' '
+          end if
+
+          write (alog%unitNumber, '(a)') trim(alog%LOG_ENTRY(j)%msg)
+
+	end do
+      end if
    
       alog%fIndex = 1 
-      122  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,4a)
-      123  FORMAT(a8,a,3i2.2,a,i6.6,7a,i0,2a)
-      132  FORMAT(a8,a,3i2.2,a,i6.6,8a)
-      133  FORMAT(a8,a,3i2.2,a,i6.6,6a)
 
       call ESMF_UtilIOUnitFlush (alog%unitNumber, rc=localrc)
  
@@ -826,6 +819,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_LogFlush
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFoundAllocError()"
 !BOP
 ! !IROUTINE: ESMF_LogFoundAllocError - Check Fortran status for allocation 
 !            error and write message
@@ -890,9 +885,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
+    type(ESMF_LogPrivate), pointer  :: alog
     
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
+    
+    nullify(alog) ! ensure that the association status is well defined
+    
+    if (present(log)) then
+      if(log%logTableIndex>0) then
+         alog => ESMF_LogTable(log%logTableIndex)
+      endif
+    else
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+    endif
+
+    if (alog%traceFlag) then
+      call ESMF_LogWrite ('called: ' // ESMF_METHOD, ESMF_LOG_TRACE,  &
+        line=line, file=file, method=method, log=log)
+    end if
 
 !   The Fortran Standard requires that a successful allocate return a stat value
 !   of 0.  Any other value indicates a processor-defined error.
@@ -921,6 +932,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end function ESMF_LogFoundAllocError
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFoundDeallocError()"
 !BOP
 ! !IROUTINE: ESMF_LogFoundDeallocError - Check Fortran status for deallocation 
 !            error and write message
@@ -985,9 +998,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
+    type(ESMF_LogPrivate), pointer  :: alog
     
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundDeallocError=.FALSE.
+    
+    nullify(alog) ! ensure that the association status is well defined
+    
+    if (present(log)) then
+      if(log%logTableIndex>0) then
+         alog => ESMF_LogTable(log%logTableIndex)
+      endif
+    else
+      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+    endif
+
+    if (alog%traceFlag) then
+      call ESMF_LogWrite ('called: ' // ESMF_METHOD, ESMF_LOG_TRACE,  &
+        line=line, file=file, method=method, log=log)
+    end if
 
 !   The Fortran Standard requires that a successful deallocate return a stat value
 !   of 0.  Any other value indicates a processor-defined error.
@@ -1016,6 +1045,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end function ESMF_LogFoundDeallocError
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogFoundError()"
 !BOP
 ! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error and write message
 
@@ -1105,6 +1136,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #ifdef ESMF_SUCCESS_DEFAULT_ON	
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
 #endif
+
+      if (alog%traceFlag) then
+        call ESMF_LogWrite ('called: ' // ESMF_METHOD, ESMF_LOG_TRACE,  &
+          line=line, file=file, method=method, log=log)
+      end if
     
       ! check the error code
       if (rcToCheck .NE. ESMF_SUCCESS) then
@@ -1135,6 +1171,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end function ESMF_LogFoundError
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogGet()"
 !BOPI
 ! !IROUTINE: ESMF_LogGet - Return information about a log object
 
@@ -1246,6 +1284,8 @@ end function ESMF_LogFoundError
 end subroutine ESMF_LogGet
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogInitialize()"
 !BOPI
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
@@ -1285,6 +1325,8 @@ end subroutine ESMF_LogGet
 end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogOpen()"
 !BOP
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
@@ -1389,6 +1431,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
         alog%logtype=ESMF_LOG_MULTI
     endif
+    alog%traceFlag = .false.
     
   if(alog%logtype /= ESMF_LOG_NONE) then
     	
@@ -1473,13 +1516,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_LogOpen	
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogSet()"
 !BOP
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
 	subroutine ESMF_LogSet(keywordEnforcer, log, verbose, flush, rootOnly,  &
                                halt, stream, maxElements, msgAllow,  &
-                               errorMask, rc)
+                               errorMask, trace, rc)
 !
 ! !ARGUMENTS:
 !	
@@ -1492,7 +1537,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(in),    optional :: stream		   
       integer,             intent(in),    optional :: maxElements 	   
       type(ESMF_MsgType),  intent(in),    optional :: msgAllow(:) 	   
-      integer,             intent(in),    optional :: errorMask(:)	   
+      integer,             intent(in),    optional :: errorMask(:)
+      logical,             intent(in),    optional :: trace	   
       integer,             intent(out),   optional :: rc  		   
 	
 !
@@ -1539,6 +1585,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            If an empty array is provided, no messages will be logged.  
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
+!      \item [{[traceFlag]}]
+!            If set to true, calls such as {\tt ESMF\_LogFoundError},
+!            {\tt ESMF\_LogFoundAllocError}, and {\tt ESMF\_LogFoundDeallocError}
+!            will be logged as a tool for program flow tracing.  This may generate
+!            voluminous output in the log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1637,6 +1688,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         end if
       end if
 
+      if (present (trace)) then
+        alog%traceFlag = trace
+        call ESMF_LogWrite ('--- TRACE is ' // merge ('enabled ', 'disabled', trace),  &
+            ESMF_LOG_TRACE, method=ESMF_METHOD, log=log)
+      end if
+
       if (present(rc)) then
         rc=ESMF_SUCCESS 
       endif
@@ -1646,6 +1703,8 @@ end subroutine ESMF_LogSet
 
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogSetError()"
 !BOP
 ! !IROUTINE: ESMF_LogSetError - Set ESMF return code for error and write msg
 
@@ -1757,6 +1816,8 @@ end subroutine ESMF_LogSetError
 
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogWrite()"
 !BOP
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
@@ -1891,12 +1952,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		alog%LOG_ENTRY(index)%file = tfile
     	endif
     	select case (msgtype%mtype)
-        case (1)
-    	    alog%LOG_ENTRY(index)%lt="INFO"
-        case (2)
-    	    alog%LOG_ENTRY(index)%lt="WARNING"
-   	case default
-    	    alog%LOG_ENTRY(index)%lt="ERROR"
+        case (:0, size (ESMF_MsgTypeString)+1:)
+            alog%LOG_ENTRY(index)%lt="INTERNAL ERROR"
+        case default
+            alog%LOG_ENTRY(index)%lt= ESMF_MsgTypeString(msgtype%mtype)
     	end select	
     	alog%LOG_ENTRY(alog%fIndex)%d = d
     	alog%LOG_ENTRY(alog%fIndex)%h = h
@@ -1931,6 +1990,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 end subroutine ESMF_LogWrite
 
 !--------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogEntryCopy()"
 !BOPI
 ! !IROUTINE: ESMF_LogEntryCopy - Copy a Log entry
 
