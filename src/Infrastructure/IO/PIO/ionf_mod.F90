@@ -124,7 +124,10 @@ contains
     
     if(.not. file%iosystem%ioproc) file%fh=-tmpfh
 
-    if(Debug.or.DebugAsync) print *,__FILE__,__LINE__,file%fh,ierr
+    if(Debug.or.DebugAsync) &
+    print *,__FILE__, &
+            __LINE__, &
+            file%fh,ierr
     
     call check_netcdf(File, ierr,_FILE_,__LINE__)
 
@@ -335,9 +338,10 @@ contains
                 File%iotype=pio_iotype_netcdf4c
              end if
 #else
-             call piodie(__FILE__,__LINE__, &
-                'You must link with the netcdf4 ',0,&
-                'library built with hdf5 support to read this file',0,filename)
+             call piodie(__FILE__, &
+                         __LINE__, &
+             'You must link with the netcdf4 ',0,  &
+             'library built with hdf5 support to read this file',0,filename)
 #endif       
           else 
              ! The HDF identifier could be offset further into the file.
@@ -369,8 +373,12 @@ contains
        call CheckMPIReturn('nf_mod',mpierr)
     end if
     return
-100 call piodie(__FILE__,__LINE__,'File open error ',0,filename)
-101 call piodie(__FILE__,__LINE__,'File read error ',0,filename)
+100 call piodie(__FILE__,  &
+                __LINE__,  &
+                'File open error ',0,filename)
+101 call piodie(__FILE__,  &
+                __LINE__,  &
+                'File read error ',0,filename)
 
 
 
