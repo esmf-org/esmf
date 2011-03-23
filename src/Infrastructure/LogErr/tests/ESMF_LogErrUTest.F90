@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.71 2011/03/23 18:24:07 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.72 2011/03/23 21:07:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.71 2011/03/23 18:24:07 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.72 2011/03/23 21:07:13 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -77,6 +77,7 @@
       type(ESMF_Time) :: my_time, log_time
       integer :: log8unit
       logical :: was_found
+      logical :: trace_flag
 #endif
 
 
@@ -212,11 +213,29 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Test default value of tracing flag
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogGet trace flag default flag"
+      call ESMF_LogGet (trace=trace_flag, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS .and. .not. trace_flag,  &
+          name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Test turning on tracing for a while
       write (failMsg, *) "Did not return ESMF_SUCCESS"
       write (name, *) "LogSet trace flag set to .true."
       call ESMF_LogSet (trace=.true., rc=rc)
       call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test to check that tracing was turned on
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogGet trace flag set to .true."
+      call ESMF_LogGet (trace=trace_flag, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS .and. trace_flag,  &
+          name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -392,6 +411,15 @@
       write (name, *) "LogSet trace flag set to .true."
       call ESMF_LogSet (trace=.false., rc=rc)
       call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test turning off tracing
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogGet trace flag set to .false."
+      call ESMF_LogGet (trace=trace_flag, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS .and. .not. trace_flag,  &
+          name, failMsg, result, ESMF_SRCLINE)
 
       !-----------------------------------------------------------------------
       !EX_UTest
