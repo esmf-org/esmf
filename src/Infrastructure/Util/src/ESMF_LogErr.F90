@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.79 2011/03/23 18:22:05 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.80 2011/03/23 21:06:34 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1178,7 +1178,7 @@ end function ESMF_LogFoundError
 
 ! !INTERFACE: 
       subroutine ESMF_LogGet(log,verbose,flush,rootOnly,halt,logtype,stream,&
-                             maxElements,rc)
+                             maxElements, trace, rc)
 !
 ! !ARGUMENTS:
 !      
@@ -1189,7 +1189,8 @@ end function ESMF_LogFoundError
       type(ESMF_HaltType), intent(out),optional  :: halt        	
       type(ESMF_LogType), intent(out),optional   :: logtype     	
       integer, intent(out),optional              :: stream      	
-      integer, intent(out),optional              :: maxElements 	
+      integer, intent(out),optional              :: maxElements
+      logical, intent(out),optional              :: trace	
       integer, intent(out),optional              :: rc          	
 	
 
@@ -1225,6 +1226,8 @@ end function ESMF_LogFoundError
 !            \end{description}
 !      \item [{[maxElements]}]
 !            Maximum number of elements in the Log.
+!      \item [{[trace]}]
+!            Current setting of the Log call tracing flag.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1274,6 +1277,9 @@ end function ESMF_LogFoundError
         endif
 	if (present(maxElements)) then
           maxElements=alog%maxElements	
+        endif
+	if (present(trace)) then
+          trace=alog%traceFlag	
         endif
 
 	if (present(rc)) then
@@ -1585,7 +1591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            If an empty array is provided, no messages will be logged.  
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
-!      \item [{[traceFlag]}]
+!      \item [{[trace]}]
 !            If set to true, calls such as {\tt ESMF\_LogFoundError},
 !            {\tt ESMF\_LogFoundAllocError}, and {\tt ESMF\_LogFoundDeallocError}
 !            will be logged as a tool for program flow tracing.  This may generate
