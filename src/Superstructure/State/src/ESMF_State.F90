@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.249 2011/03/08 16:26:42 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.250 2011/03/23 16:55:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.249 2011/03/08 16:26:42 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.250 2011/03/23 16:55:31 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1477,7 +1477,7 @@ contains
 
       ! link the Attribute hierarchies
       linkChange = ESMF_TRUE
-      do i=1,count
+      do i=1,localcount
          call c_ESMC_AttributeLink(state%statep%base, &
           arrayList(i), linkChange, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
