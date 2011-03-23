@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.98 2011/03/21 21:12:09 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.99 2011/03/23 19:31:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.98 2011/03/21 21:12:09 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.99 2011/03/23 19:31:14 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1222,7 +1222,9 @@ int Attribute::count=0;
 // !ARGUMENTS:
       const string &convention,          // in - Attribute convention
       const string &purpose,             // in - Attribute purpose
-      const string &object) const {      // in - Attribute object type
+      const string &object,              // in - Attribute object type
+      const bool   &thisObjectTreeOnly,  // only search within this object tree?
+      const bool   &nestedAttPacks) const { // search within nested attpacks?
 // 
 // !DESCRIPTION:
 //     Query one or all Attribute packages of the given type, within the
@@ -1232,13 +1234,16 @@ int Attribute::count=0;
 //
 //EOPI
 
-  Attribute *attpack = NULL, *ap;
+  Attribute *attpack = NULL;
 
   // check all attributes in this component tree
   for(int i=0; i<linkList.size(); i++) {
-    // only consider objects within *this* component (TODO: generalize?)
-    if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),
-        "Component")==0) continue; // skip if any other component
+    if (thisObjectTreeOnly) {
+      // only consider objects within *this* object
+      if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),
+          this->attrBase->ESMC_BaseGetClassName())==0) continue;
+             // skip if any other object of the same class
+    }
 
     // recurse until we reach objects of the specified type
     char baseName[ESMF_MAXSTR];
@@ -1246,23 +1251,60 @@ int Attribute::count=0;
     baseName[0] = toupper(baseName[0]);
     if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),
         baseName)!=0) {
-      if (linkList.at(i)->AttPackIsSet(convention, purpose, object))
+      if (linkList.at(i)->AttPackIsSet(convention, purpose, object, 
+                                       thisObjectTreeOnly, nestedAttPacks))
         return true; else continue;
     }
-    // found object of the specified type, now check its attpacks
-    for(int j=0; j<linkList.at(i)->packList.size(); j++) {
-      attpack = linkList.at(i)->packList.at(j);
-      if (!(attpack->attrConvention.compare(convention)==0 &&
-            attpack->attrPurpose.compare(purpose)==0 &&
-            attpack->attrObject.compare(object)==0)) {
-        continue; // look for attPacks of the specified type
-      }
-      // found specified attpack, now check if any of its attributes are set
-      for(int k=0; k<attpack->attrList.size(); k++) { 
-        string name = attpack->attrList.at(k)->attrName;
-        if (((ap = attpack->AttPackGetAttribute(name)) != NULL) &&
-             (ap->parent->AttributeIsSet(name))) return true;
-      }
+    // found object of the specified type, 
+    //   now look for attPacks of the specified type
+    string attPackInstanceName;
+    attpack = linkList.at(i)->AttPackGet(convention, purpose, object,
+                                         attPackInstanceName);
+    if (attpack == NULL) continue;
+
+    // found specified attpack, now check if any of its attributes are set,
+    // optionally including those of any of its nested attpacks
+    if (attpack->AttPackIsSet(nestedAttPacks)) return true;
+  }
+
+  // if we get here, no set attributes found
+  return false;
+
+}  // end AttPackIsSet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackIsSet"
+//BOPI
+// !IROUTINE:  AttPackIsSet - check if any {\tt Attribute} is set in an attpack
+//
+// !INTERFACE:
+      bool Attribute::AttPackIsSet(
+// 
+// !RETURN VALUE:
+//    true if attribute set, false otherwise.
+// 
+// !ARGUMENTS:
+      const bool &nestedAttPacks) const {  // search within nested attpacks?
+// 
+// !DESCRIPTION:
+//     Query Attribute package to see if any {\tt Attribute} has been set,
+//     within the given package or optionally any of its nested packages.
+//     Returns true as soon as a set attribute is found.
+//
+//EOPI
+
+  Attribute *ap;
+
+  // check attributes defined on this attpack
+  for(int i=0; i<attrList.size(); i++) { 
+    string name = attrList.at(i)->attrName;
+    if (((ap = AttPackGetAttribute(name)) != NULL) &&
+         (ap->parent->AttributeIsSet(name))) return true;
+  }
+  // otherwise check for any set attributes on nested attpacks, if requested
+  if (nestedAttPacks) {
+    for(int i=0; i<packList.size(); i++) { 
+      if (packList.at(i)->AttPackIsSet(nestedAttPacks)) return true; 
     }
   }
 
@@ -5158,6 +5200,7 @@ int Attribute::count=0;
   int localrc;
   Attribute *attpack = NULL;
   static int callCount=0;
+  bool thisObjectTreeOnly, nestedAttPacks;
 
   vector<string> valuevector;
   string value;
@@ -5184,7 +5227,7 @@ int Attribute::count=0;
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("shortName", value, indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("LongName")) {
     localrc = attpack->AttributeGet("LongName", &valuevector);
@@ -5208,7 +5251,8 @@ int Attribute::count=0;
   }
 
   // <componentProperties><componentProperty> nodes
-  if (AttPackIsSet("CIM 1.0", "Inputs Description", "field")) {
+  if (AttPackIsSet("ESMF", "General", "field", 
+                   thisObjectTreeOnly=true, nestedAttPacks=true)) {
     localrc = io_xml->writeStartElement("componentProperties", "", indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
@@ -5263,14 +5307,17 @@ int Attribute::count=0;
 
   // <composition><coupling> (all fields, written only in top-level component)
   if (callCount == 1) {
-    localrc = io_xml->writeStartElement("composition", "", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    if (AttPackIsSet("CIM 1.0", "Inputs Description", "field", 
+                     thisObjectTreeOnly=false, nestedAttPacks=false)) {
+      localrc = io_xml->writeStartElement("composition", "", 2, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-    localrc = AttributeWriteCIMcomposition(io_xml);
+      localrc = AttributeWriteCIMcomposition(io_xml);
 
-    localrc = io_xml->writeElement("description", "", 3, 0);
-    localrc = io_xml->writeEndElement("composition", 2);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("description", "", 3, 0);
+      localrc = io_xml->writeEndElement("composition", 2);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
   }
 
   // <childComponent> tree
@@ -6235,7 +6282,6 @@ int Attribute::count=0;
           localrc = io_xml->writeStartElement("coupling", "", 3, 2,
                        "fullySpecified", "false", "purpose", value.c_str());
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
         if (attpack->AttributeIsSet("Frequency")) {
           localrc = attpack->AttributeGet("Frequency", &valuevector);
     if (valuevector.size() > 1) {
@@ -6351,6 +6397,7 @@ int Attribute::count=0;
 
         localrc = io_xml->writeEndElement("coupling", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        }
       }
     }
     // recurse through ESMF objects
