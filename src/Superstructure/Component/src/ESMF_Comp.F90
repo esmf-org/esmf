@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.208 2011/03/24 05:00:22 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.209 2011/03/24 15:28:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -252,7 +252,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.208 2011/03/24 05:00:22 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.209 2011/03/24 15:28:04 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1051,8 +1051,9 @@ contains
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
-    vm_info, contextflag, gridcomptype, grid, clock, dirPath, configFile, &
-    config, ctype, currentMethod, currentPhase, localPet, petCount, rc)
+    vm_info, contextflag, gridcomptype, grid, importState, exportState, &
+    clock, dirPath, configFile, config, ctype, currentMethod, currentPhase, &
+    localPet, petCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -1064,6 +1065,8 @@ contains
     type(ESMF_ContextFlag),  intent(out), optional :: contextflag
     type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
     type(ESMF_Grid),         intent(out), optional :: grid
+    type(ESMF_State),        intent(out), optional :: importState
+    type(ESMF_State),        intent(out), optional :: exportState
     type(ESMF_Clock),        intent(out), optional :: clock
     character(len=*),        intent(out), optional :: dirPath
     character(len=*),        intent(out), optional :: configFile
@@ -1153,6 +1156,14 @@ contains
 
     if (present(grid)) then
       grid = compp%grid
+    endif
+
+    if (present(importState)) then
+      importState = compp%is
+    endif
+
+    if (present(exportState)) then
+      exportState = compp%es
     endif
 
     if (present(clock)) then

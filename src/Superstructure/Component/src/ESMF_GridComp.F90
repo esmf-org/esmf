@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.159 2011/03/10 04:55:47 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.160 2011/03/24 15:28:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.159 2011/03/10 04:55:47 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.160 2011/03/24 15:28:04 theurich Exp $'
 
 !==============================================================================
 !
@@ -696,14 +696,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, grid, config, &
-    configFile, clock, localPet, petCount, contextflag, currentMethod, &
-    currentPhase, comptype, vm, name, rc)
+  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, grid, importState, &
+    exportState, config, configFile, clock, localPet, petCount, contextflag, &
+    currentMethod, currentPhase, comptype, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(in)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Grid),         intent(out), optional :: grid
+    type(ESMF_State),        intent(out), optional :: importState
+    type(ESMF_State),        intent(out), optional :: exportState    
     type(ESMF_Config),       intent(out), optional :: config
     character(len=*),        intent(out), optional :: configFile
     type(ESMF_Clock),        intent(out), optional :: clock
@@ -734,6 +736,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_GridComp} object to query.
 ! \item[{[grid]}]
 !   Return the {\tt ESMF\_Grid} associated with this {\tt ESMF\_GridComp}.
+! \item[{[importState]}]
+!   Return the import State.
+! \item[{[exportState]}]
+!   Return the export State.
 ! \item[{[config]}]
 !   Return the {\tt ESMF\_Config} object for this {\tt ESMF\_GridComp}.
 ! \item[{[configFile]}]
@@ -775,7 +781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
-      grid=grid, clock=clock, &
+      grid=grid, importState=importState, exportState=exportState, clock=clock,&
       configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       ctype=comptype, rc=localrc)
