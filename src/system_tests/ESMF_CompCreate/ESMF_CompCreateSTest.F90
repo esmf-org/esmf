@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.37 2011/03/08 23:55:12 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.38 2011/03/24 20:19:57 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -93,19 +93,19 @@
 
       imp = ESMF_StateCreate(name="igrid import state",  &
                              stateType=ESMF_STATE_IMPORT, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      if ( (rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS) ) goto 10
       exp = ESMF_StateCreate(name="igrid export state",  &
                              stateType=ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompInitialize(comp1, importState=imp, &
-        exportState=exp, phase=1, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+        exportState=exp, phase=1, userRc=userrc, rc=rc)
+      if ( (rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS) ) goto 10
       print *, "Comp Initialize 1 finished"
 
       call ESMF_GridCompInitialize(comp1, importState=imp, &
-        exportState=exp, phase=2, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+        exportState=exp, phase=2, userRc=userrc, rc=rc)
+      if ( (rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS) ) goto 10
       print *, "Comp Initialize 2 finished"
 
 !-------------------------------------------------------------------------
