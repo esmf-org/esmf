@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.21 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMCI_FTable.h,v 1.22 2011/03/24 04:59:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -237,7 +237,8 @@ class MethodTable{
     int add(std::string labelArg, void *pointer);
     int add(std::string labelArg, std::string name, std::string sharedObj);
     int remove(std::string labelArg);
-    int execute(std::string labelArg, void *object, int *userRc);
+    int execute(std::string labelArg, void *object, int *userRc,
+      bool* existflag=NULL);
 };
 
 } // namespace ESMCI

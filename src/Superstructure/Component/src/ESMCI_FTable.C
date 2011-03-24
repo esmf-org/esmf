@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.52 2011/03/15 22:41:38 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.53 2011/03/24 04:59:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.52 2011/03/15 22:41:38 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.53 2011/03/24 04:59:17 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2078,6 +2078,41 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_methodtableexecuteef"
+  void FTN(c_esmc_methodtableexecuteef)(ESMCI::MethodTable **ptr,
+    char const *label, void *object, ESMC_Logical *existflag,
+    int *userRc, int *rc,
+    ESMCI_FortranStrLenArg labelLen){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (labelLen>=0){
+      bool existing;
+      string labelArg(label, labelLen);
+      labelArg.resize(labelArg.find_last_not_of(" ")+1);
+      localrc = (*ptr)->execute(labelArg, object, userRc, &existing);
+      if (existing)
+        *existflag = ESMF_TRUE;
+      else
+        *existflag = ESMF_FALSE;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
+        return;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "- corrupt label string", rc);
+      return;
+    }
+
+    // debugging---------
+//    localrc = (*ptr)->print();
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
+//      return;
+    // debugging---------
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
 } // extern "C"
 
 
@@ -2259,13 +2294,15 @@ namespace ESMCI {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MethodTable::execute()"
-  int MethodTable::execute(std::string labelArg, void *object, int *userRc){
+  int MethodTable::execute(std::string labelArg, void *object, int *userRc,
+    bool *existflag){
     int localrc = ESMC_RC_NOT_IMPL;
     int rc = ESMC_RC_NOT_IMPL;
     if (table){
       MethodElement *element = table; // initialize
       while (element){
         if (element->label == labelArg){
+          if (existflag) *existflag = true;
           localrc = element->execute(object, userRc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
             return rc; // bail out
@@ -2275,13 +2312,23 @@ namespace ESMCI {
         }
         element = element->nextElement;
       }
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- method not found in method table", &rc);
-      return rc;
+      if (existflag){
+        existflag = false;
+        if (userRc) *userRc = ESMF_SUCCESS;
+      }else{
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+          "- method not found in method table", &rc);
+        return rc;
+      }
     }else{
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- empty method table", &rc);
-      return rc;
+      if (existflag){
+        existflag = false;
+        if (userRc) *userRc = ESMF_SUCCESS;
+      }else{
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+          "- empty method table", &rc);
+        return rc;
+      }
     }
     // return successfully
     rc = ESMF_SUCCESS;
