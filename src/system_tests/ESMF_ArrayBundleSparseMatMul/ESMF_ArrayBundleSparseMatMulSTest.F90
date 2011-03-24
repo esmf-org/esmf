@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.17 2011/03/24 19:06:55 svasquez Exp $
+! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.18 2011/03/24 19:10:06 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -185,7 +185,7 @@ program ESMF_ArrayBundleSparseMMSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompInitialize(comp1, exportState=c1exp, &
      userRc=userrc, rc=localrc)
-  print *, "Comp 1 Initialize finished, rc =", localrc
+  print *, "Comp 1 Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -200,7 +200,7 @@ program ESMF_ArrayBundleSparseMMSTest
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
   call ESMF_GridCompInitialize(comp2, importState=c2imp, &
      userRc=userrc, rc=localrc)
-  print *, "Comp 2 Initialize finished, rc =", localrc
+  print *, "Comp 2 Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -212,7 +212,7 @@ program ESMF_ArrayBundleSparseMMSTest
   ! and coupler's export is comp2's import state
   call ESMF_CplCompInitialize(cpl, importState=c1exp, &
     exportState=c2imp, userRc=userrc, rc=localrc)
-  print *, "Coupler Initialize finished, rc =", localrc
+  print *, "Coupler Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
