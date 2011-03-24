@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.113 2011/03/01 20:16:31 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.114 2011/03/24 04:48:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -833,6 +833,19 @@ interface assignment (=)
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
 end interface  
+
+
+!------------------------------------------------------------------------------
+! ! ESMF_MethodTable
+
+  type ESMF_MethodTable
+    sequence
+    !private
+    type(ESMF_Pointer) :: this
+    ! only use internally -> no init macro!
+  end type
+     
+  public ESMF_MethodTable
 
 
 !------------------------------------------------------------------------------

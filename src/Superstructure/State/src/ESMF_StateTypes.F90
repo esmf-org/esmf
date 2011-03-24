@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.41 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_StateTypes.F90,v 1.42 2011/03/24 04:48:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -198,16 +198,6 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_MethodTable
-
-      type ESMF_MethodTable
-        sequence
-        !private
-        type(ESMF_Pointer) :: this
-        ! only use internally -> no init macro!
-      end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_StateClass
 !
 !     ! Internal State data type.
@@ -271,7 +261,6 @@
       public ESMF_StateClass, ESMF_StateItem, ESMF_DataHolder
       public ESMF_STATEITEM_INDIRECT, ESMF_STATEITEM_UNKNOWN
       public ESMF_STATE_INVALID
-      public ESMF_MethodTable
 
       ! Public Methods
       public ESMF_DataHolderValidate
@@ -294,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.41 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.42 2011/03/24 04:48:32 theurich Exp $'
 
 !==============================================================================
 ! 
