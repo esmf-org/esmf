@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.22 2011/03/24 20:45:57 svasquez Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.23 2011/03/24 21:04:04 svasquez Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -236,7 +236,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=userrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     !print *, "Comp 1 Initialize finished, rc =", rc
 
     c2imp = ESMF_StateCreate(name="comp2 import",  &
@@ -251,7 +251,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=userrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     !print *, "Comp 2 Initialize finished, rc =", rc
 
     ! note that the coupler's import is comp1's export
@@ -262,7 +262,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=userrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     !print *, "Coupler Initialize finished, rc =", rc
 
 !-------------------------------------------------------------------------
@@ -373,7 +373,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=userrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     !print *, "Comp 1 Finalize finished, rc =", rc
 
     call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, &
@@ -383,7 +383,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=userrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     !print *, "Comp 2 Finalize finished, rc =", rc
 
     call ESMF_CplCompFinalize(cpl, importState=c1exp, &
@@ -393,7 +393,7 @@
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
     if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=userrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     !print *, "Coupler Finalize finished, rc =", rc
 
 
