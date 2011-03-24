@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.207 2011/02/23 20:17:12 w6ws Exp $
+! $Id: ESMF_Comp.F90,v 1.208 2011/03/24 05:00:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -140,6 +140,7 @@ module ESMF_CompMod
     !private
     type(ESMF_Pointer)  :: this             ! C++ ftable pointer - MUST BE FIRST
     type(ESMF_Base)     :: base             ! base class
+    type(ESMF_MethodTable) :: methodTable   ! attachable methods
     type(ESMF_CompType) :: ctype            ! component type
     type(ESMF_Config)   :: config           ! configuration object
     type(ESMF_Clock)    :: clock            ! private component clock
@@ -251,7 +252,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.207 2011/02/23 20:17:12 w6ws Exp $'
+    '$Id: ESMF_Comp.F90,v 1.208 2011/03/24 05:00:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -734,6 +735,12 @@ contains
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
+      
+    ! create methodTable object
+    call c_ESMC_MethodTableCreate(compp%methodTable, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set init code
     ESMF_INIT_SET_CREATED(compp)
@@ -826,6 +833,12 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcTOReturn=rc)) return
       endif
+
+      ! destroy the methodTable object
+      call c_ESMC_MethodTableDestroy(compp%methodTable, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     endif
 
