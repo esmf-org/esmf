@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.12 2008/09/26 05:18:12 cdeluca Exp $
+# $Id: makefile,v 1.13 2011/03/24 04:55:08 theurich Exp $
 
 ALL: build_here 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_Init.F90 ESMF.F90 
+SOURCEF	  = ESMF_AttachMethods.F90 ESMF_Init.F90 ESMF.F90 
 
 # list all .h files which should be copied to common include dir
 STOREH	  = 
