@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.18 2011/03/22 20:26:40 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.19 2011/03/24 20:06:54 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -204,25 +204,34 @@ program ESMF_ArrayScatterGatherSTest
 
   ! comp1's sense of import/export is reverse to coupler's
   call ESMF_GridCompInitialize(comp1, importState=exportState, &
-    exportState=importState, rc=localrc)
-  print *, "Comp 1 Initialize finished, rc =", localrc
+    exportState=importState, userRc=userrc, rc=localrc)
+  print *, "Comp 1 Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! comp2 uses the coupler's export state for import and export
   call ESMF_GridCompInitialize(comp2, importState=exportState, &
-    exportState=exportState, rc=localrc)
-  print *, "Comp 2 Initialize finished, rc =", localrc
+    exportState=exportState, userRc=userrc, rc=localrc)
+  print *, "Comp 2 Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! coupler's import/export states are as defined
   call ESMF_CplCompInitialize(cpl, importState=importState, &
-    exportState=exportState, rc=localrc)
-  print *, "Coupler Initialize finished, rc =", localrc
+    exportState=exportState, userRc=userrc, rc=localrc)
+  print *, "Coupler Initialize finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
