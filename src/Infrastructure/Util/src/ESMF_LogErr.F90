@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.80 2011/03/23 21:06:34 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.81 2011/03/24 04:13:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1060,7 +1060,7 @@ end function ESMF_LogFoundDeallocError
 !
 ! !ARGUMENTS:
 !	
-      integer,          intent(in)              :: rcToCheck
+      integer,          intent(in),    optional :: rcToCheck
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in),    optional :: msg
       integer,          intent(in),    optional :: line
@@ -1084,8 +1084,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [rcToCheck]
-!            Return code to check.
+!      \item [{[rcToCheck}]]
+!            Return code to check. Default is {\tt ESMF\_SUCCESS}.
 !      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
@@ -1108,12 +1108,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !EOP
 	
+    integer:: rcToCheckInternal
     integer:: i
     logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
+    
+    if (.not.present(rcToCheck)) then
+      rcToCheckInternal = ESMF_SUCCESS
+    else
+      rcToCheckInternal = rcToCheck
+    endif
 
     ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
@@ -1143,13 +1150,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if
     
       ! check the error code
-      if (rcToCheck .NE. ESMF_SUCCESS) then
+      if (rcToCheckInternal .NE. ESMF_SUCCESS) then
         masked = .false.
         do i=1, alog%errorMaskCount
-          if (alog%errorMask(i) == rcToCheck) masked = .true.
+          if (alog%errorMask(i) == rcToCheckInternal) masked = .true.
         enddo
         if (.not.masked) then
-          call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
+          call c_esmc_loggeterrormsg(rcToCheckInternal,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
           if (present(msg)) then
             call ESMF_LogWrite(trim(allocmsg)//" - "//msg,ESMF_LOG_ERROR,  &
@@ -1159,7 +1166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               line=line, file=file, method=method, log=log)
           endif
           ESMF_LogFoundError=.TRUE.
-          if (present(rcToReturn)) rcToReturn = rcToCheck
+          if (present(rcToReturn)) rcToReturn = rcToCheckInternal
         endif
       endif
 #ifdef ESMF_SUCCESS_DEFAULT_ON	
