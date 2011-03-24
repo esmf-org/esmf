@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.32 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.33 2011/03/24 18:24:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.32 2011/01/05 20:05:41 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.33 2011/03/24 18:24:14 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -103,7 +103,7 @@ static const int keySize = 4*sizeof(int) + 1;
 
   // find out if update is necessary
   localrc = AttributeUpdateNeeded(vm, length, roots, nonroots);
-    if (localrc != ESMF_SUCCESS) return ESMF_SUCCESS;
+    if (localrc != ESMF_SUCCESS || petCount == 1) return ESMF_SUCCESS;
 // there got to be a better way to do this...  
  
   // find out if I am a root
