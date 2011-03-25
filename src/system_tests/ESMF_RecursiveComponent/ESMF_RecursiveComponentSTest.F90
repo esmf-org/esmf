@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.16 2011/03/25 20:32:23 svasquez Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.17 2011/03/25 23:05:23 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -113,12 +113,20 @@ program ESMF_RecursiveComponentSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetVM(component, userRoutine=componentSetVM, rc=localrc)
+  call ESMF_GridCompSetVM(component, userRoutine=componentSetVM, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_GridCompSetServices(component, userRoutine=componentReg, rc=localrc)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_GridCompSetServices(component, userRoutine=componentReg, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
