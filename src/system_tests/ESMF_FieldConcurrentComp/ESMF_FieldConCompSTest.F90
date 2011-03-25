@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.19 2011/03/25 17:20:27 svasquez Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.20 2011/03/25 20:13:16 svasquez Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -290,11 +290,15 @@
       ! with the second component since comp1 and comp2 are defined on
       ! exclusive sets of PETs
       !print *, "I am calling into GridCompRun(comp1)"
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=localrc)
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
+        userRc=userrc, rc=localrc)
       !print *, "Comp 1 Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
       ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls
@@ -321,12 +325,15 @@
       ! calls contained in the user written coupler methods will indirectly
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
-      call ESMF_CplCompRun(cpl, importState=c1exp, &
-        exportState=c2imp, clock=clock, rc=localrc)
+      call ESMF_CplCompRun(cpl, importState=c1exp, exportState=c2imp, &
+        clock=clock, userRc=userrc, rc=localrc)
       !print *, "Coupler Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
@@ -343,11 +350,15 @@
       ! that are part of comp1 will not block in the following call but proceed
       ! to the next loop increment, executing comp1 concurrently with comp2.
       !print *, "I am calling into GridCompRun(comp2)"
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=localrc)
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
+        userRc=userrc, rc=localrc)
       !print *, "Comp 2 Run returned, rc =", localrc
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
       call ESMF_ClockAdvance(clock, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
