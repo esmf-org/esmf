@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.15 2011/03/22 21:49:56 svasquez Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.16 2011/03/25 22:31:26 svasquez Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -128,23 +128,35 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    call ESMF_GridCompSetServices(comp1, userm1_register, rc=localrc)
+    call ESMF_GridCompSetServices(comp1, userm1_register, &
+      userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Comp SetServices finished, rc= ", rc
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    print *, "Comp SetServices finished, rc= ", rc, userrc
 
-    call ESMF_GridCompSetServices(comp2, userm2_register, rc=localrc)
+    call ESMF_GridCompSetServices(comp2, userm2_register, &
+      userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Comp SetServices finished, rc= ", rc
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    print *, "Comp SetServices finished, rc= ", rc, userrc
 
-    call ESMF_CplCompSetServices(cpl, usercpl_register, rc=localrc)
+    call ESMF_CplCompSetServices(cpl, usercpl_register, &
+      userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
-    print *, "Comp SetServices finished, rc= ", rc
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    print *, "Comp SetServices finished, rc= ", rc, userrc
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

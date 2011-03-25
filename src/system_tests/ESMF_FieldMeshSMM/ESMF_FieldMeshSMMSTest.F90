@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.15 2011/02/23 14:45:08 eschwab Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.16 2011/03/25 22:34:19 svasquez Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -125,21 +125,33 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    call ESMF_GridCompSetServices(comp1, userm1_register, rc=localrc)
+    call ESMF_GridCompSetServices(comp1, userm1_register, &
+      userRc=userrc, rc=localrc)
     print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    call ESMF_GridCompSetServices(comp2, userm2_register, rc=localrc)
+    call ESMF_GridCompSetServices(comp2, userm2_register, &
+      userRc=userrc, rc=localrc)
     print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    call ESMF_CplCompSetServices(cpl, usercpl_register, rc=localrc)
+    call ESMF_CplCompSetServices(cpl, usercpl_register, &
+      userRc=userrc, rc=localrc)
     print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
