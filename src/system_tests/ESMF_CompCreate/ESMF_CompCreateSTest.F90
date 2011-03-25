@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.39 2011/03/25 19:32:15 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.40 2011/03/25 21:55:05 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -78,11 +78,13 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetVM(comp1, userRoutine=user_setvm, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridCompSetVM(comp1, userRoutine=user_setvm, &
+        userRc=userrc, rc=rc)
+      if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
       print *, "Comp SetVM finished, rc= ", rc
-      call ESMF_GridCompSetServices(comp1, userRoutine=user_register, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridCompSetServices(comp1, userRoutine=user_register, &
+        userRc=userrc, rc=rc)
+      if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
       print *, "Comp Register finished, rc= ", rc
 
 !-------------------------------------------------------------------------
