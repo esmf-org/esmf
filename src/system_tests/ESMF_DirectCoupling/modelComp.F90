@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.17 2011/03/25 20:04:35 svasquez Exp $
+! $Id: modelComp.F90,v 1.18 2011/03/25 22:15:21 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -115,14 +115,16 @@ module modelCompMod
     ! SetServices for modelAComp
     call ESMF_GridCompSetVM(modelAComp, userRoutine=modelACompSetVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetServices(modelAComp, userRoutine=modelACompReg, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetServices(modelAComp, userRoutine=modelACompReg, &
+        userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
     ! SetServices for modelBComp
     call ESMF_GridCompSetVM(modelBComp, userRoutine=modelBCompSetVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetServices(modelBComp, userRoutine=modelBCompReg, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetServices(modelBComp, userRoutine=modelBCompReg, &
+        userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
     ! Create State and initialize modelAComp
     modelAExp = ESMF_StateCreate(name="modelAComp export",  &
