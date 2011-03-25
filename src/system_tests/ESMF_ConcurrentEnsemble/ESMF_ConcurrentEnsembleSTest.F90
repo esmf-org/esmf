@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.26 2011/03/24 21:14:27 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.27 2011/03/25 19:56:24 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -406,35 +406,57 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
 
         ! Sequence:  A1, A2, B1, B2 (run concurrently), Coupler, C
-  	call ESMF_GridCompRun(compA1, exportState=cA1exp, clock=clock, userRc=localrc)
+  	call ESMF_GridCompRun(compA1, exportState=cA1exp, clock=clock, &
+          userRc=userrc, rc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  	call ESMF_GridCompRun(compA2, exportState=cA2exp, clock=clock, userRc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  	call ESMF_GridCompRun(compB1, exportState=cB1exp, clock=clock, userRc=localrc)
+  	call ESMF_GridCompRun(compA2, exportState=cA2exp, clock=clock, &
+          userRc=userrc, rc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  	call ESMF_GridCompRun(compB2, exportState=cB2exp, clock=clock, userRc=localrc)
+  	call ESMF_GridCompRun(compB1, exportState=cB1exp, clock=clock, &
+          userRc=userrc, rc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+  	call ESMF_GridCompRun(compB2, exportState=cB2exp, clock=clock, &
+          userRc=userrc, rc=localrc)
+  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   	call ESMF_CplCompRun(cpl, importState=cplimp, &
-      exportState=cplexp, clock=clock, userRc=localrc)
+      exportState=cplexp, clock=clock, userRc=userrc, rc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   	call ESMF_GridCompRun(compC, importState=cplexp, &
-      exportState=compCexp, clock=clock, userRc=localrc)
+      exportState=compCexp, clock=clock, userRc=userrc, rc=localrc)
   	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    	ESMF_CONTEXT, rcToReturn=rc)) &
+    	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     	ESMF_CONTEXT, rcToReturn=rc)) &
     	call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
