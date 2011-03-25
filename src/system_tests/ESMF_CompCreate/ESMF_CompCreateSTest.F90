@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.38 2011/03/24 20:19:57 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.39 2011/03/25 19:32:15 svasquez Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -115,18 +115,18 @@
 !-------------------------------------------------------------------------
 
       call ESMF_GridCompRun(comp1, importState=imp, &
-        exportState=exp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+        exportState=exp, userRc=userrc, rc=rc)
+      if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
       print *, "Comp Run returned first time"
 
       call ESMF_GridCompRun(comp1, importState=imp, &
-        exportState=exp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+        exportState=exp, userRc=userrc, rc=rc)
+      if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
       print *, "Comp Run returned second time"
 
       call ESMF_GridCompRun(comp1, importState=imp, &
-        exportState=exp, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
+        exportState=exp, userRc=userrc, rc=rc)
+      if ((rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS)) goto 10
       print *, "Comp Run returned third time"
 
 !-------------------------------------------------------------------------
