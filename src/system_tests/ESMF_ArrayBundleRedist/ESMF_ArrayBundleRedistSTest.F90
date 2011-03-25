@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleRedistSTest.F90,v 1.11 2011/03/22 22:40:44 svasquez Exp $
+! $Id: ESMF_ArrayBundleRedistSTest.F90,v 1.12 2011/03/25 18:55:55 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -225,22 +225,33 @@ program ESMF_ArrayBundleRedistSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompRun(comp1, exportState=c1exp, rc=localrc)
+  call ESMF_GridCompRun(comp1, exportState=c1exp, &
+    userRc=userrc, rc=localrc)
   print *, "Comp 1 Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_CplCompRun(cpl, importState=c1exp, &
-    exportState=c2imp, rc=localrc)
+    exportState=c2imp, userRc=userrc, rc=localrc)
   print *, "Coupler Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompRun(comp2, importState=c2imp, rc=localrc)
+  call ESMF_GridCompRun(comp2, importState=c2imp, &
+    userRc=userrc, rc=localrc)
   print *, "Comp 2 Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
