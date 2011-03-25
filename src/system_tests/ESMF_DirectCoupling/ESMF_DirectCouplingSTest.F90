@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.16 2011/03/25 17:03:55 svasquez Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.17 2011/03/25 20:04:35 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -289,15 +289,21 @@ program ESMF_DirectCouplingSTest
 
   ! ioComp
   call ESMF_GridCompRun(ioComp, importState=ioImp, exportState=ioExp, &
-    rc=localrc)
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! modelComp
   call ESMF_GridCompRun(modelComp, importState=modelImp, exportState=modelExp, &
-    rc=localrc)
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 

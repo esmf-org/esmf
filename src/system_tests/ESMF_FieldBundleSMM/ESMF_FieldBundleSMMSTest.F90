@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.17 2011/03/25 17:16:04 svasquez Exp $
+! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.18 2011/03/25 20:07:24 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -222,6 +222,9 @@ program ESMF_FieldBundleSMMSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(urc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_CplCompRun(cpl, importState=c1exp, &
     exportState=c2imp, userRc=urc, rc=localrc)
@@ -229,10 +232,16 @@ program ESMF_FieldBundleSMMSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(urc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   call ESMF_GridCompRun(comp2, importState=c2imp, userRc=urc, rc=localrc)
   print *, "Comp 2 Run returned, rc =", urc, localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(urc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 

@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.16 2011/03/25 17:12:10 svasquez Exp $
+! $Id: modelComp.F90,v 1.17 2011/03/25 20:04:35 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -177,16 +177,17 @@ module modelCompMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    integer :: userrc
     ! Initialize
     rc = ESMF_SUCCESS
 
     ! Run modelAComp and modelBComp concurrently -> direct coupling
     call ESMF_GridCompRun(modelAComp, importState=importState, &
-      exportState=modelAExp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+      exportState=modelAExp, userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
     call ESMF_GridCompRun(modelBComp, importState=modelBImp, &
-      exportState=exportState, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+      exportState=exportState, userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
   end subroutine
 
