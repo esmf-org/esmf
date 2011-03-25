@@ -1,4 +1,4 @@
-! $Id: component.F90,v 1.12 2011/03/25 17:52:05 svasquez Exp $
+! $Id: component.F90,v 1.13 2011/03/25 20:32:23 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -172,7 +172,7 @@ module componentMod
 
     ! Local variables
     type(ESMF_VM)           :: vm
-    integer                 :: petCount
+    integer                 :: petCount, userrc
     type(ESMF_GridComp)     :: component1, component2
     type(myComponents), pointer :: myComps
     type(myComponentsWrapper) :: myCompsWrapper
@@ -202,11 +202,11 @@ module componentMod
       component2 = myComps%component2
       ! Recursive Run()
       call ESMF_GridCompRun(component1, importState=importState, &
-        exportState=exportState, rc=rc)
-      if (rc/=ESMF_SUCCESS) return ! bail out
+        exportState=exportState, userRc=userrc, rc=rc)
+      if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
       call ESMF_GridCompRun(component2, importState=importState, &
-        exportState=exportState, rc=rc)
-      if (rc/=ESMF_SUCCESS) return ! bail out
+        exportState=exportState, userRc=userrc, rc=rc)
+      if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
     endif
         
     print *, "Run() method after recursive call"
@@ -257,7 +257,7 @@ module componentMod
       if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
       call ESMF_GridCompFinalize(component2, importState=importState, &
         exportState=exportState, userRc=userrc, rc=rc)
-      if (rc/=ESMF_SUCCESS) return ! bail out
+      if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
       ! Destroy subcomponents
       call ESMF_GridCompDestroy(component1, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
