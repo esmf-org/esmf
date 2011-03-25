@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.15 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: modelComp.F90,v 1.16 2011/03/25 17:12:10 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -84,7 +84,7 @@ module modelCompMod
 
     ! Local variables
     type(ESMF_VM)           :: vm
-    integer                 :: petCount
+    integer                 :: petCount, userrc
     type(ESMF_Array)        :: arraySrc, arrayDst
     type(ESMF_RouteHandle)  :: routehandle
 
@@ -129,16 +129,16 @@ module modelCompMod
                                  stateType=ESMF_STATE_EXPORT, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompInitialize(modelAComp, importState=importState, &
-      exportState=modelAExp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+      exportState=modelAExp, userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
     ! Create State and initialize modelBComp
     modelBImp = ESMF_StateCreate(name="modelBComp import",  &
                                  stateType=ESMF_STATE_IMPORT, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompInitialize(modelBComp, importState=modelBImp, &
-      exportState=exportState, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+      exportState=exportState, userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
     ! Reconcile module wide import and export States
     call ESMF_StateReconcile(modelAExp, vm, rc=rc)
