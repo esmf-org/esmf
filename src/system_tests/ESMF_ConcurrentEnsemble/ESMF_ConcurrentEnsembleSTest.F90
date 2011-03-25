@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.27 2011/03/25 19:56:24 svasquez Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.28 2011/03/25 22:05:13 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -188,35 +188,59 @@ program ESMF_ConcurrentEnsembleSTest
 !-------------------------------------------------------------------------
 
   !compA1 and compA2 are two instances for user_modelA
-  call ESMF_GridCompSetServices(compA1, userRoutine=usermA_register, rc=localrc)
+  call ESMF_GridCompSetServices(compA1, userRoutine=usermA_register, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompSetServices(compA2, userRoutine=usermA_register, rc=localrc)
+  call ESMF_GridCompSetServices(compA2, userRoutine=usermA_register, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   !compB1 and compB2 are two instances for user_modelB
-  call ESMF_GridCompSetServices(compB1, userRoutine=usermB_register, rc=localrc)
+  call ESMF_GridCompSetServices(compB1, userRoutine=usermB_register, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_GridCompSetServices(compB2, userRoutine=usermB_register, rc=localrc)
+  call ESMF_GridCompSetServices(compB2, userRoutine=usermB_register, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
   ! CompC is user_modelC
-  call ESMF_GridCompSetServices(compC, userRoutine=usermC_register, rc=localrc)
+  call ESMF_GridCompSetServices(compC, userRoutine=usermC_register, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  call ESMF_CplCompSetServices(cpl, userRoutine=usercpl_register, rc=localrc)
+  call ESMF_CplCompSetServices(cpl, userRoutine=usercpl_register, &
+    userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
