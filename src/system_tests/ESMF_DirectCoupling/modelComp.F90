@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.18 2011/03/25 22:15:21 svasquez Exp $
+! $Id: modelComp.F90,v 1.19 2011/03/28 20:50:54 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -113,15 +113,17 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SetServices for modelAComp
-    call ESMF_GridCompSetVM(modelAComp, userRoutine=modelACompSetVM, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetVM(modelAComp, userRoutine=modelACompSetVM, &
+        userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
     call ESMF_GridCompSetServices(modelAComp, userRoutine=modelACompReg, &
         userRc=userrc, rc=rc)
     if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
     ! SetServices for modelBComp
-    call ESMF_GridCompSetVM(modelBComp, userRoutine=modelBCompSetVM, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetVM(modelBComp, userRoutine=modelBCompSetVM, &
+        userRc=userrc, rc=rc)
+    if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
     call ESMF_GridCompSetServices(modelBComp, userRoutine=modelBCompReg, &
         userRc=userrc, rc=rc)
     if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
