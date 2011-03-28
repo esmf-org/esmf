@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.29 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.30 2011/03/28 20:35:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -66,7 +66,7 @@ implicit none
 
 
 !BOC
-      integer                 :: rc, finalrc, petCount, localPet
+      integer                 :: rc, urc, finalrc, petCount, localPet
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1
@@ -198,7 +198,16 @@ implicit none
 
       call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
       call ESMF_CplCompRun(cplcomp, importState=c1exp, &
-        exportState=c2imp, rc=rc)
+        exportState=c2imp, userRc=urc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        call ESMF_Finalize(terminationflag=ESMF_ABORT)  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        call ESMF_Finalize(terminationflag=ESMF_ABORT)  ! bail out
+        
       call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
       
       call ESMF_GridCompFinalize(gridcomp1, exportState=c1exp, rc=rc)

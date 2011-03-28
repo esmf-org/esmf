@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.28 2011/01/16 20:26:04 svasquez Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.29 2011/03/28 20:35:00 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -704,22 +704,40 @@ module ESMF_AttributeUpdateMod
     rc = ESMF_SUCCESS
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     call ESMF_VMGet(vm, localPet=myPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     call ESMF_StateGet(importState, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
     call ESMF_StateGet(exportState, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 
     rootList = (/0,1/)
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
    
     call ESMF_AttributeCopy(importState, exportState, &
       ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
 !EOC
 
 
