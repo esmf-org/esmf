@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.9 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.10 2011/03/31 22:59:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -141,7 +141,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleCreate Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  arraybundle_w = ESMF_ArrayBundleCreate(arrayList=array_w, arrayCount=3, &
+  arraybundle_w = ESMF_ArrayBundleCreate(arrayList=array_w(1:3), &
     name="MyArrayBundle", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -204,7 +204,7 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleCreate Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  arraybundle_r = ESMF_ArrayBundleCreate(arrayList=array_r, arrayCount=3, &
+  arraybundle_r = ESMF_ArrayBundleCreate(arrayList=array_r(1:3), &
     name="EmptyBundle", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

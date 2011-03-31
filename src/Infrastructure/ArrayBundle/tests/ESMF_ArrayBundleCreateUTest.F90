@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.11 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.12 2011/03/31 22:59:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.11 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.12 2011/03/31 22:59:33 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -116,7 +116,7 @@ program ESMF_ArrayBundleCreateUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleCreate Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  arraybundle = ESMF_ArrayBundleCreate(arrayList=array, arrayCount=2, &
+  arraybundle = ESMF_ArrayBundleCreate(arrayList=array(1:2), &
     name="MyArrayBundle", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -170,7 +170,7 @@ program ESMF_ArrayBundleCreateUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleCreate Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  arraybundle = ESMF_ArrayBundleCreate(arrayList=array, arrayCount=2, &
+  arraybundle = ESMF_ArrayBundleCreate(arrayList=array(1:2), &
     name="MyArrayBundle", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   

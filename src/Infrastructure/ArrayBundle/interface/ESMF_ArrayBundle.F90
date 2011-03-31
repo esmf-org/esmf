@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.46 2011/02/26 01:50:26 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.47 2011/03/31 22:59:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.46 2011/02/26 01:50:26 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.47 2011/03/31 22:59:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -379,13 +379,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleCreate - Create an ArrayBundle from a list of Arrays
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_ArrayBundleCreate()
-  function ESMF_ArrayBundleCreate(arrayList, keywordEnforcer, arrayCount, name, rc)
+  function ESMF_ArrayBundleCreate(arrayList, keywordEnforcer, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,          intent(in),  optional :: arrayCount
     character (len=*),intent(in),  optional :: name
     integer,          intent(out), optional :: rc
 !         
@@ -404,10 +402,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [arrayList]
 !       List of {\tt ESMF\_Array} objects to be bundled.
-! \item [{[arrayCount]}]
-!       If provided specifies that only first {\tt arrayCount} Arrays in the
-!       {\tt arrayList} argument are to be included in the ArrayBundle. By
-!       default {\tt arrayCount} is equal to {\tt size(arrayList)}.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -416,7 +410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
     type(ESMF_ArrayBundle)  :: arraybundle! opaque pointer to ESMCI class
-    integer :: arrayCount_opt, i
+    integer :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
     integer :: len_name
     type(ESMF_Logical) :: linkChange
@@ -426,33 +420,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     
     ! Determine the number of ArrayList elements
-    arrayCount_opt = size(arrayList)
-    if (present(arrayCount)) then
-      if (arrayCount < 0) then
-        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          msg="- arrayCount must be positive", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      if (arrayCount > arrayCount_opt) then
-        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          msg="- arrayCount cannot be larger than size of arrayList", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      arrayCount_opt = arrayCount
-    endif
+    arrayCount = size(arrayList)
 
     ! Check init status of arguments
-    do i=1, arrayCount_opt
+    do i=1, arrayCount
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
     enddo
     
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
     ! This is necessary in order to strip off the F90 init check members
     ! when passing into C++
-    allocate(arrayPointerList(arrayCount_opt))
-    do i=1, arrayCount_opt
+    allocate(arrayPointerList(arrayCount))
+    do i=1, arrayCount
       call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -466,11 +445,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(name)) then
       len_name = len(name)
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
-        arrayCount_opt, name, len_name, localrc)
+        arrayCount, name, len_name, localrc)
     else
       len_name = 0
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
-        arrayCount_opt, "", len_name, localrc)
+        arrayCount, "", len_name, localrc)
     endif    
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -480,7 +459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! link the Attribute hierarchies
     linkChange = ESMF_TRUE;
-    do i=1,arrayCount_opt
+    do i=1,arrayCount
       call c_ESMC_AttributeLink(arraybundle, arrayList(i), linkChange, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc))  return
@@ -565,7 +544,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleGet - Get a list of Arrays out of an ArrayBundle
 !
 ! !INTERFACE:
-    ! Private name; call using ESMF_ArrayBundleGet()
     subroutine ESMF_ArrayBundleGet(arraybundle, keywordEnforcer, arrayCount, &
       arrayList, name, rc)
 !
@@ -1324,8 +1302,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[factor]}]
-!     Factor by which to multipy source data. Default is 1.
+!   \item [factor]
+!     Factor by which to multipy source data.
 !   \item [{[srcToDstTransposeMap]}]
 !     List with as many entries as there are dimensions in the Arrays in
 !     {\tt srcArrayBundle}. Each
