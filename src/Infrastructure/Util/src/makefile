@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2010/06/24 04:49:07 theurich Exp $ 
+# $Id: makefile,v 1.33 2011/04/01 22:04:46 theurich Exp $ 
 
 ALL: build_here
 
@@ -16,7 +16,7 @@ STOREH    = ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMCI_Util.h \
             ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMCI_Fraction.h \
             ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc \
-            ESMCI_LogMacros.inc
+            ESMCI_LogMacros.inc ESMCI_Container.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
