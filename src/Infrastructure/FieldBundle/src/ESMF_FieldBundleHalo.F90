@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.13 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.14 2011/04/01 23:06:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.13 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.14 2011/04/01 23:06:43 theurich Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -149,7 +149,7 @@ contains
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        arrayBundle = ESMF_ArrayBundleCreate(arrays, rc=localrc)
+        arrayBundle = ESMF_ArrayBundleCreate(arrayList=arrays, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(arrays)
@@ -299,7 +299,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        arrayBundle = ESMF_ArrayBundleCreate(arrays, rc=localrc)
+        arrayBundle = ESMF_ArrayBundleCreate(arrayList=arrays, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(arrays)

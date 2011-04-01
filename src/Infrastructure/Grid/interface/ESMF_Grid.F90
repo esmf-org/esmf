@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.208 2011/03/31 23:26:32 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.209 2011/04/01 23:06:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.208 2011/03/31 23:26:32 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.209 2011/04/01 23:06:45 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2585,7 +2585,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
        
-       srcAB = ESMF_ArrayBundleCreate(srcA2D(1:nStaggers), rc=localrc)
+       srcAB = ESMF_ArrayBundleCreate(arrayList=srcA2D(1:nStaggers), rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
             
@@ -2625,7 +2625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
        enddo
        
-       dstAB = ESMF_ArrayBundleCreate(dstA2D(1:nStaggers), rc=localrc)
+       dstAB = ESMF_ArrayBundleCreate(arrayList=dstA2D(1:nStaggers), rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 

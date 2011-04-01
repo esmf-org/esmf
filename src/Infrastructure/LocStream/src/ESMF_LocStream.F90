@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.52 2011/04/01 16:42:22 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.53 2011/04/01 23:06:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.52 2011/04/01 16:42:22 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.53 2011/04/01 23:06:47 theurich Exp $'
 
 !==============================================================================
 !
@@ -5338,12 +5338,12 @@ end subroutine ESMF_LocStreamGetBounds
       ! Redistribute data from one locstream to another 
 
       ! Create ArrayBundles for redistribution
-      oldAB=ESMF_ArrayBundleCreate(oldLStypep%keys, rc=localrc)      
+      oldAB=ESMF_ArrayBundleCreate(arrayList=oldLStypep%keys, rc=localrc)      
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return     
 
-      newAB=ESMF_ArrayBundleCreate(newLStypep%keys, rc=localrc)      
+      newAB=ESMF_ArrayBundleCreate(arrayList=newLStypep%keys, rc=localrc)      
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return     

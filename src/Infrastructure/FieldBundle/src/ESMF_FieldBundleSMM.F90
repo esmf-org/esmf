@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.28 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.29 2011/04/01 23:06:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.28 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.29 2011/04/01 23:06:43 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -197,7 +197,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
             enddo
-            srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+            srcab = ESMF_ArrayBundleCreate(arrayList=srca, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             deallocate(srca)
@@ -220,7 +220,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
             enddo
-            dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+            dstab = ESMF_ArrayBundleCreate(arrayList=dsta, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             deallocate(dsta)
@@ -489,7 +489,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        srcab = ESMF_ArrayBundleCreate(arrayList=srca, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(srca)
@@ -504,7 +504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        dstab = ESMF_ArrayBundleCreate(arrayList=dsta, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(dsta)
@@ -584,7 +584,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        srcab = ESMF_ArrayBundleCreate(arrayList=srca, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(srca)
@@ -599,7 +599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        dstab = ESMF_ArrayBundleCreate(arrayList=dsta, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(dsta)
@@ -679,7 +679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        srcab = ESMF_ArrayBundleCreate(arrayList=srca, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(srca)
@@ -694,7 +694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        dstab = ESMF_ArrayBundleCreate(arrayList=dsta, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(dsta)
@@ -774,7 +774,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        srcab = ESMF_ArrayBundleCreate(arrayList=srca, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(srca)
@@ -789,7 +789,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        dstab = ESMF_ArrayBundleCreate(arrayList=dsta, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(dsta)
@@ -961,7 +961,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        srcab = ESMF_ArrayBundleCreate(srca, rc=localrc)
+        srcab = ESMF_ArrayBundleCreate(arrayList=srca, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(srca)
@@ -976,7 +976,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
-        dstab = ESMF_ArrayBundleCreate(dsta, rc=localrc)
+        dstab = ESMF_ArrayBundleCreate(arrayList=dsta, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         deallocate(dsta)
