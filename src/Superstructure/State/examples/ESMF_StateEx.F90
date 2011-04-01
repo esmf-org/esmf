@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.41 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_StateEx.F90,v 1.42 2011/04/01 22:21:02 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,6 +28,8 @@
     type(ESMF_FieldBundle) :: bundle1, bundle2
     type(ESMF_State) :: state1, state2, state3
     integer :: finalrc
+    logical :: neededFlag(1)
+
     finalrc = ESMF_SUCCESS
 
 
@@ -125,16 +127,16 @@
     print *, "State Create returned", rc, " name = ", trim(statename)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    dataname = "Downward wind"
-    call ESMF_StateAdd(state3, dataname, rc=rc)
+    dataname = "Downward wind:needed"
+    call ESMF_AttributeSet (state3, dataname, .false., rc=rc)
 !EOC
-    print *, "StateAdd returned", rc, " name = ", trim(dataname)
+    print *, "AttributeSet returned", rc, " name = ", trim(dataname)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    dataname = "Humidity"
-    call ESMF_StateAdd(state3, dataname, rc=rc)
+    dataname = "Humidity:needed"
+    call ESMF_AttributeSet (state3, dataname, .false., rc=rc)
 !EOC
-    print *, "StateAdd returned", rc, " name = ", trim(dataname)
+    print *, "AttributeSet returned", rc, " name = ", trim(dataname)
 
     ! See next example for how this is used.
 
@@ -155,10 +157,10 @@
     ! is given an opportunity to mark which data items are needed.
 
 !BOC
-    dataname = "Downward wind"
-    call ESMF_StateSetNeeded(state3, dataname, ESMF_NEEDED, rc=rc)
+    dataname = "Downward wind:needed"
+    call ESMF_AttributeSet (state3, name=dataname, value=.true., rc=rc)
 !EOC
-    print *, "StateSetNeeded returned", rc
+    print *, "AttributeSet returned", rc
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
@@ -180,11 +182,12 @@
     ! can check the state to see what data items are required.
 
 !BOC
-    dataname = "Downward wind"
-    if (ESMF_StateIsNeeded(state3, dataname, rc=rc)) then
+    dataname = "Downward wind:needed"
+    call ESMF_AttributeGet (state3, dataname, valueList=neededFlag, rc=rc)
 !EOC
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
+    if (rc == ESMF_SUCCESS .and. neededFlag(1)) then
         bundlename = dataname
         bundle2 = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
 !EOC
