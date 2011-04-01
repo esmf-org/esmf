@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.111 2011/03/08 16:23:00 w6ws Exp $
+! $Id: ESMF_Clock.F90,v 1.112 2011/04/01 16:42:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.111 2011/03/08 16:23:00 w6ws Exp $'
+      '$Id: ESMF_Clock.F90,v 1.112 2011/04/01 16:42:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -343,7 +343,7 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
 
       sizeofRingingAlarmList = 0
 
@@ -488,8 +488,8 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
 
       nameLen = 0
 
@@ -761,15 +761,15 @@
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,currSimTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,prevSimTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,currSimTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,prevSimTime)
 
 
       ! get length of given name for C++ validation
@@ -1034,8 +1034,8 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,nextTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,nextTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, localrc)
@@ -1506,12 +1506,12 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
 
       ! get length of given name for C++ validation
       if (present(name)) then

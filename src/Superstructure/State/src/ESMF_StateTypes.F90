@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.42 2011/03/24 04:48:32 theurich Exp $
+! $Id: ESMF_StateTypes.F90,v 1.43 2011/04/01 16:42:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.42 2011/03/24 04:48:32 theurich Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.43 2011/04/01 16:42:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -425,7 +425,7 @@ end function
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_DataHolderGetInit, ESMF_DataHolderInit,dh)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_DataHolderGetInit, ESMF_DataHolderInit,dh)
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
@@ -533,7 +533,7 @@ end function
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_StateItemGetInit, ESMF_StateItemInit,si)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_StateItemGetInit, ESMF_StateItemInit,si)
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS

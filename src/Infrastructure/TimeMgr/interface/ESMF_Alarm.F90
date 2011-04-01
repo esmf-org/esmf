@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.104 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Alarm.F90,v 1.105 2011/04/01 16:42:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.104 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.105 2011/04/01 16:42:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -394,11 +394,11 @@
       nameLen = 0
 
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringInterval)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringDuration)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringInterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringDuration)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -743,14 +743,14 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevRingTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringInterval)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringBegin)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringEnd)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringDuration)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevRingTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringInterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringBegin)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,ringEnd)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,ringDuration)
 
 
       ! get length of given name for C++ validation

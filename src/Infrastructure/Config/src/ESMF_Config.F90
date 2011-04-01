@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.75 2011/02/28 20:08:29 rokuingh Exp $
+! $Id: ESMF_Config.F90,v 1.76 2011/04/01 16:42:16 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -295,7 +295,7 @@
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigAttrUsedGetInit, ESMF_ConfigAttrUsedInit,s)
+     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ConfigAttrUsedGetInit, ESMF_ConfigAttrUsedInit,s)
 
      ! return success
      if(present(rc)) then
@@ -396,7 +396,7 @@
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_ConfigClassGetInit, ESMF_ConfigClassInit,s)
+     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ConfigClassGetInit, ESMF_ConfigClassInit,s)
 
      ! return success
      if(present(rc)) then

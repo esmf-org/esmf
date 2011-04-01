@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.89 2011/03/04 19:08:58 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.90 2011/04/01 16:42:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -3492,7 +3492,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldBundleCongDataGetInit, ESMF_FieldBundleCongrntDataInit,s)
+     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_FieldBundleCongDataGetInit, ESMF_FieldBundleCongrntDataInit,s)
 
      ! return success
      if(present(rc)) then
@@ -3588,7 +3588,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_LocalFieldBundleGetInit,ESMF_LocalFieldBundleInit,s)
+     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LocalFieldBundleGetInit,ESMF_LocalFieldBundleInit,s)
 
      ! return success
      if(present(rc)) then
@@ -3687,7 +3687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_FieldBundleTypeGetInit,ESMF_FieldBundleTypeInit,s)
+     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_FieldBundleTypeGetInit,ESMF_FieldBundleTypeInit,s)
 
      ! return success
      if(present(rc)) then

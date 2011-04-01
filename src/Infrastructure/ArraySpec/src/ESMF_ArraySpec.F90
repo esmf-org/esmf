@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.46 2011/02/26 00:20:34 rokuingh Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.47 2011/04/01 16:42:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.46 2011/02/26 00:20:34 rokuingh Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.47 2011/04/01 16:42:14 theurich Exp $'
 
 !==============================================================================
 
@@ -210,7 +210,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
     ! check status
     if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
@@ -283,7 +283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
 
     ! Set arrayspec contents with some checking to keep Silverio at bay
     if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
@@ -349,7 +349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
     
     ! Call into the C++ interface, which will sort out optional arguments.
     !todo: call c_ESMC_ArraySpecValidate(arrayspec, localrc)

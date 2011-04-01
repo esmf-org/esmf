@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.81 2011/03/24 04:13:45 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.82 2011/04/01 16:42:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -333,7 +333,7 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,s)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,s)
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS 
     !TODO: Remove the following dummy test when implementing this method
@@ -439,7 +439,7 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,s)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,s)
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when implementing this method
@@ -540,7 +540,7 @@ contains
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,s)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,s)
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when implementing this method
@@ -631,11 +631,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rc=ESMF_FAILURE
     endif
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     if(log%logTableIndex>0) then
       alog => ESMF_LogTable(log%logTableIndex)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%logtype /= ESMF_LOG_NONE) then
 	if (alog%FileIsOpen == ESMF_TRUE) then
@@ -689,7 +689,7 @@ end subroutine ESMF_LogClose
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+        ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
         ! Loop through all ESMF_LogTable(*) and close the files
         do k = 1,ESMF_LogTableCount
@@ -740,7 +740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc
     logical                         :: spaceflag
    
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
     nullify(alog) ! ensure that the association status is well defined
     
@@ -759,7 +759,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (associated(alog)) then
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%FileIsOpen /= ESMF_TRUE) then
         print *, "ESMF_Log not open -- cannot ESMF_LogFlush()."
@@ -887,7 +887,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer::msglen=0
     type(ESMF_LogPrivate), pointer  :: alog
     
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundAllocError=.FALSE.
     
     nullify(alog) ! ensure that the association status is well defined
@@ -1000,7 +1000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer::msglen=0
     type(ESMF_LogPrivate), pointer  :: alog
     
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     ESMF_LogFoundDeallocError=.FALSE.
     
     nullify(alog) ! ensure that the association status is well defined
@@ -1122,7 +1122,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rcToCheckInternal = rcToCheck
     endif
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     nullify(alog) ! ensure that the association status is well defined
     
@@ -1136,7 +1136,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (associated(alog)) then
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       ! set default returns
       ESMF_LogFoundError = .FALSE.
@@ -1248,7 +1248,7 @@ end function ESMF_LogFoundError
           rc=ESMF_FAILURE
         endif
 
-        ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+        ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     nullify(alog) ! ensure that the association status is well defined
     
@@ -1262,7 +1262,7 @@ end function ESMF_LogFoundError
     
     if (associated(alog)) then
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
 	if (present(verbose)) then
           verbose=alog%verbose
@@ -1396,7 +1396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     type(ESMF_LogPrivate),pointer     :: alog
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) then
@@ -1411,7 +1411,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       alog => ESMF_LogTable(log%logTableIndex)
     endif
         
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
     ! Test if it is open or closed
     if (alog%FileIsOpen == ESMF_TRUE) then
@@ -1613,7 +1613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LogPrivate), pointer          :: alog
     type(ESMF_LogEntry), dimension(:), pointer :: localbuf
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
     nullify(alog) ! ensure that the association status is well defined
 
@@ -1632,7 +1632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (associated(alog)) then
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%FileIsOpen /= ESMF_TRUE) then
         print *, "ESMF_Log not open -- cannot ESMF_LogSet()."
@@ -1783,7 +1783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXSTR)::allocmsg
     integer::msglen=0
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
     nullify(alog) ! ensure that the association status is well defined
     
@@ -1797,7 +1797,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (associated(alog)) then
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       ! set default returns
       if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
@@ -1901,7 +1901,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer			    :: rc2, index
     type(ESMF_LogPrivate), pointer  :: alog
     
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
     
     nullify(alog) ! ensure that the association status is well defined
     
@@ -2035,7 +2035,7 @@ end subroutine ESMF_LogWrite
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,logEntryIn)
+    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogEntryGetInit,ESMF_LogEntryInit,logEntryIn)
 
     logEntryOut%h    = logEntryIn%h
     logEntryOut%m    = logEntryIn%m

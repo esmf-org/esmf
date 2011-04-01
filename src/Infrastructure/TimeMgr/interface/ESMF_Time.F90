@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.123 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Time.F90,v 1.124 2011/04/01 16:42:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.123 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_Time.F90,v 1.124 2011/04/01 16:42:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -788,9 +788,9 @@
       tempTimeStringLenISOFrac = 0
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,midMonth)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,dayOfYear_intvl)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,midMonth)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,dayOfYear_intvl)
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
@@ -872,7 +872,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
       call c_ESMC_TimeIsLeapYear(time, ESMF_TimeIsLeapYear, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -927,8 +927,8 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time1)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time2)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time1)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time2)
 
       call c_ESMC_TimeIsSameCalendar(time1, time2, ESMF_TimeIsSameCalendar, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1004,7 +1004,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
    
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
       call c_ESMC_TimePrint(time, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1054,7 +1054,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
       nameLen = len_trim(name)
    
@@ -1264,7 +1264,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 !      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
 
@@ -1320,7 +1320,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
 
       call c_ESMC_TimeSyncToRealTime(time, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1376,7 +1376,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
       call c_ESMC_TimeValidate(time, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1421,7 +1421,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
    
 !     invoke C to C++ entry point
       call c_ESMC_TimeWriteRestart(time, localrc)

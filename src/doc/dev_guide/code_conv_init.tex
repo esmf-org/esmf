@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_init.tex,v 1.5 2009/08/27 05:34:24 theurich Exp $
+% CVS $Id: code_conv_init.tex,v 1.6 2011/04/01 16:42:35 theurich Exp $
 
 
 \subsection{Initialization Standardization Instructions}
@@ -177,7 +177,7 @@ it (except in ESMF\_LogErr.F90 and ESMF\_UtilTypes.F90):
        integer, intent(out),optional :: rc
 
        ! check initialization status
-       ESMF_INIT_CHECK_SHALLOW(ESMF_STYPEGetInit,ESMF_STYPEInit,s)
+       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_STYPEGetInit,ESMF_STYPEInit,s)
        
        ! return success
        if (present(rc)) then
@@ -288,7 +288,7 @@ The standardization procedure yields this:\\
 *       integer, intent(out),optional :: rc
 *
 *       ! check initialization status
-*       ESMF_INIT_CHECK_SHALLOW(ESMF_ShallowGetInit,ESMF_ShallowInit,s)
+*       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ShallowGetInit,ESMF_ShallowInit,s)
 *       
 *       ! return success
 *       if (present(rc)) then
@@ -581,8 +581,8 @@ The standardization yields this:\\
 *         ESMF_INIT_CHECK_DEEP(ESMF_Deep1GetInit,d1,rc)
 *         ESMF_INIT_CHECK_DEEP(ESMF_Deep2GetInit,d2,rc)
 *
-*         ESMF_INIT_CHECK_SHALLOW(ESMF_Shallow1GetInit,ESMF_Shallow1Init,s1)
-*         ESMF_INIT_CHECK_SHALLOW(ESMF_Shallow2GetInit,ESMF_Shallow2Init,s2)
+*         ESMF_INIT_CHECK_SET_SHALLOW(ESMF_Shallow1GetInit,ESMF_Shallow1Init,s1)
+*         ESMF_INIT_CHECK_SET_SHALLOW(ESMF_Shallow2GetInit,ESMF_Shallow2Init,s2)
 
           ...... rest of subroutine code....
 

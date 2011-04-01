@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.115 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.116 2011/04/01 16:42:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.115 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.116 2011/04/01 16:42:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -1145,8 +1145,8 @@
       localrc = ESMF_RC_NOT_IMPL
 
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
 
       timeStringLen = 0     
       timeStringLenISOFrac = 0     
@@ -1376,9 +1376,9 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTimeIn)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTimeIn)
 
 
       timeStringLen = 0
@@ -1614,8 +1614,8 @@
       localrc = ESMF_RC_NOT_IMPL
 
 !      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendarIn,rc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
 
       timeStringLen = 0     
       timeStringLenISOFrac = 0     
@@ -1847,8 +1847,8 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
 
       timeStringLen = 0
       timeStringLenISOFrac = 0
@@ -1926,7 +1926,7 @@
 ! !REQUIREMENTS:
 !     TMG1.5.8
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
       call ESMF_TimeIntervalInit(ESMF_TimeIntervalNegAbsValue)
     
       call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
@@ -1999,7 +1999,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
     
       call c_ESMC_TimeIntervalPrint(timeinterval, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2050,7 +2050,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       nameLen = len_trim(name)
 
@@ -2199,7 +2199,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDur(timeinterval, yy, yy_i8, &
@@ -2358,7 +2358,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDurStart(timeinterval, yy, yy_i8, &
@@ -2522,7 +2522,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check variables
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDurCal(timeinterval, yy, yy_i8, &
@@ -2681,7 +2681,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       ! use optional args for any subset
       call c_ESMC_TimeIntervalSetDurCalTyp(timeinterval, yy, yy_i8, &
@@ -2738,7 +2738,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
     
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
       call c_ESMC_TimeIntervalValidate(timeinterval, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2784,7 +2784,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeinterval)
 
 !     invoke C to C++ entry point 
       call c_ESMC_TimeIntervalWriteRestart(timeinterval, localrc)

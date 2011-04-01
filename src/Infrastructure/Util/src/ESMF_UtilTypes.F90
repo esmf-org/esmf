@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.115 2011/03/25 13:34:46 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.116 2011/04/01 16:42:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -940,7 +940,7 @@ end interface
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SHALLOW(ESMF_ObjectIDGetInit,ESMF_ObjectIDInit,s)
+     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ObjectIDGetInit,ESMF_ObjectIDInit,s)
 
      ! return success
      if(present(rc)) then

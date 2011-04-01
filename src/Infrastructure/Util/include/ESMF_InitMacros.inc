@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.36 2011/02/24 21:07:41 theurich Exp $
+$Id: ESMF_InitMacros.inc,v 1.37 2011/04/01 16:42:27 theurich Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -53,12 +53,12 @@ automatic initialization of types.
 
 #ifdef ESMF_NO_INITIALIZERS
 #define ESMF_INIT_DECLARE  ESMF_INIT_TYPE :: isInit
-#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var) \
+#define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var) \
              if (fget(var) .ne. ESMF_INIT_DEFINED) call \
                  finit(var)
 #else
 #define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_DEFINED
-#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var)
+#define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var)
 #endif
 
 #define ESMF_INIT_SET_DEFINED(var) var%isInit=ESMF_INIT_DEFINED
@@ -81,10 +81,10 @@ if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
 
 #ifdef ESMF_NO_INITIALIZERS
 #define ESMF_INIT_DECLARE 
-#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var) 
+#define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var) 
 #else
 #define ESMF_INIT_DECLARE 
-#define ESMF_INIT_CHECK_SHALLOW(fget,finit,var)
+#define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var)
 #endif
 
 #define ESMF_INIT_SET_DEFINED(var) 
