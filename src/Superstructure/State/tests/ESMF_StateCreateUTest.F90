@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.35 2011/02/18 23:52:42 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.36 2011/04/01 22:26:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,12 +46,10 @@ end module
       use userMethodMod
       implicit none
 
-#define ESMF_ENABLESTATENEEDED
-
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.35 2011/02/18 23:52:42 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.36 2011/04/01 22:26:28 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -360,31 +358,32 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Adding a name only
-      sname = "Downward wind"
-      call ESMF_StateAdd(state3, sname, rc=rc)
+      sname = "Downward wind:needed"
+      call ESMF_AttributeSet (state3, sname, value=.false., rc=rc)
+!      call ESMF_StateAdd(state3, sname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a name only"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-#if defined (ESMF_ENABLESTATENEEDED)
-      !EX_xUTest      
+      !EX_UTest      
       ! Marking an item needed
-      sname = "Downward wind"
-      call ESMF_StateSetNeeded(state3, sname, ESMF_NEEDED, rc=rc)
+      sname = "Downward wind:needed"
+      call ESMF_AttributeSet (state3, sname, value=.true., rc=rc)
+!      call ESMF_StateSetNeeded(state3, sname, ESMF_NEEDED, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Marking an item needed"
-      !Call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      Call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      !EX_xUTest      
+      !EX_UTest      
       ! Querying if an item is needed, using sname from above
-      isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
+      call ESMF_AttributeGet (state3, sname, value=isNeeded, rc=rc)
+!      isNeeded =  ESMF_StateIsNeeded(state3, sname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Querying if an item is needed"
-      !call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (.not. isNeeded)), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-#endif
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .or. (.not. isNeeded)), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Creating a FieldBundle to add to a State
