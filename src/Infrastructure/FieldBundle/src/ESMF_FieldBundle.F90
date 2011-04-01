@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.90 2011/04/01 16:42:20 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.91 2011/04/01 17:24:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -594,7 +594,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
-      type(ESMF_Field),       intent(inout)         :: field
+      type(ESMF_Field),       intent(in)            :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
