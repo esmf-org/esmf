@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.47 2011/03/31 22:59:31 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.48 2011/04/01 22:11:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.47 2011/03/31 22:59:31 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.48 2011/04/01 22:11:54 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -379,11 +379,11 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleCreate - Create an ArrayBundle from a list of Arrays
 !
 ! !INTERFACE:
-  function ESMF_ArrayBundleCreate(arrayList, keywordEnforcer, name, rc)
+  function ESMF_ArrayBundleCreate(keywordEnforcer, arrayList, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Array), intent(in),  optional :: arrayList(:)
     character (len=*),intent(in),  optional :: name
     integer,          intent(out), optional :: rc
 !         
@@ -391,20 +391,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArrayBundle) :: ESMF_ArrayBundleCreate
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_ArrayBundle} object from a list of Arrays.
+!   Create an {\tt ESMF\_ArrayBundle} object from a list of existing Arrays.
 !
-! The creation of an ArrayBundle leaves the bundled Arrays unchanged, they
-! remain valid individual objects. An ArrayBundle is a light weight container
-! of Array references. The actual data remains in place, there are no
-! data movements or duplications associated with the creation of an 
-! ArrayBundle.
+!   The creation of an ArrayBundle leaves the bundled Arrays unchanged, they
+!   remain valid individual objects. An ArrayBundle is a light weight container
+!   of Array references. The actual data remains in place, there are no
+!   data movements or duplications associated with the creation of an 
+!   ArrayBundle.
 !
-! \begin{description}
-! \item [arrayList]
-!       List of {\tt ESMF\_Array} objects to be bundled.
-! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!   \begin{description}
+!   \item [{[arrayList]}]
+!     List of {\tt ESMF\_Array} objects to be bundled.
+!   \item [{[name]}]
+!     Name of the created {\tt ESMF\_ArrayBundle}. A default name is generated
+!     if not specified.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -420,7 +423,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     
     ! Determine the number of ArrayList elements
-    arrayCount = size(arrayList)
+    if (present(arrayList)) then
+      arrayCount = size(arrayList)
+    else
+      arrayCount = 0
+    endif
 
     ! Check init status of arguments
     do i=1, arrayCount
