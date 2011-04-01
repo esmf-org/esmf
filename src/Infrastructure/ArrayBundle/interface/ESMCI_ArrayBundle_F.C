@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.21 2011/02/22 23:37:21 w6ws Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.22 2011/04/01 22:09:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -21,10 +21,13 @@
 #include "ESMCI_RHandle.h"
 #include "ESMCI_Array.h"
 
-#include "ESMCI_ArrayBundle.h"
-
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMCI_LogMacros.inc"
+
+#include "ESMCI_ArrayBundle.h"
+
+#include <vector>
+
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -95,8 +98,10 @@ extern "C" {
         return;
       }
       // opt_arrayList has correct number of elements
+      vector<ESMCI::Array *> arrayVector;
+      (*ptr)->getArrayVector(arrayVector);
       for (int i=0; i<(*ptr)->getArrayCount(); i++)
-        opt_arrayList[i] = ((*ptr)->getArrayList())[i];
+        opt_arrayList[i] = arrayVector[i];
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

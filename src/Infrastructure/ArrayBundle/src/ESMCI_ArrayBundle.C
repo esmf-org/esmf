@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.34 2011/02/22 23:37:21 w6ws Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.35 2011/04/01 22:09:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -29,11 +29,13 @@
 // include higher level, 3rd party or system headers
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <vector>
 #include <algorithm>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
+#include "ESMCI_Container.h"
 
 // LogErr headers
 #include "ESMCI_LogErr.h"                  // for LogErr
@@ -44,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.34 2011/02/22 23:37:21 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.35 2011/04/01 22:09:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -70,9 +72,9 @@ ArrayBundle::ArrayBundle(
 //
 // !ARGUMENTS:
 //
-  Array **arrayListArg,                   // (in)
-  int arrayCountArg,                      // (in)
-  int *rc                                 // (out)
+  Array **arrayList,                   // (in)
+  int arrayCount,                      // (in)
+  int *rc                              // (out)
   ){
 //
 // !DESCRIPTION:
@@ -89,15 +91,15 @@ ArrayBundle::ArrayBundle(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   try{  
-
-  // fill in the ArrayBundle object
-  arrayCount = arrayCountArg;
-  arrayList = new Array*[arrayCount];
-  memcpy(arrayList, arrayListArg, arrayCount*sizeof(Array *));
-  arrayCreator = false; // Array objects were provided externally
+    
+    // fill in the ArrayBundle object
+    for (int i=0; i<arrayCount; i++)
+      arrayContainer.add(string(arrayList[i]->getName()), arrayList[i]);
+    
+    arrayCreator = false; // Array objects were provided externally
   
-  // invalidate the name for this ArrayBundle object in the Base class
-  ESMC_BaseSetName(NULL, "ArrayBundle");
+    // invalidate the name for this ArrayBundle object in the Base class
+    ESMC_BaseSetName(NULL, "ArrayBundle");
    
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -113,7 +115,7 @@ ArrayBundle::ArrayBundle(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayBundle::destrict()"
+#define ESMC_METHOD "ESMCI::ArrayBundle::destruct()"
 //BOPI
 // !IROUTINE:  ESMCI::ArrayBundle::destruct
 //
@@ -136,11 +138,11 @@ int ArrayBundle::destruct(bool followCreator){
   
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
-    if (arrayList != NULL){
-      if (arrayCreator && followCreator)
-        for (int i=0; i<arrayCount; i++)
-          Array::destroy(&arrayList[i]);
-      delete [] arrayList;
+    if (arrayCreator && followCreator){
+      vector<Array *> arrayVector;
+      getArrayVector(arrayVector);
+      for (int i=0; i<getArrayCount(); i++)
+        Array::destroy(&arrayVector[i]);
     }
   }
   
@@ -171,9 +173,9 @@ ArrayBundle *ArrayBundle::create(
 //
 // !ARGUMENTS:
 //
-  Array **arrayListArg,                       // (in)
-  int arrayCount,                             // (in)
-  int *rc                                     // (out) return code
+  Array **arrayList,                       // (in)
+  int arrayCount,                          // (in)
+  int *rc                                  // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -191,7 +193,7 @@ ArrayBundle *ArrayBundle::create(
 
   // call class constructor
   try{
-    arraybundle = new ArrayBundle(arrayListArg, arrayCount, &localrc);
+    arraybundle = new ArrayBundle(arrayList, arrayCount, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }catch(...){
@@ -296,9 +298,11 @@ int ArrayBundle::print()const{
   // print info about the ESMCI::ArrayBundle object
   printf("--- ESMCI::ArrayBundle::print start ---\n");
   printf("ArrayBundle: %s\n", getName());
-  printf("arrayCount = %d\n", arrayCount);
-  for (int i=0; i<arrayCount; i++)
-    printf("arrayList[%d]: %s\n", i, arrayList[i]->getName());
+  printf("arrayCount = %d\n", getArrayCount());
+  vector<Array *> arrayVector;
+  getArrayVector(arrayVector);
+  for (int i=0; i<getArrayCount(); i++)
+    printf("array #%d: %s\n", i, arrayVector[i]->getName());
   printf("--- ESMCI::ArrayBundle::print end ---\n");
   
   // return successfully
@@ -377,13 +381,14 @@ int ArrayBundle::haloStore(
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
+    vector<Array *> arrayVector;
+    arraybundle->getArrayVector(arrayVector);
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
-      Array *array = arraybundle->getArrayList()[i];
+      Array *array = arrayVector[i];
       // search if there was an earlier entry that is weakly congruent
       for (int j=i-1; j>=0; j--){
-        bool match = Array::match(array, arraybundle->getArrayList()[j],
-          &localrc);
+        bool match = Array::match(array, arrayVector[j], &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         if (match){
@@ -426,7 +431,7 @@ int ArrayBundle::haloStore(
     int vectorLengthShift = 0;  // reset
     vector<XXE *> xxeSub(arrayCount);
     for (int i=0; i<arrayCount; i++){
-      Array *array = arraybundle->getArrayList()[i];
+      Array *array = arrayVector[i];
       if (matchList[i] < i){
         // Array matches previous Array in ArrayBundle
 //        printf("localPet=%d, Array #%d does not require precompute, "
@@ -639,18 +644,20 @@ int ArrayBundle::redistStore(
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
+    vector<Array *> srcArrayVector;
+    vector<Array *> dstArrayVector;
+    srcArraybundle->getArrayVector(srcArrayVector);
+    dstArraybundle->getArrayVector(dstArrayVector);
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
-      Array *srcArray = srcArraybundle->getArrayList()[i];
-      Array *dstArray = dstArraybundle->getArrayList()[i];
+      Array *srcArray = srcArrayVector[i];
+      Array *dstArray = dstArrayVector[i];
       // search if there was an earlier entry that is weakly congruent
       for (int j=i-1; j>=0; j--){
-        bool srcMatch = Array::match(srcArray,
-          srcArraybundle->getArrayList()[j], &localrc);
+        bool srcMatch = Array::match(srcArray, srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
-        bool dstMatch = Array::match(dstArray,
-          dstArraybundle->getArrayList()[j], &localrc);
+        bool dstMatch = Array::match(dstArray, dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         if (srcMatch && dstMatch){
@@ -693,8 +700,8 @@ int ArrayBundle::redistStore(
     int vectorLengthShift = 0;  // reset
     vector<XXE *> xxeSub(arrayCount);
     for (int i=0; i<arrayCount; i++){
-      Array *srcArray = srcArraybundle->getArrayList()[i];
-      Array *dstArray = dstArraybundle->getArrayList()[i];
+      Array *srcArray = srcArrayVector[i];
+      Array *dstArray = dstArrayVector[i];
       if (matchList[i] < i){
         // src/dst Array pair matches previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
@@ -907,18 +914,20 @@ int ArrayBundle::sparseMatMulStore(
     }
     // construct local matchList
     vector<int> matchList(arrayCount);
+    vector<Array *> srcArrayVector;
+    vector<Array *> dstArrayVector;
+    srcArraybundle->getArrayVector(srcArrayVector);
+    dstArraybundle->getArrayVector(dstArrayVector);    
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
-      Array *srcArray = srcArraybundle->getArrayList()[i];
-      Array *dstArray = dstArraybundle->getArrayList()[i];
+      Array *srcArray = srcArrayVector[i];
+      Array *dstArray = dstArrayVector[i];
       // search if there was an earlier entry that is weakly congruent
       for (int j=i-1; j>=0; j--){
-        bool srcMatch = Array::match(srcArray,
-          srcArraybundle->getArrayList()[j], &localrc);
+        bool srcMatch = Array::match(srcArray, srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
-        bool dstMatch = Array::match(dstArray,
-          dstArraybundle->getArrayList()[j], &localrc);
+        bool dstMatch = Array::match(dstArray, dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         if (srcMatch && dstMatch){
@@ -961,8 +970,8 @@ int ArrayBundle::sparseMatMulStore(
     int vectorLengthShift = 0;  // reset
     vector<XXE *> xxeSub(arrayCount);
     for (int i=0; i<arrayCount; i++){
-      Array *srcArray = srcArraybundle->getArrayList()[i];
-      Array *dstArray = dstArraybundle->getArrayList()[i];
+      Array *srcArray = srcArrayVector[i];
+      Array *dstArray = dstArrayVector[i];
       if (matchList[i] < i){
         // src/dst Array pair matches previous pair in ArrayBundle
 //        printf("localPet=%d, src/dst pair #%d does not require precompute\n",
@@ -1065,6 +1074,10 @@ int ArrayBundle::sparseMatMul(
     
     Array *srcArray = NULL;
     Array *dstArray = NULL;
+    vector<Array *> srcArrayVector;
+    vector<Array *> dstArrayVector;
+    srcArraybundle->getArrayVector(srcArrayVector);
+    dstArraybundle->getArrayVector(dstArrayVector);    
     if (rhType == ESMC_ARRAYXXE){
       // apply same routehandle to each src/dst Array pair
       if (srcArraybundle != NULL && dstArraybundle != NULL){
@@ -1075,8 +1088,8 @@ int ArrayBundle::sparseMatMul(
           return rc;
         }
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
-          srcArray = srcArraybundle->getArrayList()[i];
-          dstArray = dstArraybundle->getArrayList()[i];
+          srcArray = srcArrayVector[i];
+          dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1084,7 +1097,7 @@ int ArrayBundle::sparseMatMul(
         }
       }else if (srcArraybundle != NULL){
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
-          srcArray = srcArraybundle->getArrayList()[i];
+          srcArray = srcArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1092,7 +1105,7 @@ int ArrayBundle::sparseMatMul(
         }
       }else if (dstArraybundle != NULL){
         for (int i=0; i<dstArraybundle->getArrayCount(); i++){
-          dstArray = dstArraybundle->getArrayList()[i];
+          dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1116,13 +1129,13 @@ int ArrayBundle::sparseMatMul(
           return rc;
         }
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
-          srcArray = srcArraybundle->getArrayList()[i];
+          srcArray = srcArrayVector[i];
           void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
           for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
             char *rraElement = (char *)larrayBaseAddrList[j];
             rraList.push_back(rraElement);
           }
-          dstArray = dstArraybundle->getArrayList()[i];
+          dstArray = dstArrayVector[i];
           larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
           for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
             char *rraElement = (char *)larrayBaseAddrList[j];
@@ -1143,7 +1156,7 @@ int ArrayBundle::sparseMatMul(
         }
       }else if (srcArraybundle != NULL){
         for (int i=0; i<srcArraybundle->getArrayCount(); i++){
-          srcArray = srcArraybundle->getArrayList()[i];
+          srcArray = srcArrayVector[i];
           void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
           for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
             char *rraElement = (char *)larrayBaseAddrList[j];
@@ -1164,7 +1177,7 @@ int ArrayBundle::sparseMatMul(
         }
       }else if (dstArraybundle != NULL){
         for (int i=0; i<dstArraybundle->getArrayCount(); i++){
-          dstArray = dstArraybundle->getArrayList()[i];
+          dstArray = dstArrayVector[i];
           void **larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
           for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
             char *rraElement = (char *)larrayBaseAddrList[j];
@@ -1344,7 +1357,8 @@ int ArrayBundle::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < sizeof(ArrayBundle)){
+  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) <
+    sizeof(ArrayBundle)){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an ArrayBundle object", &rc);
     return rc;
@@ -1353,7 +1367,8 @@ int ArrayBundle::serialize(
   // Serialize the Base class
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  localrc = ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,inquireflag);
+  localrc =
+    ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   // Serialize the ArrayBundle with all its Arrays
@@ -1361,14 +1376,17 @@ int ArrayBundle::serialize(
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   if (inquireflag != ESMF_INQUIREONLY)
-    *ip++ = arrayCount;
+    *ip++ = getArrayCount();
   else
     ip++;
 
   cp = (char *)ip;
   *offset = (cp - buffer);
-  for (int i=0; i<arrayCount; i++){
-    localrc = arrayList[i]->serialize(buffer,length,offset,attreconflag,inquireflag);
+  vector<Array *> arrayVector;
+  getArrayVector(arrayVector);
+  for (int i=0; i<getArrayCount(); i++){
+    localrc =
+      arrayVector[i]->serialize(buffer,length,offset,attreconflag,inquireflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
@@ -1420,13 +1438,13 @@ int ArrayBundle::deserialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
-  arrayCount = *ip++;
+  int arrayCount = *ip++;
   cp = (char *)ip;
   *offset = (cp - buffer);
-  arrayList = new Array*[arrayCount];
   for (int i=0; i<arrayCount; i++){
-    arrayList[i] = new Array(-1); // prevent baseID counter increment
-    arrayList[i]->deserialize(buffer,offset,attreconflag);
+    Array *array = new Array(-1); // prevent baseID counter increment
+    array->deserialize(buffer,offset,attreconflag);
+    arrayContainer.add(string(array->getName()), array);
   }
   arrayCreator = true;  // deserialize creates local Array objects
   

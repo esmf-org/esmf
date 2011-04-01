@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.18 2011/01/05 20:05:40 svasquez Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.19 2011/04/01 22:09:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,6 +35,10 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_RHandle.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_Container.h"
+
+#include <string>
+#include <vector>
 
 //-------------------------------------------------------------------------
 
@@ -48,20 +52,17 @@ class ArrayBundle;
 class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
   
   private:
-    Array **arrayList;
-    int arrayCount;
+    Container<std::string, Array *> arrayContainer;
     bool arrayCreator;
   
   public:
     // constructor and destructor
     ArrayBundle(){
-      arrayList = NULL;
-      arrayCount = 0;
+      arrayContainer;
       arrayCreator = false;
     }
     ArrayBundle(int baseID):ESMC_Base(baseID){// prevent baseID counter incr.
-      arrayList = NULL;
-      arrayCount = 0;
+      arrayContainer;
       arrayCreator = false;
     }
   private:
@@ -75,8 +76,10 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static ArrayBundle *create(Array **arrayList, int arrayCount, int *rc);
     static int destroy(ArrayBundle **arraybundle);
     // get() and set()
-    Array **getArrayList()      const {return arrayList;}
-    int getArrayCount()         const {return arrayCount;}
+    void getArrayVector(vector<Array *> &arrayVector)const{ 
+      arrayContainer.getVector(arrayVector);
+    }
+    int getArrayCount()         const {return arrayContainer.size();}
     const char *getName()       const {return ESMC_BaseGetName();}
     int setName(char *name){return ESMC_BaseSetName(name, "ArrayBundle");}
     // misc.
