@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.37 2011/04/01 16:42:27 theurich Exp $
+$Id: ESMF_InitMacros.inc,v 1.38 2011/04/02 03:50:00 oehmke Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,11 +38,13 @@ automatic initialization of types.
  (For more information about the detection process please see Section 5.10 of the 
  developers guide.)
 
-  ESMF_INIT_DEFINED  marks if a shallow object has been defined by ESMF. 
+  ESMF_INIT_UNDEFINED    marks if a shallow object hasn't been defined by ESMF. 
+  ESMF_INIT_DEFINED      marks if a shallow object has been set by an ESMF call.
   ESMF_INIT_CREATED  marks if a deep object has been allocated
   ESMF_INIT_DELETED  marks if a deep object has been deallocated. 
 #endif
-#define ESMF_INIT_DEFINED 76838410
+#define ESMF_INIT_UNDEFINED   76838410
+#define ESMF_INIT_DEFINED     63451943
 #define ESMF_INIT_CREATED 82949521
 #define ESMF_INIT_DELETED 12594838
 
@@ -57,7 +59,7 @@ automatic initialization of types.
              if (fget(var) .ne. ESMF_INIT_DEFINED) call \
                  finit(var)
 #else
-#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_DEFINED
+#define ESMF_INIT_DECLARE ESMF_INIT_TYPE :: isInit = ESMF_INIT_UNDEFINED
 #define ESMF_INIT_CHECK_SET_SHALLOW(fget,finit,var)
 #endif
 
@@ -72,6 +74,13 @@ if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rc)) return
 
 #define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rc) \
 if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
+
+#define ESMF_INIT_CHECK_SHALLOW(fget,var, rc) \
+if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rc)) return
+
+#define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rc) \
+if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
+
 
 #define ESMF_INIT_C_PAD   char isInit[8]; 
 
@@ -93,6 +102,8 @@ if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
 #define ESMF_INIT_COPY(dvar,svar)
 #define ESMF_INIT_CHECK_DEEP(fget, var, rc)
 #define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rc) 
+#define ESMF_INIT_CHECK_SHALLOW(fget,var, rc) 
+#define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rc)
 
 #define ESMF_INIT_C_PAD 
 
