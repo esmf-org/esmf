@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.11 2011/03/04 19:00:38 feiliu Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.12 2011/04/02 00:11:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.11 2011/03/04 19:00:38 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.12 2011/04/02 00:11:54 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -180,21 +180,21 @@ contains
         do i = 1, NFIELDS
              write(xstring, '(i1)') i
              srcField360(i) = ESMF_FieldCreate(grid360, arrayspec, &
-                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="source"//xstring, rc=localrc)
+                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="src360_"//xstring, rc=localrc)
             if (localrc /=ESMF_SUCCESS) then
               rc=ESMF_FAILURE
               return
             endif
           
              dstField360(i) = ESMF_FieldCreate(grid360, arrayspec, &
-                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="source"//xstring, rc=localrc)
+                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dst360_"//xstring, rc=localrc)
             if (localrc /=ESMF_SUCCESS) then
               rc=ESMF_FAILURE
               return
             endif
           
              errorField(i) = ESMF_FieldCreate(grid360, arrayspec, &
-                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="source"//xstring, rc=localrc)
+                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="error"//xstring, rc=localrc)
             if (localrc /=ESMF_SUCCESS) then
               rc=ESMF_FAILURE
               return
@@ -202,7 +202,7 @@ contains
           
           
              field180(i) = ESMF_FieldCreate(grid180, arrayspec, &
-                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dest"//xstring, rc=localrc)
+                                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dst180_"//xstring, rc=localrc)
             if (localrc /=ESMF_SUCCESS) then
               rc=ESMF_FAILURE
               return
@@ -601,7 +601,9 @@ contains
 
   integer, pointer :: larrayList(:)
   integer :: localPet, petCount
-
+  
+  character(len=1) :: xstring
+  
   ! result code
   integer :: finalrc
   
@@ -684,8 +686,9 @@ contains
 
    ! Create Field List
    do f=1,numFields
+      write(xstring, '(i1)') f
       fieldA(f) = ESMF_FieldCreate(gridA, arrayspec, &
-                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
+                         staggerloc=ESMF_STAGGERLOC_CENTER, name="source"//xstring, rc=localrc)
       if (localrc /=ESMF_SUCCESS) then
          rc=ESMF_FAILURE
          return
@@ -694,8 +697,9 @@ contains
 
    ! Create Field List
    do f=1,numFields
+      write(xstring, '(i1)') f
       fieldB(f) = ESMF_FieldCreate(gridB, arrayspec, &
-           staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
+           staggerloc=ESMF_STAGGERLOC_CENTER, name="dest"//xstring, rc=localrc)
       if (localrc /=ESMF_SUCCESS) then
          rc=ESMF_FAILURE
          return
