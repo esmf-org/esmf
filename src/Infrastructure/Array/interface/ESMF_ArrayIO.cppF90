@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.39 2011/03/14 23:38:01 samsoncheung Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.40 2011/04/04 17:06:18 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.39 2011/03/14 23:38:01 samsoncheung Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.40 2011/04/04 17:06:18 samsoncheung Exp $'
 
 !==============================================================================
 
@@ -109,8 +109,10 @@ contains
 !------------------------------------------------------------------------------
 ! Internally used subroutines that only exist if ESMF_PIO is defined.
 
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_checkpioerr"
 
-  subroutine check_pioerr(ierr, localPet, file, line, str1, str2)
+  subroutine ESMF_checkpioerr(ierr, localPet, file, line, str1, str2, rc)
 
     implicit none
     
@@ -120,11 +122,15 @@ contains
     integer,intent(in) :: line
     character(len=*),optional,intent(in) :: str1
     character(len=*),optional,intent(in) :: str2
+    integer,intent(out) :: rc
     
     character(len=256) lstr1
     character(len=256) lstr2
-    character(len=*),parameter :: myname_="check_pioerr"
+    character(len=*),parameter :: myname_="ESMF_checkpioerr"
+    integer :: local_rc
 
+    local_rc = ESMF_SUCCESS
+    rc = ESMF_SUCCESS
     lstr1 = ""
     if (present(str1)) then
        lstr1 = trim(str1)
@@ -136,10 +142,14 @@ contains
 
     if(ierr /= PIO_noerr) then
       write(*,*) trim(myname_),":: ERROR on my_task=",localPet," ierr=",ierr,"  ",trim(lstr1)
-      call piodie(file,line,trim(lstr2))
+      local_rc = ESMF_FAILURE
+      if (ESMF_LogFoundError(local_rc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      !! call piodie(file,line,trim(lstr2))
     endif
 
-  end subroutine check_pioerr
+  end subroutine ESMF_checkpioerr
 
   subroutine WriteHeader(FileObj,vname,puttag,nxyz,dimid_xyz,spacedim)
 
@@ -436,10 +446,11 @@ contains
        else @\
         pioerr = PIO_def_var(FileObj,varname,basepiotype, dimid_xyz ,vard) @\
        endif @\
-       call check_pioerr(pioerr, localPet,  & @\
+       call ESMF_checkpioerr(pioerr, localPet,  & @\
         __FILE__,  & @\
-        __LINE__, " defvar") @\
-       !TODO: need error checking here! @\
+        __LINE__, " defvar", rc=localrc) @\
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
        pioerr = PIO_enddef(FileObj) @\
        !TODO: need error checking here! @\
      endif @\
@@ -459,11 +470,11 @@ contains
 !    call MPI_Barrier(mpic,rc) @\
 !    st = MPI_Wtime() @\
     call PIO_write_darray(FileObj,vard, IOdesc, farraywr, pioerr) @\
-    !TODO: need error checking here! @\
-    call check_pioerr(pioerr, localPet,  & @\
+    call ESMF_checkpioerr(pioerr, localPet,  & @\
         __FILE__,  & @\
-        __LINE__, " write_darray") @\
-    !TODO: need error checking here! @\
+        __LINE__, " write_darray",rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
 !    et = MPI_Wtime() @\
 @\
     call PIO_CloseFile(FileObj) @\
@@ -690,9 +701,11 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     ! Open a file and check data @\
     !-------------------------------- @\
     pioerr = PIO_OpenFile(PIOSYS,FileObj,fmtiotype,file) @\
-    call check_pioerr(pioerr,localPet,  & @\
+    call ESMF_checkpioerr(pioerr,localPet,  & @\
       __FILE__,  & @\
-      __LINE__," openfile") @\
+      __LINE__," openfile",rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     if( piofmt .ne. 'bin') then @\
       ! Set Frame to '1' in the PIO descriptor file @\
@@ -709,9 +722,11 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
         frame = time @\
       endif @\
       pioerr = PIO_inq_varid(FileObj, trim(varname), vard) @\
-      call check_pioerr(pioerr,localPet,  & @\
+      call ESMF_checkpioerr(pioerr,localPet,  & @\
                         __FILE__,  & @\
-                        __LINE__," defvar") @\
+                        __LINE__," defvar", rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
       ! Will read the time-slice number "frame" from the file @\
       call PIO_SetFrame(vard,frame) @\
       !TODO: need error checking here! @\
@@ -724,10 +739,11 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
 !    call MPI_Barrier(mpic,rc) @\
 !    st = MPI_Wtime() @\
     call PIO_read_darray(FileObj,vard, IOdesc, farrayrd, pioerr) @\
-    call check_pioerr(pioerr,localPet,  & @\
+    call ESMF_checkpioerr(pioerr,localPet,  & @\
       __FILE__,  & @\
-      __LINE__," read_darray") @\
-    !TODO: need error checking here! @\
+      __LINE__," read_darray",rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
 !    et = MPI_Wtime() @\
 @\
     call PIO_CloseFile(FileObj) @\
