@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.17 2011/02/23 20:05:29 w6ws Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.18 2011/04/05 21:11:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.17 2011/02/23 20:05:29 w6ws Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.18 2011/04/05 21:11:20 feiliu Exp $'
 
 !==============================================================================
 !
@@ -335,8 +335,10 @@ function ESMF_XGridCreateRaw(sideA, sideB, area, centroid, &
 type(ESMF_Grid), intent(in)     :: sideA(:), sideB(:)
 real(ESMF_KIND_R8), intent(in), optional   :: area(:)
 real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
-type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:), sparseMatX2A(:)
-type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:), sparseMatX2B(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
 character (len=*), intent(in), optional :: name
 integer, intent(out), optional  :: rc 
 
@@ -666,6 +668,11 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 
     ! generate the union of indices from all the A2X factorIndexLists
     ! generate the initial array that has the index positions marked '1'
+    ! Because of the distributed nature of the indicies, there may be
+    ! duplicate entries in the index union residing on the other PETs
+    ! this is currently left to to the SMM engine to detect such an error.
+    ! TODO: query the distributed data directory to avoid duplication
+    ! and return to user an error as early as possible
     minidx = minval(sparseMat(1)%factorIndexList(dim,:))
     maxidx = maxval(sparseMat(1)%factorIndexList(dim,:))
     allocate(iarray(minidx:maxidx), stat=localrc)
@@ -673,8 +680,10 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
         msg="- Allocating iarray(minidx:maxidx) ", &
         ESMF_CONTEXT, rcToReturn=rc)) return
     iarray = 0
-    do i = minidx, maxidx
-        iarray(sparseMat(1)%factorIndexList(dim,i)) = 1
+    l = lbound(sparseMat(1)%factorIndexList, dim)
+    u = ubound(sparseMat(1)%factorIndexList, dim)
+    do j = l, u
+        iarray(sparseMat(1)%factorIndexList(dim,j)) = 1
     enddo
 
     do i = 2, ngrid
@@ -689,13 +698,21 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
             msg="- Allocating iarray_t(minidx_n:maxidx_n) ", &
             ESMF_CONTEXT, rcToReturn=rc)) return
         ! copy the old index position array
+        iarray_t = 0
         do j = minidx, maxidx
             iarray_t(j) = iarray(j)
         enddo
         ! toggle the index position array with the new index list
+        ! do local uniqueness checking
         l = lbound(sparseMat(i)%factorIndexList, dim)
         u = ubound(sparseMat(i)%factorIndexList, dim)
         do j = l, u
+            if(iarray_t(sparseMat(i)%factorIndexList(dim,j)) == 1) then
+              call ESMF_LogSetError(ESMF_RC_ARG_RANK, &
+                msg=" - local duplicate index entry discovered", &
+                ESMF_CONTEXT, rcToReturn=rc)
+              return
+            endif
             iarray_t(sparseMat(i)%factorIndexList(dim,j)) = 1
         enddo
 
@@ -801,7 +818,7 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
 
     do i = 1, ngrid
         if(.not. associated(sparseMats(i)%factorIndexList) .or. &
-          .not. associated(sparseMats(i)%factorList)) then
+           .not. associated(sparseMats(i)%factorList)) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                msg="- sparseMat not initiailzed properly for "//tag, &
                ESMF_CONTEXT, rcToReturn=rc) 
