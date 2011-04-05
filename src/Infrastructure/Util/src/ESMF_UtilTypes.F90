@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.116 2011/04/01 16:42:30 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.117 2011/04/05 00:22:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -216,16 +216,15 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_MapName - used to provide Fortran access to C++ STL map containers
-!     ! for name-value pairs.
+!     ! ESMF_MapPtr - used to provide Fortran access to C++ STL map containers
+!     ! for associative lookup name-pointer pairs.
 
-      type ESMF_MapName
+      type ESMF_MapPtr
         sequence
         !private
         type(ESMF_Pointer) :: this
         ! only used internally -> no init macro!
       end type
-
 
 
 !------------------------------------------------------------------------------
@@ -774,7 +773,7 @@
       public ESMF_Status, ESMF_Pointer, ESMF_TypeKind
       public ESMF_DataValue
 
-      public ESMF_MapName
+      public ESMF_MapPtr
 
       public ESMF_PointerPrint
 

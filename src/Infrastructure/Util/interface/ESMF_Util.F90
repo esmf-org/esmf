@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.49 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Util.F90,v 1.50 2011/04/05 00:22:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -57,6 +57,38 @@
 !
 ! !DESCRIPTION:
 !
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_UtilNameMapAdd
+
+! !INTERFACE:
+
+    interface ESMF_UtilMapNameAdd
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_UtilMapNameContainerAdd
+      module procedure ESMF_UtilMapNameValueAdd
+    end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_UtilNameMapLookup
+
+! !INTERFACE:
+
+    interface ESMF_UtilMapNameLookup
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_UtilMapNameContainerLookup
+      module procedure ESMF_UtilMapNameValueLookup
+    end interface
+
+!------------------------------------------------------------------------------
+
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
@@ -104,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.49 2011/02/26 00:20:35 rokuingh Exp $'
+               '$Id: ESMF_Util.F90,v 1.50 2011/04/05 00:22:12 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -113,18 +145,68 @@
 ! Map routines - Interfaces to C++ STL map containers
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameAdd"
+#define ESMF_METHOD "ESMF_UtilMapNameContainerAdd"
 !BOPI
-! !IROUTINE:  ESMF_UtilMapNameAdd - Add a name/value pair to a map container
+! !IROUTINE:  ESMF_UtilMapNameContainerAdd - Add a name/value pair to a map container
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilMapNameAdd (this, name, value, rc)
+  subroutine ESMF_UtilMapNameContainerAdd (this, name, value, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(in) :: this
-    character(*),       intent(in) :: name
-    integer,            intent(in) :: value
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(in) :: this
+    character(*),      intent(in) :: name
+    type(ESMF_Pointer),intent(in) :: value
+    integer,           intent(out), optional :: rc
+!
+! !Description:
+! This method adds a name/value pair to a MapName container.  The
+! name argument is used within the container to identify the pair
+! for lookups.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! \item [{[name]}]
+! A character string which will be the keyword used to identify the
+! pair within the container.
+! \item [{[value]}]
+! A pointer associated with the name.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    if (this%this%ptr == 0) then
+      if (present (rc))  &
+        rc = ESMF_RC_PTR_NULL
+      return
+    end if
+
+    call c_esmc_mapname_add (this, trim (name), value, localrc)
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameContainerAdd
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameValueAdd"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameValueAdd - Add a name/value pair to a map container
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameValueAdd (this, name, value, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapPtr), intent(in) :: this
+    character(*),      intent(in) :: name
+    integer,           intent(in) :: value
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method adds a name/value pair to a MapName container.  The
@@ -159,7 +241,7 @@
     if (present (rc))  &
       rc = localrc
 
-  end subroutine ESMF_UtilMapNameAdd
+  end subroutine ESMF_UtilMapNameValueAdd
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
@@ -171,8 +253,8 @@
   subroutine ESMF_UtilMapNameCreate (this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(out) :: this
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(out) :: this
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method creates a MapName container.
@@ -206,8 +288,8 @@
   subroutine ESMF_UtilMapNameDestroy (this, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(inout) :: this
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(inout) :: this
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method destroys a MapName container.
@@ -239,19 +321,74 @@
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameLookup"
+#define ESMF_METHOD "ESMF_UtilMapNameContainerLookup"
 !BOPI
-! !IROUTINE:  ESMF_UtilMapNameLookup - Return the value associated with a name
+! !IROUTINE:  ESMF_UtilMapNameContainerLookup - Return the pointer associated with a name
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilMapNameLookup (this, name, value, foundFlag, rc)
+  subroutine ESMF_UtilMapNameContainerLookup (this, name, value, foundFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(in)  :: this
-    character(*),       intent(in)  :: name
-    integer,            intent(out) :: value
-    logical,            intent(out) :: foundFlag
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(in)  :: this
+    character(*),      intent(in)  :: name
+    type(ESMF_Pointer),intent(out) :: value
+    logical,           intent(out) :: foundFlag
+    integer,           intent(out), optional :: rc
+!
+! !Description:
+! This method looks up a name/value pair in a MapName container
+! and returns the value.
+!
+! The arguments are:
+! \begin{description}
+! \item [{[this]}]
+! A ESMF\_MapName object
+! \item [{[name]}]
+! A character string which will be the keyword used to identify the
+! pair within the container.
+! \item [{[value]}]
+! The pointer associated with the name.
+! \item [{[foundFlag]}]
+! Set to .TRUE. if the name is found, otherwise .FALSE.
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+
+    type(ESMF_Logical) :: localfoundflag
+    integer :: localrc
+
+    localrc = ESMF_FAILURE
+
+    if (this%this%ptr == 0) then
+      if (present (rc))  &
+        rc = ESMF_RC_PTR_NULL
+      return
+    end if
+
+    call c_esmc_mapname_lookup (this, trim (name),  &
+                                value, localfoundFlag, localrc)
+    foundflag = localfoundflag
+
+    if (present (rc))  &
+      rc = localrc
+
+  end subroutine ESMF_UtilMapNameContainerLookup
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilMapNameValueLookup"
+!BOPI
+! !IROUTINE:  ESMF_UtilMapNameValueLookup - Return the value associated with a name
+!
+! !INTERFACE:
+  subroutine ESMF_UtilMapNameValueLookup (this, name, value, foundFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_MapPtr), intent(in)  :: this
+    character(*),      intent(in)  :: name
+    integer,           intent(out) :: value
+    logical,           intent(out) :: foundFlag
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method looks up a name/value pair in a MapName container
@@ -290,7 +427,7 @@
     if (present (rc))  &
       rc = localrc
 
-  end subroutine ESMF_UtilMapNameLookup
+  end subroutine ESMF_UtilMapNameValueLookup
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
@@ -302,9 +439,9 @@
   subroutine ESMF_UtilMapNamePrint (this, title, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(in) :: this
-    character(*),       intent(in),  optional :: title
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(in) :: this
+    character(*),      intent(in),  optional :: title
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method prints the name/value pair from a MapName container to
@@ -324,21 +461,21 @@
 
     localrc = ESMF_FAILURE
 
-    if (this%this%ptr == 0) then
-      if (present (title)) then
-        print *, trim (title)
-      else
-        print *, "ESMF_UtilMapNamePrint:"
-      end if
-      print *, " *** NULL MapName pointer ***"
+    if (present (title)) then
+      print *, trim (title)
+    else
+      print *, "ESMF_UtilMapNamePrint:"
+    end if
 
+    if (this%this%ptr == 0) then
+      print *, " *** NULL MapName pointer ***"
       if (present (rc))  &
         rc = ESMF_SUCCESS
       return
     end if
 
-    call ESMF_UtilIOUnitFlush (0, rc=ignorerc)
-    call ESMF_UtilIOUnitFlush (6, rc=ignorerc)
+    call ESMF_UtilIOUnitFlush (ESMF_IOstderr, rc=ignorerc)
+    call ESMF_UtilIOUnitFlush (ESMF_IOstdout, rc=ignorerc)
 
     if (present (title)) then
       call c_esmc_mapname_print (this, trim (title), localrc)
@@ -361,9 +498,9 @@
   subroutine ESMF_UtilMapNameRemove (this, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(in) :: this
-    character(*),       intent(in) :: name
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(in) :: this
+    character(*),      intent(in) :: name
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method removes a name/value pair from a MapName container.
@@ -409,8 +546,8 @@
     integer :: ESMF_UtilMapNameSize
 !
 ! !ARGUMENTS:
-    type(ESMF_MapName), intent(in) :: this
-    integer,            intent(out), optional :: rc
+    type(ESMF_MapPtr), intent(in) :: this
+    integer,           intent(out), optional :: rc
 !
 ! !Description:
 ! This method returns the number of elements contained within
