@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.19 2011/04/01 22:09:10 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.20 2011/04/05 21:46:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,6 +78,9 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     // get() and set()
     void getArrayVector(vector<Array *> &arrayVector)const{ 
       arrayContainer.getVector(arrayVector);
+    }
+    void getArrayNameVector(vector<string> &arrayNameVector)const{ 
+      arrayContainer.getKeyVector(arrayNameVector);
     }
     int getArrayCount()         const {return arrayContainer.size();}
     const char *getName()       const {return ESMC_BaseGetName();}

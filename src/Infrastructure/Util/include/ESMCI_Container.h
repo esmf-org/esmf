@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.1 2011/04/01 22:04:45 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.2 2011/04/05 21:46:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@ namespace ESMCI {
     void replace(Key k, T t);
     T get(Key k)const;
     void getVector(std::vector<T> &v)const;
+    void getKeyVector(std::vector<Key> &v)const;
   };
   
 #undef  ESMC_METHOD
@@ -97,6 +98,18 @@ namespace ESMCI {
     int i = 0;
     for (pos = this->begin(); pos != this->end(); ++pos)
       v[i++] = pos->second;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::getKeyVector()"
+  template <typename Key, typename T>
+  void Container<Key, T>::getKeyVector(std::vector<Key> &v)const{
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+    v.resize(this->size());
+    typename Container::const_iterator pos;
+    int i = 0;
+    for (pos = this->begin(); pos != this->end(); ++pos)
+      v[i++] = pos->first;
   }
 
 } // namespace ESMCI
