@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.26 2011/04/05 21:19:18 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.27 2011/04/05 21:27:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1226,10 +1226,6 @@ contains
       coordY(i) = starty + (i-1)*ocn_dy
     enddo
 
-    ! Write VTK files
-    !call ESMF_GridWriteVTK(grid_ocn,staggerloc=ESMF_STAGGERLOC_CORNER, isSphere=.false., &
-    !    isLatLonDeg=.true., filename="ocnGrid")
-
     ! build Fields on the Grids
     f_atm = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1259,12 +1255,12 @@ contains
     call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
     if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1280,29 +1276,29 @@ contains
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     ! create a Field on the xgrid
     f_xgrid = ESMF_FieldCreate(xgrid=xgrid, TYPEKIND=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! regrid through the xgrid
     ! set up src flux
     call ESMF_FieldGet(f_atm, farrayPtr=atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_FieldGet(f_xgrid, farrayPtr=exf, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! compute regrid routehandle
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! execute regrid
     ! once area information is retrieved from mesh regrid store, then
@@ -1312,7 +1308,7 @@ contains
     call ESMF_FieldRegrid(f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     print *, lpet, exf
 
     ! clean up
@@ -1339,11 +1335,11 @@ contains
     call ESMF_FieldDestroy(f_xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_XGridDestroy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(sparseMatA2X(1)%factorIndexList)
 
@@ -1378,12 +1374,12 @@ contains
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Grid constants
     atm_nx = 10
@@ -1406,18 +1402,18 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridAddCoord(grid_atm, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridAddCoord(grid_atm, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! global indexing
     ! atm grid is not decomposed in the y direction
@@ -1430,7 +1426,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
     enddo
@@ -1439,7 +1435,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + (i-1)*atm_dx
     enddo
@@ -1449,7 +1445,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + atm_dy/2. + (i-1)*atm_dy
     enddo
@@ -1458,7 +1454,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + (i-1)*atm_dy
     enddo
@@ -1474,18 +1470,18 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridAddCoord(grid_ocn, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridAddCoord(grid_ocn, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ocn grid is not decomposed in the y direction
     !startx = lpet*ocn_nx/npet*ocn_dx
@@ -1497,7 +1493,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + ocn_dx/2. + (i-1)*ocn_dx
     enddo
@@ -1506,7 +1502,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + (i-1)*ocn_dx
     enddo
@@ -1515,7 +1511,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + ocn_dy/2. + (i-1)*ocn_dy
     enddo
@@ -1524,25 +1520,21 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + (i-1)*ocn_dy
     enddo
-
-    ! Write VTK files
-    !call ESMF_GridWriteVTK(grid_ocn,staggerloc=ESMF_STAGGERLOC_CORNER, isSphere=.false., &
-    !    isLatLonDeg=.true., filename="ocnGrid")
 
     ! build Fields on the Grids
     f_atm = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     f_ocn = ESMF_FieldCreate(grid_ocn, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
     call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
@@ -1551,7 +1543,7 @@ contains
       indicies=indicies, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights), '-', weights
@@ -1562,12 +1554,12 @@ contains
     call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
     if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1583,29 +1575,29 @@ contains
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     ! create a Field on the xgrid
     f_xgrid = ESMF_FieldCreate(xgrid=xgrid, TYPEKIND=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! regrid through the xgrid
     ! set up src flux
     call ESMF_FieldGet(f_atm, farrayPtr=atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_FieldGet(f_xgrid, farrayPtr=exf, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! compute regrid routehandle
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! execute regrid
     ! once area information is retrieved from mesh regrid store, then
@@ -1615,38 +1607,38 @@ contains
     call ESMF_FieldRegrid(f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     print *, lpet, 'flux on xgrid: ', exf
 
     ! clean up
     call ESMF_FieldDestroy(f_atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldDestroy(f_ocn, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridDestroy(grid_atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridDestroy(grid_ocn, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldDestroy(f_xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_XGridDestroy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(sparseMatA2X(1)%factorIndexList)
 
@@ -1681,12 +1673,12 @@ contains
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Grid constants
     atm_nx = 10
@@ -1709,18 +1701,18 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridAddCoord(grid_atm, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridAddCoord(grid_atm, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! global indexing
     ! atm grid is not decomposed in the y direction
@@ -1733,7 +1725,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
     enddo
@@ -1742,7 +1734,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + (i-1)*atm_dx
     enddo
@@ -1752,7 +1744,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + atm_dy/2. + (i-1)*atm_dy
     enddo
@@ -1761,7 +1753,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + (i-1)*atm_dy
     enddo
@@ -1777,18 +1769,18 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridAddCoord(grid_ocn, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridAddCoord(grid_ocn, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ocn grid is not decomposed in the y direction
     !startx = lpet*ocn_nx/npet*ocn_dx
@@ -1800,7 +1792,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + ocn_dx/2. + (i-1)*ocn_dx
     enddo
@@ -1809,7 +1801,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + (i-1)*ocn_dx
     enddo
@@ -1818,7 +1810,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + ocn_dy/2. + (i-1)*ocn_dy
     enddo
@@ -1827,25 +1819,21 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + (i-1)*ocn_dy
     enddo
-
-    ! Write VTK files
-    !call ESMF_GridWriteVTK(grid_ocn,staggerloc=ESMF_STAGGERLOC_CORNER, isSphere=.false., &
-    !    isLatLonDeg=.true., filename="ocnGrid")
 
     ! build Fields on the Grids
     f_atm = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     f_ocn = ESMF_FieldCreate(grid_ocn, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
     call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
@@ -1854,7 +1842,7 @@ contains
       indicies=indicies, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights), '-', weights
@@ -1865,12 +1853,12 @@ contains
     call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
     if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)
+        ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
 
@@ -1886,29 +1874,29 @@ contains
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     ! create a Field on the xgrid
     f_xgrid = ESMF_FieldCreate(xgrid=xgrid, TYPEKIND=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! regrid through the xgrid
     ! set up src flux
     call ESMF_FieldGet(f_atm, farrayPtr=atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_FieldGet(f_xgrid, farrayPtr=exf, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! compute regrid routehandle
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! execute regrid
     ! once area information is retrieved from mesh regrid store, then
@@ -1918,38 +1906,38 @@ contains
     call ESMF_FieldRegrid(f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     print *, lpet, 'flux on xgrid: ', exf
 
     ! clean up
     call ESMF_FieldDestroy(f_atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldDestroy(f_ocn, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridDestroy(grid_atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridDestroy(grid_ocn, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldDestroy(f_xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_XGridDestroy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(sparseMatA2X(1)%factorIndexList)
 
@@ -1982,12 +1970,12 @@ contains
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Grid constants
     atm_nx = 10
@@ -2010,18 +1998,18 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridAddCoord(grid_atm, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridAddCoord(grid_atm, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! global indexing
     ! atm grid is not decomposed in the y direction
@@ -2034,7 +2022,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
     enddo
@@ -2043,7 +2031,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + (i-1)*atm_dx
     enddo
@@ -2053,7 +2041,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + atm_dy/2. + (i-1)*atm_dy
     enddo
@@ -2062,7 +2050,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + (i-1)*atm_dy
     enddo
@@ -2078,18 +2066,18 @@ contains
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridAddCoord(grid_ocn, staggerloc=ESMF_STAGGERLOC_CENTER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridAddCoord(grid_ocn, staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! ocn grid is not decomposed in the y direction
     !startx = lpet*ocn_nx/npet*ocn_dx
@@ -2101,7 +2089,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + ocn_dx/2. + (i-1)*ocn_dx
     enddo
@@ -2110,7 +2098,7 @@ contains
         coordDim=1, farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + (i-1)*ocn_dx
     enddo
@@ -2119,7 +2107,7 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + ocn_dy/2. + (i-1)*ocn_dy
     enddo
@@ -2128,25 +2116,21 @@ contains
         coordDim=2, farrayPtr=coordY, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordY,1), ubound(coordY,1)
       coordY(i) = starty + (i-1)*ocn_dy
     enddo
-
-    ! Write VTK files
-    !call ESMF_GridWriteVTK(grid_ocn,staggerloc=ESMF_STAGGERLOC_CORNER, isSphere=.false., &
-    !    isLatLonDeg=.true., filename="ocnGrid")
 
     ! build Fields on the Grids
     f_atm = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     f_ocn = ESMF_FieldCreate(grid_ocn, typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
     call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
@@ -2155,7 +2139,7 @@ contains
       indicies=indicies, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights)
@@ -2166,14 +2150,14 @@ contains
     call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
     print *, lpet, 'src idx range: ', minval(indicies(:,1)), maxval(indicies(:,1))
     print *, lpet, 'dst idx range: ', minval(indicies(:,2)), maxval(indicies(:,2))
     !if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
     !  call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-    !    ESMF_CONTEXT, rc)
+    !    ESMF_CONTEXT, rcToReturn=rc)
     !  return
     !endif
 
@@ -2189,29 +2173,29 @@ contains
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     ! create a Field on the xgrid
     f_xgrid = ESMF_FieldCreate(xgrid=xgrid, TYPEKIND=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! regrid through the xgrid
     ! set up src flux
     call ESMF_FieldGet(f_atm, farrayPtr=atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_FieldGet(f_xgrid, farrayPtr=exf, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! compute regrid routehandle
     call ESMF_FieldRegridStore(xgrid, f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! execute regrid
     ! once area information is retrieved from mesh regrid store, then
@@ -2221,38 +2205,38 @@ contains
     call ESMF_FieldRegrid(f_atm, f_xgrid, routehandle=rh, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     print *, lpet, 'flux on xgrid: ', exf
 
     ! clean up
     call ESMF_FieldDestroy(f_atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldDestroy(f_ocn, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridDestroy(grid_atm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_GridDestroy(grid_ocn, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_FieldDestroy(f_xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_XGridDestroy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rc)) return
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(sparseMatA2X(1)%factorIndexList)
 
