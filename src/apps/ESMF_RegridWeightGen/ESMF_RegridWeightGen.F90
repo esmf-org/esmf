@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.28 2011/03/15 21:28:49 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.29 2011/04/05 19:00:41 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -47,9 +47,15 @@ program ESMF_RegridWeightGen
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
       character(len=256) :: commandbuf1(3)
-      integer            :: commandbuf2(14)
+      integer            :: commandbuf2(15)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
+      logical            :: wasCompacted
+      integer(ESMF_KIND_I4), pointer:: compactedIndicies(:,:)
+      real(ESMF_KIND_R8), pointer :: compactedWeights(:)
+      logical :: ignoreUnmapped
+      type(ESMF_UnmappedAction) :: unmappedAction
+
       !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
       ! Initialize ESMF
@@ -207,6 +213,13 @@ program ESMF_RegridWeightGen
            endif
          endif
 
+         ignoreUnmapped=.false.
+         call ESMF_UtilGetArgIndex('-i', argindex=index, rc=rc)
+         if (index == -1) call ESMF_UtilGetArgIndex('--ignore_unmapped', argindex=index, rc=rc)
+         if (index /= -1) then
+            ignoreUnmapped=.true.
+         end if
+
          call ESMF_UtilGetArgIndex('-r', argindex=index, rc=rc)
          if (index /= -1) then
            srcIsRegional = .true.
@@ -304,6 +317,9 @@ program ESMF_RegridWeightGen
 	else
 	       print *, "  Pole option: ", poleptrs
         endif
+        if (ignoreUnmapped) then
+	       print *, "  Ignore unmapped destination points"
+        endif
 
         ! Group the command line arguments and broadcast to other PETs
         commandbuf1(1)=srcfile
@@ -344,7 +360,10 @@ program ESMF_RegridWeightGen
               commandbuf2(14) = dstdims(2)
            endif
         endif
-        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
+        if (ignoreUnmapped) commandbuf2(15) = 1
+
+
+        call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
      else
         call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
@@ -353,7 +372,7 @@ program ESMF_RegridWeightGen
         dstfile = commandbuf1(2)
         wgtfile = commandbuf1(3)
 
-        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
         if (commandbuf2(1)==1) then
            srcIsScrip = .true.
@@ -413,6 +432,12 @@ program ESMF_RegridWeightGen
            dstdims(1)=commandbuf2(13)
            dstdims(2)=commandbuf2(14)
         endif
+
+        if (commandbuf2(15) == 1) then
+           ignoreUnmapped=.true.
+        else
+           ignoreUnmapped=.false.
+        endif
      endif
         
      ! Set flag to say if we're conservative
@@ -431,7 +456,6 @@ program ESMF_RegridWeightGen
         meshLoc=ESMF_MESHLOC_ELEMENT
      endif
 
-
      if (srcIsRegional .and. dstIsRegional) then
         regridScheme = ESMF_REGRID_SCHEME_REGION3D
         srcIsSphere=.false.
@@ -448,6 +472,12 @@ program ESMF_RegridWeightGen
         regridScheme = ESMF_REGRID_SCHEME_FULL3D
         srcIsSphere=.true.
         dstIsSphere=.true.
+     endif
+
+     ! Set unmapped flag
+     unmappedAction=ESMF_UNMAPPEDACTION_ERROR
+     if (ignoreUnmapped) then
+        unmappedAction=ESMF_UNMAPPEDACTION_IGNORE
      endif
 
      ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
@@ -596,7 +626,7 @@ program ESMF_RegridWeightGen
       if (trim(method) .eq. 'bilinear') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	    unmappedDstAction=unmappedAction, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
@@ -606,7 +636,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'patch') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	    unmappedDstAction=unmappedAction, &
 	    indicies=indicies, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
@@ -616,7 +646,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'conserve') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	    unmappedDstAction=unmappedAction, &
 	    indicies=indicies, weights=weights, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridMethod = ESMF_REGRID_METHOD_CONSERVE, &
@@ -655,6 +685,24 @@ program ESMF_RegridWeightGen
          endif
       endif
 
+      ! Compact weight matrix
+      ! (only compact if one of the grids is irregular, because that's when the repeated entries occur)
+      if ((.not. srcIsReg) .or. (.not. dstIsReg)) then
+         call compactMatrix(weights, indicies, &
+                            wasCompacted, &
+                            compactedWeights, compactedIndicies, &
+                            rc)
+         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+         ! If the list was compacted get rid of the old lists and 
+         ! point to the new lists
+         if (wasCompacted) then
+            deallocate(weights)
+            weights=>compactedWeights
+            deallocate(indicies)
+            indicies=>compactedIndicies
+         endif
+      endif
 
       ! Computer fraction if bilinear
       ! src fraction is always 0
@@ -684,6 +732,8 @@ program ESMF_RegridWeightGen
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
          endif
       endif
+
+
 	 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
@@ -1300,6 +1350,98 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
 end subroutine gatherFracFieldMesh
 
 
+! Compact the weight matrix getting rid of duplicate entries with the same row and column
+! return the compacted matrix in outFactorList, outFactorIndexList
+subroutine compactMatrix(inFactorList, inFactorIndexList, &
+                         wasCompacted, &
+                         outFactorList, outFactorIndexList, &
+                         rc)
+    real(ESMF_KIND_R8), intent(inout)               :: inFactorList(:) 
+    integer(ESMF_KIND_I4),intent(inout)             :: inFactorIndexList(:,:)
+    logical, intent(out)                            :: wasCompacted
+    real(ESMF_KIND_R8), pointer                     :: outFactorList(:) 
+    integer(ESMF_KIND_I4),pointer                   :: outFactorIndexList(:,:)
+    integer, intent(out)                            :: rc
+    integer  :: localrc      ! local return code
+    integer  :: inListCount, outListCount
+    integer  :: i, srcInd, dstInd
+    integer  :: outListPos
+    real(ESMF_KIND_R8) :: factorSum
+
+
+    ! Get size of list
+    inListCount=size(inFactorIndexList,1)
+ 
+    ! if too small to need compacting (e.g. <2) return
+    if (inListCount .lt. 2) then
+       wasCompacted=.false.
+       return
+    endif
+
+    ! Loop counting unique entries
+    outListCount=1 ! 1 because counting switches below
+    srcInd=inFactorIndexList(1,1)
+    dstInd=inFactorIndexList(1,2)
+    do i=2,inListCount
+       if ((srcInd /= inFactorIndexList(i,1)) .or. &
+           (dstInd /= inFactorIndexList(i,2))) then
+          srcInd=inFactorIndexList(i,1)
+          dstInd=inFactorIndexList(i,2)
+          outListCount=outListCount+1
+       endif
+    enddo
+
+    ! if all unique then don't compact
+    if (inListCount .eq. outListCount) then
+       wasCompacted=.false.
+       return
+    endif
+
+
+    ! Allocate new lists
+    allocate(outFactorList(outListCount)) 
+    allocate(outFactorIndexList(outListCount,2))
+
+    ! Loop counting unique entries
+    outListPos=1 
+    srcInd=inFactorIndexList(1,1)
+    dstInd=inFactorIndexList(1,2)
+    factorSum=inFactorList(1)
+    do i=2,inListCount
+       if ((srcInd /= inFactorIndexList(i,1)) .or. &
+           (dstInd /= inFactorIndexList(i,2))) then
+          ! Save the old entry
+          outFactorIndexList(outListPos,1)=srcInd
+          outFactorIndexList(outListPos,2)=dstInd
+          outFactorList(outListPos)=factorSum
+          
+          ! Change to a new entry
+          srcInd=inFactorIndexList(i,1)
+          dstInd=inFactorIndexList(i,2)
+          factorSum=inFactorList(i)
+
+          outListPos=outListPos+1
+       else
+          factorSum=factorSum+inFactorList(i)
+       endif
+    enddo
+
+    ! Save the last entry
+    outFactorIndexList(outListPos,1)=srcInd
+    outFactorIndexList(outListPos,2)=dstInd
+    outFactorList(outListPos)=factorSum
+
+
+    ! Output that the lists were compacted
+    wasCompacted=.true.
+
+    ! return success
+    rc = ESMF_SUCCESS
+
+end subroutine CompactMatrix
+
+
+
 
 subroutine PrintUsage()
      print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 
@@ -1307,6 +1449,7 @@ subroutine PrintUsage()
      print *, "                      [--weight|-w] out_weight_file "
      print *, "                      [--method|-m] [bilinear|patch|conservative]"
      print *, "                      [--pole|-p] [all|none|<N>]"
+     print *, "                      [--ignore_unmapped|-i]"
      print *, "                      --src_type [SCRIP|ESMF]" 
      print *, "                      --dst_type [SCRIP|ESMF]"
      print *, "                      -t [SCRIP|ESMF]"
@@ -1322,6 +1465,8 @@ subroutine PrintUsage()
      print *, "                 used.  The default method is bilinear"
      print *, "--pole or -p - an optional argument indicating what to do with the pole."
      print *, "                 The default value is all"
+     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
+     print *, "                          the default is to stop with an error."
      print *, "--src_type - an optional argument specifying the source grid file type."
      print *, "             The ESMF type is only available for the unstructured grid."
      print *, "             The default option is SCRIP."

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.4 2011/01/25 18:48:06 oehmke Exp $
+// $Id: ESMCI_MathUtil.h,v 1.5 2011/04/05 19:00:36 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -42,6 +42,9 @@ namespace ESMCI {
   void remove_0len_edges3D(int *num_p, double *p);
 
   void remove_0len_edges2D(int *num_p, double *p);
+
+  void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
+  void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
 
 } // namespace
 
