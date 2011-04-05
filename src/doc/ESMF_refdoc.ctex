@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.106 2011/04/05 15:10:34 theurich Exp $
+% $Id: ESMF_refdoc.ctex,v 1.107 2011/04/05 19:01:40 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -133,6 +133,8 @@
 
 #include "../Superstructure/State/doc/State_refdoc.ctex"
 
+#include "../Superstructure/AttachMethods/doc/AttachMethods_refdoc.ctex"
+
 %+==============================================================================
 
 \newpage
@@ -201,8 +203,6 @@
 \newpage
 
 #include "../Infrastructure/Attribute/doc/Attribute_refdoc.ctex"
-
-#include "../Superstructure/ESMFMod/doc/AttachMethods_refdoc.ctex"
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 

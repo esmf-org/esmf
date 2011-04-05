@@ -1,4 +1,4 @@
-% $Id: AttachMethods_rest.tex,v 1.1 2011/04/05 15:10:25 theurich Exp $
+% $Id: AttachMethods_rest.tex,v 1.2 2011/04/05 19:01:38 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -11,17 +11,11 @@
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
-\item{\bf Only States.}
-The current implementation of Attachable Methods is limited to the ESMF State
-class. States are a general container class for Fields, FieldBundles, Arrays
-and ArrayBundles. States provide the most general interface to Attachable
-Methods. Dependent on future requirements, the Attachable Methods concept may
-be extended to other ESMF data classes as the need arises.
 \item{\bf Not reconciled.}
-Attachable Methods are PET-local settings on a State. Currently Attachable
-Methods are ignored during {\tt ESMF\_StateReconcile()}.
+Attachable Methods are PET-local settings on an object. Currently Attachable
+Methods cannot be reconciled (i.e. ignored during {\tt ESMF\_StateReconcile()}).
 \item{\bf No copy nor move.}
-Currently Attachable Methods cannot be copied or moved between States.
+Currently Attachable Methods cannot be copied or moved between objects.
 \end{enumerate}
 
 

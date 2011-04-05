@@ -1,4 +1,4 @@
-% $Id: AttachMethods_desc.tex,v 1.1 2011/04/05 15:10:25 theurich Exp $
+% $Id: AttachMethods_desc.tex,v 1.2 2011/04/05 19:01:38 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -10,19 +10,33 @@
 
 %\subsection{Description}
 
-ESMF data types, such as Fields, FieldBundles, Arrays and ArrayBundles, are used
-to exchange data between Components through States. In the simplest
-scenario the producer Component or Coupler can compute the full data set
-required by the consumer Component. However, memory constraints or otherwise
-the nature of the algorithm, may require that the final calculation be
-performed right before the data is consumed. 
+%ESMF data types, such as Fields, FieldBundles, Arrays and ArrayBundles, are used
+%to exchange data between Components through States. In the simplest
+%scenario the producer Component or Coupler can compute the full data set
+%required by the consumer Component. However, memory constraints or otherwise
+%the nature of the algorithm, may require that the final calculation be
+%performed right before the data is consumed. 
 
-ESMF provides the concept of Attachable Methods that allows a producer 
-component to associate user defined methods with the data objects it provides.
-The final calculation, while defined by the producer Component, is deferred
-until the consumer Component requires its execution.
+%ESMF provides the concept of Attachable Methods that allows a producer 
+%component to associate user defined methods with the data objects it provides.
+%The final calculation, while defined by the producer Component, is deferred
+%until the consumer Component requires its execution.
 
-The current implementation of Attachable Methods is limited to the ESMF State
-class. States are a general container class for Fields, FieldBundles, Arrays
-and ArrayBundles. States provide the most general interface to Attachable
-Methods.
+%The current implementation of Attachable Methods is limited to the ESMF State
+%class. States are a general container class for Fields, FieldBundles, Arrays
+%and ArrayBundles. States provide the most general interface to Attachable
+%Methods.
+
+ESMF allows user methods to be attached to Components and States. Providing
+this capability supports a more object oriented way of model design. 
+
+Attachable methods on Components can be used to implement the concept of
+generic Components where the specialization requires attaching methods with
+well defined names. This methods are then called by the generic Component 
+code.
+
+Attaching methods to States can be used to supply data operations along with
+the data objects inside of a State object. This can be useful where a producer
+Component not only supplies a data set, but also the associated processing
+functionality. This can be more efficient than providing all of the possible
+sets of derived data.

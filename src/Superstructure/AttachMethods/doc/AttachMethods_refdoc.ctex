@@ -1,4 +1,4 @@
-% $Id: AttachMethods_refdoc.ctex,v 1.1 2011/04/05 15:10:25 theurich Exp $
+% $Id: AttachMethods_refdoc.ctex,v 1.2 2011/04/05 19:01:38 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
 #ifdef STANDALONE
 \input{AttachMethods_desc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/State/doc/AttachMethods_desc}
+\input{../Superstructure/AttachMethods/doc/AttachMethods_desc}
 #endif
 
 \subsection{Use and Examples}
@@ -59,22 +59,22 @@
 \input{AttachMethods_usage}
 \input{ESMF_AttachMethodsEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/State/doc/AttachMethods_usage}
-\input{../Superstructure/State/doc/ESMF_AttachMethodsEx_fapi}
+\input{../Superstructure/AttachMethods/doc/AttachMethods_usage}
+\input{../Superstructure/AttachMethods/doc/ESMF_AttachMethodsEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{AttachMethods_rest}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/State/doc/AttachMethods_rest}
+\input{../Superstructure/AttachMethods/doc/AttachMethods_rest}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_AttachMethods_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/State/doc/ESMF_AttachMethods_fapi}
+\input{../Superstructure/AttachMethods/doc/ESMF_AttachMethods_fapi}
 #endif
 
 #ifdef STANDALONE
