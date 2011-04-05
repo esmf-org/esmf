@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2010/11/03 22:48:48 theurich Exp $
+! $Id: user_model1.F90,v 1.7 2011/04/05 20:51:08 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -170,7 +170,7 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGetPETLocalInfo(vm, pet=localPet, peCount=peCount, rc=rc)
+    call ESMF_VMGet(vm, pet=localPet, peCount=peCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 !$  call omp_set_num_threads(peCount)

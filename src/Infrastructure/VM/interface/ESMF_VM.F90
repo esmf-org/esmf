@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.134 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.135 2011/04/05 20:51:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -137,7 +137,6 @@ module ESMF_VMMod
   public ESMF_VMGetGlobal
   public ESMF_VMGetCurrent
   public ESMF_VMGetCurrentID
-  public ESMF_VMGetPETLocalInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
   public ESMF_VMRecv
@@ -187,7 +186,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.134 2011/02/26 00:20:35 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.135 2011/04/05 20:51:07 theurich Exp $"
 
 !==============================================================================
 
@@ -202,7 +201,7 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMAllFullReduce -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMAllFullReduce
+    interface ESMF_VMAllFullReduce
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -214,14 +213,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllFullReduce} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMAllGather -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMAllGather
+    interface ESMF_VMAllGather
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -234,14 +233,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllGather} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMAllGatherV -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMAllGatherV
+    interface ESMF_VMAllGatherV
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -253,14 +252,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllGatherV} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMAllReduce -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMAllReduce
+    interface ESMF_VMAllReduce
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -273,14 +272,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllReduce} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMAllToAllV -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMAllToAllV
+    interface ESMF_VMAllToAllV
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -292,14 +291,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMAllToAllV} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMBroadcast -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMBroadcast
+    interface ESMF_VMBroadcast
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -315,14 +314,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMBroadcast} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMGather -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMGather
+    interface ESMF_VMGather
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -335,14 +334,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMGather} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMGatherV -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMGatherV
+    interface ESMF_VMGatherV
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -354,14 +353,32 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMGatherV} functions.   
 !EOPI 
-      end interface
+    end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMGet -- Generic interface
+
+! !INTERFACE:
+    interface ESMF_VMGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMGetDefault
+      module procedure ESMF_VMGetPetLocalInfo
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMGet} functions.   
+!EOPI 
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMRecv -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMRecv
+    interface ESMF_VMRecv
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -376,14 +393,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMRecv} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMReduce -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMReduce
+    interface ESMF_VMReduce
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -395,14 +412,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMReduce} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMScatter -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMScatter
+    interface ESMF_VMScatter
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -415,14 +432,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMScatter} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMScatterV -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMScatterV
+    interface ESMF_VMScatterV
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -434,14 +451,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMScatterV} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMSend -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMSend
+    interface ESMF_VMSend
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -456,14 +473,14 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMSend} functions.   
 !EOPI 
-      end interface
+    end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMSendRecv -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMSendRecv
+    interface ESMF_VMSendRecv
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
@@ -477,7 +494,7 @@ module ESMF_VMMod
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMSendRecv} functions.   
 !EOPI 
-      end interface
+    end interface
 
 
 !==============================================================================
@@ -3481,13 +3498,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGet()"
+#define ESMF_METHOD "ESMF_VMGetDefault()"
 !BOP
 ! !IROUTINE: ESMF_VMGet - Get VM internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGet(vm, keywordEnforcer, localPet, petCount, peCount, &
-    mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
+  ! Private name; call using ESMF_VMGet()
+  subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, petCount, &
+    peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
@@ -3569,7 +3587,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMGet
+  end subroutine ESMF_VMGetDefault
 !------------------------------------------------------------------------------
 
 
@@ -3801,12 +3819,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGetPETLocalInfo()"
+#define ESMF_METHOD "ESMF_VMGetPetLocalInfo()"
 !BOP
-! !IROUTINE: ESMF_VMGetPETLocalInfo - Get VM PET local internals
+! !IROUTINE: ESMF_VMGet - Get VM PET local internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetPETLocalInfo(vm, pet, keywordEnforcer, peCount, ssiId, &
+  ! Private name; call using ESMF_VMGet()
+  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, ssiId, &
     threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
@@ -3872,7 +3891,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMGetPETLocalInfo
+  end subroutine ESMF_VMGetPetLocalInfo
 !------------------------------------------------------------------------------
 
 
