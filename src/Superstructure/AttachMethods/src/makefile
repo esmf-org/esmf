@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.14 2011/04/05 15:10:30 theurich Exp $
+# $Id: makefile,v 1.1 2011/04/05 15:10:28 theurich Exp $
 
 ALL: build_here 
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_Init.F90 ESMF.F90 
+SOURCEF	  = ESMF_AttachMethods.F90 
 
 # list all .h files which should be copied to common include dir
 STOREH	  = 
@@ -12,7 +12,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Superstructure/ESMFMod/src
+LOCDIR	  = src/Superstructure/AttachMethods/src
 
 CLEANDIRS  =
 CLEANFILES =

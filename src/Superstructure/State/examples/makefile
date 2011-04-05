@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2009/10/16 05:58:29 eschwab Exp $ 
+# $Id: makefile,v 1.18 2011/04/05 15:10:33 theurich Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -9,18 +9,15 @@ LOCDIR	  = src/Superstructure/State/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx \
                  $(ESMF_EXDIR)/ESMF_StateReconcileEx \
-                 $(ESMF_EXDIR)/ESMF_StateReadWriteEx \
-                 $(ESMF_EXDIR)/ESMF_AttachMethodsEx 
+                 $(ESMF_EXDIR)/ESMF_StateReadWriteEx
 
 EXAMPLES_RUN   = run_ESMF_StateEx \
                  run_ESMF_StateReconcileEx \
-                 run_ESMF_StateReadWriteEx \
-                 run_ESMF_AttachMethodsEx
+                 run_ESMF_StateReadWriteEx
 
 EXAMPLES_RUN_UNI = run_ESMF_StateEx_uni \
                    run_ESMF_StateReconcileEx_uni \
-                   run_ESMF_StateReadWriteEx_uni \
-                   run_ESMF_AttachMethodsEx_uni
+                   run_ESMF_StateReadWriteEx_uni
                    
 include $(ESMF_DIR)/makefile
 
@@ -60,11 +57,3 @@ run_ESMF_StateReadWriteEx_uni:
 	cp -f $(ESMF_DIR)/src/Infrastructure/IO/tests/io_netcdf_testdata.nc $(ESMF_EXDIR)
 	$(MAKE) EXNAME=StateReadWrite NP=1 exfrun
 
-#
-# ESMF_AttachMethodsEx
-#
-run_ESMF_AttachMethodsEx:
-	$(MAKE) EXNAME=AttachMethods NP=4 exfrun
-
-run_ESMF_AttachMethodsEx_uni:
-	$(MAKE) EXNAME=AttachMethods NP=1 exfrun

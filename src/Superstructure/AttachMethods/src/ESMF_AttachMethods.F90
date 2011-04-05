@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.1 2011/03/24 04:55:08 theurich Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.1 2011/04/05 15:10:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.1 2011/03/24 04:55:08 theurich Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.1 2011/04/05 15:10:28 theurich Exp $'
 
 !==============================================================================
 ! 

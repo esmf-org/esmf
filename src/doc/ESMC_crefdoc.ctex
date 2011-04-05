@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.17 2011/01/24 23:36:14 svasquez Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.18 2011/04/05 15:10:34 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -195,7 +195,7 @@
 
 %#include "../Infrastructure/Attribute/doc/Attribute_crefdoc.ctex"
 
-%#include "../Superstructure/State/doc/AttachMethods_crefdoc.ctex"
+%#include "../Superstructure/ESMFMod/doc/AttachMethods_crefdoc.ctex"
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_crefdoc.ctex"
 
