@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.22 2011/04/01 22:09:09 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.23 2011/04/05 22:52:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -27,6 +27,7 @@
 #include "ESMCI_ArrayBundle.h"
 
 #include <vector>
+#include <string>
 
 //------------------------------------------------------------------------------
 //BOP
@@ -79,10 +80,10 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundleget)(ESMCI::ArrayBundle **ptr, int *arrayCount,  
+  void FTN(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, int *arrayCount,
     ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraybundleget()"
+#define ESMC_METHOD "c_esmc_arraybundlegetlist()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -103,6 +104,35 @@ extern "C" {
       for (int i=0; i<(*ptr)->getArrayCount(); i++)
         opt_arrayList[i] = arrayVector[i];
     }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+ 
+  void FTN(c_esmc_arraybundlegetitem)(ESMCI::ArrayBundle **ptr, char *arrayName,
+    ESMCI::Array **array, int *rc, ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlegetitem()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    try{
+
+      // query the C++ layer
+      *array = (*ptr)->getArray(std::string(arrayName, nlen));
+
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Caught exception", rc);
+      return;
+    }
+  
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
