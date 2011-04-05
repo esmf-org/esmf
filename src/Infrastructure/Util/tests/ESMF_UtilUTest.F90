@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.31 2011/02/22 18:01:19 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.32 2011/04/05 15:05:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.31 2011/02/22 18:01:19 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.32 2011/04/05 15:05:12 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -77,7 +77,7 @@
       character(ESMF_MAXSTR) :: program_path
       integer :: argindex
 
-      type(ESMF_MapName) :: mapcontainer
+      type(ESMF_MapPtr) :: mapcontainer
       integer :: newvalue
       integer :: mapsize
       logical :: isfound
@@ -402,6 +402,8 @@
     write (failMsg, *) "indicated a removed pair was found"
     call ESMF_Test(.not. isfound,  &
         name, failMsg, result, ESMF_SRCLINE)
+
+    call ESMF_UtilMapNamePrint (mapcontainer, title=name, rc=rc)
 
     !EX_UTest
     ! Test destruction of a MapName container
