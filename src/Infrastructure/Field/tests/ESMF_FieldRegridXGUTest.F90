@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.27 2011/04/05 21:27:56 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.28 2011/04/05 22:41:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -86,12 +86,12 @@
         write(name, *) "Regrid then create xgrid and regrid through xgrid, check containment"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-        !!------------------------------------------------------------------------
-        !!E-X_UTest_Multi_Proc_Only
-        !call test_regrid2xg_clip(rc)
-        !write(failMsg, *) ""
-        !write(name, *) "Regrid then create xgrid and regrid through xgrid, check clipping"
-        !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        call test_regrid2xg_clip(rc)
+        write(failMsg, *) ""
+        write(name, *) "Regrid then create xgrid and regrid through xgrid, check clipping"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
         !------------------------------------------------------------------------
         !E-disable-X_UTest_Multi_Proc_Only
@@ -1238,7 +1238,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
-    call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
+    call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
       indicies=indicies, weights=weights, rc=localrc)
@@ -1537,7 +1537,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
-    call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
+    call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
       indicies=indicies, weights=weights, rc=localrc)
@@ -1836,7 +1836,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
-    call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
+    call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
       indicies=indicies, weights=weights, rc=localrc)
@@ -2133,7 +2133,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
-    call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
+    call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
       indicies=indicies, weights=weights, rc=localrc)
@@ -2144,9 +2144,9 @@ contains
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights)
     print *, lpet, 'indicies: ', size(indicies,1)
-    do j = 1, size(indicies,1)
-         print *, indicies(j,1), '->', indicies(j,2)
-    enddo
+    !do j = 1, size(indicies,1)
+    !     print *, indicies(j,1), '->', indicies(j,2)
+    !enddo
     call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2206,7 +2206,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    print *, lpet, 'flux on xgrid: ', exf
+    !print *, lpet, 'flux on xgrid: ', exf
 
     ! clean up
     call ESMF_FieldDestroy(f_atm, rc=localrc)
@@ -2440,7 +2440,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call RegridStore here to compute SMM weights and indicies
-    call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
+    call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
       regridScheme=ESMF_REGRID_SCHEME_REGION3D, &
