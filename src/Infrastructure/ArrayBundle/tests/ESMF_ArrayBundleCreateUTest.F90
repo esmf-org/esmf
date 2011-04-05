@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.13 2011/04/01 22:12:28 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.14 2011/04/05 21:47:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.13 2011/04/01 22:12:28 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.14 2011/04/05 21:47:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -53,7 +53,8 @@ program ESMF_ArrayBundleCreateUTest
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_DistGrid):: distgrid
   type(ESMF_Array):: array(10), arrayOut(5)
-  integer:: arrayCount
+  character(len=ESMF_MAXSTR):: arrayNameList(5)
+  integer:: arrayCount, i
   type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
   character (len=80)      :: arrayName
   logical:: arraybundleBool
@@ -211,6 +212,18 @@ program ESMF_ArrayBundleCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   print *,"arrayCount=", arrayCount
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleGet Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, &
+    arrayNameList=arrayNameList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  do i=1, arrayCount
+    print *,"arrayNameList(",i,")=", trim(arrayNameList(i))
+  enddo
 
   ! BEGIN tests of INTERNAL serialization methods.  They are subject
   ! to change and are NOT part of the ESMF user API.

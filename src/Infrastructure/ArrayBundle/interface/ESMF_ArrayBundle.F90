@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.48 2011/04/01 22:11:54 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.49 2011/04/05 21:47:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.48 2011/04/01 22:11:54 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.49 2011/04/05 21:47:45 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -552,15 +552,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleGet(arraybundle, keywordEnforcer, arrayCount, &
-      arrayList, name, rc)
+      arrayList, arrayNameList, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)               :: arraybundle
+    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),    optional :: arrayCount
-    type(ESMF_Array),       intent(inout),  optional :: arrayList(:)
-    character(len=*),       intent(out),    optional :: name
-    integer,                intent(out),    optional :: rc
+    integer,                intent(out),  optional :: arrayCount
+    type(ESMF_Array),       intent(out),  optional :: arrayList(:)
+    character(len=*),       intent(out),  optional :: arrayNameList(:)
+    character(len=*),       intent(out),  optional :: name
+    integer,                intent(out),  optional :: rc
 !
 !
 ! !STATUS:
@@ -575,8 +576,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[arrayCount]}]
 !         Upon return holds the number of Arrays bundled in the ArrayBundle.
 !   \item [{[arrayList]}]
-!         Upon return holds a List of Arrays bundled in ArrayBundle. The
+!         Upon return holds a list of Arrays bundled in {\tt arraybundle}. The
 !         argument must be allocated to be at least of size {\tt arrayCount}.
+!   \item [{[arrayNameList]}]
+!         Upon return holds a list of the names of the Array bundled in 
+!         {\tt arraybundle}. The argument must be allocated to be at least of
+!         size {\tt arrayCount}.
 !   \item [{[name]}]
 !         Name of the ArrayBundle object.
 !   \item [{[rc]}]
@@ -586,9 +591,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)   ! helper variable
-    integer                       :: len_arrayPtrList, i   ! helper variable
-    integer                       :: opt_arrayCount        ! helper variable
+    integer                       :: opt_arrayCount         ! helper variable
+    type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)    ! helper variable
+    integer                       :: len_arrayPtrList       ! helper variable
+    integer                       :: i                      ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -598,11 +604,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Deal with (optional) array arguments
+    len_arrayPtrList = 0
     if (present(arrayList)) then
       len_arrayPtrList = size(arrayList)
+    endif
+    if (present(arrayNameList)) then
+      len_arrayPtrList = max(len_arrayPtrList, size(arrayNameList))
+    endif
+    if (present(arrayList).or.present(arrayNameList)) then
       allocate(opt_arrayPtrList(len_arrayPtrList))
     else
-      len_arrayPtrList = 0
       allocate(opt_arrayPtrList(1))
     endif
 
@@ -612,9 +623,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! fill in arrayCount output variable
+    if (present(arrayCount)) then
+      arrayCount = opt_arrayCount
+    endif
+
     ! Set init code for deep C++ objects
     if (present(arrayList)) then
-      do i=1, min(len_arrayPtrList, opt_arrayCount)
+      do i=1, min(size(arrayList), opt_arrayCount)
         call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -625,11 +641,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     endif
     
-    ! fill in arrayCount output variable
-    if (present(arrayCount)) then
-      arrayCount = opt_arrayCount
+    ! Fill arrayNameList
+    if (present(arrayNameList)) then
+      do i=1, min(size(arrayNameList), opt_arrayCount)
+        call c_ESMC_GetName(opt_arrayPtrList(i), arrayNameList(i), localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
     endif
-
+    
     ! Garbage collection
     deallocate(opt_arrayPtrList)
 
