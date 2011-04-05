@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.2 2011/04/05 21:46:28 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.3 2011/04/05 22:50:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ namespace ESMCI {
     void add(Key k, T t);
     void remove(Key k);
     void replace(Key k, T t);
-    T get(Key k)const;
+    T get(Key k);
     void getVector(std::vector<T> &v)const;
     void getKeyVector(std::vector<Key> &v)const;
   };
@@ -60,7 +60,7 @@ namespace ESMCI {
     if (pos==this->end()){
       // does not exist -> error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "key does not exists", &rc);
+        "key does not exist", &rc);
       throw rc;  // bail out with exception
     }
     this->erase(pos);
@@ -76,13 +76,13 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::get()"
   template <typename Key, typename T>
-  T Container<Key, T>::get(Key k)const{
+  T Container<Key, T>::get(Key k){
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     typename Container::const_iterator pos = this->find(k);
     if (pos==this->end()){
       // does not exist -> error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "key does not exists", &rc);
+        "key does not exist", &rc);
       throw rc;  // bail out with exception
     }
     return (*this)[k];
