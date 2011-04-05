@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.43 2011/04/01 16:42:33 theurich Exp $
+! $Id: ESMF_StateTypes.F90,v 1.44 2011/04/05 00:23:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -190,6 +190,10 @@
         type(ESMF_ReadyFlag) :: ready
         type(ESMF_ValidFlag) :: valid
         type(ESMF_ReqForRestartFlag) :: reqrestart
+
+        ! VMId is currently needed for FieldBundles and their indirect Fields.
+        type(ESMF_VMId)      :: FldBundleVMId
+
         logical :: proxyFlag
         integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
@@ -216,7 +220,7 @@
         type(ESMF_ReqForRestartFlag) :: reqrestart_default
         integer :: alloccount
         integer :: datacount
-        type(ESMF_MapName) :: nameMap
+        type(ESMF_MapPtr) :: nameMap
         type(ESMF_StateItem), pointer :: datalist(:)
         logical :: reconcileneededflag
          ESMF_INIT_DECLARE
@@ -283,7 +287,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.43 2011/04/01 16:42:33 theurich Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.44 2011/04/05 00:23:11 w6ws Exp $'
 
 !==============================================================================
 ! 
