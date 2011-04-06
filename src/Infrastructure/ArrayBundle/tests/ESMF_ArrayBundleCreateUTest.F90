@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.17 2011/04/06 01:08:20 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.18 2011/04/06 04:18:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.17 2011/04/06 01:08:20 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.18 2011/04/06 04:18:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -305,7 +305,6 @@ program ESMF_ArrayBundleCreateUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"  
   call ESMF_ArrayBundleAdd(arraybundle, arrayList=arrays, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  if (associated(arrays)) deallocate(arrays)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -315,6 +314,14 @@ program ESMF_ArrayBundleCreateUTest
     "MyArray5"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleReplace with arrayList 2exist+1notexist not strict Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"  
+  call ESMF_ArrayBundleReplace(arraybundle, arrayList=arrays, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (associated(arrays)) deallocate(arrays)
+
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------

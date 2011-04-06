@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.25 2011/04/06 01:08:19 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.26 2011/04/06 04:18:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -281,6 +281,47 @@ extern "C" {
       for (int i=0; i<*itemCount; i++){
         // call into C++ layer
         (*ptr)->removeArray(std::string(arrayNameList+i*nlen, nlen));
+      }
+
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+ 
+  void FTN(c_esmc_arraybundlereplace)(ESMCI::ArrayBundle **ptr,
+    ESMCI::Array **arrayList, int *itemCount, ESMC_Logical *strictflag,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlereplace()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    bool strict;
+    if (*strictflag == ESMF_TRUE)
+      strict=true;
+    else
+      strict=false;
+      
+    // call into C++
+    try{
+      
+      for (int i=0; i<*itemCount; i++){
+        // call into C++ layer
+        (*ptr)->replaceArray(arrayList[i], strict);
       }
 
     }catch(int localrc){

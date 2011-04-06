@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.53 2011/04/06 01:23:18 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.54 2011/04/06 04:18:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -88,6 +88,7 @@ module ESMF_ArrayBundleMod
   public ESMF_ArrayBundleRedistStore
   public ESMF_ArrayBundleRedistRelease
   public ESMF_ArrayBundleRemove
+  public ESMF_ArrayBundleReplace
   public ESMF_ArrayBundleSMM
   public ESMF_ArrayBundleSMMRelease
   public ESMF_ArrayBundleSMMStore
@@ -106,7 +107,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.53 2011/04/06 01:23:18 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.54 2011/04/06 04:18:28 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -412,8 +413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Add Array(s) to an ArrayBundle. It is an error if {\tt arrayList} contains
-!   Arrays with names that are identical Arrays already contained in 
-!   {\tt arraybundle}.
+!   Arrays that match Arrays already contained in {\tt arraybundle} by name.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -1938,6 +1938,102 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
   
   end subroutine ESMF_ArrayBundleRemove
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleReplace()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleReplace - Replace item(s) in ArrayBundle
+!
+! !INTERFACE:
+    subroutine ESMF_ArrayBundleReplace(arraybundle, arrayList, &
+      keywordEnforcer, strictflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    type(ESMF_Array),       intent(in)            :: arrayList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: strictflag
+    integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Replace item(s) by name in ArrayBundle. Depending on the setting of 
+!   {\tt strictflag} it is or is not an error if {\tt arrayList} contains
+!   items that are not found in {\tt arraybundle} by name. In the less strict
+!   setting these Arrays are added to the {\tt arraybundle}.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} in which to replace items.
+!   \item [arrayList]
+!     List of items to replace.
+!   \item [{[strictflag]}]
+!     A setting of {\tt .true.} indicates a stict definition of "replace" where
+!     it is an error if {\tt arrayList} contains items that are not found in
+!     {\tt arraybundle} by name. For {\tt .false.} this is not an error
+!     condition and these extra items are added to the {\tt arraybundle}.
+!     The default setting is {\tt .false.}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: strictflagArg
+    integer :: arrayCount, i
+    type(ESMF_Pointer), allocatable :: arrayPointerList(:)
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Determine the number of ArrayList elements
+    arrayCount = size(arrayList)
+
+    ! Check init status of array arguments
+    do i=1, arrayCount
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
+    enddo
+    
+    ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
+    ! This is necessary in order to strip off the F90 init check members
+    ! when passing into C++
+    allocate(arrayPointerList(arrayCount))
+    do i=1, arrayCount
+      call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    if (present(strictflag)) then
+      strictflagArg = strictflag
+    else
+      strictflagArg = ESMF_FALSE
+    endif
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_ArrayBundleReplace(arraybundle, arrayPointerList, arrayCount, &
+      strictflagArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Garbage collection
+    deallocate(arrayPointerList)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_ArrayBundleReplace
 !------------------------------------------------------------------------------
 
 
