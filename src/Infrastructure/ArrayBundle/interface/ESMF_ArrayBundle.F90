@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.55 2011/04/06 04:43:30 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.56 2011/04/06 22:21:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.55 2011/04/06 04:43:30 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.56 2011/04/06 22:21:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -402,7 +402,7 @@ contains
     subroutine ESMF_ArrayBundleAdd(arraybundle, arrayList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     type(ESMF_Array),       intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
@@ -413,7 +413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Add Array(s) to an ArrayBundle. It is an error if {\tt arrayList} contains
-!   Arrays that match Arrays already contained in {\tt arraybundle} by name.
+!   Arrays that match by name Arrays already contained in {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -1891,7 +1891,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       keywordEnforcer, strictflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     character(len=*),       intent(in)            :: arrayNameList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: strictflag
@@ -1965,7 +1965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       keywordEnforcer, strictflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     type(ESMF_Array),       intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: strictflag
@@ -1976,10 +1976,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Replace item(s) by name in ArrayBundle. Depending on the setting of 
-!   {\tt strictflag} it is or is not an error if {\tt arrayList} contains
-!   items that are not found in {\tt arraybundle} by name. In the less strict
-!   setting these Arrays are added to the {\tt arraybundle}.
+!   Replace item(s) by name in ArrayBundle. In the strict setting it is an
+!   error if {\tt arrayList} contains Arrays that do not match by name any
+!   item in {\tt arraybundle}. In the less strict setting these Arrays
+!   are simply added to the {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -1988,9 +1988,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     List of items to replace.
 !   \item [{[strictflag]}]
 !     A setting of {\tt .true.} indicates a stict definition of "replace" where
-!     it is an error if {\tt arrayList} contains items that are not found in
-!     {\tt arraybundle} by name. For {\tt .false.} this is not an error
-!     condition and these extra items are added to the {\tt arraybundle}.
+!     it is an error if {\tt arrayList} contains items that do not match by 
+!     name any item in {\tt arraybundle}. For {\tt .false.} this is not an error
+!     condition and these Arrays are added to the {\tt arraybundle}.
 !     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
