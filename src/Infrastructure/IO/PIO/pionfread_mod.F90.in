@@ -1,5 +1,5 @@
 #include "ESMFPIO.h"
-#define _FILE_ "pionfread_mod.F90.in"
+#define __PIO_FILE__ "pionfread_mod.F90.in"
 module pionfread_mod
 
   implicit none
@@ -70,10 +70,10 @@ contains
        select case (iotype) 
 #ifdef _PNETCDF
        case(pio_iotype_pnetcdf)
-          if(DebugIO) print *,_FILE_,__LINE__, &
+          if(DebugIO) print *,__PIO_FILE__,__LINE__, &
                '  IAM: ',File%iosystem%io_rank
 
-          if(Debug) print *,_FILE_,__LINE__, &
+          if(Debug) print *,__PIO_FILE__,__LINE__, &
                '  IAM: ',File%iosystem%io_rank,' start: ', &
                start,' count: ', &
                count, ' iobuf size: ',size(iobuf)
@@ -180,11 +180,11 @@ contains
 #endif
 
        case default
-          call bad_iotype(iotype,_FILE_,__LINE__)
+          call bad_iotype(iotype,__PIO_FILE__,__LINE__)
 
        end select
     endif ! File%iosystem%IOproc
-    call check_netcdf(File, ierr,_FILE_,__LINE__);
+    call check_netcdf(File, ierr,__PIO_FILE__,__LINE__);
 #ifdef TIMING
     call t_stopf("pio_read_nfdarray_{TYPE}")
 #endif

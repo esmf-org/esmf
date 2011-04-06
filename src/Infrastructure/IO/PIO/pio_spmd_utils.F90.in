@@ -1,5 +1,5 @@
 #include "ESMFPIO.h"
-#define _FILE_ "pio_spmd_utils.F90"
+#define __PIO_FILE__ "pio_spmd_utils.F90"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !  Module pio_spmd_utils
