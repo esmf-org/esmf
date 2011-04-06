@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.50 2011/04/05 22:52:32 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.51 2011/04/06 00:26:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,6 +75,7 @@ module ESMF_ArrayBundleMod
   public operator(==)
   public operator(/=)
 
+  public ESMF_ArrayBundleAdd
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
@@ -104,7 +105,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.50 2011/04/05 22:52:32 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.51 2011/04/06 00:26:11 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -388,6 +389,85 @@ contains
   end function ESMF_ArrayBundleNE
 !-------------------------------------------------------------------------------
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleAdd()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleAdd - Add Array(s) to an ArrayBundle
+!
+! !INTERFACE:
+    subroutine ESMF_ArrayBundleAdd(arraybundle, keywordEnforcer, arrayList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Array),       intent(in)            :: arrayList(:)
+    integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Add Array(s) to an ArrayBundle.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} to be added to.
+!   \item [arrayList]
+!     List of {\tt ESMF\_Array} objects to be added.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer :: arrayCount, i
+    type(ESMF_Pointer), allocatable :: arrayPointerList(:)
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Determine the number of ArrayList elements
+    arrayCount = size(arrayList)
+
+    ! Check init status of array arguments
+    do i=1, arrayCount
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
+    enddo
+    
+    ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
+    ! This is necessary in order to strip off the F90 init check members
+    ! when passing into C++
+    allocate(arrayPointerList(arrayCount))
+    do i=1, arrayCount
+      call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_ArrayBundleAdd(arraybundle, arrayPointerList, arrayCount, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Garbage collection
+    deallocate(arrayPointerList)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_ArrayBundleAdd
+!------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleCreate()"
@@ -469,13 +549,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_name = len(name)
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
         arrayCount, name, len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
         arrayCount, "", len_name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif    
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Garbage collection
     deallocate(arrayPointerList)

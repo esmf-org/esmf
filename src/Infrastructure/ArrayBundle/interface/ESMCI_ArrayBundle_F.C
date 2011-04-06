@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.23 2011/04/05 22:52:32 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.24 2011/04/06 00:26:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,6 +44,39 @@ extern "C" {
 
   // - ESMF-public methods:
 
+  void FTN(c_esmc_arraybundleadd)(ESMCI::ArrayBundle **ptr, 
+    ESMCI::Array **arrayList, int *arrayCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundleadd()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    try{
+      
+      for (int i=0; i<*arrayCount; i++){
+        // call into C++ layer
+        (*ptr)->addArray(arrayList[i]);
+      }
+
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
   void FTN(c_esmc_arraybundlecreate)(ESMCI::ArrayBundle **ptr, 
     ESMCI::Array **arrayList, int *arrayCount, char *name, int *len_name,
     int *rc,
@@ -67,6 +100,8 @@ extern "C" {
         "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   void FTN(c_esmc_arraybundledestroy)(ESMCI::ArrayBundle **ptr, int *rc){
@@ -78,6 +113,8 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::destroy(ptr),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, int *arrayCount,
@@ -122,17 +159,18 @@ extern "C" {
 
     }catch(int localrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
       return;
     }catch(exception &x){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
       return;
     }
-  
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -282,17 +320,18 @@ extern "C" {
     
     }catch(int localrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
       return;
     }catch(exception &x){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
       return;
     }catch(...){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
       return;
     }
-  
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
