@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.52 2011/04/06 01:08:19 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.53 2011/04/06 01:23:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -106,7 +106,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.52 2011/04/06 01:08:19 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.53 2011/04/06 01:23:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -411,7 +411,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Add Array(s) to an ArrayBundle.
+!   Add Array(s) to an ArrayBundle. It is an error if {\tt arrayList} contains
+!   Arrays with names that are identical Arrays already contained in 
+!   {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -668,7 +670,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get the list of Arrays bundled in an ArrayBundle.
+!   Get the list of Arrays and Array names bundled in an ArrayBundle.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -790,7 +792,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get the list of Arrays bundled in an ArrayBundle.
+!   Get an Array by name from ArrayBundle. It is an error if no Array called
+!   {\tt arrayName} exists in {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -1898,7 +1901,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Remove item(s) from ArrayBundle.
+!   Remove item(s) by name from ArrayBundle. It is an error if
+!   {\tt arrayNameList} contains an names that are not found in
+!   {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
