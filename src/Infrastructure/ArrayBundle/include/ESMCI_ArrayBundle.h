@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.24 2011/04/06 04:18:26 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.25 2011/04/06 04:43:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -90,8 +90,8 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     }
     int getArrayCount()         const {return arrayContainer.size();}
     char const *getName()       const {return ESMC_BaseGetName();}
-    void removeArray(std::string arrayName){
-      arrayContainer.remove(arrayName);
+    void removeArray(std::string arrayName, bool strict=false){
+      arrayContainer.remove(arrayName, strict);
     }
     void replaceArray(Array *array, bool strict=false){
       arrayContainer.replace(array->getName(), array, strict);

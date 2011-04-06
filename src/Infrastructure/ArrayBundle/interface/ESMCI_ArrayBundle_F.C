@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.26 2011/04/06 04:18:28 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.27 2011/04/06 04:43:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -269,18 +269,27 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundleremove)(ESMCI::ArrayBundle **ptr,
-    char *arrayNameList, int *itemCount, int *rc, ESMCI_FortranStrLenArg nlen){
+    char *arrayNameList, int *itemCount, ESMC_Logical *strictflag, int *rc,
+    ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleremove()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool strict;
+    if (*strictflag == ESMF_TRUE)
+      strict=true;
+    else
+      strict=false;
+      
+
     // call into C++
     try{
       
       for (int i=0; i<*itemCount; i++){
         // call into C++ layer
-        (*ptr)->removeArray(std::string(arrayNameList+i*nlen, nlen));
+        (*ptr)->removeArray(std::string(arrayNameList+i*nlen, nlen), strict);
       }
 
     }catch(int localrc){

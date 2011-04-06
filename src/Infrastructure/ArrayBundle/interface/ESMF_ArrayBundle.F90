@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.54 2011/04/06 04:18:28 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.55 2011/04/06 04:43:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.54 2011/04/06 04:18:28 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.55 2011/04/06 04:43:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1888,35 +1888,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleRemove(arraybundle, arrayNameList, &
-      keywordEnforcer, rc)
+      keywordEnforcer, strictflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
-    character(len=*),       intent(in)             :: arrayNameList(:)
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    character(len=*),       intent(in)            :: arrayNameList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional :: rc
+    logical,                intent(in),  optional :: strictflag
+    integer,                intent(out), optional :: rc
 !
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Remove item(s) by name from ArrayBundle. It is an error if
-!   {\tt arrayNameList} contains an names that are not found in
+!   Remove item(s) by name from ArrayBundle. In the strict setting it is an
+!   error if {\tt arrayNameList} contains names that are not found in
 !   {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
-!         {\tt ESMF\_ArrayBundle} from which to remove items.
+!     {\tt ESMF\_ArrayBundle} from which to remove items.
 !   \item [arrayNameList]
-!         List of items to remove.
+!     List of items to remove.
+!   \item [{[strictflag]}]
+!     A setting of {\tt .true.} indicates a stict definition of "remove" where
+!     it is an error if {\tt arrayNameList} contains names that are not found in
+!     {\tt arraybundle}. For {\tt .false.} this is not an error condition.
+!     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: strictflagArg
     integer                       :: itemCount
 
     ! initialize return code; assume routine not implemented
@@ -1927,10 +1934,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     itemCount = size(arrayNameList)
+
+    if (present(strictflag)) then
+      strictflagArg = strictflag
+    else
+      strictflagArg = ESMF_FALSE
+    endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundleRemove(arraybundle, arrayNameList, itemCount, &
-      localrc)
+      strictflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
