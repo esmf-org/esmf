@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.33 2011/03/24 18:24:14 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.34 2011/04/07 21:23:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.33 2011/03/24 18:24:14 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.34 2011/04/07 21:23:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1241,7 +1241,11 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   }
   
   // set return value of buffer size
-  bufSize = (realChangesOut+10)*sizeof(Attribute) + numKeysOut*keySize;
+  // gjt: make sure to take 8-byte alignment into account
+  int keySize8 = keySize/8 * 8;
+  if (keySize%8) keySize8 += 8; 
+  
+  bufSize = (realChangesOut+10)*sizeof(Attribute) + numKeysOut*keySize8;
   
   delete [] recvBuf;
   delete [] sendBuf;
