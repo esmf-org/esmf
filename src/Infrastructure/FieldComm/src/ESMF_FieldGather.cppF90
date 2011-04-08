@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.22 2011/03/08 05:27:08 w6ws Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.23 2011/04/08 21:21:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.22 2011/03/08 05:27:08 w6ws Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.23 2011/04/08 21:21:06 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -77,7 +77,7 @@ contains
 !   rootPet, keywordEnforcer, tile, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Field),           intent(inout)           :: field @\
+!   type(ESMF_Field),           intent(in)              :: field @\
 !   mtype (ESMF_KIND_##mtypekind),intent(in), target    :: farray(mdim) @\
 !   integer,                    intent(in)              :: rootPet @\
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
@@ -140,8 +140,8 @@ contains
         rootPet, keywordEnforcer, tile, vm, rc) @\
 @\
         ! input arguments @\
-        type(ESMF_Field)                                       :: field  @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+        type(ESMF_Field), intent(in)                           :: field  @\
+        mname (ESMF_KIND_##mtypekind), intent(out), target     :: farray(mdim) @\
         integer, intent(in)                                    :: rootPet @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
         integer, intent(in), optional                          :: tile     @\
@@ -184,7 +184,7 @@ TypeKindRankDeclarationMacro(FieldGather)
 ^define ESMF_METHOD "ESMF_FieldGather"
 subroutine ESMF_FieldGatherNotRoot(field, tile, rootPet, vm, rc)
 
-        type(ESMF_Field),           intent(inout)           :: field
+        type(ESMF_Field),           intent(in)              :: field
         integer,                    intent(in),   optional  :: tile
         integer,                    intent(in)              :: rootPet
         type(ESMF_VM),              intent(in),   optional  :: vm

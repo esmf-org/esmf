@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.27 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.28 2011/04/08 21:21:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.27 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.28 2011/04/08 21:21:06 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -82,7 +82,7 @@ contains
              zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_Field),       intent(inout),optional  :: srcField
+        type(ESMF_Field),       intent(in),   optional  :: srcField
         type(ESMF_Field),       intent(inout),optional  :: dstField
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -392,7 +392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)         :: srcField  
+        type(ESMF_Field),       intent(in)            :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
@@ -451,7 +451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)         :: srcField  
+        type(ESMF_Field),       intent(in)            :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
@@ -510,7 +510,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)         :: srcField  
+        type(ESMF_Field),       intent(in)            :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
@@ -569,7 +569,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)         :: srcField  
+        type(ESMF_Field),       intent(in)            :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
@@ -718,7 +718,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         routehandle, keywordEnforcer, rc) 
 
         ! input arguments 
-        type(ESMF_Field),       intent(inout)         :: srcField  
+        type(ESMF_Field),       intent(in)            :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below

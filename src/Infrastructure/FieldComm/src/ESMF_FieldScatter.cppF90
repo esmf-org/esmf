@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.21 2011/03/08 05:27:08 w6ws Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.22 2011/04/08 21:21:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.21 2011/03/08 05:27:08 w6ws Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.22 2011/04/08 21:21:06 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
@@ -139,8 +139,8 @@ contains
         rootPet, keywordEnforcer, tile, vm, rc) @\
 @\
         ! input arguments @\
-        type(ESMF_Field)                                       :: field  @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+        type(ESMF_Field), intent(inout)                        :: field  @\
+        mname (ESMF_KIND_##mtypekind), intent(in), target      :: farray(mdim) @\
         integer, intent(in)                                    :: rootPet @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
         integer, intent(in), optional                          :: tile     @\
