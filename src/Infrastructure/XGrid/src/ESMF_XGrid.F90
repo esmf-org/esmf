@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.18 2011/02/23 20:05:29 w6ws Exp $
+! $Id: ESMF_XGrid.F90,v 1.19 2011/04/08 21:28:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.18 2011/02/23 20:05:29 w6ws Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.19 2011/04/08 21:28:28 feiliu Exp $'
 
 !==============================================================================
 !
@@ -511,7 +511,7 @@ contains
       logical :: ESMF_XGridMatch
 !
 ! !ARGUMENTS:
-      type(ESMF_XGrid), intent(inout) :: xgrid1, xgrid2 
+      type(ESMF_XGrid), intent(in)   :: xgrid1, xgrid2 
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:

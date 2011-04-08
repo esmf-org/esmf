@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.95 2011/04/01 16:42:18 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.96 2011/04/08 21:28:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.95 2011/04/01 16:42:18 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.96 2011/04/08 21:28:13 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -2724,7 +2724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Grid),       intent(in)            :: grid                  @\
-!   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
+!   <type> (ESMF_KIND_<kind>), intent(in) target :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -2853,7 +2853,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! input arguments @\
     type(ESMF_Grid),       intent(in)            :: grid @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
     type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
@@ -3540,9 +3540,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field) :: ESMF_FieldCreateLSData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_LocStream),  intent(in)           :: locstream                  @\
-!   <type> (ESMF_KIND_<kind>), target           :: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+!   type(ESMF_LocStream),  intent(in)            :: locstream                  @\
+!   <type> (ESMF_KIND_<kind>), intent(in), target:: farray(<rank>) @\
+!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:)     @\
@@ -3636,7 +3636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! input arguments @\
     type(ESMF_LocStream), intent(in) :: locstream                  @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
@@ -4226,17 +4226,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Mesh),     intent(in)            :: mesh                  @\
-!   <type> (ESMF_KIND_<kind>), target          :: farray(<rank>) @\
-!   type(ESMF_MeshLoc),  intent(in),  optional :: location @\
-!   type(ESMF_IndexFlag), intent(in)           :: indexflag @\
+!   type(ESMF_Mesh),     intent(in)               :: mesh                  @\
+!   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
+!   type(ESMF_MeshLoc),  intent(in),  optional    :: location @\
+!   type(ESMF_IndexFlag), intent(in)              :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
-!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
-!   integer,             intent(in),  optional :: ungriddedLBound(:) @\
-!   integer,             intent(in),  optional :: ungriddedUBound(:) @\
-!   character (len=*),   intent(in),  optional :: name  @\
-!   integer,             intent(out), optional :: rc                @\
+!   type(ESMF_CopyFlag), intent(in),  optional    :: copyflag @\
+!   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
+!   integer,             intent(in),  optional    :: ungriddedLBound(:) @\
+!   integer,             intent(in),  optional    :: ungriddedUBound(:) @\
+!   character (len=*),   intent(in),  optional    :: name  @\
+!   integer,             intent(out), optional    :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
@@ -4327,7 +4327,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! input arguments @\
     type(ESMF_Mesh), intent(in) :: mesh                  @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
+    mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
     type(ESMF_MeshLoc), intent(in), optional    :: location @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
@@ -4931,18 +4931,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field) :: ESMF_FieldCreateXGData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_XGrid),     intent(in)           :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional :: xgridSide @\
-!   integer,              intent(in), optional :: gridIndex @\
-!   <type> (ESMF_KIND_<kind>), target          :: farray(<rank>) @\
-!   type(ESMF_IndexFlag), intent(in)           :: indexflag @\
+!   type(ESMF_XGrid),     intent(in)              :: xgrid @\
+!   type(ESMF_XGridSide), intent(in), optional    :: xgridSide @\
+!   integer,              intent(in), optional    :: gridIndex @\
+!   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
+!   type(ESMF_IndexFlag), intent(in)              :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in),  optional :: copyflag @\
-!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
-!   integer,             intent(in),  optional :: ungriddedLBound(:) @\
-!   integer,             intent(in),  optional :: ungriddedUBound(:) @\
-!   character (len=*),   intent(in),  optional :: name  @\
-!   integer,             intent(out), optional :: rc                @\
+!   type(ESMF_CopyFlag), intent(in),  optional    :: copyflag @\
+!   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
+!   integer,             intent(in),  optional    :: ungriddedLBound(:) @\
+!   integer,             intent(in),  optional    :: ungriddedUBound(:) @\
+!   character (len=*),   intent(in),  optional    :: name  @\
+!   integer,             intent(out), optional    :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Xgrid}. @\
@@ -5033,18 +5033,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field) :: ESMF_FieldCreateXGData##mrank##D##mtypekind @\
 @\
     ! input arguments @\
-    type(ESMF_XGrid), intent(in) :: xgrid @\
-    type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
-    integer, intent(in), optional               :: gridIndex @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_XGrid), intent(in)                      :: xgrid @\
+    type(ESMF_XGridSide), intent(in), optional        :: xgridSide @\
+    integer, intent(in), optional                     :: gridIndex @\
+    mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
+    type(ESMF_IndexFlag), intent(in)                  :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
-    integer, intent(in), optional :: gridToFieldMap(:)     @\
-    integer, intent(in), optional :: ungriddedLBound(:) @\
-    integer, intent(in), optional :: ungriddedUBound(:) @\
-    character (len=*), intent(in), optional :: name  @\
-    integer, intent(out), optional :: rc                @\
+    type(ESMF_CopyFlag), intent(in), optional         :: copyflag @\
+    integer, intent(in), optional                     :: gridToFieldMap(:)     @\
+    integer, intent(in), optional                     :: ungriddedLBound(:) @\
+    integer, intent(in), optional                     :: ungriddedUBound(:) @\
+    character (len=*), intent(in), optional           :: name  @\
+    integer, intent(out), optional                    :: rc                @\
 @\
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\

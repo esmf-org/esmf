@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.61 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.62 2011/04/08 21:28:14 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.61 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.62 2011/04/08 21:28:14 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -106,7 +106,7 @@ contains
                    routehandle, keywordEnforcer, zeroflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field),       intent(inout), optional :: srcField
+      type(ESMF_Field),       intent(in),    optional :: srcField
       type(ESMF_Field),       intent(inout), optional :: dstField
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -289,7 +289,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
-      type(ESMF_Field),          intent(inout)           :: srcField
+      type(ESMF_Field),          intent(in)              :: srcField
       type(ESMF_Field),          intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
@@ -859,8 +859,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
-      type(ESMF_XGrid),       intent(inout)           :: xgrid
-      type(ESMF_Field),       intent(inout)           :: srcField
+      type(ESMF_XGrid),       intent(in)              :: xgrid
+      type(ESMF_Field),       intent(in)              :: srcField
       type(ESMF_Field),       intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
