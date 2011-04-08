@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.40 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_FieldPr.F90,v 1.41 2011/04/08 20:40:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@ contains
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout)         :: field 
+      type(ESMF_Field), intent(in)            :: field 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 !

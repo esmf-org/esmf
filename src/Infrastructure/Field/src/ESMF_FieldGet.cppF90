@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.72 2011/03/08 05:20:53 w6ws Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.73 2011/04/08 20:40:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.72 2011/03/08 05:20:53 w6ws Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.73 2011/04/08 20:40:23 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1155,7 +1155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_Grid),       intent(inout)         :: grid     
+    type(ESMF_Grid),       intent(in)            :: grid     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(in),  optional :: localDe
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
@@ -1322,7 +1322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_LocStream), intent(inout)         :: locstream     
+    type(ESMF_LocStream), intent(in)            :: locstream     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: localDe
     integer,              intent(in),  optional :: gridToFieldMap(:)    
@@ -1453,7 +1453,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)         :: mesh     
+    type(ESMF_Mesh), intent(in)            :: mesh     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(in),  optional :: localDe
     integer,         intent(in),  optional :: gridToFieldMap(:)    
@@ -1584,7 +1584,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
-    type(ESMF_XGrid),     intent(inout)         :: xgrid
+    type(ESMF_XGrid),     intent(in)            :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_XGridSide), intent(in),  optional :: xgridSide
     integer,              intent(in),  optional :: gridIndex
