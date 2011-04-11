@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.21 2011/03/21 16:43:59 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.22 2011/04/11 16:37:34 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1150,6 +1150,7 @@ module ESMF_ComplianceICMod
         file=__FILE__)) &
         return  ! bail out
     else if (len_trim(value) == 0) then
+!    else if (zeroTerminatedString(value)) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
         trim(attributeName)//"> is present but NOT set!", ESMF_LOG_WARNING, rc=rc)
@@ -1302,7 +1303,6 @@ module ESMF_ComplianceICMod
       
   end subroutine
     
-    
   recursive subroutine checkFieldAttribute(prefix, field, attributeName, &
     convention, purpose, rc)
     character(*), intent(in)              :: prefix
@@ -1332,6 +1332,7 @@ module ESMF_ComplianceICMod
         file=__FILE__)) &
         return  ! bail out
     else if (len_trim(value) == 0) then
+!    else if (zeroTerminatedString(value)) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
         trim(attributeName)//"> is present but NOT set!", ESMF_LOG_WARNING, rc=rc)
@@ -1609,6 +1610,22 @@ module ESMF_ComplianceICMod
   end subroutine
 
 !-------------------------------------------------------------------------
+
+  recursive function zeroTerminatedString(string)
+    logical :: zeroTerminatedString
+    character(len=*), intent(in)        :: string
+    integer(kind=ESMF_KIND_I1)          :: vbyte, mbyte
+    
+    zeroTerminatedString = .false. ! initialize
+    vbyte = transfer(string, mbyte)
+    
+    print *, "In function zeroTerminatedString", vbyte
+    
+    if (vbyte==0) zeroTerminatedString = .true.
+    
+  end function
+ 
+ !-------------------------------------------------------------------------
 
 
 end module ESMF_ComplianceICMod
