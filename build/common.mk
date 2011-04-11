@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.331 2011/03/17 22:20:40 svasquez Exp $
+#  $Id: common.mk,v 1.332 2011/04/11 23:02:45 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2751,6 +2751,11 @@ alldoc: doc
 # subsystem doc directory and will build only that doc.
 # this is also the default if you call make from a doc subdir.
 
+localdoc:
+	$(MAKE) $(TEXFILES_TO_MAKE)
+	$(MAKE) $(DVIFILES)
+	$(MAKE) $(PDFFILES)
+        
 onedoc: chkdir_doc include tex
 	@echo "========================================="
 	@echo "Building Single Document"
