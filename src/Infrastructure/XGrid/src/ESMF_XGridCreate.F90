@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.18 2011/04/05 21:11:20 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.19 2011/04/12 15:02:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.18 2011/04/05 21:11:20 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.19 2011/04/12 15:02:07 feiliu Exp $'
 
 !==============================================================================
 !
@@ -218,14 +218,23 @@ contains
 ! !IROUTINE:  ESMF_XGridCreateDefault - Create an XGrid online from user input
 
 ! !INTERFACE:
+! ! Private name; call using ESMF_XGridCreate()
 
-type(ESMF_XGrid) function ESMF_XGridCreateDefault(sideA, sideB, sideAPriority, &
+function ESMF_XGridCreateDefault(sideA, sideB, sideAPriority, &
 sideBPriority, storeOverlay, name, rc)
+
+!
+! !ARGUMENTS:
 type(ESMF_Grid), intent(in)     :: sideA(:), sideB(:)
 integer, intent(in), optional   :: sideAPriority(:), sideBPriority(:)
 logical, intent(in), optional   :: storeOverlay
 character(len=*), intent(in), optional :: name
 integer, intent(out), optional  :: rc
+
+!
+! !RETURN VALUE:
+  type(ESMF_XGrid)              :: ESMF_XGridCreateDefault
+
 !
 ! !DESCRIPTION:
 !      Create an XGrid onine from user input
@@ -332,15 +341,15 @@ function ESMF_XGridCreateRaw(sideA, sideB, area, centroid, &
 
 !
 ! !ARGUMENTS:
-type(ESMF_Grid), intent(in)     :: sideA(:), sideB(:)
+type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
 real(ESMF_KIND_R8), intent(in), optional   :: area(:)
 real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
-character (len=*), intent(in), optional :: name
-integer, intent(out), optional  :: rc 
+character (len=*), intent(in), optional    :: name
+integer, intent(out), optional             :: rc 
 
 !
 ! !RETURN VALUE:
@@ -353,25 +362,25 @@ integer, intent(out), optional  :: rc
 !     The arguments are:
 !     \begin{description}
 !     \item [sideA]
-!           2D Grids on side A
+!           2D Grids on side A.
 !     \item [sideB]
-!           2D Grids on side B
+!           2D Grids on side B.
 !     \item [{[area]}]
-!           area of the xgrid cells
+!           area of the xgrid cells.
 !     \item [{[centroid]}]
-!           coordinates at the area weighted center of the xgrid cells
+!           coordinates at the area weighted center of the xgrid cells.
 !     \item [{[sparseMatA2X]}]
-!           indexlist from a Grid index space on side A to xgrid index space
-!           indexFactorlist from a Grid index space on side A to xgrid index space
+!           indexlist from a Grid index space on side A to xgrid index space;
+!           indexFactorlist from a Grid index space on side A to xgrid index space.
 !     \item [{[sparseMatX2A]}]
-!           indexlist from xgrid index space to a Grid index space on side A
-!           indexFactorlist from xgrid index space to a Grid index space on side A
+!           indexlist from xgrid index space to a Grid index space on side A;
+!           indexFactorlist from xgrid index space to a Grid index space on side A.
 !     \item [{[sparseMatB2X]}]
-!           indexlist from a Grid index space on side B to xgrid index space
-!           indexFactorlist from a Grid index space on side B to xgrid index space
+!           indexlist from a Grid index space on side B to xgrid index space;
+!           indexFactorlist from a Grid index space on side B to xgrid index space.
 !     \item [{[sparseMatX2B]}]
-!           indexlist from xgrid index space to a Grid index space on side B
-!           indexFactorlist from xgrid index space to a Grid index space on side B
+!           indexlist from xgrid index space to a Grid index space on side B;
+!           indexFactorlist from xgrid index space to a Grid index space on side B.
 !     \item [{[name]}]
 !           name of the xgrid object.
 !     \item [{[rc]}]
@@ -449,14 +458,16 @@ integer, intent(out), optional  :: rc
 
     ! check and copy all the sparse matrix spec structures
     if(present(sparseMatA2X)) then
-        call ESMF_SparseMatca(sparseMatA2X, xgtype%sparseMatA2X, ngrid_a, 'sparseMatA2X', rc=localrc)
+        call ESMF_SparseMatca(sparseMatA2X, xgtype%sparseMatA2X, ngrid_a, &
+          'sparseMatA2X', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
             msg="- Initializing xgtype%sparseMatX2A ", &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if(present(sparseMatX2A)) then
-        call ESMF_SparseMatca(sparseMatX2A, xgtype%sparseMatX2A, ngrid_a, 'sparseMatX2A', rc=localrc)
+        call ESMF_SparseMatca(sparseMatX2A, xgtype%sparseMatX2A, ngrid_a, &
+          'sparseMatX2A', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
             msg="- Initializing xgtype%sparseMatX2A ", &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -471,14 +482,16 @@ integer, intent(out), optional  :: rc
     ! the result Distgrid as discussed.
 
     if(present(sparseMatB2X)) then
-        call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, 'sparseMatB2X', rc=localrc)
+        call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, &
+          'sparseMatB2X', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
             msg="- Initializing xgtype%sparseMatB2X ", &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if(present(sparseMatX2B)) then
-        call ESMF_SparseMatca(sparseMatX2B, xgtype%sparseMatX2B, ngrid_b, 'sparseMatX2B', rc=localrc)
+        call ESMF_SparseMatca(sparseMatX2B, xgtype%sparseMatX2B, ngrid_b, &
+          'sparseMatX2B', rc=localrc)
         if (ESMF_LogFoundAllocError(localrc, &
             msg="- Initializing xgtype%sparseMatX2B ", &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -510,12 +523,33 @@ integer, intent(out), optional  :: rc
 
 end function ESMF_XGridCreateRaw
 
-! modularize this to have a subroutine to compute union of integer sets
-! this will make debuging easier
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ESMF_XGridDistGrids()"
+!BOPI
+! !IROUTINE:  ESMF_XGridDistGrids - create the distgrids for the xgridtype object
+
+! !INTERFACE:
 subroutine ESMF_XGridDistGrids(xgtype, rc)
 
+!
+! !ARGUMENTS:
     type(ESMF_XGridType), intent(inout) :: xgtype
     integer, intent(out), optional      :: rc
+
+!
+! !DESCRIPTION:
+!      Create the distgrids for the {ESMF\_XGridType} object
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgtype]
+!           the {ESMF\_XGridType} object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
 
     integer :: i, ngrid, localrc
 
@@ -648,10 +682,37 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
 end subroutine ESMF_XGridDistGrids
 
 !------------------------------------------------------------------------------
-type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridDGOverlay()"
+!BOPI
+! !IROUTINE:  ESMF_XGridDGOverlay - compute the overlay distgrid from offline input
+
+! !INTERFACE:
+function ESMF_XGridDGOverlay(sparseMat, dim, rc)
+!
+! !ARGUMENTS:
     type(ESMF_XGridSpec), pointer               :: sparseMat(:)
     integer, intent(in)                         :: dim
     integer, intent(out), optional              :: rc
+!
+! !RETURN VALUE:
+    type(ESMF_DistGrid)                         :: ESMF_XGridDGOverlay
+
+!
+! !DESCRIPTION:
+!      Compute the overlay distgrid from offline input of indicies
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [sparseMat]
+!           the {ESMF\_XGridSpec} object containing indicies and weights.
+!     \item [dim]
+!           dimension of the indicies used to retrieve the seq. index list.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
 
     integer :: i, j, ii, ngrid, localrc, nidx, nidx_tot, l, u
     integer :: minidx, maxidx, minidx1, maxidx1, minidx_n, maxidx_n
@@ -666,11 +727,12 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 
     ngrid = size(sparseMat, 1)
 
-    ! generate the union of indices from all the A2X factorIndexLists
+    ! generate the union of indices from all the factorIndexLists:
     ! generate the initial array that has the index positions marked '1'
     ! Because of the distributed nature of the indicies, there may be
     ! duplicate entries in the index union residing on the other PETs
     ! this is currently left to to the SMM engine to detect such an error.
+    !
     ! TODO: query the distributed data directory to avoid duplication
     ! and return to user an error as early as possible
     minidx = minval(sparseMat(1)%factorIndexList(dim,:))
@@ -765,7 +827,33 @@ type(ESMF_DistGrid) function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 end function ESMF_XGridDGOverlay
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridDG()"
+!BOPI
+! !IROUTINE:  ESMF_XGridDG - compute distgrid on the XGrid locally matching the grid
+
+! !INTERFACE:
 subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
+!
+! !DESCRIPTION:
+!      Compute distgrid on the XGrid locally matching the grid on the same set of PETs;
+!     This allows local SMM optimization. To be completed.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           grid object spanning a set of PETs.
+!     \item [distgrid]
+!           distgrid object spanning the same set of PETs.
+!     \item [factorIndexList]
+!           indicies used to construct the arb index list.
+!     \item [dim]
+!           dimension of the indicies used to retrieve the seq. index list.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
 
     type(ESMF_Grid), intent(in)                 :: grid
     type(ESMF_DistGrid), intent(inout)          :: distgrid
@@ -793,14 +881,41 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 end subroutine ESMF_XGridDG
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SparseMatca()"
+!BOPI
+! !IROUTINE:  ESMF_SparseMatca - allocate internal SMM parameters and copy from src.
+
+! !INTERFACE:
 subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
 
+!
+! !ARGUMENTS:
     type(ESMF_XGridSpec), intent(in)    :: sparseMats(:)
     type(ESMF_XGridSpec),     pointer   :: sparseMatd(:)
     integer, intent(in)                 :: ngrid
     character(len=*), intent(in)        :: tag
     integer, intent(out), optional      :: rc
 
+!
+! !DESCRIPTION:
+!      Allocate internal SMM parameters and copy from src.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [sparseMats]
+!           the source {\tt ESMF\_XGridSpec} object.
+!     \item [sparseMatd]
+!           the destination {\tt ESMF\_XGridSpec} object.
+!     \item [ngrid]
+!           number of grid, redundency check.
+!     \item [tag]
+!           A string to indicate which one of the 4 SMM parameters is used.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
     integer                             :: i, localrc
 
     ! Initialize
