@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.12 2011/04/08 21:21:06 feiliu Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.13 2011/04/12 14:30:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.12 2011/04/08 21:21:06 feiliu Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.13 2011/04/12 14:30:16 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -103,7 +103,7 @@ contains
                             commflag, finishedflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),       intent(in)              :: field
+    type(ESMF_Field),       intent(inout)           :: field
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
@@ -255,7 +255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       halostartregionflag, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),       intent(in)                   :: field
+    type(ESMF_Field),       intent(inout)                :: field
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_HaloStartRegionFlag), intent(in), &
