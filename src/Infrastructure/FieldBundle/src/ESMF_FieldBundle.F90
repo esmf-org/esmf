@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.92 2011/04/12 14:07:55 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.93 2011/04/12 14:19:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -778,10 +778,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
-!   \item [fieldList]
+!   \item [{[fieldList]}]
 !      \begin{sloppypar}
-!      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
-!      items will be added to the new {\tt ESMF\_FieldBundle}.
+!      Array of existing {\tt ESMF\_Field}s to be added to the 
+!      new {\tt ESMF\_FieldBundle}.
 !      \end{sloppypar}
 !   \item [{[name]}]
 !      {\tt ESMF\_FieldBundle} name.  A default name is generated if
