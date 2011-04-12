@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.22 2011/04/11 16:37:34 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.23 2011/04/12 16:13:37 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1135,6 +1135,8 @@ module ESMF_ComplianceICMod
 
     defaultvalue = "ComplianceICdefault"
 
+    value = " " !TODO: remove this work around once Attribute code is fixed
+
     call ESMF_AttributeGet(comp, name=attributeName, value=value, &
       defaultvalue=defaultvalue, convention=convention, purpose=purpose, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1187,6 +1189,8 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr
 
     defaultvalueList = "ComplianceICdefault"
+
+    valueList = " " !TODO: remove this work around once Attribute code is fixed
 
     itemCount = itemCountMax ! initialize
     call ESMF_AttributeGet(comp, name=attributeName, valueList=valueList, &
@@ -1316,6 +1320,8 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: defaultvalue
 
     defaultvalue = "ComplianceICdefault"
+
+    value = " " !TODO: remove this work around once Attribute code is fixed
 
     call ESMF_AttributeGet(field, name=attributeName, value=value, &
       defaultvalue=defaultvalue, convention=convention, purpose=purpose, rc=rc)
@@ -1614,7 +1620,7 @@ module ESMF_ComplianceICMod
   recursive function zeroTerminatedString(string)
     logical :: zeroTerminatedString
     character(len=*), intent(in)        :: string
-    integer(kind=ESMF_KIND_I1)          :: vbyte, mbyte
+    integer(kind=selected_int_kind(2))  :: vbyte, mbyte
     
     zeroTerminatedString = .false. ! initialize
     vbyte = transfer(string, mbyte)
