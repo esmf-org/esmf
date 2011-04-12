@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.29 2011/04/01 23:06:43 theurich Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.30 2011/04/12 14:07:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.29 2011/04/01 23:06:43 theurich Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.30 2011/04/12 14:07:55 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -909,7 +909,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         routehandle, keywordEnforcer, rc) 
 
         ! input arguments 
-        type(ESMF_FieldBundle), intent(in)           :: srcFieldBundle  
+        type(ESMF_FieldBundle), intent(in)            :: srcFieldBundle  
         type(ESMF_FieldBundle), intent(inout)         :: dstFieldBundle  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below

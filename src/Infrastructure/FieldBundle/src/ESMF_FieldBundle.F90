@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.91 2011/04/01 17:24:18 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.92 2011/04/12 14:07:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -229,27 +229,6 @@
 !  !function ESMF_FieldBundleCreateRemap(fieldbundle, grid, name, packflag, rc)
 
 !EOPI
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldBundleCreate - Create a new FieldBundle
-!
-! !INTERFACE:
-     interface ESMF_FieldBundleCreate
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldBundleCreateNew
-        !module procedure ESMF_FieldBundleCreateNFNone
-        !module procedure ESMF_FieldBundleCreateNFGrid
-        !module procedure ESMF_FieldBundleCreateNFLS
-        !module procedure ESMF_FieldBundleCreateNFMesh
-
-! !DESCRIPTION:
-! This interface provides a single entry point for the various
-!  types of {\tt ESMF\_FieldBundleCreate} functions.
-!EOPI
-      end interface
 
 
 !------------------------------------------------------------------------------
@@ -768,17 +747,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleCreateNew"
+#define ESMF_METHOD "ESMF_FieldBundleCreate"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle from existing Fields
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_FieldBundleCreate()
-      function ESMF_FieldBundleCreateNew(keywordEnforcer, fieldList, &
+      function ESMF_FieldBundleCreate(keywordEnforcer, fieldList, &
         name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreateNew
+      type(ESMF_FieldBundle) :: ESMF_FieldBundleCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -827,7 +805,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Shortcut to CreateNFNone if user didn't supply fieldList
       if(.not. present(fieldList)) then
-        ESMF_FieldBundleCreateNew = ESMF_FieldBundleCreateNFNone(name=name, rc=status)
+        ESMF_FieldBundleCreate = ESMF_FieldBundleCreateNFNone(name=name, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
         if(present(rc)) rc = ESMF_SUCCESS
@@ -844,7 +822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Initialize pointers
       nullify(btypep)
-      nullify(ESMF_FieldBundleCreateNew%btypep)
+      nullify(ESMF_FieldBundleCreate%btypep)
 
       allocate(btypep,  stat=status)
       if (ESMF_LogFoundAllocError(status, msg="FieldBundle allocate", &
@@ -870,27 +848,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
 
       ! set the return fieldbundle
-      ESMF_FieldBundleCreateNew%btypep => btypep
+      ESMF_FieldBundleCreate%btypep => btypep
       
       ! Add reference to this object into ESMF garbage collection table
       ! Only call this in those Create() methods that call Construct()
-      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreateNew, &
+      call c_ESMC_VMAddFObject(ESMF_FieldBundleCreate, &
         ESMF_ID_FIELDBUNDLE%objectID)
 
       ! do this before ESMF_FieldBundleIsConguent so it doesn't complain
       ! about uninitialized fieldbundles
-      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreateNew)
+      ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreate)
 
 
       ! this resets the congruent flag as a side effect
-      dummy = ESMF_FieldBundleIsCongruent(ESMF_FieldBundleCreateNew, rc)
+      dummy = ESMF_FieldBundleIsCongruent(ESMF_FieldBundleCreate, rc)
 
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
 
-      end function ESMF_FieldBundleCreateNew
+      end function ESMF_FieldBundleCreate
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
