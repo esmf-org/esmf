@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.28 2011/04/05 22:41:46 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.29 2011/04/12 14:08:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@ contains
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
         integer                             :: eleCount, ngridA, ngridB
-        integer                             :: elb, eub, ec, lpet
+        integer                             :: elb, eub, ec, lpet, npet
 
         real(ESMF_KIND_R8), pointer         :: farrayPtr(:,:), xfarrayPtr(:)
         real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
@@ -143,10 +143,12 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_VMGet(vm, localPet=lpet, rc=localrc)
+        call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if(npet /= 2) return
 
         gridNameA(1) = 'srcGrid 1'
         gridNameA(2) = 'srcGrid 2'
@@ -597,7 +599,7 @@ contains
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
         integer                             :: eleCount, ngridA, ngridB
-        integer                             :: elb, eub, ec, lpet
+        integer                             :: elb, eub, ec, lpet, npet
 
         real(ESMF_KIND_R8), pointer         :: farrayPtr(:,:), xfarrayPtr(:)
         real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
@@ -619,10 +621,12 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_VMGet(vm, localPet=lpet, rc=localrc)
+        call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if(npet /= 2) return
 
         gridNameA(1) = 'srcGrid 1'
         gridNameA(2) = 'srcGrid 2'
@@ -1380,6 +1384,8 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(npet /= 2) return
 
     ! Grid constants
     atm_nx = 10
