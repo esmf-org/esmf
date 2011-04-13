@@ -1,0 +1,80 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: NUOPC\_ModelExplicit.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+}
+
+\bigskip{\sf MODULE:}
+\begin{verbatim} module NUOPC_ModelExplicit
+\end{verbatim}
+
+\bigskip{\sf DESCRIPTION:\\}
+Model component that is driven by explicit time stepping. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
+
+\bigskip{\sf SUPER:}
+\begin{verbatim} ESMF_GridComp
+\end{verbatim}
+
+\bigskip{\sf USE DEPENDENCIES:}
+\begin{verbatim} use ESMF_Mod
+\end{verbatim}
+
+\bigskip{\sf SETSERVICES:}
+\begin{verbatim} subroutine SetServices(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+\end{verbatim} 
+
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: {\sc Required:} Add potential Fields to import and export States.
+\item phase 1: {\sc Required:} Replace potential Fields in import and export States with actual Fields. Set the model internal Clock.
+\item phase 2: {\sc Provided:} Check compatibility.
+\item phase 3. {\sc Provided:} Initialize export Fields and set time stamp to current time.
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: {\sc Provided:} Time keeping. Calls into {\em required} attachable method {\tt ModelExplicit\_Advance}.
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: {\sc Provided:} Calls into {\em optional} attachable method {\tt ModelExplicit\_Finalize}.
+\end{itemize}
+
+\bigskip{\sf INTERNALSTATE:}
+{\sc None.}
+%...............................................................
+
