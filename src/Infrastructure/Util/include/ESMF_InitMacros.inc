@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.38 2011/04/02 03:50:00 oehmke Exp $
+$Id: ESMF_InitMacros.inc,v 1.39 2011/04/13 19:05:42 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,8 +38,8 @@ automatic initialization of types.
  (For more information about the detection process please see Section 5.10 of the 
  developers guide.)
 
-  ESMF_INIT_UNDEFINED    marks if a shallow object hasn't been defined by ESMF. 
-  ESMF_INIT_DEFINED      marks if a shallow object has been set by an ESMF call.
+  ESMF_INIT_UNDEFINED marks if a shallow object has not been defined by ESMF. 
+  ESMF_INIT_DEFINED   marks if a shallow object has been set by an ESMF call.
   ESMF_INIT_CREATED  marks if a deep object has been allocated
   ESMF_INIT_DELETED  marks if a deep object has been deallocated. 
 #endif
